@@ -69,16 +69,16 @@
     "zsh-powerlevel10k": {
       "flake": false,
       "locked": {
-        "lastModified": 1687499067,
-        "narHash": "sha256-+hzjSbbrXr0w1rGHm6m2oZ6pfmD6UUDBfPd7uMg5l5c=",
+        "lastModified": 1706252285,
+        "narHash": "sha256-ES5vJXHjAKw/VHjWs8Au/3R+/aotSbY7PWnWAMzCR8E=",
         "owner": "romkatv",
         "repo": "powerlevel10k",
-        "rev": "017395a266aa15011c09e64e44a1c98ed91c478c",
+        "rev": "35833ea15f14b71dbcebc7e54c104d8d56ca5268",
         "type": "github"
       },
       "original": {
         "owner": "romkatv",
-        "ref": "v1.19.0",
+        "ref": "v1.20.0",
         "repo": "powerlevel10k",
         "type": "github"
       }

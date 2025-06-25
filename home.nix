@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, system, username, homeDirectory, zsh-powerlevel10k, ... }:
 
 {
   nixpkgs.config = {
@@ -10,8 +10,7 @@
   news.display = "silent";
 
   home = {
-    username = "gyutak";
-    homeDirectory = "/Users/gyutak";
+    inherit username homeDirectory;
 
     # Set language for shell sessions managed by home-manager
     language = {
@@ -19,6 +18,13 @@
     };
 
     packages = with pkgs; [
+      # System utilities
+      coreutils
+      findutils
+
+      # IDEs
+      code-cursor
+
       # Dev tools
       terraform
       awscli2

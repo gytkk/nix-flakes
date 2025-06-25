@@ -19,22 +19,52 @@
 
     # ===== Zsh plugins =====
     zsh-powerlevel10k = {
-      url = "github:romkatv/powerlevel10k/v1.19.0";
+      url = "github:romkatv/powerlevel10k/v1.20.0";
       flake = false;
     };
   };
 
   outputs = { self, nixpkgs, home-manager, darwin, zsh-powerlevel10k, ... }:
     let
-      system = "aarch64-darwin";
-      username = "gyutak";
-    in {
-      homeConfigurations."${username}" = home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages.${system};
-        extraSpecialArgs = { inherit system username; };
-        modules = [
-          ./home.nix
-        ];
+      # 각 환경별 설정 정의
+      environments = {
+        macbook = {
+          system = "aarch64-darwin";
+          username = "gyutak";
+          homeDirectory = "/Users/gyutak";
+        };
+
+        macstudio = {
+          system = "x86_64-darwin";
+          username = "gyutak";
+          homeDirectory = "/Users/gyutak";
+        };
+
+        wsl-ubuntu = {
+          system = "x86_64-linux";
+          username = "gytkk";
+          homeDirectory = "/home/gytkk";
+        };
       };
+
+      # 각 환경별 Home Manager 설정 생성 함수
+      mkHomeConfiguration = name: config: 
+        home-manager.lib.homeManagerConfiguration {
+          pkgs = nixpkgs.legacyPackages.${config.system};
+          extraSpecialArgs = { 
+            inherit (config) system username;
+            homeDirectory = config.homeDirectory;
+          };
+          modules = [
+            ./home.nix
+          ];
+
+          extraSpecialArgs = {
+            inherit zsh-powerlevel10k;
+          };
+        };
+    in {
+      # 각 환경별 homeConfigurations 생성
+      homeConfigurations = builtins.mapAttrs mkHomeConfiguration environments;
     };
 }
