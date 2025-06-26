@@ -34,14 +34,27 @@
 
   outputs = { self, nixpkgs, ... }@inputs:
     let
-      pkgs = import nixpkgs {
-        config.allowUnfree = true;
+      pkgs = {
+        "x86_64-linux" = 
+          import nixpkgs {
+            config.allowUnfree = true;
 
-        system = "x86_64-linux"; # Default system, can be overridden in configurations
+            system = "x86_64-linux";
 
-        overlays = [
-          inputs.nix-vscode-extensions.overlays.default
-        ];
+            overlays = [
+              inputs.nix-vscode-extensions.overlays.default
+            ];
+          };
+        "aarch64-darwin" = 
+          import nixpkgs {
+            config.allowUnfree = true;
+
+            system = "aarch64-darwin";
+
+            overlays = [
+              inputs.nix-vscode-extensions.overlays.default
+            ];
+          };
       };
     in {
       darwinConfigurations = {
@@ -66,7 +79,7 @@
 
       homeConfigurations = {
         "devsisters-macbook" = inputs.home-manager.lib.homeManagerConfiguration {
-          inherit pkgs;
+          pkgs = pkgs.aarch64-darwin;
           extraSpecialArgs = {
             system = "aarch64-darwin";
           };
@@ -76,17 +89,22 @@
         };
 
         "devsisters-macstudio" = inputs.home-manager.lib.homeManagerConfiguration {
-          inherit pkgs;
+          pkgs = pkgs.aarch64-darwin;
           extraSpecialArgs = {
             system = "aarch64-darwin";
+            username = "gyutak";
+            homeDirectory = "/Users/gyutak";
+
+            zsh-powerlevel10k = inputs.zsh-powerlevel10k;
           };
           modules = [
             ./home.nix
+            ./modules/devsisters
           ];
         };
 
         "wsl-ubuntu" = inputs.home-manager.lib.homeManagerConfiguration {
-          inherit pkgs;
+          pkgs = pkgs.x86_64-linux;
           extraSpecialArgs = {
             system = "x86_64-linux";
             username = "gytkk";
@@ -96,7 +114,6 @@
           };
           modules = [
             ./home.nix
-            ./modules/git
           ];
         };
       };

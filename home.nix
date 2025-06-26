@@ -2,7 +2,9 @@
 
 {
   imports = [
-    ./modules/zsh    
+    ./modules/claude
+    ./modules/git
+    ./modules/zsh
   ];
 
   # Disable news on update
@@ -23,8 +25,9 @@
 
       # Development
       mise
-      uv
       docker
+      uv
+      nodejs
 
       # IDEs
       neovim
@@ -33,6 +36,7 @@
       # Dev tools
       awscli2
       yq
+      ripgrep
 
       # Kubernetes tools
       kubectl

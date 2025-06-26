@@ -44,5 +44,10 @@ with lib;
   # Create .gitignore file
   home.file.".gitignore".text = ''
     .DS_Store
+    .idea
+    .vscode
+
+    # Python
+    .coverage
   '';
 }
