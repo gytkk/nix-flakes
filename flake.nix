@@ -37,6 +37,8 @@
       pkgs = import nixpkgs {
         config.allowUnfree = true;
 
+        system = "x86_64-linux"; # Default system, can be overridden in configurations
+
         overlays = [
           inputs.nix-vscode-extensions.overlays.default
         ];
@@ -51,6 +53,12 @@
 
         "devsisters-macstudio" = inputs.nix-darwin.lib.darwinSystem {
           system = "aarch64-darwin";
+          modules = [
+          ];
+        };
+
+        "wsl-ubuntu" = inputs.nix-darwin.lib.darwinSystem {
+          system = "x86_64-linux";
           modules = [
           ];
         };
@@ -74,6 +82,21 @@
           };
           modules = [
             ./home.nix
+          ];
+        };
+
+        "wsl-ubuntu" = inputs.home-manager.lib.homeManagerConfiguration {
+          inherit pkgs;
+          extraSpecialArgs = {
+            system = "x86_64-linux";
+            username = "gytkk";
+            homeDirectory = "/home/gytkk";
+
+            zsh-powerlevel10k = inputs.zsh-powerlevel10k;
+          };
+          modules = [
+            ./home.nix
+            ./modules/git
           ];
         };
       };
