@@ -1,4 +1,4 @@
-{ config, pkgs, zsh-powerlevel10k, ... }:
+{ config, lib, pkgs, zsh-powerlevel10k, ... }:
 
 {
   # Zsh configuration
@@ -25,14 +25,14 @@
       enable = true;
 
       plugins = [
+        "fzf"
         "git"
-        "docker"
         "terraform"
+        "docker"
         "aws"
         "kubectl"
-        "fzf"
         "z"
-      ]
+      ];
     };
 
     plugins = [
@@ -73,4 +73,7 @@
     nix-direnv.enable = true;
     enableZshIntegration = true;
   };
+
+  # Copy p10k configuration file to home directory
+  home.file.".p10k.zsh".source = ./p10k.zsh;
 }
