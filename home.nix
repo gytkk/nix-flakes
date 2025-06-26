@@ -5,11 +5,6 @@
     ./modules/zsh    
   ];
 
-  nixpkgs.config = {
-    allowUnfree = true;
-    allowBroken = true;
-  };
-
   # Disable news on update
   news.display = "silent";
 

@@ -16,13 +16,10 @@ echo "experimental-features = nix-command flakes" | sudo tee -a /etc/nix/nix.con
 ### Install Home Manager profile for specific environment:
 
 ```bash
-# For MacBook (Apple Silicon)
-home-manager switch --flake .#macbook
+home-manager switch --flake .#devsisters-macbook
 
-# For MacStudio (Apple Silicon)
-home-manager switch --flake .#macstudio
+home-manager switch --flake .#devsisters-macstudio
 
-# For WSL Ubuntu
 home-manager switch --flake .#wsl-ubuntu
 ```
 

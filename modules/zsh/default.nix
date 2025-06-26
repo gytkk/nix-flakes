@@ -53,6 +53,7 @@
       # Neovim
       vim = "nvim";
       vi = "nvim";
+      vimdiff = "nvim -d";
 
       # k8s aliases
       kl = "kubectl";

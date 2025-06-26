@@ -11,60 +11,71 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # nix-darwin - use master for unstable
-    darwin = {
-      url = "github:LnL7/nix-darwin/master";
+    # nix-darwin
+    nix-darwin = {
+      url = "github:nix-darwin/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # ===== Zsh plugins =====
+    # zsh-powerlevel10k - for zsh theme
     zsh-powerlevel10k = {
       url = "github:romkatv/powerlevel10k/v1.20.0";
       flake = false;
     };
+
+    # ===== VS Code =====
+    # nix-vscode-extensions - for VS Code extensions from marketplace
+    nix-vscode-extensions = {
+      url = "github:nix-community/nix-vscode-extensions";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, home-manager, darwin, zsh-powerlevel10k, ... }:
+  outputs = { self, nixpkgs, ... }@inputs:
     let
-      # 각 환경별 설정 정의
-      environments = {
-        macbook = {
+      pkgs = import nixpkgs {
+        config.allowUnfree = true;
+
+        overlays = [
+          inputs.nix-vscode-extensions.overlays.default
+        ];
+      };
+    in {
+      darwinConfigurations = {
+        "devsisters-macbook" = inputs.nix-darwin.lib.darwinSystem {
           system = "aarch64-darwin";
-          username = "gyutak";
-          homeDirectory = "/Users/gyutak";
+          modules = [
+          ];
         };
 
-        macstudio = {
+        "devsisters-macstudio" = inputs.nix-darwin.lib.darwinSystem {
           system = "aarch64-darwin";
-          username = "gyutak";
-          homeDirectory = "/Users/gyutak";
-        };
-
-        wsl-ubuntu = {
-          system = "x86_64-linux";
-          username = "gytkk";
-          homeDirectory = "/home/gytkk";
+          modules = [
+          ];
         };
       };
 
-      # 각 환경별 Home Manager 설정 생성 함수
-      mkHomeConfiguration = name: config: 
-        home-manager.lib.homeManagerConfiguration {
-          pkgs = nixpkgs.legacyPackages.${config.system};
-          extraSpecialArgs = { 
-            inherit (config) system username;
-            homeDirectory = config.homeDirectory;
+      homeConfigurations = {
+        "devsisters-macbook" = inputs.home-manager.lib.homeManagerConfiguration {
+          inherit pkgs;
+          extraSpecialArgs = {
+            system = "aarch64-darwin";
           };
           modules = [
             ./home.nix
           ];
-
-          extraSpecialArgs = {
-            inherit zsh-powerlevel10k;
-          };
         };
-    in {
-      # 각 환경별 homeConfigurations 생성
-      homeConfigurations = builtins.mapAttrs mkHomeConfiguration environments;
+
+        "devsisters-macstudio" = inputs.home-manager.lib.homeManagerConfiguration {
+          inherit pkgs;
+          extraSpecialArgs = {
+            system = "aarch64-darwin";
+          };
+          modules = [
+            ./home.nix
+          ];
+        };
+      };
     };
 }
