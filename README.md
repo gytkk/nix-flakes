@@ -4,6 +4,15 @@ Home Manager configuration using Nix flakes for multiple environments.
 
 ## Usage
 
+### Install Nix, Home Manager
+- Nix: https://nixos.org/download
+- Home Manager: https://nix-community.github.io/home-manager/index.xhtml#sec-install-standalone
+
+Home manager 실행을 위한 config를 줘야 한다.
+```
+echo "experimental-features = nix-command flakes" | sudo tee -a /etc/nix/nix.conf
+```
+
 ### Install Home Manager profile for specific environment:
 
 ```bash
