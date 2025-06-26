@@ -27,14 +27,14 @@
       findutils
 
       # Development
+      mise
       uv
-      nodejs
 
       # IDEs
+      neovim
       code-cursor
 
       # Dev tools
-      terraform
       awscli2
       yq
 
@@ -51,6 +51,19 @@
     ];
 
     stateVersion = "25.05";
+  };
+
+  programs.mise = {
+    enable = true;
+    enableZshIntegration = true;
+    globalConfig = {
+      tools = {
+        terraform = [
+          "1.10.2"
+          "1.12.2"
+        ];
+      };
+    };
   };
 
   programs.home-manager.enable = true;

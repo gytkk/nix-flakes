@@ -58,7 +58,40 @@
       kl = "kubectl";
       kx = "kubectx";
       kn = "kubens";
+
+      # TODO: Separate into profiles
+      tf = "AWS_PROFILE=saml terraform";
     };
+
+    # Initialize p10k configuration
+    initContent = ''
+      # Initialize p10k configuration
+      [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
+
+      # Initialize mise
+      if command -v mise > /dev/null; then
+        eval "$(mise activate zsh)"
+      fi
+
+      # Enable colors
+      autoload -U colors && colors
+
+      # Ensure oh-my-zsh cache directory has proper permissions
+      if [ -d "$HOME/.cache/oh-my-zsh" ]; then
+        chmod -R 755 "$HOME/.cache/oh-my-zsh" 2>/dev/null || true
+      else
+        mkdir -p "$HOME/.cache/oh-my-zsh"
+        chmod -R 755 "$HOME/.cache/oh-my-zsh" 2>/dev/null || true
+      fi
+
+      # Set zsh completion to use LS_COLORS
+      zstyle ':completion:*' list-colors "$LS_COLORS"
+
+      # Set uv shell completion
+      if command -v uv > /dev/null; then
+        eval "$(uv generate-shell-completion zsh)"
+      fi
+    '';
   };
 
   # fzf configuration
