@@ -29,6 +29,7 @@
       # Development
       mise
       uv
+      docker
 
       # IDEs
       neovim
