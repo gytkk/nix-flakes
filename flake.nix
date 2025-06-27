@@ -34,27 +34,18 @@
 
   outputs = { self, nixpkgs, ... }@inputs:
     let
+      # 패키지 생성 헬퍼 함수
+      mkPkgs = system: import nixpkgs {
+        inherit system;
+        config.allowUnfree = true;
+        overlays = [
+          inputs.nix-vscode-extensions.overlays.default
+        ];
+      };
+
       pkgs = {
-        "x86_64-linux" = 
-          import nixpkgs {
-            config.allowUnfree = true;
-
-            system = "x86_64-linux";
-
-            overlays = [
-              inputs.nix-vscode-extensions.overlays.default
-            ];
-          };
-        "aarch64-darwin" = 
-          import nixpkgs {
-            config.allowUnfree = true;
-
-            system = "aarch64-darwin";
-
-            overlays = [
-              inputs.nix-vscode-extensions.overlays.default
-            ];
-          };
+        "x86_64-linux" = mkPkgs "x86_64-linux";
+        "aarch64-darwin" = mkPkgs "aarch64-darwin";
       };
     in {
       darwinConfigurations = {
