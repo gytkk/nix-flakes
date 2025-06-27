@@ -1,4 +1,12 @@
-{ config, pkgs, system, username, homeDirectory, zsh-powerlevel10k, ... }:
+{
+  config,
+  pkgs,
+  system,
+  username,
+  homeDirectory,
+  zsh-powerlevel10k,
+  ...
+}:
 
 {
   imports = [
@@ -19,6 +27,9 @@
     };
 
     packages = with pkgs; [
+      # Nix
+      nixfmt-rfc-style
+
       # System utilities
       coreutils
       findutils
@@ -31,7 +42,6 @@
 
       # IDEs
       neovim
-      code-cursor
 
       # Dev tools
       awscli2

@@ -1,0 +1,8 @@
+#!/bin/sh
+
+main () {
+  vault login -method=oidc
+  saml2aws login --disable-keychain --force --session-duration=43200
+}
+
+main "$@"
