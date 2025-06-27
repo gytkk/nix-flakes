@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 with lib;
 
 {
@@ -24,6 +29,11 @@ with lib;
       pull = {
         rebase = true;
         ff = "only";
+      };
+
+      push = {
+        default = "current";
+        autoSetupRemote = true;
       };
 
       # Color configuration
