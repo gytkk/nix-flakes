@@ -46,6 +46,12 @@ with lib;
     .DS_Store
     .idea
     .vscode
+    .tool-versions
+
+    # Environment
+    .env
+    .envrc
+    mise.toml
 
     # Python
     .coverage
