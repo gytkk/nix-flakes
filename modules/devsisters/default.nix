@@ -5,6 +5,9 @@
     # Authentication
     saml2aws
     vault
+    
+    # Custom scripts
+    (pkgs.writeShellScriptBin "sign" (builtins.readFile ./scripts/sign))
   ];
 
   programs.zsh.shellAliases = {

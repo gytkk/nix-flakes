@@ -1,0 +1,98 @@
+#!/bin/bash
+set -euo pipefail; IFS=$'\n\t'
+
+DEFAULT_VAULT_ADDR="https://vault.devsisters.cloud"
+
+if [ -z "$VAULT_ADDR" ]; then
+    echo -e "환경변수 VAULT_ADDR이 설정되어있지 않아 기본값 ${DEFAULT_VAULT_ADDR}을 이용합니다."
+    VAULT_ADDR=${DEFAULT_VAULT_ADDR}
+fi
+
+#
+# 도움말을 출력하는 함수
+#
+show_help() {
+  cat <<EOF
+Usage:
+  sign [options]                   ~/.ssh 안에 있는 키들을 모두 서명함
+  sign [options] [keyfile ...]     입력으로 주어진 키들을 서명함
+
+Vault를 사용하여 OpenSSH 키들을 서명해주는 스크립트
+
+Options:
+  -t ttl    서명이 얼마나 오래 유지될지 결정하는 옵션. 옵션이 주어지지 않았을
+            경우, 서버의 기본값이 사용된다. Vault 서버에 지정된 max_ttl 값보다
+            길게 지정하는것이 불가능하다.
+  -h        이 도움말을 출력하고 종료함
+  -r <role> 사용할 Role. 지정하지 않을 경우 default를 따른다.
+
+Examples:
+  sign                    # ~/.ssh 안의 키들을 기본 TTL동안 유지되도록 서명
+  sign -t 24h             # ~/.ssh 안의 키들을 24시간동안 유지되도록 서명
+  sign ./some_ed25519     # 키 ./some_ed25519 서명
+EOF
+}
+
+#
+# 커맨드라인 인자 파싱
+#
+while getopts t:r:h opt; do
+  case $opt in
+    t)  TTL=$OPTARG;;
+    r)  ROLE=$OPTARG;;
+    h)  show_help; exit;;
+    \?) echo >&2; show_help >&2; exit 1;;
+  esac
+done
+shift "$((OPTIND-1))"
+
+#
+# 첫번째 인자로 주어진 키를 서명하는 함수
+#
+sign_key () {
+  if [[ -r "$1".pub ]]; then
+    vault write \
+      -field=signed_key \
+      ssh-client-signer/sign/${ROLE-developer} \
+      valid_principals=Administrator,admin,core,devadmin,ec2-user,openvpnas,ubuntu \
+      ttl="${TTL-24h}" public_key=@"$1".pub > "$1"-cert.pub
+  else
+    ssh-keygen -yf "$1" | vault write \
+      -field=signed_key \
+      ssh-client-signer/sign/${ROLE-developer} \
+      valid_principals=Administrator,admin,core,devadmin,ec2-user,openvpnas,ubuntu \
+      ttl="${TTL-24h}" public_key=- > "$1"-cert.pub
+  fi
+
+  chmod 600 "$1"-cert.pub
+}
+
+#
+# 프로그램 진입점
+#
+main () {
+  local FILES=("$@") VERBOSE=true
+
+  # 인자로 입력된 파일이 아무것도 없을경우, ~/.ssh 안의 키들 서명 시도
+  if [ "$#" -eq 0 ]; then
+    FILES=(\
+      ~/.ssh/id_dsa
+      ~/.ssh/id_ecdsa
+      ~/.ssh/id_ed25519
+      ~/.ssh/id_rsa
+    )
+    VERBOSE=false
+  fi
+
+  for KEY in "${FILES[@]}"; do
+    # 파일이 존재하는지 먼저 체크
+    if [ ! -f "$KEY" ]; then
+      [ "$VERBOSE" = true ] && printf '%s: No such file "%s"\n' "$0" "$KEY" >&2
+      continue
+    fi
+
+    sign_key "$KEY"
+  done
+}
+
+main "$@"
