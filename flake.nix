@@ -34,19 +34,11 @@
 
   outputs = { self, nixpkgs, ... }@inputs:
     let
-      # 패키지 생성 헬퍼 함수
-      mkPkgs = system: import nixpkgs {
-        inherit system;
-        config.allowUnfree = true;
-        overlays = [
-          inputs.nix-vscode-extensions.overlays.default
-        ];
-      };
-
-      pkgs = {
-        "x86_64-linux" = mkPkgs "x86_64-linux";
-        "aarch64-darwin" = mkPkgs "aarch64-darwin";
-      };
+      # 라이브러리 import
+      myLib = import ./lib { inherit inputs nixpkgs; };
+      
+      # 시스템별 패키지
+      pkgs = myLib.builders.mkSystemPkgs [ "x86_64-linux" "aarch64-darwin" ];
 
       # 환경별 설정 정의
       environmentConfigs = {
@@ -77,21 +69,10 @@
 
       baseModules = [ ./home.nix ];
 
-      # Home Configuration 헬퍼 함수
-      mkHomeConfig = name: config:
-        let
-          requiredFields = [ "system" "username" "homeDirectory" ];
-          missingFields = builtins.filter (field: !(builtins.hasAttr field config)) requiredFields;
-        in
-          if missingFields != []
-          then throw "Missing required fields for ${name}: ${builtins.toString missingFields}"
-          else inputs.home-manager.lib.homeManagerConfiguration {
-            pkgs = pkgs.${config.system};
-            extraSpecialArgs = commonSpecialArgs // {
-              inherit (config) system username homeDirectory;
-            };
-            modules = baseModules ++ (config.extraModules or []);
-          };
+      # 홈 설정 생성 함수
+      mkHomeConfig = myLib.builders.mkHomeConfig {
+        inherit environmentConfigs commonSpecialArgs baseModules;
+      };
     in {
       darwinConfigurations = {
         "devsisters-macbook" = inputs.nix-darwin.lib.darwinSystem {
