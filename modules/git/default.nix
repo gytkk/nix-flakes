@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  environmentConfig ? null,
   ...
 }:
 with lib;
@@ -9,8 +10,8 @@ with lib;
 {
   programs.git = {
     enable = true;
-    userName = "gytkk";
-    userEmail = "gytk.kim@gmail.com";
+    userName = if environmentConfig != null then environmentConfig.git.userName else "gytkk";
+    userEmail = if environmentConfig != null then environmentConfig.git.userEmail else "gytk.kim@gmail.com";
 
     lfs.enable = true;
 

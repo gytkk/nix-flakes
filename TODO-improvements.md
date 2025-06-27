@@ -24,11 +24,11 @@
 
 ### TODO 4: 환경별 설정 중앙화
 
-- [ ] 환경별 설정을 별도 파일로 분리
+- [v] 환경별 설정을 별도 파일로 분리
   - `environments/devsisters-macbook.nix`
   - `environments/devsisters-macstudio.nix`  
   - `environments/wsl-ubuntu.nix`
-- [ ] 하드코딩된 값들을 환경 설정으로 이동
+- [v] 하드코딩된 값들을 환경 설정으로 이동
   - 사용자명, 홈 디렉토리
   - Git 사용자 정보
   - 시스템별 경로

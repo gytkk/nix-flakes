@@ -6,6 +6,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - Use context7
 
+## Rules
+
+- Write a code according to the rule of nixfmt-rfc-style package
+- Write an action plan as markdown format first
+
 ## Commands
 
 ### Home Manager Operations

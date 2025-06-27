@@ -32,35 +32,20 @@
     };
   };
 
-  outputs = { self, nixpkgs, ... }@inputs:
+  outputs =
+    { self, nixpkgs, ... }@inputs:
     let
       # 라이브러리 import
       myLib = import ./lib { inherit inputs nixpkgs; };
-      
-      # 시스템별 패키지
-      pkgs = myLib.builders.mkSystemPkgs [ "x86_64-linux" "aarch64-darwin" ];
 
-      # 환경별 설정 정의
-      environmentConfigs = {
-        "devsisters-macbook" = {
-          system = "aarch64-darwin";
-          username = "gyutak";
-          homeDirectory = "/Users/gyutak";
-          extraModules = [ ./modules/devsisters ];
-        };
-        "devsisters-macstudio" = {
-          system = "aarch64-darwin";
-          username = "gyutak";
-          homeDirectory = "/Users/gyutak";
-          extraModules = [ ./modules/devsisters ];
-        };
-        "wsl-ubuntu" = {
-          system = "x86_64-linux";
-          username = "gytkk";
-          homeDirectory = "/home/gytkk";
-          extraModules = [];
-        };
-      };
+      # 시스템별 패키지
+      pkgs = myLib.builders.mkSystemPkgs [
+        "x86_64-linux"
+        "aarch64-darwin"
+      ];
+
+      # 환경별 설정 (라이브러리에서 자동 로드)
+      environmentConfigs = myLib.environments.allEnvironments;
 
       # 공통 설정
       commonSpecialArgs = {
@@ -73,7 +58,8 @@
       mkHomeConfig = myLib.builders.mkHomeConfig {
         inherit environmentConfigs commonSpecialArgs baseModules;
       };
-    in {
+    in
+    {
       darwinConfigurations = {
         "devsisters-macbook" = inputs.nix-darwin.lib.darwinSystem {
           system = "aarch64-darwin";
