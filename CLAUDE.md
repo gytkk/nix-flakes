@@ -16,14 +16,19 @@ home-manager switch --flake .#devsisters-macbook
 home-manager switch --flake .#devsisters-macstudio
 home-manager switch --flake .#wsl-ubuntu
 
-# Build without switching
-home-manager build --flake .#macbook
+# Build without switching (test configuration)
+home-manager build --flake .#devsisters-macbook
+home-manager build --flake .#devsisters-macstudio
+home-manager build --flake .#wsl-ubuntu
 
 # List available configurations
 nix flake show
 
 # Update flake inputs
 nix flake update
+
+# Format Nix files
+nixfmt-rfc-style flake.nix home.nix modules/**/*.nix
 ```
 
 ### Nix Development
@@ -41,43 +46,55 @@ nix develop
 
 ## Architecture
 
-This is a Nix flakes-based Home Manager configuration supporting multiple environments (macOS and WSL Ubuntu). The configuration is modular and environment-specific.
+This is a Nix flakes-based Home Manager configuration supporting multiple environments (macOS and WSL Ubuntu). The configuration is modular with environment-specific customizations.
 
 ### Core Structure
 
-- `flake.nix`: Main flake configuration defining inputs, outputs, and environment-specific configurations
+- `flake.nix`: Main flake configuration with inputs, outputs, and environment definitions
 - `home.nix`: Base Home Manager configuration imported by all environments
 - `modules/`: Modular configuration components
+- `plans/`: Planning documents for improvements and refactoring
 
 ### Environment Configurations
 
-The flake defines three main environments:
+The flake defines three environments with specific user and system settings:
 
-- `devsisters-macbook`: ARM64 macOS configuration
-- `devsisters-macstudio`: ARM64 macOS configuration with devsisters-specific tools
-- `wsl-ubuntu`: x86_64 Linux configuration for WSL
+- **`devsisters-macbook`**: ARM64 macOS (gyutak@/Users/gyutak) with devsisters tools
+- **`devsisters-macstudio`**: ARM64 macOS (gyutak@/Users/gyutak) with devsisters tools  
+- **`wsl-ubuntu`**: x86_64 Linux (gytkk@/home/gytkk) without devsisters tools
 
-Each environment has both `darwinConfigurations` and `homeConfigurations` entries, with the latter being the primary configurations used.
+Environment configs are managed through the `environmentConfigs` attribute set in `flake.nix:52-71`.
 
 ### Module System
 
-- `modules/claude/`: Claude Code installation and MCP configuration
-- `modules/git/`: Git configuration with user settings and global gitignore
-- `modules/zsh/`: Zsh configuration with Oh-My-Zsh, Powerlevel10k theme, and development aliases
-- `modules/devsisters/`: Company-specific tools (saml2aws, vault) and environment variables
+- **`modules/claude/`**: Claude Code installation with MCP support enabled
+- **`modules/git/`**: Git configuration (gytkk/gytk.kim@gmail.com) with LFS, custom aliases, and global gitignore
+- **`modules/zsh/`**: Zsh with Oh-My-Zsh, Powerlevel10k theme, fzf, direnv, and development aliases
+- **`modules/devsisters/`**: Company tools (saml2aws, vault, eclair) and authentication scripts
 
 ### Key Features
 
-- **Environment-specific configurations**: Each environment can have different packages and settings
-- **Modular design**: Common functionality is extracted into reusable modules
-- **Development tooling**: Includes mise for version management, various CLI tools, and IDE configurations
-- **Shell customization**: Zsh with Powerlevel10k theme and productivity aliases
-- **Authentication tools**: SAML2AWS and Vault integration for devsisters environment
+- **Multi-environment support**: Different user accounts and system architectures
+- **Modular design**: Reusable components with environment-specific overrides
+- **Development tooling**: mise, docker, uv, nodejs, kubectl, k9s, awscli2
+- **Shell experience**: Zsh with syntax highlighting, autosuggestion, and custom aliases
+- **Code editing**: Neovim with development utilities
+- **Nix tooling**: nixfmt-rfc-style for code formatting
 
 ### Package Management
 
-Packages are defined in `home.nix` and include development tools (mise, docker, nodejs), editors (neovim, cursor), cloud tools (awscli2, kubectl), and shell enhancements.
+Base packages defined in `home.nix:29-61`:
+- **System**: coreutils, findutils, ripgrep, direnv
+- **Development**: mise, docker, uv, nodejs, awscli2, yq
+- **Kubernetes**: kubectl, kubectx, k9s
+- **Editor**: neovim
+- **Nix**: nixfmt-rfc-style
 
-### Configuration Updates
+Additional environment-specific packages added via module imports.
 
-When modifying configurations, test with `home-manager build` before switching to avoid breaking the current environment.
+### Configuration Management
+
+- Test changes: `home-manager build --flake .#<environment>`
+- Apply changes: `home-manager switch --flake .#<environment>`
+- Format code: `nixfmt-rfc-style` for consistent styling
+- Version control: All configurations tracked in git
