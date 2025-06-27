@@ -47,6 +47,51 @@
         "x86_64-linux" = mkPkgs "x86_64-linux";
         "aarch64-darwin" = mkPkgs "aarch64-darwin";
       };
+
+      # 환경별 설정 정의
+      environmentConfigs = {
+        "devsisters-macbook" = {
+          system = "aarch64-darwin";
+          username = "gyutak";
+          homeDirectory = "/Users/gyutak";
+          extraModules = [ ./modules/devsisters ];
+        };
+        "devsisters-macstudio" = {
+          system = "aarch64-darwin";
+          username = "gyutak";
+          homeDirectory = "/Users/gyutak";
+          extraModules = [ ./modules/devsisters ];
+        };
+        "wsl-ubuntu" = {
+          system = "x86_64-linux";
+          username = "gytkk";
+          homeDirectory = "/home/gytkk";
+          extraModules = [];
+        };
+      };
+
+      # 공통 설정
+      commonSpecialArgs = {
+        zsh-powerlevel10k = inputs.zsh-powerlevel10k;
+      };
+
+      baseModules = [ ./home.nix ];
+
+      # Home Configuration 헬퍼 함수
+      mkHomeConfig = name: config:
+        let
+          requiredFields = [ "system" "username" "homeDirectory" ];
+          missingFields = builtins.filter (field: !(builtins.hasAttr field config)) requiredFields;
+        in
+          if missingFields != []
+          then throw "Missing required fields for ${name}: ${builtins.toString missingFields}"
+          else inputs.home-manager.lib.homeManagerConfiguration {
+            pkgs = pkgs.${config.system};
+            extraSpecialArgs = commonSpecialArgs // {
+              inherit (config) system username homeDirectory;
+            };
+            modules = baseModules ++ (config.extraModules or []);
+          };
     in {
       darwinConfigurations = {
         "devsisters-macbook" = inputs.nix-darwin.lib.darwinSystem {
@@ -68,50 +113,6 @@
         };
       };
 
-      homeConfigurations = {
-        "devsisters-macbook" = inputs.home-manager.lib.homeManagerConfiguration {
-          pkgs = pkgs.aarch64-darwin;
-          extraSpecialArgs = {
-            system = "aarch64-darwin";
-            username = "gyutak";
-            homeDirectory = "/Users/gyutak";
-
-            zsh-powerlevel10k = inputs.zsh-powerlevel10k;
-          };
-          modules = [
-            ./home.nix
-            ./modules/devsisters
-          ];
-        };
-
-        "devsisters-macstudio" = inputs.home-manager.lib.homeManagerConfiguration {
-          pkgs = pkgs.aarch64-darwin;
-          extraSpecialArgs = {
-            system = "aarch64-darwin";
-            username = "gyutak";
-            homeDirectory = "/Users/gyutak";
-
-            zsh-powerlevel10k = inputs.zsh-powerlevel10k;
-          };
-          modules = [
-            ./home.nix
-            ./modules/devsisters
-          ];
-        };
-
-        "wsl-ubuntu" = inputs.home-manager.lib.homeManagerConfiguration {
-          pkgs = pkgs.x86_64-linux;
-          extraSpecialArgs = {
-            system = "x86_64-linux";
-            username = "gytkk";
-            homeDirectory = "/home/gytkk";
-
-            zsh-powerlevel10k = inputs.zsh-powerlevel10k;
-          };
-          modules = [
-            ./home.nix
-          ];
-        };
-      };
+      homeConfigurations = builtins.mapAttrs mkHomeConfig environmentConfigs;
     };
 }
