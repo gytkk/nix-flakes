@@ -82,9 +82,14 @@
           pkgs = pkgs.aarch64-darwin;
           extraSpecialArgs = {
             system = "aarch64-darwin";
+            username = "gyutak";
+            homeDirectory = "/Users/gyutak";
+
+            zsh-powerlevel10k = inputs.zsh-powerlevel10k;
           };
           modules = [
             ./home.nix
+            ./modules/devsisters
           ];
         };
 
