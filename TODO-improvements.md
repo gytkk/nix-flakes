@@ -16,11 +16,9 @@
 
 ### TODO 3: 라이브러리 디렉토리 구조 생성
 
-- [ ] `lib/` 디렉토리 생성
-- [ ] `lib/default.nix` - 라이브러리 익스포트
-- [ ] `lib/environments.nix` - 환경 정의 중앙화
-- [ ] `lib/builders.nix` - 빌더 헬퍼 함수들
-- [ ] `lib/profiles.nix` - 패키지 프로필 정의
+- [v] `lib/` 디렉토리 생성
+- [v] `lib/default.nix` - 라이브러리 익스포트
+- [v] `lib/builders.nix` - 빌더 헬퍼 함수들
 
 ## 🎯 환경 설정 개선
 
