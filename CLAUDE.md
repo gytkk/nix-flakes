@@ -84,6 +84,7 @@ Environment configs are managed through the `environmentConfigs` attribute set i
 ### Package Management
 
 Base packages defined in `home.nix:29-61`:
+
 - **System**: coreutils, findutils, ripgrep, direnv
 - **Development**: mise, docker, uv, nodejs, awscli2, yq
 - **Kubernetes**: kubectl, kubectx, k9s
