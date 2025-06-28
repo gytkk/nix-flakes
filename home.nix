@@ -10,6 +10,7 @@
   imports = [
     ./modules/claude
     ./modules/git
+    ./modules/vim
     ./modules/zsh
   ];
 
@@ -24,6 +25,7 @@
       base = "en_US.UTF-8";
     };
 
+    # 별도의 설정이 필요한 경우는 modules 디렉토리에 추가한다
     packages = with pkgs; [
       # Nix
       nixfmt-rfc-style
@@ -37,9 +39,6 @@
       docker
       uv
       nodejs
-
-      # IDEs
-      neovim
 
       # Dev tools
       awscli2
