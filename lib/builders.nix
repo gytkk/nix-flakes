@@ -25,7 +25,6 @@ rec {
   mkHomeConfig =
     {
       environmentConfigs,
-      commonSpecialArgs,
       baseModules,
     }:
     name: config:
@@ -43,7 +42,7 @@ rec {
     else
       inputs.home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
-        extraSpecialArgs = commonSpecialArgs // {
+        extraSpecialArgs = {
           inherit (config) system username homeDirectory;
           environmentConfig = config;
         };

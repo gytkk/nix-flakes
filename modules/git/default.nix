@@ -11,7 +11,8 @@ with lib;
   programs.git = {
     enable = true;
     userName = if environmentConfig != null then environmentConfig.git.userName else "gytkk";
-    userEmail = if environmentConfig != null then environmentConfig.git.userEmail else "gytk.kim@gmail.com";
+    userEmail =
+      if environmentConfig != null then environmentConfig.git.userEmail else "gytk.kim@gmail.com";
 
     lfs.enable = true;
 

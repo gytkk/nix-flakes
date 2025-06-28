@@ -17,13 +17,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # ===== Zsh plugins =====
-    # zsh-powerlevel10k - for zsh theme
-    zsh-powerlevel10k = {
-      url = "github:romkatv/powerlevel10k/v1.20.0";
-      flake = false;
-    };
-
     # ===== VS Code =====
     # nix-vscode-extensions - for VS Code extensions from marketplace
     nix-vscode-extensions = {
@@ -36,27 +29,22 @@
     { self, nixpkgs, ... }@inputs:
     let
       # 라이브러리 import
-      myLib = import ./lib { inherit inputs nixpkgs; };
+      lib = import ./lib { inherit inputs nixpkgs; };
 
       # 시스템별 패키지
-      pkgs = myLib.builders.mkSystemPkgs [
+      pkgs = lib.builders.mkSystemPkgs [
         "x86_64-linux"
         "aarch64-darwin"
       ];
 
       # 환경별 설정 (라이브러리에서 자동 로드)
-      environmentConfigs = myLib.environments.allEnvironments;
-
-      # 공통 설정
-      commonSpecialArgs = {
-        zsh-powerlevel10k = inputs.zsh-powerlevel10k;
-      };
+      environmentConfigs = lib.environments.allEnvironments;
 
       baseModules = [ ./home.nix ];
 
       # 홈 설정 생성 함수
-      mkHomeConfig = myLib.builders.mkHomeConfig {
-        inherit environmentConfigs commonSpecialArgs baseModules;
+      mkHomeConfig = lib.builders.mkHomeConfig {
+        inherit environmentConfigs baseModules;
       };
     in
     {

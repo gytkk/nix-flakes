@@ -4,7 +4,6 @@
   system,
   username,
   homeDirectory,
-  zsh-powerlevel10k,
   ...
 }:
 
@@ -52,9 +51,6 @@
       kubectl
       kubectx
       k9s
-
-      # Zsh
-      zsh-powerlevel10k
 
       # etc
       direnv

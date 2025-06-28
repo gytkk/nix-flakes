@@ -102,8 +102,7 @@
         "home-manager": "home-manager",
         "nix-darwin": "nix-darwin",
         "nix-vscode-extensions": "nix-vscode-extensions",
-        "nixpkgs": "nixpkgs",
-        "zsh-powerlevel10k": "zsh-powerlevel10k"
+        "nixpkgs": "nixpkgs"
       }
     },
     "systems": {
@@ -118,23 +117,6 @@
       "original": {
         "owner": "nix-systems",
         "repo": "default",
-        "type": "github"
-      }
-    },
-    "zsh-powerlevel10k": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1706252285,
-        "narHash": "sha256-ES5vJXHjAKw/VHjWs8Au/3R+/aotSbY7PWnWAMzCR8E=",
-        "owner": "romkatv",
-        "repo": "powerlevel10k",
-        "rev": "35833ea15f14b71dbcebc7e54c104d8d56ca5268",
-        "type": "github"
-      },
-      "original": {
-        "owner": "romkatv",
-        "ref": "v1.20.0",
-        "repo": "powerlevel10k",
         "type": "github"
       }
     }

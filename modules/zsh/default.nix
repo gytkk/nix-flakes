@@ -1,6 +1,16 @@
-{ config, lib, pkgs, zsh-powerlevel10k, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
+  home.packages = with pkgs; [
+    zsh
+    zsh-powerlevel10k
+  ];
+
   # Zsh configuration
   programs.zsh = {
     enable = true;
@@ -39,7 +49,7 @@
       {
         # Powerlevel10k theme
         name = "powerlevel10k";
-        src = zsh-powerlevel10k;
+        src = "${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/";
         file = "powerlevel10k.zsh-theme";
       }
     ];
