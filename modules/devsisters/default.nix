@@ -27,14 +27,12 @@ in
     saml2aws
     vault
 
-    # Required dependencies for DevSisters tools
+    # Required dependencies for eclair
+    eclair
     ruby_3_1
     tmux
     ncurses.dev
     gcc
-
-    # DevSisters tools
-    eclair
 
     # Custom scripts
     (pkgs.writeShellScriptBin "sign" (builtins.readFile ./scripts/sign))
