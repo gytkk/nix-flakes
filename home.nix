@@ -39,6 +39,7 @@
       docker
       uv
       nodejs
+      flutter
 
       # Dev tools
       awscli2
