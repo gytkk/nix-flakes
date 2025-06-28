@@ -1,7 +1,6 @@
 {
   # 시스템 정보
   system = "aarch64-darwin";
-  platform = "darwin";
 
   # 사용자 정보
   username = "gyutak";

@@ -21,7 +21,7 @@ rec {
       }) systems
     );
 
-  # Home Configuration 헬퍼 함수 (기존 mkHomeConfig)
+  # Home Configuration helper function
   mkHomeConfig =
     {
       environmentConfigs,
@@ -43,7 +43,7 @@ rec {
       inputs.home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
         extraSpecialArgs = {
-          inherit (config) system username homeDirectory;
+          inherit (config) username homeDirectory;
           environmentConfig = config;
         };
         modules = baseModules ++ (config.extraModules or [ ]);

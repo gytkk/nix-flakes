@@ -60,12 +60,6 @@
           modules = [
           ];
         };
-
-        "wsl-ubuntu" = inputs.nix-darwin.lib.darwinSystem {
-          system = "x86_64-linux";
-          modules = [
-          ];
-        };
       };
 
       homeConfigurations = builtins.mapAttrs mkHomeConfig environmentConfigs;

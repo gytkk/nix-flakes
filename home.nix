@@ -1,7 +1,6 @@
 {
   config,
   pkgs,
-  system,
   username,
   homeDirectory,
   ...
