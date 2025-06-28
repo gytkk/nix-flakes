@@ -25,15 +25,6 @@ home-manager switch --flake .#wsl-ubuntu
 home-manager build --flake .#devsisters-macbook
 home-manager build --flake .#devsisters-macstudio
 home-manager build --flake .#wsl-ubuntu
-
-# List available configurations
-nix flake show
-
-# Update flake inputs
-nix flake update
-
-# Format Nix files
-nixfmt-rfc-style flake.nix home.nix modules/**/*.nix
 ```
 
 ### Nix Development
@@ -41,9 +32,6 @@ nixfmt-rfc-style flake.nix home.nix modules/**/*.nix
 ```bash
 # Check flake configuration
 nix flake check
-
-# Show flake metadata
-nix flake metadata
 
 # Enter development shell
 nix develop

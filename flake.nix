@@ -44,7 +44,7 @@
 
       # 홈 설정 생성 함수
       mkHomeConfig = lib.builders.mkHomeConfig {
-        inherit environmentConfigs baseModules;
+        inherit baseModules;
       };
     in
     {

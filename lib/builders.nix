@@ -23,10 +23,7 @@ rec {
 
   # Home Configuration helper function
   mkHomeConfig =
-    {
-      environmentConfigs,
-      baseModules,
-    }:
+    { baseModules }:
     name: config:
     let
       requiredFields = [
@@ -44,7 +41,6 @@ rec {
         inherit pkgs;
         extraSpecialArgs = {
           inherit (config) username homeDirectory;
-          environmentConfig = config;
         };
         modules = baseModules ++ (config.extraModules or [ ]);
       };
