@@ -11,6 +11,7 @@
     ./modules/claude
     ./modules/git
     ./modules/vim
+    ./modules/vscode
     ./modules/zsh
   ];
 
@@ -39,7 +40,6 @@
       docker
       uv
       nodejs
-      flutter
 
       # Dev tools
       awscli2
