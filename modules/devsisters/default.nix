@@ -34,6 +34,9 @@ in
     ncurses.dev
     gcc
 
+    # Databricks
+    databricks-cli
+
     # Custom scripts
     (pkgs.writeShellScriptBin "sign" (builtins.readFile ./scripts/sign))
     (pkgs.writeShellScriptBin "login" (builtins.readFile ./scripts/login))
