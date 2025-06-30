@@ -11,7 +11,6 @@
     ./modules/claude
     ./modules/git
     ./modules/vim
-    ./modules/vscode
     ./modules/zsh
   ];
 
