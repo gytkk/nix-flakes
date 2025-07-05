@@ -2,14 +2,21 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Context for MCPs
+## Documentation Guidelines
 
-- Use context7
+- **NO ONE-OFF DOCUMENTATION FILES**: Do not create temporary or one-off documentation files (e.g., CHANGES.md, NOTES.md, etc.)
+- All documentation belongs in:
+  - CLAUDE.md - Primary source of truth for development guidelines
+  - README.md - User-facing documentation
+  - Code comments - Only when absolutely necessary
+  - Commit messages - For change history
+- If you need to document something, update the appropriate existing file
 
-## Rules
+## Source of Truth & Code Patterns
 
-- Write a code according to the rule of nixfmt-rfc-style package
-- Write an action plan as markdown format first
+- CLAUDE.md is the primary source of truth for coding rules
+- Always follow existing code patterns and module structure
+- Maintain architectural boundaries and consistency
 
 ## Commands
 
