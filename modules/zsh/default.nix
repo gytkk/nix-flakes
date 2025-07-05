@@ -55,6 +55,11 @@
     ];
 
     shellAliases = {
+      # Home manager aliases
+      hm = "home-manager";
+      hmb = "home-manager build";
+      hms = "home-manager switch";
+
       # ls aliases with color by default
       ls = "ls --color=auto";
       ll = "ls -la --color=auto";
