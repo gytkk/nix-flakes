@@ -39,6 +39,7 @@
       docker
       uv
       nodejs
+      pnpm
 
       # Dev tools
       awscli2
