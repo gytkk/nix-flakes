@@ -10,7 +10,7 @@
   imports = [
     ./modules/claude
     ./modules/git
-    ./modules/nodejs
+    ./modules/js
     ./modules/vim
     ./modules/zsh
   ];
@@ -39,8 +39,11 @@
       mise
       docker
       uv
+
+      # JavaScript + Node.js
       nodejs
       pnpm
+      turbo
 
       # Dev tools
       awscli2
