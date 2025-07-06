@@ -34,9 +34,16 @@
       coreutils
       findutils
 
-      # Development
+      # Development (common)
       mise
       docker
+
+      # Dev tools
+      awscli2
+      yq
+      ripgrep
+
+      # Python
       uv
 
       # JavaScript + Node.js
@@ -44,12 +51,10 @@
       pnpm
       turbo
 
-      # Dev tools
-      awscli2
-      yq
-      ripgrep
+      # Go
+      go
 
-      # Kubernetes tools
+      # Kubernetes
       kubectl
       kubectx
       k9s
