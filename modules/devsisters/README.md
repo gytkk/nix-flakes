@@ -12,15 +12,18 @@ This module provides authentication and access tools for Devsisters infrastructu
 ## Features
 
 ### Authentication Tools
+
 - **saml2aws**: SAML-based AWS authentication
 - **vault**: HashiCorp Vault client for secret management
 - **Eclair Integration**: Ruby gem (ecl) with automatic installation and path management
 
 ### Custom Scripts
+
 - **`login`**: Automated login script that combines Vault OIDC and SAML2AWS authentication
 - **`sign`**: SSH key signing utility using Vault's SSH client signer
 
 ### Environment Configuration
+
 - Sets `VAULT_ADDR=https://vault.devsisters.cloud` for Vault operations
 
 ## Requirements
@@ -34,15 +37,19 @@ This module provides authentication and access tools for Devsisters infrastructu
 ## Scripts Details
 
 ### Login Script (`login`)
+
 Performs authentication to both Vault and AWS:
+
 ```bash
 login
 ```
+
 - Authenticates to Vault using OIDC method
 - Logs into AWS via SAML with 12-hour session duration
 - Disables keychain storage and forces fresh authentication
 
 ### Sign Script (`sign`)
+
 Signs SSH keys using Vault's SSH client signer:
 
 ```bash
@@ -60,6 +67,7 @@ sign -r developer
 ```
 
 **Features:**
+
 - Automatically discovers common SSH key types (RSA, Ed25519, ECDSA, DSA)
 - Supports custom TTL (time-to-live) for certificates
 - Configurable roles (defaults to 'developer')
@@ -67,7 +75,9 @@ sign -r developer
 - Generates signed certificates with proper permissions (600)
 
 ### Eclair Integration
+
 The module creates a wrapper script for the Eclair Ruby gem:
+
 - Automatically installs ecl gem version 3.0.4 if not present
 - Manages Ruby gem paths and environment
 - Provides `ecl` command for Devsisters-specific tooling
