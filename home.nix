@@ -40,6 +40,7 @@
       uv
       nodejs
       pnpm
+      turbo
 
       # Dev tools
       awscli2
