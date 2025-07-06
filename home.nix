@@ -10,7 +10,6 @@
   imports = [
     ./modules/claude
     ./modules/git
-    ./modules/js
     ./modules/vim
     ./modules/zsh
   ];
