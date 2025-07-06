@@ -10,6 +10,7 @@
   imports = [
     ./modules/claude
     ./modules/git
+    ./modules/nodejs
     ./modules/vim
     ./modules/zsh
   ];
@@ -40,7 +41,6 @@
       uv
       nodejs
       pnpm
-      turbo
 
       # Dev tools
       awscli2
