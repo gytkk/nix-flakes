@@ -77,9 +77,6 @@
 
       # uv
       ur = "uv run";
-
-      # TODO: Separate into profiles
-      tf = "AWS_PROFILE=saml terraform";
     };
 
     # Initialize p10k configuration

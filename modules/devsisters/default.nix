@@ -40,7 +40,13 @@ in
     (pkgs.writeShellScriptBin "login" (builtins.readFile ./scripts/login))
   ];
 
-  programs.zsh.envExtra = ''
-    export VAULT_ADDR=https://vault.devsisters.cloud
-  '';
+  programs.zsh = {
+    envExtra = ''
+      export VAULT_ADDR=https://vault.devsisters.cloud
+    '';
+    
+    shellAliases = {
+      tf = "AWS_PROFILE=saml terraform";
+    };
+  };
 }
