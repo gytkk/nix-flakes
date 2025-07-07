@@ -64,5 +64,8 @@
 
     # Python
     .coverage
+
+    # Claude
+    .claude/settings.local.json
   '';
 }
