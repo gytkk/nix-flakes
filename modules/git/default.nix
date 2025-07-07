@@ -63,7 +63,41 @@
     mise.toml
 
     # Python
+    __pycache__/
+    *.py[codz]
+    *$py.class.Python
+
+    build/
+    develop-eggs/
+    dist/
+    downloads/
+    eggs/
+    .eggs/
+    parts/
+    sdist/
+    wheels/
+    share/python-wheels/
+    *.egg-info/
+    .installed.cfg
+    *.egg
+    MANIFEST
+
     .coverage
+    htmlcov/
+
+    .ruff_cache/
+
+    # Node.js
+    logs
+    *.log
+    npm-debug.log*
+    yarn-debug.log*
+    yarn-error.log*
+    lerna-debug.log*
+
+    # Nix
+    result
+    result-*
 
     # Claude
     .claude/settings.local.json
