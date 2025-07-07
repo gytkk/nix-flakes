@@ -37,11 +37,13 @@
       # Development (common)
       mise
       docker
+      gcc
 
       # Dev tools
       awscli2
       yq
       ripgrep
+      tmux
 
       # Python
       uv

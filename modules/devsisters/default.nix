@@ -30,9 +30,7 @@ in
     # Required dependencies for eclair
     eclair
     ruby_3_1
-    tmux
     ncurses.dev
-    gcc
 
     # Databricks
     databricks-cli
