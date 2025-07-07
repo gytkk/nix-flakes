@@ -57,9 +57,6 @@
     .vscode
     .tool-versions
 
-    # Claude
-    .claude
-
     # Environment
     .env
     .envrc
