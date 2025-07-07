@@ -48,6 +48,7 @@
 
       # JavaScript + Node.js
       nodejs
+      typescript
       pnpm
       turbo
 
