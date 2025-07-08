@@ -61,6 +61,7 @@
       kubectl
       kubectx
       k9s
+      kubernetes-helm
 
       # etc
       direnv
