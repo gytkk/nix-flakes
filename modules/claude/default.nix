@@ -15,24 +15,8 @@
   programs.zsh.shellAliases.ccusage = "npx ccusage@latest";
 
   # Create ~/.claude/settings.json file
-  home.file.".claude/settings.json".text = ''
-    {
-      "permissions": {
-        "allow": [
-          "Bash(find:*)",
-          "Bash(mkdir:*)"
-        ]
-      }
-    }
-  '';
+  home.file.".claude/settings.json".source = ./files/settings.json;
 
   # Create ~/.claude/CLAUDE.md file
-  home.file.".claude/CLAUDE.md".text = ''
-    # CLAUDE.md
-
-    ## Critical Rules
-    - First, deeply understand and think about what you want to achieve with your code.
-    - Always follow existing code patterns and module structure.
-    - Be concise. Commit small, frequent changes for readable diffs.
-  '';
+  home.file.".claude/CLAUDE.md".source = ./files/CLAUDE.md;
 }
