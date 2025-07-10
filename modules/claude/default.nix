@@ -19,4 +19,28 @@
 
   # Create ~/.claude/CLAUDE.md file
   home.file.".claude/CLAUDE.md".source = ./files/CLAUDE.md;
+
+  # Create update script and source it in shell
+  home.file.".claude/update-config.sh" = {
+    text = ''
+      #!/bin/bash
+      # Update ~/.claude.json (merge with files/claude.json)
+      CLAUDE_JSON="$HOME/.claude.json"
+      OVERRIDE_FILE="${./files/claude.json}"
+
+      if [ -f "$CLAUDE_JSON" ]; then
+        jq -s '.[0] * .[1]' "$CLAUDE_JSON" "$OVERRIDE_FILE" > "$CLAUDE_JSON.tmp" && mv "$CLAUDE_JSON.tmp" "$CLAUDE_JSON"
+      else
+        cp "$OVERRIDE_FILE" "$CLAUDE_JSON"
+        chmod 644 "$CLAUDE_JSON"
+      fi
+    '';
+    executable = true;
+  };
+
+  # Source the update script on shell initialization
+  programs.zsh.profileExtra = ''
+    # Update Claude configuration
+    [[ -f ~/.claude/update-config.sh ]] && source ~/.claude/update-config.sh
+  '';
 }
