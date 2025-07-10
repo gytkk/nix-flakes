@@ -10,6 +10,17 @@
         "-y",
         "@modelcontextprotocol/server-sequential-thinking"
       ]
+    },
+    "gemini": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "github:aliargun/mcp-server-gemini"
+      ],
+      "env": {
+        "GEMINI_API_KEY": ""
+      }
     }
   }
 }
