@@ -2,6 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(ls:*)",
       "Bash(mkdir:*)",
       "WebFetch(domain:github.com)",
       "mcp__sequential-thinking__sequentialthinking"
