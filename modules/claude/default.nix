@@ -29,7 +29,7 @@
       OVERRIDE_FILE="${./files/claude.json}"
 
       if [ -f "$CLAUDE_JSON" ]; then
-        jq -s '.[0] * .[1]' "$CLAUDE_JSON" "$OVERRIDE_FILE" > "$CLAUDE_JSON.tmp" && mv "$CLAUDE_JSON.tmp" "$CLAUDE_JSON"
+        ${pkgs.jq}/bin/jq -s '.[0] * .[1]' "$CLAUDE_JSON" "$OVERRIDE_FILE" > "$CLAUDE_JSON.tmp" && mv "$CLAUDE_JSON.tmp" "$CLAUDE_JSON"
       else
         cp "$OVERRIDE_FILE" "$CLAUDE_JSON"
         chmod 644 "$CLAUDE_JSON"
