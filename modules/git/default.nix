@@ -17,6 +17,7 @@
       core = {
         editor = "nvim";
         excludesfile = "~/.gitignore";
+        quotepath = "false";
       };
 
       # Diff configuration
