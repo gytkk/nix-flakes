@@ -22,7 +22,7 @@
 
     # Set language for shell sessions managed by home-manager
     language = {
-      base = "en_US.UTF-8";
+      base = "ko_KR.UTF-8";
     };
 
     # 별도의 설정이 필요한 경우는 modules 디렉토리에 추가한다
