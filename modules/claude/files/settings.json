@@ -6,6 +6,8 @@
       "Bash(ls:*)",
       "Bash(mkdir:*)",
       "WebFetch(domain:github.com)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs",
       "mcp__sequential-thinking__sequentialthinking"
     ]
   }
