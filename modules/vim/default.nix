@@ -19,7 +19,7 @@
       filetype plugin indent on
 
       " Editor settings
-      set endcoding=utf-8
+      set encoding=utf-8
       set fileencoding=utf-8
       set termencoding=utf-8
       set mouse=a
