@@ -12,12 +12,14 @@ This module configures Neovim as the primary text editor with essential settings
 ## Features
 
 ### Editor Configuration
+
 - **Default Editor**: Sets Neovim as the system's default editor
 - **Aliases**: `vi` and `vim` commands redirect to `nvim`
 - **Syntax Highlighting**: Enabled with `syntax enable` and optimized sync
 - **File Type Detection**: Automatic file type detection with appropriate plugins and indentation
 
 ### Basic Settings
+
 - **Mouse Support**: Full mouse integration (`set mouse=a`)
 - **Line Numbers**: Display line numbers (`set nu`)
 - **Ruler**: Show cursor position (`set ruler`, `set ru`)
@@ -32,6 +34,7 @@ This module configures Neovim as the primary text editor with essential settings
 ## Configuration Details
 
 The module provides a minimal but functional Neovim setup with:
+
 - Syntax highlighting with optimized synchronization (`syntax sync fromstart`)
 - File type detection and appropriate plugin/indent loading
 - Basic editor settings for line numbers and cursor position
@@ -40,6 +43,7 @@ The module provides a minimal but functional Neovim setup with:
 ## Usage
 
 After applying this module, you can use any of these commands to edit files:
+
 ```bash
 nvim filename.txt    # Direct Neovim command
 vim filename.txt     # Alias to Neovim
@@ -47,6 +51,7 @@ vi filename.txt      # Alias to Neovim
 ```
 
 The configuration automatically:
+
 - Enables syntax highlighting for supported file types
 - Shows line numbers and cursor position
 - Provides mouse support for navigation and selection
