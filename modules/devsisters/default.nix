@@ -20,33 +20,56 @@ let
     # Execute the actual ecl command
     exec "/Users/gyutak/.gem/ruby/3.1.0/bin/ecl" "$@"
   '';
+
+  # Generate terraform version aliases dynamically based on terraform module config
+  terraformVersionAliases =
+    lib.mkIf (config.modules.terraform.enable && config.modules.terraform.installAll)
+      (
+        builtins.listToAttrs (
+          map (version: {
+            name = "tf-${builtins.replaceStrings [ "." ] [ "" ] version}";
+            value = "AWS_PROFILE=saml terraform-${version}";
+          }) config.modules.terraform.versions
+        )
+      );
 in
 {
-  home.packages = with pkgs; [
-    # Authentication
-    saml2aws
-    vault
+  # Export option for other modules to check if devsisters environment is enabled
+  options.modules.devsisters = {
+    enable = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Enable devsisters-specific configuration";
+    };
+  };
 
-    # Required dependencies for eclair
-    eclair
-    ruby_3_1
-    ncurses.dev
+  config = {
+    home.packages = with pkgs; [
+      # Authentication
+      saml2aws
+      vault
 
-    # Databricks
-    databricks-cli
+      # Required dependencies for eclair
+      eclair
+      ruby_3_1
+      ncurses.dev
 
-    # Custom scripts
-    (pkgs.writeShellScriptBin "sign" (builtins.readFile ./scripts/sign))
-    (pkgs.writeShellScriptBin "login" (builtins.readFile ./scripts/login))
-  ];
+      # Databricks
+      databricks-cli
 
-  programs.zsh = {
-    envExtra = ''
-      export VAULT_ADDR=https://vault.devsisters.cloud
-    '';
-    
-    shellAliases = {
-      tf = "AWS_PROFILE=saml terraform";
+      # Custom scripts
+      (pkgs.writeShellScriptBin "sign" (builtins.readFile ./scripts/sign))
+      (pkgs.writeShellScriptBin "login" (builtins.readFile ./scripts/login))
+    ];
+
+    programs.zsh = {
+      envExtra = ''
+        export VAULT_ADDR=https://vault.devsisters.cloud
+      '';
+
+      shellAliases = {
+        tf = "AWS_PROFILE=saml terraform";
+      } // terraformVersionAliases;
     };
   };
 }

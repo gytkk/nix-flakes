@@ -77,6 +77,9 @@
 
       # uv
       ur = "uv run";
+
+      # Terraform (can be overridden by other modules)
+      tf = "terraform";
     };
 
     # Initialize p10k configuration
