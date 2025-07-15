@@ -11,9 +11,6 @@
     pkgs.claude-code
   ];
 
-  # Create ccusage alias for npx ccusage@latest
-  programs.zsh.shellAliases.ccusage = "npx ccusage@latest";
-
   # Create ~/.claude/settings.json file
   home.file.".claude/settings.json".source = ./files/settings.json;
 
@@ -38,9 +35,16 @@
     executable = true;
   };
 
-  # Source the update script on shell initialization
-  programs.zsh.profileExtra = ''
+  # Update Claude configuration during home-manager activation
+  home.activation.updateClaudeConfig = lib.hm.dag.entryAfter ["writeBoundary"] ''
     # Update Claude configuration
-    [[ -f ~/.claude/update-config.sh ]] && source ~/.claude/update-config.sh
+    if [[ -f ~/.claude/update-config.sh ]]; then
+      source ~/.claude/update-config.sh
+    fi
   '';
+
+  home.shellAliases = {
+    # Create ccusage alias for npx ccusage@latest
+    ccusage = "npx ccusage@latest";
+  };
 }
