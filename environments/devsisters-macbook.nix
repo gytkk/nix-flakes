@@ -7,10 +7,10 @@
   homeDirectory = "/Users/gyutak";
 
   # 환경별 모듈
-  extraModules = [ 
+  extraModules = [
     ../modules/devsisters
     {
-      modules.devsisters.enabled = true;
+      modules.devsisters.enable = true;
     }
   ];
 }
