@@ -7,7 +7,6 @@ rec {
       inherit system;
       config.allowUnfree = true;
       overlays = [
-        inputs.nix-vscode-extensions.overlays.default
         inputs.nixpkgs-terraform.overlays.default
       ];
     };

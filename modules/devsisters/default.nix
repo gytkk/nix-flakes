@@ -34,42 +34,31 @@ let
       );
 in
 {
-  # Export option for other modules to check if devsisters environment is enabled
-  options.modules.devsisters = {
-    enable = lib.mkOption {
-      type = lib.types.bool;
-      default = true;
-      description = "Enable devsisters-specific configuration";
-    };
-  };
+  home.packages = with pkgs; [
+    # Authentication
+    saml2aws
+    vault
 
-  config = {
-    home.packages = with pkgs; [
-      # Authentication
-      saml2aws
-      vault
+    # Required dependencies for eclair
+    eclair
+    ruby_3_1
+    ncurses.dev
 
-      # Required dependencies for eclair
-      eclair
-      ruby_3_1
-      ncurses.dev
+    # Databricks
+    databricks-cli
 
-      # Databricks
-      databricks-cli
+    # Custom scripts
+    (pkgs.writeShellScriptBin "sign" (builtins.readFile ./scripts/sign))
+    (pkgs.writeShellScriptBin "login" (builtins.readFile ./scripts/login))
+  ];
 
-      # Custom scripts
-      (pkgs.writeShellScriptBin "sign" (builtins.readFile ./scripts/sign))
-      (pkgs.writeShellScriptBin "login" (builtins.readFile ./scripts/login))
-    ];
+  programs.zsh = {
+    envExtra = ''
+      export VAULT_ADDR=https://vault.devsisters.cloud
+    '';
 
-    programs.zsh = {
-      envExtra = ''
-        export VAULT_ADDR=https://vault.devsisters.cloud
-      '';
-
-      shellAliases = {
-        tf = "AWS_PROFILE=saml terraform";
-      } // terraformVersionAliases;
-    };
+    shellAliases = {
+      tf = "AWS_PROFILE=saml terraform";
+    } // terraformVersionAliases;
   };
 }

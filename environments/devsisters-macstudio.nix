@@ -6,11 +6,8 @@
   username = "gyutak";
   homeDirectory = "/Users/gyutak";
 
-  # 환경별 모듈
-  extraModules = [
-    ../modules/devsisters
-    {
-      modules.devsisters.enable = true;
-    }
-  ];
+  # 환경별 기능 활성화
+  features = {
+    devsisters = true;
+  };
 }

@@ -6,6 +6,8 @@
   username = "gytkk";
   homeDirectory = "/home/gytkk";
 
-  # 환경별 모듈
-  extraModules = [ ];
+  # 환경별 기능 활성화
+  features = {
+    # WSL 환경에서는 devsisters 기능 비활성화
+  };
 }

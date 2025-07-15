@@ -8,11 +8,13 @@
 
 {
   imports = [
+    # 기본 모듈들 (항상 import됨)
     ./modules/claude
     ./modules/git
     ./modules/terraform
     ./modules/vim
     ./modules/zsh
+    # devsisters 모듈은 features.devsisters = true인 환경에서만 import됨
   ];
 
   # Disable news on update

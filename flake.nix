@@ -17,13 +17,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # ===== VS Code =====
-    # nix-vscode-extensions - for VS Code extensions from marketplace
-    nix-vscode-extensions = {
-      url = "github:nix-community/nix-vscode-extensions";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # nixpkgs-terraform - for Terraform version management
     nixpkgs-terraform = {
       url = "github:stackbuilders/nixpkgs-terraform";
