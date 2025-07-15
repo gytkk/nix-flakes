@@ -36,7 +36,7 @@
   };
 
   # Update Claude configuration during home-manager activation
-  home.activation.updateClaudeConfig = lib.hm.dag.entryAfter ["writeBoundary"] ''
+  home.activation.updateClaudeConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     # Update Claude configuration
     if [[ -f ~/.claude/update-config.sh ]]; then
       source ~/.claude/update-config.sh
