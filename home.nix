@@ -73,6 +73,16 @@
     stateVersion = "25.05";
   };
 
+  programs = {
+    # Enable Home Manager
+    home-manager = {
+      enable = true;
+    };
 
-  programs.home-manager.enable = true;
+    direnv = {
+      enable = true;
+      enableZshIntegration = true;
+      nix-direnv.enable = true;
+    };
+  };
 }

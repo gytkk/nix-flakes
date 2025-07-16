@@ -42,7 +42,6 @@
         "aws"
         "kubectl"
         "z"
-        "zsh-autosuggestions"
       ];
     };
 
@@ -114,13 +113,6 @@
   # fzf configuration
   programs.fzf = {
     enable = true;
-    enableZshIntegration = true;
-  };
-
-  # direnv
-  programs.direnv = {
-    enable = true;
-    nix-direnv.enable = true;
     enableZshIntegration = true;
   };
 
