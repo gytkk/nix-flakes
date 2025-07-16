@@ -2,21 +2,21 @@
 
 ## 목표
 
-direnv와 nixpkgs-terraform을 기반으로 각 디렉토리의 `.tool-versions` 파일 또는 `.envrc` 파일에 기록된 Terraform 버전을 자동으로 읽어서 적절한 Terraform 패키지를 선택하는 시스템 구현
+direnv와 nixpkgs-terraform을 기반으로 각 디렉토리의 Terraform 설정 파일에서 버전을 자동으로 읽어서 적절한 Terraform 패키지를 선택하는 시스템 구현
 
 ## 구현 전략
 
 ### 핵심 아이디어
 
-- `.tool-versions` 파일에서 terraform 버전을 읽어서 환경 변수로 설정
+- `backend.tf` 파일의 `required_version` 또는 `required_providers` 블록에서 terraform 버전을 읽어서 환경 변수로 설정
 - `flake.nix`에서 환경 변수를 읽어서 적절한 nixpkgs-terraform 패키지 선택
 - direnv를 통해 자동으로 환경 적용
 
 ### 구성 요소
 
 1. **flake.nix** - 환경 변수 기반 terraform 버전 선택
-2. **'.envrc'** - .tool-versions 파싱 및 환경 변수 설정
-3. **'.tool-versions'** - terraform 버전 명시 (asdf 형식)
+2. **'.envrc'** - backend.tf 파싱 및 환경 변수 설정
+3. **'backend.tf'** - terraform 버전 명시 (HCL 형식)
 
 ## 구현 단계
 
@@ -78,9 +78,16 @@ source_url "https://raw.githubusercontent.com/nix-community/nix-direnv/main/dire
 #### 기본 구조
 
 ```bash
-# .tool-versions에서 terraform 버전 읽기
-if [[ -f .tool-versions ]]; then
-  TF_VERSION=$(grep "^terraform " .tool-versions | cut -d' ' -f2)
+# backend.tf에서 terraform 버전 읽기
+if [[ -f backend.tf ]]; then
+  # required_version 파싱
+  TF_VERSION=$(grep -E '^\s*required_version\s*=' backend.tf | sed -E 's/.*"([^"]+)".*/\1/' | head -1)
+  
+  # required_providers 블록에서 terraform 버전 파싱
+  if [[ -z "$TF_VERSION" ]]; then
+    TF_VERSION=$(awk '/required_providers/,/}/' backend.tf | grep -E '^\s*terraform\s*=' | sed -E 's/.*"([^"]+)".*/\1/' | head -1)
+  fi
+  
   if [[ -n "$TF_VERSION" ]]; then
     export TERRAFORM_VERSION="$TF_VERSION"
   fi
@@ -92,8 +99,8 @@ use flake
 
 #### 향상된 기능
 
-- 버전 파싱 에러 처리
-- 다중 도구 지원
+- HCL 구문 파싱 에러 처리
+- 버전 범위 처리 (예: ">= 1.5.0")
 - 로깅 및 디버깅
 
 ### 4단계: 테스트 및 검증
@@ -101,16 +108,24 @@ use flake
 #### 테스트 케이스
 
 1. **기본 동작 테스트**
-   - `.tool-versions`에 terraform 버전 명시
+   - `backend.tf`에 terraform 버전 명시
    - 디렉토리 진입시 자동 환경 설정 확인
 
-2. **버전 변경 테스트**
+2. **우선순위 테스트**
+   - `required_version` vs `required_providers` 우선순위 확인
+
+3. **버전 변경 테스트**
    - 다른 terraform 버전으로 변경
    - 환경 재로드 확인
 
-3. **에러 처리 테스트**
+4. **에러 처리 테스트**
    - 존재하지 않는 버전 지정
    - 파일 없음 상황 처리
+   - 잘못된 HCL 구문 처리
+
+5. **backend.tf 파싱 테스트**
+   - 다양한 HCL 구문 형식 지원
+   - 버전 범위 표현 처리 (">= 1.5.0", "~> 1.5.0")
 
 #### 검증 방법
 
@@ -136,8 +151,9 @@ which terraform
 ### 2. 버전 관리
 
 - nixpkgs-terraform에서 지원하는 버전 확인
-- 버전 범위 지정 (예: 1.5.x)
+- 버전 범위 지정 (예: ">= 1.5.0", "~> 1.5.0")
 - 최신 버전 자동 선택
+- Terraform 설정 파일 구문 파싱 개선
 
 ### 3. 성능 최적화
 
@@ -150,6 +166,7 @@ which terraform
 - 다른 도구 지원 (terragrunt, tflint 등)
 - 커스텀 훅 지원
 - 팀 단위 설정 공유
+- 다양한 Terraform 설정 파일 지원 (main.tf, versions.tf 등)
 
 ## 배포 전략
 
@@ -181,9 +198,11 @@ which terraform
 이 시스템을 통해:
 
 - 프로젝트별 terraform 버전 자동 관리
+- backend.tf 파일 기반 버전 자동 감지
 - 개발 환경 일관성 보장
 - 기존 도구와의 호환성 유지
 - 팀 협업 효율성 향상
+- Terraform 설정 파일과 환경 동기화
 
 ## 유지보수 계획
 
