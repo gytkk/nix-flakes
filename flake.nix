@@ -17,6 +17,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # nix-direnv
+    nix-direnv = {
+      url = "github:nix-community/nix-direnv/master";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # nixpkgs-terraform - for Terraform version management
     nixpkgs-terraform = {
       url = "github:stackbuilders/nixpkgs-terraform";

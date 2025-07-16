@@ -35,12 +35,14 @@
       enable = true;
 
       plugins = [
+        "direnv"
         "fzf"
         "git"
         "docker"
         "aws"
         "kubectl"
         "z"
+        "zsh-autosuggestions"
       ];
     };
 

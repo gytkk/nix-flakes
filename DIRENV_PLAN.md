@@ -7,6 +7,7 @@ direnv와 nixpkgs-terraform을 기반으로 각 디렉토리의 `.tool-versions`
 ## 구현 전략
 
 ### 핵심 아이디어
+
 - `.tool-versions` 파일에서 terraform 버전을 읽어서 환경 변수로 설정
 - `flake.nix`에서 환경 변수를 읽어서 적절한 nixpkgs-terraform 패키지 선택
 - direnv를 통해 자동으로 환경 적용
@@ -22,12 +23,14 @@ direnv와 nixpkgs-terraform을 기반으로 각 디렉토리의 `.tool-versions`
 ### 1단계: nix-direnv 설정
 
 #### 필요한 패키지 설치
+
 ```bash
 # nix-direnv 설치
 nix profile install nixpkgs#nix-direnv
 ```
 
 #### direnv 설정
+
 ```bash
 # ~/.config/direnv/direnvrc에 추가
 source_url "https://raw.githubusercontent.com/nix-community/nix-direnv/main/direnvrc" "sha256-0000000000000000000000000000000000000000000="
@@ -36,6 +39,7 @@ source_url "https://raw.githubusercontent.com/nix-community/nix-direnv/main/dire
 ### 2단계: flake.nix 템플릿 생성
 
 #### 기본 구조
+
 ```nix
 {
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -64,6 +68,7 @@ source_url "https://raw.githubusercontent.com/nix-community/nix-direnv/main/dire
 ```
 
 #### 향상된 기능
+
 - 버전 유효성 검사
 - 에러 처리
 - 다중 시스템 지원
@@ -71,6 +76,7 @@ source_url "https://raw.githubusercontent.com/nix-community/nix-direnv/main/dire
 ### 3단계: .envrc 템플릿 생성
 
 #### 기본 구조
+
 ```bash
 # .tool-versions에서 terraform 버전 읽기
 if [[ -f .tool-versions ]]; then
@@ -85,6 +91,7 @@ use flake
 ```
 
 #### 향상된 기능
+
 - 버전 파싱 에러 처리
 - 다중 도구 지원
 - 로깅 및 디버깅
@@ -92,6 +99,7 @@ use flake
 ### 4단계: 테스트 및 검증
 
 #### 테스트 케이스
+
 1. **기본 동작 테스트**
    - `.tool-versions`에 terraform 버전 명시
    - 디렉토리 진입시 자동 환경 설정 확인
@@ -105,6 +113,7 @@ use flake
    - 파일 없음 상황 처리
 
 #### 검증 방법
+
 ```bash
 # terraform 버전 확인
 terraform version
@@ -119,21 +128,25 @@ which terraform
 ## 추가 고려사항
 
 ### 1. 시스템 호환성
+
 - macOS (aarch64-darwin, x86_64-darwin)
 - Linux (x86_64-linux)
 - WSL 환경
 
 ### 2. 버전 관리
+
 - nixpkgs-terraform에서 지원하는 버전 확인
 - 버전 범위 지정 (예: 1.5.x)
 - 최신 버전 자동 선택
 
 ### 3. 성능 최적화
+
 - nix-direnv 캐싱 활용
 - 불필요한 다운로드 방지
 - 빠른 환경 전환
 
 ### 4. 확장성
+
 - 다른 도구 지원 (terragrunt, tflint 등)
 - 커스텀 훅 지원
 - 팀 단위 설정 공유
@@ -141,20 +154,24 @@ which terraform
 ## 배포 전략
 
 ### 1. 프로토타입 구현
+
 - 기본 기능 구현
 - 단일 시스템에서 테스트
 
 ### 2. 기능 확장
+
 - 에러 처리 강화
 - 다중 시스템 지원
 - 성능 최적화
 
 ### 3. 문서화
+
 - 사용법 가이드
 - 트러블슈팅 가이드
 - 설정 예시
 
 ### 4. 커뮤니티 공유
+
 - GitHub 저장소 공개
 - 사용 사례 공유
 - 피드백 수집
@@ -162,6 +179,7 @@ which terraform
 ## 예상 결과
 
 이 시스템을 통해:
+
 - 프로젝트별 terraform 버전 자동 관리
 - 개발 환경 일관성 보장
 - 기존 도구와의 호환성 유지
