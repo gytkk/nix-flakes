@@ -12,4 +12,8 @@
       # Tailscale VPN
       tailscale
     ];
+
+  programs.tailscale = {
+    enable = true;
+  };
 }
