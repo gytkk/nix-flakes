@@ -5,6 +5,7 @@ let
     "devsisters-macbook"
     "devsisters-macstudio"
     "wsl-ubuntu"
+    "pylv-sepia"
   ];
 
   # 환경 설정 로더
