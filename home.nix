@@ -3,6 +3,7 @@
   pkgs,
   username,
   homeDirectory,
+  extraPackages ? (_: []),
   ...
 }:
 
@@ -28,7 +29,7 @@
       base = "ko_KR.UTF-8";
     };
 
-    # 별도의 설정이 필요한 경우는 modules 디렉토리에 추가한다
+    # 기본 패키지 (모든 환경에서 공통)
     packages = with pkgs; [
       # Nix
       nixfmt-rfc-style
@@ -69,7 +70,7 @@
 
       # etc
       direnv
-    ];
+    ] ++ (extraPackages pkgs); # 환경별 추가 패키지
 
     stateVersion = "25.05";
   };
