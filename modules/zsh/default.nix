@@ -79,6 +79,11 @@
       ur = "uv run";
     };
 
+    # Environment variables
+    sessionVariables = {
+      LESSCHARSET = "utf-8";
+    };
+
     # Initialize p10k configuration
     initContent = ''
       # Initialize p10k configuration

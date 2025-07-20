@@ -20,9 +20,12 @@
         quotepath = "false";
       };
 
-      # Diff configuration
-      diff = {
-        tool = "vimdiff";
+      # Color configuration
+      color = {
+        ui = "auto";
+        diff = "auto";
+        status = "auto";
+        branch = "auto";
       };
 
       # Pull configuration
@@ -36,17 +39,21 @@
         autoSetupRemote = true;
       };
 
-      # Color configuration
-      color = {
-        ui = "auto";
-        diff = "auto";
-        status = "auto";
-        branch = "auto";
-      };
-
       # Init configuration
       init = {
         defaultBranch = "main";
+      };
+
+      fetch = {
+        all = true;
+        prune = true;
+        pruneTags = true;
+      };
+
+      url = {
+        "ssh://git@github.com/" = {
+          insteadOf = "https://github.com/";
+        };
       };
     };
   };
