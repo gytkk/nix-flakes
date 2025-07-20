@@ -4,7 +4,7 @@ let
   envNames = [
     "devsisters-macbook"
     "devsisters-macstudio"
-    "wsl-ubuntu"
+    "pylv-denim"
     "pylv-sepia"
   ];
 
