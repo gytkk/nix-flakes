@@ -7,17 +7,5 @@
   homeDirectory = "/home/gytkk";
 
   # 환경별 추가 패키지
-  extraPackages =
-    pkgs: with pkgs; [
-      # Tailscale VPN
-      tailscale
-    ];
-
-  programs.tailscale = {
-    enable = true;
-  };
-
-  services.tailscale = {
-    enable = true;
-  };
+  extraPackages = pkgs: with pkgs; [ ];
 }
