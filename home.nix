@@ -3,7 +3,7 @@
   pkgs,
   username,
   homeDirectory,
-  extraPackages ? (_: []),
+  extraPackages ? (_: [ ]),
   ...
 }:
 
@@ -30,47 +30,53 @@
     };
 
     # 기본 패키지 (모든 환경에서 공통)
-    packages = with pkgs; [
-      # Nix
-      nixfmt-rfc-style
+    packages =
+      with pkgs;
+      [
+        # Nix
+        nixfmt-rfc-style
 
-      # System utilities
-      coreutils
-      findutils
+        # System utilities
+        coreutils
+        findutils
 
-      # Development (common)
-      docker
-      gcc
+        # Development (common)
+        docker
+        gcc
 
-      # Dev tools
-      awscli2
-      jq
-      yq-go # yq 패키지는 더 이상 관리되지 않음
-      ripgrep
-      tmux
-      less
+        # Dev tools
+        awscli2
+        jq
+        yq-go # yq 패키지는 더 이상 관리되지 않음
+        ripgrep
+        tmux
+        less
 
-      # Python
-      uv
+        # Python
+        uv
 
-      # JavaScript + Node.js
-      nodejs
-      typescript
-      pnpm
-      turbo
+        # JavaScript + Node.js
+        nodejs
+        typescript
+        pnpm
+        turbo
 
-      # Go
-      go
+        # Go
+        go
 
-      # Kubernetes
-      kubectl
-      kubectx
-      k9s
-      kubernetes-helm
+        # Kubernetes
+        kubectl
+        kubectx
+        k9s
+        kubernetes-helm
 
-      # etc
-      direnv
-    ] ++ (extraPackages pkgs); # 환경별 추가 패키지
+        # Secrets
+        _1password-cli
+
+        # etc
+        direnv
+      ]
+      ++ (extraPackages pkgs); # 환경별 추가 패키지
 
     stateVersion = "25.05";
   };
