@@ -22,14 +22,16 @@ home-manager switch --flake .#devsisters-macbook
 
 home-manager switch --flake .#devsisters-macstudio
 
-home-manager switch --flake .#wsl-ubuntu
+home-manager switch --flake .#pylv-denim
+
+home-manager switch --flake .#pylv-sepia
 ```
 
 ### Build without switching
 
 ```bash
 # Build configuration for specific environment
-home-manager build --flake .#macbook
+home-manager build --flake .#devsisters-macbook
 ```
 
 ### List available configurations
