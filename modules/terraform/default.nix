@@ -43,8 +43,8 @@ in
       description = "List of terraform versions to install";
       example = [
         "1.10.2"
+        "1.11.1"
         "1.12.2"
-        "latest"
       ];
     };
 
@@ -82,7 +82,9 @@ in
       )
     );
 
-    # Note: terraform flake is manually copied to ~/.config/nix-direnv/terraform-flake/
-    # This avoids Home Manager symlink complications with nix-direnv
+    home.file.".config/nix-direnv/terraform-flake" = {
+      source = ./terraform-flake;
+      recursive = true;
+    };
   };
 }
