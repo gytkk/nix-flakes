@@ -81,5 +81,11 @@ in
         }) cfg.versions
       )
     );
+
+    # Install terraform flake dotfile for direnv integration
+    home.file.".config/nix-direnv/terraform-flake" = {
+      source = ./terraform-flake;
+      recursive = true;
+    };
   };
 }
