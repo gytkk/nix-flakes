@@ -6,8 +6,6 @@
   username = "gyutak";
   homeDirectory = "/Users/gyutak";
 
-  # 추가 모듈
-  extraModules = [
-    ../modules/devsisters
-  ];
+  # Base profile
+  baseProfile = "devsisters";
 }

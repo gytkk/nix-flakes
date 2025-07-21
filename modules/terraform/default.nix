@@ -59,6 +59,16 @@ in
       default = false;
       description = "Install all configured terraform versions";
     };
+
+    runEnv = lib.mkOption {
+      type = lib.types.attrsOf lib.types.str;
+      default = { };
+      description = "Environment variables to set when running terraform";
+      example = {
+        TF_VAR_environment = "dev";
+        AWS_REGION = "ap-northeast-2";
+      };
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -73,14 +83,31 @@ in
     nixpkgs.config.allowUnfree = true;
 
     # Create terraform version aliases if multiple versions are installed
-    home.shellAliases = lib.mkIf (cfg.installAll || (builtins.length cfg.versions) > 1) (
-      builtins.listToAttrs (
-        map (version: {
-          name = "terraform-${version}";
-          value = "${terraformVersions.${version}}/bin/terraform";
-        }) cfg.versions
-      )
-    );
+    home.shellAliases = 
+      let
+        envPrefix = lib.concatStringsSep " " (lib.mapAttrsToList (name: value: "${name}=${value}") cfg.runEnv);
+        terraformCmd = version: 
+          if cfg.runEnv != {} then
+            "${envPrefix} ${terraformVersions.${version}}/bin/terraform"
+          else
+            "${terraformVersions.${version}}/bin/terraform";
+      in
+      lib.mkIf (cfg.installAll || (builtins.length cfg.versions) > 1) (
+        builtins.listToAttrs (
+          map (version: {
+            name = "terraform-${version}";
+            value = terraformCmd version;
+          }) cfg.versions
+        )
+      ) // 
+      # Add main tf alias with environment variables
+      (lib.optionalAttrs (cfg.runEnv != {}) {
+        tf = 
+          if cfg.installAll then
+            terraformCmd cfg.defaultVersion
+          else
+            "${envPrefix} ${terraformVersions.${cfg.defaultVersion}}/bin/terraform";
+      });
 
     home.file.".config/nix-direnv/terraform-flake" = {
       source = ./terraform-flake;

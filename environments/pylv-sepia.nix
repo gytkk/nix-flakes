@@ -6,6 +6,9 @@
   username = "gytkk";
   homeDirectory = "/home/gytkk";
 
+  # Base profile
+  baseProfile = "pylv";
+
   # 환경별 추가 패키지
   extraPackages = pkgs: with pkgs; [ ];
 }

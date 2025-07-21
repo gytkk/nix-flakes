@@ -10,12 +10,11 @@
 {
   imports = [
     # 기본 모듈들 (항상 import됨)
-    ./modules/claude
-    ./modules/git
-    ./modules/terraform
-    ./modules/vim
-    ./modules/zsh
-    # devsisters 모듈은 features.devsisters = true인 환경에서만 import됨
+    ../../modules/claude
+    ../../modules/git
+    ../../modules/terraform
+    ../../modules/vim
+    ../../modules/zsh
   ];
 
   # Disable news on update
@@ -75,6 +74,8 @@
 
         # etc
         direnv
+
+        # Pylv 특화 패키지들 (추후 필요시 추가)
       ]
       ++ (extraPackages pkgs); # 환경별 추가 패키지
 
@@ -92,5 +93,15 @@
       enableZshIntegration = true;
       nix-direnv.enable = true;
     };
+  };
+
+  # Pylv 특화 shell aliases (추후 필요시 추가)
+  home.shellAliases = {
+    # 추후 필요한 별칭들 추가 예정
+  };
+
+  # Pylv 특화 환경 변수 (추후 필요시 추가)
+  home.sessionVariables = {
+    # 추후 필요한 환경 변수들 추가 예정
   };
 }
