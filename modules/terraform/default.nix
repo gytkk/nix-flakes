@@ -82,10 +82,7 @@ in
       )
     );
 
-    # Install terraform flake dotfile for direnv integration
-    home.file.".config/nix-direnv/terraform-flake" = {
-      source = ./terraform-flake;
-      recursive = true;
-    };
+    # Note: terraform flake is manually copied to ~/.config/nix-direnv/terraform-flake/
+    # This avoids Home Manager symlink complications with nix-direnv
   };
 }
