@@ -11,6 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - Code comments - Only when absolutely necessary
   - Commit messages - For change history
 - If you need to document something, update the appropriate existing file
+- When you work on markdown files, ensure they are following markdownlint rules
 
 ## Source of Truth & Code Patterns
 
