@@ -1,55 +1,38 @@
 {
   "devsisters-macbook" = {
-    # 시스템 정보
+    baseProfile = "devsisters";
+
     system = "aarch64-darwin";
 
-    # 사용자 정보
     username = "gyutak";
     homeDirectory = "/Users/gyutak";
-
-    # Base profile
-    baseProfile = "devsisters";
   };
 
   "devsisters-macstudio" = {
-    # 시스템 정보
-    system = "aarch64-darwin";
-
-    # 사용자 정보
-    username = "gyutak";
-    homeDirectory = "/Users/gyutak";
-
     # Base profile
     baseProfile = "devsisters";
+
+    system = "aarch64-darwin";
+
+    username = "gyutak";
+    homeDirectory = "/Users/gyutak";
   };
 
   "pylv-denim" = {
-    # 시스템 정보
-    system = "x86_64-linux";
-
-    # 사용자 정보
-    username = "gytkk";
-    homeDirectory = "/home/gytkk";
-
-    # Base profile
     baseProfile = "pylv";
 
-    # 환경별 추가 패키지
-    extraPackages = pkgs: [];
+    system = "x86_64-linux";
+
+    username = "gytkk";
+    homeDirectory = "/home/gytkk";
   };
 
   "pylv-sepia" = {
-    # 시스템 정보
-    system = "x86_64-linux";
-
-    # 사용자 정보
-    username = "gytkk";
-    homeDirectory = "/home/gytkk";
-
-    # Base profile
     baseProfile = "pylv";
 
-    # 환경별 추가 패키지
-    extraPackages = pkgs: with pkgs; [ ];
+    system = "x86_64-linux";
+
+    username = "gytkk";
+    homeDirectory = "/home/gytkk";
   };
 }
