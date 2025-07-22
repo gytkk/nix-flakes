@@ -52,7 +52,7 @@ in
       "1.10.5"
       "1.12.2"
     ];
-    defaultVersion = "1.12.2";
+    defaultVersion = "1.10.5";
     runEnv = {
       AWS_PROFILE = "saml";
     };

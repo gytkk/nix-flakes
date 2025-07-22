@@ -1,0 +1,48 @@
+{
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    nixpkgs-terraform.url = "github:stackbuilders/nixpkgs-terraform";
+  };
+
+  outputs = { self, nixpkgs, nixpkgs-terraform }:
+    let
+      # 지원하는 시스템 목록
+      systems = [ "x86_64-linux" "aarch64-darwin" "aarch64-linux" "x86_64-darwin" ];
+      
+      # 각 시스템에 대해 outputs 생성
+      forAllSystems = nixpkgs.lib.genAttrs systems;
+      
+      # Home Manager에서 주입된 설정값들
+      supportedVersions = @supportedVersions@;
+      defaultVersion = "@defaultVersion@";
+    in
+    {
+      devShells = forAllSystems (system:
+        let
+          pkgs = nixpkgs.legacyPackages.$${system};
+          
+          # 각 버전별 devShell 생성
+          versionShells = builtins.listToAttrs (
+            map (version: {
+              name = "terraform-$${builtins.replaceStrings ["."] ["-"] version}";
+              value = pkgs.mkShell {
+                buildInputs = [ 
+                  (if version == "latest" 
+                    then pkgs.terraform
+                    else nixpkgs-terraform.packages.$${system}.$${version})
+                ];
+                shellHook = ''
+                  echo "🚀 Terraform $${version} environment loaded"
+                  terraform version
+                '';
+              };
+            }) supportedVersions
+          );
+        in
+        versionShells // {
+          # 기본 shell은 defaultVersion을 사용
+          default = versionShells."terraform-$${builtins.replaceStrings ["."] ["-"] defaultVersion}";
+        }
+      );
+    };
+}

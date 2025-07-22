@@ -164,6 +164,14 @@ let
     info "The new version will be loaded when you re-enter the directory"
   '';
 
+  # Create the terraform-flake as a derivation to avoid nix store path issues
+  terraform-flake = pkgs.runCommand "terraform-flake" {} ''
+    mkdir -p $out
+    substitute ${./terraform-flake/flake.nix.template} $out/flake.nix \
+      --replace '@supportedVersions@' '${builtins.toJSON (cfg.versions ++ ["latest"])}' \
+      --replace '@defaultVersion@' '${cfg.defaultVersion}'
+  '';
+
   # Configuration options
   cfg = config.modules.terraform;
 in
@@ -224,9 +232,12 @@ in
         "${envPrefix} ${terraformVersions.${cfg.defaultVersion}}/bin/terraform";
     };
 
-    home.file.".config/nix-direnv/terraform-flake" = {
-      source = ./terraform-flake;
-      recursive = true;
+    # terraform-flake 생성 (derivation 방식으로 nix store path 문제 해결)
+    home.file.".config/nix-direnv/terraform-flake/flake.nix".source = "${terraform-flake}/flake.nix";
+    
+    # flake.lock 파일 별도 복사
+    home.file.".config/nix-direnv/terraform-flake/flake.lock" = {
+      source = ./terraform-flake/flake.lock;
     };
 
     # Install direnvrc with layout_terraform function

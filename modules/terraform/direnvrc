@@ -27,8 +27,11 @@ layout_terraform() {
   # TF_VERSION 환경변수 설정
   export TF_VERSION="$tf_version"
   
-  # 중앙 terraform-flake 사용
-  use flake ~/.config/nix-direnv/terraform-flake
+  # 버전을 shell 이름으로 변환 (1.10.5 -> terraform-1-10-5)
+  local shell_name="terraform-${tf_version//\./-}"
+  
+  # 특정 버전의 devShell 사용
+  use flake ~/.config/nix-direnv/terraform-flake#${shell_name}
   
   log_status "🚀 Terraform $tf_version environment loaded"
 }
