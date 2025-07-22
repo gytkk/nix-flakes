@@ -66,6 +66,7 @@
     .tool-versions
 
     # Environment
+    .direnv/
     .env
     .envrc
     mise.toml
