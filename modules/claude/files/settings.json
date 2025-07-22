@@ -3,7 +3,9 @@
     "allow": [
       "Bash(find:*)",
       "Bash(grep:*)",
+      "Bash(cp:*)",
       "Bash(ls:*)",
+      "Bash(mv:*)",
       "Bash(mkdir:*)",
       "WebFetch(domain:github.com)",
       "mcp__context7__resolve-library-id",

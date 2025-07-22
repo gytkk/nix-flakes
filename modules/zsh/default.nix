@@ -80,9 +80,7 @@
     };
 
     # Environment variables
-    sessionVariables = {
-      LESSCHARSET = "utf-8";
-    };
+    sessionVariables = { };
 
     # Initialize p10k configuration
     initContent = ''

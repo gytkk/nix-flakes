@@ -24,5 +24,6 @@
   # Pylv 특화 환경 변수 (추후 필요시 추가)
   home.sessionVariables = {
     # 추후 필요한 환경 변수들 추가 예정
+    LESSCHARSET = "utf-8";
   };
 }

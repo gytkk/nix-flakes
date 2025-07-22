@@ -22,18 +22,6 @@ let
     # Execute the actual ecl command
     exec "/Users/gyutak/.gem/ruby/3.1.0/bin/ecl" "$@"
   '';
-
-  # Generate terraform version aliases dynamically based on terraform module config
-  terraformVersionAliases =
-    lib.mkIf (config.modules.terraform.enable && config.modules.terraform.installAll)
-      (
-        builtins.listToAttrs (
-          map (version: {
-            name = "tf-${builtins.replaceStrings [ "." ] [ "" ] version}";
-            value = "AWS_PROFILE=saml terraform-${version}";
-          }) config.modules.terraform.versions
-        )
-      );
 in
 {
   # Import base configuration
@@ -61,8 +49,7 @@ in
   # Devsisters 특화 shell aliases
   home.shellAliases = {
     tf = "AWS_PROFILE=saml terraform";
-  }
-  // terraformVersionAliases;
+  };
 
   # Devsisters 특화 환경 변수
   home.sessionVariables = {
