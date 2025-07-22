@@ -46,9 +46,16 @@ in
     (pkgs.writeShellScriptBin "login" (builtins.readFile ./scripts/login))
   ];
 
-  # Devsisters 특화 shell aliases
-  home.shellAliases = {
-    tf = "AWS_PROFILE=saml terraform";
+  # Terraform 모듈 설정
+  modules.terraform = {
+    versions = [
+      "1.10.5"
+      "1.12.2"
+    ];
+    defaultVersion = "1.12.2";
+    runEnv = {
+      AWS_PROFILE = "saml";
+    };
   };
 
   # Devsisters 특화 환경 변수
