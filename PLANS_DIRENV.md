@@ -3,22 +3,24 @@
 nix-direnv 기반 Terraform 버전 자동 매핑 시스템을 **중앙집중식 방식**으로 구현합니다.
 각 프로젝트에 flake.nix를 생성하지 않고, 중앙 flake와 환경변수를 통한 버전 전달 방식을 사용합니다.
 
-## 1. 스크립트 디렉토리 및 파일 생성
+## 1. Nix 패키지 기반 스크립트 생성
 
-### `scripts/` 디렉토리 생성
+### `modules/terraform/default.nix`에서 스크립트 패키지 생성
 
-- 프로젝트 루트에 scripts 디렉토리 생성
+- `writeShellScriptBin`을 사용하여 Nix 패키지로 생성
+- Home Manager를 통해 자동으로 PATH에 추가
+- 별도 scripts 디렉토리 불필요
 
-### `scripts/init-terraform-project.sh`
+### `terraform-init-project` 명령어
 
 - **기능**: 새 Terraform 프로젝트 초기화
 - **인수**: Terraform 버전 (선택사항, 기본값 1.12.2)
 - **동작**:
   - backend.tf 파일 생성 (없는 경우)
-  - 중앙 flake 기반 .envrc 파일 생성
+  - .envrc 파일 생성 (`layout_terraform` 한 줄)
   - `direnv allow` 실행
 
-### `scripts/switch-terraform-version.sh`
+### `terraform-switch-version` 명령어
 
 - **기능**: 기존 프로젝트의 Terraform 버전 변경
 - **인수**: 버전, 연산자 (기본값 ">=")
@@ -26,16 +28,14 @@ nix-direnv 기반 Terraform 버전 자동 매핑 시스템을 **중앙집중식 
   - backend.tf의 required_version 업데이트
   - `direnv reload` 실행
 
-## 2. modules/terraform/default.nix 업데이트
+## 2. modules/terraform/default.nix 구현 완료
 
-### 스크립트 패키지 추가
+### 추가된 기능들
 
-- `writeShellScriptBin`으로 두 스크립트를 home.packages에 추가
-- 스크립트명: `terraform-init-project`, `terraform-switch-version`
-
-### 기존 기능 유지
-
-- 중앙집중식 terraform-flake 복사 유지 (backward compatibility)
+- `terraform-init-project`, `terraform-switch-version` 스크립트를 `writeShellScriptBin`으로 패키지 생성
+- `direnvrc` 파일 배포 (`layout_terraform` 함수 포함)
+- 스크립트들을 `home.packages`에 자동 추가
+- 기존 terraform-flake 복사 유지 (backward compatibility)
 
 ## 3. 테스트 프로젝트 생성
 
@@ -70,18 +70,18 @@ terraform-switch-version 1.12.2 "="
 
 ## 구현 세부사항
 
-### init-terraform-project.sh 스크립트 내용
+### terraform-init-project 명령어 구현
 
 - 인수 파싱 (버전, 기본값 설정)
 - backend.tf 파일 존재 확인 및 생성
-- .envrc 템플릿 적용
+- .envrc 파일을 `layout_terraform` 한 줄로 생성
 - direnv 활성화
 
-### switch-terraform-version.sh 스크립트 내용
+### terraform-switch-version 명령어 구현
 
 - 인수 파싱 (버전, 연산자)
 - backend.tf 파일에서 required_version 라인 찾기 및 교체
-- 환경 재로드
+- direnv 재로드
 
 ### .envrc 템플릿 (중앙집중식)
 
@@ -92,17 +92,18 @@ terraform-switch-version 1.12.2 "="
 - `TF_VERSION` 환경변수 설정
 - `use flake ~/.config/nix-direnv/terraform-flake` 실행
 
-### modules/terraform/default.nix 변경사항
+### modules/terraform/default.nix 구현 완료
 
-- 새 스크립트들을 home.packages에 추가
-- terraform-flake/flake.nix 개선: `TF_VERSION` 환경변수 지원
-- 기존 terraform-flake 디렉토리 복사는 유지
+- ✅ `terraform-init-project`, `terraform-switch-version` 스크립트를 home.packages에 추가
+- ✅ direnvrc 파일 배포 (`layout_terraform` 함수 포함)
+- ✅ terraform-flake/flake.nix 개선: `TF_VERSION` 환경변수 지원
+- ✅ 기존 terraform-flake 디렉토리 복사는 유지
 
-### terraform-flake/flake.nix 개선사항
+### terraform-flake/flake.nix 개선사항 완료
 
-- `builtins.getEnv "TF_VERSION"`으로 환경변수에서 버전 읽기
-- 환경변수가 없으면 PWD 기반 파일 파싱으로 fallback
-- 더 안정적인 버전 감지 로직
+- ✅ `builtins.getEnv "TF_VERSION"`으로 환경변수에서 버전 읽기
+- ✅ 환경변수가 없으면 PWD 기반 파일 파싱으로 fallback
+- ✅ 환경변수 소스 표시 개선 (environment variable vs terraform config)
 
 ## 기대 효과
 
@@ -244,13 +245,29 @@ layout_terraform
 
 3. **향후 확장성**: layout_node, layout_python 등 다른 언어/도구 지원 가능
 
-## TODO
+## 구현 상태
 
-- [ ] scripts 디렉토리 생성
-- [ ] direnvrc 파일 생성 (layout_terraform 함수 포함)
-- [ ] init-terraform-project.sh 스크립트 작성 (한 줄 .envrc 생성)
-- [ ] switch-terraform-version.sh 스크립트 작성
-- [ ] terraform-flake/flake.nix 개선 (TF_VERSION 환경변수 지원)
-- [ ] modules/terraform/default.nix 업데이트 (direnvrc 배포 추가)
+### 완료된 항목 ✅
+
+- ✅ direnvrc 파일 생성 (layout_terraform 함수 포함)
+- ✅ terraform-init-project 명령어 구현 (한 줄 .envrc 생성)
+- ✅ terraform-switch-version 명령어 구현
+- ✅ terraform-flake/flake.nix 개선 (TF_VERSION 환경변수 지원)
+- ✅ modules/terraform/default.nix 업데이트 (direnvrc 배포, 스크립트 패키지 추가)
+
+### 남은 작업 📝
+
 - [ ] test-terraform-project 디렉토리 생성
 - [ ] 테스트 및 검증
+
+## 사용법
+
+```bash
+# 새 프로젝트 초기화
+terraform-init-project 1.10.5
+
+# 기존 프로젝트 버전 변경
+terraform-switch-version 1.12.2 "="
+```
+
+각 프로젝트의 `.envrc` 파일은 단순히 `layout_terraform` 한 줄만 포함하면 됩니다.
