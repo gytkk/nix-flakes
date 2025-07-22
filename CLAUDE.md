@@ -27,12 +27,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Switch to environment-specific configuration
 home-manager switch --flake .#devsisters-macbook
 home-manager switch --flake .#devsisters-macstudio
-home-manager switch --flake .#wsl-ubuntu
+home-manager switch --flake .#pylv-denim
+home-manager switch --flake .#pylv-sepia
 
 # Build without switching (test configuration)
 home-manager build --flake .#devsisters-macbook
 home-manager build --flake .#devsisters-macstudio
-home-manager build --flake .#wsl-ubuntu
+home-manager build --flake .#pylv-denim
+home-manager build --flake .#pylv-sepia
 ```
 
 ### Nix Development
@@ -47,52 +49,78 @@ nix develop
 
 ## Architecture
 
-This is a Nix flakes-based Home Manager configuration supporting multiple environments (macOS and WSL Ubuntu). The configuration is modular with environment-specific customizations.
+This is a Nix flakes-based Home Manager configuration supporting multiple environments (macOS and Linux). The configuration uses a layered base system with company-specific customizations.
 
 ### Core Structure
 
 - `flake.nix`: Main flake configuration with inputs, outputs, and environment definitions
-- `home.nix`: Base Home Manager configuration imported by all environments
+- `environments.nix`: All environment configurations in a single file
+- `base/`: Layered Home Manager configurations
+  - `base/home.nix`: Common base configuration for all environments
+  - `base/devsisters/`: Devsisters-specific extensions
+  - `base/pylv/`: Pylv-specific extensions
 - `modules/`: Modular configuration components
-- `plans/`: Planning documents for improvements and refactoring
+- `lib/`: Helper functions and environment loaders
 
 ### Environment Configurations
 
-The flake defines three environments with specific user and system settings:
+All environments are defined in `environments.nix` with the following structure:
 
-- **`devsisters-macbook`**: ARM64 macOS (gyutak@/Users/gyutak) with devsisters tools
-- **`devsisters-macstudio`**: ARM64 macOS (gyutak@/Users/gyutak) with devsisters tools  
-- **`wsl-ubuntu`**: x86_64 Linux (gytkk@/home/gytkk) without devsisters tools
+- **`devsisters-macbook`**: ARM64 macOS (gyutak@/Users/gyutak) with devsisters base profile
+- **`devsisters-macstudio`**: ARM64 macOS (gyutak@/Users/gyutak) with devsisters base profile
+- **`pylv-denim`**: x86_64 Linux (gytkk@/home/gytkk) with pylv base profile
+- **`pylv-sepia`**: x86_64 Linux (gytkk@/home/gytkk) with pylv base profile
 
-Environment configs are managed through the `environmentConfigs` attribute set in `flake.nix:52-71`.
+Each environment specifies a `baseProfile` which determines which base configuration to load.
+
+### Base System Architecture
+
+The layered base system provides inheritance and customization:
+
+1. **`base/home.nix`**: Common configuration imported by all company bases
+   - Core modules (claude, git, terraform, vim, zsh)
+   - Standard development packages
+   - Basic programs configuration
+
+2. **`base/devsisters/home.nix`**: Extends base with Devsisters-specific tools
+   - Authentication tools (saml2aws, vault)
+   - Eclair CLI with Ruby environment
+   - Company-specific aliases and environment variables
+
+3. **`base/pylv/home.nix`**: Extends base with minimal Pylv-specific configuration
+   - Currently inherits base configuration
+   - Ready for company-specific customizations
 
 ### Module System
 
 - **`modules/claude/`**: Claude Code installation with MCP support enabled
 - **`modules/git/`**: Git configuration (gytkk/gytk.kim@gmail.com) with LFS, custom aliases, and global gitignore
 - **`modules/zsh/`**: Zsh with Oh-My-Zsh, Powerlevel10k theme, fzf, direnv, and development aliases
-- **`modules/devsisters/`**: Company tools (saml2aws, vault, eclair) and authentication scripts
+- **`modules/terraform/`**: Terraform version management with environment variable support
 
 ### Key Features
 
+- **Layered base system**: Common configuration with company-specific extensions
 - **Multi-environment support**: Different user accounts and system architectures
-- **Modular design**: Reusable components with environment-specific overrides
-- **Development tooling**: mise, docker, uv, nodejs, kubectl, k9s, awscli2
+- **Single file environment management**: All environments defined in `environments.nix`
+- **Development tooling**: docker, uv, nodejs, kubectl, k9s, awscli2
 - **Shell experience**: Zsh with syntax highlighting, autosuggestion, and custom aliases
 - **Code editing**: Neovim with development utilities
 - **Nix tooling**: nixfmt-rfc-style for code formatting
 
 ### Package Management
 
-Base packages defined in `home.nix:29-61`:
+Base packages defined in `base/home.nix`:
 
 - **System**: coreutils, findutils, ripgrep, direnv
-- **Development**: mise, docker, uv, nodejs, awscli2, yq
+- **Development**: docker, uv, nodejs, awscli2, yq
 - **Kubernetes**: kubectl, kubectx, k9s
-- **Editor**: neovim
 - **Nix**: nixfmt-rfc-style
 
-Additional environment-specific packages added via module imports.
+Company-specific packages added in respective base configurations:
+
+- **Devsisters**: saml2aws, vault, eclair, ruby_3_1, databricks-cli
+- **Pylv**: Currently none (inherits base only)
 
 ### Configuration Management
 
@@ -100,3 +128,28 @@ Additional environment-specific packages added via module imports.
 - Apply changes: `home-manager switch --flake .#<environment>`
 - Format code: `nixfmt-rfc-style` for consistent styling
 - Version control: All configurations tracked in git
+
+### Adding New Environments
+
+To add a new company or environment:
+
+1. **Add base configuration** (if new company):
+   ```bash
+   mkdir base/new-company
+   # Create base/new-company/home.nix that imports ../home.nix
+   ```
+
+2. **Add environment to `environments.nix`**:
+   ```nix
+   "new-environment" = {
+     baseProfile = "new-company";
+     system = "aarch64-darwin";
+     username = "user";
+     homeDirectory = "/Users/user";
+   };
+   ```
+
+3. **Test the configuration**:
+   ```bash
+   home-manager build --flake .#new-environment
+   ```
