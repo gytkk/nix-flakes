@@ -25,7 +25,7 @@ let
 in
 {
   # Import base configuration
-  imports = [ ../home.nix ];
+  imports = [ ../default.nix ];
 
   # Devsisters 특화 패키지 추가
   home.packages = with pkgs; [

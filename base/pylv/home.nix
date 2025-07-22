@@ -9,7 +9,7 @@
 
 {
   # Import base configuration
-  imports = [ ../home.nix ];
+  imports = [ ../default.nix ];
 
   # Pylv 특화 패키지들 (추후 필요시 추가)
   home.packages = with pkgs; [
