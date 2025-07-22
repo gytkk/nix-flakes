@@ -1,19 +1,3 @@
-#!/usr/bin/env bash
-
-# Terraform layout 함수
-layout_terraform() {
-  # Terraform 설정 파일들 변경 감지
-  watch_file backend.tf
-  watch_file versions.tf
-  watch_file main.tf
-  
-  # .direnv 디렉토리 생성
-  mkdir -p .direnv
-  
-  # .direnv/flake.nix가 없으면 자동 생성
-  if [[ ! -f ".direnv/flake.nix" ]]; then
-    log_status "Creating .direnv/flake.nix..."
-    cat > .direnv/flake.nix << 'FLAKE_EOF'
 {
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
@@ -69,16 +53,4 @@ layout_terraform() {
           };
         });
     };
-}
-FLAKE_EOF
-  fi
-  
-  # git add가 필요한 경우 자동으로 처리 (임시)
-  if ! git ls-files --error-unmatch .direnv >/dev/null 2>&1; then
-    log_status "Adding .direnv to git temporarily for nix..."
-    git add -f .direnv >/dev/null 2>&1 || true
-  fi
-  
-  # .direnv 디렉토리의 flake 사용
-  use flake .direnv
 }

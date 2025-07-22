@@ -66,7 +66,7 @@ let
         info "backend.tf already exists, skipping creation"
     fi
     
-    # .envrc 파일 생성 (한 줄로 간단히)
+    # .envrc 파일 생성 (layout_terraform만 사용)
     if [[ ! -f ".envrc" ]]; then
         info "Creating .envrc file..."
         echo "layout_terraform" > .envrc
@@ -149,6 +149,12 @@ let
         exit 1
     fi
     
+    # .direnv/flake.nix 제거 (재생성을 위해)
+    if [[ -f ".direnv/flake.nix" ]]; then
+        info "Removing existing .direnv/flake.nix for regeneration..."
+        rm -f .direnv/flake.nix .direnv/flake.lock
+    fi
+    
     # direnv 재로드
     if command -v direnv >/dev/null 2>&1; then
         info "Reloading direnv..."
@@ -164,13 +170,6 @@ let
     info "The new version will be loaded when you re-enter the directory"
   '';
 
-  # Create the terraform-flake as a derivation to avoid nix store path issues
-  terraform-flake = pkgs.runCommand "terraform-flake" {} ''
-    mkdir -p $out
-    substitute ${./terraform-flake/flake.nix.template} $out/flake.nix \
-      --replace '@supportedVersions@' '${builtins.toJSON (cfg.versions ++ ["latest"])}' \
-      --replace '@defaultVersion@' '${cfg.defaultVersion}'
-  '';
 
   # Configuration options
   cfg = config.modules.terraform;
@@ -230,14 +229,6 @@ in
           );
         in
         "${envPrefix} ${terraformVersions.${cfg.defaultVersion}}/bin/terraform";
-    };
-
-    # terraform-flake 생성 (derivation 방식으로 nix store path 문제 해결)
-    home.file.".config/nix-direnv/terraform-flake/flake.nix".source = "${terraform-flake}/flake.nix";
-    
-    # flake.lock 파일 별도 복사
-    home.file.".config/nix-direnv/terraform-flake/flake.lock" = {
-      source = ./terraform-flake/flake.lock;
     };
 
     # Install direnvrc with layout_terraform function
