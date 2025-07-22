@@ -13,7 +13,37 @@ layout_terraform() {
   # .direnv/flake.nix가 없으면 자동 생성
   if [[ ! -f ".direnv/flake.nix" ]]; then
     log_status "Creating .direnv/flake.nix..."
-    cat > .direnv/flake.nix << 'FLAKE_EOF'
+    
+    # Terraform 버전을 미리 파싱
+    TERRAFORM_VERSION="1.12.2"  # 기본값
+    
+    # backend.tf, versions.tf, main.tf에서 required_version 찾기
+    for file in "backend.tf" "versions.tf" "main.tf"; do
+      if [[ -f "$file" ]]; then
+        VERSION_SPEC=$(grep -o 'required_version[ ]*=[ ]*"[^"]*"' "$file" | sed 's/.*"\([^"]*\)".*/\1/' | head -1)
+        if [[ -n "$VERSION_SPEC" ]]; then
+          log_status "Found version spec in $file: $VERSION_SPEC"
+          
+          # ~> 1.10 -> 1.10.5, ~> 1.10.5 -> 1.10.5, >= 1.10 -> 1.10 등 처리
+          if [[ "$VERSION_SPEC" =~ ~\>[[:space:]]*1\.10([\.0-9]*) ]]; then
+            TERRAFORM_VERSION="1.10.5"
+          elif [[ "$VERSION_SPEC" =~ ~\>[[:space:]]*1\.11([\.0-9]*) ]]; then
+            TERRAFORM_VERSION="1.11.5"  
+          elif [[ "$VERSION_SPEC" =~ ~\>[[:space:]]*1\.12([\.0-9]*) ]]; then
+            TERRAFORM_VERSION="1.12.2"
+          elif [[ "$VERSION_SPEC" =~ =[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+            TERRAFORM_VERSION="${BASH_REMATCH[1]}"
+          elif [[ "$VERSION_SPEC" =~ \>=[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+            TERRAFORM_VERSION="${BASH_REMATCH[1]}"
+          fi
+          break
+        fi
+      fi
+    done
+    
+    log_status "Using Terraform version: $TERRAFORM_VERSION"
+    
+    cat > .direnv/flake.nix << FLAKE_EOF
 {
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
@@ -24,46 +54,19 @@ layout_terraform() {
     let
       systems = [ "x86_64-linux" "aarch64-darwin" "aarch64-linux" "x86_64-darwin" ];
       forAllSystems = nixpkgs.lib.genAttrs systems;
-      
-      parseRequiredVersion = content:
-        let
-          versionMatch = builtins.match ".*required_version[ ]*=[ ]*\"([^\"]+)\".*" content;
-        in
-          if versionMatch != null then
-            let 
-              versionSpec = builtins.head versionMatch;
-              exactMatch = builtins.match "=[ ]*([0-9.]+)" versionSpec;
-              minMatch = builtins.match ">=[ ]*([0-9.]+).*" versionSpec;
-              rangeMatch = builtins.match "~>[ ]*([0-9.]+)" versionSpec;
-            in
-              if exactMatch != null then builtins.head exactMatch
-              else if minMatch != null then builtins.head minMatch
-              else if rangeMatch != null then builtins.head rangeMatch
-              else "1.12.2"
-          else "1.12.2";
     in
     {
       devShells = forAllSystems (system:
         let
-          pkgs = nixpkgs.legacyPackages.${system};
-          
-          tfVersion = 
-            if builtins.pathExists ../backend.tf then
-              parseRequiredVersion (builtins.readFile ../backend.tf)
-            else if builtins.pathExists ../versions.tf then
-              parseRequiredVersion (builtins.readFile ../versions.tf)
-            else if builtins.pathExists ../main.tf then
-              parseRequiredVersion (builtins.readFile ../main.tf)
-            else "1.12.2";
-          
-          terraform = nixpkgs-terraform.packages.${system}.${tfVersion};
+          pkgs = nixpkgs.legacyPackages.\${system};
+          terraform = nixpkgs-terraform.packages.\${system}."$TERRAFORM_VERSION";
         in
         {
           default = pkgs.mkShell {
             buildInputs = [ terraform ];
             
             shellHook = ''
-              echo "🚀 Terraform ${tfVersion} environment loaded from .direnv/flake.nix"
+              echo "🚀 Terraform $TERRAFORM_VERSION environment loaded from .direnv/flake.nix"
               terraform version
             '';
           };
