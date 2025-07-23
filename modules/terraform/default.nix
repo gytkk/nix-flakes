@@ -220,15 +220,17 @@ in
     # Configure nixpkgs to allow unfree for terraform
     nixpkgs.config.allowUnfree = true;
 
-    # Add tf alias with environment variables if configured
-    home.shellAliases = lib.optionalAttrs (cfg.runEnv != { }) {
-      tf =
+    # Add tf alias that uses the terraform binary from PATH (respects direnv)
+    home.shellAliases = {
+      tf = 
         let
-          envPrefix = lib.concatStringsSep " " (
-            lib.mapAttrsToList (name: value: "${name}=${value}") cfg.runEnv
+          envPrefix = lib.optionalString (cfg.runEnv != { }) (
+            lib.concatStringsSep " " (
+              lib.mapAttrsToList (name: value: "${name}=${value}") cfg.runEnv
+            ) + " "
           );
         in
-        "${envPrefix} ${terraformVersions.${cfg.defaultVersion}}/bin/terraform";
+        "${envPrefix}terraform";
     };
 
     # Install direnvrc with layout_terraform function

@@ -24,23 +24,17 @@ layout_terraform() {
         if [[ -n "$VERSION_SPEC" ]]; then
           log_status "Found version spec in $file: $VERSION_SPEC"
           
-          # 정확한 버전 추출 (= 1.10.5, >= 1.10.5, ~> 1.10.5 등)
-          if [[ "$VERSION_SPEC" =~ =[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+          # ~> 1.10 -> 1.10.5, ~> 1.10.5 -> 1.10.5, >= 1.10 -> 1.10 등 처리
+          if [[ "$VERSION_SPEC" =~ ~\>[[:space:]]*1\.10([\.0-9]*) ]]; then
+            TERRAFORM_VERSION="1.10.5"
+          elif [[ "$VERSION_SPEC" =~ ~\>[[:space:]]*1\.11([\.0-9]*) ]]; then
+            TERRAFORM_VERSION="1.11.5"  
+          elif [[ "$VERSION_SPEC" =~ ~\>[[:space:]]*1\.12([\.0-9]*) ]]; then
+            TERRAFORM_VERSION="1.12.2"
+          elif [[ "$VERSION_SPEC" =~ =[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+) ]]; then
             TERRAFORM_VERSION="${BASH_REMATCH[1]}"
           elif [[ "$VERSION_SPEC" =~ \>=[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+) ]]; then
             TERRAFORM_VERSION="${BASH_REMATCH[1]}"
-          elif [[ "$VERSION_SPEC" =~ ~\>[[:space:]]*([0-9]+\.[0-9]+)([\.0-9]*) ]]; then
-            # ~> 버전에 대한 매핑 - 사용 가능한 버전 목록에서 찾기
-            MAJOR_MINOR="${BASH_REMATCH[1]}"
-            # 사용 가능한 버전 목록: @AVAILABLE_VERSIONS@
-            AVAILABLE_VERSIONS=(@AVAILABLE_VERSIONS@)
-            
-            # 가장 적합한 버전 찾기 (가장 높은 패치 버전)
-            for version in "${AVAILABLE_VERSIONS[@]}"; do
-              if [[ "$version" =~ ^$MAJOR_MINOR\. ]]; then
-                TERRAFORM_VERSION="$version"
-              fi
-            done
           fi
           break
         fi
@@ -77,6 +71,6 @@ layout_terraform() {
 FLAKE_EOF
   fi
   
-  # .direnv 디렉토리의 flake 사용
-  use flake .direnv
+  # .direnv 디렉토리의 flake 사용 (절대 경로로)
+  use flake "path:$(pwd)/.direnv" --impure
 }
