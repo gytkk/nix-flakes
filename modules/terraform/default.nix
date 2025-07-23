@@ -233,7 +233,10 @@ in
 
     # Install direnvrc with layout_terraform function
     home.file.".config/direnv/direnvrc" = {
-      source = ./direnvrc;
+      text = builtins.replaceStrings 
+        [ "@DEFAULT_VERSION@" "@AVAILABLE_VERSIONS@" ]
+        [ cfg.defaultVersion (lib.concatStringsSep " " cfg.versions) ]
+        (builtins.readFile ./direnvrc);
     };
   };
 }

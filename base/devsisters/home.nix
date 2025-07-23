@@ -49,10 +49,11 @@ in
   # Terraform 모듈 설정
   modules.terraform = {
     versions = [
-      "1.10.5"
       "1.12.2"
+      "1.11.4"
+      "1.10.5"
     ];
-    defaultVersion = "1.10.5";
+    defaultVersion = "1.12.2";
     runEnv = {
       AWS_PROFILE = "saml";
     };

@@ -15,7 +15,7 @@ layout_terraform() {
     log_status "Creating .direnv/flake.nix..."
     
     # Terraform 버전을 미리 파싱
-    TERRAFORM_VERSION="1.12.2"  # 기본값
+    TERRAFORM_VERSION="@DEFAULT_VERSION@"  # Nix에서 치환됨
     
     # backend.tf, versions.tf, main.tf에서 required_version 찾기
     for file in "backend.tf" "versions.tf" "main.tf"; do
@@ -24,17 +24,23 @@ layout_terraform() {
         if [[ -n "$VERSION_SPEC" ]]; then
           log_status "Found version spec in $file: $VERSION_SPEC"
           
-          # ~> 1.10 -> 1.10.5, ~> 1.10.5 -> 1.10.5, >= 1.10 -> 1.10 등 처리
-          if [[ "$VERSION_SPEC" =~ ~\>[[:space:]]*1\.10([\.0-9]*) ]]; then
-            TERRAFORM_VERSION="1.10.5"
-          elif [[ "$VERSION_SPEC" =~ ~\>[[:space:]]*1\.11([\.0-9]*) ]]; then
-            TERRAFORM_VERSION="1.11.5"  
-          elif [[ "$VERSION_SPEC" =~ ~\>[[:space:]]*1\.12([\.0-9]*) ]]; then
-            TERRAFORM_VERSION="1.12.2"
-          elif [[ "$VERSION_SPEC" =~ =[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+          # 정확한 버전 추출 (= 1.10.5, >= 1.10.5, ~> 1.10.5 등)
+          if [[ "$VERSION_SPEC" =~ =[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+) ]]; then
             TERRAFORM_VERSION="${BASH_REMATCH[1]}"
           elif [[ "$VERSION_SPEC" =~ \>=[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+) ]]; then
             TERRAFORM_VERSION="${BASH_REMATCH[1]}"
+          elif [[ "$VERSION_SPEC" =~ ~\>[[:space:]]*([0-9]+\.[0-9]+)([\.0-9]*) ]]; then
+            # ~> 버전에 대한 매핑 - 사용 가능한 버전 목록에서 찾기
+            MAJOR_MINOR="${BASH_REMATCH[1]}"
+            # 사용 가능한 버전 목록: @AVAILABLE_VERSIONS@
+            AVAILABLE_VERSIONS=(@AVAILABLE_VERSIONS@)
+            
+            # 가장 적합한 버전 찾기 (가장 높은 패치 버전)
+            for version in "${AVAILABLE_VERSIONS[@]}"; do
+              if [[ "$version" =~ ^$MAJOR_MINOR\. ]]; then
+                TERRAFORM_VERSION="$version"
+              fi
+            done
           fi
           break
         fi
@@ -64,22 +70,11 @@ layout_terraform() {
         {
           default = pkgs.mkShell {
             buildInputs = [ terraform ];
-            
-            shellHook = ''
-              echo "🚀 Terraform $TERRAFORM_VERSION environment loaded from .direnv/flake.nix"
-              terraform version
-            '';
           };
         });
     };
 }
 FLAKE_EOF
-  fi
-  
-  # git add가 필요한 경우 자동으로 처리 (임시)
-  if ! git ls-files --error-unmatch .direnv >/dev/null 2>&1; then
-    log_status "Adding .direnv to git temporarily for nix..."
-    git add -f .direnv >/dev/null 2>&1 || true
   fi
   
   # .direnv 디렉토리의 flake 사용
