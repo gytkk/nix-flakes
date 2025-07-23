@@ -24,13 +24,18 @@ layout_terraform() {
         if [[ -n "$VERSION_SPEC" ]]; then
           log_status "Found version spec in $file: $VERSION_SPEC"
           
-          # ~> 1.10 -> 1.10.5, ~> 1.10.5 -> 1.10.5, >= 1.10 -> 1.10 등 처리
-          if [[ "$VERSION_SPEC" =~ ~\>[[:space:]]*1\.10([\.0-9]*) ]]; then
-            TERRAFORM_VERSION="1.10.5"
-          elif [[ "$VERSION_SPEC" =~ ~\>[[:space:]]*1\.11([\.0-9]*) ]]; then
-            TERRAFORM_VERSION="1.11.5"  
-          elif [[ "$VERSION_SPEC" =~ ~\>[[:space:]]*1\.12([\.0-9]*) ]]; then
-            TERRAFORM_VERSION="1.12.2"
+          # 사용 가능한 버전 목록 (Nix에서 치환됨)
+          AVAILABLE_VERSIONS="@AVAILABLE_VERSIONS@"
+          
+          # ~> 버전 제약사항을 처리하여 사용 가능한 버전 중에서 찾기
+          if [[ "$VERSION_SPEC" =~ ~\>[[:space:]]*([0-9]+\.[0-9]+)([\.0-9]*) ]]; then
+            MAJOR_MINOR="${BASH_REMATCH[1]}"
+            # 해당 major.minor와 일치하는 가장 높은 버전 찾기
+            for version in $AVAILABLE_VERSIONS; do
+              if [[ "$version" =~ ^$MAJOR_MINOR\.[0-9]+$ ]]; then
+                TERRAFORM_VERSION="$version"
+              fi
+            done
           elif [[ "$VERSION_SPEC" =~ =[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+) ]]; then
             TERRAFORM_VERSION="${BASH_REMATCH[1]}"
           elif [[ "$VERSION_SPEC" =~ \>=[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+) ]]; then
