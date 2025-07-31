@@ -17,6 +17,9 @@
   # Create ~/.claude/CLAUDE.md file
   home.file.".claude/CLAUDE.md".source = ./files/CLAUDE.md;
 
+  # Copy all agent files to ~/.claude/agents
+  home.file.".claude/agents".source = ./agents;
+
   # Create update script and source it in shell
   home.file.".claude/update-config.sh" = {
     text = ''
