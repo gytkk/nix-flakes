@@ -11,16 +11,11 @@
         "@modelcontextprotocol/server-sequential-thinking"
       ]
     },
-    "gemini": {
-      "type": "stdio",
+    "playwright": {
       "command": "npx",
       "args": [
-        "-y",
-        "github:aliargun/mcp-server-gemini"
-      ],
-      "env": {
-        "GEMINI_API_KEY": ""
-      }
+        "@playwright/mcp@latest"
+      ]
     },
     "serena": {
       "type": "stdio",
