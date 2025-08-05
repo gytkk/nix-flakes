@@ -8,19 +8,25 @@
 }:
 
 let
+  rubyEnv = pkgs.ruby_3_1.withPackages (ps: with ps; [
+    curses
+    nokogiri
+  ]);
+  
   eclair = pkgs.writeShellScriptBin "ecl" ''
-    export PATH="/Users/gyutak/.gem/ruby/3.1.0/bin:${pkgs.ruby_3_1}/bin:${pkgs.tmux}/bin:$PATH"
-    export GEM_PATH="${pkgs.ruby_3_1}/lib/ruby/gems/3.1.0:/Users/gyutak/.gem/ruby/3.1.0"
-    export GEM_HOME="/Users/gyutak/.gem/ruby/3.1.0"
-
-    # Install eclair gem if not present
-    if ! ${pkgs.ruby_3_1}/bin/gem list ecl -i > /dev/null 2>&1; then
-      echo "Installing eclair gem..."
-      ${pkgs.ruby_3_1}/bin/gem install ecl --version 3.0.4 --user-install --no-document 2>/dev/null
-    fi
-
+    export PATH="${rubyEnv}/bin:${pkgs.tmux}/bin:$PATH"
+    export GEM_PATH="${rubyEnv}/lib/ruby/gems/3.1.0"
+    
+    # Create temporary gem home for eclair installation
+    TEMP_GEM_HOME=$(mktemp -d)
+    export GEM_HOME="$TEMP_GEM_HOME"
+    export GEM_PATH="$TEMP_GEM_HOME:${rubyEnv}/lib/ruby/gems/3.1.0"
+    
+    # Install eclair gem with native extensions support
+    ${rubyEnv}/bin/gem install ecl --version 3.0.4 --no-document --force
+    
     # Execute the actual ecl command
-    exec "/Users/gyutak/.gem/ruby/3.1.0/bin/ecl" "$@"
+    exec "$TEMP_GEM_HOME/bin/ecl" "$@"
   '';
 in
 {
@@ -35,8 +41,7 @@ in
 
     # Required dependencies for eclair
     eclair
-    ruby_3_1
-    ncurses.dev
+    rubyEnv
 
     # Databricks
     databricks-cli
