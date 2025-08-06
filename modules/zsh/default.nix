@@ -84,6 +84,11 @@
 
     # Initialize p10k configuration
     initContent = ''
+      # Load Nix if not ready
+      if [[ ! $(command -v nix) && -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]]; then
+        source '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+      fi
+
       # Initialize p10k configuration
       [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
 
@@ -109,12 +114,6 @@
       # Set uv shell completion
       if command -v uv > /dev/null; then
         eval "$(uv generate-shell-completion zsh)"
-      fi
-    '';
-
-    initContent = ''
-      if [[ ! $(command -v nix) && -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]]; then
-        source '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
       fi
     '';
   };
