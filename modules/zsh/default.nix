@@ -111,6 +111,12 @@
         eval "$(uv generate-shell-completion zsh)"
       fi
     '';
+
+    initExtra = ''
+      if [[ ! $(command -v nix) && -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]]; then
+        source '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+      fi
+    '';
   };
 
   # fzf configuration
