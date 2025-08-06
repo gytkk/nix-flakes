@@ -83,39 +83,48 @@
     sessionVariables = { };
 
     # Initialize p10k configuration
-    initContent = ''
-      # Load Nix if not ready
-      if [[ ! $(command -v nix) && -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]]; then
-        source '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
-      fi
+    initContent =
+      let
+        earlyInit = lib.mkOrder 500 ''
+          # Load Nix if not ready
+          if [[ ! $(command -v nix) && -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]]; then
+            source '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+          fi
+        '';
 
-      # Initialize p10k configuration
-      [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
+        zshConfig = lib.mkOrder 1000 ''
+          # Initialize p10k configuration
+          [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
 
-      # Initialize mise
-      if command -v mise > /dev/null; then
-        eval "$(mise activate zsh)"
-      fi
+          # Initialize mise
+          if command -v mise > /dev/null; then
+            eval "$(mise activate zsh)"
+          fi
 
-      # Enable colors
-      autoload -U colors && colors
+          # Enable colors
+          autoload -U colors && colors
 
-      # Ensure oh-my-zsh cache directory has proper permissions
-      if [ -d "$HOME/.cache/oh-my-zsh" ]; then
-        chmod -R 755 "$HOME/.cache/oh-my-zsh" 2>/dev/null || true
-      else
-        mkdir -p "$HOME/.cache/oh-my-zsh"
-        chmod -R 755 "$HOME/.cache/oh-my-zsh" 2>/dev/null || true
-      fi
+          # Ensure oh-my-zsh cache directory has proper permissions
+          if [ -d "$HOME/.cache/oh-my-zsh" ]; then
+            chmod -R 755 "$HOME/.cache/oh-my-zsh" 2>/dev/null || true
+          else
+            mkdir -p "$HOME/.cache/oh-my-zsh"
+            chmod -R 755 "$HOME/.cache/oh-my-zsh" 2>/dev/null || true
+          fi
 
-      # Set zsh completion to use LS_COLORS
-      zstyle ':completion:*' list-colors "$LS_COLORS"
+          # Set zsh completion to use LS_COLORS
+          zstyle ':completion:*' list-colors "$LS_COLORS"
 
-      # Set uv shell completion
-      if command -v uv > /dev/null; then
-        eval "$(uv generate-shell-completion zsh)"
-      fi
-    '';
+          # Set uv shell completion
+          if command -v uv > /dev/null; then
+            eval "$(uv generate-shell-completion zsh)"
+          fi
+        '';
+      in
+      lib.mkMerge [
+        earlyInit
+        zshConfig
+      ];
   };
 
   # fzf configuration
