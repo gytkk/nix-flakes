@@ -83,6 +83,7 @@
     sessionVariables = { };
 
     # Initialize p10k configuration
+    # https://nix-community.github.io/home-manager/options.xhtml#opt-programs.zsh.initContent
     initContent =
       let
         earlyInit = lib.mkOrder 500 ''
