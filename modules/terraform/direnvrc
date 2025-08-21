@@ -37,9 +37,27 @@ layout_terraform() {
               fi
             done
           elif [[ "$VERSION_SPEC" =~ =[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+) ]]; then
-            TERRAFORM_VERSION="${BASH_REMATCH[1]}"
+            REQUESTED_VERSION="${BASH_REMATCH[1]}"
+            # 사용 가능한 버전 목록에서 확인
+            for version in $AVAILABLE_VERSIONS; do
+              if [[ "$version" == "$REQUESTED_VERSION" ]]; then
+                TERRAFORM_VERSION="$version"
+                break
+              fi
+            done
+            # 정확한 버전이 없으면 기본값 유지
+            if [[ "$TERRAFORM_VERSION" == "@DEFAULT_VERSION@" ]]; then
+              log_status "Warning: Version $REQUESTED_VERSION not available, using default"
+            fi
           elif [[ "$VERSION_SPEC" =~ \>=[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+) ]]; then
-            TERRAFORM_VERSION="${BASH_REMATCH[1]}"
+            REQUESTED_VERSION="${BASH_REMATCH[1]}"
+            # >= 연산자의 경우 요청한 버전 이상 중 가장 낮은 버전 선택
+            for version in $AVAILABLE_VERSIONS; do
+              if [[ "$version" == "$REQUESTED_VERSION" ]] || [[ "$version" > "$REQUESTED_VERSION" ]]; then
+                TERRAFORM_VERSION="$version"
+                break
+              fi
+            done
           fi
           break
         fi
