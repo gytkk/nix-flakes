@@ -39,15 +39,18 @@ layout_terraform() {
           elif [[ "$VERSION_SPEC" =~ =[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+) ]]; then
             REQUESTED_VERSION="${BASH_REMATCH[1]}"
             # 사용 가능한 버전 목록에서 확인
+            FOUND_VERSION=""
             for version in $AVAILABLE_VERSIONS; do
               if [[ "$version" == "$REQUESTED_VERSION" ]]; then
-                TERRAFORM_VERSION="$version"
+                FOUND_VERSION="$version"
                 break
               fi
             done
-            # 정확한 버전이 없으면 기본값 유지
-            if [[ "$TERRAFORM_VERSION" == "@DEFAULT_VERSION@" ]]; then
-              log_status "Warning: Version $REQUESTED_VERSION not available, using default"
+            # 버전을 찾았으면 설정, 아니면 기본값 유지  
+            if [[ -n "$FOUND_VERSION" ]]; then
+              TERRAFORM_VERSION="$FOUND_VERSION"
+            else
+              log_status "Warning: Version $REQUESTED_VERSION not available in [${AVAILABLE_VERSIONS}], using default $TERRAFORM_VERSION"
             fi
           elif [[ "$VERSION_SPEC" =~ \>=[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+) ]]; then
             REQUESTED_VERSION="${BASH_REMATCH[1]}"
@@ -66,7 +69,36 @@ layout_terraform() {
     
     log_status "Using Terraform version: $TERRAFORM_VERSION"
     
-    cat > .direnv/flake.nix << FLAKE_EOF
+    # nixpkgs-terraform는 버전 번호만 지원하므로 latest 처리
+    if [[ "$TERRAFORM_VERSION" == "latest" ]] || [[ "$TERRAFORM_VERSION" == "@DEFAULT_VERSION@" ]]; then
+      # latest를 사용하는 경우 nixpkgs의 기본 terraform 사용
+      cat > .direnv/flake.nix << FLAKE_EOF
+{
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+  };
+
+  outputs = { self, nixpkgs }:
+    let
+      systems = [ "x86_64-linux" "aarch64-darwin" "aarch64-linux" "x86_64-darwin" ];
+      forAllSystems = nixpkgs.lib.genAttrs systems;
+    in
+    {
+      devShells = forAllSystems (system:
+        let
+          pkgs = nixpkgs.legacyPackages.\${system};
+        in
+        {
+          default = pkgs.mkShell {
+            buildInputs = [ pkgs.terraform ];
+          };
+        });
+    };
+}
+FLAKE_EOF
+    else
+      # 특정 버전을 사용하는 경우 nixpkgs-terraform 사용
+      cat > .direnv/flake.nix << FLAKE_EOF
 {
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
@@ -92,6 +124,7 @@ layout_terraform() {
     };
 }
 FLAKE_EOF
+    fi
   fi
   
   # .direnv 디렉토리의 flake 사용 (절대 경로로)
