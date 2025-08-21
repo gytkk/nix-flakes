@@ -61,6 +61,23 @@ layout_terraform() {
                 break
               fi
             done
+          elif [[ "$VERSION_SPEC" =~ ^[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+)[[:space:]]*$ ]]; then
+            # 연산자 없이 버전만 지정된 경우 (예: "1.10.5")
+            REQUESTED_VERSION="${BASH_REMATCH[1]}"
+            # 사용 가능한 버전 목록에서 확인
+            FOUND_VERSION=""
+            for version in $AVAILABLE_VERSIONS; do
+              if [[ "$version" == "$REQUESTED_VERSION" ]]; then
+                FOUND_VERSION="$version"
+                break
+              fi
+            done
+            # 버전을 찾았으면 설정, 아니면 기본값 유지  
+            if [[ -n "$FOUND_VERSION" ]]; then
+              TERRAFORM_VERSION="$FOUND_VERSION"
+            else
+              log_status "Warning: Version $REQUESTED_VERSION not available in [${AVAILABLE_VERSIONS}], using default $TERRAFORM_VERSION"
+            fi
           fi
           break
         fi
