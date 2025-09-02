@@ -50,7 +50,6 @@ rec {
         inherit pkgs;
         extraSpecialArgs = {
           inherit (config) username homeDirectory;
-          inherit inputs;
         };
         modules = dynamicModules ++ (config.extraModules or [ ]);
       };
