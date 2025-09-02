@@ -31,7 +31,10 @@ let
 in
 {
   # Import base configuration
-  imports = [ ../default.nix ];
+  imports = [ 
+    ../default.nix
+    ../../modules/scala
+  ];
 
   # Devsisters 특화 패키지 추가
   home.packages = with pkgs; [
