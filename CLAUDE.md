@@ -47,6 +47,44 @@ nix flake check
 nix develop
 ```
 
+### Java Version Management
+
+```bash
+# Switch Java versions globally
+java8          # Switch to Java 8
+java17         # Switch to Java 17
+java-switch 8  # Alternative syntax
+java-switch 17 # Alternative syntax
+
+# Check current Java version
+java -version
+echo $JAVA_HOME
+```
+
+#### Directory-specific Java Versions (with direnv)
+
+Create `.envrc` files in project directories:
+
+**For Java 8 projects:**
+```bash
+echo "use_java_8" > .envrc
+direnv allow
+```
+
+**For Java 17 projects:**
+```bash
+echo "use_java_17" > .envrc
+direnv allow
+```
+
+**Combined with other direnv functions:**
+```bash
+# .envrc example for Java 8 + Terraform
+use_java_8
+use nix
+layout terraform 1.10.5
+```
+
 ## Architecture
 
 This is a Nix flakes-based Home Manager configuration supporting multiple environments (macOS and Linux). The configuration uses a layered base system with company-specific customizations.
@@ -95,6 +133,7 @@ The layered base system provides inheritance and customization:
 
 - **`modules/claude/`**: Claude Code installation with MCP support enabled
 - **`modules/git/`**: Git configuration (gytkk/gytk.kim@gmail.com) with LFS, custom aliases, and global gitignore
+- **`modules/java/`**: Java version management (8, 17) with directory-based switching via direnv
 - **`modules/zsh/`**: Zsh with Oh-My-Zsh, Powerlevel10k theme, fzf, direnv, and development aliases
 - **`modules/terraform/`**: Terraform version management with environment variable support
 
@@ -110,16 +149,20 @@ The layered base system provides inheritance and customization:
 
 ### Package Management
 
-Base packages defined in `base/home.nix`:
+Base packages defined in `base/default.nix`:
 
 - **System**: coreutils, findutils, ripgrep, direnv
-- **Development**: docker, uv, nodejs, awscli2, yq
-- **Kubernetes**: kubectl, kubectx, k9s
+- **Development**: docker, uv, nodejs, awscli2, yq, gcc
+- **Java**: OpenJDK 8, OpenJDK 17 with version switching tools
+- **JavaScript/TypeScript**: nodejs, typescript, pnpm, turbo
+- **Go**: go compiler and tools
+- **Python**: uv package manager
+- **Kubernetes**: kubectl, kubectx, k9s, helm
 - **Nix**: nixfmt-rfc-style
 
 Company-specific packages added in respective base configurations:
 
-- **Devsisters**: saml2aws, vault, eclair, ruby_3_1, databricks-cli
+- **Devsisters**: saml2aws, vault, eclair, ruby_3_1, databricks-cli, scala_2_12, scala_3, sbt
 - **Pylv**: Currently none (inherits base only)
 
 ### Configuration Management

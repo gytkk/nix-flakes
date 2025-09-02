@@ -12,6 +12,7 @@
     # 기본 모듈들 (항상 import됨)
     ../modules/claude
     ../modules/git
+    ../modules/java
     ../modules/terraform
     ../modules/vim
     ../modules/zsh

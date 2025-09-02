@@ -8,23 +8,25 @@
 }:
 
 let
-  rubyEnv = pkgs.ruby_3_1.withPackages (ps: with ps; [
-    curses
-    nokogiri
-  ]);
-  
+  rubyEnv = pkgs.ruby_3_1.withPackages (
+    ps: with ps; [
+      curses
+      nokogiri
+    ]
+  );
+
   eclair = pkgs.writeShellScriptBin "ecl" ''
     export PATH="${rubyEnv}/bin:${pkgs.tmux}/bin:$PATH"
     export GEM_PATH="${rubyEnv}/lib/ruby/gems/3.1.0"
-    
+
     # Create temporary gem home for eclair installation
     TEMP_GEM_HOME=$(mktemp -d)
     export GEM_HOME="$TEMP_GEM_HOME"
     export GEM_PATH="$TEMP_GEM_HOME:${rubyEnv}/lib/ruby/gems/3.1.0"
-    
+
     # Install eclair gem with native extensions support
     ${rubyEnv}/bin/gem install ecl --version 3.0.4 --no-document --force
-    
+
     # Execute the actual ecl command
     exec "$TEMP_GEM_HOME/bin/ecl" "$@"
   '';
@@ -35,6 +37,10 @@ in
 
   # Devsisters 특화 패키지 추가
   home.packages = with pkgs; [
+    # Scala (default to 2.12, compatible with existing projects)
+    sbt
+    scala_2_12
+
     # Authentication
     saml2aws
     vault
@@ -67,5 +73,7 @@ in
   # Devsisters 특화 환경 변수
   home.sessionVariables = {
     VAULT_ADDR = "https://vault.devsisters.cloud";
+    # SBT Java 호환성 설정
+    SBT_OPTS = "-Xmx2G -XX:+UseG1GC";
   };
 }
