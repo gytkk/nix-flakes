@@ -69,6 +69,12 @@ in
     };
   };
 
+  # Devsisters 특화 Git 설정
+  programs.git = {
+    userEmail = lib.mkForce "gyutak.kim@devsisters.com";
+    userName = lib.mkForce "Gyutak Kim";
+  };
+
   # Devsisters 특화 환경 변수
   home.sessionVariables = {
     VAULT_ADDR = "https://vault.devsisters.cloud";
