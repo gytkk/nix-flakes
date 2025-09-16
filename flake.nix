@@ -12,10 +12,10 @@
     };
 
     # nix-darwin
-    nix-darwin = {
-      url = "github:nix-darwin/nix-darwin/master";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # nix-darwin = {
+    #   url = "github:nix-darwin/nix-darwin/master";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
 
     # nixpkgs-terraform - for Terraform version management
     nixpkgs-terraform = {
@@ -47,20 +47,6 @@
       };
     in
     {
-      darwinConfigurations = {
-        "devsisters-macbook" = inputs.nix-darwin.lib.darwinSystem {
-          system = "aarch64-darwin";
-          modules = [
-          ];
-        };
-
-        "devsisters-macstudio" = inputs.nix-darwin.lib.darwinSystem {
-          system = "aarch64-darwin";
-          modules = [
-          ];
-        };
-      };
-
       homeConfigurations = builtins.mapAttrs mkHomeConfig environmentConfigs;
     };
 }
