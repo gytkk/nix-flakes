@@ -1,149 +1,101 @@
 #!/usr/bin/env bash
 
-# Terraform layout 함수
-layout_terraform() {
+# Terraform alias 설정 함수
+use_terraform() {
   # Terraform 설정 파일들 변경 감지
   watch_file backend.tf
   watch_file versions.tf
   watch_file main.tf
-  
-  # .direnv 디렉토리 생성
-  mkdir -p .direnv
-  
-  # .direnv/flake.nix가 없으면 자동 생성
-  if [[ ! -f ".direnv/flake.nix" ]]; then
-    log_status "Creating .direnv/flake.nix..."
-    
-    # Terraform 버전을 미리 파싱
-    TERRAFORM_VERSION="@DEFAULT_VERSION@"  # Nix에서 치환됨
-    
-    # backend.tf, versions.tf, main.tf에서 required_version 찾기
-    for file in "backend.tf" "versions.tf" "main.tf"; do
-      if [[ -f "$file" ]]; then
-        VERSION_SPEC=$(grep -o 'required_version[ ]*=[ ]*"[^"]*"' "$file" | sed 's/.*"\([^"]*\)".*/\1/' | head -1)
-        if [[ -n "$VERSION_SPEC" ]]; then
-          log_status "Found version spec in $file: $VERSION_SPEC"
-          
-          # 사용 가능한 버전 목록 (Nix에서 치환됨)
-          AVAILABLE_VERSIONS="@AVAILABLE_VERSIONS@"
-          
-          # ~> 버전 제약사항을 처리하여 사용 가능한 버전 중에서 찾기
-          if [[ "$VERSION_SPEC" =~ ~\>[[:space:]]*([0-9]+\.[0-9]+)([\.0-9]*) ]]; then
-            MAJOR_MINOR="${BASH_REMATCH[1]}"
-            # 해당 major.minor와 일치하는 가장 높은 버전 찾기
-            for version in $AVAILABLE_VERSIONS; do
-              if [[ "$version" =~ ^$MAJOR_MINOR\.[0-9]+$ ]]; then
-                TERRAFORM_VERSION="$version"
-              fi
-            done
-          elif [[ "$VERSION_SPEC" =~ =[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+) ]]; then
-            REQUESTED_VERSION="${BASH_REMATCH[1]}"
-            # 사용 가능한 버전 목록에서 확인
-            FOUND_VERSION=""
-            for version in $AVAILABLE_VERSIONS; do
-              if [[ "$version" == "$REQUESTED_VERSION" ]]; then
-                FOUND_VERSION="$version"
-                break
-              fi
-            done
-            # 버전을 찾았으면 설정, 아니면 기본값 유지  
-            if [[ -n "$FOUND_VERSION" ]]; then
-              TERRAFORM_VERSION="$FOUND_VERSION"
-            else
-              log_status "Warning: Version $REQUESTED_VERSION not available in [${AVAILABLE_VERSIONS}], using default $TERRAFORM_VERSION"
+
+  # Terraform 버전을 미리 파싱
+  TERRAFORM_VERSION="@DEFAULT_VERSION@"  # Nix에서 치환됨
+
+  # backend.tf, versions.tf, main.tf에서 required_version 찾기
+  for file in "backend.tf" "versions.tf" "main.tf"; do
+    if [[ -f "$file" ]]; then
+      VERSION_SPEC=$(grep -o 'required_version[ ]*=[ ]*"[^"]*"' "$file" | sed 's/.*"\([^"]*\)".*/\1/' | head -1)
+      if [[ -n "$VERSION_SPEC" ]]; then
+        log_status "Found version spec in $file: $VERSION_SPEC"
+
+        # 사용 가능한 버전 목록 (Nix에서 치환됨)
+        AVAILABLE_VERSIONS="@AVAILABLE_VERSIONS@"
+
+        # ~> 버전 제약사항을 처리하여 사용 가능한 버전 중에서 찾기
+        if [[ "$VERSION_SPEC" =~ ~\>[[:space:]]*([0-9]+\.[0-9]+)([\.0-9]*) ]]; then
+          MAJOR_MINOR="${BASH_REMATCH[1]}"
+          # 해당 major.minor와 일치하는 가장 높은 버전 찾기
+          for version in $AVAILABLE_VERSIONS; do
+            if [[ "$version" =~ ^$MAJOR_MINOR\.[0-9]+$ ]]; then
+              TERRAFORM_VERSION="$version"
             fi
-          elif [[ "$VERSION_SPEC" =~ \>=[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+) ]]; then
-            REQUESTED_VERSION="${BASH_REMATCH[1]}"
-            # >= 연산자의 경우 요청한 버전 이상 중 가장 낮은 버전 선택
-            for version in $AVAILABLE_VERSIONS; do
-              if [[ "$version" == "$REQUESTED_VERSION" ]] || [[ "$version" > "$REQUESTED_VERSION" ]]; then
-                TERRAFORM_VERSION="$version"
-                break
-              fi
-            done
-          elif [[ "$VERSION_SPEC" =~ ^[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+)[[:space:]]*$ ]]; then
-            # 연산자 없이 버전만 지정된 경우 (예: "1.10.5")
-            REQUESTED_VERSION="${BASH_REMATCH[1]}"
-            # 사용 가능한 버전 목록에서 확인
-            FOUND_VERSION=""
-            for version in $AVAILABLE_VERSIONS; do
-              if [[ "$version" == "$REQUESTED_VERSION" ]]; then
-                FOUND_VERSION="$version"
-                break
-              fi
-            done
-            # 버전을 찾았으면 설정, 아니면 기본값 유지  
-            if [[ -n "$FOUND_VERSION" ]]; then
-              TERRAFORM_VERSION="$FOUND_VERSION"
-            else
-              log_status "Warning: Version $REQUESTED_VERSION not available in [${AVAILABLE_VERSIONS}], using default $TERRAFORM_VERSION"
+          done
+        elif [[ "$VERSION_SPEC" =~ =[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+          REQUESTED_VERSION="${BASH_REMATCH[1]}"
+          # 사용 가능한 버전 목록에서 확인
+          FOUND_VERSION=""
+          for version in $AVAILABLE_VERSIONS; do
+            if [[ "$version" == "$REQUESTED_VERSION" ]]; then
+              FOUND_VERSION="$version"
+              break
             fi
+          done
+          # 버전을 찾았으면 설정, 아니면 기본값 유지
+          if [[ -n "$FOUND_VERSION" ]]; then
+            TERRAFORM_VERSION="$FOUND_VERSION"
+          else
+            log_status "Warning: Version $REQUESTED_VERSION not available in [${AVAILABLE_VERSIONS}], using default $TERRAFORM_VERSION"
           fi
-          break
+        elif [[ "$VERSION_SPEC" =~ \>=[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+          REQUESTED_VERSION="${BASH_REMATCH[1]}"
+          # >= 연산자의 경우 요청한 버전 이상 중 가장 낮은 버전 선택
+          for version in $AVAILABLE_VERSIONS; do
+            if [[ "$version" == "$REQUESTED_VERSION" ]] || [[ "$version" > "$REQUESTED_VERSION" ]]; then
+              TERRAFORM_VERSION="$version"
+              break
+            fi
+          done
+        elif [[ "$VERSION_SPEC" =~ ^[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+)[[:space:]]*$ ]]; then
+          # 연산자 없이 버전만 지정된 경우 (예: "1.10.5")
+          REQUESTED_VERSION="${BASH_REMATCH[1]}"
+          # 사용 가능한 버전 목록에서 확인
+          FOUND_VERSION=""
+          for version in $AVAILABLE_VERSIONS; do
+            if [[ "$version" == "$REQUESTED_VERSION" ]]; then
+              FOUND_VERSION="$version"
+              break
+            fi
+          done
+          # 버전을 찾았으면 설정, 아니면 기본값 유지
+          if [[ -n "$FOUND_VERSION" ]]; then
+            TERRAFORM_VERSION="$FOUND_VERSION"
+          else
+            log_status "Warning: Version $REQUESTED_VERSION not available in [${AVAILABLE_VERSIONS}], using default $TERRAFORM_VERSION"
+          fi
         fi
+        break
       fi
-    done
-    
-    log_status "Using Terraform version: $TERRAFORM_VERSION"
-    
-    # nixpkgs-terraform는 버전 번호만 지원하므로 latest 처리
-    if [[ "$TERRAFORM_VERSION" == "latest" ]] || [[ "$TERRAFORM_VERSION" == "@DEFAULT_VERSION@" ]]; then
-      # latest를 사용하는 경우 nixpkgs의 기본 terraform 사용
-      cat > .direnv/flake.nix << FLAKE_EOF
-{
-  inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
-  };
+    fi
+  done
 
-  outputs = { self, nixpkgs }:
-    let
-      systems = [ "x86_64-linux" "aarch64-darwin" "aarch64-linux" "x86_64-darwin" ];
-      forAllSystems = nixpkgs.lib.genAttrs systems;
-    in
-    {
-      devShells = forAllSystems (system:
-        let
-          pkgs = nixpkgs.legacyPackages.\${system};
-        in
-        {
-          default = pkgs.mkShell {
-            buildInputs = [ pkgs.terraform ];
-          };
-        });
-    };
-}
-FLAKE_EOF
+  log_status "Using Terraform version: $TERRAFORM_VERSION"
+
+  # terraform 명령어를 버전별 바이너리로 alias 설정
+  if [[ "$TERRAFORM_VERSION" == "latest" ]] || [[ "$TERRAFORM_VERSION" == "@DEFAULT_VERSION@" ]]; then
+    # latest는 기본 terraform 사용 (이미 PATH에 있음)
+    log_status "Using default terraform from PATH"
+  else
+    # 특정 버전 사용: terraform-1.12.2와 같은 바이너리가 이미 PATH에 있음
+    TERRAFORM_BIN="terraform-${TERRAFORM_VERSION}"
+    if command -v "$TERRAFORM_BIN" >/dev/null 2>&1; then
+      # direnv에서 terraform 명령을 override
+      # 새로운 PATH 항목을 만들어서 terraform 심볼릭 링크 생성
+      mkdir -p "${PWD}/.direnv/bin"
+      ln -sf "$(command -v $TERRAFORM_BIN)" "${PWD}/.direnv/bin/terraform"
+      PATH_add "${PWD}/.direnv/bin"
+      log_status "Aliased terraform to $TERRAFORM_BIN"
     else
-      # 특정 버전을 사용하는 경우 nixpkgs-terraform 사용
-      cat > .direnv/flake.nix << FLAKE_EOF
-{
-  inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
-    nixpkgs-terraform.url = "github:stackbuilders/nixpkgs-terraform";
-  };
-
-  outputs = { self, nixpkgs, nixpkgs-terraform }:
-    let
-      systems = [ "x86_64-linux" "aarch64-darwin" "aarch64-linux" "x86_64-darwin" ];
-      forAllSystems = nixpkgs.lib.genAttrs systems;
-    in
-    {
-      devShells = forAllSystems (system:
-        let
-          pkgs = nixpkgs.legacyPackages.\${system};
-          terraform = nixpkgs-terraform.packages.\${system}."$TERRAFORM_VERSION";
-        in
-        {
-          default = pkgs.mkShell {
-            buildInputs = [ terraform ];
-          };
-        });
-    };
-}
-FLAKE_EOF
+      log_error "terraform-${TERRAFORM_VERSION} not found in PATH"
+      log_error "Available versions: ${AVAILABLE_VERSIONS}"
     fi
   fi
-  
-  # .direnv 디렉토리의 flake 사용 (절대 경로로)
-  use flake "path:$(pwd)/.direnv" --impure
 }

@@ -6,17 +6,13 @@
 }:
 
 let
-  # Create terraform packages mapping
-  terraformVersions =
-    lib.listToAttrs (
-      map (version: {
-        name = version;
-        value = pkgs.terraform-versions.${version};
-      }) cfg.versions
-    )
-    // {
-      "latest" = pkgs.terraform;
-    };
+  # Create terraform packages with version-named binaries
+  # Each version gets a wrapper like terraform-1.12.2
+  terraformPackages = map (version:
+    pkgs.writeShellScriptBin "terraform-${version}" ''
+      exec ${pkgs.terraform-versions.${version}}/bin/terraform "$@"
+    ''
+  ) cfg.versions;
 
   # Terraform project initialization script
   terraform-init-project = pkgs.writeShellScriptBin "terraform-init-project" ''
@@ -66,17 +62,17 @@ let
         info "backend.tf already exists, skipping creation"
     fi
     
-    # .envrc 파일 생성 (layout_terraform만 사용)
+    # .envrc 파일 생성 (use_terraform만 사용)
     if [[ ! -f ".envrc" ]]; then
         info "Creating .envrc file..."
-        echo "layout_terraform" > .envrc
+        echo "use_terraform" > .envrc
         success "Created .envrc"
     else
         info ".envrc already exists"
         read -p "Do you want to overwrite it? (y/N): " -n 1 -r
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
-            echo "layout_terraform" > .envrc
+            echo "use_terraform" > .envrc
             success "Overwrote .envrc"
         else
             info "Keeping existing .envrc"
@@ -138,7 +134,7 @@ let
     
     # backend.tf에서 required_version 업데이트
     info "Updating required_version in backend.tf..."
-    
+
     if grep -q "required_version" backend.tf; then
         # 기존 required_version 라인을 새 버전으로 교체
         ${pkgs.gnused}/bin/sed -i "s/required_version.*=.*\"[^\"]*\"/required_version = \"$OPERATOR $VERSION\"/" backend.tf
@@ -148,13 +144,7 @@ let
         echo "Please add a terraform block with required_version manually"
         exit 1
     fi
-    
-    # .direnv/flake.nix 제거 (재생성을 위해)
-    if [[ -f ".direnv/flake.nix" ]]; then
-        info "Removing existing .direnv/flake.nix for regeneration..."
-        rm -f .direnv/flake.nix .direnv/flake.lock
-    fi
-    
+
     # direnv 재로드
     if command -v direnv >/dev/null 2>&1; then
         info "Reloading direnv..."
@@ -210,9 +200,16 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    # Install terraform packages and scripts
-    home.packages = [ 
-      terraformVersions.${cfg.defaultVersion}
+    # Install all terraform versions with version-named binaries
+    home.packages = [
+      # Default terraform version
+      (if cfg.defaultVersion == "latest" then
+        pkgs.terraform
+      else
+        pkgs.terraform-versions.${cfg.defaultVersion})
+
+      # All versioned terraform binaries (terraform-1.12.2, etc.)
+    ] ++ terraformPackages ++ [
       terraform-init-project
       terraform-switch-version
     ];
@@ -222,7 +219,7 @@ in
 
     # Add tf alias that uses the terraform binary from PATH (respects direnv)
     home.shellAliases = {
-      tf = 
+      tf =
         let
           envPrefix = lib.optionalString (cfg.runEnv != { }) (
             lib.concatStringsSep " " (
@@ -233,9 +230,9 @@ in
         "${envPrefix}terraform";
     };
 
-    # Install direnvrc with layout_terraform function
+    # Install direnvrc with use_terraform function
     home.file.".config/direnv/direnvrc" = {
-      text = builtins.replaceStrings 
+      text = builtins.replaceStrings
         [ "@DEFAULT_VERSION@" "@AVAILABLE_VERSIONS@" ]
         [ cfg.defaultVersion (lib.concatStringsSep " " cfg.versions) ]
         (builtins.readFile ./direnvrc);

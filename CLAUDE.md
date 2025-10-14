@@ -47,6 +47,36 @@ nix flake check
 nix develop
 ```
 
+### Terraform Version Management
+
+```bash
+# Initialize a new Terraform project with version
+terraform-init-project              # Creates backend.tf and .envrc with use_terraform
+terraform-init-project 1.10.5      # Specify version (default: 1.12.2)
+
+# Switch Terraform version in existing project
+terraform-switch-version 1.11.4    # Updates backend.tf and reloads direnv
+
+# Use specific version directly
+terraform-1.12.2 version           # All configured versions available as commands
+terraform-1.11.4 version
+terraform-1.10.5 version
+```
+
+#### Directory-specific Terraform Versions (with direnv)
+
+Create `.envrc` files in Terraform project directories:
+
+```bash
+echo "use_terraform" > .envrc
+direnv allow
+```
+
+The `use_terraform` function automatically:
+- Reads `required_version` from backend.tf/versions.tf/main.tf
+- Creates a symlink to the appropriate terraform-X.Y.Z binary
+- Adds it to PATH so `terraform` command uses the correct version
+
 ### Java Version Management
 
 ```bash
@@ -81,8 +111,7 @@ direnv allow
 ```bash
 # .envrc example for Java 8 + Terraform
 use_java_8
-use nix
-layout terraform 1.10.5
+use_terraform
 ```
 
 ## Architecture
