@@ -50,13 +50,6 @@ nix develop
 ### Terraform Version Management
 
 ```bash
-# Initialize a new Terraform project with version
-terraform-init-project              # Creates backend.tf and .envrc with use_terraform
-terraform-init-project 1.10.5      # Specify version (default: 1.12.2)
-
-# Switch Terraform version in existing project
-terraform-switch-version 1.11.4    # Updates backend.tf and reloads direnv
-
 # Use specific version directly
 terraform-1.12.2 version           # All configured versions available as commands
 terraform-1.11.4 version
