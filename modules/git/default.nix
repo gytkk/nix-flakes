@@ -110,6 +110,5 @@
 
     # Claude
     .claude/settings.local.json
-    .serena
   '';
 }
