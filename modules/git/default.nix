@@ -8,12 +8,15 @@
 {
   programs.git = {
     enable = true;
-    userName = "gytkk";
-    userEmail = "gytk.kim@gmail.com";
 
     lfs.enable = true;
 
-    extraConfig = {
+    settings = {
+      user = {
+        name = "gytkk";
+        email = "gytk.kim@gmail.com";
+      };
+
       core = {
         editor = "nvim";
         excludesfile = "~/.gitignore";

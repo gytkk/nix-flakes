@@ -70,9 +70,9 @@ in
   };
 
   # Devsisters 특화 Git 설정
-  programs.git = {
-    userEmail = lib.mkForce "gyutak.kim@devsisters.com";
-    userName = lib.mkForce "Gyutak Kim";
+  programs.git.settings.user = {
+    email = lib.mkForce "gyutak.kim@devsisters.com";
+    name = lib.mkForce "Gyutak Kim";
   };
 
   # Devsisters 특화 환경 변수
