@@ -45,8 +45,8 @@ in
     vault
 
     # Required dependencies for eclair
-    eclair
-    rubyEnv
+    # eclair
+    # rubyEnv
 
     # Databricks
     databricks-cli
