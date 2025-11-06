@@ -59,7 +59,7 @@
 
   # XXX(ecl): Add gem binaries to PATH
   home.sessionPath = [
-    "$HOME/.gem/ruby/${pkgs.ruby.version}/bin"
+    "$HOME/.gem/ruby/${pkgs.ruby.version.libDir}/bin"
   ];
 
   # XXX(ecl): Install ecl gem on activation
