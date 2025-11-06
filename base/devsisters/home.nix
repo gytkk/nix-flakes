@@ -7,30 +7,6 @@
   ...
 }:
 
-let
-  rubyEnv = pkgs.ruby_3_1.withPackages (
-    ps: with ps; [
-      curses
-      nokogiri
-    ]
-  );
-
-  eclair = pkgs.writeShellScriptBin "ecl" ''
-    export PATH="${rubyEnv}/bin:${pkgs.tmux}/bin:$PATH"
-    export GEM_PATH="${rubyEnv}/lib/ruby/gems/3.1.0"
-
-    # Create temporary gem home for eclair installation
-    TEMP_GEM_HOME=$(mktemp -d)
-    export GEM_HOME="$TEMP_GEM_HOME"
-    export GEM_PATH="$TEMP_GEM_HOME:${rubyEnv}/lib/ruby/gems/3.1.0"
-
-    # Install eclair gem with native extensions support
-    ${rubyEnv}/bin/gem install ecl --version 3.0.4 --no-document --force
-
-    # Execute the actual ecl command
-    exec "$TEMP_GEM_HOME/bin/ecl" "$@"
-  '';
-in
 {
   # Import base configuration
   imports = [ ../default.nix ];
@@ -44,12 +20,11 @@ in
     saml2aws
     vault
 
-    # Required dependencies for eclair
-    # eclair
-    # rubyEnv
-
     # Databricks
     databricks-cli
+
+    # Ruby
+    ruby
 
     # Custom scripts
     (pkgs.writeShellScriptBin "sign" (builtins.readFile ./scripts/sign))
@@ -81,4 +56,15 @@ in
     # SBT Java 호환성 설정
     SBT_OPTS = "-Xmx2G -XX:+UseG1GC";
   };
+
+  # XXX(ecl): Add gem binaries to PATH
+  home.sessionPath = [
+    "$HOME/.gem/ruby/${pkgs.ruby.version}/bin"
+  ];
+
+  # XXX(ecl): Install ecl gem on activation
+  home.activation.installEclGem = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    ${pkgs.ruby}/bin/gem list -i ecl > /dev/null 2>&1 || \
+      ${pkgs.ruby}/bin/gem install ecl
+  '';
 }
