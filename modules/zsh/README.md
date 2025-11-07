@@ -14,17 +14,20 @@ This module provides a comprehensive Zsh shell configuration with modern feature
 ## Features
 
 ### Shell Enhancements
+
 - **Syntax Highlighting**: Real-time syntax highlighting for commands
 - **Autosuggestion**: Intelligent command suggestions based on history
 - **Tab Completion**: Enhanced completion system
 - **History Management**: 10,000 command history with deduplication and sharing
 
 ### Theme and Appearance
+
 - **Powerlevel10k**: Modern, fast, and customizable prompt theme
 - **Custom Configuration**: Pre-configured `.p10k.zsh` with optimal settings
 - **Color Support**: Colorized ls output and completion menus
 
 ### Oh-My-Zsh Plugins
+
 - `fzf` - Fuzzy file finder integration
 - `git` - Git aliases and functions
 - `terraform` - Terraform command completion
@@ -34,6 +37,7 @@ This module provides a comprehensive Zsh shell configuration with modern feature
 - `z` - Smart directory jumping
 
 ### Development Aliases
+
 - **Editor**: `vim`, `vi` → `nvim`, `vimdiff` → `nvim -d`
 - **File Listing**: `ll`, `lh` with colors
 - **Kubernetes**: `kl` (kubectl), `kx` (kubectx), `kn` (kubens)
@@ -41,7 +45,7 @@ This module provides a comprehensive Zsh shell configuration with modern feature
 - **Terraform**: `tf` with AWS profile integration
 
 ### Tool Integration
-- **mise**: Runtime version manager activation
+
 - **fzf**: Fuzzy finder with Zsh integration
 - **direnv**: Directory-based environment variable management
 - **uv**: Python package manager with shell completion
@@ -61,11 +65,13 @@ This module provides a comprehensive Zsh shell configuration with modern feature
 ## Usage
 
 After applying this module, restart your shell or run:
+
 ```bash
 exec zsh
 ```
 
 The configuration will automatically:
+
 - Load Powerlevel10k theme
 - Enable all plugins and features
 - Set up aliases and integrations

@@ -14,7 +14,7 @@ This module provides comprehensive Git configuration with sensible defaults and 
 
 - **User Configuration**: Sets username to `gytkk` and email to `gytk.kim@gmail.com`
 - **Git LFS**: Automatically handles large files
-- **Smart Defaults**: 
+- **Smart Defaults**:
   - Rebase on pull with fast-forward only
   - Auto-setup remote for push
   - Default branch set to `main`
@@ -30,6 +30,7 @@ This module provides comprehensive Git configuration with sensible defaults and 
 ## Configuration Details
 
 ### Git Settings
+
 - **Editor**: Neovim (`nvim`)
 - **Diff Tool**: `vimdiff`
 - **Pull Strategy**: Rebase with fast-forward only
@@ -37,9 +38,10 @@ This module provides comprehensive Git configuration with sensible defaults and 
 - **Default Branch**: `main`
 
 ### Global Gitignore Patterns
+
 - System files: `.DS_Store`
 - IDE files: `.idea`, `.vscode`
-- Environment files: `.env`, `.envrc`, `mise.toml`, `.tool-versions`
+- Environment files: `.env`, `.envrc`, `.tool-versions`
 - Python files: `.coverage`
 
 ## Usage

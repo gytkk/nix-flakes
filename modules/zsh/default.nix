@@ -97,11 +97,6 @@
           # Initialize p10k configuration
           [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
 
-          # Initialize mise
-          if command -v mise > /dev/null; then
-            eval "$(mise activate zsh)"
-          fi
-
           # Enable colors
           autoload -U colors && colors
 
