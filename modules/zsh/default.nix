@@ -77,6 +77,9 @@
 
       # uv
       ur = "uv run";
+
+      # XXX(temporary workaround): Antigravity
+      agy = "/Applications/Antigravity.app/Contents/MacOS/Electron";
     };
 
     # Environment variables
