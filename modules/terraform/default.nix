@@ -8,12 +8,12 @@
 let
   # Create terraform packages with version-named binaries
   # Each version gets a wrapper like terraform-1.12.2
-  terraformPackages = map (version:
+  terraformPackages = map (
+    version:
     pkgs.writeShellScriptBin "terraform-${version}" ''
       exec ${pkgs.terraform-versions.${version}}/bin/terraform "$@"
     ''
   ) cfg.versions;
-
 
   # Configuration options
   cfg = config.modules.terraform;
@@ -33,6 +33,7 @@ in
       example = [
         "1.10.5"
         "1.12.2"
+        "latest"
       ];
     };
 
@@ -47,8 +48,8 @@ in
       default = { };
       description = "Environment variables to set when running terraform";
       example = {
-        TF_VAR_environment = "dev";
-        AWS_REGION = "ap-northeast-2";
+        TF_VAR_ENVIRONMENT = "dev";
+        AWS_REGION = "ap-northeast-1";
       };
     };
   };
@@ -57,13 +58,16 @@ in
     # Install all terraform versions with version-named binaries
     home.packages = [
       # Default terraform version
-      (if cfg.defaultVersion == "latest" then
-        pkgs.terraform
-      else
-        pkgs.terraform-versions.${cfg.defaultVersion})
+      (
+        if cfg.defaultVersion == "latest" then
+          pkgs.terraform
+        else
+          pkgs.terraform-versions.${cfg.defaultVersion}
+      )
 
       # All versioned terraform binaries (terraform-1.12.2, etc.)
-    ] ++ terraformPackages;
+    ]
+    ++ terraformPackages;
 
     # Configure nixpkgs to allow unfree for terraform
     nixpkgs.config.allowUnfree = true;
@@ -73,9 +77,7 @@ in
       tf =
         let
           envPrefix = lib.optionalString (cfg.runEnv != { }) (
-            lib.concatStringsSep " " (
-              lib.mapAttrsToList (name: value: "${name}=${value}") cfg.runEnv
-            ) + " "
+            lib.concatStringsSep " " (lib.mapAttrsToList (name: value: "${name}=${value}") cfg.runEnv) + " "
           );
         in
         "${envPrefix}terraform";
@@ -83,10 +85,11 @@ in
 
     # Install direnvrc with use_terraform function
     home.file.".config/direnv/direnvrc" = {
-      text = builtins.replaceStrings
-        [ "@DEFAULT_VERSION@" "@AVAILABLE_VERSIONS@" ]
-        [ cfg.defaultVersion (lib.concatStringsSep " " cfg.versions) ]
-        (builtins.readFile ./direnvrc);
+      text =
+        builtins.replaceStrings
+          [ "@DEFAULT_VERSION@" "@AVAILABLE_VERSIONS@" ]
+          [ cfg.defaultVersion (lib.concatStringsSep " " cfg.versions) ]
+          (builtins.readFile ./direnvrc);
     };
   };
 }

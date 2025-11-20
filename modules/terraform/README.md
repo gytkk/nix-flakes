@@ -2,15 +2,6 @@
 
 [stackbuilders/nixpkgs-terraform](https://github.com/stackbuilders/nixpkgs-terraform)를 사용한 Terraform 버전 관리 모듈입니다.
 
-## 주요 기능
-
-- **재현 가능한 빌드**: flake.lock에 Terraform 버전 고정
-- **다중 버전 지원**: 여러 Terraform 버전 동시 설치 가능  
-- **바이너리 캐시**: stackbuilders의 바이너리 캐시로 빠른 설치
-- **자동 업데이트**: 업스트림 CI를 통한 버전 추적
-- **셸 별칭**: 특정 Terraform 버전에 편리하게 접근
-- **Direnv 통합**: backend.tf 기반 자동 버전 감지
-
 ## 설정 방법
 
 ### 기본 사용법
@@ -44,9 +35,8 @@ modules.terraform = {
 ### `versions`
 
 - **타입**: `list of strings`  
-- **기본값**: `[ "1.10.2" "1.12.2" ]`
+- **기본값**: `[ "1.10.2" "1.12.2", "latest" ]`
 - **설명**: 설치할 Terraform 버전 목록
-- **사용 가능한 버전**: `"1.10.2"`, `"1.12.2"`, `"latest"`
 
 ### `defaultVersion`
 
@@ -237,22 +227,6 @@ direnv allow
 ls -la flake.nix
 ```
 
-## 장점
-
-### 기존 방식 대비 개선사항
-
-1. **환경변수 의존성 제거**: PWD, DIRENV_DIR 등의 환경변수 문제 완전 해결
-2. **더 확실한 파일 감지**: `./backend.tf` 상대 경로 사용
-3. **프로젝트별 독립성**: 각 프로젝트에 자체 flake 보유
-4. **간편한 디버깅**: 로컬 flake.nix로 문제 추적 용이
-
-### 핵심 특징
-
-- **자동 생성**: flake.nix가 없으면 자동으로 생성
-- **버전 감지**: backend.tf → versions.tf → main.tf 순서로 탐지
-- **캐시 최적화**: nix-direnv 캐시로 빠른 로드
-- **표준 호환**: 표준 Terraform 설정 파일 활용
-
 ## 트러블슈팅
 
 ### 올바르지 않은 버전이 로드되는 경우
@@ -290,52 +264,3 @@ chmod +x .envrc
 ```bash
 nix flake check .
 ```
-
-## 지원되는 Terraform 버전
-
-nixpkgs-terraform에서 제공하는 모든 버전이 지원됩니다:
-- 1.0.11, 1.1.9, 1.2.9, 1.3.10, 1.4.7, 1.5.7
-- 1.6.6, 1.7.5, 1.8.5, 1.9.8, 1.10.2, 1.12.2
-
-## 파일 구조
-
-### Home Manager 설치 (전역)
-```
-~/.nix-profile/bin/
-├── terraform           # 기본 버전 (defaultVersion)
-├── terraform-1.10.2    # 별칭 (installAll=true인 경우)
-└── terraform-1.12.2    # 별칭 (installAll=true인 경우)
-```
-
-### Direnv 프로젝트별 (로컬)
-```
-your-project/
-├── backend.tf                # Terraform 버전 요구사항
-├── main.tf                   # Terraform 설정
-├── .envrc                    # direnv 설정 (자동 flake 생성)
-├── flake.nix                 # 자동 생성된 로컬 flake
-└── flake.lock                # nix 의존성 락 파일
-```
-
-## 마이그레이션 가이드
-
-기존 중앙집중식 방식에서 새로운 로컬 flake 방식으로 마이그레이션:
-
-```bash
-# 기존 .envrc를 새 버전으로 교체
-cd your-terraform-project
-rm .envrc
-~/development/nix-flakes/scripts/init-terraform-project.sh
-```
-
-또는 수동으로 .envrc 내용을 위의 "기존 프로젝트에 추가" 섹션대로 업데이트하세요.
-
-## 모듈 구성
-
-이 모듈은 다음 파일들로 구성됩니다:
-
-- `default.nix`: Home Manager 모듈 정의 및 옵션
-- `terraform-flake/flake.nix`: 중앙집중식 terraform flake (더 이상 사용되지 않음)
-- `README.md`: 이 문서
-- `scripts/init-terraform-project.sh`: 프로젝트 초기화 스크립트
-- `scripts/switch-terraform-version.sh`: 버전 전환 스크립트
