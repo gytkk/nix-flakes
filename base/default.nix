@@ -8,6 +8,12 @@
   ...
 }:
 
+let
+  pkgs-master = import inputs.nixpkgs-master {
+    system = pkgs.system;
+    config.allowUnfree = true;
+  };
+in
 {
   imports = [
     # 기본 모듈들 (항상 import됨)
@@ -40,7 +46,7 @@
       findutils
 
       # Development (common)
-      antigravity
+      pkgs-master.antigravity
       docker
       gcc
 
