@@ -13,6 +13,10 @@ let
     system = pkgs.system;
     config.allowUnfree = true;
   };
+  pkgs-24_05 = import inputs.nixpkgs-24_05 {
+    system = pkgs.system;
+    config.allowUnfree = true;
+  };
 in
 {
   imports = [
@@ -47,6 +51,7 @@ in
 
       # Development (common)
       pkgs-master.antigravity
+      vscode
       docker
       gcc
 
@@ -66,7 +71,7 @@ in
       nodejs
       typescript
       pnpm
-      turbo
+      pkgs-24_05.turbo
 
       # Go
       go
