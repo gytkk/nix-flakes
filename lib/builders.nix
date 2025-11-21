@@ -34,10 +34,10 @@ rec {
       ];
       missingFields = builtins.filter (field: !(builtins.hasAttr field config)) requiredFields;
       pkgs = mkPkgs config.system;
-      
+
       # Dynamic base module loading based on baseProfile
       baseHomeModule = ../base + "/${config.baseProfile}/home.nix";
-      dynamicModules = 
+      dynamicModules =
         if builtins.pathExists baseHomeModule then
           [ baseHomeModule ]
         else
@@ -50,6 +50,7 @@ rec {
         inherit pkgs;
         extraSpecialArgs = {
           inherit (config) username homeDirectory;
+          inherit inputs;
         };
         modules = dynamicModules ++ (config.extraModules or [ ]);
       };

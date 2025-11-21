@@ -4,6 +4,7 @@
   inputs = {
     # Nix 패키지 모음
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    nixpkgs-master.url = "github:nixos/nixpkgs/master";
 
     # Home Manager
     home-manager = {

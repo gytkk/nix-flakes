@@ -4,9 +4,20 @@
   pkgs,
   username,
   homeDirectory,
+  inputs,
   ...
 }:
 
+let
+  pkgs-master = import inputs.nixpkgs-master {
+    system = pkgs.system;
+    config.allowUnfreePredicate =
+      pkg:
+      builtins.elem (lib.getName pkg) [
+        "antigravity"
+      ];
+  };
+in
 {
   imports = [
     # 기본 모듈들 (항상 import됨)
@@ -39,6 +50,7 @@
       findutils
 
       # Development (common)
+      pkgs-master.antigravity
       docker
       gcc
 
