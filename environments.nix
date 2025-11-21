@@ -25,6 +25,8 @@
 
     username = "gytkk";
     homeDirectory = "/home/gytkk";
+
+    isWSL = true;
   };
 
   "pylv-sepia" = {
@@ -34,5 +36,7 @@
 
     username = "gytkk";
     homeDirectory = "/home/gytkk";
+
+    isWSL = true;
   };
 }

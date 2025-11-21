@@ -5,6 +5,7 @@
   username,
   homeDirectory,
   inputs,
+  isWSL ? false,
   ...
 }:
 
@@ -51,7 +52,6 @@ in
 
       # Development (common)
       pkgs-master.antigravity
-      vscode
       docker
       gcc
 
@@ -87,6 +87,9 @@ in
 
       # etc
       direnv
+    ] ++ lib.optionals (!isWSL) [
+      # WSL 환경에서는 제외
+      vscode
     ];
 
     stateVersion = "25.05";

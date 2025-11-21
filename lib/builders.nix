@@ -51,6 +51,7 @@ rec {
         extraSpecialArgs = {
           inherit (config) username homeDirectory;
           inherit inputs;
+          isWSL = config.isWSL or false;
         };
         modules = dynamicModules ++ (config.extraModules or [ ]);
       };
