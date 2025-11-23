@@ -88,7 +88,7 @@ in
         _1password-cli
 
         # Modeling
-        ffmpeg_6-full
+        ffmpeg_7-full
 
         # etc
         direnv
