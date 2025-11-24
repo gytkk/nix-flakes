@@ -38,13 +38,13 @@ let
   javaSwitch = pkgs.writeShellScriptBin "java-switch" ''
     case "$1" in
       8)
-        export JAVA_HOME="${jdk8}/lib/openjdk"
+        export JAVA_HOME="${jdk8}"
         export PATH="${jdk8}/bin:$PATH"
         echo "Switched to Java 8 (OpenJDK 8)"
         java -version
         ;;
       17)
-        export JAVA_HOME="${jdk17}/lib/openjdk"
+        export JAVA_HOME="${jdk17}"
         export PATH="${jdk17}/bin:$PATH"
         echo "Switched to Java 17 (OpenJDK 17)"
         java -version
@@ -70,7 +70,7 @@ in
 
   # 기본 Java 환경 (Java 17)
   home.sessionVariables = {
-    JAVA_HOME = "${jdk17}/lib/openjdk";
+    JAVA_HOME = "${jdk17}";
   };
 
   # direnv용 Java 함수들을 별도 파일로 설치
@@ -78,14 +78,14 @@ in
     text = ''
       # Java 8 환경 설정
       use_java_8() {
-        export JAVA_HOME="${jdk8}/lib/openjdk"
+        export JAVA_HOME="${jdk8}"
         PATH_add "${jdk8}/bin"
         echo "direnv: using Java 8"
       }
 
       # Java 17 환경 설정
       use_java_17() {
-        export JAVA_HOME="${jdk17}/lib/openjdk"
+        export JAVA_HOME="${jdk17}"
         PATH_add "${jdk17}/bin"
         echo "direnv: using Java 17"
       }
