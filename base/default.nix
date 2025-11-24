@@ -33,6 +33,12 @@ in
   # Disable news on update
   news.display = "silent";
 
+  # XDG Base Directory Specification
+  xdg = {
+    enable = true;
+    configHome = "${homeDirectory}/.config";
+  };
+
   home = {
     inherit username homeDirectory;
 
@@ -64,7 +70,12 @@ in
         ripgrep
         tmux
         less
+
+        # Git
+        git
         lazygit
+        delta
+        bat
 
         # Python
         uv
