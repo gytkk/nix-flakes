@@ -85,6 +85,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-25_05": {
+      "locked": {
+        "lastModified": 1763948260,
+        "narHash": "sha256-dY9qLD0H0zOUgU3vWacPY6Qc421BeQAfm8kBuBtPVE0=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "1c8ba8d3f7634acac4a2094eef7c32ad9106532c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-25.05",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixpkgs-master": {
       "locked": {
         "lastModified": 1763685464,
@@ -130,6 +146,7 @@
         "home-manager": "home-manager",
         "nixpkgs": "nixpkgs",
         "nixpkgs-24_05": "nixpkgs-24_05",
+        "nixpkgs-25_05": "nixpkgs-25_05",
         "nixpkgs-master": "nixpkgs-master",
         "nixpkgs-terraform": "nixpkgs-terraform"
       }

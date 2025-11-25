@@ -4,9 +4,16 @@
   pkgs,
   username,
   homeDirectory,
+  inputs,
   ...
 }:
 
+let
+  pkgs-25_05 = import inputs.nixpkgs-25_05 {
+    system = pkgs.system;
+    config.allowUnfree = true;
+  };
+in
 {
   # Import base configuration
   imports = [ ../default.nix ];
@@ -24,7 +31,7 @@
     databricks-cli
 
     # Ruby
-    ruby
+    pkgs-25_05.ruby_3_2
 
     # Custom scripts
     (pkgs.writeShellScriptBin "sign" (builtins.readFile ./scripts/sign))
@@ -59,12 +66,12 @@
 
   # XXX(ecl): Add gem binaries to PATH
   home.sessionPath = [
-    "$HOME/.gem/ruby/${pkgs.ruby.version.libDir}/bin"
+    "$HOME/.gem/ruby/${pkgs-25_05.ruby_3_2.version.libDir}/bin"
   ];
 
   # XXX(ecl): Install ecl gem on activation
   home.activation.installEclGem = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    ${pkgs.ruby}/bin/gem list -i ecl > /dev/null 2>&1 || \
-      ${pkgs.ruby}/bin/gem install ecl
+    ${pkgs-25_05.ruby_3_2}/bin/gem list -i ecl > /dev/null 2>&1 || \
+      ${pkgs-25_05.ruby_3_2}/bin/gem install ecl
   '';
 }

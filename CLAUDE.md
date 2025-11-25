@@ -184,7 +184,7 @@ Base packages defined in `base/default.nix`:
 
 Company-specific packages added in respective base configurations:
 
-- **Devsisters**: saml2aws, vault, eclair, ruby_3_1, databricks-cli, scala_2_12, scala_3, sbt
+- **Devsisters**: saml2aws, vault, eclair, ruby_3_2, databricks-cli, scala_2_12, scala_3, sbt
 - **Pylv**: Currently none (inherits base only)
 
 ### Configuration Management

@@ -18,6 +18,10 @@ let
     system = pkgs.system;
     config.allowUnfree = true;
   };
+  pkgs-25_05 = import inputs.nixpkgs-25_05 {
+    system = pkgs.system;
+    config.allowUnfree = true;
+  };
 in
 {
   imports = [
