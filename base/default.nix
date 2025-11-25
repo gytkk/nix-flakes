@@ -5,24 +5,13 @@
   username,
   homeDirectory,
   inputs,
+  pkgs-master,
+  pkgs-24_05,
+  pkgs-25_05,
   isWSL ? false,
   ...
 }:
 
-let
-  pkgs-master = import inputs.nixpkgs-master {
-    system = pkgs.system;
-    config.allowUnfree = true;
-  };
-  pkgs-24_05 = import inputs.nixpkgs-24_05 {
-    system = pkgs.system;
-    config.allowUnfree = true;
-  };
-  pkgs-25_05 = import inputs.nixpkgs-25_05 {
-    system = pkgs.system;
-    config.allowUnfree = true;
-  };
-in
 {
   imports = [
     # 기본 모듈들 (항상 import됨)

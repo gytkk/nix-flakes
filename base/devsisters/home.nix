@@ -4,16 +4,10 @@
   pkgs,
   username,
   homeDirectory,
-  inputs,
+  pkgs-25_05,
   ...
 }:
 
-let
-  pkgs-25_05 = import inputs.nixpkgs-25_05 {
-    system = pkgs.system;
-    config.allowUnfree = true;
-  };
-in
 {
   # Import base configuration
   imports = [ ../default.nix ];
