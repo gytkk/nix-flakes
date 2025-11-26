@@ -65,6 +65,7 @@
 
         # Git
         git
+        gh
         lazygit
         delta
         bat
