@@ -58,14 +58,16 @@
     SBT_OPTS = "-Xmx2G -XX:+UseG1GC";
   };
 
-  # XXX(ecl): Add gem binaries to PATH
-  home.sessionPath = [
-    "$HOME/.gem/ruby/${pkgs-25_05.ruby_3_2.version.libDir}/bin"
-  ];
+  # # XXX(ecl): Add gem binaries to PATH
+  # home.sessionPath = [
+  #   "$HOME/.gem/ruby/${pkgs-25_05.ruby_3_2.version.libDir}/bin"
+  # ];
 
-  # XXX(ecl): Install ecl gem on activation
-  home.activation.installEclGem = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    ${pkgs-25_05.ruby_3_2}/bin/gem list -i ecl > /dev/null 2>&1 || \
-      ${pkgs-25_05.ruby_3_2}/bin/gem install ecl
-  '';
+  # # XXX(ecl): Install ecl gem on activation
+  # home.activation.installEclGem = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  #   if ! ${pkgs-25_05.ruby_3_2}/bin/gem list -i ecl > /dev/null 2>&1; then
+  #     export PATH="${pkgs.stdenv.cc}/bin:${pkgs.darwin.cctools}/bin:${pkgs.gnumake}/bin:$PATH"
+  #     ${pkgs-25_05.ruby_3_2}/bin/gem install ecl
+  #   fi
+  # '';
 }
