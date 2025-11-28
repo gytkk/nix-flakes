@@ -72,6 +72,7 @@
 
         # Python
         uv
+        conda
 
         # JavaScript + Node.js
         nodejs
