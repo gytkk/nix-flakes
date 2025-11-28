@@ -62,6 +62,8 @@
         ripgrep
         tmux
         less
+        wget
+        curl
 
         # Git
         git
@@ -73,6 +75,7 @@
         # Python
         uv
         conda
+        mecab
 
         # JavaScript + Node.js
         nodejs
