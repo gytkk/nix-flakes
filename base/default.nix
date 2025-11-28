@@ -5,9 +5,6 @@
   username,
   homeDirectory,
   inputs,
-  pkgs-master,
-  pkgs-24_05,
-  pkgs-25_05,
   isWSL ? false,
   ...
 }:
@@ -81,7 +78,7 @@
         nodejs
         typescript
         pnpm
-        pkgs-24_05.turbo
+        pkgs.stable-24_05.turbo
 
         # Go
         go

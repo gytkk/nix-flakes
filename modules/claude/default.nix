@@ -2,14 +2,13 @@
   config,
   lib,
   pkgs,
-  pkgs-master,
   ...
 }:
 
 {
   # Install Claude Code - AI coding assistant
   home.packages = [
-    pkgs-master.claude-code
+    pkgs.master.claude-code
   ];
 
   # Create ~/.claude/settings.json file

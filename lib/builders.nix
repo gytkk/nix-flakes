@@ -8,6 +8,7 @@ rec {
       config.allowUnfree = true;
       overlays = [
         inputs.nixpkgs-terraform.overlays.default
+        (import ../overlays { inherit inputs; }).nixpkgs-versions
       ];
     };
 
@@ -35,20 +36,6 @@ rec {
       missingFields = builtins.filter (field: !(builtins.hasAttr field config)) requiredFields;
       pkgs = mkPkgs config.system;
 
-      # Import additional nixpkgs versions for all modules to use
-      pkgs-master = import inputs.nixpkgs-master {
-        system = config.system;
-        config.allowUnfree = true;
-      };
-      pkgs-24_05 = import inputs.nixpkgs-24_05 {
-        system = config.system;
-        config.allowUnfree = true;
-      };
-      pkgs-25_05 = import inputs.nixpkgs-25_05 {
-        system = config.system;
-        config.allowUnfree = true;
-      };
-
       # Dynamic base module loading based on baseProfile
       baseHomeModule = ../base + "/${config.baseProfile}/home.nix";
       dynamicModules =
@@ -64,7 +51,7 @@ rec {
         inherit pkgs;
         extraSpecialArgs = {
           inherit (config) username homeDirectory;
-          inherit inputs pkgs-master pkgs-24_05 pkgs-25_05;
+          inherit inputs;
           isWSL = config.isWSL or false;
         };
         modules = dynamicModules ++ (config.extraModules or [ ]);
