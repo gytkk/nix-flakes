@@ -6,6 +6,18 @@
 }:
 
 {
+  programs.delta = {
+    enable = true;
+    enableGitIntegration = true;
+    options = {
+      syntax-theme = "Monokai Extended";
+      navigate = true;
+      side-by-side = true;
+      line-numbers = true;
+      plus-style = "syntax #3d6b4d";
+    };
+  };
+
   programs.git = {
     enable = true;
 
