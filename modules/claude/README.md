@@ -4,32 +4,48 @@ This module installs and configures Claude Code, an AI coding assistant from Ant
 
 ## What it does
 
-- Installs the `claude-code` package
-- Enables MCP (Model Context Protocol) support for enhanced functionality
-- Configures environment variables for optimal Claude Code experience
+- Installs `claude-code` from nixpkgs master
+- Configures Claude Code settings (`~/.claude/settings.json`)
+- Sets up MCP servers (`~/.claude/mcp.json`)
+- Installs global instructions (`~/.claude/CLAUDE.md`)
+- Installs custom agents (`~/.claude/agents/`)
+- Creates `ccusage` alias for usage tracking
 
-## Features
+## Configuration Files
 
-- **AI Coding Assistant**: Provides intelligent code completion, generation, and debugging assistance
-- **MCP Support**: Enables Model Context Protocol for enhanced AI capabilities
-- **Cross-platform**: Works on both macOS and Linux environments
+### settings.json
 
-## Requirements
+- **Model**: `opus` (default)
+- **MCP**: Enables all project MCP servers
+- **Permissions**: Pre-approved commands for common operations
+  - File operations: `find`, `grep`, `cp`, `ls`, `mv`, `mkdir`, `rm`, `cat`, `sed`, `chmod`
+  - Web fetch: `github.com`
+  - MCP tools: `context7` library resolution and docs
 
-- Nix package manager
-- Home Manager
-- Access to the `claude-code` package from nixpkgs
+### mcp.json
 
-## Configuration
+Configures MCP servers:
 
-The module automatically sets:
-- `CLAUDE_CODE_MCP_ENABLED=true` - Enables MCP support for enhanced functionality
+- **Context7**: Provides up-to-date library documentation via HTTP MCP
+
+### CLAUDE.md
+
+Global instructions for Claude Code behavior across all projects.
+
+## Custom Agents
+
+Located in `agents/` directory:
+
+- **code-reviewer**: Code review agent
+- **software-dev-engineer**: Software development guidance
+- **test-code-writer**: Test code generation
 
 ## Usage
 
-After installation, you can use Claude Code by running:
 ```bash
-claude-code
-```
+# Run Claude Code
+claude
 
-The MCP support provides additional context and capabilities for better AI assistance.
+# Check usage statistics
+ccusage
+```
