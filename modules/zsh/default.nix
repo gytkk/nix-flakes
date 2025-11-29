@@ -75,9 +75,6 @@
       kx = "kubectx";
       kn = "kubens";
 
-      # uv
-      ur = "uv run";
-
       # antigravity
       agy = "antigravity";
     };
@@ -117,6 +114,11 @@
           # Set uv shell completion
           if command -v uv > /dev/null; then
             eval "$(uv generate-shell-completion zsh)"
+          fi
+
+          # Initialize micromamba
+          if command -v micromamba > /dev/null; then
+            eval "$(micromamba shell hook --shell zsh)"
           fi
         '';
       in

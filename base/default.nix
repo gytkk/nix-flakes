@@ -71,8 +71,6 @@
 
         # Python
         uv
-        conda
-        mecab
 
         # JavaScript + Node.js
         nodejs
@@ -94,6 +92,7 @@
 
         # Modeling
         ffmpeg_7-full
+        pkgs.stable-25_05.micromamba
 
         # etc
         direnv
