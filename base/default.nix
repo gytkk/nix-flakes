@@ -93,6 +93,7 @@
         # Modeling
         ffmpeg_7-full
         pkgs.stable-25_05.micromamba
+        yt-dlp
 
         # etc
         direnv
