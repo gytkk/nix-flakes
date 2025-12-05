@@ -72,6 +72,10 @@
         # Python
         uv
 
+        # Rust
+        cargo
+        rustc
+
         # JavaScript + Node.js
         nodejs
         typescript
