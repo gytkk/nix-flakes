@@ -73,8 +73,7 @@
         uv
 
         # Rust
-        cargo
-        rustc
+        rustup
 
         # JavaScript + Node.js
         nodejs

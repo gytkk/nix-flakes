@@ -17,5 +17,10 @@
       inherit (final) system;
       config.allowUnfree = true;
     };
+
+    stable-25_11 = import inputs.nixpkgs-25_11 {
+      inherit (final) system;
+      config.allowUnfree = true;
+    };
   };
 }
