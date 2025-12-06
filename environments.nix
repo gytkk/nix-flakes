@@ -38,5 +38,7 @@
     homeDirectory = "/home/gytkk";
 
     isWSL = true;
+
+    extraModules = [ ./base/pylv/sepia.nix ];
   };
 }

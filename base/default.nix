@@ -104,7 +104,6 @@
       ++ lib.optionals (!isWSL) [
         # WSL 환경에서는 제외
         vscode
-        antigravity
       ];
 
     stateVersion = "25.05";
