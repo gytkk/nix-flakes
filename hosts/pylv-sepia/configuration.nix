@@ -29,6 +29,9 @@
   # Enable zsh system-wide (configuration via Home Manager)
   programs.zsh.enable = true;
 
+  # Enable flakes
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
   # Security
   security.sudo = {
     enable = true;
