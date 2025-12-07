@@ -77,6 +77,7 @@
     };
     promptInit = ''
       source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
+      [[ -f /etc/p10k.zsh ]] && source /etc/p10k.zsh
     '';
     shellAliases = {
       ls = "ls --color=auto";
@@ -87,6 +88,9 @@
       kx = "kubectx";
     };
   };
+
+  # p10k configuration
+  environment.etc."p10k.zsh".source = ./p10k.zsh;
 
   # Git system-wide config
   programs.git = {
