@@ -17,10 +17,42 @@
     efiInstallAsRemovable = true;
   };
   services.openssh.enable = true;
+  services.tailscale.enable = true;
 
-  environment.systemPackages = map lib.lowPrio [
-    pkgs.curl
-    pkgs.gitMinimal
+  environment.systemPackages = with pkgs; [
+    # System utilities
+    curl
+    wget
+    htop
+    tmux
+    less
+
+    # Development
+    git
+    gh
+    vim
+    jq
+    ripgrep
+    fd
+
+    # Python
+    uv
+
+    # Node.js
+    nodejs
+    pnpm
+
+    # Go
+    go
+
+    # Rust
+    rustup
+
+    # Nix
+    nixfmt-rfc-style
+
+    # Code Server
+    code-server
   ];
 
   security.sudo.enable = true;
