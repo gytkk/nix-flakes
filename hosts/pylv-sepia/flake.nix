@@ -1,21 +1,36 @@
 {
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-  inputs.disko.url = "github:nix-community/disko";
-  inputs.disko.inputs.nixpkgs.follows = "nixpkgs";
-  inputs.nixos-facter-modules.url = "github:numtide/nixos-facter-modules";
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    disko.url = "github:nix-community/disko";
+    disko.inputs.nixpkgs.follows = "nixpkgs";
+    nixos-facter-modules.url = "github:numtide/nixos-facter-modules";
+
+    home-manager.url = "github:nix-community/home-manager";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+  };
 
   outputs =
     {
       nixpkgs,
       disko,
+      home-manager,
       nixos-facter-modules,
       ...
     }:
+    let
+      homeManagerModule = {
+        home-manager.useGlobalPkgs = true;
+        home-manager.useUserPackages = true;
+        home-manager.users.gytkk = import ./home.nix;
+      };
+    in
     {
       nixosConfigurations.hetzner-cloud = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
           disko.nixosModules.disko
+          home-manager.nixosModules.home-manager
+          homeManagerModule
           ./configuration.nix
         ];
       };
@@ -25,6 +40,8 @@
         modules = [
           ./digitalocean.nix
           disko.nixosModules.disko
+          home-manager.nixosModules.home-manager
+          homeManagerModule
           { disko.devices.disk.disk1.device = "/dev/vda"; }
           ./configuration.nix
         ];
@@ -33,6 +50,8 @@
         system = "aarch64-linux";
         modules = [
           disko.nixosModules.disko
+          home-manager.nixosModules.home-manager
+          homeManagerModule
           ./configuration.nix
         ];
       };
@@ -43,8 +62,9 @@
         system = "x86_64-linux";
         modules = [
           disko.nixosModules.disko
+          home-manager.nixosModules.home-manager
+          homeManagerModule
           ./configuration.nix
-          # ./hardware-configuration.nix
         ];
       };
 
@@ -54,6 +74,8 @@
         system = "x86_64-linux";
         modules = [
           disko.nixosModules.disko
+          home-manager.nixosModules.home-manager
+          homeManagerModule
           ./configuration.nix
           nixos-facter-modules.nixosModules.facter
           {

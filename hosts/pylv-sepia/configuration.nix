@@ -23,11 +23,17 @@
     pkgs.gitMinimal
   ];
 
-  users.users.root.openssh.authorizedKeys.keys =
-  [
-    # change this to your ssh key
+  users.users.root.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJhE4Uakcz7usa0aetMqb99LYybOQ0I+sWKOiAidmBio gytk.kim@gmail.com"
-  ] ++ (args.extraPublicKeys or []); # this is used for unit-testing this module and can be removed if not needed
+  ] ++ (args.extraPublicKeys or []);
+
+  users.users.gytkk = {
+    isNormalUser = true;
+    extraGroups = [ "wheel" ];
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJhE4Uakcz7usa0aetMqb99LYybOQ0I+sWKOiAidmBio gytk.kim@gmail.com"
+    ];
+  };
 
   system.stateVersion = "25.11";
 }
