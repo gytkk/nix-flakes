@@ -19,6 +19,15 @@
   services.openssh.enable = true;
   services.tailscale.enable = true;
 
+  # Code Server
+  services.code-server = {
+    enable = true;
+    user = "gytkk";
+    host = "0.0.0.0";
+    port = 8080;
+    auth = "none";  # Tailscale로 접근 제한하므로 인증 불필요
+  };
+
   # Minimal system packages (most packages managed by Home Manager)
   environment.systemPackages = with pkgs; [
     curl

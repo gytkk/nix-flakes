@@ -64,6 +64,12 @@
         homeDirectory = "/home/gytkk";
         isWSL = false;
       };
+
+      # Overlays for NixOS
+      nixosOverlays = [
+        inputs.nixpkgs-terraform.overlays.default
+        (import ./overlays { inherit inputs; }).nixpkgs-versions
+      ];
     in
     {
       homeConfigurations = builtins.mapAttrs mkHomeConfig environmentConfigs;
@@ -78,6 +84,9 @@
             inputs.home-manager.nixosModules.home-manager
             ./hosts/pylv-sepia/configuration.nix
             {
+              nixpkgs.overlays = nixosOverlays;
+              nixpkgs.config.allowUnfree = true;
+
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
               home-manager.extraSpecialArgs = specialArgs;
