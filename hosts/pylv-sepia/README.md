@@ -1,12 +1,12 @@
 # pylv-sepia
 
-NixOS configuration for pylv-sepia server.
+NixOS configuration for pylv-sepia server, managed from the main flake.
 
 ## Initial Installation
 
 ```bash
 nix run github:nix-community/nixos-anywhere -- \
-  --flake .#generic \
+  --flake .#pylv-sepia \
   root@<hostname>
 ```
 
@@ -15,23 +15,26 @@ nix run github:nix-community/nixos-anywhere -- \
 ### From Local Machine
 
 ```bash
+# From repository root
 nix run nixpkgs#nixos-rebuild -- switch \
-  --flake .#generic \
+  --flake .#pylv-sepia \
   --target-host root@<hostname>
 ```
 
 ### On the Server
 
 ```bash
-sudo nixos-rebuild switch --flake /path/to/repo#generic
+sudo nixos-rebuild switch --flake github:gytkk/nix-flakes#pylv-sepia
 ```
 
 ## Adding Packages
 
-Edit `configuration.nix`:
+User packages are managed via Home Manager modules in `base/pylv/`.
+
+Edit `base/pylv/home.nix` or `base/pylv/sepia.nix`:
 
 ```nix
-environment.systemPackages = with pkgs; [
+home.packages = with pkgs; [
   # add packages here
 ];
 ```
@@ -40,7 +43,16 @@ environment.systemPackages = with pkgs; [
 
 | File | Description |
 |------|-------------|
-| `flake.nix` | Flake configuration with nixpkgs, disko inputs |
-| `configuration.nix` | NixOS system configuration |
+| `configuration.nix` | NixOS system configuration (services, users) |
 | `disk-config.nix` | Disk partitioning configuration (disko) |
 | `hardware-configuration.nix` | Auto-generated hardware configuration |
+
+## Shared Modules
+
+This configuration uses shared modules from the main flake:
+
+- `modules/git` - Git configuration
+- `modules/zsh` - Zsh with Oh-My-Zsh and Powerlevel10k
+- `modules/vim` - Neovim configuration
+- `modules/claude` - Claude Code configuration
+- `modules/terraform` - Terraform version management

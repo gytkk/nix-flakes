@@ -1,5 +1,5 @@
 {
-  description = "Home Manager configuration";
+  description = "Home Manager and NixOS configuration";
 
   inputs = {
     # Nix 패키지 모음
@@ -12,6 +12,12 @@
     # Home Manager
     home-manager = {
       url = "github:nix-community/home-manager/master";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # Disko - declarative disk partitioning
+    disko = {
+      url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -50,8 +56,35 @@
       mkHomeConfig = lib.builders.mkHomeConfig {
         inherit baseModules;
       };
+
+      # NixOS 설정에서 사용할 특수 인자
+      specialArgs = {
+        inherit inputs;
+        username = "gytkk";
+        homeDirectory = "/home/gytkk";
+        isWSL = false;
+      };
     in
     {
       homeConfigurations = builtins.mapAttrs mkHomeConfig environmentConfigs;
+
+      # NixOS configurations
+      nixosConfigurations = {
+        pylv-sepia = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          specialArgs = specialArgs;
+          modules = [
+            inputs.disko.nixosModules.disko
+            inputs.home-manager.nixosModules.home-manager
+            ./hosts/pylv-sepia/configuration.nix
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.extraSpecialArgs = specialArgs;
+              home-manager.users.gytkk = import ./base/pylv/home.nix;
+            }
+          ];
+        };
+      };
     };
 }
