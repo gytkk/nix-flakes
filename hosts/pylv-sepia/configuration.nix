@@ -23,6 +23,8 @@
     pkgs.gitMinimal
   ];
 
+  security.sudo.enable = true;
+
   users.users.root.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJhE4Uakcz7usa0aetMqb99LYybOQ0I+sWKOiAidmBio gytk.kim@gmail.com"
   ] ++ (args.extraPublicKeys or []);
