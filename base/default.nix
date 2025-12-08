@@ -17,6 +17,7 @@
     ../modules/java
     ../modules/terraform
     ../modules/vim
+    ../modules/vscode
     ../modules/zsh
   ];
 
@@ -38,73 +39,71 @@
     };
 
     # 기본 패키지 (모든 환경에서 공통)
-    packages =
-      with pkgs;
-      [
-        # Nix
-        nixfmt-rfc-style
+    packages = with pkgs; [
+      # Nix
+      nixfmt-rfc-style
 
-        # System utilities
-        coreutils
-        findutils
+      # System utilities
+      coreutils
+      findutils
 
-        # Development (common)
-        docker
-        gcc
+      # Development (common)
+      docker
+      gcc
 
-        # Dev tools
-        awscli2
-        jq
-        yq-go # yq 패키지는 더 이상 관리되지 않음
-        ripgrep
-        tmux
-        less
-        wget
-        curl
+      # Dev tools
+      awscli2
+      jq
+      yq-go # yq 패키지는 더 이상 관리되지 않음
+      ripgrep
+      tmux
+      less
+      wget
+      curl
 
-        # Git
-        git
-        gh
-        lazygit
-        delta
-        bat
+      # Git
+      git
+      gh
+      lazygit
+      delta
+      bat
 
-        # Python
-        uv
+      # Python
+      uv
 
-        # Rust
-        rustup
+      # Rust
+      rustup
 
-        # JavaScript + Node.js
-        nodejs
-        typescript
-        pnpm
-        pkgs.stable-24_05.turbo
+      # JavaScript + Node.js
+      nodejs
+      typescript
+      pnpm
+      pkgs.stable-24_05.turbo
 
-        # Go
-        go
+      # Go
+      go
 
-        # Kubernetes
-        kubectl
-        kubectx
-        k9s
-        kubernetes-helm
+      # Kubernetes
+      kubectl
+      kubectx
+      k9s
+      kubernetes-helm
 
-        # Secrets
-        _1password-cli
+      # Secrets
+      _1password-cli
 
-        # Modeling
-        ffmpeg_7-full
-        pkgs.stable-25_05.micromamba
-        yt-dlp
+      # Modeling
+      ffmpeg_7-full
+      pkgs.stable-25_05.micromamba
+      yt-dlp
 
-        # etc
-        direnv
-      ]
-      ++ lib.optionals (!isWSL) [
-        # WSL 환경에서는 제외
-        vscode
-      ];
+      # etc
+      direnv
+
+      # Fonts
+      fontconfig
+      nerd-fonts.fira-code
+    ];
 
     stateVersion = "25.05";
   };

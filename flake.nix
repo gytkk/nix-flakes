@@ -33,6 +33,12 @@
       url = "github:stackbuilders/nixpkgs-terraform/67111c56b525073991fcb656ce30e9ad25a78826";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # nix-vscode-extensions - for VSCode extension management
+    nix-vscode-extensions = {
+      url = "github:nix-community/nix-vscode-extensions";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
