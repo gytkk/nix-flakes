@@ -88,6 +88,7 @@ rec {
         modules = [
           inputs.disko.nixosModules.disko
           inputs.home-manager.nixosModules.home-manager
+          inputs.agenix.nixosModules.default
           (../hosts + "/${name}/configuration.nix")
           {
             nixpkgs.overlays = commonOverlays;

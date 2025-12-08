@@ -107,6 +107,30 @@ use_java_8
 use_terraform
 ```
 
+### Secrets Management (agenix)
+
+This repository uses [agenix](https://github.com/ryantm/agenix) for managing secrets in NixOS configurations.
+
+```bash
+# Edit or create a secret (opens $EDITOR)
+agenix -e secrets/secret-name.age
+
+# Re-encrypt all secrets after adding new keys
+agenix -r
+```
+
+**Workflow:**
+
+1. Add public keys to `secrets/secrets.nix`
+2. Define which keys can decrypt each secret
+3. Create encrypted secret: `agenix -e secrets/my-secret.age`
+4. Reference in NixOS config:
+
+   ```nix
+   age.secrets.mySecret.file = ../../secrets/my-secret.age;
+   # Decrypted file available at /run/agenix/mySecret
+   ```
+
 ## Architecture
 
 This is a Nix flakes-based Home Manager configuration supporting multiple environments (macOS and Linux). The configuration uses a layered base system with company-specific customizations.
