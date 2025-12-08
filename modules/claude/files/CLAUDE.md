@@ -14,3 +14,14 @@
   - Use `uv run script.py` instead of `python script.py`
   - Use `uv run -m pytest` instead of `python -m pytest`
   - Use `uv run -m pip install` instead of `pip install`
+
+## Git
+
+- Prefer [Conventional Commits](https://www.conventionalcommits.org/) format (e.g., `feat:`, `fix:`, `docs:`).
+- Write commit messages in imperative mood (e.g., "Add feature" not "Added feature").
+- Keep commits atomic: one logical change per commit.
+
+## Security
+
+- Never commit secrets, credentials, or API keys.
+- Use environment variables or secret management tools for sensitive data.
