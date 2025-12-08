@@ -20,6 +20,7 @@
 - Prefer [Conventional Commits](https://www.conventionalcommits.org/) format (e.g., `feat:`, `fix:`, `docs:`).
 - Write commit messages in imperative mood (e.g., "Add feature" not "Added feature").
 - Keep commits atomic: one logical change per commit.
+- Do NOT push unless explicitly requested.
 
 ## Security
 
