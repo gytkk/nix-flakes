@@ -55,6 +55,7 @@
 
       # 환경별 설정 (라이브러리에서 자동 로드)
       environmentConfigs = lib.environments.allEnvironments;
+      hostConfigs = lib.environments.allHosts;
 
       baseModules = [ ./home.nix ];
 
@@ -63,43 +64,12 @@
         inherit baseModules;
       };
 
-      # NixOS 설정에서 사용할 특수 인자
-      specialArgs = {
-        inherit inputs;
-        username = "gytkk";
-        homeDirectory = "/home/gytkk";
-        isWSL = false;
-      };
-
-      # Overlays for NixOS
-      nixosOverlays = [
-        inputs.nixpkgs-terraform.overlays.default
-        (import ./overlays { inherit inputs; }).nixpkgs-versions
-      ];
+      # NixOS 설정 생성 함수
+      mkNixOSConfig = lib.builders.mkNixOSConfig;
     in
     {
       homeConfigurations = builtins.mapAttrs mkHomeConfig environmentConfigs;
 
-      # NixOS configurations
-      nixosConfigurations = {
-        pylv-sepia = nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-          specialArgs = specialArgs;
-          modules = [
-            inputs.disko.nixosModules.disko
-            inputs.home-manager.nixosModules.home-manager
-            ./hosts/pylv-sepia/configuration.nix
-            {
-              nixpkgs.overlays = nixosOverlays;
-              nixpkgs.config.allowUnfree = true;
-
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-              home-manager.extraSpecialArgs = specialArgs;
-              home-manager.users.gytkk = import ./base/pylv/home.nix;
-            }
-          ];
-        };
-      };
+      nixosConfigurations = builtins.mapAttrs mkNixOSConfig hostConfigs;
     };
 }

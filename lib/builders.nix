@@ -1,4 +1,11 @@
 { inputs, nixpkgs }:
+let
+  # Common overlays for both Home Manager and NixOS
+  commonOverlays = [
+    inputs.nixpkgs-terraform.overlays.default
+    (import ../overlays { inherit inputs; }).nixpkgs-versions
+  ];
+in
 rec {
   # 패키지 생성 헬퍼 함수 (기존 mkPkgs)
   mkPkgs =
@@ -6,10 +13,7 @@ rec {
     import nixpkgs {
       inherit system;
       config.allowUnfree = true;
-      overlays = [
-        inputs.nixpkgs-terraform.overlays.default
-        (import ../overlays { inherit inputs; }).nixpkgs-versions
-      ];
+      overlays = commonOverlays;
     };
 
   # 시스템별 패키지 생성
@@ -55,5 +59,45 @@ rec {
           isWSL = config.isWSL or false;
         };
         modules = dynamicModules ++ (config.extraModules or [ ]);
+      };
+
+  # NixOS Configuration helper function
+  mkNixOSConfig =
+    name: config:
+    let
+      requiredFields = [
+        "system"
+        "username"
+        "homeDirectory"
+        "homeConfig"
+      ];
+      missingFields = builtins.filter (field: !(builtins.hasAttr field config)) requiredFields;
+
+      specialArgs = {
+        inherit inputs;
+        inherit (config) username homeDirectory;
+        isWSL = config.isWSL or false;
+      };
+    in
+    if missingFields != [ ] then
+      throw "Missing required fields for NixOS host ${name}: ${builtins.toString missingFields}"
+    else
+      nixpkgs.lib.nixosSystem {
+        system = config.system;
+        inherit specialArgs;
+        modules = [
+          inputs.disko.nixosModules.disko
+          inputs.home-manager.nixosModules.home-manager
+          (../hosts + "/${name}/configuration.nix")
+          {
+            nixpkgs.overlays = commonOverlays;
+            nixpkgs.config.allowUnfree = true;
+
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.extraSpecialArgs = specialArgs;
+            home-manager.users.${config.username} = import config.homeConfig;
+          }
+        ] ++ (config.extraModules or [ ]);
       };
 }

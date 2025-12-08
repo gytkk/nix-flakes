@@ -1,5 +1,8 @@
 { pkgs, lib, ... }:
 {
-  # 모든 환경 설정 (environments.nix 파일에서 직접 가져옴)
+  # Home Manager 환경 설정
   allEnvironments = import ../environments.nix;
+
+  # NixOS 호스트 설정
+  allHosts = import ../hosts.nix;
 }
