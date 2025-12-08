@@ -30,6 +30,7 @@ let
 
     # Theme (unfree)
     (allowUnfree monokai.theme-monokai-pro-vscode)
+    fehey.brackets-light-pro
 
     # AWS
     boto3typed.boto3-ide
@@ -132,7 +133,7 @@ let
     "files.insertFinalNewline" = true;
 
     # Workbench
-    "workbench.colorTheme" = "Monokai Pro";
+    "workbench.colorTheme" = "Brackets Light Pro";
     "workbench.iconTheme" = "Visual Studio Light Icons";
 
     # Window
