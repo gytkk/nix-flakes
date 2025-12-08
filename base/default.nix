@@ -103,6 +103,7 @@
       # Fonts
       fontconfig
       nerd-fonts.fira-code
+      nerd-fonts.jetbrains-mono
     ];
 
     stateVersion = "25.05";
