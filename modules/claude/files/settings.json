@@ -1,5 +1,6 @@
 {
   "enableAllProjectMcpServers": true,
+  "alwaysThinkingEnabled": true,
   "permissions": {
     "allow": [
       "Bash(find:*)",
