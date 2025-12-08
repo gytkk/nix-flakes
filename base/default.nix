@@ -101,9 +101,9 @@
       direnv
 
       # Fonts
-      fontconfig
       nerd-fonts.fira-code
       nerd-fonts.jetbrains-mono
+      sarasa-gothic
     ];
 
     stateVersion = "25.05";
