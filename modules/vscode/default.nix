@@ -35,10 +35,6 @@ let
     # AWS
     boto3typed.boto3-ide
 
-    # Dart/Flutter
-    dart-code.dart-code
-    dart-code.flutter
-
     # Docker/Kubernetes (unfree)
     (allowUnfree ms-azuretools.vscode-containers)
     (allowUnfree ms-kubernetes-tools.vscode-kubernetes-tools)
@@ -59,9 +55,6 @@ let
 
     # Localization (unfree)
     (allowUnfree ms-ceintl.vscode-language-pack-ko)
-
-    # Markdown
-    davidanson.vscode-markdownlint
 
     # Nix
     jnoortheen.nix-ide
@@ -84,7 +77,6 @@ let
 
     # Tools (unfree)
     (allowUnfree ms-vscode.makefile-tools)
-    (allowUnfree sourcegraph.amp)
 
     # Vim
     vscodevim.vim
@@ -135,6 +127,7 @@ let
     # Workbench
     "workbench.colorTheme" = "Brackets Light Pro";
     "workbench.iconTheme" = "Visual Studio Light Icons";
+    "workbench.list.typeNavigationMode" = "filter";
 
     # Window
     "window.openFoldersInNewWindow" = "on";
@@ -148,7 +141,7 @@ let
     # Vim
     "vim.easymotion" = true;
     "vim.enableNeovim" = true;
-    "vim.useCtrlKeys" = false;
+    "vim.useCtrlKeys" = true;
 
     # Python
     "python.analysis.typeCheckingMode" = "standard";
@@ -213,12 +206,6 @@ let
 
     # Claude Code
     "claudeCode.preferredLocation" = "panel";
-
-    # AMP
-    "amp.url" = "https://ampcode.com/";
-
-    # Telemetry
-    "redhat.telemetry.enabled" = true;
   };
 in
 lib.mkMerge [
