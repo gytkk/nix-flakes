@@ -8,8 +8,8 @@
 }:
 
 let
-  # nix-vscode-extensions에서 시스템에 맞는 확장 가져오기
-  vscodeExtensions = inputs.nix-vscode-extensions.extensions.${pkgs.system};
+  # nix-vscode-extensions에서 시스템에 맞는 확장 가져오기 (nixpkgs에 없는 것만)
+  marketplaceExtensions = inputs.nix-vscode-extensions.extensions.${pkgs.system}.vscode-marketplace;
 
   # unfree 확장에 대한 license override 헬퍼
   allowUnfree =
@@ -20,25 +20,16 @@ let
       };
     });
 
-  # 공통 확장 프로그램 (macOS/Linux/WSL 모두 사용)
-  # Microsoft 확장들은 대부분 unfree이므로 allowUnfree 적용
-  commonExtensions = with vscodeExtensions.vscode-marketplace; [
-    # AI (unfree)
-    (allowUnfree anthropic.claude-code)
-    (allowUnfree github.copilot)
-    (allowUnfree github.copilot-chat)
+  # nixpkgs 확장 (빠름, 캐시됨)
+  nixpkgsExtensions = with pkgs.vscode-extensions; [
+    # AI (copilot은 nixpkgs에서)
+    github.copilot
+    github.copilot-chat
 
-    # Theme (unfree)
-    (allowUnfree monokai.theme-monokai-pro-vscode)
-    fehey.brackets-light-pro
-
-    # AWS
-    boto3typed.boto3-ide
-
-    # Docker/Kubernetes (unfree)
-    (allowUnfree ms-azuretools.vscode-containers)
-    (allowUnfree ms-kubernetes-tools.vscode-kubernetes-tools)
-    (allowUnfree ms-vscode-remote.remote-containers)
+    # Docker/Kubernetes
+    ms-azuretools.vscode-docker
+    ms-kubernetes-tools.vscode-kubernetes-tools
+    ms-vscode-remote.remote-containers
 
     # Git/GitHub
     eamodio.gitlens
@@ -51,23 +42,21 @@ let
     bradlc.vscode-tailwindcss
     dbaeumer.vscode-eslint
     prisma.prisma
-    vercel.turbo-vsc
 
-    # Localization (unfree)
-    (allowUnfree ms-ceintl.vscode-language-pack-ko)
+    # Localization
+    ms-ceintl.vscode-language-pack-ko
 
     # Nix
     jnoortheen.nix-ide
 
-    # Python (unfree)
+    # Python
     charliermarsh.ruff
-    (allowUnfree ms-python.debugpy)
-    (allowUnfree ms-python.python)
-    (allowUnfree ms-python.vscode-pylance)
-    (allowUnfree ms-python.vscode-python-envs)
+    ms-python.debugpy
+    ms-python.python
+    ms-python.vscode-pylance
 
-    # Remote (unfree)
-    (allowUnfree ms-vscode-remote.remote-wsl)
+    # Remote
+    ms-vscode-remote.remote-wsl
 
     # Rust
     rust-lang.rust-analyzer
@@ -75,8 +64,8 @@ let
     # Terraform
     hashicorp.terraform
 
-    # Tools (unfree)
-    (allowUnfree ms-vscode.makefile-tools)
+    # Tools
+    ms-vscode.makefile-tools
 
     # Vim
     vscodevim.vim
@@ -85,6 +74,28 @@ let
     redhat.vscode-yaml
     tamasfe.even-better-toml
   ];
+
+  # nix-vscode-extensions에서만 가져올 확장 (nixpkgs에 없거나 자주 업데이트되는 것들)
+  extraExtensions = with marketplaceExtensions; [
+    # AI (자주 업데이트되어 nixpkgs 해시가 오래됨)
+    (allowUnfree anthropic.claude-code)
+
+    # Theme (unfree)
+    (allowUnfree monokai.theme-monokai-pro-vscode)
+    fehey.brackets-light-pro
+
+    # AWS
+    boto3typed.boto3-ide
+
+    # JavaScript/TypeScript
+    vercel.turbo-vsc
+
+    # Python (unfree)
+    (allowUnfree ms-python.vscode-python-envs)
+  ];
+
+  # 공통 확장 프로그램 (macOS/Linux/WSL 모두 사용)
+  commonExtensions = nixpkgsExtensions ++ extraExtensions;
 
   # WSL용 확장 심볼릭 링크 생성
   wslExtensionLinks = builtins.listToAttrs (
