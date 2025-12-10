@@ -25,6 +25,10 @@
       set ruler
       set nu
       set ru
+
+      " Use terminal 16-color palette
+      set notermguicolors
+      set t_Co=16
     '';
   };
 }
