@@ -15,6 +15,7 @@
     ../modules/claude
     ../modules/git
     ../modules/java
+    ../modules/k9s
     ../modules/terraform
     ../modules/vim
     ../modules/vscode
@@ -86,7 +87,6 @@
       # Kubernetes
       kubectl
       kubectx
-      k9s
       kubernetes-helm
 
       # Secrets
