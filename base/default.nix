@@ -13,6 +13,7 @@
   imports = [
     # 기본 모듈들 (항상 import됨)
     ../modules/claude
+    ../modules/ghostty
     ../modules/git
     ../modules/java
     ../modules/k9s
