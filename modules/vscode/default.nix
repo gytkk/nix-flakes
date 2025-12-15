@@ -33,8 +33,6 @@ let
 
     # Git/GitHub
     github.vscode-github-actions
-    qezhu.gitlink
-    waderyan.gitblame
 
     # Go
     golang.go
@@ -84,6 +82,10 @@ let
     # Theme
     mvllow.rose-pine
     vscode-icons-team.vscode-icons
+
+    # Git
+    qezhu.gitlink
+    waderyan.gitblame
 
     # AWS
     boto3typed.boto3-ide

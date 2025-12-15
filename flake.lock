@@ -23,22 +23,6 @@
         "type": "github"
       }
     },
-    "catppuccin-ghostty": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1764347662,
-        "narHash": "sha256-Y+f/kRYxZrkwcQrNEfEunpWjYHf1pqdS5RSXVfpI+KI=",
-        "owner": "catppuccin",
-        "repo": "ghostty",
-        "rev": "c4c0f8e64378d27d26967acb16c3c080190d07c2",
-        "type": "github"
-      },
-      "original": {
-        "owner": "catppuccin",
-        "repo": "ghostty",
-        "type": "github"
-      }
-    },
     "darwin": {
       "inputs": {
         "nixpkgs": [
@@ -282,7 +266,6 @@
     "root": {
       "inputs": {
         "agenix": "agenix",
-        "catppuccin-ghostty": "catppuccin-ghostty",
         "disko": "disko",
         "home-manager": "home-manager_2",
         "nix-vscode-extensions": "nix-vscode-extensions",
@@ -291,7 +274,24 @@
         "nixpkgs-25_05": "nixpkgs-25_05",
         "nixpkgs-25_11": "nixpkgs-25_11",
         "nixpkgs-master": "nixpkgs-master",
-        "nixpkgs-terraform": "nixpkgs-terraform"
+        "nixpkgs-terraform": "nixpkgs-terraform",
+        "rose-pine-ghostty": "rose-pine-ghostty"
+      }
+    },
+    "rose-pine-ghostty": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1763566328,
+        "narHash": "sha256-kNHbd3BhLp49nDk0Cr+9LNKJVwhguQ4uiheXDLGn3s8=",
+        "owner": "rose-pine",
+        "repo": "ghostty",
+        "rev": "cd5c30210c8d90fa276e2632bbbf49b8abb18455",
+        "type": "github"
+      },
+      "original": {
+        "owner": "rose-pine",
+        "repo": "ghostty",
+        "type": "github"
       }
     },
     "systems": {
