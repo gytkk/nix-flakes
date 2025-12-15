@@ -12,7 +12,7 @@
   xdg.configFile."ghostty/config".text = ''
     auto-update = check
 
-    theme = catppuccin-latte
+    theme = catppuccin-latte.conf
 
     background-opacity = 0.95
 
