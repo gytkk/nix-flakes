@@ -2,16 +2,17 @@
   config,
   lib,
   pkgs,
+  inputs,
   ...
 }:
 
 {
+  xdg.configFile."ghostty/themes".source = "${inputs.catppuccin-ghostty}/themes";
+
   xdg.configFile."ghostty/config".text = ''
     auto-update = check
 
-    theme = OneHalfLight
-    # theme = Monokai Pro Light
-    # theme = Material
+    theme = catppuccin-latte
 
     background-opacity = 0.95
 

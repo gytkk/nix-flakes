@@ -45,6 +45,12 @@
       url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Catppuccin themes
+    catppuccin-ghostty = {
+      url = "github:catppuccin/ghostty";
+      flake = false;
+    };
   };
 
   outputs =

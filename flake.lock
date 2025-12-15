@@ -23,6 +23,22 @@
         "type": "github"
       }
     },
+    "catppuccin-ghostty": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1764347662,
+        "narHash": "sha256-Y+f/kRYxZrkwcQrNEfEunpWjYHf1pqdS5RSXVfpI+KI=",
+        "owner": "catppuccin",
+        "repo": "ghostty",
+        "rev": "c4c0f8e64378d27d26967acb16c3c080190d07c2",
+        "type": "github"
+      },
+      "original": {
+        "owner": "catppuccin",
+        "repo": "ghostty",
+        "type": "github"
+      }
+    },
     "darwin": {
       "inputs": {
         "nixpkgs": [
@@ -266,6 +282,7 @@
     "root": {
       "inputs": {
         "agenix": "agenix",
+        "catppuccin-ghostty": "catppuccin-ghostty",
         "disko": "disko",
         "home-manager": "home-manager_2",
         "nix-vscode-extensions": "nix-vscode-extensions",
