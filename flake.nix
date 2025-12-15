@@ -46,9 +46,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Catppuccin themes
-    catppuccin-ghostty = {
-      url = "github:catppuccin/ghostty";
+    # Rosé Pine themes
+    rose-pine-ghostty = {
+      url = "github:rose-pine/ghostty";
       flake = false;
     };
   };

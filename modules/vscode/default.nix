@@ -32,8 +32,9 @@ let
     ms-vscode-remote.remote-containers
 
     # Git/GitHub
-    eamodio.gitlens
     github.vscode-github-actions
+    qezhu.gitlink
+    waderyan.gitblame
 
     # Go
     golang.go
@@ -80,9 +81,9 @@ let
     # AI (자주 업데이트되어 nixpkgs 해시가 오래됨)
     (allowUnfree anthropic.claude-code)
 
-    # Theme (unfree)
-    (allowUnfree monokai.theme-monokai-pro-vscode)
-    fehey.brackets-light-pro
+    # Theme
+    mvllow.rose-pine
+    vscode-icons-team.vscode-icons
 
     # AWS
     boto3typed.boto3-ide
@@ -136,8 +137,8 @@ let
     "files.insertFinalNewline" = true;
 
     # Workbench
-    "workbench.colorTheme" = "Brackets Light Pro";
-    "workbench.iconTheme" = "Visual Studio Light Icons";
+    "workbench.colorTheme" = "Rosé Pine Dawn";
+    "workbench.iconTheme" = "vscode-icons";
     "workbench.list.typeNavigationMode" = "filter";
 
     # Window
