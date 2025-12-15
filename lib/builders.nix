@@ -5,16 +5,24 @@ let
     inputs.nixpkgs-terraform.overlays.default
     (import ../overlays { inherit inputs; }).nixpkgs-versions
   ];
-in
-rec {
-  # 패키지 생성 헬퍼 함수 (기존 mkPkgs)
-  mkPkgs =
-    system:
-    import nixpkgs {
-      inherit system;
+
+  # Pre-evaluated pkgs per system (evaluated once, reused everywhere)
+  systemPkgs = {
+    "x86_64-linux" = import nixpkgs {
+      system = "x86_64-linux";
       config.allowUnfree = true;
       overlays = commonOverlays;
     };
+    "aarch64-darwin" = import nixpkgs {
+      system = "aarch64-darwin";
+      config.allowUnfree = true;
+      overlays = commonOverlays;
+    };
+  };
+in
+rec {
+  # 패키지 생성 헬퍼 함수 - systemPkgs 재사용
+  mkPkgs = system: systemPkgs.${system};
 
   # 시스템별 패키지 생성
   mkSystemPkgs =
@@ -22,7 +30,7 @@ rec {
     builtins.listToAttrs (
       map (system: {
         name = system;
-        value = mkPkgs system;
+        value = systemPkgs.${system};
       }) systems
     );
 
@@ -38,7 +46,7 @@ rec {
         "baseProfile"
       ];
       missingFields = builtins.filter (field: !(builtins.hasAttr field config)) requiredFields;
-      pkgs = mkPkgs config.system;
+      pkgs = systemPkgs.${config.system};
 
       # Dynamic base module loading based on baseProfile
       baseHomeModule = ../base + "/${config.baseProfile}/home.nix";
