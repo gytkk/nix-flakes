@@ -228,11 +228,8 @@ lib.mkMerge [
     programs.vscode = {
       enable = true;
       package = pkgs.vscode;
-
-      profiles.default = {
-        extensions = commonExtensions;
-        inherit userSettings;
-      };
+      extensions = commonExtensions;
+      inherit userSettings;
     };
   })
 
