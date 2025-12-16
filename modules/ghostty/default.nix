@@ -6,16 +6,23 @@
   ...
 }:
 
+let
+  # 두 테마 소스를 하나의 디렉토리로 병합
+  combinedThemes = pkgs.symlinkJoin {
+    name = "ghostty-themes";
+    paths = [
+      "${inputs.rose-pine-ghostty}/dist"
+      "${inputs.catppuccin-ghostty}/themes"
+    ];
+  };
+in
 {
-  # Rosé Pine 테마
-  xdg.configFile."ghostty/themes/rose-pine".source = "${inputs.rose-pine-ghostty}/dist";
-  # Catppuccin 테마
-  xdg.configFile."ghostty/themes/catppuccin".source = "${inputs.catppuccin-ghostty}/themes";
+  xdg.configFile."ghostty/themes".source = combinedThemes;
 
   xdg.configFile."ghostty/config".text = ''
     auto-update = check
 
-    theme = catppuccin/catppuccin-latte.conf
+    theme = catppuccin-latte.conf
 
     background-opacity = 0.95
 
