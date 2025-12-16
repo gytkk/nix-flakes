@@ -81,11 +81,12 @@ let
 
     # Theme
     mvllow.rose-pine
+    catppuccin.catppuccin-vsc
+    catppuccin.catppuccin-vsc-icons
     vscode-icons-team.vscode-icons
 
     # Git
     qezhu.gitlink
-    waderyan.gitblame
 
     # AWS
     boto3typed.boto3-ide
@@ -139,7 +140,7 @@ let
     "files.insertFinalNewline" = true;
 
     # Workbench
-    "workbench.colorTheme" = "Rosé Pine Dawn";
+    "workbench.colorTheme" = "Catppuccin Latte";
     "workbench.iconTheme" = "vscode-icons";
     "workbench.list.typeNavigationMode" = "filter";
 

@@ -7,12 +7,15 @@
 }:
 
 {
-  xdg.configFile."ghostty/themes".source = "${inputs.rose-pine-ghostty}/dist";
+  # Rosé Pine 테마
+  xdg.configFile."ghostty/themes/rose-pine".source = "${inputs.rose-pine-ghostty}/dist";
+  # Catppuccin 테마
+  xdg.configFile."ghostty/themes/catppuccin".source = "${inputs.catppuccin-ghostty}/themes";
 
   xdg.configFile."ghostty/config".text = ''
     auto-update = check
 
-    theme = rose-pine-dawn
+    theme = catppuccin/catppuccin-latte.conf
 
     background-opacity = 0.95
 

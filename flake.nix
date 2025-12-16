@@ -51,6 +51,12 @@
       url = "github:rose-pine/ghostty";
       flake = false;
     };
+
+    # Catppuccin themes
+    catppuccin-ghostty = {
+      url = "github:catppuccin/ghostty";
+      flake = false;
+    };
   };
 
   outputs =
