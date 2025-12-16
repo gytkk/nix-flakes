@@ -28,6 +28,7 @@ let
 
     # Docker/Kubernetes
     ms-azuretools.vscode-docker
+    ms-azuretools.vscode-containers
     ms-kubernetes-tools.vscode-kubernetes-tools
     ms-vscode-remote.remote-containers
 

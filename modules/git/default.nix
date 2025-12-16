@@ -14,12 +14,6 @@
       navigate = true;
       side-by-side = true;
       line-numbers = true;
-
-      # Claude Code colorblind-free 색상 (대비 조절)
-      minus-style = "syntax #EAADAD";
-      minus-emph-style = "syntax #D48080";
-      plus-style = "syntax #A3C7E8";
-      plus-emph-style = "syntax #6699CC";
     };
   };
 
