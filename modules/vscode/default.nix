@@ -51,6 +51,7 @@ let
 
     # Python
     charliermarsh.ruff
+    astral-sh.ty
     ms-python.debugpy
     ms-python.python
     ms-python.vscode-pylance
@@ -160,6 +161,7 @@ let
     "vim.useCtrlKeys" = true;
 
     # Python
+    "python.languageServer" = "None";
     "python.analysis.typeCheckingMode" = "standard";
     "python.venvPath" = "\${workspaceFolder}/.venv";
     "[python]" = {
