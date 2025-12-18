@@ -51,7 +51,6 @@ let
 
     # Python
     charliermarsh.ruff
-    astral-sh.ty
     ms-python.debugpy
     ms-python.python
     ms-python.vscode-pylance
@@ -93,11 +92,12 @@ let
     # AWS
     boto3typed.boto3-ide
 
+    # Python
+    astral-sh.ty
+    ms-python.vscode-python-envs
+
     # JavaScript/TypeScript
     vercel.turbo-vsc
-
-    # Python (unfree)
-    (allowUnfree ms-python.vscode-python-envs)
   ];
 
   # 공통 확장 프로그램 (macOS/Linux/WSL 모두 사용)
@@ -164,6 +164,13 @@ let
     "python.languageServer" = "None";
     "python.analysis.typeCheckingMode" = "standard";
     "python.venvPath" = "\${workspaceFolder}/.venv";
+    "python.venvFolders" = [
+      ".venv"
+      "venv"
+      ".env"
+      "env"
+      ".virtualenvs"
+    ];
     "[python]" = {
       "editor.codeActionsOnSave" = {
         "source.fixAll" = "explicit";
