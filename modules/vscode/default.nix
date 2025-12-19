@@ -81,6 +81,7 @@ let
     (allowUnfree anthropic.claude-code)
 
     # Theme
+    uloco.theme-bluloco-light
     mvllow.rose-pine
     catppuccin.catppuccin-vsc
     catppuccin.catppuccin-vsc-icons
@@ -146,7 +147,7 @@ let
     "files.insertFinalNewline" = true;
 
     # Workbench
-    "workbench.colorTheme" = "Catppuccin Latte";
+    "workbench.colorTheme" = "Bluloco Light";
     "workbench.iconTheme" = "vscode-icons";
     "workbench.list.typeNavigationMode" = "filter";
 
