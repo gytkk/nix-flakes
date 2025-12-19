@@ -104,14 +104,18 @@ let
   commonExtensions = nixpkgsExtensions ++ extraExtensions;
 
   # WSL용 확장 심볼릭 링크 생성
+  # Nix 패키지 구조: ${ext}/share/vscode/extensions/${ext.vscodeExtUniqueId}/
   wslExtensionLinks = builtins.listToAttrs (
     map (ext: {
       name = ".vscode-server/extensions/${ext.vscodeExtUniqueId}";
       value = {
-        source = ext;
+        source = "${ext}/share/vscode/extensions/${ext.vscodeExtUniqueId}";
       };
     }) commonExtensions
   );
+
+  # WSL용 settings.json 생성
+  wslSettingsFile = pkgs.writeText "vscode-settings.json" (builtins.toJSON userSettings);
 
   # 공통 설정
   userSettings = {
@@ -248,8 +252,10 @@ lib.mkMerge [
     };
   })
 
-  # WSL: 확장만 심볼릭 링크로 설치 (VSCode는 Windows에서 실행)
+  # WSL: 확장과 설정을 심볼릭 링크로 설치 (VSCode는 Windows에서 실행)
   (lib.mkIf isWSL {
-    home.file = wslExtensionLinks;
+    home.file = wslExtensionLinks // {
+      ".vscode-server/data/Machine/settings.json".source = wslSettingsFile;
+    };
   })
 ]
