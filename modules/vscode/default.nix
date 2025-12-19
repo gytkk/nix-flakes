@@ -147,8 +147,8 @@ let
     "files.insertFinalNewline" = true;
 
     # Workbench
-    "workbench.colorTheme" = "Bluloco Light";
-    "workbench.iconTheme" = "vscode-icons";
+    "workbench.colorTheme" = "Catppuccin Latte";
+    "workbench.iconTheme" = "catppuccin-latte";
     "workbench.list.typeNavigationMode" = "filter";
 
     # Window
