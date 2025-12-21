@@ -25,8 +25,34 @@
     user = "gytkk";
     host = "0.0.0.0";
     port = 8080;
-    auth = "none";  # Tailscale로 접근 제한하므로 인증 불필요
+    auth = "none"; # Tailscale로 접근 제한하므로 인증 불필요
   };
+
+  # Copyparty - file server
+  services.copyparty = {
+    enable = true;
+    settings = {
+      i = "0.0.0.0";
+      p = [ 3923 ];
+    };
+    volumes = {
+      "/" = {
+        path = "/srv/copyparty";
+        access = {
+          r = "*"; # 모든 사용자 읽기 허용
+          w = "*"; # 모든 사용자 쓰기 허용
+        };
+        flags = {
+          e2d = true; # enable file indexing
+        };
+      };
+    };
+  };
+
+  # Copyparty 데이터 디렉토리 생성
+  systemd.tmpfiles.rules = [
+    "d /srv/copyparty 0755 copyparty copyparty -"
+  ];
 
   # Minimal system packages (most packages managed by Home Manager)
   environment.systemPackages = with pkgs; [

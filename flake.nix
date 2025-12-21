@@ -57,6 +57,12 @@
       url = "github:catppuccin/ghostty";
       flake = false;
     };
+
+    # copyparty - file server
+    copyparty = {
+      url = "github:9001/copyparty";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =

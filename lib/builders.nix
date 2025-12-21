@@ -3,6 +3,7 @@ let
   # Common overlays for both Home Manager and NixOS
   commonOverlays = [
     inputs.nixpkgs-terraform.overlays.default
+    inputs.copyparty.overlays.default
     (import ../overlays { inherit inputs; }).nixpkgs-versions
   ];
 
@@ -97,6 +98,7 @@ rec {
           inputs.disko.nixosModules.disko
           inputs.home-manager.nixosModules.home-manager
           inputs.agenix.nixosModules.default
+          inputs.copyparty.nixosModules.default
           (../hosts + "/${name}/configuration.nix")
           {
             nixpkgs.overlays = commonOverlays;
