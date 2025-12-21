@@ -54,6 +54,14 @@
     "d /srv/copyparty 0755 copyparty copyparty -"
   ];
 
+  # Immich - self-hosted photo/video management
+  services.immich = {
+    enable = true;
+    host = "0.0.0.0";
+    port = 2283;
+    # mediaLocation = "/var/lib/immich"; # 기본값 사용
+  };
+
   # Minimal system packages (most packages managed by Home Manager)
   environment.systemPackages = with pkgs; [
     curl
