@@ -22,7 +22,29 @@ in
   xdg.configFile."ghostty/config".text = ''
     auto-update = check
 
-    theme = catppuccin-latte.conf
+    # Tomorrow Light theme (by Chris Kempson)
+    background = #ffffff
+    foreground = #4d4d4c
+
+    # ANSI colors (normal)
+    palette = 0=#1d1f21
+    palette = 1=#c82829
+    palette = 2=#718c00
+    palette = 3=#eab700
+    palette = 4=#4271ae
+    palette = 5=#8959a8
+    palette = 6=#3e999f
+    palette = 7=#4d4d4c
+
+    # ANSI colors (bright)
+    palette = 8=#8e908c
+    palette = 9=#c82829
+    palette = 10=#718c00
+    palette = 11=#eab700
+    palette = 12=#4271ae
+    palette = 13=#8959a8
+    palette = 14=#3e999f
+    palette = 15=#1d1f21
 
     background-opacity = 0.95
 

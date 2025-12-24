@@ -86,6 +86,7 @@ let
     catppuccin.catppuccin-vsc
     catppuccin.catppuccin-vsc-icons
     vscode-icons-team.vscode-icons
+    ms-vscode.theme-tomorrowkit
 
     # Git
     qezhu.gitlink
@@ -147,8 +148,8 @@ let
     "files.insertFinalNewline" = true;
 
     # Workbench
-    "workbench.colorTheme" = "Catppuccin Latte";
-    "workbench.iconTheme" = "catppuccin-latte";
+    "workbench.colorTheme" = "Tomorrow";
+    "workbench.iconTheme" = "vscode-icons";
     "workbench.list.typeNavigationMode" = "filter";
 
     # Window
