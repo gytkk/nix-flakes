@@ -75,6 +75,13 @@
   # Enable flakes
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
+  # Firewall - open ports for services
+  networking.firewall.allowedTCPPorts = [
+    8080  # Code Server
+    3923  # Copyparty
+    2283  # Immich
+  ];
+
   # Security
   security.sudo = {
     enable = true;
