@@ -62,8 +62,42 @@
     # mediaLocation = "/var/lib/immich"; # 기본값 사용
   };
 
+  # Cloudflare Tunnel (token-based, managed via Zero Trust dashboard)
+  age.secrets.cloudflare-tunnel-token = {
+    file = ../../secrets/cloudflare-tunnel-token.age;
+    owner = "cloudflared";
+    group = "cloudflared";
+  };
+
+  systemd.services.cloudflared-tunnel = {
+    description = "Cloudflare Tunnel";
+    after = [
+      "network-online.target"
+      "agenix.service"
+    ];
+    wants = [ "network-online.target" ];
+    wantedBy = [ "multi-user.target" ];
+    script = ''
+      ${pkgs.cloudflared}/bin/cloudflared tunnel --no-autoupdate run \
+        --token "$(cat /run/agenix/cloudflare-tunnel-token)"
+    '';
+    serviceConfig = {
+      Restart = "always";
+      RestartSec = 5;
+      User = "cloudflared";
+      Group = "cloudflared";
+    };
+  };
+
+  users.users.cloudflared = {
+    isSystemUser = true;
+    group = "cloudflared";
+  };
+  users.groups.cloudflared = { };
+
   # Minimal system packages (most packages managed by Home Manager)
   environment.systemPackages = with pkgs; [
+    cloudflared
     curl
     wget
     vim

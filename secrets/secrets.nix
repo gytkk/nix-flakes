@@ -18,9 +18,6 @@ let
   allUsers = [ gyutak ];
 in
 {
-  # Example: API token accessible by all users
-  # "api-token.age".publicKeys = allUsers;
-
-  # Example: Host-specific secret
-  # "host-secret.age".publicKeys = [ gyutak pylv-sepia ];
+  # Cloudflare Tunnel token for pylv-sepia
+  "cloudflare-tunnel-token.age".publicKeys = allUsers;
 }
