@@ -263,11 +263,23 @@
             bgColor = "#eff1f5";
             chartBgColor = "#eff1f5";
             dialBgColor = "#eff1f5";
-            defaultDialColors = [ "#40a02b" "#d20f39" ];
-            defaultChartColors = [ "#40a02b" "#d20f39" ];
+            defaultDialColors = [
+              "#40a02b"
+              "#d20f39"
+            ];
+            defaultChartColors = [
+              "#40a02b"
+              "#d20f39"
+            ];
             resourceColors = {
-              cpu = [ "#8839ef" "#1e66f5" ];
-              mem = [ "#df8e1d" "#fe640b" ];
+              cpu = [
+                "#8839ef"
+                "#1e66f5"
+              ];
+              mem = [
+                "#df8e1d"
+                "#fe640b"
+              ];
             };
           };
           yaml = {
