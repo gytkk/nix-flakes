@@ -10,10 +10,11 @@
     enable = true;
     enableGitIntegration = true;
     options = {
-      syntax-theme = "Monokai Extended";
+      syntax-theme = "Catppuccin-latte";
       navigate = true;
       side-by-side = true;
       line-numbers = true;
+      light = true;
     };
   };
 
