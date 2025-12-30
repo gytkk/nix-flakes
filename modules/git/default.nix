@@ -10,7 +10,7 @@
     enable = true;
     enableGitIntegration = true;
     options = {
-      syntax-theme = "Catppuccin-latte";
+      syntax-theme = "GitHub";
       navigate = true;
       side-by-side = true;
       line-numbers = true;
