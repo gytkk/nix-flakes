@@ -99,6 +99,7 @@
   environment.systemPackages = with pkgs; [
     cloudflared
     curl
+    dnsutils
     wget
     vim
   ];
