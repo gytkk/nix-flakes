@@ -62,6 +62,26 @@
     # mediaLocation = "/var/lib/immich"; # 기본값 사용
   };
 
+  # K3s - lightweight Kubernetes
+  services.k3s = {
+    enable = true;
+    role = "server";
+    extraFlags = toString [
+      "--disable=traefik" # Cloudflare Tunnel 사용하므로 비활성화
+    ];
+  };
+
+  # K3s kubeconfig for non-root users
+  environment.variables.KUBECONFIG = "/etc/rancher/k3s/k3s.yaml";
+  # Allow wheel group to read kubeconfig
+  systemd.tmpfiles.settings."k3s-kubeconfig" = {
+    "/etc/rancher/k3s/k3s.yaml".z = {
+      mode = "0640";
+      user = "root";
+      group = "wheel";
+    };
+  };
+
   # Cloudflare Tunnel (token-based, managed via Zero Trust dashboard)
   age.secrets.cloudflare-tunnel-token = {
     file = ../../secrets/cloudflare-tunnel-token.age;
@@ -102,6 +122,9 @@
     dnsutils
     wget
     vim
+    # Kubernetes tools
+    kubectl
+    k9s
   ];
 
   # Enable zsh system-wide (configuration via Home Manager)
