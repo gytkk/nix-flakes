@@ -17,6 +17,7 @@
     ../modules/git
     ../modules/java
     ../modules/k9s
+    ../modules/opencode
     ../modules/terraform
     ../modules/vim
     ../modules/vscode
