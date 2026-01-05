@@ -9,7 +9,8 @@
 
 let
   # nix-vscode-extensions에서 시스템에 맞는 확장 가져오기 (nixpkgs에 없는 것만)
-  marketplaceExtensions = inputs.nix-vscode-extensions.extensions.${pkgs.system}.vscode-marketplace;
+  marketplaceExtensions =
+    inputs.nix-vscode-extensions.extensions.${pkgs.stdenv.hostPlatform.system}.vscode-marketplace;
 
   # unfree 확장에 대한 license override 헬퍼
   allowUnfree =

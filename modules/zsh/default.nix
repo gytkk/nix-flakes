@@ -15,6 +15,9 @@
   programs.zsh = {
     enable = true;
 
+    # Use XDG config directory for zsh configuration files
+    dotDir = "${config.xdg.configHome}/zsh";
+
     # Enable features
     autosuggestion.enable = true;
     enableCompletion = true;
