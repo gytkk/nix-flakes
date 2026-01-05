@@ -3,6 +3,7 @@
   "model": "anthropic/claude-opus-4-5",
   "theme": "opencode",
   "autoupdate": true,
+  "plugin": ["@plannotator/opencode@latest"],
   "tui": {
     "scroll_speed": 3,
     "diff_style": "auto"
