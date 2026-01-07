@@ -2,8 +2,9 @@
 
 {
   # Install OpenCode - open source AI coding agent
+  # Use nixpkgs master for the latest version
   home.packages = [
-    pkgs.opencode
+    pkgs.master.opencode
   ];
 
   # Create ~/.config/opencode/opencode.json file
