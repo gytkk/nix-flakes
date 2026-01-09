@@ -1,0 +1,87 @@
+# Immich Helm Chart values for pylv-sepia
+# Install: helm install immich oci://ghcr.io/immich-app/immich-charts/immich -n immich -f values.yaml
+
+controllers:
+  main:
+    containers:
+      main:
+        image:
+          tag: v1.132.3
+        env:
+          # Database connection (CloudNative-PG)
+          DB_HOSTNAME: immich-database-rw
+          DB_PORT: "5432"
+          DB_DATABASE_NAME: immich
+          DB_USERNAME: immich
+          # Password from CloudNative-PG secret
+          DB_PASSWORD:
+            valueFrom:
+              secretKeyRef:
+                name: immich-database-app
+                key: password
+          # Redis connection
+          REDIS_HOSTNAME: immich-redis
+          REDIS_PORT: "6379"
+
+immich:
+  persistence:
+    library:
+      existingClaim: immich-library
+
+# Disable built-in valkey (using external redis)
+valkey:
+  enabled: false
+
+# Server component
+server:
+  enabled: true
+  controllers:
+    main:
+      containers:
+        main:
+          image:
+            repository: ghcr.io/immich-app/immich-server
+            pullPolicy: IfNotPresent
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "100m"
+            limits:
+              memory: "2Gi"
+              cpu: "2000m"
+  # No ingress - using Cloudflare Tunnel
+  ingress:
+    main:
+      enabled: false
+  service:
+    main:
+      controller: main
+      ports:
+        http:
+          port: 2283
+
+# Machine Learning component
+machine-learning:
+  enabled: true
+  controllers:
+    main:
+      containers:
+        main:
+          image:
+            repository: ghcr.io/immich-app/immich-machine-learning
+            pullPolicy: IfNotPresent
+          env:
+            TRANSFORMERS_CACHE: /cache
+            HF_XET_CACHE: /cache/huggingface-xet
+            MPLCONFIGDIR: /cache/matplotlib-config
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "200m"
+            limits:
+              memory: "4Gi"
+              cpu: "4000m"
+  persistence:
+    cache:
+      enabled: true
+      existingClaim: immich-ml-cache

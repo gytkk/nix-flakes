@@ -1,0 +1,58 @@
+# PersistentVolumeClaim for Immich media library
+# Using hostPath for simplicity - data stored on node
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: immich-library-pv
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: manual
+  hostPath:
+    path: /srv/immich/library
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: immich-library
+  namespace: immich
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: manual
+  resources:
+    requests:
+      storage: 100Gi
+---
+# PVC for Machine Learning cache
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: immich-ml-cache-pv
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: manual
+  hostPath:
+    path: /srv/immich/ml-cache
+    type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: immich-ml-cache
+  namespace: immich
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: manual
+  resources:
+    requests:
+      storage: 10Gi
