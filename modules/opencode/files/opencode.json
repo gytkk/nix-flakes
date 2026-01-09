@@ -5,7 +5,7 @@
   "autoupdate": true,
   "plugin": [
     "@plannotator/opencode@latest",
-    "file:///Users/gyutak/workspace/opencode-anthropic-auth/index.mjs",
+    "file:///Users/gyutak/workspace/opencode-anthropic-auth/index.mjs"
   ],
   "tui": {
     "scroll_speed": 3,
