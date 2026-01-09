@@ -3,7 +3,10 @@
   "model": "anthropic/claude-opus-4-5",
   "theme": "opencode",
   "autoupdate": true,
-  "plugin": ["@plannotator/opencode@latest"],
+  "plugin": [
+    "@plannotator/opencode@latest",
+    "file:///Users/gyutak/workspace/opencode-anthropic-auth/index.mjs",
+  ],
   "tui": {
     "scroll_speed": 3,
     "diff_style": "auto"
@@ -13,7 +16,11 @@
     "prune": true
   },
   "watcher": {
-    "ignore": ["node_modules/**", "dist/**", ".git/**"]
+    "ignore": [
+      "node_modules/**",
+      "dist/**",
+      ".git/**"
+    ]
   },
   "mcp": {
     "context7": {
