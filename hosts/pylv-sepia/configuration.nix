@@ -73,12 +73,17 @@
 
   # K3s kubeconfig for non-root users
   environment.variables.KUBECONFIG = "/etc/rancher/k3s/k3s.yaml";
-  # Allow wheel group to read kubeconfig
-  systemd.tmpfiles.settings."k3s-kubeconfig" = {
-    "/etc/rancher/k3s/k3s.yaml".z = {
-      mode = "0640";
-      user = "root";
-      group = "wheel";
+
+  # Fix kubeconfig permissions after k3s starts
+  systemd.services.k3s-kubeconfig-permissions = {
+    description = "Fix k3s kubeconfig permissions for wheel group";
+    after = [ "k3s.service" ];
+    requires = [ "k3s.service" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = "${pkgs.coreutils}/bin/chmod 644 /etc/rancher/k3s/k3s.yaml";
     };
   };
 
@@ -131,13 +136,16 @@
   programs.zsh.enable = true;
 
   # Enable flakes
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
 
   # Firewall - open ports for services
   networking.firewall.allowedTCPPorts = [
-    8080  # Code Server
-    3923  # Copyparty
-    2283  # Immich
+    8080 # Code Server
+    3923 # Copyparty
+    2283 # Immich
   ];
 
   # Security
@@ -149,7 +157,8 @@
   # Users
   users.users.root.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJhE4Uakcz7usa0aetMqb99LYybOQ0I+sWKOiAidmBio gytk.kim@gmail.com"
-  ] ++ (args.extraPublicKeys or [ ]);
+  ]
+  ++ (args.extraPublicKeys or [ ]);
 
   users.users.gytkk = {
     isNormalUser = true;
