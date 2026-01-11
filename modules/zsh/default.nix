@@ -41,7 +41,6 @@
         "direnv"
         "fzf"
         "git"
-        "docker"
         "aws"
         "kubectl"
         "z"
