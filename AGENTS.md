@@ -6,7 +6,7 @@ This file provides guidance to agentic coding agents working in this Nix flakes 
 
 - Follow existing code patterns and module structure in this repository
 - Use `nixfmt-rfc-style` to format all Nix files before committing
-- Test changes with `home-manager build` before applying with `switch`
+- Do NOT run build tests directly - ask the user to test instead (builds can take several minutes)
 - CLAUDE.md is the primary source of truth - this file supplements it
 
 ## Build/Test/Lint Commands

@@ -22,19 +22,16 @@
         );
     in
     {
-      # stable-24_05: turbo만 사용
-      stable-24_05 = mkLazyPkgs inputs.nixpkgs-24_05 [
-        "turbo"
-      ];
-
       # stable-25_05: ruby_3_2, micromamba 사용
       stable-25_05 = mkLazyPkgs inputs.nixpkgs-25_05 [
         "ruby_3_2"
         "micromamba"
       ];
 
-      # master, stable-25_11: 현재 사용되지 않음 - 필요시 패키지 추가
-      master = mkLazyPkgs inputs.nixpkgs-master [ ];
-      stable-25_11 = mkLazyPkgs inputs.nixpkgs-25_11 [ ];
+      # master: opencode, claude-code 사용
+      master = mkLazyPkgs inputs.nixpkgs-master [
+        "opencode"
+        "claude-code"
+      ];
     };
 }

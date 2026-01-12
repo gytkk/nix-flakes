@@ -81,7 +81,7 @@
       nodejs
       typescript
       pnpm
-      pkgs.stable-24_05.turbo
+      turbo
 
       # Go
       go
