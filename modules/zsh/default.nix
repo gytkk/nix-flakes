@@ -43,6 +43,16 @@
       ll = "ls -la --color=auto";
       lh = "ls -lh --color=auto";
 
+      # git
+      ga = "git add";
+      gc = "git commit";
+      gp = "git push";
+      gl = "git pull";
+      gst = "git status";
+      gsw = "git switch";
+      gco = "git checkout";
+      gd = "git diff";
+
       # Neovim
       vim = "nvim";
       vi = "nvim";
