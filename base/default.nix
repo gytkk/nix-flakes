@@ -95,7 +95,7 @@
       _1password-cli
 
       # Modeling
-      ffmpeg_7-full
+      ffmpeg
       pkgs.stable-25_05.micromamba
       yt-dlp
 
