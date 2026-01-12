@@ -8,7 +8,6 @@
 {
   home.packages = with pkgs; [
     zsh
-    zsh-powerlevel10k
   ];
 
   # Zsh configuration
@@ -32,29 +31,6 @@
       share = true;
       extended = true;
     };
-
-    # Oh-My-Zsh configuration
-    oh-my-zsh = {
-      enable = true;
-
-      plugins = [
-        "direnv"
-        "fzf"
-        "git"
-        "aws"
-        "kubectl"
-        "z"
-      ];
-    };
-
-    plugins = [
-      {
-        # Powerlevel10k theme
-        name = "powerlevel10k";
-        src = "${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/";
-        file = "powerlevel10k.zsh-theme";
-      }
-    ];
 
     shellAliases = {
       # Home manager aliases
@@ -84,7 +60,7 @@
     # Environment variables
     sessionVariables = { };
 
-    # Initialize p10k configuration
+    # Zsh initialization
     # https://nix-community.github.io/home-manager/options.xhtml#opt-programs.zsh.initContent
     initContent =
       let
@@ -96,9 +72,6 @@
         '';
 
         zshConfig = lib.mkOrder 1000 ''
-          # Initialize p10k configuration
-          [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
-
           # gh auth 후 자동으로 ~/.netrc 업데이트 (Nix flake용)
           gh-auth-netrc() {
             gh auth "$@"
@@ -117,14 +90,6 @@
 
           # Enable colors
           autoload -U colors && colors
-
-          # Ensure oh-my-zsh cache directory has proper permissions
-          if [ -d "$HOME/.cache/oh-my-zsh" ]; then
-            chmod -R 755 "$HOME/.cache/oh-my-zsh" 2>/dev/null || true
-          else
-            mkdir -p "$HOME/.cache/oh-my-zsh"
-            chmod -R 755 "$HOME/.cache/oh-my-zsh" 2>/dev/null || true
-          fi
 
           # Set zsh completion to use LS_COLORS
           zstyle ':completion:*' list-colors "$LS_COLORS"
@@ -146,12 +111,31 @@
       ];
   };
 
+  # Starship prompt
+  programs.starship = {
+    enable = true;
+    enableZshIntegration = true;
+    # Default settings - customize in settings if needed
+    # See https://starship.rs/config/ for options
+    settings = { };
+  };
+
+  # zoxide (replacement for z)
+  programs.zoxide = {
+    enable = true;
+    enableZshIntegration = true;
+  };
+
   # fzf configuration
   programs.fzf = {
     enable = true;
     enableZshIntegration = true;
   };
 
-  # Copy p10k configuration file to home directory
-  home.file.".p10k.zsh".source = ./p10k.zsh;
+  # direnv configuration
+  programs.direnv = {
+    enable = true;
+    enableZshIntegration = true;
+    nix-direnv.enable = true;
+  };
 }
