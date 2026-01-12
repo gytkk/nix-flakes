@@ -102,8 +102,12 @@
           autoload -U up-line-or-beginning-search down-line-or-beginning-search
           zle -N up-line-or-beginning-search
           zle -N down-line-or-beginning-search
-          bindkey "^[[A" up-line-or-beginning-search    # Up arrow
-          bindkey "^[[B" down-line-or-beginning-search  # Down arrow
+          # ^[[A/^[[B: normal mode (macOS, some Linux terminals)
+          # ^[OA/^[OB: application mode (Linux, WSL, tmux)
+          bindkey "^[[A" up-line-or-beginning-search
+          bindkey "^[[B" down-line-or-beginning-search
+          bindkey "^[OA" up-line-or-beginning-search
+          bindkey "^[OB" down-line-or-beginning-search
 
           # Enable colors
           autoload -U colors && colors
