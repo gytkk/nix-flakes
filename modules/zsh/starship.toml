@@ -33,9 +33,9 @@ $pixi\
 \n$character"""
 
 right_format = """
-[](fg:surface)\
+[](fg:surface)\
 $time\
-[](fg:surface)"""
+[](fg:surface)"""
 
 [directory]
 style = "fg:base bg:foam"
