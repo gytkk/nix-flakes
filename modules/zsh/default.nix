@@ -99,6 +99,22 @@
           # Initialize p10k configuration
           [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
 
+          # gh auth 후 자동으로 ~/.netrc 업데이트 (Nix flake용)
+          gh-auth-netrc() {
+            gh auth "$@"
+            if [[ $? -eq 0 ]] && gh auth status &>/dev/null; then
+              local token=$(gh auth token 2>/dev/null)
+              if [[ -n "$token" ]]; then
+                # 기존 github.com 항목 제거 후 새로 추가
+                grep -v "machine github.com" ~/.netrc > ~/.netrc.tmp 2>/dev/null || touch ~/.netrc.tmp
+                echo "machine github.com login oauth password $token" >> ~/.netrc.tmp
+                mv ~/.netrc.tmp ~/.netrc
+                chmod 600 ~/.netrc
+                echo "Updated ~/.netrc with GitHub token for Nix"
+              fi
+            fi
+          }
+
           # Enable colors
           autoload -U colors && colors
 
