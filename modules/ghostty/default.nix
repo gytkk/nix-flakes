@@ -22,7 +22,7 @@ in
   xdg.configFile."ghostty/config".text = ''
     auto-update = check
 
-    theme = catppuccin-latte.conf
+    theme = rose-pine-dawn
 
     background-opacity = 0.95
 

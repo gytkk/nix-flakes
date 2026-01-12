@@ -1,20 +1,20 @@
 # Starship configuration
 # Style: Tokyo Night layout
-# Colors: Catppuccin Latte palette (light theme)
+# Colors: Rosé Pine Dawn palette (light theme)
 
 "$schema" = 'https://starship.rs/config-schema.json'
 
-palette = 'catppuccin_latte'
+palette = 'rose_pine_dawn'
 
 format = """
-[](lavender)\
-[ 󰉋 ](bg:lavender fg:base)\
-[](bg:blue fg:lavender)\
+[](iris)\
+[ 󰉋 ](bg:iris fg:base)\
+[](bg:foam fg:iris)\
 $directory\
-[](fg:blue bg:surface1)\
+[](fg:foam bg:overlay)\
 $git_branch\
 $git_status\
-[](fg:surface1 bg:surface0)\
+[](fg:overlay bg:highlight_med)\
 $c\
 $cpp\
 $rust\
@@ -25,20 +25,20 @@ $java\
 $kotlin\
 $haskell\
 $python\
-[](fg:surface0 bg:mantle)\
+[](fg:highlight_med bg:highlight_low)\
 $docker_context\
 $conda\
 $pixi\
-[](fg:mantle)\
+[](fg:highlight_low)\
 \n$character"""
 
 right_format = """
-[](fg:crust)\
+[](fg:surface)\
 $time\
-[ ](bg:crust)"""
+[](fg:surface)"""
 
 [directory]
-style = "fg:base bg:blue"
+style = "fg:base bg:foam"
 format = "[ $path ]($style)"
 truncation_length = 3
 truncation_symbol = "…/"
@@ -52,119 +52,108 @@ truncation_symbol = "…/"
 "development" = "󰲷 "
 
 [git_branch]
-symbol = ""
-style = "bg:surface1"
-format = '[[ $symbol $branch ](fg:blue bg:surface1)]($style)'
+symbol = ""
+style = "bg:overlay"
+format = '[[ $symbol $branch ](fg:pine bg:overlay)]($style)'
 
 [git_status]
-style = "bg:surface1"
-format = '[[($all_status$ahead_behind )](fg:blue bg:surface1)]($style)'
+style = "bg:overlay"
+format = '[[($all_status$ahead_behind )](fg:pine bg:overlay)]($style)'
 
 [c]
-symbol = " "
-style = "bg:surface0"
-format = '[[ $symbol($version) ](fg:sapphire bg:surface0)]($style)'
+symbol = " "
+style = "bg:highlight_med"
+format = '[[ $symbol($version) ](fg:foam bg:highlight_med)]($style)'
 
 [cpp]
-symbol = " "
-style = "bg:surface0"
-format = '[[ $symbol($version) ](fg:sapphire bg:surface0)]($style)'
+symbol = " "
+style = "bg:highlight_med"
+format = '[[ $symbol($version) ](fg:foam bg:highlight_med)]($style)'
 
 [nodejs]
-symbol = " "
-style = "bg:surface0"
-format = '[[ $symbol($version) ](fg:green bg:surface0)]($style)'
+symbol = " "
+style = "bg:highlight_med"
+format = '[[ $symbol($version) ](fg:pine bg:highlight_med)]($style)'
 
 [rust]
 symbol = "󱘗 "
-style = "bg:surface0"
-format = '[[ $symbol($version) ](fg:peach bg:surface0)]($style)'
+style = "bg:highlight_med"
+format = '[[ $symbol($version) ](fg:rose bg:highlight_med)]($style)'
 
 [golang]
-symbol = " "
-style = "bg:surface0"
-format = '[[ $symbol($version) ](fg:sky bg:surface0)]($style)'
+symbol = " "
+style = "bg:highlight_med"
+format = '[[ $symbol($version) ](fg:foam bg:highlight_med)]($style)'
 
 [php]
-symbol = " "
-style = "bg:surface0"
-format = '[[ $symbol($version) ](fg:mauve bg:surface0)]($style)'
+symbol = " "
+style = "bg:highlight_med"
+format = '[[ $symbol($version) ](fg:iris bg:highlight_med)]($style)'
 
 [java]
-symbol = " "
-style = "bg:surface0"
-format = '[[ $symbol($version) ](fg:red bg:surface0)]($style)'
+symbol = " "
+style = "bg:highlight_med"
+format = '[[ $symbol($version) ](fg:love bg:highlight_med)]($style)'
 
 [kotlin]
-symbol = " "
-style = "bg:surface0"
-format = '[[ $symbol($version) ](fg:mauve bg:surface0)]($style)'
+symbol = " "
+style = "bg:highlight_med"
+format = '[[ $symbol($version) ](fg:iris bg:highlight_med)]($style)'
 
 [haskell]
-symbol = " "
-style = "bg:surface0"
-format = '[[ $symbol($version) ](fg:mauve bg:surface0)]($style)'
+symbol = " "
+style = "bg:highlight_med"
+format = '[[ $symbol($version) ](fg:iris bg:highlight_med)]($style)'
 
 [python]
-symbol = " "
-style = "bg:surface0"
-format = '[[ $symbol($version) ](fg:yellow bg:surface0)]($style)'
+symbol = " "
+style = "bg:highlight_med"
+format = '[[ $symbol($version) ](fg:gold bg:highlight_med)]($style)'
 
 [docker_context]
-symbol = " "
-style = "bg:mantle"
-format = '[[ $symbol($context) ](fg:sky bg:mantle)]($style)'
+symbol = " "
+style = "bg:highlight_low"
+format = '[[ $symbol($context) ](fg:foam bg:highlight_low)]($style)'
 
 [conda]
-symbol = " "
-style = "bg:mantle"
-format = '[[ $symbol($environment) ](fg:green bg:mantle)]($style)'
+symbol = " "
+style = "bg:highlight_low"
+format = '[[ $symbol($environment) ](fg:pine bg:highlight_low)]($style)'
 
 [pixi]
 symbol = "󰏗 "
-style = "bg:mantle"
-format = '[[ $symbol($version) ($environment) ](fg:green bg:mantle)]($style)'
+style = "bg:highlight_low"
+format = '[[ $symbol($version) ($environment) ](fg:pine bg:highlight_low)]($style)'
 
 [time]
 disabled = false
 time_format = "%R"
-style = "bg:crust"
-format = '[[ 󰥔 $time ](fg:subtext0 bg:crust)]($style)'
+style = "bg:surface"
+format = '[[ 󰥔 $time ](fg:muted bg:surface)]($style)'
 
 [character]
 disabled = false
-success_symbol = '[❯](bold fg:green)'
-error_symbol = '[❯](bold fg:red)'
-vimcmd_symbol = '[❮](bold fg:green)'
-vimcmd_replace_one_symbol = '[❮](bold fg:lavender)'
-vimcmd_replace_symbol = '[❮](bold fg:lavender)'
-vimcmd_visual_symbol = '[❮](bold fg:yellow)'
+success_symbol = '[❯](bold fg:pine)'
+error_symbol = '[❯](bold fg:love)'
+vimcmd_symbol = '[❮](bold fg:pine)'
+vimcmd_replace_one_symbol = '[❮](bold fg:iris)'
+vimcmd_replace_symbol = '[❮](bold fg:iris)'
+vimcmd_visual_symbol = '[❮](bold fg:gold)'
 
-# Catppuccin Latte palette
-[palettes.catppuccin_latte]
-rosewater = "#dc8a78"
-flamingo = "#dd7878"
-pink = "#ea76cb"
-mauve = "#8839ef"
-red = "#d20f39"
-maroon = "#e64553"
-peach = "#fe640b"
-yellow = "#df8e1d"
-green = "#40a02b"
-teal = "#179299"
-sky = "#04a5e5"
-sapphire = "#209fb5"
-blue = "#1e66f5"
-lavender = "#7287fd"
-text = "#4c4f69"
-subtext1 = "#5c5f77"
-subtext0 = "#6c6f85"
-overlay2 = "#7c7f93"
-overlay1 = "#8c8fa1"
-overlay0 = "#9ca0b0"
-surface2 = "#acb0be"
-surface1 = "#bcc0cc"
-surface0 = "#ccd0da"
-base = "#eff1f5"
-mantle = "#e6e9ef"
-crust = "#dce0e8"
+# Rosé Pine Dawn palette
+[palettes.rose_pine_dawn]
+base = "#faf4ed"
+surface = "#fffaf3"
+overlay = "#f2e9e1"
+muted = "#9893a5"
+subtle = "#797593"
+text = "#575279"
+love = "#b4637a"
+gold = "#ea9d34"
+rose = "#d7827e"
+pine = "#286983"
+foam = "#56949f"
+iris = "#907aa9"
+highlight_low = "#f4ede8"
+highlight_med = "#dfdad9"
+highlight_high = "#cecacd"

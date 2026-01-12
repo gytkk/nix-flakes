@@ -19,12 +19,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # nix-darwin
-    # nix-darwin = {
-    #   url = "github:nix-darwin/nix-darwin/master";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
-
     # nixpkgs-terraform - for Terraform version management
     # XXX: Pinned to specific commit to avoid infinite recursion issues
     nixpkgs-terraform = {
