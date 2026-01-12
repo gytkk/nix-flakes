@@ -20,7 +20,7 @@
         noExitOnCtrlC = false;
         portForwardAddress = "localhost";
         ui = {
-          skin = "catppuccin-latte";
+          skin = "rose-pine-dawn";
           enableMouse = false;
           headless = false;
           logoless = false;
