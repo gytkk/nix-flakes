@@ -1,5 +1,5 @@
 # Starship configuration
-# Style: Tokyo Night layout
+# Style: Tokyo Night layout with rounded edges
 # Colors: Rosé Pine Dawn palette (light theme)
 
 "$schema" = 'https://starship.rs/config-schema.json'
@@ -7,14 +7,14 @@
 palette = 'rose_pine_dawn'
 
 format = """
-[](iris)\
+[](iris)\
 [ 󰉋 ](bg:iris fg:base)\
-[](bg:foam fg:iris)\
+[](bg:foam fg:iris)\
 $directory\
-[](fg:foam bg:overlay)\
+[](fg:foam bg:overlay)\
 $git_branch\
 $git_status\
-[](fg:overlay bg:highlight_med)\
+[](fg:overlay bg:highlight_med)\
 $c\
 $cpp\
 $rust\
@@ -25,17 +25,19 @@ $java\
 $kotlin\
 $haskell\
 $python\
-[](fg:highlight_med bg:highlight_low)\
+[](fg:highlight_med bg:highlight_low)\
 $docker_context\
 $conda\
 $pixi\
-[](fg:highlight_low)\
-\n$character"""
-
-right_format = """
+[](fg:highlight_low)\
+$fill\
 [](fg:surface)\
 $time\
-[](fg:surface)"""
+[](fg:surface)
+$character"""
+
+[fill]
+symbol = " "
 
 [directory]
 style = "fg:base bg:foam"
@@ -52,26 +54,33 @@ truncation_symbol = "…/"
 "development" = "󰲷 "
 
 [git_branch]
-symbol = ""
+symbol = ""
 style = "bg:overlay"
 format = '[[ $symbol $branch ](fg:pine bg:overlay)]($style)'
 
 [git_status]
 style = "bg:overlay"
-format = '[[($all_status$ahead_behind )](fg:pine bg:overlay)]($style)'
+format = '[[($conflicted$staged$modified$untracked$renamed$deleted$stashed$ahead_behind )](fg:pine bg:overlay)]($style)'
+conflicted = "=$count "
+staged = "+$count "
+modified = "!$count "
+untracked = "?$count "
+renamed = "»$count "
+deleted = "-$count "
+stashed = "*$count "
 
 [c]
-symbol = " "
+symbol = " "
 style = "bg:highlight_med"
 format = '[[ $symbol($version) ](fg:foam bg:highlight_med)]($style)'
 
 [cpp]
-symbol = " "
+symbol = " "
 style = "bg:highlight_med"
 format = '[[ $symbol($version) ](fg:foam bg:highlight_med)]($style)'
 
 [nodejs]
-symbol = " "
+symbol = " "
 style = "bg:highlight_med"
 format = '[[ $symbol($version) ](fg:pine bg:highlight_med)]($style)'
 
@@ -81,42 +90,42 @@ style = "bg:highlight_med"
 format = '[[ $symbol($version) ](fg:rose bg:highlight_med)]($style)'
 
 [golang]
-symbol = " "
+symbol = " "
 style = "bg:highlight_med"
 format = '[[ $symbol($version) ](fg:foam bg:highlight_med)]($style)'
 
 [php]
-symbol = " "
+symbol = " "
 style = "bg:highlight_med"
 format = '[[ $symbol($version) ](fg:iris bg:highlight_med)]($style)'
 
 [java]
-symbol = " "
+symbol = " "
 style = "bg:highlight_med"
 format = '[[ $symbol($version) ](fg:love bg:highlight_med)]($style)'
 
 [kotlin]
-symbol = " "
+symbol = " "
 style = "bg:highlight_med"
 format = '[[ $symbol($version) ](fg:iris bg:highlight_med)]($style)'
 
 [haskell]
-symbol = " "
+symbol = " "
 style = "bg:highlight_med"
 format = '[[ $symbol($version) ](fg:iris bg:highlight_med)]($style)'
 
 [python]
-symbol = " "
+symbol = " "
 style = "bg:highlight_med"
 format = '[[ $symbol($version) ](fg:gold bg:highlight_med)]($style)'
 
 [docker_context]
-symbol = " "
+symbol = " "
 style = "bg:highlight_low"
 format = '[[ $symbol($context) ](fg:foam bg:highlight_low)]($style)'
 
 [conda]
-symbol = " "
+symbol = " "
 style = "bg:highlight_low"
 format = '[[ $symbol($environment) ](fg:pine bg:highlight_low)]($style)'
 

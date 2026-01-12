@@ -23,6 +23,7 @@ in
     auto-update = check
 
     theme = rose-pine-dawn
+    background = #fdfcfc
 
     background-opacity = 0.95
 
