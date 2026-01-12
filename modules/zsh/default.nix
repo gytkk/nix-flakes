@@ -115,10 +115,11 @@
   programs.starship = {
     enable = true;
     enableZshIntegration = true;
-    # Default settings - customize in settings if needed
-    # See https://starship.rs/config/ for options
-    settings = { };
   };
+
+  # Starship configuration from TOML file
+  # Style: Jetpack (minimalist) + Catppuccin Latte colors
+  xdg.configFile."starship.toml".source = ./starship.toml;
 
   # zoxide (replacement for z)
   programs.zoxide = {

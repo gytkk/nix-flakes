@@ -44,7 +44,7 @@
     # 기본 패키지 (모든 환경에서 공통)
     packages = with pkgs; [
       # Nix
-      nixfmt-rfc-style
+      nixfmt
 
       # System utilities
       coreutils

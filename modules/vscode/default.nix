@@ -123,7 +123,7 @@ let
   # 공통 설정
   userSettings = {
     # Editor
-    "editor.fontFamily" = "'JetBrains Mono', 'Sarasa Gothic J', 'Sarasa Gothic K', monospace";
+    "editor.fontFamily" = "'JetBrainsMono Nerd Font', 'Sarasa Gothic J', 'Sarasa Gothic K', monospace";
     "editor.fontSize" = 14;
     "editor.formatOnPaste" = true;
     "editor.formatOnSave" = true;
