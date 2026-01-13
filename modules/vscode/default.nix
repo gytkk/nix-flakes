@@ -21,6 +21,24 @@ let
       };
     });
 
+  # 로컬 One Half Light 테마 확장
+  oneHalfLightTheme = pkgs.stdenv.mkDerivation {
+    pname = "vscode-one-half-light-theme";
+    version = "1.0.0";
+    src = ./one-half-light-theme;
+    installPhase = ''
+      runHook preInstall
+      mkdir -p $out/share/vscode/extensions/local.one-half-light-theme
+      cp -r . $out/share/vscode/extensions/local.one-half-light-theme/
+      runHook postInstall
+    '';
+    passthru = {
+      vscodeExtUniqueId = "local.one-half-light-theme";
+      vscodeExtPublisher = "local";
+      vscodeExtName = "one-half-light-theme";
+    };
+  };
+
   # nixpkgs 확장 (빠름, 캐시됨)
   nixpkgsExtensions = with pkgs.vscode-extensions; [
     # AI (copilot은 nixpkgs에서)
@@ -82,6 +100,7 @@ let
     (allowUnfree anthropic.claude-code)
 
     # Theme
+    oneHalfLightTheme
     uloco.theme-bluloco-light
     mvllow.rose-pine
     catppuccin.catppuccin-vsc
@@ -149,7 +168,7 @@ let
     "files.insertFinalNewline" = true;
 
     # Workbench
-    "workbench.colorTheme" = "Rosé Pine Dawn";
+    "workbench.colorTheme" = "One Half Light";
     "workbench.iconTheme" = "vscode-icons";
     "workbench.list.typeNavigationMode" = "filter";
 

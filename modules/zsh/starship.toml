@@ -1,10 +1,10 @@
 # Starship configuration
 # Style: Tokyo Night layout with rounded edges
-# Colors: Rosé Pine Dawn palette (light theme)
+# Colors: One Half Light palette
 
 "$schema" = 'https://starship.rs/config-schema.json'
 
-palette = 'rose_pine_dawn'
+palette = 'one_half_light'
 
 format = """
 [](iris)\
@@ -149,20 +149,21 @@ vimcmd_replace_one_symbol = '[❮](bold fg:iris)'
 vimcmd_replace_symbol = '[❮](bold fg:iris)'
 vimcmd_visual_symbol = '[❮](bold fg:gold)'
 
-# Rosé Pine Dawn palette
-[palettes.rose_pine_dawn]
-base = "#faf4ed"
-surface = "#fffaf3"
-overlay = "#f2e9e1"
-muted = "#9893a5"
-subtle = "#797593"
-text = "#575279"
-love = "#b4637a"
-gold = "#ea9d34"
-rose = "#d7827e"
-pine = "#286983"
-foam = "#56949f"
-iris = "#907aa9"
-highlight_low = "#f4ede8"
-highlight_med = "#dfdad9"
-highlight_high = "#cecacd"
+# One Half Light palette
+[palettes.one_half_light]
+base = "#fafafa"
+surface = "#f0f0f0"
+overlay = "#e5e5e5"
+muted = "#4f525e"
+subtle = "#383a42"
+text = "#383a42"
+love = "#e45649"
+gold = "#c18401"
+rose = "#e06c75"
+pine = "#0184bc"
+foam = "#0997b3"
+iris = "#a626a4"
+highlight_low = "#f5f5f5"
+highlight_med = "#e8e8e8"
+highlight_high = "#d0d0d0"
+green = "#50a14f"
