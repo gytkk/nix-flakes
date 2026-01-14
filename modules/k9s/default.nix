@@ -20,7 +20,7 @@
         noExitOnCtrlC = false;
         portForwardAddress = "localhost";
         ui = {
-          skin = "rose-pine-dawn";
+          skin = "one-half-light";
           enableMouse = false;
           headless = false;
           logoless = false;
@@ -80,103 +80,107 @@
       };
     };
 
-    skins.rose-pine-dawn = {
+    skins.one-half-light = {
       k9s = {
         body = {
-          fgColor = "#575279";
-          bgColor = "#faf4ed";
-          logoColor = "#907aa9";
+          fgColor = "#383a42";
+          bgColor = "#fafafa";
+          logoColor = "#0184bc";
         };
         prompt = {
-          fgColor = "#575279";
-          bgColor = "#faf4ed";
-          suggestColor = "#907aa9";
+          fgColor = "#383a42";
+          bgColor = "#fafafa";
+          suggestColor = "#0184bc";
         };
         info = {
-          fgColor = "#907aa9";
-          sectionColor = "#575279";
+          fgColor = "#0184bc";
+          sectionColor = "#383a42";
         };
         dialog = {
-          fgColor = "#575279";
-          bgColor = "#faf4ed";
-          buttonFgColor = "#575279";
-          buttonBgColor = "#907aa9";
-          buttonFocusFgColor = "#ea9d34";
-          buttonFocusBgColor = "#907aa9";
-          labelFgColor = "#ea9d34";
-          fieldFgColor = "#575279";
+          fgColor = "#383a42";
+          bgColor = "#fafafa";
+          buttonFgColor = "#ffffff";
+          buttonBgColor = "#0184bc";
+          buttonFocusFgColor = "#ffffff";
+          buttonFocusBgColor = "#a626a4";
+          labelFgColor = "#c18401";
+          fieldFgColor = "#383a42";
         };
         frame = {
           border = {
-            fgColor = "#f2e9e1";
-            focusColor = "#f2e9e1";
+            fgColor = "#e5e5e5";
+            focusColor = "#0184bc";
           };
           menu = {
-            fgColor = "#575279";
-            keyColor = "#907aa9";
-            numKeyColor = "#907aa9";
+            fgColor = "#383a42";
+            keyColor = "#0184bc";
+            numKeyColor = "#a626a4";
           };
           crumbs = {
-            fgColor = "#575279";
-            bgColor = "#f2e9e1";
-            activeColor = "#f2e9e1";
+            fgColor = "#383a42";
+            bgColor = "#f0f0f0";
+            activeColor = "#bfceff";
           };
           status = {
-            newColor = "#d7827e";
-            modifyColor = "#907aa9";
-            addColor = "#286983";
-            errorColor = "#b4637a";
-            highlightcolor = "#ea9d34";
-            killColor = "#9893a5";
-            completedColor = "#9893a5";
+            newColor = "#0184bc";
+            modifyColor = "#c18401";
+            addColor = "#50a14f";
+            errorColor = "#e45649";
+            highlightcolor = "#c18401";
+            killColor = "#a626a4";
+            completedColor = "#a0a1a7";
           };
           title = {
-            fgColor = "#575279";
-            bgColor = "#f2e9e1";
-            highlightColor = "#ea9d34";
-            counterColor = "#907aa9";
-            filterColor = "#907aa9";
+            fgColor = "#383a42";
+            bgColor = "#f0f0f0";
+            highlightColor = "#c18401";
+            counterColor = "#0184bc";
+            filterColor = "#a626a4";
           };
         };
         views = {
           charts = {
             bgColor = "default";
             defaultDialColors = [
-              "#907aa9"
-              "#b4637a"
+              "#50a14f"
+              "#e45649"
             ];
             defaultChartColors = [
-              "#907aa9"
-              "#b4637a"
+              "#50a14f"
+              "#e45649"
             ];
           };
           table = {
-            fgColor = "#575279";
-            bgColor = "#faf4ed";
+            fgColor = "#383a42";
+            bgColor = "#fafafa";
+            cursorFgColor = "#383a42";
+            cursorBgColor = "#bfceff";
             header = {
-              fgColor = "#575279";
-              bgColor = "#faf4ed";
-              sorterColor = "#d7827e";
+              fgColor = "#383a42";
+              bgColor = "#fafafa";
+              sorterColor = "#0184bc";
             };
           };
           xray = {
-            fgColor = "#575279";
-            bgColor = "#faf4ed";
-            cursorColor = "#f2e9e1";
-            graphicColor = "#907aa9";
+            fgColor = "#383a42";
+            bgColor = "#fafafa";
+            cursorColor = "#bfceff";
+            graphicColor = "#0184bc";
             showIcons = false;
           };
           yaml = {
-            keyColor = "#907aa9";
-            colonColor = "#907aa9";
-            valueColor = "#575279";
+            keyColor = "#0184bc";
+            colonColor = "#a0a1a7";
+            valueColor = "#383a42";
           };
           logs = {
-            fgColor = "#575279";
-            bgColor = "#faf4ed";
+            fgColor = "#383a42";
+            bgColor = "#fafafa";
             indicator = {
-              fgColor = "#575279";
-              bgColor = "#907aa9";
+              fgColor = "#ffffff";
+              bgColor = "#0184bc";
+              toggleOnColor = "#50a14f";
+              toggleOffColor = "#a0a1a7";
             };
           };
         };
