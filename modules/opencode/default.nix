@@ -5,6 +5,7 @@
   # Use nixpkgs master for the latest version
   home.packages = [
     pkgs.master.opencode
+    pkgs.github-mcp-server
   ];
 
   # Create ~/.config/opencode/opencode.json file
