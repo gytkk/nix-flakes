@@ -31,7 +31,9 @@ $conda\
 $pixi\
 [](fg:highlight_low)\
 $fill\
-[](fg:surface)\
+[](fg:highlight_low)\
+$kubernetes\
+[](fg:surface bg:highlight_low)\
 $time\
 [](fg:surface)
 $character"""
@@ -51,7 +53,6 @@ truncation_symbol = "…/"
 "Music" = "󰝚 "
 "Pictures" = "󰈟 "
 "Developer" = "󰲷 "
-"development" = "󰲷 "
 
 [git_branch]
 symbol = ""
@@ -133,6 +134,12 @@ format = '[[ $symbol($environment) ](fg:pine bg:highlight_low)]($style)'
 symbol = "󰏗 "
 style = "bg:highlight_low"
 format = '[[ $symbol($version) ($environment) ](fg:pine bg:highlight_low)]($style)'
+
+[kubernetes]
+disabled = false
+symbol = "󱃾 "
+style = "bg:highlight_low"
+format = '[[ $symbol$context ](fg:foam bg:highlight_low)]($style)'
 
 [time]
 disabled = false
