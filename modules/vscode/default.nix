@@ -96,8 +96,8 @@ let
 
   # nix-vscode-extensions에서만 가져올 확장 (nixpkgs에 없거나 자주 업데이트되는 것들)
   extraExtensions = with marketplaceExtensions; [
-    # AI (자주 업데이트되어 nixpkgs 해시가 오래됨)
-    (allowUnfree anthropic.claude-code)
+    # AI - claude-code 확장은 마켓플레이스에서 직접 설치 (unfree 라이센스 문제 회피)
+    # CLI는 modules/claude에서 설치됨
 
     # Theme
     oneHalfLightTheme
