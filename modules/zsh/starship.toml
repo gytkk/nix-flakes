@@ -33,8 +33,9 @@ $pixi\
 $fill\
 [](fg:highlight_low)\
 $kubernetes\
+[](fg:highlight_med bg:highlight_low)\
 $hostname\
-[](fg:surface bg:highlight_low)\
+[](fg:surface bg:highlight_med)\
 $time\
 [](fg:surface)
 $character"""
@@ -150,8 +151,8 @@ format = '[[ 󰥔 $time ](fg:muted bg:surface)]($style)'
 
 [hostname]
 ssh_only = true
-style = "bg:highlight_low"
-format = '[[  $hostname ](fg:love bg:highlight_low)]($style)'
+style = "bg:highlight_med"
+format = '[[  $hostname ](fg:love bg:highlight_med)]($style)'
 
 [character]
 disabled = false
