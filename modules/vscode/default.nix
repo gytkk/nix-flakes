@@ -139,6 +139,29 @@ let
   # WSL용 settings.json 생성
   wslSettingsFile = pkgs.writeText "vscode-settings.json" (builtins.toJSON userSettings);
 
+  # WSL용 extensions.json 항목 생성
+  # VSCode가 확장을 인식하려면 extensions.json에 등록되어야 함
+  mkExtensionEntry = ext: {
+    identifier = {
+      id = ext.vscodeExtUniqueId;
+    };
+    version = ext.version or "1.0.0";
+    location = {
+      "$mid" = 1;
+      path = "${config.home.homeDirectory}/.vscode-server/extensions/${ext.vscodeExtUniqueId}";
+      scheme = "file";
+    };
+    relativeLocation = ext.vscodeExtUniqueId;
+    metadata = {
+      id = ext.vscodeExtUniqueId;
+      publisherDisplayName = ext.vscodeExtPublisher or "Unknown";
+      publisherId = ext.vscodeExtPublisher or "unknown";
+      isPreReleaseVersion = false;
+    };
+  };
+
+  nixExtensionsJson = map mkExtensionEntry commonExtensions;
+
   # 공통 설정
   userSettings = {
     # Editor
@@ -279,5 +302,27 @@ lib.mkMerge [
     home.file = wslExtensionLinks // {
       ".vscode-server/data/Machine/settings.json".source = wslSettingsFile;
     };
+
+    # extensions.json에 Nix 확장들을 병합
+    home.activation.vscodeExtensionsJson =
+      let
+        nixExtensionsFile = pkgs.writeText "nix-extensions.json" (builtins.toJSON nixExtensionsJson);
+        extensionsJsonPath = "${config.home.homeDirectory}/.vscode-server/extensions/extensions.json";
+      in
+      lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        if [ -f "${extensionsJsonPath}" ]; then
+          # 기존 extensions.json과 Nix 확장들을 병합 (Nix 확장 ID로 중복 제거)
+          ${pkgs.jq}/bin/jq -s '
+            (.[0] | map({key: .identifier.id, value: .}) | from_entries) as $existing |
+            (.[1] | map({key: .identifier.id, value: .}) | from_entries) as $nix |
+            ($existing + $nix) | to_entries | map(.value)
+          ' "${extensionsJsonPath}" "${nixExtensionsFile}" > "${extensionsJsonPath}.tmp"
+          mv "${extensionsJsonPath}.tmp" "${extensionsJsonPath}"
+        else
+          # extensions.json이 없으면 새로 생성
+          mkdir -p "$(dirname "${extensionsJsonPath}")"
+          cp "${nixExtensionsFile}" "${extensionsJsonPath}"
+        fi
+      '';
   })
 ]
