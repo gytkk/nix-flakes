@@ -7,7 +7,6 @@
 palette = 'one_half_light'
 
 format = """
-$hostname\
 [](iris)\
 [ 󰉋 ](bg:iris fg:base)\
 [](bg:foam fg:iris)\
@@ -34,6 +33,7 @@ $pixi\
 $fill\
 [](fg:highlight_low)\
 $kubernetes\
+$hostname\
 [](fg:surface bg:highlight_low)\
 $time\
 [](fg:surface)
@@ -150,8 +150,8 @@ format = '[[ 󰥔 $time ](fg:muted bg:surface)]($style)'
 
 [hostname]
 ssh_only = true
-format = "[ $hostname]($style) "
-style = "bold fg:love"
+style = "bg:highlight_low"
+format = '[[  $hostname ](fg:love bg:highlight_low)]($style)'
 
 [character]
 disabled = false
