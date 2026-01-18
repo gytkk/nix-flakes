@@ -7,6 +7,7 @@
 palette = 'one_half_light'
 
 format = """
+$hostname\
 [](iris)\
 [ 󰉋 ](bg:iris fg:base)\
 [](bg:foam fg:iris)\
@@ -146,6 +147,11 @@ disabled = false
 time_format = "%R"
 style = "bg:surface"
 format = '[[ 󰥔 $time ](fg:muted bg:surface)]($style)'
+
+[hostname]
+ssh_only = true
+format = "[ $hostname]($style) "
+style = "bold fg:love"
 
 [character]
 disabled = false
