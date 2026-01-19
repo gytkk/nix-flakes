@@ -49,6 +49,7 @@
       # System utilities
       coreutils
       findutils
+      gnupg
 
       # Development (common)
       docker
@@ -94,6 +95,7 @@
 
       # Secrets
       _1password-cli
+      keybase
 
       # Modeling
       ffmpeg
