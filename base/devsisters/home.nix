@@ -57,10 +57,10 @@
     SBT_OPTS = "-Xmx2G -XX:+UseG1GC";
   };
 
-  # # XXX(ecl): Add gem binaries to PATH
-  # home.sessionPath = [
-  #   "$HOME/.gem/ruby/${pkgs.stable-25_05.ruby_3_2.version.libDir}/bin"
-  # ];
+  # Add gem binaries to PATH
+  home.sessionPath = [
+    "$HOME/.gem/ruby/3.2.0/bin"
+  ];
 
   # # XXX(ecl): Install ecl gem on activation
   # home.activation.installEclGem = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
