@@ -61,12 +61,4 @@
   home.sessionPath = [
     "$HOME/.gem/ruby/3.2.0/bin"
   ];
-
-  # # XXX(ecl): Install ecl gem on activation
-  # home.activation.installEclGem = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-  #   if ! ${pkgs.stable-25_05.ruby_3_2}/bin/gem list -i ecl > /dev/null 2>&1; then
-  #     export PATH="${pkgs.stdenv.cc}/bin:${pkgs.darwin.cctools}/bin:${pkgs.gnumake}/bin:$PATH"
-  #     ${pkgs.stable-25_05.ruby_3_2}/bin/gem install ecl
-  #   fi
-  # '';
 }
