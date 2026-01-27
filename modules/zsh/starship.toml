@@ -46,7 +46,7 @@ symbol = " "
 [directory]
 style = "fg:base bg:foam"
 format = "[ $path ]($style)"
-truncation_length = 3
+truncation_length = 4
 truncation_symbol = "…/"
 
 [directory.substitutions]

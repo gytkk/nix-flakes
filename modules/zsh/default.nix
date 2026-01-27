@@ -109,6 +109,17 @@
           bindkey "^[OA" up-line-or-beginning-search
           bindkey "^[OB" down-line-or-beginning-search
 
+          # Home/End key bindings (for vi mode compatibility)
+          # ^[[H/^[[F: normal mode, ^[OH/^[OF: application mode
+          bindkey "^[[H" beginning-of-line
+          bindkey "^[[F" end-of-line
+          bindkey "^[OH" beginning-of-line
+          bindkey "^[OF" end-of-line
+          bindkey -M vicmd "^[[H" beginning-of-line
+          bindkey -M vicmd "^[[F" end-of-line
+          bindkey -M vicmd "^[OH" beginning-of-line
+          bindkey -M vicmd "^[OF" end-of-line
+
           # Enable colors
           autoload -U colors && colors
 
