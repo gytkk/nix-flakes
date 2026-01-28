@@ -44,6 +44,7 @@ let
 
     # Git/GitHub
     github.vscode-github-actions
+    eamodio.gitlens
 
     # Go
     golang.go
@@ -92,9 +93,6 @@ let
 
     # Theme
     oneHalfLightTheme
-
-    # Git
-    qezhu.gitlink
 
     # Python
     astral-sh.ty
