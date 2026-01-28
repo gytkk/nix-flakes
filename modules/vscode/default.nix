@@ -12,15 +12,6 @@ let
   marketplaceExtensions =
     inputs.nix-vscode-extensions.extensions.${pkgs.stdenv.hostPlatform.system}.vscode-marketplace;
 
-  # unfree 확장에 대한 license override 헬퍼
-  allowUnfree =
-    ext:
-    ext.overrideAttrs (old: {
-      meta = (old.meta or { }) // {
-        license = lib.licenses.mit;
-      };
-    });
-
   # 로컬 One Half Light 테마 확장
   oneHalfLightTheme = pkgs.stdenv.mkDerivation {
     pname = "vscode-one-half-light-theme";
@@ -101,25 +92,13 @@ let
 
     # Theme
     oneHalfLightTheme
-    uloco.theme-bluloco-light
-    mvllow.rose-pine
-    catppuccin.catppuccin-vsc
-    catppuccin.catppuccin-vsc-icons
-    vscode-icons-team.vscode-icons
-    ms-vscode.theme-tomorrowkit
 
     # Git
     qezhu.gitlink
 
-    # AWS
-    boto3typed.boto3-ide
-
     # Python
     astral-sh.ty
     ms-python.vscode-python-envs
-
-    # JavaScript/TypeScript
-    vercel.turbo-vsc
   ];
 
   # 공통 확장 프로그램 (macOS/Linux/WSL 모두 사용)
