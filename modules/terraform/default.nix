@@ -6,16 +6,6 @@
 }:
 
 let
-  # Create terraform packages with version-named binaries
-  # Each version gets a wrapper like terraform-1.12.2
-  terraformPackages = map (
-    version:
-    pkgs.writeShellScriptBin "terraform-${version}" ''
-      exec ${pkgs.terraform-versions.${version}}/bin/terraform "$@"
-    ''
-  ) cfg.versions;
-
-  # Configuration options
   cfg = config.modules.terraform;
 in
 {
@@ -29,11 +19,10 @@ in
     versions = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = [ ];
-      description = "List of terraform versions to install";
+      description = "List of available terraform versions (loaded lazily via direnv)";
       example = [
         "1.10.5"
         "1.12.2"
-        "latest"
       ];
     };
 
@@ -55,19 +44,16 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    # Install all terraform versions with version-named binaries
+    # Only install default terraform version
+    # Other versions are loaded lazily via direnv + nix-direnv
     home.packages = [
-      # Default terraform version
       (
         if cfg.defaultVersion == "latest" then
           pkgs.terraform
         else
           pkgs.terraform-versions.${cfg.defaultVersion}
       )
-
-      # All versioned terraform binaries (terraform-1.12.2, etc.)
-    ]
-    ++ terraformPackages;
+    ];
 
     # Configure nixpkgs to allow unfree for terraform
     nixpkgs.config.allowUnfree = true;
@@ -83,7 +69,7 @@ in
         "${envPrefix}terraform";
     };
 
-    # Install direnvrc with use_terraform function
+    # Install direnvrc with use_terraform function (lazy loading)
     home.file.".config/direnv/direnvrc" = {
       text =
         builtins.replaceStrings

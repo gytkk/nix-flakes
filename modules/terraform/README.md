@@ -2,6 +2,20 @@
 
 [stackbuilders/nixpkgs-terraform](https://github.com/stackbuilders/nixpkgs-terraform)를 사용한 Terraform 버전 관리 모듈입니다.
 
+## Lazy Loading 방식
+
+이 모듈은 **lazy loading** 방식을 사용합니다:
+
+- **기본 버전**만 `home-manager switch` 시 설치
+- **다른 버전**은 프로젝트 디렉토리 진입 시 **on-demand로 로드**
+- 한 번 로드된 버전은 `/nix/store`에 캐시되어 **기기 전체에서 재사용**
+
+### 장점
+
+- `home-manager switch`가 빠름 (기본 버전만 빌드)
+- 실제 사용하는 버전만 빌드됨
+- Nix의 재현성 유지
+
 ## 설정 방법
 
 ### 기본 사용법
@@ -18,9 +32,8 @@ modules.terraform = {
 ```nix
 modules.terraform = {
   enable = true;
-  versions = [ "1.10.2" "1.12.2" "latest" ];
+  versions = [ "1.10.5" "1.11.4" "1.12.2" ];  # direnv에서 인식할 버전 목록
   defaultVersion = "1.12.2";
-  installAll = true;
 };
 ```
 
@@ -34,233 +47,100 @@ modules.terraform = {
 
 ### `versions`
 
-- **타입**: `list of strings`  
-- **기본값**: `[ "1.10.2" "1.12.2", "latest" ]`
-- **설명**: 설치할 Terraform 버전 목록
+- **타입**: `list of strings`
+- **기본값**: `[]`
+- **설명**: direnv에서 사용 가능한 Terraform 버전 목록 (lazy loading)
 
 ### `defaultVersion`
 
 - **타입**: `string`
-- **기본값**: `"1.12.2"`
-- **설명**: 기본으로 사용할 Terraform 버전
+- **기본값**: `"latest"`
+- **설명**: 기본으로 사용할 Terraform 버전 (즉시 설치됨)
 
-### `installAll`
+### `runEnv`
 
-- **타입**: `bool`
-- **기본값**: `false`
-- **설명**: 설정된 모든 Terraform 버전 설치
-
-## 셸 별칭
-
-다중 버전이 설치된 경우, 각 버전별로 별칭이 생성됩니다:
-
-- `terraform-1.10.2` → terraform version 1.10.2
-- `terraform-1.12.2` → terraform version 1.12.2  
-- `terraform-latest` → 최신 terraform version
+- **타입**: `attrs of strings`
+- **기본값**: `{}`
+- **설명**: `tf` alias 실행 시 설정할 환경 변수
 
 ---
 
-# Direnv 통합
+## Direnv 통합
 
-backend.tf 파일의 `required_version`을 자동으로 감지하여 해당 버전의 Terraform을 사용하는 direnv 통합 시스템입니다.
+`backend.tf` 파일의 `required_version`을 자동으로 감지하여 해당 버전의 Terraform을 로드합니다.
 
-## 작동 방식
+### 작동 방식
 
-각 프로젝트에 로컬 `flake.nix`를 자동 생성하여 환경변수 의존성을 완전히 제거한 개선된 방식을 사용합니다.
+1. 프로젝트 디렉토리에 `.envrc` 파일 생성
+2. `use_terraform` 함수 호출
+3. `backend.tf`, `versions.tf`, `main.tf`에서 `required_version` 파싱
+4. 기본 버전과 다르면 **nix-direnv를 통해 lazy load**
+5. `/nix/store`에 캐시되어 이후 즉시 로드
 
-### 자동 flake 생성
+### 사용법
 
-`.envrc` 파일이 실행될 때 자동으로 다음을 수행합니다:
-
-1. 현재 디렉토리에 `flake.nix`가 없으면 자동 생성
-2. 로컬 `backend.tf`, `versions.tf`, `main.tf` 파일에서 `required_version` 파싱
-3. 해당 버전의 terraform 환경 로드
-
-## 사용법
-
-### 1. 새 프로젝트 초기화
+프로젝트 디렉토리에 `.envrc` 파일 생성:
 
 ```bash
-cd /path/to/your/terraform/project
-~/development/nix-flakes/scripts/init-terraform-project.sh 1.10.2
+# .envrc
+use_terraform
 ```
 
-이 명령어는 다음을 수행합니다:
-- `backend.tf` 파일 생성 (없는 경우)
-- 개선된 `.envrc` 파일 생성 (자동 flake 생성 포함)
-- direnv 설정 활성화
-
-### 2. 기존 프로젝트에 추가
-
-기존 Terraform 프로젝트에 direnv를 추가하려면:
+그리고 direnv 허용:
 
 ```bash
-cd /path/to/existing/terraform/project
-
-# 개선된 .envrc 파일 생성
-cat > .envrc << 'EOF'
-#!/usr/bin/env bash
-# Terraform 설정 파일들 변경 감지
-watch_file backend.tf
-watch_file versions.tf
-watch_file main.tf
-
-# 로컬 flake 자동 생성
-if [[ ! -f "flake.nix" ]]; then
-  cat > flake.nix << 'FLAKE_EOF'
-{
-  inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
-    nixpkgs-terraform.url = "github:stackbuilders/nixpkgs-terraform";
-  };
-
-  outputs = { self, nixpkgs, nixpkgs-terraform }:
-    let
-      systems = [ "x86_64-linux" "aarch64-darwin" "aarch64-linux" "x86_64-darwin" ];
-      forAllSystems = nixpkgs.lib.genAttrs systems;
-      
-      parseRequiredVersion = content:
-        let
-          versionMatch = builtins.match ".*required_version[ ]*=[ ]*\"([^\"]+)\".*" content;
-        in
-          if versionMatch != null then
-            let 
-              versionSpec = builtins.head versionMatch;
-              exactMatch = builtins.match "=[ ]*([0-9.]+)" versionSpec;
-              minMatch = builtins.match ">=[ ]*([0-9.]+).*" versionSpec;
-              rangeMatch = builtins.match "~>[ ]*([0-9.]+)" versionSpec;
-            in
-              if exactMatch != null then builtins.head exactMatch
-              else if minMatch != null then builtins.head minMatch
-              else if rangeMatch != null then builtins.head rangeMatch
-              else "1.12.2"
-          else "1.12.2";
-    in
-    {
-      devShells = forAllSystems (system:
-        let
-          pkgs = nixpkgs.legacyPackages.${system};
-          
-          tfVersion = 
-            if builtins.pathExists ./backend.tf then
-              parseRequiredVersion (builtins.readFile ./backend.tf)
-            else if builtins.pathExists ./versions.tf then
-              parseRequiredVersion (builtins.readFile ./versions.tf)
-            else if builtins.pathExists ./main.tf then
-              parseRequiredVersion (builtins.readFile ./main.tf)
-            else "1.12.2";
-          
-          terraform = nixpkgs-terraform.packages.${system}.${tfVersion};
-        in
-        {
-          default = pkgs.mkShell {
-            buildInputs = [ terraform ];
-            
-            shellHook = ''
-              echo "🚀 Terraform ${tfVersion} environment loaded from local config"
-              terraform version
-            '';
-          };
-        });
-    };
-}
-FLAKE_EOF
-fi
-
-use flake
-EOF
-
-# direnv 허용
 direnv allow
 ```
 
-### 3. 버전 변경
-
-```bash
-~/development/nix-flakes/scripts/switch-terraform-version.sh 1.10.2 "="
-```
-
-변경 후 flake를 새로 생성하려면:
-```bash
-rm flake.nix flake.lock
-direnv reload
-```
-
-## 지원되는 버전 형식
-
-backend.tf, versions.tf, main.tf에서 다음 형식들이 지원됩니다:
+### 지원되는 버전 형식
 
 ```hcl
 terraform {
   # 정확한 버전
-  required_version = "= 1.10.2"
+  required_version = "= 1.10.5"
   
-  # 최소 버전  
-  required_version = ">= 1.10.2"
+  # 최소 버전
+  required_version = ">= 1.10.5"
   
   # 범위 버전
   required_version = "~> 1.10.0"
   
-  # 복합 조건 (첫 번째 조건만 파싱됨)
-  required_version = ">= 1.10.0, < 2.0.0"
+  # 버전만 지정
+  required_version = "1.10.5"
 }
 ```
 
-## 테스트
+## 캐시 동작
 
-제공된 테스트 프로젝트에서 확인:
-
-```bash
-cd ~/development/nix-flakes/test-terraform-project
-
-# backend.tf 내용 확인
-cat backend.tf
-
-# direnv 환경 진입
-direnv allow
-
-# 예상 출력:
-# 🚀 Terraform 1.10.2 environment loaded from local config
-# Terraform v1.10.2
-
-# flake.nix가 자동 생성되었는지 확인
-ls -la flake.nix
-```
+| 상황 | 동작 |
+|------|------|
+| 첫 번째 프로젝트에서 1.10.5 사용 | 빌드 (1회) |
+| 두 번째 프로젝트에서 1.10.5 사용 | 캐시에서 즉시 로드 |
+| `nix flake update` 후 (nixpkgs-terraform 고정) | 캐시 유지 |
+| `nix flake update` 후 (nixpkgs-terraform 변경) | 재빌드 |
 
 ## 트러블슈팅
 
-### 올바르지 않은 버전이 로드되는 경우
+### 버전이 로드되지 않는 경우
 
-1. backend.tf 파일의 `required_version` 확인:
+1. nix-direnv가 설치되어 있는지 확인:
 ```bash
-grep required_version backend.tf
+# base/default.nix에서 direnv.nix-direnv.enable = true 확인
 ```
 
-2. flake 재생성:
+2. direnv 캐시 초기화:
 ```bash
-rm flake.nix flake.lock
-direnv reload
-```
-
-3. 수동 테스트:
-```bash
-nix develop . --command terraform version
-```
-
-### direnv 에러가 발생하는 경우
-
-1. direnv 재허용:
-```bash
+rm -rf .direnv
 direnv allow
-direnv reload
 ```
 
-2. .envrc 권한 확인:
+3. 수동으로 버전 확인:
 ```bash
-chmod +x .envrc
+nix shell github:stackbuilders/nixpkgs-terraform#1.10.5 --command terraform version
 ```
 
-3. flake 유효성 검증:
-```bash
-nix flake check .
-```
+### 빌드가 오래 걸리는 경우
+
+첫 번째 로드 시에만 빌드가 필요합니다. 이후에는 `/nix/store` 캐시를 사용합니다.
+
+binary cache에서 다운로드되지 않는 경우 로컬 빌드가 필요할 수 있습니다 (특히 aarch64-darwin).
