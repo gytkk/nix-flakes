@@ -44,7 +44,6 @@
     # 기본 패키지 (모든 환경에서 공통)
     packages = with pkgs; [
       # Nix
-      nixd
       nixfmt
 
       # System utilities
