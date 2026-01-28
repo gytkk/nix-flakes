@@ -6,18 +6,17 @@
   nixpkgs-versions =
     final: _prev:
     let
-      system = final.stdenv.hostPlatform.system;
-      config = {
-        allowUnfree = true;
-      };
-
       # Lazy import helper - 패키지가 실제로 접근될 때만 nixpkgs를 import
       mkLazyPkgs =
         nixpkgsInput: packages:
         builtins.listToAttrs (
           map (name: {
             inherit name;
-            value = (import nixpkgsInput { inherit system config; }).${name};
+            value =
+              (import nixpkgsInput {
+                localSystem = final.stdenv.hostPlatform.system;
+                config.allowUnfree = true;
+              }).${name};
           }) packages
         );
     in

@@ -10,12 +10,12 @@ let
   # Pre-evaluated pkgs per system (evaluated once, reused everywhere)
   systemPkgs = {
     "x86_64-linux" = import nixpkgs {
-      system = "x86_64-linux";
+      localSystem = "x86_64-linux";
       config.allowUnfree = true;
       overlays = commonOverlays;
     };
     "aarch64-darwin" = import nixpkgs {
-      system = "aarch64-darwin";
+      localSystem = "aarch64-darwin";
       config.allowUnfree = true;
       overlays = commonOverlays;
     };

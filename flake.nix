@@ -20,9 +20,8 @@
     };
 
     # nixpkgs-terraform - for Terraform version management
-    # XXX: Pinned to specific commit to avoid infinite recursion issues
     nixpkgs-terraform = {
-      url = "github:stackbuilders/nixpkgs-terraform/67111c56b525073991fcb656ce30e9ad25a78826";
+      url = "github:stackbuilders/nixpkgs-terraform";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
