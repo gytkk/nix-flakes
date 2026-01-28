@@ -92,7 +92,6 @@ rec {
       throw "Missing required fields for NixOS host ${name}: ${builtins.toString missingFields}"
     else
       nixpkgs.lib.nixosSystem {
-        system = config.system;
         inherit specialArgs;
         modules = [
           inputs.disko.nixosModules.disko
@@ -101,6 +100,7 @@ rec {
           inputs.copyparty.nixosModules.default
           (../hosts + "/${name}/configuration.nix")
           {
+            nixpkgs.hostPlatform = config.system;
             nixpkgs.overlays = commonOverlays;
             nixpkgs.config.allowUnfree = true;
 
@@ -109,6 +109,7 @@ rec {
             home-manager.extraSpecialArgs = specialArgs;
             home-manager.users.${config.username} = import config.homeConfig;
           }
-        ] ++ (config.extraModules or [ ]);
+        ]
+        ++ (config.extraModules or [ ]);
       };
 }
