@@ -2,6 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Critical Rules
+
+- Follow existing code patterns and module structure in this repository
+- Use `nixfmt-rfc-style` to format all Nix files before committing
+- Do NOT run build tests directly - ask the user to test instead (builds can take several minutes)
+- Do NOT push unless explicitly requested
+
 ## Documentation Guidelines
 
 - **NO ONE-OFF DOCUMENTATION FILES**: Do not create temporary or one-off documentation files (e.g., CHANGES.md, NOTES.md, etc.)
@@ -13,47 +20,52 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - If you need to document something, update the appropriate existing file
 - When you work on markdown files, ensure they are following markdownlint rules
 
-## Source of Truth & Code Patterns
-
-- CLAUDE.md is the primary source of truth for coding rules
-- Always follow existing code patterns and module structure
-- Maintain architectural boundaries and consistency
-
-## Commands
-
-### Home Manager Operations
+## Build/Test/Lint Commands
 
 ```bash
-# Switch to environment-specific configuration
-home-manager switch --flake .#devsisters-macbook
-home-manager switch --flake .#devsisters-macstudio
-home-manager switch --flake .#pylv-denim
-home-manager switch --flake .#pylv-sepia
+# Validate flake configuration (run this first)
+nix flake check
 
-# Build without switching (test configuration)
-home-manager build --flake .#devsisters-macbook
-home-manager build --flake .#devsisters-macstudio
+# Test build specific environment (without applying)
 home-manager build --flake .#pylv-denim
 home-manager build --flake .#pylv-sepia
-```
+home-manager build --flake .#devsisters-macbook
+home-manager build --flake .#devsisters-macstudio
 
-### Nix Development
+# Apply configuration (after successful build)
+home-manager switch --flake .#<environment>
 
-```bash
-# Check flake configuration
-nix flake check
+# Format Nix files
+nixfmt-rfc-style <file.nix>
+nixfmt-rfc-style **/*.nix        # Format all Nix files
+
+# Show available flake outputs
+nix flake show
+
+# Update flake inputs
+nix flake update
 
 # Enter development shell
 nix develop
 ```
 
-### Terraform Version Management
+### Testing a Single Module
 
 ```bash
-# Use specific version directly
-terraform-1.12.2 version           # All configured versions available as commands
-terraform-1.11.4 version
-terraform-1.10.5 version
+# Build and check specific environment to test module changes
+home-manager build --flake .#pylv-denim 2>&1 | head -50
+
+# Check for evaluation errors without building
+nix eval .#homeConfigurations.pylv-denim.config.home.packages --apply 'x: map (p: p.name) x'
+```
+
+### Terraform Version Management
+
+Terraform uses **lazy loading** - only the default version is installed during `home-manager switch`. Other versions are loaded on-demand via direnv.
+
+```bash
+# Default terraform (configured in modules.terraform.defaultVersion)
+terraform version
 ```
 
 #### Directory-specific Terraform Versions (with direnv)
@@ -66,9 +78,10 @@ direnv allow
 ```
 
 The `use_terraform` function automatically:
+
 - Reads `required_version` from backend.tf/versions.tf/main.tf
-- Creates a symlink to the appropriate terraform-X.Y.Z binary
-- Adds it to PATH so `terraform` command uses the correct version
+- If different from default, loads the version via nix-direnv (cached in /nix/store)
+- First load builds the version; subsequent loads are instant
 
 ### Java Version Management
 
@@ -88,23 +101,21 @@ echo $JAVA_HOME
 
 Create `.envrc` files in project directories:
 
-**For Java 8 projects:**
 ```bash
+# For Java 8 projects
 echo "use_java_8" > .envrc
 direnv allow
-```
 
-**For Java 17 projects:**
-```bash
+# For Java 17 projects
 echo "use_java_17" > .envrc
 direnv allow
-```
 
-**Combined with other direnv functions:**
-```bash
-# .envrc example for Java 8 + Terraform
+# Combined with Terraform
+cat > .envrc << 'EOF'
 use_java_8
 use_terraform
+EOF
+direnv allow
 ```
 
 ### Secrets Management (agenix)
@@ -131,16 +142,139 @@ agenix -r
    # Decrypted file available at /run/agenix/mySecret
    ```
 
+## Nix Code Style Guidelines
+
+### File Structure
+
+```nix
+{
+  config,
+  lib,
+  pkgs,
+  username,           # Custom args from extraSpecialArgs
+  homeDirectory,
+  inputs,
+  isWSL ? false,      # Optional parameters with defaults
+  ...
+}:
+
+let
+  cfg = config.modules.moduleName;
+in
+{
+  # Main configuration body
+}
+```
+
+### Imports
+
+```nix
+imports = [
+  ../modules/claude
+  ../modules/git
+];
+```
+
+- Use relative paths for imports within the repository
+- Import directories containing `default.nix` by directory name
+
+### Formatting Rules
+
+- Opening brace `{` on same line for function parameters
+- One attribute per line in attribute sets
+- Semicolons at end of each attribute
+- Closing brace `}` on separate line
+- Use 2-space indentation (enforced by nixfmt-rfc-style)
+- Use `with pkgs;` for package lists
+
+### Naming Conventions
+
+| Type | Convention | Example |
+|------|------------|---------|
+| Variables | camelCase | `terraformPackages`, `defaultVersion` |
+| Module options | camelCase | `enable`, `runEnv`, `versions` |
+| Files | lowercase | `default.nix`, `home.nix` |
+| Directories | lowercase/kebab | `modules/`, `base/devsisters/` |
+| Environment names | kebab-case | `pylv-denim`, `devsisters-macbook` |
+
+### Module Pattern
+
+```nix
+let
+  cfg = config.modules.moduleName;
+in
+{
+  options.modules.moduleName = {
+    enable = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Enable this module";
+    };
+  };
+
+  config = lib.mkIf cfg.enable {
+    # Configuration when enabled
+  };
+}
+```
+
+### Package Lists
+
+```nix
+home.packages = with pkgs; [
+  packageName
+  pkgs.stable-25_05.ruby_3_2     # Specific nixpkgs version
+  pkgs.master.claude-code         # Master branch package
+  (pkgs.writeShellScriptBin "script-name" ''
+    script content
+  '')
+];
+```
+
+### Conditional Configuration
+
+```nix
+config = lib.mkIf cfg.enable { ... };                              # Single condition
+lib.mkMerge [ (lib.mkIf (!isWSL) { ... }) (lib.mkIf isWSL { ... }) ] # Multiple
+programs.git.settings.user.email = lib.mkForce "x@example.com";    # Force override
+```
+
+### Environment Definition (environments.nix)
+
+```nix
+{
+  "environment-name" = {
+    baseProfile = "company";       # Required: determines base config
+    system = "x86_64-linux";       # Required: architecture
+    username = "user";             # Required: user account
+    homeDirectory = "/home/user";  # Required: home path
+    isWSL = true;                  # Optional: WSL detection
+    extraModules = [ ./extra.nix ]; # Optional: additional modules
+  };
+}
+```
+
 ## Architecture
 
 This is a Nix flakes-based Home Manager configuration supporting multiple environments (macOS and Linux). The configuration uses a layered base system with company-specific customizations.
+
+### Quick Reference
+
+```text
+base/default.nix          # Common configuration for all environments
+base/<company>/home.nix   # Company-specific extensions
+modules/<name>/default.nix # Reusable module
+environments.nix          # All environment definitions
+lib/builders.nix          # mkHomeConfig, mkNixOSConfig helpers
+overlays/default.nix      # nixpkgs version overlays
+```
 
 ### Core Structure
 
 - `flake.nix`: Main flake configuration with inputs, outputs, and environment definitions
 - `environments.nix`: All environment configurations in a single file
 - `base/`: Layered Home Manager configurations
-  - `base/home.nix`: Common base configuration for all environments
+  - `base/default.nix`: Common base configuration for all environments
   - `base/devsisters/`: Devsisters-specific extensions
   - `base/pylv/`: Pylv-specific extensions
 - `modules/`: Modular configuration components
@@ -152,8 +286,8 @@ All environments are defined in `environments.nix` with the following structure:
 
 - **`devsisters-macbook`**: ARM64 macOS (gyutak@/Users/gyutak) with devsisters base profile
 - **`devsisters-macstudio`**: ARM64 macOS (gyutak@/Users/gyutak) with devsisters base profile
-- **`pylv-denim`**: x86_64 Linux (gytkk@/home/gytkk) with pylv base profile
-- **`pylv-sepia`**: x86_64 Linux (gytkk@/home/gytkk) with pylv base profile
+- **`pylv-denim`**: x86_64 Linux/WSL (gytkk@/home/gytkk) with pylv base profile
+- **`pylv-sepia`**: x86_64 Linux/WSL (gytkk@/home/gytkk) with pylv base profile
 
 Each environment specifies a `baseProfile` which determines which base configuration to load.
 
@@ -161,14 +295,14 @@ Each environment specifies a `baseProfile` which determines which base configura
 
 The layered base system provides inheritance and customization:
 
-1. **`base/home.nix`**: Common configuration imported by all company bases
-   - Core modules (claude, git, terraform, vim, zsh)
+1. **`base/default.nix`**: Common configuration imported by all company bases
+   - Core modules (claude, ghostty, git, java, k9s, opencode, terraform, vim, vscode, zsh)
    - Standard development packages
    - Basic programs configuration
 
 2. **`base/devsisters/home.nix`**: Extends base with Devsisters-specific tools
    - Authentication tools (saml2aws, vault)
-   - Eclair CLI with Ruby environment
+   - Scala, Ruby, Databricks CLI
    - Company-specific aliases and environment variables
 
 3. **`base/pylv/home.nix`**: Extends base with minimal Pylv-specific configuration
@@ -177,58 +311,50 @@ The layered base system provides inheritance and customization:
 
 ### Module System
 
-- **`modules/claude/`**: Claude Code installation with MCP support enabled
-- **`modules/git/`**: Git configuration (gytkk/gytk.kim@gmail.com) with LFS, custom aliases, and global gitignore
+- **`modules/claude/`**: Claude Code installation with MCP support
+- **`modules/ghostty/`**: Ghostty terminal configuration with themes
+- **`modules/git/`**: Git configuration with LFS, custom aliases, and global gitignore
 - **`modules/java/`**: Java version management (8, 17) with directory-based switching via direnv
-- **`modules/zsh/`**: Zsh with Oh-My-Zsh, Powerlevel10k theme, fzf, direnv, and development aliases
-- **`modules/terraform/`**: Terraform version management with environment variable support
-
-### Key Features
-
-- **Layered base system**: Common configuration with company-specific extensions
-- **Multi-environment support**: Different user accounts and system architectures
-- **Single file environment management**: All environments defined in `environments.nix`
-- **Development tooling**: docker, uv, nodejs, kubectl, k9s, awscli2
-- **Shell experience**: Zsh with syntax highlighting, autosuggestion, and custom aliases
-- **Code editing**: Neovim with development utilities
-- **Nix tooling**: nixfmt-rfc-style for code formatting
+- **`modules/k9s/`**: Kubernetes cluster manager
+- **`modules/opencode/`**: OpenCode AI coding agent
+- **`modules/terraform/`**: Terraform version management with lazy loading via direnv
+- **`modules/vim/`**: Neovim configuration
+- **`modules/vscode/`**: VSCode with extensions (full install on macOS, symlinks on WSL)
+- **`modules/zsh/`**: Zsh with Oh-My-Zsh, Powerlevel10k theme, fzf, direnv
 
 ### Package Management
 
 Base packages defined in `base/default.nix`:
 
 - **System**: coreutils, findutils, ripgrep, direnv
-- **Development**: docker, uv, nodejs, awscli2, yq, gcc
-- **Java**: OpenJDK 8, OpenJDK 17 with version switching tools
-- **JavaScript/TypeScript**: nodejs, typescript, pnpm, turbo
+- **Development**: docker, gcc, awscli2, jq, yq-go
+- **Java**: OpenJDK 17 (default), OpenJDK 8 via direnv
+- **JavaScript/TypeScript**: nodejs, bun, typescript, pnpm, turbo
 - **Go**: go compiler and tools
 - **Python**: uv package manager
+- **Rust**: rustup
 - **Kubernetes**: kubectl, kubectx, k9s, helm
-- **Nix**: nixfmt-rfc-style
+- **Secrets**: 1password-cli, keybase
+- **Nix**: nixfmt
 
-Company-specific packages added in respective base configurations:
+Company-specific packages:
 
-- **Devsisters**: saml2aws, vault, eclair, ruby_3_2, databricks-cli, scala_2_12, scala_3, sbt
+- **Devsisters**: saml2aws, vault, databricks-cli, scala_2_12, ruby_3_2
 - **Pylv**: Currently none (inherits base only)
-
-### Configuration Management
-
-- Test changes: `home-manager build --flake .#<environment>`
-- Apply changes: `home-manager switch --flake .#<environment>`
-- Format code: `nixfmt-rfc-style` for consistent styling
-- Version control: All configurations tracked in git
 
 ### Adding New Environments
 
 To add a new company or environment:
 
 1. **Add base configuration** (if new company):
+
    ```bash
    mkdir base/new-company
-   # Create base/new-company/home.nix that imports ../home.nix
+   # Create base/new-company/home.nix that imports ../default.nix
    ```
 
 2. **Add environment to `environments.nix`**:
+
    ```nix
    "new-environment" = {
      baseProfile = "new-company";
@@ -239,6 +365,24 @@ To add a new company or environment:
    ```
 
 3. **Test the configuration**:
+
    ```bash
    home-manager build --flake .#new-environment
    ```
+
+## Git Conventions
+
+- Use [Conventional Commits](https://www.conventionalcommits.org/): `feat:`, `fix:`, `docs:`, `refactor:`
+- Write in imperative mood: "Add feature" not "Added feature"
+- Keep commits atomic: one logical change per commit
+
+## Security
+
+- Never commit secrets or credentials
+- Use agenix for secrets management:
+
+  ```nix
+  age.secrets.secretName.file = ../../secrets/secret-name.age;
+  ```
+
+- Secrets decrypt to `/run/agenix/<secretName>`
