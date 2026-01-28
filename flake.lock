@@ -195,7 +195,7 @@
         "type": "github"
       }
     },
-    "nixpkgs-1_0": {
+    "nixpkgs-23_05": {
       "locked": {
         "lastModified": 1705033721,
         "narHash": "sha256-K5eJHmL1/kev6WuqyqqbS1cdNnSidIZ3jeqJ7GbrYnQ=",
@@ -211,7 +211,7 @@
         "type": "github"
       }
     },
-    "nixpkgs-1_6": {
+    "nixpkgs-24_05": {
       "locked": {
         "lastModified": 1735651292,
         "narHash": "sha256-YLbzcBtYo1/FEzFsB3AnM16qFc6fWPMIoOuSoDwvg9g=",
@@ -264,22 +264,21 @@
         "nixpkgs": [
           "nixpkgs"
         ],
-        "nixpkgs-1_0": "nixpkgs-1_0",
-        "nixpkgs-1_6": "nixpkgs-1_6",
+        "nixpkgs-23_05": "nixpkgs-23_05",
+        "nixpkgs-24_05": "nixpkgs-24_05",
         "systems": "systems_2"
       },
       "locked": {
-        "lastModified": 1760585172,
-        "narHash": "sha256-MhjD2Z2LHun2DIO2e2C04okFmAzr1iDarRZv1U/28NM=",
+        "lastModified": 1767712615,
+        "narHash": "sha256-I5EkVyzvN4izkB/uoiA9PdC9HVnp2BnlWTr4QcHDH+8=",
         "owner": "stackbuilders",
         "repo": "nixpkgs-terraform",
-        "rev": "67111c56b525073991fcb656ce30e9ad25a78826",
+        "rev": "b0a3a5b8f3fb7cf61cf8bf670f02d25d1a52386b",
         "type": "github"
       },
       "original": {
         "owner": "stackbuilders",
         "repo": "nixpkgs-terraform",
-        "rev": "67111c56b525073991fcb656ce30e9ad25a78826",
         "type": "github"
       }
     },
