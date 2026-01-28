@@ -27,11 +27,11 @@ in
     foreground = #383a42
     selection-background = #bfceff
     selection-foreground = #383a42
-    adjust-cursor-thickness = 100%
+    adjust-cursor-thickness = 250%
     cursor-style = bar
-    cursor-color = #324eff
+    cursor-color = #0184bc
     cursor-text = #ffffff
-    cursor-click-to-move
+    cursor-click-to-move = true
     palette = 0=#383a42
     palette = 1=#e45649
     palette = 2=#50a14f
