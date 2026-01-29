@@ -114,6 +114,11 @@
     ];
 
     stateVersion = "25.05";
+
+    # Rust/C 빌드 시 라이브러리 경로 (특히 macOS에서 libiconv 링킹용)
+    sessionVariables = {
+      LIBRARY_PATH = lib.makeLibraryPath [ pkgs.libiconv ];
+    };
   };
 
   programs = {
