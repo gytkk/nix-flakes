@@ -48,10 +48,7 @@ in
     # Other versions are loaded lazily via direnv + nix-direnv
     home.packages = [
       (
-        if cfg.defaultVersion == "latest" then
-          pkgs.terraform
-        else
-          pkgs.terraform-versions.${cfg.defaultVersion}
+        if cfg.defaultVersion == "latest" then pkgs.terraform else pkgs.${"terraform-${cfg.defaultVersion}"}
       )
     ];
 
