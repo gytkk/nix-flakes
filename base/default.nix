@@ -50,6 +50,7 @@
       coreutils
       findutils
       gnupg
+      libiconv
 
       # Development (common)
       docker
