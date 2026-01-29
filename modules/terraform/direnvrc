@@ -8,6 +8,7 @@ use_terraform() {
   watch_file backend.tf
   watch_file versions.tf
   watch_file main.tf
+  watch_file terraform.tf
 
   # Default version (substituted by Nix)
   local DEFAULT_VERSION="@DEFAULT_VERSION@"
@@ -15,7 +16,7 @@ use_terraform() {
   local TERRAFORM_VERSION="$DEFAULT_VERSION"
 
   # Parse required_version from terraform config files
-  for file in "backend.tf" "versions.tf" "main.tf"; do
+  for file in "backend.tf" "versions.tf" "main.tf" "terraform.tf"; do
     if [[ -f "$file" ]]; then
       local VERSION_SPEC
       VERSION_SPEC=$(grep -o 'required_version[ ]*=[ ]*"[^"]*"' "$file" 2>/dev/null | sed 's/.*"\([^"]*\)".*/\1/' | head -1)
