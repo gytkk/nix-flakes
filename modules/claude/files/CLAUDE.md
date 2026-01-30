@@ -26,3 +26,31 @@
 
 - Never commit secrets, credentials, or API keys.
 - Use environment variables or secret management tools for sensitive data.
+
+## Testing
+
+- Write tests for new features before or alongside implementation.
+- Run existing tests before committing (e.g., `uv run -m pytest`, `npm test`).
+- Ensure all tests pass before pushing.
+- Cover edge cases and error scenarios in tests.
+
+## Code Review
+
+- Focus on: readability, maintainability, security, and performance.
+- Suggest improvements constructively with clear explanations.
+- Check for edge cases and proper error handling.
+- Verify that changes align with existing code patterns.
+
+## Documentation
+
+- Update README.md when adding new features or changing behavior.
+- Add docstrings/comments for complex logic only when necessary.
+- Keep documentation in sync with code changes.
+- Do NOT create one-off or temporary documentation files.
+
+## Error Handling
+
+- Always handle errors gracefully; avoid silent failures.
+- Use specific error types when possible.
+- Log errors with enough context for debugging.
+- Provide meaningful error messages to users.
