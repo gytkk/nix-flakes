@@ -15,7 +15,6 @@
     ../modules/claude
     ../modules/ghostty
     ../modules/git
-    ../modules/java
     ../modules/k9s
     ../modules/opencode
     ../modules/terraform
