@@ -72,6 +72,10 @@ let
     # Rust
     rust-lang.rust-analyzer
 
+    # Scala
+    scala-lang.scala
+    scalameta.metals
+
     # Terraform
     hashicorp.terraform
 
