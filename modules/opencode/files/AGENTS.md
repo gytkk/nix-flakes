@@ -61,3 +61,31 @@
 - Use specific error types when possible.
 - Log errors with enough context for debugging.
 - Provide meaningful error messages to users.
+
+## Custom Agents
+
+Use the appropriate custom agent for specialized tasks:
+
+- **@review**: Invoke when reviewing code for quality, best practices, potential bugs, or security issues. This agent provides constructive feedback without making direct changes.
+- **@troubleshoot**: Invoke when analyzing error logs, stack traces, or debugging issues. This agent helps identify root causes and proposes solutions.
+
+Example usage:
+
+```text
+@review Check this authentication implementation for security issues
+@troubleshoot Analyze this error: [paste error log]
+```
+
+## Skills
+
+Load these skills for specialized workflows. Skills provide step-by-step guidance for specific tasks.
+
+- **/git-commit**: Load when creating git commits. Ensures conventional commit format and best practices.
+- **/git-pr**: Load when creating GitHub pull requests. Provides structured PR descriptions.
+
+When to use skills:
+
+- Before making a commit → load `/git-commit`
+- Before creating a PR → load `/git-pr`
+
+Skills are loaded via the `/skill-name` command or automatically when the task matches the skill description.

@@ -29,5 +29,13 @@
       "type": "remote",
       "url": "https://mcp.context7.com/mcp"
     }
+  },
+  "permission": {
+    "skill": {
+      "*": "allow"
+    },
+    "task": {
+      "*": "allow"
+    }
   }
 }

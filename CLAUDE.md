@@ -322,6 +322,65 @@ The layered base system provides inheritance and customization:
 - **`modules/vscode/`**: VSCode with extensions (full install on macOS, symlinks on WSL)
 - **`modules/zsh/`**: Zsh with Oh-My-Zsh, Powerlevel10k theme, fzf, direnv
 
+### AI Coding Agent Configurations
+
+When updating AI coding agent settings (agents, tools, skills, MCP servers, etc.), **modify the global configuration files in these modules** rather than local project files. Changes here apply globally across all projects.
+
+#### Claude Code Module (`modules/claude/`)
+
+Global configuration for Claude Code (Anthropic's AI coding assistant).
+
+| File | Purpose | Deployed To |
+|------|---------|-------------|
+| `files/settings.json` | Model selection, permissions, MCP settings | `~/.claude/settings.json` |
+| `files/mcp.json` | MCP server configurations | `~/.claude/mcp.json` |
+| `files/CLAUDE.md` | Global instructions for Claude behavior | `~/.claude/CLAUDE.md` |
+| `agents/*.md` | Custom agent definitions | `~/.claude/agents/` |
+
+**Custom Agents** (in `agents/`):
+
+- `code-reviewer.md`: Code review agent
+- `software-dev-engineer.md`: Software development guidance
+- `test-code-writer.md`: Test code generation
+
+**Common modification scenarios**:
+
+- Add new MCP server → Edit `files/mcp.json`
+- Add new pre-approved command → Edit `files/settings.json` → `permissions.allow`
+- Change default model → Edit `files/settings.json` → `model`
+- Update global instructions → Edit `files/CLAUDE.md`
+- Create new custom agent → Add `agents/{agent-name}.md`
+
+#### OpenCode Module (`modules/opencode/`)
+
+Global configuration for OpenCode (open-source AI coding agent).
+
+| File | Purpose | Deployed To |
+|------|---------|-------------|
+| `files/opencode.json` | Model, theme, plugins, MCP settings | `~/.config/opencode/opencode.json` |
+| `files/AGENTS.md` | Global instructions for OpenCode behavior | `~/.config/opencode/AGENTS.md` |
+| `files/agents/*.md` | Custom agent definitions | `~/.config/opencode/agents/` |
+| `files/skills/*/SKILL.md` | Custom skill definitions | `~/.config/opencode/skills/` |
+
+**Custom Agents** (in `files/agents/`):
+
+- `review.md`: Code review agent
+- `troubleshoot.md`: Troubleshooting agent
+
+**Custom Skills** (in `files/skills/`):
+
+- `git-commit/SKILL.md`: Conventional commits skill
+- `git-pr/SKILL.md`: GitHub PR creation skill
+
+**Common modification scenarios**:
+
+- Add new MCP server → Edit `files/opencode.json` → `mcp`
+- Add new plugin → Edit `files/opencode.json` → `plugin`
+- Change default model → Edit `files/opencode.json` → `model`
+- Update global instructions → Edit `files/AGENTS.md`
+- Create new custom agent → Add `files/agents/{agent-name}.md`
+- Create new custom skill → Add `files/skills/{skill-name}/SKILL.md`
+
 ### Package Management
 
 Base packages defined in `base/default.nix`:
