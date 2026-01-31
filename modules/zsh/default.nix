@@ -45,6 +45,7 @@
 
       # git
       ga = "git add";
+      gb = "git branch";
       gc = "git commit";
       gp = "git push";
       gl = "git pull";
