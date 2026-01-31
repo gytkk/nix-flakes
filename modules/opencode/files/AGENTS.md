@@ -5,6 +5,11 @@
 - First, deeply understand and think about what you want to achieve with your code.
 - Always follow existing code patterns and module structure in your working directory.
 - Be concise. Commit small, frequent changes for readable diffs.
+- Proactively use web search if there is any uncertainity or lack of knowledge.
+
+## Writing Code
+- Prefer to write docstring and unit tests first (TDD approach).
+- No 'any' type hints, use specific types.
 
 ## Python
 
@@ -17,7 +22,10 @@
 
 ## Git
 
+- Commit often with small, focused changes.
+- Write clear, descriptive commit messages.
 - Prefer [Conventional Commits](https://www.conventionalcommits.org/) format (e.g., `feat:`, `fix:`, `docs:`).
+- Also check git commit history for examples of good commit messages.
 - Write commit messages in imperative mood (e.g., "Add feature" not "Added feature").
 - Keep commits atomic: one logical change per commit.
 - Do NOT push unless explicitly requested.
@@ -31,7 +39,6 @@
 
 - Write tests for new features before or alongside implementation.
 - Run existing tests before committing (e.g., `uv run -m pytest`, `npm test`).
-- Ensure all tests pass before pushing.
 - Cover edge cases and error scenarios in tests.
 
 ## Code Review

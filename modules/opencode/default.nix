@@ -12,4 +12,10 @@
 
   # Create ~/.config/opencode/AGENTS.md file
   home.file.".config/opencode/AGENTS.md".source = ./files/AGENTS.md;
+
+  # Create ~/.config/opencode/agents/ directory
+  home.file.".config/opencode/agents".source = ./files/agents;
+
+  # Create ~/.config/opencode/skills/ directory
+  home.file.".config/opencode/skills".source = ./files/skills;
 }
