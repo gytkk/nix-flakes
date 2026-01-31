@@ -31,6 +31,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # nix-zed-extensions - for Zed extension management
+    nix-zed-extensions = {
+      url = "github:DuskSystems/nix-zed-extensions";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # agenix - secrets management for NixOS
     agenix = {
       url = "github:ryantm/agenix";

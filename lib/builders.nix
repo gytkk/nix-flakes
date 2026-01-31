@@ -4,6 +4,7 @@ let
   commonOverlays = [
     inputs.nixpkgs-terraform.overlays.default
     inputs.copyparty.overlays.default
+    inputs.nix-zed-extensions.overlays.default
     (import ../overlays { inherit inputs; }).nixpkgs-versions
   ];
 
