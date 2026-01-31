@@ -20,6 +20,7 @@
     ../modules/terraform
     ../modules/vim
     ../modules/vscode
+    ../modules/zed
     ../modules/zsh
   ];
 
