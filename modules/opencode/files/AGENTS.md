@@ -22,6 +22,9 @@
 
 ## Git
 
+> **IMPORTANT**: After completing each self-contained, logical change, immediately
+> commit it locally using `/git-commit`. Do NOT batch multiple unrelated changes.
+
 - Commit often with small, focused changes.
 - Write clear, descriptive commit messages.
 - Prefer [Conventional Commits](https://www.conventionalcommits.org/) format (e.g., `feat:`, `fix:`, `docs:`).

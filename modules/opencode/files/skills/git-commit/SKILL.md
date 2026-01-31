@@ -54,6 +54,10 @@ Use [Conventional Commits](https://www.conventionalcommits.org/):
 
 ## Safety Rules
 
+> **CRITICAL**: Only commit files that YOU directly modified in this session.
+> Do NOT commit unrelated changes or files modified by other processes.
+
+- NEVER commit files you did not explicitly modify
 - NEVER commit files containing secrets (.env, credentials, API keys)
 - NEVER use `--no-verify` to skip hooks
 - NEVER amend commits unless explicitly requested
