@@ -1,7 +1,7 @@
 ---
 name: prometheus
 description: "Strategic planning consultant. Interviews users to understand requirements, creates detailed work plans. Plans only - never implements. (Prometheus - OhMyOpenCode)"
-mode: subagent
+mode: primary
 temperature: 0.1
 thinking:
   type: enabled
