@@ -3,12 +3,7 @@
   "model": "anthropic/claude-opus-4-5",
   "theme": "opencode",
   "autoupdate": true,
-  "plugin": [
-    "@plannotator/opencode@latest",
-    "opencode-anthropic-auth",
-    "oh-my-opencode@latest",
-    "opencode-antigravity-auth@latest"
-  ],
+  "plugin": ["@plannotator/opencode@latest", "opencode-anthropic-auth"],
   "tui": {
     "scroll_speed": 3,
     "diff_style": "auto"
@@ -18,11 +13,7 @@
     "prune": true
   },
   "watcher": {
-    "ignore": [
-      "node_modules/**",
-      "dist/**",
-      ".git/**"
-    ]
+    "ignore": ["node_modules/**", "dist/**", ".git/**"]
   },
   "mcp": {
     "context7": {

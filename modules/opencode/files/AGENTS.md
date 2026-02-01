@@ -83,21 +83,34 @@ Example usage:
 
 Specialized agents from oh-my-opencode for advanced workflows:
 
+### Primary Orchestrators
+
+- **@sisyphus**: Main orchestrator agent. Delegates strategically via category+skills, manages todos obsessively, assesses codebase before implementation.
+- **@atlas**: Master orchestrator for work plans. Completes ALL tasks in a todo list via delegate_task() until fully done.
+- **@prometheus**: Strategic planning consultant. Interviews users, creates detailed work plans. Plans only - never implements.
+
+### Specialized Subagents
+
 - **@oracle**: High-IQ reasoning specialist for debugging hard problems and architecture design. Read-only consultation.
 - **@librarian**: Searches remote codebases, retrieves official documentation, finds implementation examples.
 - **@explore**: Contextual grep for codebases. Answers "Where is X?", "Find the code that does Z".
 - **@metis**: Pre-planning consultant that identifies hidden intentions and ambiguities.
 - **@momus**: Expert plan reviewer for clarity, verifiability, and completeness.
+- **@multimodal-looker**: Analyzes media files (PDFs, images, diagrams) that require interpretation beyond raw text.
 - **@sisyphus-junior**: Focused task executor without delegation capability.
 
 Example usage:
 
 ```text
+@sisyphus Implement user authentication with JWT
+@atlas Execute the work plan at .sisyphus/plans/auth.md
+@prometheus Create a work plan for adding dark mode
 @oracle Analyze this complex architecture decision
 @librarian Find best practices for React hooks
 @explore Find where authentication is implemented
 @metis Help me plan this refactoring task
 @momus Review my work plan
+@multimodal-looker Analyze this architecture diagram
 @sisyphus-junior Implement this specific function
 ```
 
