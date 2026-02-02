@@ -8,6 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Use `nixfmt-rfc-style` to format all Nix files before committing
 - Do NOT run build tests directly - ask the user to test instead (builds can take several minutes)
 - Do NOT push unless explicitly requested
+- Commit changes after completing a logical unit of work (when possible)
 
 ## Documentation Guidelines
 
