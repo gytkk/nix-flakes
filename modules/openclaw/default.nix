@@ -9,6 +9,7 @@
 
 let
   cfg = config.modules.openclaw;
+  isLinux = pkgs.stdenv.hostPlatform.isLinux;
 in
 {
   imports = [
@@ -24,6 +25,11 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    # Add Install section for systemd auto-start on Linux
+    systemd.user.services.openclaw-gateway = lib.mkIf isLinux {
+      Install.WantedBy = [ "default.target" ];
+    };
+
     programs.openclaw = {
       # Exclude tools that conflict with existing packages
       excludeTools = [
