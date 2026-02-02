@@ -52,21 +52,26 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    # Create Discord token env file at activation (before service starts)
+    home.activation.openclawDiscordEnv = lib.mkIf (isLinux && cfg.discord.enable) (
+      lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        mkdir -p /tmp/openclaw
+        if [ -f "${cfg.discord.tokenFile}" ]; then
+          echo "DISCORD_BOT_TOKEN=$(cat ${cfg.discord.tokenFile})" > /tmp/openclaw/env
+          chmod 600 /tmp/openclaw/env
+        else
+          # Create empty file to prevent service failure
+          touch /tmp/openclaw/env
+        fi
+      ''
+    );
+
     # Systemd service configuration for Linux
     systemd.user.services.openclaw-gateway = lib.mkIf isLinux {
       Install.WantedBy = [ "default.target" ];
 
-      # Load Discord bot token from agenix secret
-      Service.ExecStartPre = lib.mkIf cfg.discord.enable [
-        "${pkgs.writeShellScript "load-discord-token" ''
-          mkdir -p /tmp/openclaw
-          if [ -f "${cfg.discord.tokenFile}" ]; then
-            echo "DISCORD_BOT_TOKEN=$(cat ${cfg.discord.tokenFile})" > /tmp/openclaw/env
-            chmod 600 /tmp/openclaw/env
-          fi
-        ''}"
-      ];
-      Service.EnvironmentFile = lib.mkIf cfg.discord.enable [ "/tmp/openclaw/env" ];
+      # Load Discord token from env file (created by activation script)
+      Service.EnvironmentFile = lib.mkIf cfg.discord.enable [ "-/tmp/openclaw/env" ];
     };
 
     programs.openclaw = {
