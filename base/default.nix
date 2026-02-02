@@ -16,7 +16,6 @@
     ../modules/ghostty
     ../modules/git
     ../modules/k9s
-    ../modules/openclaw
     ../modules/opencode
     ../modules/terraform
     ../modules/vim
