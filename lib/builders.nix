@@ -88,6 +88,9 @@ rec {
         inherit (config) username homeDirectory;
         isWSL = config.isWSL or false;
       };
+
+      # Combine base home config with extra home modules
+      homeModules = [ config.homeConfig ] ++ (config.extraHomeModules or [ ]);
     in
     if missingFields != [ ] then
       throw "Missing required fields for NixOS host ${name}: ${builtins.toString missingFields}"
@@ -108,7 +111,9 @@ rec {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.extraSpecialArgs = specialArgs;
-            home-manager.users.${config.username} = import config.homeConfig;
+            home-manager.users.${config.username} = {
+              imports = homeModules;
+            };
           }
         ]
         ++ (config.extraModules or [ ]);

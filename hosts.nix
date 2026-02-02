@@ -7,5 +7,8 @@
 
     # Home Manager configuration for this host
     homeConfig = ./base/pylv/home.nix;
+
+    # Extra home manager modules for this host
+    extraHomeModules = [ ./base/pylv/sepia.nix ];
   };
 }
