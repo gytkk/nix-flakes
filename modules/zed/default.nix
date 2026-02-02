@@ -214,6 +214,24 @@ in
           recursive = true;
           source = extensionsDir;
         };
+
+        # macOS: Nix로 설치된 Zed.app을 ~/Applications에 링크
+        home.activation.installZedApp = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+          app_src="${pkgs.zed-editor}/Applications/Zed.app"
+          app_dest="$HOME/Applications/Zed.app"
+
+          if [ -e "$app_src" ]; then
+            # 기존 앱 제거 (심볼릭 링크 또는 디렉토리)
+            if [ -L "$app_dest" ] || [ -d "$app_dest" ]; then
+              rm -rf "$app_dest"
+            fi
+
+            # 새 앱 복사 (심볼릭 링크 대신 복사 - Spotlight 인덱싱을 위해)
+            mkdir -p "$HOME/Applications"
+            cp -RL "$app_src" "$app_dest"
+            echo "Zed.app installed to ~/Applications/"
+          fi
+        '';
       })
 
       # WSL: Windows Zed에 설정, 테마, 확장 배포 (Zed는 Windows에서 실행)

@@ -79,60 +79,9 @@ Example usage:
 @troubleshoot Analyze this error: [paste error log]
 ```
 
-## Oh-My-OpenCode Agents
-
-Specialized agents from oh-my-opencode for advanced workflows:
-
-### Primary Orchestrators
-
-- **@sisyphus**: Main orchestrator agent. Delegates strategically via category+skills, manages todos obsessively, assesses codebase before implementation.
-- **@atlas**: Master orchestrator for work plans. Completes ALL tasks in a todo list via delegate_task() until fully done.
-- **@prometheus**: Strategic planning consultant. Interviews users, creates detailed work plans. Plans only - never implements.
-
-### Specialized Subagents
-
-- **@oracle**: High-IQ reasoning specialist for debugging hard problems and architecture design. Read-only consultation.
-- **@librarian**: Searches remote codebases, retrieves official documentation, finds implementation examples.
-- **@explore**: Contextual grep for codebases. Answers "Where is X?", "Find the code that does Z".
-- **@metis**: Pre-planning consultant that identifies hidden intentions and ambiguities.
-- **@momus**: Expert plan reviewer for clarity, verifiability, and completeness.
-- **@multimodal-looker**: Analyzes media files (PDFs, images, diagrams) that require interpretation beyond raw text.
-- **@sisyphus-junior**: Focused task executor without delegation capability.
-
-Example usage:
-
-```text
-@sisyphus Implement user authentication with JWT
-@atlas Execute the work plan at .sisyphus/plans/auth.md
-@prometheus Create a work plan for adding dark mode
-@oracle Analyze this complex architecture decision
-@librarian Find best practices for React hooks
-@explore Find where authentication is implemented
-@metis Help me plan this refactoring task
-@momus Review my work plan
-@multimodal-looker Analyze this architecture diagram
-@sisyphus-junior Implement this specific function
-```
-
 ## Skills
 
 Load these skills for specialized workflows. Skills provide step-by-step guidance for specific tasks.
 
 - **/git-commit**: Load when creating git commits. Ensures conventional commit format and best practices.
 - **/git-pr**: Load when creating GitHub pull requests. Provides structured PR descriptions.
-
-## Oh-My-OpenCode Skills
-
-- **/git-master**: Advanced git operations - atomic commits, rebase/squash, history search (blame, bisect, log -S).
-- **/frontend-ui-ux**: Designer-turned-developer skill for crafting stunning UI/UX.
-- **/dev-browser**: Browser automation with persistent page state via Playwright.
-
-When to use skills:
-
-- Before making a commit → load `/git-commit`
-- Before creating a PR → load `/git-pr`
-- For complex git operations → load `/git-master`
-- For UI/UX work → load `/frontend-ui-ux`
-- For browser automation → load `/dev-browser`
-
-Skills are loaded via the `/skill-name` command or automatically when the task matches the skill description.
