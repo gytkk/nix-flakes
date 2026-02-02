@@ -18,11 +18,14 @@ let
     docker-compose
     dockerfile
     git-firefly
-    html
     make
-    nix
+
+    # Languages
     sql
+    nix
     toml
+    html
+    terraform
   ];
 
   # 모든 확장을 하나의 디렉토리로 병합
@@ -193,7 +196,14 @@ in
 
           inherit userSettings;
 
-          userKeymaps = [ ];
+          userKeymaps = [
+            {
+              context = "ProjectPanel";
+              bindings = {
+                "cmd-w" = null;
+              };
+            }
+          ];
 
           mutableUserSettings = true;
           mutableUserKeymaps = true;
