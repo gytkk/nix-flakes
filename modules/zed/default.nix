@@ -224,7 +224,11 @@ in
 
           if [ -e "$app_src" ]; then
             # 기존 앱 제거 (심볼릭 링크 또는 디렉토리)
-            if [ -L "$app_dest" ] || [ -d "$app_dest" ]; then
+            if [ -L "$app_dest" ]; then
+              rm -f "$app_dest"
+            elif [ -d "$app_dest" ]; then
+              # Nix store에서 복사된 파일은 읽기 전용이므로 삭제 전 권한 변경
+              chmod -R u+w "$app_dest"
               rm -rf "$app_dest"
             fi
 
