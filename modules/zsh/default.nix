@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  isWSL ? false,
   ...
 }:
 
@@ -59,8 +60,8 @@
       vi = "nvim";
       vimdiff = "nvim -d";
 
-      # Zed editor
-      zed = "zeditor";
+      # Zed editor (use Windows zed.exe on WSL)
+      zed = if isWSL then "zed.exe" else "zeditor";
 
       # OpenCode
       oc = "opencode";

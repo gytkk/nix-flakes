@@ -9,13 +9,13 @@
 # The decrypted secret will be available at /run/agenix/secretName
 let
   # User SSH public keys (for encrypting secrets)
-  gyutak = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG8W9FHKr99lQs1+t8zjB3rCtCfgfbxbmmazj/R1BVb0";
+  gytkk = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG8W9FHKr99lQs1+t8zjB3rCtCfgfbxbmmazj/R1BVb0";
 
   # Host SSH public keys (for host-specific secrets)
   pylv-sepia = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIC6EAZczgXONlXiwh946SidpRKSMw7fehg0u2L5SkHmd";
 
   # Key groups
-  allUsers = [ gyutak ];
+  allUsers = [ gytkk ];
   allHosts = [ pylv-sepia ];
 in
 {
