@@ -311,16 +311,124 @@ The layered base system provides inheritance and customization:
 
 ### Module System
 
-- **`modules/claude/`**: Claude Code installation with MCP support
-- **`modules/ghostty/`**: Ghostty terminal configuration with themes
-- **`modules/git/`**: Git configuration with LFS, custom aliases, and global gitignore
-- **`modules/java/`**: Java version management (8, 17) with directory-based switching via direnv
-- **`modules/k9s/`**: Kubernetes cluster manager
-- **`modules/opencode/`**: OpenCode AI coding agent
-- **`modules/terraform/`**: Terraform version management with lazy loading via direnv
-- **`modules/vim/`**: Neovim configuration
-- **`modules/vscode/`**: VSCode with extensions (full install on macOS, symlinks on WSL)
-- **`modules/zsh/`**: Zsh with Oh-My-Zsh, Powerlevel10k theme, fzf, direnv
+Each module in `modules/` manages a specific tool or application. **When asked to modify settings for any tool (VSCode, Zed, Git, etc.), always look in the corresponding module directory first.**
+
+#### Module Structure Pattern
+
+```text
+modules/<name>/
+├── default.nix          # Main module configuration (ALWAYS exists)
+├── files/               # Static config files deployed to home directory
+│   ├── settings.json    # JSON configuration files
+│   └── *.md             # Markdown files (instructions, agents)
+├── themes/              # Custom themes (JSON, TOML)
+├── agents/              # AI agent definitions (for AI tools)
+├── skills/              # Skill definitions (for AI tools)
+└── README.md            # Module documentation (optional)
+```
+
+#### Quick Module Reference
+
+| Module | Purpose | Config Location | Key Files |
+|--------|---------|-----------------|-----------|
+| `claude/` | Claude Code AI assistant | `~/.claude/` | `files/settings.json`, `files/mcp.json` |
+| `ghostty/` | Ghostty terminal | `~/.config/ghostty/` | `default.nix` (inline config) |
+| `git/` | Git configuration | `~/.gitconfig` | `default.nix` |
+| `k9s/` | Kubernetes manager | `~/.config/k9s/` | `default.nix` |
+| `opencode/` | OpenCode AI agent | `~/.config/opencode/` | `files/opencode.json`, `files/AGENTS.md` |
+| `terraform/` | Terraform versions | direnv lazy-load | `default.nix` |
+| `vim/` | Neovim | `~/.config/nvim/` | `default.nix` |
+| `vscode/` | VSCode editor | `~/.config/Code/` | `default.nix`, `themes/` |
+| `zed/` | Zed editor | `~/Library/Application Support/Zed/` (macOS) | `default.nix`, `themes/` |
+| `zsh/` | Zsh shell | `~/.zshrc` | `default.nix`, `starship.toml` |
+
+#### How to Find and Modify Settings
+
+**Step 1**: Identify the module
+
+```bash
+ls modules/  # See available modules
+```
+
+**Step 2**: Check module structure
+
+```bash
+ls -la modules/<name>/  # See files in the module
+```
+
+**Step 3**: Locate the setting
+
+- **Nix options** (packages, enable flags, program settings) → `default.nix`
+- **Static config files** (JSON, TOML, YAML) → `files/` or root of module
+- **Themes** → `themes/` directory
+- **AI agents/skills** → `agents/` or `skills/` directories
+
+**Step 4**: Make the change and validate
+
+```bash
+nix flake check --no-build  # Validate syntax
+# Ask user to run: home-manager switch --flake .#<environment>
+```
+
+### Editor Configurations
+
+#### VSCode Module (`modules/vscode/`)
+
+| File | Purpose |
+|------|---------|
+| `default.nix` | Extensions, settings, keybindings (via Home Manager `programs.vscode`) |
+| `one-half-light-theme/` | Custom theme package |
+
+**Common modification scenarios**:
+
+- Add/remove extension → Edit `default.nix` → `programs.vscode.extensions`
+- Change settings → Edit `default.nix` → `programs.vscode.userSettings`
+- Add keybinding → Edit `default.nix` → `programs.vscode.keybindings`
+- Modify theme → Edit `one-half-light-theme/themes/one-half-light.json`
+
+#### Zed Module (`modules/zed/`)
+
+| File | Purpose |
+|------|---------|
+| `default.nix` | All settings defined inline in `userSettings` attribute |
+| `themes/one-half-light.json` | Custom theme definition |
+
+**Common modification scenarios**:
+
+- Change editor settings → Edit `default.nix` → `userSettings` attribute set
+- Modify vim settings → Edit `default.nix` → `userSettings.vim`
+- Change theme → Edit `default.nix` → `userSettings.theme` or `themes/one-half-light.json`
+- Add language config → Edit `default.nix` → `userSettings.languages`
+- Add LSP config → Edit `default.nix` → `userSettings.lsp`
+- Add extensions → Edit `default.nix` → `nixExtensions` list (uses `pkgs.zed-extensions`)
+
+**Note**: Zed settings are defined as Nix attribute sets in `default.nix`, not separate JSON files. The module converts them to JSON automatically.
+
+#### Ghostty Module (`modules/ghostty/`)
+
+| File | Purpose |
+|------|---------|
+| `default.nix` | All terminal settings defined inline |
+
+**Common modification scenarios**:
+
+- Change font → Edit `default.nix` → `programs.ghostty.settings.font-family`
+- Change theme/colors → Edit `default.nix` → `programs.ghostty.settings`
+- Add keybindings → Edit `default.nix` → `programs.ghostty.settings`
+
+#### Zsh Module (`modules/zsh/`)
+
+| File | Purpose |
+|------|---------|
+| `default.nix` | Shell config, aliases, plugins, environment variables |
+| `starship.toml` | Starship prompt theme configuration |
+
+**Common modification scenarios**:
+
+- Add alias → Edit `default.nix` → `programs.zsh.shellAliases`
+- Add environment variable → Edit `default.nix` → `programs.zsh.sessionVariables`
+- Change prompt → Edit `starship.toml`
+- Add shell initialization → Edit `default.nix` → `programs.zsh.initContent`
 
 ### AI Coding Agent Configurations
 
