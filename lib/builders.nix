@@ -5,6 +5,7 @@ let
     inputs.nixpkgs-terraform.overlays.default
     inputs.copyparty.overlays.default
     inputs.nix-zed-extensions.overlays.default
+    inputs.nix-openclaw.overlays.default
     (import ../overlays { inherit inputs; }).nixpkgs-versions
   ];
 
