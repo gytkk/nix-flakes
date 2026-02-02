@@ -2,6 +2,14 @@
 
 이 모듈은 오픈소스 AI 코딩 에이전트인 OpenCode를 설치하고 설정합니다.
 
+## 초기 설정
+
+OpenCode 사용 전에 먼저 인증이 필요합니다:
+
+```bash
+opencode auth login
+```
+
 ## 기능
 
 - nixpkgs에서 `opencode` 설치
