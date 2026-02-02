@@ -94,6 +94,14 @@
     group = "cloudflared";
   };
 
+  # Discord bot token for openclaw (readable by user)
+  age.secrets.discord-bot-token = {
+    file = ../../secrets/discord-bot-token.age;
+    owner = "gytkk";
+    group = "users";
+    mode = "0400";
+  };
+
   systemd.services.cloudflared-tunnel = {
     description = "Cloudflare Tunnel";
     after = [

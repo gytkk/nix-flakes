@@ -13,7 +13,17 @@
 
   # OpenClaw - enabled with local hasown fix overlay
   # See: https://github.com/openclaw/nix-openclaw/issues/45
-  modules.openclaw.enable = true;
+  modules.openclaw = {
+    enable = true;
+
+    # Discord channel configuration
+    discord = {
+      enable = true;
+      tokenFile = "/run/agenix/discord-bot-token";
+      guildId = "1467867949657227318";
+      channelId = "1467867998655217850";
+    };
+  };
 
   # Pylv 특화 패키지들 (추후 필요시 추가)
   home.packages = with pkgs; [
