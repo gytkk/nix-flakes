@@ -37,7 +37,8 @@
     username = "gytkk";
     homeDirectory = "/home/gytkk";
 
-    isWSL = true;
+    # NixOS server (not WSL)
+    isWSL = false;
 
     extraModules = [ ./base/pylv/sepia.nix ];
   };
