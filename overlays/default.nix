@@ -1,13 +1,20 @@
 { inputs, ... }:
 
 {
-  # Fix for nix-openclaw hasown dependency issue
+  # Fix for nix-openclaw packaging issues
   # See: https://github.com/openclaw/nix-openclaw/issues/45
-  # The form-data package requires 'hasown' but pnpm doesn't symlink it
   openclaw-fix = final: prev: {
     openclaw-gateway = prev.openclaw-gateway.overrideAttrs (oldAttrs: {
-      # Use postFixup because the upstream uses a custom installPhase script
-      # that doesn't call runHook postInstall
+      # Wrap installPhase to also copy docs directory (needed for templates)
+      installPhase = ''
+        ${oldAttrs.installPhase}
+        # Copy docs directory for workspace templates (AGENTS.md, etc.)
+        if [ -d docs ]; then
+          cp -r docs "$out/lib/openclaw/"
+        fi
+      '';
+
+      # Use postFixup for symlink fixes (runs after install, before store is sealed)
       postFixup = (oldAttrs.postFixup or "") + ''
         # Work around missing dependency declaration in form-data (hasown).
         # form-data requires 'hasown' but doesn't declare it, causing runtime failures.
