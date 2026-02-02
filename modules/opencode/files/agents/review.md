@@ -1,4 +1,5 @@
 ---
+name: review
 description: Reviews code for quality and best practices
 mode: subagent
 temperature: 0.2

@@ -1,4 +1,5 @@
 ---
+name: troubleshoot
 description: Iterate over error logs and troubleshoot given issues
 mode: subagent
 temperature: 0.6
