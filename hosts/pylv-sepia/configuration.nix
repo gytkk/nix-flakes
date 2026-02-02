@@ -135,6 +135,9 @@
   # Enable zsh system-wide (configuration via Home Manager)
   programs.zsh.enable = true;
 
+  # Enable nix-ld for running dynamically linked binaries (e.g., bun plugins)
+  programs.nix-ld.enable = true;
+
   # Enable flakes
   nix.settings.experimental-features = [
     "nix-command"
