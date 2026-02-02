@@ -55,6 +55,18 @@ in
     # Systemd service configuration for Linux
     systemd.user.services.openclaw-gateway = lib.mkIf isLinux {
       Install.WantedBy = [ "default.target" ];
+
+      # Load Discord bot token from agenix secret
+      Service.ExecStartPre = lib.mkIf cfg.discord.enable [
+        "${pkgs.writeShellScript "load-discord-token" ''
+          mkdir -p /tmp/openclaw
+          if [ -f "${cfg.discord.tokenFile}" ]; then
+            echo "DISCORD_BOT_TOKEN=$(cat ${cfg.discord.tokenFile})" > /tmp/openclaw/env
+            chmod 600 /tmp/openclaw/env
+          fi
+        ''}"
+      ];
+      Service.EnvironmentFile = lib.mkIf cfg.discord.enable [ "/tmp/openclaw/env" ];
     };
 
     programs.openclaw = {
@@ -130,9 +142,9 @@ in
           plugins.entries.discord.enabled = cfg.discord.enable;
 
           # Discord channel configuration
+          # Token is provided via DISCORD_BOT_TOKEN environment variable (loaded from agenix)
           channels.discord = lib.mkIf cfg.discord.enable {
             enabled = true;
-            tokenFile = cfg.discord.tokenFile;
             groupPolicy = "allowlist";
 
             # DM settings - pairing mode for security
@@ -169,10 +181,9 @@ in
           skills.install.nodeManager = "bun";
         };
 
-        # Plugins - summarize for basic functionality
-        plugins = [
-          { source = "github:openclaw/nix-steipete-tools?dir=tools/summarize"; }
-        ];
+        # Plugins disabled for now (unlocked flake reference issue)
+        # Enable later: plugins = [ { source = "github:openclaw/nix-steipete-tools?dir=tools/summarize"; } ];
+        plugins = [ ];
       };
     };
   };
