@@ -160,6 +160,10 @@ let
       enabled = true;
     };
 
+    # Completions
+    show_completions_on_input = true;
+    show_completion_documentation = true;
+
     # Auto update
     auto_update = false;
   };

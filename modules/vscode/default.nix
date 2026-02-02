@@ -8,6 +8,8 @@
 }:
 
 let
+  cfg = config.modules.vscode;
+
   # nix-vscode-extensions에서 시스템에 맞는 확장 가져오기 (nixpkgs에 없는 것만)
   marketplaceExtensions =
     inputs.nix-vscode-extensions.extensions.${pkgs.stdenv.hostPlatform.system}.vscode-marketplace;
@@ -260,47 +262,59 @@ let
     "claudeCode.preferredLocation" = "panel";
   };
 in
-lib.mkMerge [
-  # macOS/Linux (non-WSL): 전체 VSCode 설정
-  (lib.mkIf (!isWSL) {
-    programs.vscode = {
-      enable = true;
-      package = pkgs.vscode;
-      mutableExtensionsDir = true;
-
-      profiles.default = {
-        extensions = commonExtensions;
-        inherit userSettings;
-      };
+{
+  options.modules.vscode = {
+    enable = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Enable VSCode module (currently disabled, use Zed instead)";
     };
-  })
+  };
 
-  # WSL: 확장과 설정을 심볼릭 링크로 설치 (VSCode는 Windows에서 실행)
-  (lib.mkIf isWSL {
-    home.file = wslExtensionLinks // {
-      ".vscode-server/data/Machine/settings.json".source = wslSettingsFile;
-    };
+  config = lib.mkIf cfg.enable (
+    lib.mkMerge [
+      # macOS/Linux (non-WSL): 전체 VSCode 설정
+      (lib.mkIf (!isWSL) {
+        programs.vscode = {
+          enable = true;
+          package = pkgs.vscode;
+          mutableExtensionsDir = true;
 
-    # extensions.json에 Nix 확장들을 병합
-    home.activation.vscodeExtensionsJson =
-      let
-        nixExtensionsFile = pkgs.writeText "nix-extensions.json" (builtins.toJSON nixExtensionsJson);
-        extensionsJsonPath = "${config.home.homeDirectory}/.vscode-server/extensions/extensions.json";
-      in
-      lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-        if [ -f "${extensionsJsonPath}" ]; then
-          # 기존 extensions.json과 Nix 확장들을 병합 (Nix 확장 ID로 중복 제거)
-          ${pkgs.jq}/bin/jq -s '
-            (.[0] | map({key: .identifier.id, value: .}) | from_entries) as $existing |
-            (.[1] | map({key: .identifier.id, value: .}) | from_entries) as $nix |
-            ($existing + $nix) | to_entries | map(.value)
-          ' "${extensionsJsonPath}" "${nixExtensionsFile}" > "${extensionsJsonPath}.tmp"
-          mv "${extensionsJsonPath}.tmp" "${extensionsJsonPath}"
-        else
-          # extensions.json이 없으면 새로 생성
-          mkdir -p "$(dirname "${extensionsJsonPath}")"
-          cp "${nixExtensionsFile}" "${extensionsJsonPath}"
-        fi
-      '';
-  })
-]
+          profiles.default = {
+            extensions = commonExtensions;
+            inherit userSettings;
+          };
+        };
+      })
+
+      # WSL: 확장과 설정을 심볼릭 링크로 설치 (VSCode는 Windows에서 실행)
+      (lib.mkIf isWSL {
+        home.file = wslExtensionLinks // {
+          ".vscode-server/data/Machine/settings.json".source = wslSettingsFile;
+        };
+
+        # extensions.json에 Nix 확장들을 병합
+        home.activation.vscodeExtensionsJson =
+          let
+            nixExtensionsFile = pkgs.writeText "nix-extensions.json" (builtins.toJSON nixExtensionsJson);
+            extensionsJsonPath = "${config.home.homeDirectory}/.vscode-server/extensions/extensions.json";
+          in
+          lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+            if [ -f "${extensionsJsonPath}" ]; then
+              # 기존 extensions.json과 Nix 확장들을 병합 (Nix 확장 ID로 중복 제거)
+              ${pkgs.jq}/bin/jq -s '
+                (.[0] | map({key: .identifier.id, value: .}) | from_entries) as $existing |
+                (.[1] | map({key: .identifier.id, value: .}) | from_entries) as $nix |
+                ($existing + $nix) | to_entries | map(.value)
+              ' "${extensionsJsonPath}" "${nixExtensionsFile}" > "${extensionsJsonPath}.tmp"
+              mv "${extensionsJsonPath}.tmp" "${extensionsJsonPath}"
+            else
+              # extensions.json이 없으면 새로 생성
+              mkdir -p "$(dirname "${extensionsJsonPath}")"
+              cp "${nixExtensionsFile}" "${extensionsJsonPath}"
+            fi
+          '';
+      })
+    ]
+  );
+}

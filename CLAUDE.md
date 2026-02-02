@@ -339,7 +339,7 @@ modules/<name>/
 | `opencode/` | OpenCode AI agent | `~/.config/opencode/` | `files/opencode.json`, `files/AGENTS.md` |
 | `terraform/` | Terraform versions | direnv lazy-load | `default.nix` |
 | `vim/` | Neovim | `~/.config/nvim/` | `default.nix` |
-| `vscode/` | VSCode editor | `~/.config/Code/` | `default.nix`, `themes/` |
+| `vscode/` | VSCode editor (DISABLED) | `~/.config/Code/` | `default.nix`, `themes/` |
 | `zed/` | Zed editor | `~/Library/Application Support/Zed/` (macOS) | `default.nix`, `themes/` |
 | `zsh/` | Zsh shell | `~/.zshrc` | `default.nix`, `starship.toml` |
 
@@ -373,7 +373,11 @@ nix flake check --no-build  # Validate syntax
 
 ### Editor Configurations
 
-#### VSCode Module (`modules/vscode/`)
+#### VSCode Module (`modules/vscode/`) - DISABLED
+
+> **Status**: This module is currently **disabled** (`enable = false`). Zed is the primary editor.
+>
+> **AI Assistant Note**: When the user requests VSCode-related modifications, **ask first** whether to re-enable the module before making changes. To re-enable, set `modules.vscode.enable = true` in the appropriate base or environment configuration.
 
 | File | Purpose |
 |------|---------|
