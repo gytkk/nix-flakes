@@ -47,11 +47,6 @@ let
       metrics = false;
     };
 
-    # Features
-    features = {
-      copilot = false;
-    };
-
     # UI
     ui_font_family = "JetBrainsMono Nerd Font";
     ui_font_size = 14;
@@ -76,7 +71,6 @@ let
     vim_mode = true;
     vim = {
       use_system_clipboard = "always";
-      use_multiline_find = true;
       use_smartcase_find = true;
     };
 
@@ -210,10 +204,18 @@ in
         };
 
         # Nix로 확장 관리 (nix-zed-extensions Home Manager 모듈 방식)
-        home.file.".local/share/zed/extensions/installed" = {
-          recursive = true;
-          source = extensionsDir;
-        };
+        # macOS: ~/Library/Application Support/Zed/extensions/installed/
+        # Linux: ~/.local/share/zed/extensions/installed/
+        home.file."${
+          if pkgs.stdenv.isDarwin then
+            "Library/Application Support/Zed/extensions/installed"
+          else
+            ".local/share/zed/extensions/installed"
+        }" =
+          {
+            recursive = true;
+            source = extensionsDir;
+          };
 
         # macOS: Nix로 설치된 Zed.app을 ~/Applications에 링크
         home.activation.installZedApp = lib.hm.dag.entryAfter [ "writeBoundary" ] ''

@@ -59,6 +59,12 @@
       vi = "nvim";
       vimdiff = "nvim -d";
 
+      # Zed editor
+      zed = "zeditor";
+
+      # OpenCode
+      oc = "opencode";
+
       # k8s aliases
       kl = "kubectl";
       kx = "kubectx";
