@@ -21,4 +21,7 @@ in
 {
   # Cloudflare Tunnel token for pylv-sepia
   "cloudflare-tunnel-token.age".publicKeys = allUsers ++ allHosts;
+
+  # Discord bot token for openclaw
+  "discord-bot-token.age".publicKeys = allUsers ++ allHosts;
 }
