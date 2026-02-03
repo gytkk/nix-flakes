@@ -52,7 +52,11 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    # Create Discord token env file at activation (before service starts)
+    # Create Discord token env file and daemon drop-in at activation.
+    # The `openclaw gateway` command creates a SEPARATE systemd service
+    # (clawdbot-gateway.service) for the actual daemon. Environment variables
+    # from openclaw-gateway.service are NOT inherited by the daemon, so we
+    # inject DISCORD_BOT_TOKEN via a systemd drop-in on the daemon service.
     home.activation.openclawDiscordEnv = lib.mkIf (isLinux && cfg.discord.enable) (
       lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         mkdir -p /tmp/openclaw
@@ -60,13 +64,24 @@ in
           echo "DISCORD_BOT_TOKEN=$(cat ${cfg.discord.tokenFile})" > /tmp/openclaw/env
           chmod 600 /tmp/openclaw/env
         else
-          # Create empty file to prevent service failure
           touch /tmp/openclaw/env
         fi
+
+        # Create systemd drop-in for the daemon service (clawdbot-gateway.service)
+        # to inject DISCORD_BOT_TOKEN into the daemon's environment
+        mkdir -p "$HOME/.config/systemd/user/clawdbot-gateway.service.d"
+        cat > "$HOME/.config/systemd/user/clawdbot-gateway.service.d/discord-token.conf" << 'EOF'
+        [Service]
+        EnvironmentFile=-/tmp/openclaw/env
+        EOF
+        systemctl --user daemon-reload 2>/dev/null || true
       ''
     );
 
     # Systemd service configuration for Linux
+    # In Nix mode (OPENCLAW_NIX_MODE=1), the gateway runs in the foreground,
+    # so the upstream Type=simple is correct. The EnvironmentFile injects the
+    # Discord bot token into the gateway process.
     systemd.user.services.openclaw-gateway = lib.mkIf isLinux {
       Install.WantedBy = [ "default.target" ];
 
