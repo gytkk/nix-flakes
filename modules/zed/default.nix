@@ -199,6 +199,7 @@ in
           extraPackages = with pkgs; [
             nixd
             ty
+            metals
           ];
 
           inherit userSettings;
