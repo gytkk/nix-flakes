@@ -132,6 +132,11 @@ let
           };
         };
       };
+      metals = {
+        binary = {
+          path = "${pkgs.metals}/bin/metals";
+        };
+      };
     };
 
     # Files
@@ -198,7 +203,6 @@ in
           extraPackages = with pkgs; [
             nixd
             ty
-            metals
           ];
 
           inherit userSettings;
