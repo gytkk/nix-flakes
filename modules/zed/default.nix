@@ -231,6 +231,7 @@ in
         }" =
           {
             recursive = true;
+            force = true;
             source = extensionsDir;
           };
 
