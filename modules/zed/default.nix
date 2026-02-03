@@ -21,6 +21,9 @@ let
     make
 
     # Languages
+    java
+    scala
+    html
     sql
     nix
     toml
