@@ -23,7 +23,6 @@ let
     # Languages
     java
     scala
-    html
     sql
     nix
     toml
