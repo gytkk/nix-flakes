@@ -36,5 +36,14 @@
     "task": {
       "*": "allow"
     }
+  },
+  "experimental": {
+    "hook": {
+      "session_completed": [
+        {
+          "command": ["printf", "\\e]9;OpenCode 응답 완료\\a"]
+        }
+      ]
+    }
   }
 }
