@@ -138,6 +138,8 @@
     # Kubernetes tools
     kubectl
     k9s
+    # Ghostty terminfo (SSH 접속 시 xterm-ghostty TERM 인식용)
+    ghostty.terminfo
   ];
 
   # Enable zsh system-wide (configuration via Home Manager)
