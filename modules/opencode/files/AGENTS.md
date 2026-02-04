@@ -1,5 +1,28 @@
 # AGENTS.md
 
+## Worktree Workflow (MANDATORY)
+
+> **CRITICAL**: Before starting ANY new task, you MUST create a git worktree.
+> Do NOT work directly on the main branch. This is non-negotiable.
+
+1. Create a new branch and worktree: `git worktree add ../$(basename $PWD)-<short-task-name> -b <branch-name>`
+2. Change to the worktree directory and work there
+3. When done, create a PR from the worktree branch
+4. After merge, clean up: `git worktree remove ../$(basename $PWD)-<short-task-name>`
+
+## Git
+
+> **CRITICAL**: After completing each self-contained, logical change, immediately
+> commit it locally using `/git-commit`. Do NOT batch multiple unrelated changes.
+
+- Commit often with small, focused changes.
+- Write clear, descriptive commit messages.
+- Prefer [Conventional Commits](https://www.conventionalcommits.org/) format (e.g., `feat:`, `fix:`, `docs:`).
+- Also check git commit history for examples of good commit messages.
+- Write commit messages in imperative mood (e.g., "Add feature" not "Added feature").
+- Keep commits atomic: one logical change per commit.
+- Do NOT push unless explicitly requested.
+
 ## Critical Rules
 
 - First, deeply understand and think about what you want to achieve with your code.
@@ -8,6 +31,7 @@
 - Proactively use web search if there is any uncertainity or lack of knowledge.
 
 ## Writing Code
+
 - Prefer to write docstring and unit tests first (TDD approach).
 - No 'any' type hints, use specific types.
 
@@ -19,19 +43,6 @@
   - Use `uv run script.py` instead of `python script.py`
   - Use `uv run -m pytest` instead of `python -m pytest`
   - Use `uv run -m pip install` instead of `pip install`
-
-## Git
-
-> **IMPORTANT**: After completing each self-contained, logical change, immediately
-> commit it locally using `/git-commit`. Do NOT batch multiple unrelated changes.
-
-- Commit often with small, focused changes.
-- Write clear, descriptive commit messages.
-- Prefer [Conventional Commits](https://www.conventionalcommits.org/) format (e.g., `feat:`, `fix:`, `docs:`).
-- Also check git commit history for examples of good commit messages.
-- Write commit messages in imperative mood (e.g., "Add feature" not "Added feature").
-- Keep commits atomic: one logical change per commit.
-- Do NOT push unless explicitly requested.
 
 ## Security
 
