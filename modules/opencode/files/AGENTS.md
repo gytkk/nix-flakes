@@ -5,10 +5,10 @@
 > **CRITICAL**: Before starting ANY new task, you MUST create a git worktree.
 > Do NOT work directly on the main branch. This is non-negotiable.
 
-1. Create a new branch and worktree: `git worktree add ../$(basename $PWD)-<short-task-name> -b <branch-name>`
+1. Create a new branch and worktree: `git worktree add ~/trees/$(basename $PWD)/<short-task-name> -b <branch-name>`
 2. Change to the worktree directory and work there
 3. When done, create a PR from the worktree branch
-4. After merge, clean up: `git worktree remove ../$(basename $PWD)-<short-task-name>`
+4. After merge, clean up: `git worktree remove ~/trees/$(basename $PWD)/<short-task-name>`
 
 ## Git
 
