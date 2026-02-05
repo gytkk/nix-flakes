@@ -66,13 +66,11 @@ in
         "${envPrefix}terraform";
     };
 
-    # Install direnvrc with use_terraform function (lazy loading)
-    home.file.".config/direnv/direnvrc" = {
-      text =
-        builtins.replaceStrings
-          [ "@DEFAULT_VERSION@" "@AVAILABLE_VERSIONS@" ]
-          [ cfg.defaultVersion (lib.concatStringsSep " " cfg.versions) ]
-          (builtins.readFile ./direnvrc);
-    };
+    # Add use_terraform function to direnv stdlib (preserves nix-direnv setup)
+    programs.direnv.stdlib =
+      builtins.replaceStrings
+        [ "@DEFAULT_VERSION@" "@AVAILABLE_VERSIONS@" ]
+        [ cfg.defaultVersion (lib.concatStringsSep " " cfg.versions) ]
+        (builtins.readFile ./direnvrc);
   };
 }
