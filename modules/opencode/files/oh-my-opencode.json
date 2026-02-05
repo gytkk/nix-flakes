@@ -60,5 +60,12 @@
     "writing": {
       "model": "google/gemini-3-flash"
     }
+  },
+  "lsp": {
+    "metals": {
+      "command": ["metals"],
+      "extensions": [".scala", ".sc", ".sbt"],
+      "priority": 10
+    }
   }
 }

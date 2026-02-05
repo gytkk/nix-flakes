@@ -15,6 +15,7 @@
   home.packages = with pkgs; [
     # Scala (default to 2.12, compatible with existing projects)
     scala_2_12
+    metals
 
     # Authentication
     saml2aws
