@@ -90,6 +90,16 @@ Example usage:
 @troubleshoot Analyze this error: [paste error log]
 ```
 
+## Prompt Keywords
+
+When the user's message contains any of these keywords (case-insensitive, typically
+at the end of the message), apply the associated behavior throughout the entire task.
+Strip the keyword from the message before processing the actual request.
+
+| Keyword | Behavior |
+|---------|----------|
+| `webs` | **Aggressive web search mode.** Before writing ANY code or making decisions, search the web first. Use web search to verify APIs, check latest docs, find best practices, and confirm syntax. When in doubt, search again. Prefer up-to-date web results over your training data. Search at minimum 3 times during the task. |
+
 ## Skills
 
 Load these skills for specialized workflows. Skills provide step-by-step guidance for specific tasks.
