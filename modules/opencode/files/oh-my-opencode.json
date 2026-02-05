@@ -1,0 +1,64 @@
+{
+  "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/master/assets/oh-my-opencode.schema.json",
+  "agents": {
+    "sisyphus": {
+      "model": "anthropic/claude-opus-4-5"
+    },
+    "oracle": {
+      "model": "opencode/gpt-5.2-codex",
+      "variant": "high"
+    },
+    "build": {
+      "model": "anthropic/claude-sonnet-4-5"
+    },
+    "librarian": {
+      "model": "anthropic/claude-haiku-4-5"
+    },
+    "explore": {
+      "model": "anthropic/claude-haiku-4-5"
+    },
+    "multimodal-looker": {
+      "model": "anthropic/claude-haiku-4-5"
+    },
+    "prometheus": {
+      "model": "anthropic/claude-opus-4-5",
+      "variant": "max"
+    },
+    "metis": {
+      "model": "anthropic/claude-opus-4-5",
+      "variant": "max"
+    },
+    "momus": {
+      "model": "opencode/gpt-5.2-codex",
+      "variant": "medium"
+    },
+    "atlas": {
+      "model": "anthropic/claude-sonnet-4-5"
+    }
+  },
+  "categories": {
+    "visual-engineering": {
+      "model": "google/gemini-3-pro"
+    },
+    "ultrabrain": {
+      "model": "opencode/gpt-5.2-codex",
+      "variant": "xhigh"
+    },
+    "artistry": {
+      "model": "google/gemini-3-pro",
+      "variant": "max"
+    },
+    "quick": {
+      "model": "anthropic/claude-haiku-4-5"
+    },
+    "unspecified-low": {
+      "model": "anthropic/claude-sonnet-4-5"
+    },
+    "unspecified-high": {
+      "model": "anthropic/claude-sonnet-4-5"
+    },
+    "writing": {
+      "model": "google/gemini-3-flash"
+    }
+  }
+}
