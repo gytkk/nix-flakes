@@ -23,7 +23,7 @@ opencode auth login
 
 ### opencode.json
 
-- **모델**: `anthropic/claude-opus-4-5` (기본값)
+- **모델**: `anthropic/claude-opus-4-6` (기본값)
 - **테마**: `opencode`
 - **자동 업데이트**: 활성화
 - **MCP**: 최신 라이브러리 문서를 위한 Context7

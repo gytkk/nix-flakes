@@ -78,6 +78,7 @@
     .DS_Store
     .idea
     .vscode
+    .zed
     .tool-versions
 
     # Environment
