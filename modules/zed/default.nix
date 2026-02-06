@@ -136,6 +136,9 @@ let
         binary = {
           path = "${pkgs.metals}/bin/metals";
         };
+        initialization_options = {
+          isHttpEnabled = true;
+        };
       };
     };
 
