@@ -11,7 +11,7 @@
   },
   "theme": "opencode",
   "autoupdate": true,
-  "plugin": ["@plannotator/opencode@latest", "opencode-anthropic-auth", "oh-my-opencode"],
+  "plugin": ["@plannotator/opencode@latest", "opencode-anthropic-auth", "oh-my-opencode", "@mohak34/opencode-notifier@latest"],
   "tui": {
     "scroll_speed": 3,
     "diff_style": "auto"
