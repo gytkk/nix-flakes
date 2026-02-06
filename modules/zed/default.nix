@@ -118,6 +118,22 @@ let
           "ty"
         ];
       };
+      Scala = {
+        formatter = "language_server";
+        format_on_save = "on";
+      };
+      Terraform = {
+        formatter = "language_server";
+        format_on_save = "on";
+      };
+      HCL = {
+        formatter = "language_server";
+        format_on_save = "on";
+      };
+      "Terraform Vars" = {
+        formatter = "language_server";
+        format_on_save = "on";
+      };
       Markdown = {
         soft_wrap = "editor_width";
       };
