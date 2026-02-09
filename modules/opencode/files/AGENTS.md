@@ -1,5 +1,13 @@
 # AGENTS.md
 
+## Verification & Inquiry Protocol (TOP PRIORITY)
+
+> **CRITICAL**: Apply at EVERY step. This overrides all other instructions.
+
+- **Verify before moving on.** Confirm each step succeeded with evidence (tests, diagnostics, diffs) — never assume.
+- **Ask, don't guess.** If requirements are ambiguous or context is missing, ask the user immediately.
+- **Surface blockers early.** Flag missing info, risky assumptions, or dependencies NOW — not after building on them.
+
 ## Worktree Workflow (MANDATORY)
 
 > **CRITICAL**: Before starting ANY new task, you MUST create a git worktree.
