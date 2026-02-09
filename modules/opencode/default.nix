@@ -18,7 +18,4 @@
 
   # Create ~/.config/opencode/agents/ directory
   home.file.".config/opencode/agents".source = ./files/agents;
-
-  # Create ~/.config/opencode/skills/ directory
-  home.file.".config/opencode/skills".source = ./files/skills;
 }

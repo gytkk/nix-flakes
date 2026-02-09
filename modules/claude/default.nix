@@ -17,9 +17,4 @@
 
   # Copy all agent files to ~/.claude/agents
   home.file.".claude/agents".source = ./agents;
-
-  home.shellAliases = {
-    # Create ccusage alias for npx ccusage@latest
-    ccusage = "npx ccusage@latest";
-  };
 }

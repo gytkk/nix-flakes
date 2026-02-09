@@ -11,7 +11,12 @@
   },
   "theme": "opencode",
   "autoupdate": true,
-  "plugin": ["@plannotator/opencode@latest", "opencode-anthropic-auth", "oh-my-opencode", "@mohak34/opencode-notifier@latest"],
+  "plugin": [
+    "@plannotator/opencode@latest",
+    "opencode-anthropic-auth",
+    "oh-my-opencode",
+    "@mohak34/opencode-notifier@latest"
+  ],
   "tui": {
     "scroll_speed": 3,
     "diff_style": "auto"
@@ -35,15 +40,6 @@
     },
     "task": {
       "*": "allow"
-    }
-  },
-  "experimental": {
-    "hook": {
-      "session_completed": [
-        {
-          "command": ["printf", "\\e]9;OpenCode 응답 완료\\a"]
-        }
-      ]
     }
   }
 }
