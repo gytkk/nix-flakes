@@ -86,13 +86,15 @@ in
     INSTALLED_PLUGINS="$HOME/.claude/plugins/installed_plugins.json"
 
     # Cache marketplace list once to avoid repeated calls
-    MARKETPLACE_CACHE=$(${timeout} 15s ${claude} plugin marketplace list 2>/dev/null || echo "")
+    # All claude commands use < /dev/null to prevent SIGTTIN when timeout(1)
+    # creates a new process group (background group reading from tty = stopped)
+    MARKETPLACE_CACHE=$(${timeout} 15s ${claude} plugin marketplace list < /dev/null 2>/dev/null || echo "")
 
     # Register marketplaces (failures are non-fatal)
     ${lib.concatMapStringsSep "\n    " (mp: ''
       if ! echo "$MARKETPLACE_CACHE" | grep -qF "${mp}"; then
         log "Adding marketplace: ${mp}"
-        if ${timeout} 60s ${claude} plugin marketplace add ${mp} >> "$SETUP_LOG" 2>&1; then
+        if ${timeout} 60s ${claude} plugin marketplace add ${mp} < /dev/null >> "$SETUP_LOG" 2>&1; then
           log "  -> OK"
         else
           log "  -> FAILED (exit $?)"
@@ -103,13 +105,13 @@ in
 
     # Refresh marketplace index after adding new ones
     log "Updating marketplace index..."
-    ${timeout} 30s ${claude} plugin marketplace update >> "$SETUP_LOG" 2>&1 || log "Marketplace update failed"
+    ${timeout} 30s ${claude} plugin marketplace update < /dev/null >> "$SETUP_LOG" 2>&1 || log "Marketplace update failed"
 
     # Install plugins (skip if already installed)
     ${lib.concatMapStringsSep "\n    " (plugin: ''
       if ! grep -qF "${plugin}" "$INSTALLED_PLUGINS" 2>/dev/null; then
         log "Installing plugin: ${plugin}"
-        if ${timeout} 60s ${claude} plugin install ${plugin} >> "$SETUP_LOG" 2>&1; then
+        if ${timeout} 60s ${claude} plugin install ${plugin} < /dev/null >> "$SETUP_LOG" 2>&1; then
           log "  -> OK"
         else
           log "  -> FAILED (exit $?)"
@@ -119,7 +121,7 @@ in
       fi'') plugins}
 
     # Cache MCP server list once to avoid repeated calls
-    MCP_CACHE=$(${timeout} 15s ${claude} mcp list 2>/dev/null || echo "")
+    MCP_CACHE=$(${timeout} 15s ${claude} mcp list < /dev/null 2>/dev/null || echo "")
 
     # Register MCP servers (skip if already registered)
     ${lib.concatMapStringsSep "\n    " (
@@ -132,7 +134,7 @@ in
       ''
         if ! echo "$MCP_CACHE" | grep -qF "${name}"; then
           log "Adding MCP server: ${name}"
-          if ${timeout} 30s ${claude} ${cmd} >> "$SETUP_LOG" 2>&1; then
+          if ${timeout} 30s ${claude} ${cmd} < /dev/null >> "$SETUP_LOG" 2>&1; then
             log "  -> OK"
           else
             log "  -> FAILED (exit $?)"
