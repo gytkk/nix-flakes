@@ -22,19 +22,15 @@ let
     "plugin install commit-commands@claude-code-plugins"
     # anthropics/claude-code — security warning hooks
     "plugin install security-guidance@claude-code-plugins"
-    # anthropics/claude-code — frontend design
-    "plugin install frontend-design@claude-code-plugins"
-    # anthropics/claude-plugins-official — browser automation
-    "plugin install playwright@claude-plugins-official"
 
     # anthropics/claude-plugins-official — LSP language servers
     "plugin install gopls-lsp@claude-plugins-official"
-    "plugin install pyright-lsp@claude-plugins-official"
     "plugin install rust-analyzer-lsp@claude-plugins-official"
     "plugin install typescript-lsp@claude-plugins-official"
-    # gytkk/claude-marketplace — custom agents and Scala LSP
-    "plugin install gytkk-agents@gytkk"
+
+    # gytkk/claude-marketplace — custom agents, Scala LSP, and Python LSP
     "plugin install metals-lsp@gytkk"
+    "plugin install ty-lsp@gytkk"
   ];
 
   allCommands = mcpCommands ++ marketplaceCommands ++ pluginCommands;
@@ -45,7 +41,6 @@ in
 
     # LSP servers for Claude Code plugins
     pkgs.gopls
-    pkgs.pyright
     # rust-analyzer is provided by rustup (base/default.nix)
     pkgs.nodePackages.typescript-language-server
   ];
