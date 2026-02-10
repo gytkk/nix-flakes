@@ -62,10 +62,10 @@ in
   '';
 
   # Install plannotator CLI binary (from GitHub releases, not in nixpkgs)
-  # The install script needs curl, coreutils, etc. on PATH
+  # Export PATH so install.sh subprocess also has access to curl, etc.
   home.activation.installPlannotator = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if ! command -v plannotator &>/dev/null; then
-      PATH="${
+      export PATH="${
         lib.makeBinPath (
           with pkgs;
           [
@@ -75,8 +75,8 @@ in
             gawk
           ]
         )
-      }:$PATH" \
-        ${pkgs.curl}/bin/curl -fsSL https://plannotator.ai/install.sh | ${pkgs.bash}/bin/bash
+      }:$PATH"
+      ${pkgs.curl}/bin/curl -fsSL https://plannotator.ai/install.sh | ${pkgs.bash}/bin/bash
     fi
   '';
 }
