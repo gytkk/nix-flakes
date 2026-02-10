@@ -24,6 +24,8 @@ let
     # anthropics/claude-code — security warning hooks
     "plugin install security-guidance@claude-code-plugins"
 
+    "plugin install ralph-loop@claude-plugins-official"
+
     # anthropics/claude-plugins-official — LSP language servers
     "plugin install gopls-lsp@claude-plugins-official"
     "plugin install rust-analyzer-lsp@claude-plugins-official"
@@ -52,12 +54,23 @@ in
     pkgs.terraform-ls
   ];
 
-  home.file.".claude/settings.json".source = ./files/settings.json;
+  # CLAUDE.md is read-only, safe as symlink
   home.file.".claude/CLAUDE.md".source = ./files/CLAUDE.md;
 
-  # Commands may fail if already registered (exit code 1), so use || true
-  # to prevent set -e from aborting the activation script early
+  # Deploy settings.json as a writable copy (plugins need to modify it),
+  # then run claude commands with git/which on PATH
   home.activation.setupClaudeCode = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    install -Dm644 ${./files/settings.json} "$HOME/.claude/settings.json"
+
+    export PATH="${
+      lib.makeBinPath (
+        with pkgs;
+        [
+          git
+          which
+        ]
+      )
+    }:$PATH"
     ${lib.concatMapStringsSep "\n" (cmd: "${claude} ${cmd} || true") allCommands}
   '';
 
