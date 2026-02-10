@@ -73,6 +73,7 @@ in
             coreutils
             gnugrep
             gawk
+            perl
           ]
         )
       }:$PATH"
