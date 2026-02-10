@@ -116,7 +116,7 @@ in
           ]
         )
       }:$PATH"
-      ${pkgs.curl}/bin/curl -fsSL https://plannotator.ai/install.sh | ${pkgs.bash}/bin/bash
+      ${pkgs.curl}/bin/curl -fsSL https://plannotator.ai/install.sh | ${pkgs.bash}/bin/bash >/dev/null 2>&1
     fi
   '';
 }
