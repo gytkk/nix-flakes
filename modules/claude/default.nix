@@ -61,6 +61,9 @@ in
   home.activation.setupClaudeCode = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     INSTALLED_PLUGINS="$HOME/.claude/plugins/installed_plugins.json"
 
+    # Ensure SSH_AUTH_SOCK is set (activation env may not inherit it)
+    export SSH_AUTH_SOCK="''${SSH_AUTH_SOCK:-$(launchctl getenv SSH_AUTH_SOCK 2>/dev/null || echo "")}"
+
     # Check if SSH agent has keys loaded (needed for marketplace git clone)
     SSH_READY=true
     if ! /usr/bin/ssh-add -l >/dev/null 2>&1; then
