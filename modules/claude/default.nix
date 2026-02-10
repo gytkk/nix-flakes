@@ -59,6 +59,19 @@ in
 
   # Install marketplaces, plugins, and MCP servers
   home.activation.setupClaudeCode = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    # Ensure git, ssh, and which are available for plugin marketplace operations
+    # (activation PATH only includes bash, coreutils, jq, etc.)
+    export PATH="${
+      lib.makeBinPath (
+        with pkgs;
+        [
+          git
+          openssh
+          which
+        ]
+      )
+    }:$PATH"
+
     SETUP_LOG="$HOME/.claude/nix-setup.log"
     SETTINGS_FILE="$HOME/.claude/settings.json"
 
