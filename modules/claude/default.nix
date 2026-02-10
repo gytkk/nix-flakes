@@ -39,6 +39,40 @@ let
     "plannotator@plannotator"
   ];
 
+  marketplaceEntries = {
+    "anthropic-agent-skills" = {
+      source = {
+        source = "github";
+        repo = "anthropics/skills";
+      };
+    };
+    "claude-code-plugins" = {
+      source = {
+        source = "github";
+        repo = "anthropics/claude-code";
+      };
+    };
+    "claude-plugins-official" = {
+      source = {
+        source = "github";
+        repo = "anthropics/claude-plugins-official";
+      };
+    };
+    "gytkk" = {
+      source = {
+        source = "github";
+        repo = "gytkk/claude-marketplace";
+      };
+    };
+    "plannotator" = {
+      source = {
+        source = "github";
+        repo = "backnotprop/plannotator";
+      };
+    };
+  };
+  marketplaceEntriesJson = builtins.toJSON marketplaceEntries;
+
   mcpCommands = [
     "mcp add -s user --transport http context7 https://mcp.context7.com/mcp"
     "mcp add -s user --transport http notion https://mcp.notion.com/mcp"
@@ -75,6 +109,10 @@ in
       cp ${./files/settings.json} "$SETTINGS_FILE"
       chmod 644 "$SETTINGS_FILE"
     fi
+
+    # Register extraKnownMarketplaces in settings.json
+    ${jq} --argjson mp '${marketplaceEntriesJson}' '.extraKnownMarketplaces = $mp' "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp"
+    mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
 
     INSTALLED_PLUGINS="$HOME/.claude/plugins/installed_plugins.json"
 

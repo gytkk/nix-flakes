@@ -27,12 +27,5 @@
     ],
     "defaultMode": "delegate"
   },
-  "model": "opus",
-  "extraKnownMarketplaces": {
-    "anthropic-agent-skills": { "source": { "source": "github", "repo": "anthropics/skills" } },
-    "claude-code-plugins": { "source": { "source": "github", "repo": "anthropics/claude-code" } },
-    "claude-plugins-official": { "source": { "source": "github", "repo": "anthropics/claude-plugins-official" } },
-    "gytkk": { "source": { "source": "github", "repo": "gytkk/claude-marketplace" } },
-    "plannotator": { "source": { "source": "github", "repo": "backnotprop/plannotator" } }
-  }
+  "model": "opus"
 }
