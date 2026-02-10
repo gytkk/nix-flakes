@@ -50,7 +50,6 @@ in
     # rust-analyzer is provided by rustup (base/default.nix)
     pkgs.nodePackages.typescript-language-server
     pkgs.terraform-ls
-    pkgs.nixd
   ];
 
   home.file.".claude/settings.json".source = ./files/settings.json;
