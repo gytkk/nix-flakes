@@ -59,11 +59,16 @@ in
 
   # Install marketplaces, plugins, and MCP servers
   home.activation.setupClaudeCode = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    SETUP_LOG="$HOME/.claude/nix-setup.log"
     SETTINGS_FILE="$HOME/.claude/settings.json"
+
+    log() { echo "[$(date '+%H:%M:%S')] $*" >> "$SETUP_LOG"; }
+    log "=== Claude Code setup started ==="
 
     # Remove read-only symlink from previous nix setup
     if [ -L "$SETTINGS_FILE" ]; then
       rm "$SETTINGS_FILE"
+      log "Removed settings.json symlink"
     fi
 
     # Merge nix settings into existing settings.json (nix takes precedence)
@@ -71,37 +76,73 @@ in
     if [ -f "$SETTINGS_FILE" ]; then
       ${jq} -s '.[0] * .[1]' "$SETTINGS_FILE" ${./files/settings.json} > "$SETTINGS_FILE.tmp"
       mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
+      log "Merged settings.json"
     else
       cp ${./files/settings.json} "$SETTINGS_FILE"
       chmod 644 "$SETTINGS_FILE"
+      log "Copied initial settings.json"
     fi
 
     INSTALLED_PLUGINS="$HOME/.claude/plugins/installed_plugins.json"
 
+    # Cache marketplace list once to avoid repeated calls
+    MARKETPLACE_CACHE=$(${timeout} 15s ${claude} plugin marketplace list 2>/dev/null || echo "")
+
     # Register marketplaces (failures are non-fatal)
     ${lib.concatMapStringsSep "\n    " (mp: ''
-      if ! ${timeout} 5s ${claude} plugin marketplace list 2>/dev/null | grep -q "${mp}"; then
-        ${timeout} 10s ${claude} plugin marketplace add ${mp} >/dev/null 2>&1 || true
+      if ! echo "$MARKETPLACE_CACHE" | grep -qF "${mp}"; then
+        log "Adding marketplace: ${mp}"
+        if ${timeout} 60s ${claude} plugin marketplace add ${mp} >> "$SETUP_LOG" 2>&1; then
+          log "  -> OK"
+        else
+          log "  -> FAILED (exit $?)"
+        fi
+      else
+        log "Marketplace already registered: ${mp}"
       fi'') marketplaces}
+
+    # Refresh marketplace index after adding new ones
+    log "Updating marketplace index..."
+    ${timeout} 30s ${claude} plugin marketplace update >> "$SETUP_LOG" 2>&1 || log "Marketplace update failed"
 
     # Install plugins (skip if already installed)
     ${lib.concatMapStringsSep "\n    " (plugin: ''
-      if ! grep -q "${plugin}" "$INSTALLED_PLUGINS" 2>/dev/null; then
-        ${timeout} 10s ${claude} plugin install ${plugin} >/dev/null 2>&1 || true
+      if ! grep -qF "${plugin}" "$INSTALLED_PLUGINS" 2>/dev/null; then
+        log "Installing plugin: ${plugin}"
+        if ${timeout} 60s ${claude} plugin install ${plugin} >> "$SETUP_LOG" 2>&1; then
+          log "  -> OK"
+        else
+          log "  -> FAILED (exit $?)"
+        fi
+      else
+        log "Plugin already installed: ${plugin}"
       fi'') plugins}
+
+    # Cache MCP server list once to avoid repeated calls
+    MCP_CACHE=$(${timeout} 15s ${claude} mcp list 2>/dev/null || echo "")
 
     # Register MCP servers (skip if already registered)
     ${lib.concatMapStringsSep "\n    " (
       cmd:
       let
-        # Extract server name (4th token: mcp add -s user --transport http <name> <url>)
-        name = builtins.elemAt (lib.splitString " " cmd) 7;
+        # Extract server name: mcp add -s user --transport http <name> <url>
+        #                       0    1  2  3     4          5    6      7
+        name = builtins.elemAt (lib.splitString " " cmd) 6;
       in
       ''
-        if ! ${timeout} 5s ${claude} mcp list 2>/dev/null | grep -q "${name}"; then
-          ${timeout} 10s ${claude} ${cmd} >/dev/null 2>&1 || true
+        if ! echo "$MCP_CACHE" | grep -qF "${name}"; then
+          log "Adding MCP server: ${name}"
+          if ${timeout} 30s ${claude} ${cmd} >> "$SETUP_LOG" 2>&1; then
+            log "  -> OK"
+          else
+            log "  -> FAILED (exit $?)"
+          fi
+        else
+          log "MCP server already registered: ${name}"
         fi''
     ) mcpCommands}
+
+    log "=== Claude Code setup finished ==="
   '';
 
   # Install plannotator CLI binary (from GitHub releases, not in nixpkgs)
