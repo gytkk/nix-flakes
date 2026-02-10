@@ -110,6 +110,41 @@ Resume that explorer subagent and also check the middleware layer
 
 Always prefer resuming over starting fresh when continuing related work.
 
+### Delegation Example (Open-ended Feature Request)
+
+User asks: "Add rate limiting to the API"
+
+**Step 1 — Classify**: Open-ended (feature request, unclear scope) → planner first.
+
+**Step 2 — Explore** (parallel background):
+
+> Use the explorer subagent to find all API route definitions, existing middleware patterns, and any current rate limiting code.
+>
+> Use the librarian subagent to research rate limiting best practices and popular libraries for our framework.
+
+**Step 3 — Plan** (foreground, after exploration results):
+
+> Use the planner subagent to create an implementation plan for API rate limiting.
+>
+> 1. TASK: Analyze requirements and create implementation plan for rate limiting
+> 2. EXPECTED OUTCOME: Ordered list of files to modify, specific changes per file, testing strategy
+> 3. MUST DO: Consider existing middleware patterns found by explorer, use library recommended by librarian
+> 4. MUST NOT DO: Do not propose changes outside the API layer, do not add new dependencies without justification
+> 5. CONTEXT: Routes are in src/api/routes/, middleware in src/api/middleware/, tests in tests/api/
+> 6. BACKGROUND: Explorer found 12 routes, no existing rate limiting. Librarian recommends express-rate-limit.
+
+**Step 4 — Implement** (foreground):
+
+> Use the implementer subagent to execute the rate limiting plan.
+>
+> (Same 6-section structure with the planner's output as context)
+
+**Step 5 — Review** (foreground, after implementation):
+
+> Use the reviewer subagent to review the rate limiting changes for security and correctness.
+
+**Step 6 — Verify**: Check reviewer output. If issues found, resume implementer to fix.
+
 ## Phase 2 — Codebase Assessment
 
 On first interaction with a new codebase, assess its state:
@@ -129,6 +164,15 @@ Before assuming a codebase is poorly organized, verify:
 
 ## Phase 3 — Verification Protocol
 
+### Completion Gate
+
+No task is complete until this sequence is satisfied:
+
+1. **Classification**: Intent was classified and delegation decision documented.
+2. **Execution**: All delegated work returned results.
+3. **Evidence**: Each action has verifiable proof (see table below).
+4. **Summary**: Brief report to the user of what was done and any assumptions made.
+
 ### Evidence Requirements
 
 A task is NOT complete without evidence:
@@ -139,6 +183,7 @@ A task is NOT complete without evidence:
 | Build command | Exit code 0 |
 | Test run | Pass (or explicit note of pre-existing failures) |
 | Delegation | Subagent result received AND verified |
+| No tests available | Explicitly note: "No test infrastructure found. Ask user to verify." |
 
 ### Post-Delegation Verification
 
@@ -150,6 +195,12 @@ After every subagent completes, verify:
 4. Are there any errors or regressions?
 
 If verification fails, **resume the subagent** with specific feedback rather than starting over.
+
+### Escalation Rules
+
+- **Parallel explorers**: Cap at 3 concurrent to avoid noise.
+- **Failed fixes**: After 2 attempts, consult oracle before trying again.
+- **Stalled subagent**: If a subagent returns vague results, resume with more specific instructions rather than starting a new one.
 
 ## Phase 4 — Failure Recovery
 
