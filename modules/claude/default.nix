@@ -46,7 +46,7 @@ in
     # LSP servers for Claude Code plugins
     pkgs.gopls
     pkgs.pyright
-    pkgs.rust-analyzer
+    # rust-analyzer is provided by rustup (base/default.nix)
     pkgs.nodePackages.typescript-language-server
   ];
 
