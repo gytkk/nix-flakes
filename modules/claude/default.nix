@@ -28,9 +28,11 @@ let
     "plugin install rust-analyzer-lsp@claude-plugins-official"
     "plugin install typescript-lsp@claude-plugins-official"
 
-    # gytkk/claude-marketplace — custom agents, Scala LSP, and Python LSP
+    # gytkk/claude-marketplace — custom agents, Scala LSP, Python LSP, Terraform LSP, and Nix LSP
     "plugin install metals-lsp@gytkk"
     "plugin install ty-lsp@gytkk"
+    "plugin install terraform-ls@gytkk"
+    "plugin install nixd-lsp@gytkk"
   ];
 
   allCommands = mcpCommands ++ marketplaceCommands ++ pluginCommands;
@@ -43,6 +45,7 @@ in
     pkgs.gopls
     # rust-analyzer is provided by rustup (base/default.nix)
     pkgs.nodePackages.typescript-language-server
+    pkgs.terraform-ls
   ];
 
   home.file.".claude/settings.json".source = ./files/settings.json;
