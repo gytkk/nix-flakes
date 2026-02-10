@@ -1,5 +1,11 @@
 # CLAUDE.md
 
+## Teams (IMPORTANT)
+
+- Prefer to work in teams when possible.
+- Communicate effectively with team members.
+- Collaborate on tasks and share knowledge.
+
 ## Verification & Inquiry Protocol (TOP PRIORITY)
 
 > **CRITICAL**: Apply at EVERY step. This overrides all other instructions.
@@ -8,10 +14,10 @@
 - **Ask, don't guess.** If requirements are ambiguous or context is missing, ask the user immediately.
 - **Surface blockers early.** Flag missing info, risky assumptions, or dependencies NOW — not after building on them.
 
-## Worktree Workflow (MANDATORY)
+## Worktree Workflow (RECOMMENDED)
 
-> **CRITICAL**: Before starting ANY new task, you MUST create a git worktree.
-> Do NOT work directly on the main branch. This is non-negotiable.
+> Before starting new task which adds new functionality or changes existing code, you will create a git worktree.
+> Do NOT work directly on the main branch if you are not sure about the changes.
 
 1. Create a new branch and worktree: `git worktree add ~/trees/$(basename $PWD)/<short-task-name> -b <branch-name>`
 2. Change to the worktree directory and work there
