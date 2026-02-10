@@ -3,6 +3,7 @@
 let
   claude = "${pkgs.master.claude-code}/bin/claude";
   timeout = "${pkgs.coreutils}/bin/timeout";
+  jq = "${pkgs.jq}/bin/jq";
 
   marketplaces = [
     "anthropics/skills"
@@ -54,11 +55,27 @@ in
     pkgs.terraform-ls
   ];
 
-  home.file.".claude/settings.json".source = ./files/settings.json;
   home.file.".claude/CLAUDE.md".source = ./files/CLAUDE.md;
 
   # Install marketplaces, plugins, and MCP servers
   home.activation.setupClaudeCode = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    SETTINGS_FILE="$HOME/.claude/settings.json"
+
+    # Remove read-only symlink from previous nix setup
+    if [ -L "$SETTINGS_FILE" ]; then
+      rm "$SETTINGS_FILE"
+    fi
+
+    # Merge nix settings into existing settings.json (nix takes precedence)
+    mkdir -p "$(dirname "$SETTINGS_FILE")"
+    if [ -f "$SETTINGS_FILE" ]; then
+      ${jq} -s '.[0] * .[1]' "$SETTINGS_FILE" ${./files/settings.json} > "$SETTINGS_FILE.tmp"
+      mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
+    else
+      cp ${./files/settings.json} "$SETTINGS_FILE"
+      chmod 644 "$SETTINGS_FILE"
+    fi
+
     INSTALLED_PLUGINS="$HOME/.claude/plugins/installed_plugins.json"
 
     # Register marketplaces (failures are non-fatal)
