@@ -13,6 +13,7 @@ let
     "plugin marketplace add anthropics/claude-code"
     "plugin marketplace add anthropics/claude-plugins-official"
     "plugin marketplace add gytkk/claude-marketplace"
+    "plugin marketplace add backnotprop/plannotator"
   ];
 
   pluginCommands = [
@@ -33,6 +34,9 @@ let
     "plugin install ty-lsp@gytkk"
     "plugin install terraform-ls@gytkk"
     "plugin install nixd-lsp@gytkk"
+
+    # backnotprop/plannotator — visual plan annotation and review
+    "plugin install plannotator@plannotator"
   ];
 
   allCommands = mcpCommands ++ marketplaceCommands ++ pluginCommands;
@@ -54,5 +58,12 @@ in
 
   home.activation.setupClaudeCode = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     ${lib.concatMapStringsSep "\n" (cmd: "${claude} ${cmd}") allCommands}
+  '';
+
+  # Install plannotator CLI binary (from GitHub releases, not in nixpkgs)
+  home.activation.installPlannotator = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    if ! command -v plannotator &>/dev/null; then
+      ${pkgs.curl}/bin/curl -fsSL https://plannotator.ai/install.sh | ${pkgs.bash}/bin/bash
+    fi
   '';
 }
