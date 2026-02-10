@@ -453,7 +453,14 @@ Global configuration for Claude Code (Anthropic's AI coding assistant).
 **Custom Agents and Plugins** are managed via [gytkk/claude-marketplace](https://github.com/gytkk/claude-marketplace):
 
 - `gytkk-agents` plugin: code-reviewer, software-dev-engineer, test-code-writer
-- `metals-lsp` plugin: Scala language server (Metals)
+- `metals-lsp` plugin: Scala language server (Metals) — requires `metals` binary
+- `ty-lsp` plugin: Python type checker (ty by Astral) — requires `ty` binary
+- `terraform-ls` plugin: Terraform language server — requires `terraform-ls` binary
+- `nixd-lsp` plugin: Nix language server — requires `nixd` binary
+
+> **Note**: Each LSP plugin requires its corresponding binary on `PATH`.
+> LSP binaries are installed via `home.packages` in `modules/claude/default.nix`.
+> See each plugin's README in the marketplace repo for standalone installation instructions.
 
 **Common modification scenarios**:
 
