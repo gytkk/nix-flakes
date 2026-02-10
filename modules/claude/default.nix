@@ -2,46 +2,46 @@
 
 let
   claude = "${pkgs.master.claude-code}/bin/claude";
+  timeout = "${pkgs.coreutils}/bin/timeout";
+
+  marketplaces = [
+    "anthropics/skills"
+    "anthropics/claude-code"
+    "anthropics/claude-plugins-official"
+    "gytkk/claude-marketplace"
+    "backnotprop/plannotator"
+  ];
+
+  # plugin-name@marketplace-name
+  plugins = [
+    # anthropics/skills — document generation (PDF, DOCX, XLSX, PPTX)
+    "document-skills@anthropic-agent-skills"
+    # anthropics/claude-code — git commit/push/PR workflow
+    "commit-commands@claude-code-plugins"
+    # anthropics/claude-code — security warning hooks
+    "security-guidance@claude-code-plugins"
+
+    "ralph-loop@claude-plugins-official"
+
+    # anthropics/claude-plugins-official — LSP language servers
+    "gopls-lsp@claude-plugins-official"
+    "rust-analyzer-lsp@claude-plugins-official"
+    "typescript-lsp@claude-plugins-official"
+
+    # gytkk/claude-marketplace — custom agents, Scala LSP, Python LSP, Terraform LSP, and Nix LSP
+    "metals-lsp@gytkk"
+    "ty-lsp@gytkk"
+    "terraform-ls@gytkk"
+    "nixd-lsp@gytkk"
+
+    # backnotprop/plannotator — visual plan annotation and review
+    "plannotator@plannotator"
+  ];
 
   mcpCommands = [
     "mcp add -s user --transport http context7 https://mcp.context7.com/mcp"
     "mcp add -s user --transport http notion https://mcp.notion.com/mcp"
   ];
-
-  marketplaceCommands = [
-    "plugin marketplace add anthropics/skills"
-    "plugin marketplace add anthropics/claude-code"
-    "plugin marketplace add anthropics/claude-plugins-official"
-    "plugin marketplace add gytkk/claude-marketplace"
-    "plugin marketplace add backnotprop/plannotator"
-  ];
-
-  pluginCommands = [
-    # anthropics/skills — document generation (PDF, DOCX, XLSX, PPTX)
-    "plugin install document-skills@anthropic-agent-skills"
-    # anthropics/claude-code — git commit/push/PR workflow
-    "plugin install commit-commands@claude-code-plugins"
-    # anthropics/claude-code — security warning hooks
-    "plugin install security-guidance@claude-code-plugins"
-
-    "plugin install ralph-loop@claude-plugins-official"
-
-    # anthropics/claude-plugins-official — LSP language servers
-    "plugin install gopls-lsp@claude-plugins-official"
-    "plugin install rust-analyzer-lsp@claude-plugins-official"
-    "plugin install typescript-lsp@claude-plugins-official"
-
-    # gytkk/claude-marketplace — custom agents, Scala LSP, Python LSP, Terraform LSP, and Nix LSP
-    "plugin install metals-lsp@gytkk"
-    "plugin install ty-lsp@gytkk"
-    "plugin install terraform-ls@gytkk"
-    "plugin install nixd-lsp@gytkk"
-
-    # backnotprop/plannotator — visual plan annotation and review
-    "plugin install plannotator@plannotator"
-  ];
-
-  allCommands = mcpCommands ++ marketplaceCommands ++ pluginCommands;
 in
 {
   home.packages = [
@@ -54,24 +54,50 @@ in
     pkgs.terraform-ls
   ];
 
-  # CLAUDE.md is read-only, safe as symlink
+  home.file.".claude/settings.json".source = ./files/settings.json;
   home.file.".claude/CLAUDE.md".source = ./files/CLAUDE.md;
 
-  # Deploy settings.json as a writable copy (plugins need to modify it),
-  # then run claude commands with git/which on PATH
+  # Install marketplaces, plugins, and MCP servers
   home.activation.setupClaudeCode = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    install -Dm644 ${./files/settings.json} "$HOME/.claude/settings.json"
+    INSTALLED_PLUGINS="$HOME/.claude/plugins/installed_plugins.json"
 
-    export PATH="${
-      lib.makeBinPath (
-        with pkgs;
-        [
-          git
-          which
-        ]
-      )
-    }:$PATH"
-    ${lib.concatMapStringsSep "\n" (cmd: "${claude} ${cmd} || true") allCommands}
+    # Check if SSH agent has keys loaded (needed for marketplace git clone)
+    SSH_READY=true
+    if ! /usr/bin/ssh-add -l >/dev/null 2>&1; then
+      SSH_READY=false
+      echo ""
+      echo "SSH agent has no keys loaded. Marketplace operations will be skipped."
+      echo "To enable marketplace plugins, run: ssh-add"
+      echo "Then re-run: home-manager switch --flake .#<environment>"
+      echo ""
+    fi
+
+    # Register marketplaces (requires SSH for git clone)
+    if [ "$SSH_READY" = true ]; then
+      ${lib.concatMapStringsSep "\n    " (mp: ''
+        if ! ${timeout} 5s ${claude} plugin marketplace list 2>/dev/null | grep -q "${mp}"; then
+          ${timeout} 10s ${claude} plugin marketplace add ${mp} >/dev/null 2>&1 || true
+        fi'') marketplaces}
+    fi
+
+    # Install plugins (skip if already installed)
+    ${lib.concatMapStringsSep "\n    " (plugin: ''
+      if ! grep -q "${plugin}" "$INSTALLED_PLUGINS" 2>/dev/null; then
+        ${timeout} 30s ${claude} plugin install ${plugin} >/dev/null 2>&1 || true
+      fi'') plugins}
+
+    # Register MCP servers (skip if already registered)
+    ${lib.concatMapStringsSep "\n    " (
+      cmd:
+      let
+        # Extract server name (4th token: mcp add -s user --transport http <name> <url>)
+        name = builtins.elemAt (lib.splitString " " cmd) 7;
+      in
+      ''
+        if ! ${timeout} 5s ${claude} mcp list 2>/dev/null | grep -q "${name}"; then
+          ${timeout} 10s ${claude} ${cmd} >/dev/null 2>&1 || true
+        fi''
+    ) mcpCommands}
   '';
 
   # Install plannotator CLI binary (from GitHub releases, not in nixpkgs)
