@@ -61,27 +61,11 @@ in
   home.activation.setupClaudeCode = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     INSTALLED_PLUGINS="$HOME/.claude/plugins/installed_plugins.json"
 
-    # Ensure SSH_AUTH_SOCK is set (activation env may not inherit it)
-    export SSH_AUTH_SOCK="''${SSH_AUTH_SOCK:-$(launchctl getenv SSH_AUTH_SOCK 2>/dev/null || echo "")}"
-
-    # Check if SSH agent has keys loaded (needed for marketplace git clone)
-    SSH_READY=true
-    if ! /usr/bin/ssh-add -l >/dev/null 2>&1; then
-      SSH_READY=false
-      echo ""
-      echo "SSH agent has no keys loaded. Marketplace operations will be skipped."
-      echo "To enable marketplace plugins, run: ssh-add"
-      echo "Then re-run: home-manager switch --flake .#<environment>"
-      echo ""
-    fi
-
-    # Register marketplaces (requires SSH for git clone)
-    if [ "$SSH_READY" = true ]; then
-      ${lib.concatMapStringsSep "\n    " (mp: ''
-        if ! ${timeout} 5s ${claude} plugin marketplace list 2>/dev/null | grep -q "${mp}"; then
-          ${timeout} 10s ${claude} plugin marketplace add ${mp} >/dev/null 2>&1 || true
-        fi'') marketplaces}
-    fi
+    # Register marketplaces (failures are non-fatal)
+    ${lib.concatMapStringsSep "\n    " (mp: ''
+      if ! ${timeout} 5s ${claude} plugin marketplace list 2>/dev/null | grep -q "${mp}"; then
+        ${timeout} 10s ${claude} plugin marketplace add ${mp} >/dev/null 2>&1 || true
+      fi'') marketplaces}
 
     # Install plugins (skip if already installed)
     ${lib.concatMapStringsSep "\n    " (plugin: ''

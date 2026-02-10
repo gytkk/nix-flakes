@@ -4,6 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Critical Rules
 
+- DO NOT use git worktree for this repository
 - Follow existing code patterns and module structure in this repository
 - Use `nixfmt-rfc-style` to format all Nix files before committing
 - Do NOT run build tests directly - ask the user to test instead (builds can take several minutes)
@@ -191,13 +192,13 @@ imports = [
 
 ### Naming Conventions
 
-| Type | Convention | Example |
-|------|------------|---------|
-| Variables | camelCase | `terraformPackages`, `defaultVersion` |
-| Module options | camelCase | `enable`, `runEnv`, `versions` |
-| Files | lowercase | `default.nix`, `home.nix` |
-| Directories | lowercase/kebab | `modules/`, `base/devsisters/` |
-| Environment names | kebab-case | `pylv-denim`, `devsisters-macbook` |
+| Type              | Convention      | Example                               |
+| ----------------- | --------------- | ------------------------------------- |
+| Variables         | camelCase       | `terraformPackages`, `defaultVersion` |
+| Module options    | camelCase       | `enable`, `runEnv`, `versions`        |
+| Files             | lowercase       | `default.nix`, `home.nix`             |
+| Directories       | lowercase/kebab | `modules/`, `base/devsisters/`        |
+| Environment names | kebab-case      | `pylv-denim`, `devsisters-macbook`    |
 
 ### Module Pattern
 
@@ -331,18 +332,18 @@ modules/<name>/
 
 #### Quick Module Reference
 
-| Module | Purpose | Config Location | Key Files |
-|--------|---------|-----------------|-----------|
-| `claude/` | Claude Code AI assistant | `~/.claude/` | `files/settings.json`, `files/mcp.json` |
-| `ghostty/` | Ghostty terminal | `~/.config/ghostty/` | `default.nix` (inline config) |
-| `git/` | Git configuration | `~/.gitconfig` | `default.nix` |
-| `k9s/` | Kubernetes manager | `~/.config/k9s/` | `default.nix` |
-| `opencode/` | OpenCode AI agent | `~/.config/opencode/` | `files/opencode.json`, `files/AGENTS.md` |
-| `terraform/` | Terraform versions | direnv lazy-load | `default.nix` |
-| `vim/` | Neovim | `~/.config/nvim/` | `default.nix` |
-| `vscode/` | VSCode editor (DISABLED) | `~/.config/Code/` | `default.nix`, `themes/` |
-| `zed/` | Zed editor | `~/Library/Application Support/Zed/` (macOS) | `default.nix`, `themes/` |
-| `zsh/` | Zsh shell | `~/.zshrc` | `default.nix`, `starship.toml` |
+| Module       | Purpose                  | Config Location                              | Key Files                                |
+| ------------ | ------------------------ | -------------------------------------------- | ---------------------------------------- |
+| `claude/`    | Claude Code AI assistant | `~/.claude/`                                 | `files/settings.json`, `files/mcp.json`  |
+| `ghostty/`   | Ghostty terminal         | `~/.config/ghostty/`                         | `default.nix` (inline config)            |
+| `git/`       | Git configuration        | `~/.gitconfig`                               | `default.nix`                            |
+| `k9s/`       | Kubernetes manager       | `~/.config/k9s/`                             | `default.nix`                            |
+| `opencode/`  | OpenCode AI agent        | `~/.config/opencode/`                        | `files/opencode.json`, `files/AGENTS.md` |
+| `terraform/` | Terraform versions       | direnv lazy-load                             | `default.nix`                            |
+| `vim/`       | Neovim                   | `~/.config/nvim/`                            | `default.nix`                            |
+| `vscode/`    | VSCode editor (DISABLED) | `~/.config/Code/`                            | `default.nix`, `themes/`                 |
+| `zed/`       | Zed editor               | `~/Library/Application Support/Zed/` (macOS) | `default.nix`, `themes/`                 |
+| `zsh/`       | Zsh shell                | `~/.zshrc`                                   | `default.nix`, `starship.toml`           |
 
 #### How to Find and Modify Settings
 
@@ -380,10 +381,10 @@ nix flake check --no-build  # Validate syntax
 >
 > **AI Assistant Note**: When the user requests VSCode-related modifications, **ask first** whether to re-enable the module before making changes. To re-enable, set `modules.vscode.enable = true` in the appropriate base or environment configuration.
 
-| File | Purpose |
-|------|---------|
-| `default.nix` | Extensions, settings, keybindings (via Home Manager `programs.vscode`) |
-| `one-half-light-theme/` | Custom theme package |
+| File                    | Purpose                                                                |
+| ----------------------- | ---------------------------------------------------------------------- |
+| `default.nix`           | Extensions, settings, keybindings (via Home Manager `programs.vscode`) |
+| `one-half-light-theme/` | Custom theme package                                                   |
 
 **Common modification scenarios**:
 
@@ -394,10 +395,10 @@ nix flake check --no-build  # Validate syntax
 
 #### Zed Module (`modules/zed/`)
 
-| File | Purpose |
-|------|---------|
-| `default.nix` | All settings defined inline in `userSettings` attribute |
-| `themes/one-half-light.json` | Custom theme definition |
+| File                         | Purpose                                                 |
+| ---------------------------- | ------------------------------------------------------- |
+| `default.nix`                | All settings defined inline in `userSettings` attribute |
+| `themes/one-half-light.json` | Custom theme definition                                 |
 
 **Common modification scenarios**:
 
@@ -412,8 +413,8 @@ nix flake check --no-build  # Validate syntax
 
 #### Ghostty Module (`modules/ghostty/`)
 
-| File | Purpose |
-|------|---------|
+| File          | Purpose                              |
+| ------------- | ------------------------------------ |
 | `default.nix` | All terminal settings defined inline |
 
 **Common modification scenarios**:
@@ -424,10 +425,10 @@ nix flake check --no-build  # Validate syntax
 
 #### Zsh Module (`modules/zsh/`)
 
-| File | Purpose |
-|------|---------|
-| `default.nix` | Shell config, aliases, plugins, environment variables |
-| `starship.toml` | Starship prompt theme configuration |
+| File            | Purpose                                               |
+| --------------- | ----------------------------------------------------- |
+| `default.nix`   | Shell config, aliases, plugins, environment variables |
+| `starship.toml` | Starship prompt theme configuration                   |
 
 **Common modification scenarios**:
 
@@ -444,11 +445,11 @@ When updating AI coding agent settings (agents, tools, skills, MCP servers, etc.
 
 Global configuration for Claude Code (Anthropic's AI coding assistant).
 
-| File | Purpose | Deployed To |
-|------|---------|-------------|
+| File                  | Purpose                                    | Deployed To               |
+| --------------------- | ------------------------------------------ | ------------------------- |
 | `files/settings.json` | Model selection, permissions, MCP settings | `~/.claude/settings.json` |
-| `files/mcp.json` | MCP server configurations | `~/.claude/mcp.json` |
-| `files/CLAUDE.md` | Global instructions for Claude behavior | `~/.claude/CLAUDE.md` |
+| `files/mcp.json`      | MCP server configurations                  | `~/.claude/mcp.json`      |
+| `files/CLAUDE.md`     | Global instructions for Claude behavior    | `~/.claude/CLAUDE.md`     |
 
 **Custom Agents and Plugins** are managed via [gytkk/claude-marketplace](https://github.com/gytkk/claude-marketplace):
 
@@ -478,12 +479,12 @@ Global configuration for Claude Code (Anthropic's AI coding assistant).
 
 Global configuration for OpenCode (open-source AI coding agent).
 
-| File | Purpose | Deployed To |
-|------|---------|-------------|
-| `files/opencode.json` | Model, theme, plugins, MCP settings | `~/.config/opencode/opencode.json` |
-| `files/AGENTS.md` | Global instructions for OpenCode behavior | `~/.config/opencode/AGENTS.md` |
-| `files/agents/*.md` | Custom agent definitions | `~/.config/opencode/agents/` |
-| `files/skills/*/SKILL.md` | Custom skill definitions | `~/.config/opencode/skills/` |
+| File                      | Purpose                                   | Deployed To                        |
+| ------------------------- | ----------------------------------------- | ---------------------------------- |
+| `files/opencode.json`     | Model, theme, plugins, MCP settings       | `~/.config/opencode/opencode.json` |
+| `files/AGENTS.md`         | Global instructions for OpenCode behavior | `~/.config/opencode/AGENTS.md`     |
+| `files/agents/*.md`       | Custom agent definitions                  | `~/.config/opencode/agents/`       |
+| `files/skills/*/SKILL.md` | Custom skill definitions                  | `~/.config/opencode/skills/`       |
 
 **Custom Agents** (in `files/agents/`):
 
