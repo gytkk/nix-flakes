@@ -56,6 +56,7 @@ in
   ];
 
   home.file.".claude/CLAUDE.md".source = ./files/CLAUDE.md;
+  home.file.".claude/agents".source = ./agents;
 
   # Install marketplaces, plugins, and MCP servers
   home.activation.setupClaudeCode = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
