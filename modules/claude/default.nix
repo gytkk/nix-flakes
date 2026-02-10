@@ -70,7 +70,7 @@ in
     # Install plugins (skip if already installed)
     ${lib.concatMapStringsSep "\n    " (plugin: ''
       if ! grep -q "${plugin}" "$INSTALLED_PLUGINS" 2>/dev/null; then
-        ${timeout} 30s ${claude} plugin install ${plugin} >/dev/null 2>&1 || true
+        ${timeout} 10s ${claude} plugin install ${plugin} >/dev/null 2>&1 || true
       fi'') plugins}
 
     # Register MCP servers (skip if already registered)
