@@ -12,7 +12,7 @@ let
     "plugin marketplace add anthropics/skills"
     "plugin marketplace add anthropics/claude-code"
     "plugin marketplace add anthropics/claude-plugins-official"
-    "plugin marketplace add $HOME/.claude/marketplace"
+    "plugin marketplace add gytkk/claude-marketplace"
   ];
 
   pluginCommands = [
@@ -32,8 +32,9 @@ let
     "plugin install pyright-lsp@claude-plugins-official"
     "plugin install rust-analyzer-lsp@claude-plugins-official"
     "plugin install typescript-lsp@claude-plugins-official"
-    # custom local marketplace — Scala LSP
-    "plugin install metals-lsp@custom-lsp-plugins"
+    # gytkk/claude-marketplace — custom agents and Scala LSP
+    "plugin install gytkk-agents@gytkk"
+    "plugin install metals-lsp@gytkk"
   ];
 
   allCommands = mcpCommands ++ marketplaceCommands ++ pluginCommands;
@@ -51,8 +52,6 @@ in
 
   home.file.".claude/settings.json".source = ./files/settings.json;
   home.file.".claude/CLAUDE.md".source = ./files/CLAUDE.md;
-  home.file.".claude/agents".source = ./agents;
-  home.file.".claude/marketplace".source = ./marketplace;
 
   home.activation.setupClaudeCode = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     ${lib.concatMapStringsSep "\n" (cmd: "${claude} ${cmd}") allCommands}
