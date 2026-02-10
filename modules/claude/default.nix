@@ -55,8 +55,10 @@ in
   home.file.".claude/settings.json".source = ./files/settings.json;
   home.file.".claude/CLAUDE.md".source = ./files/CLAUDE.md;
 
+  # Commands may fail if already registered (exit code 1), so use || true
+  # to prevent set -e from aborting the activation script early
   home.activation.setupClaudeCode = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    ${lib.concatMapStringsSep "\n" (cmd: "${claude} ${cmd}") allCommands}
+    ${lib.concatMapStringsSep "\n" (cmd: "${claude} ${cmd} || true") allCommands}
   '';
 
   # Install plannotator CLI binary (from GitHub releases, not in nixpkgs)
