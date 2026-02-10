@@ -449,13 +449,11 @@ Global configuration for Claude Code (Anthropic's AI coding assistant).
 | `files/settings.json` | Model selection, permissions, MCP settings | `~/.claude/settings.json` |
 | `files/mcp.json` | MCP server configurations | `~/.claude/mcp.json` |
 | `files/CLAUDE.md` | Global instructions for Claude behavior | `~/.claude/CLAUDE.md` |
-| `agents/*.md` | Custom agent definitions | `~/.claude/agents/` |
 
-**Custom Agents** (in `agents/`):
+**Custom Agents and Plugins** are managed via [gytkk/claude-marketplace](https://github.com/gytkk/claude-marketplace):
 
-- `code-reviewer.md`: Code review agent
-- `software-dev-engineer.md`: Software development guidance
-- `test-code-writer.md`: Test code generation
+- `gytkk-agents` plugin: code-reviewer, software-dev-engineer, test-code-writer
+- `metals-lsp` plugin: Scala language server (Metals)
 
 **Common modification scenarios**:
 
@@ -463,7 +461,7 @@ Global configuration for Claude Code (Anthropic's AI coding assistant).
 - Add new pre-approved command → Edit `files/settings.json` → `permissions.allow`
 - Change default model → Edit `files/settings.json` → `model`
 - Update global instructions → Edit `files/CLAUDE.md`
-- Create new custom agent → Add `agents/{agent-name}.md`
+- Add/modify custom agents → Edit [gytkk/claude-marketplace](https://github.com/gytkk/claude-marketplace) repo
 
 #### OpenCode Module (`modules/opencode/`)
 
