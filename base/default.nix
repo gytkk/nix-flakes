@@ -29,8 +29,10 @@
   news.display = "silent";
 
   # macOS: App Management 권한 문제 방지
-  # Nix로 .app 번들을 설치하지 않으므로 linkApps 비활성화
-  targets.darwin.linkApps.enable = false;
+  # stateVersion >= 25.11에서 copyApps가 기본 활성화되며,
+  # 매 switch마다 tccutil reset으로 TCC App Management 권한을 리셋함
+  # Nix로 .app 번들을 설치하지 않으므로 비활성화
+  targets.darwin.copyApps.enable = false;
 
   # XDG Base Directory Specification
   xdg = {
@@ -120,7 +122,7 @@
       sarasa-gothic
     ];
 
-    stateVersion = "25.11";
+    stateVersion = "26.05";
 
     # Rust/C 빌드 시 라이브러리 경로 (특히 macOS에서 libiconv 링킹용)
     sessionVariables = {
