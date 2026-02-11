@@ -21,6 +21,9 @@
       "Bash(chmod:*)",
       "Bash(git:*)",
       "Bash(gh:*)",
+      "Read(~/workspace/**)",
+      "Read(~/development/**)",
+      "Read(/tmp/**)",
       "WebFetch(domain:github.com)",
       "mcp__context7__resolve-library-id",
       "mcp__context7__get-library-docs"
