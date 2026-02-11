@@ -76,7 +76,9 @@
     };
 
     # Environment variables
-    sessionVariables = { };
+    sessionVariables = {
+      SHELL = "${pkgs.zsh}/bin/zsh";
+    };
 
     # Zsh initialization
     # https://nix-community.github.io/home-manager/options.xhtml#opt-programs.zsh.initContent
