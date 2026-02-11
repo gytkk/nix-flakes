@@ -28,6 +28,10 @@
   # Disable news on update
   news.display = "silent";
 
+  # macOS: App Management 권한 문제 방지
+  # Nix로 .app 번들을 설치하지 않으므로 linkApps 비활성화
+  targets.darwin.linkApps.enable = false;
+
   # XDG Base Directory Specification
   xdg = {
     enable = true;
