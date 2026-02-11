@@ -5,28 +5,8 @@
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
   "permissions": {
-    "allow": [
-      "Bash(find *)",
-      "Bash(grep *)",
-      "Bash(rg *)",
-      "Bash(cp *)",
-      "Bash(ls *)",
-      "Bash(mv *)",
-      "Bash(mkdir *)",
-      "Bash(rm *)",
-      "Bash(head *)",
-      "Bash(tail *)",
-      "Bash(cat *)",
-      "Bash(sed *)",
-      "Bash(chmod *)",
-      "Bash(git *)",
-      "Bash(gh *)",
-      "Bash(* --version)",
-      "Read",
-      "WebFetch",
-      "mcp__context7__*"
-    ],
-    "defaultMode": "acceptEdits"
+    "allow": ["Bash", "Read", "Edit", "WebFetch"],
+    "defaultMode": "delegate"
   },
   "language": "korean",
   "teammateMode": "tmux",
