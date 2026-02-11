@@ -38,6 +38,10 @@ home-manager build --flake .#devsisters-macstudio
 # Apply configuration (after successful build)
 home-manager switch --flake .#<environment>
 
+# NixOS build and apply (for pylv-sepia)
+nixos-rebuild build --flake .#pylv-sepia
+nixos-rebuild switch --flake .#pylv-sepia
+
 # Format Nix files
 nixfmt-rfc-style <file.nix>
 nixfmt-rfc-style **/*.nix        # Format all Nix files
@@ -262,20 +266,28 @@ base/default.nix          # Common configuration for all environments
 base/<company>/home.nix   # Company-specific extensions
 modules/<name>/default.nix # Reusable module
 environments.nix          # All environment definitions
+hosts.nix                 # NixOS host definitions
+hosts/<name>/configuration.nix # NixOS host configuration
 lib/builders.nix          # mkHomeConfig, mkNixOSConfig helpers
-overlays/default.nix      # nixpkgs version overlays
+overlays/default.nix      # nixpkgs version overlays (openclaw-fix, nixpkgs-versions)
+secrets/secrets.nix       # Agenix secrets configuration
 ```
 
 ### Core Structure
 
 - `flake.nix`: Main flake configuration with inputs, outputs, and environment definitions
 - `environments.nix`: All environment configurations in a single file
+- `hosts.nix`: NixOS host definitions (currently pylv-sepia)
 - `base/`: Layered Home Manager configurations
   - `base/default.nix`: Common base configuration for all environments
   - `base/devsisters/`: Devsisters-specific extensions
   - `base/pylv/`: Pylv-specific extensions
+- `hosts/`: NixOS host configurations
+  - `hosts/pylv-sepia/`: NixOS server configuration (configuration.nix, disk-config.nix, hardware-configuration.nix)
 - `modules/`: Modular configuration components
 - `lib/`: Helper functions and environment loaders
+- `secrets/`: Encrypted secrets management (agenix)
+- `docs/`: Additional documentation
 
 ### Environment Configurations
 
@@ -284,27 +296,38 @@ All environments are defined in `environments.nix` with the following structure:
 - **`devsisters-macbook`**: ARM64 macOS (gyutak@/Users/gyutak) with devsisters base profile
 - **`devsisters-macstudio`**: ARM64 macOS (gyutak@/Users/gyutak) with devsisters base profile
 - **`pylv-denim`**: x86_64 Linux/WSL (gytkk@/home/gytkk) with pylv base profile
-- **`pylv-sepia`**: x86_64 Linux/WSL (gytkk@/home/gytkk) with pylv base profile
+- **`pylv-sepia`**: x86_64 Linux/NixOS server (gytkk@/home/gytkk) with pylv base profile + OpenClaw
 
 Each environment specifies a `baseProfile` which determines which base configuration to load.
+
+### NixOS Host Configurations
+
+NixOS hosts are defined in `hosts.nix` with full system configurations:
+
+- **`pylv-sepia`**: x86_64 Linux NixOS server with Disko, agenix, Home Manager, copyparty, and OpenClaw AI gateway
 
 ### Base System Architecture
 
 The layered base system provides inheritance and customization:
 
 1. **`base/default.nix`**: Common configuration imported by all company bases
-   - Core modules (claude, ghostty, git, java, k9s, opencode, terraform, vim, vscode, zsh)
+   - Core modules (claude, ghostty, git, k9s, openclaw, opencode, terraform, vim, vscode, zed, zsh)
    - Standard development packages
    - Basic programs configuration
 
 2. **`base/devsisters/home.nix`**: Extends base with Devsisters-specific tools
    - Authentication tools (saml2aws, vault)
    - Scala, Ruby, Databricks CLI
+   - Custom scripts (login, sign)
    - Company-specific aliases and environment variables
 
 3. **`base/pylv/home.nix`**: Extends base with minimal Pylv-specific configuration
    - Currently inherits base configuration
    - Ready for company-specific customizations
+
+4. **`base/pylv/sepia.nix`**: Environment-specific config for pylv-sepia NixOS server
+   - OpenClaw AI gateway (Discord integration enabled)
+   - Only imported by pylv-sepia environment via `extraModules`
 
 ### Module System
 
@@ -328,10 +351,11 @@ modules/<name>/
 
 | Module       | Purpose                  | Config Location                              | Key Files                                |
 | ------------ | ------------------------ | -------------------------------------------- | ---------------------------------------- |
-| `claude/`    | Claude Code AI assistant | `~/.claude/`                                 | `files/settings.json`, `files/mcp.json`  |
+| `claude/`    | Claude Code AI assistant | `~/.claude/`                                 | `files/settings.json`, `files/CLAUDE.md`, `agents/*.md` |
 | `ghostty/`   | Ghostty terminal         | `~/.config/ghostty/`                         | `default.nix` (inline config)            |
 | `git/`       | Git configuration        | `~/.gitconfig`                               | `default.nix`                            |
 | `k9s/`       | Kubernetes manager       | `~/.config/k9s/`                             | `default.nix`                            |
+| `openclaw/`  | OpenClaw AI gateway      | Systemd/Launchd service                      | `default.nix`                            |
 | `opencode/`  | OpenCode AI agent        | `~/.config/opencode/`                        | `files/opencode.json`, `files/AGENTS.md` |
 | `terraform/` | Terraform versions       | direnv lazy-load                             | `default.nix`                            |
 | `vim/`       | Neovim                   | `~/.config/nvim/`                            | `default.nix`                            |
@@ -442,8 +466,17 @@ Global configuration for Claude Code (Anthropic's AI coding assistant).
 | File                  | Purpose                                    | Deployed To               |
 | --------------------- | ------------------------------------------ | ------------------------- |
 | `files/settings.json` | Model selection, permissions, MCP settings | `~/.claude/settings.json` |
-| `files/mcp.json`      | MCP server configurations                  | `~/.claude/mcp.json`      |
 | `files/CLAUDE.md`     | Global instructions for Claude behavior    | `~/.claude/CLAUDE.md`     |
+| `agents/*.md`         | Custom agent definitions (6 agents)        | `~/.claude/agents/`       |
+
+**Local Agents** (in `agents/`):
+
+- `oracle.md`: Architecture/debugging advisor (read-only)
+- `explorer.md`: Codebase search specialist (read-only)
+- `librarian.md`: External docs/API researcher (read-only)
+- `planner.md`: Pre-implementation analyzer (read-only)
+- `reviewer.md`: Code quality auditor (read-only)
+- `implementer.md`: Autonomous code implementer (read-write)
 
 **Custom Agents and Plugins** are managed via [gytkk/claude-marketplace](https://github.com/gytkk/claude-marketplace):
 
@@ -463,7 +496,7 @@ Global configuration for Claude Code (Anthropic's AI coding assistant).
 
 **Common modification scenarios**:
 
-- Add new MCP server → Edit `files/mcp.json`
+- Add new MCP server → Edit `default.nix` (MCP servers configured via activation script)
 - Add new pre-approved command → Edit `files/settings.json` → `permissions.allow`
 - Change default model → Edit `files/settings.json` → `model`
 - Update global instructions → Edit `files/CLAUDE.md`
@@ -503,20 +536,24 @@ Global configuration for OpenCode (open-source AI coding agent).
 
 Base packages defined in `base/default.nix`:
 
-- **System**: coreutils, findutils, ripgrep, direnv
-- **Development**: docker, gcc, awscli2, jq, yq-go
+- **System**: coreutils, findutils, gnupg, libiconv, direnv, tmux, less, wget, curl
+- **Development**: docker, gcc, awscli2, jq, yq-go, ripgrep
+- **Git**: git, gh, lazygit, delta, bat
 - **Java**: OpenJDK 17 (default), OpenJDK 8 via direnv
 - **JavaScript/TypeScript**: nodejs, bun, typescript, pnpm, turbo
 - **Go**: go compiler and tools
-- **Python**: uv package manager
+- **Python**: uv package manager, ty type checker
 - **Rust**: rustup
 - **Kubernetes**: kubectl, kubectx, k9s, helm
 - **Secrets**: 1password-cli, keybase
-- **Nix**: nixfmt
+- **Media**: ffmpeg, yt-dlp
+- **ML**: micromamba
+- **Nix**: nixfmt, nixd
+- **Fonts**: nerd-fonts (fira-code, jetbrains-mono), sarasa-gothic
 
 Company-specific packages:
 
-- **Devsisters**: saml2aws, vault, databricks-cli, scala_2_12, ruby_3_2
+- **Devsisters**: saml2aws, vault, databricks-cli, scala_2_12, metals, ruby_3_2, custom scripts (login, sign)
 - **Pylv**: Currently none (inherits base only)
 
 ### Adding New Environments
