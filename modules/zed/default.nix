@@ -220,7 +220,6 @@ in
           package = pkgs.zed-editor;
 
           extraPackages = with pkgs; [
-            nixd
             ty
           ];
 
