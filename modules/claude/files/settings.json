@@ -6,7 +6,7 @@
   },
   "permissions": {
     "allow": ["Bash", "Read", "Edit", "WebFetch", "mcp__context7__resolve-library-id", "mcp__context7__query-docs"],
-    "defaultMode": "delegate"
+    "defaultMode": "acceptEdits"
   },
   "language": "korean",
   "teammateMode": "tmux",
