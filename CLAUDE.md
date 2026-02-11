@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - DO NOT use git worktree for this repository
 - Follow existing code patterns and module structure in this repository
-- Use `nixfmt-rfc-style` to format all Nix files before committing (you should delegate this task to subagent using sonnet model)
+- Use `nixfmt` to format all Nix files before committing (you should delegate this task to subagent using sonnet model)
 - Do NOT run build tests directly - ask the user to test instead (builds can take several minutes)
 - Skip `nix flake check` unless explicitly requested - it often takes too long
 - Do NOT push unless explicitly requested
