@@ -91,6 +91,7 @@
 
       # Go
       go
+      gopls
 
       # Kubernetes
       kubectl
@@ -115,7 +116,7 @@
       sarasa-gothic
     ];
 
-    stateVersion = "25.05";
+    stateVersion = "25.11";
 
     # Rust/C 빌드 시 라이브러리 경로 (특히 macOS에서 libiconv 링킹용)
     sessionVariables = {

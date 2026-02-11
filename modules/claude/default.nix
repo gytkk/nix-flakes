@@ -20,28 +20,24 @@ let
 
   # plugin-name@marketplace-name
   plugins = [
-    # anthropics/skills — document generation (PDF, DOCX, XLSX, PPTX)
     "document-skills@anthropic-agent-skills"
-    # anthropics/claude-code — git commit/push/PR workflow
     "commit-commands@claude-code-plugins"
-    # anthropics/claude-code — security warning hooks
     "security-guidance@claude-code-plugins"
 
     "ralph-loop@claude-plugins-official"
 
-    # anthropics/claude-plugins-official — LSP language servers
     "gopls-lsp@claude-plugins-official"
     "rust-analyzer-lsp@claude-plugins-official"
     "typescript-lsp@claude-plugins-official"
+
+    # backnotprop/plannotator — visual plan annotation and review
+    "plannotator@plannotator"
 
     # gytkk/claude-marketplace — custom agents, Scala LSP, Python LSP, Terraform LSP, and Nix LSP
     "metals-lsp@gytkk"
     "ty-lsp@gytkk"
     "terraform-ls@gytkk"
     "nixd-lsp@gytkk"
-
-    # backnotprop/plannotator — visual plan annotation and review
-    "plannotator@plannotator"
   ];
 
   mcpCommands = [
@@ -53,8 +49,6 @@ in
   home.packages = [
     pkgs.master.claude-code
 
-    # LSP servers for Claude Code plugins
-    pkgs.gopls
     # rust-analyzer is provided by rustup (base/default.nix)
     pkgs.nodePackages.typescript-language-server
     pkgs.terraform-ls
