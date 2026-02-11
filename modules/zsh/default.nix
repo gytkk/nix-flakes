@@ -60,9 +60,6 @@
       vi = "nvim";
       vimdiff = "nvim -d";
 
-      # Zed editor (use Windows zed.exe on WSL)
-      zed = if isWSL then "zed.exe" else "zeditor";
-
       # OpenCode
       oc = "opencode";
 
@@ -73,6 +70,9 @@
 
       # antigravity
       agy = "antigravity";
+    }
+    // lib.optionalAttrs (!pkgs.stdenv.isDarwin) {
+      zed = if isWSL then "zed.exe" else "zeditor";
     };
 
     # Environment variables
