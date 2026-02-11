@@ -1,4 +1,9 @@
-{ pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
 let
   claude = "${pkgs.master.claude-code}/bin/claude";
@@ -54,6 +59,9 @@ in
     pkgs.nodePackages.typescript-language-server
     pkgs.terraform-ls
   ];
+
+  # Add XDG data bin to PATH (for plannotator CLI installed via install.sh)
+  home.sessionPath = [ "${config.xdg.dataHome}/bin" ];
 
   home.file.".claude/CLAUDE.md".source = ./files/CLAUDE.md;
   home.file.".claude/agents".source = ./agents;
@@ -162,9 +170,11 @@ in
   '';
 
   # Install plannotator CLI binary (from GitHub releases, not in nixpkgs)
-  # Export PATH so install.sh subprocess also has access to curl, etc.
+  # Binary installs to ${XDG_DATA_HOME}/bin/plannotator via install.sh
   home.activation.installPlannotator = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    if ! command -v plannotator &>/dev/null; then
+    PLANNOTATOR_BIN="${config.xdg.dataHome}/bin/plannotator"
+    SETUP_LOG="$HOME/.claude/nix-setup.log"
+    if [ ! -x "$PLANNOTATOR_BIN" ]; then
       export PATH="${
         lib.makeBinPath (
           with pkgs;
@@ -177,7 +187,12 @@ in
           ]
         )
       }:$PATH"
-      ${pkgs.curl}/bin/curl -fsSL https://plannotator.ai/install.sh | ${pkgs.bash}/bin/bash >/dev/null 2>&1
+      echo "[$(date '+%H:%M:%S')] Installing plannotator CLI..." >> "$SETUP_LOG"
+      if ${pkgs.curl}/bin/curl -fsSL https://plannotator.ai/install.sh | ${pkgs.bash}/bin/bash >> "$SETUP_LOG" 2>&1; then
+        echo "[$(date '+%H:%M:%S')] plannotator installed to $PLANNOTATOR_BIN" >> "$SETUP_LOG"
+      else
+        echo "[$(date '+%H:%M:%S')] plannotator installation FAILED (exit $?)" >> "$SETUP_LOG"
+      fi
     fi
   '';
 }
