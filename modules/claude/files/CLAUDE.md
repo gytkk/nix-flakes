@@ -17,9 +17,12 @@ up a subagent (single-file edits, quick answers, known-location fixes).
 |------|--------|--------|
 | **Trivial** | Single file, known location, quick fix | Handle directly |
 | **Explicit** | Specific file/line, clear scope | Handle directly or delegate to implementer |
-| **Exploratory** | "How does X work?", "Find Y" | Delegate to explorer (parallel if multiple areas) |
+| **Exploratory** | "Find Y", "Where is X", "Show me Z", "List all" | Delegate to explorer (parallel if multiple areas) |
+| **Analytical** | "Why is X?", "Root cause", "Investigate", "분석해줘" | Delegate to parallel explorers for context gathering, then synthesize (see Analysis Workflow) |
 | **Open-ended** | "Add feature", "Refactor", "Improve" | Delegate to planner first, then implementer |
 | **Ambiguous** | Unclear scope, multiple interpretations | Ask ONE clarifying question, then proceed |
+
+> **Exploratory vs. Analytical**: Use Exploratory when the user needs to **locate or list** code. Use Analytical when they need to **understand why** something behaves a certain way.
 
 ### Delegation Triggers
 
@@ -144,6 +147,52 @@ User asks: "Add rate limiting to the API"
 > Use the reviewer subagent to review the rate limiting changes for security and correctness.
 
 **Step 6 — Verify**: Check reviewer output. If issues found, resume implementer to fix.
+
+### Analysis Workflow (Analytical Request)
+
+When a request is classified as **Analytical**, follow this workflow to ensure conclusions
+are grounded in evidence. The key principle: never conclude without evidence, always gather
+context first.
+
+**Step 1 — Context Gathering** (parallel background):
+
+Run 2-3 explorer subagents in parallel to cover different angles of the problem:
+
+> Use the explorer subagent to trace the relevant code paths, call chains, and data flow.
+>
+> Use the explorer subagent to find related patterns, configurations, and error handling.
+
+If external libraries or APIs are involved, also run a librarian in parallel:
+
+> Use the librarian subagent to research the library's documented behavior, known issues, and edge cases.
+
+**Step 2 — Deep Analysis** (foreground, after context gathering):
+
+If the problem is complex (architecture-level, multi-system interaction, or hard debugging after
+2+ failed attempts), escalate to the oracle:
+
+> Use the oracle subagent to analyze the root cause based on gathered context.
+>
+> 1. TASK: Analyze why X behaves this way / diagnose the root cause of Y
+> 2. EXPECTED OUTCOME: Root cause identification with evidence, potential fixes ranked by confidence
+> 3. MUST DO: Reference specific file paths and code from explorer findings
+> 4. MUST NOT DO: Do not speculate without evidence, do not propose fixes without understanding the cause
+> 5. CONTEXT: (file paths, patterns, and call chains from explorer results)
+> 6. BACKGROUND: (explorer and librarian findings)
+
+For simpler analytical questions where explorer results are sufficient, skip this step.
+
+**Step 3 — Synthesis**:
+
+Combine all gathered information into a structured analysis. The response must include:
+
+- **Root cause or explanation** supported by evidence
+- **Evidence**: specific file paths, code references, and line numbers
+- **Confidence level**: high (direct evidence), medium (strong inference), or low (hypothesis)
+- **Related concerns**: side effects, edge cases, or areas that need further investigation
+
+Never present a hypothesis as a conclusion. If evidence is insufficient, state what is known,
+what is uncertain, and what additional investigation would resolve the uncertainty.
 
 ## Phase 2 — Codebase Assessment
 
