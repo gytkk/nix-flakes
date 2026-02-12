@@ -1,7 +1,7 @@
 /**
- * Ghostty native notification plugin for OpenCode.
- * Uses OSC 777 escape sequence — same protocol as Claude Code.
- * Format: ESC]777;notify;TITLE;MESSAGE BEL
+ * Terminal-native notification plugin for OpenCode.
+ * Ghostty: OSC 777 — ESC]777;notify;TITLE;MESSAGE BEL
+ * Fallback: OSC 9  — ESC]9;TITLE: MESSAGE BEL
  */
 
 import { writeFileSync } from "node:fs"
@@ -24,11 +24,28 @@ interface OpencodeClient {
   }
 }
 
-function sendNotification(title: string, message: string): void {
+type TerminalType = "ghostty" | "other"
+
+function detectTerminal(): TerminalType {
+  const termProgram = (process.env.TERM_PROGRAM ?? "").toLowerCase()
+  if (termProgram === "ghostty" || process.env.GHOSTTY_RESOURCES_DIR) {
+    return "ghostty"
+  }
+  return "other"
+}
+
+function buildOscSequence(terminal: TerminalType, title: string, message: string): string {
   const safeTitle = title.replace(/[;\x07\x1b]/g, "")
   const safeMessage = message.replace(/[;\x07\x1b]/g, "")
+  if (terminal === "ghostty") {
+    return `\x1b]777;notify;${safeTitle};${safeMessage}\x07`
+  }
+  return `\x1b]9;${safeTitle}: ${safeMessage}\x07`
+}
+
+function sendNotification(terminal: TerminalType, title: string, message: string): void {
   try {
-    writeFileSync("/dev/tty", `\x1b]777;notify;${safeTitle};${safeMessage}\x07`)
+    writeFileSync("/dev/tty", buildOscSequence(terminal, title, message))
   } catch {
     // /dev/tty unavailable (e.g. not running in a terminal)
   }
@@ -66,10 +83,12 @@ export const NativeNotifyPlugin = async ({
 }: {
   client: OpencodeClient
 }) => {
+  const terminal = detectTerminal()
+
   return {
     "tool.execute.before": async (input: { tool: string }) => {
       if (input.tool === "question") {
-        sendNotification("Question", "OpenCode has a question for you")
+        sendNotification(terminal, "Question", "OpenCode has a question for you")
       }
     },
     event: async ({ event }: { event: Event }): Promise<void> => {
@@ -78,7 +97,7 @@ export const NativeNotifyPlugin = async ({
           const sessionID = event.properties.sessionID as string | undefined
           if (sessionID) {
             const title = await getSessionTitle(client, sessionID)
-            sendNotification("Ready for review", title)
+            sendNotification(terminal, "Ready for review", title)
           }
           break
         }
@@ -90,12 +109,12 @@ export const NativeNotifyPlugin = async ({
           if (sessionID) {
             const title = await getSessionTitle(client, sessionID)
             const message = errorMsg ? `${title}: ${errorMsg}` : title
-            sendNotification("Error occurred", message)
+            sendNotification(terminal, "Error occurred", message)
           }
           break
         }
         case "permission.asked": {
-          sendNotification("Permission needed", "Waiting for your approval")
+          sendNotification(terminal, "Permission needed", "Waiting for your approval")
           break
         }
       }
