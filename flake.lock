@@ -432,6 +432,26 @@
         "type": "github"
       }
     },
+    "opencode-flake": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1770900692,
+        "narHash": "sha256-acRP/nY0f3TAx41vfIflaXJrEL+HZATrl/oZF0tw20Q=",
+        "owner": "gytkk",
+        "repo": "opencode-flake",
+        "rev": "c2b08361d13bf9b0d4693d27c044193634e15bf0",
+        "type": "github"
+      },
+      "original": {
+        "owner": "gytkk",
+        "repo": "opencode-flake",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "agenix": "agenix",
@@ -446,6 +466,7 @@
         "nixpkgs-25_05": "nixpkgs-25_05",
         "nixpkgs-master": "nixpkgs-master",
         "nixpkgs-terraform": "nixpkgs-terraform",
+        "opencode-flake": "opencode-flake",
         "rose-pine-ghostty": "rose-pine-ghostty"
       }
     },

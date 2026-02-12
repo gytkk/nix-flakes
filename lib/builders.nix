@@ -6,6 +6,7 @@ let
     inputs.copyparty.overlays.default
     inputs.nix-zed-extensions.overlays.default
     inputs.nix-openclaw.overlays.default
+    inputs.opencode-flake.overlays.default
     # Fix for hasown dependency issue - must come AFTER nix-openclaw overlay
     (import ../overlays { inherit inputs; }).openclaw-fix
     (import ../overlays { inherit inputs; }).nixpkgs-versions
