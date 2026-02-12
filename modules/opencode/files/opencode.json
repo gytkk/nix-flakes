@@ -37,6 +37,12 @@
       "url": "https://mcp.notion.com/mcp"
     }
   },
+  "lsp": {
+    "metals": {
+      "command": ["metals"],
+      "extensions": [".scala", ".sc", ".sbt"]
+    }
+  },
   "permission": {
     "skill": {
       "*": "allow"
