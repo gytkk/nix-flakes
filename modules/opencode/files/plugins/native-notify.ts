@@ -1,13 +1,10 @@
 /**
- * Native macOS notification plugin for OpenCode.
- * Uses osascript directly — no external dependencies required.
- * Suppresses notifications when Ghostty is focused.
+ * Ghostty native notification plugin for OpenCode.
+ * Uses OSC 777 escape sequence — same protocol as Claude Code.
+ * Format: ESC]777;notify;TITLE;MESSAGE BEL
  */
 
-import { exec } from "node:child_process"
-import { promisify } from "node:util"
-
-const execAsync = promisify(exec)
+import { writeFileSync } from "node:fs"
 
 interface Event {
   type: string
@@ -27,45 +24,14 @@ interface OpencodeClient {
   }
 }
 
-const TERMINAL_PROCESS_NAME = "Ghostty"
-
-const SOUNDS = {
-  idle: "Glass",
-  error: "Basso",
-  permission: "Submarine",
-  question: "Submarine",
-} as const
-
-async function runOsascript(script: string): Promise<string | null> {
+function sendNotification(title: string, message: string): void {
+  const safeTitle = title.replace(/[;\x07\x1b]/g, "")
+  const safeMessage = message.replace(/[;\x07\x1b]/g, "")
   try {
-    const { stdout } = await execAsync(`osascript -e '${script}'`)
-    return stdout.trim() || null
+    writeFileSync("/dev/tty", `\x1b]777;notify;${safeTitle};${safeMessage}\x07`)
   } catch {
-    return null
+    // /dev/tty unavailable (e.g. not running in a terminal)
   }
-}
-
-async function isTerminalFocused(): Promise<boolean> {
-  const frontmost = await runOsascript(
-    'tell application "System Events" to get name of first application process whose frontmost is true',
-  )
-  if (!frontmost) return false
-  return frontmost.toLowerCase() === TERMINAL_PROCESS_NAME.toLowerCase()
-}
-
-async function sendNotification(
-  title: string,
-  message: string,
-  sound: string,
-): Promise<void> {
-  if (await isTerminalFocused()) return
-
-  const safeTitle = title.replace(/"/g, '\\"')
-  const safeMessage = message.replace(/"/g, '\\"')
-
-  await runOsascript(
-    `display notification "${safeMessage}" with title "${safeTitle}" sound name "${sound}"`,
-  )
 }
 
 async function getSessionTitle(
@@ -95,42 +61,6 @@ async function getSessionTitle(
   return "Task"
 }
 
-async function handleSessionIdle(
-  client: OpencodeClient,
-  sessionID: string,
-): Promise<void> {
-  const sessionTitle = await getSessionTitle(client, sessionID)
-  await sendNotification("Ready for review", sessionTitle, SOUNDS.idle)
-}
-
-async function handleSessionError(
-  client: OpencodeClient,
-  sessionID: string,
-  errorMessage?: string,
-): Promise<void> {
-  const sessionTitle = await getSessionTitle(client, sessionID)
-  const message = errorMessage
-    ? `${sessionTitle}: ${errorMessage}`
-    : sessionTitle
-  await sendNotification("Error occurred", message, SOUNDS.error)
-}
-
-async function handlePermissionAsked(): Promise<void> {
-  await sendNotification(
-    "Permission needed",
-    "OpenCode is waiting for your approval",
-    SOUNDS.permission,
-  )
-}
-
-async function handleQuestionAsked(): Promise<void> {
-  await sendNotification(
-    "Question",
-    "OpenCode has a question for you",
-    SOUNDS.question,
-  )
-}
-
 export const NativeNotifyPlugin = async ({
   client,
 }: {
@@ -139,7 +69,7 @@ export const NativeNotifyPlugin = async ({
   return {
     "tool.execute.before": async (input: { tool: string }) => {
       if (input.tool === "question") {
-        await handleQuestionAsked()
+        sendNotification("Question", "OpenCode has a question for you")
       }
     },
     event: async ({ event }: { event: Event }): Promise<void> => {
@@ -147,22 +77,25 @@ export const NativeNotifyPlugin = async ({
         case "session.idle": {
           const sessionID = event.properties.sessionID as string | undefined
           if (sessionID) {
-            await handleSessionIdle(client, sessionID)
+            const title = await getSessionTitle(client, sessionID)
+            sendNotification("Ready for review", title)
           }
           break
         }
         case "session.error": {
           const sessionID = event.properties.sessionID as string | undefined
           const error = event.properties.error
-          const errorMessage =
+          const errorMsg =
             typeof error === "string" ? error : error ? String(error) : undefined
           if (sessionID) {
-            await handleSessionError(client, sessionID, errorMessage)
+            const title = await getSessionTitle(client, sessionID)
+            const message = errorMsg ? `${title}: ${errorMsg}` : title
+            sendNotification("Error occurred", message)
           }
           break
         }
         case "permission.asked": {
-          await handlePermissionAsked()
+          sendNotification("Permission needed", "Waiting for your approval")
           break
         }
       }

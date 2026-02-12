@@ -13,7 +13,7 @@
   # Create ~/.config/opencode/oh-my-opencode.json file (oh-my-opencode plugin config)
   home.file.".config/opencode/oh-my-opencode.json".source = ./files/oh-my-opencode.json;
 
-  # Deploy native notification plugin (uses osascript for macOS native notifications)
+  # Deploy native notification plugin (uses OSC 777 for Ghostty desktop notifications)
   home.file.".config/opencode/plugins/native-notify.ts".source = ./files/plugins/native-notify.ts;
 
   # Create ~/.config/opencode/AGENTS.md file
