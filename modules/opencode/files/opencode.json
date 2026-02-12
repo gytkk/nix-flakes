@@ -14,8 +14,7 @@
   "plugin": [
     "@plannotator/opencode@latest",
     "opencode-anthropic-auth",
-    "oh-my-opencode",
-    "@mohak34/opencode-notifier@latest"
+    "oh-my-opencode"
   ],
   "tui": {
     "scroll_speed": 3,
