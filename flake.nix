@@ -4,7 +4,6 @@
   inputs = {
     # Nix 패키지 모음
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
-    nixpkgs-master.url = "github:nixos/nixpkgs/master";
     nixpkgs-25_05.url = "github:nixos/nixpkgs/nixos-25.05";
 
     # Home Manager
@@ -71,6 +70,12 @@
 
     opencode-flake = {
       url = "github:gytkk/opencode-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # claude-code - AI coding assistant (always up-to-date)
+    claude-code-nix = {
+      url = "github:sadjow/claude-code-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };

@@ -64,9 +64,5 @@
         "micromamba"
       ];
 
-      # master: claude-code 사용
-      master = mkLazyPkgs inputs.nixpkgs-master [
-        "claude-code"
-      ];
     };
 }

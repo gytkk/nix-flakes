@@ -6,7 +6,7 @@
 }:
 
 let
-  claude = "${pkgs.master.claude-code}/bin/claude";
+  claude = "${pkgs.claude-code}/bin/claude";
   timeout = "${pkgs.coreutils}/bin/timeout";
   jq = "${pkgs.jq}/bin/jq";
 
@@ -47,7 +47,7 @@ let
 in
 {
   home.packages = [
-    pkgs.master.claude-code
+    pkgs.claude-code
 
     # rust-analyzer is provided by rustup (base/default.nix)
     pkgs.nodePackages.typescript-language-server

@@ -225,7 +225,7 @@ in
 home.packages = with pkgs; [
   packageName
   pkgs.stable-25_05.ruby_3_2     # Specific nixpkgs version
-  pkgs.master.claude-code         # Master branch package
+  pkgs.claude-code                # claude-code-nix flake
   (pkgs.writeShellScriptBin "script-name" ''
     script content
   '')

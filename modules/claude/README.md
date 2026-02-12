@@ -5,7 +5,7 @@ with a Sisyphus-style agent orchestration system.
 
 ## What it does
 
-- Installs `claude-code` from nixpkgs master
+- Installs `claude-code` from [sadjow/claude-code-nix](https://github.com/sadjow/claude-code-nix) flake
 - Configures Claude Code settings (`~/.claude/settings.json`)
 - Installs global orchestration instructions (`~/.claude/CLAUDE.md`)
 - Deploys 6 custom subagents to `~/.claude/agents/`
