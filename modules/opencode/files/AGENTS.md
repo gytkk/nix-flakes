@@ -8,10 +8,12 @@
 - **Ask, don't guess.** If requirements are ambiguous or context is missing, ask the user immediately.
 - **Surface blockers early.** Flag missing info, risky assumptions, or dependencies NOW — not after building on them.
 
-## Worktree Workflow (MANDATORY)
+## Worktree Workflow
 
-> **CRITICAL**: Before starting ANY new task, you MUST create a git worktree.
-> Do NOT work directly on the main branch. This is non-negotiable.
+By default, work on the current branch. Only use git worktree when the user explicitly requests it.
+For large-scale changes (e.g., new features, major refactors), ask the user whether to use a worktree before proceeding.
+
+**When worktree is requested:**
 
 1. Create a new branch and worktree: `git worktree add ~/trees/$(basename $PWD)/<short-task-name> -b <branch-name>`
 2. Change to the worktree directory and work there
