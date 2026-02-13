@@ -1,10 +1,12 @@
 /**
  * Terminal-native notification plugin for OpenCode.
  * Ghostty: OSC 777 — ESC]777;notify;TITLE;MESSAGE BEL
+ * WSL:     PowerShell toast via Windows notification API
  * Fallback: OSC 9  — ESC]9;TITLE: MESSAGE BEL
  */
 
 import { writeFileSync } from "node:fs"
+import { execFile } from "node:child_process"
 
 interface Event {
   type: string
@@ -24,12 +26,15 @@ interface OpencodeClient {
   }
 }
 
-type TerminalType = "ghostty" | "other"
+type TerminalType = "ghostty" | "wsl" | "other"
 
 function detectTerminal(): TerminalType {
   const termProgram = (process.env.TERM_PROGRAM ?? "").toLowerCase()
   if (termProgram === "ghostty" || process.env.GHOSTTY_RESOURCES_DIR) {
     return "ghostty"
+  }
+  if (process.env.WSL_DISTRO_NAME) {
+    return "wsl"
   }
   return "other"
 }
@@ -43,7 +48,27 @@ function buildOscSequence(terminal: TerminalType, title: string, message: string
   return `\x1b]9;${safeTitle}: ${safeMessage}\x07`
 }
 
+function sendWslToast(title: string, message: string): void {
+  const safeTitle = title.replace(/'/g, "''").replace(/`/g, "``")
+  const safeMessage = message.replace(/'/g, "''").replace(/`/g, "``")
+  const script = [
+    "[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null",
+    "[Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime] | Out-Null",
+    `$xml = '<toast><visual><binding template="ToastText02"><text id="1">${safeTitle}</text><text id="2">${safeMessage}</text></binding></visual></toast>'`,
+    "$doc = [Windows.Data.Xml.Dom.XmlDocument]::new()",
+    "$doc.LoadXml($xml)",
+    '$notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("OpenCode")',
+    "$notifier.Show([Windows.UI.Notifications.ToastNotification]::new($doc))",
+  ].join("; ")
+
+  execFile("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], { timeout: 10000 }, () => {})
+}
+
 function sendNotification(terminal: TerminalType, title: string, message: string): void {
+  if (terminal === "wsl") {
+    sendWslToast(title, message)
+    return
+  }
   try {
     writeFileSync("/dev/tty", buildOscSequence(terminal, title, message))
   } catch {
