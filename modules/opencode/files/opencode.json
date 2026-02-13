@@ -14,7 +14,6 @@
   "plugin": [
     "@plannotator/opencode@latest",
     "opencode-anthropic-auth",
-    "opencode-openai-auth",
     "oh-my-opencode"
   ],
   "tui": {
