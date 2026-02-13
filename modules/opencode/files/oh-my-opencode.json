@@ -5,7 +5,7 @@
       "model": "anthropic/claude-opus-4-6"
     },
     "oracle": {
-      "model": "opencode/gpt-5.3-codex",
+      "model": "openai/gpt-5.3-codex",
       "variant": "high"
     },
     "build": {
@@ -29,7 +29,7 @@
       "variant": "max"
     },
     "momus": {
-      "model": "opencode/gpt-5.3-codex",
+      "model": "openai/gpt-5.3-codex",
       "variant": "medium"
     },
     "atlas": {
@@ -41,7 +41,7 @@
       "model": "google/gemini-3-pro"
     },
     "ultrabrain": {
-      "model": "opencode/gpt-5.3-codex",
+      "model": "openai/gpt-5.3-codex",
       "variant": "xhigh"
     },
     "artistry": {
