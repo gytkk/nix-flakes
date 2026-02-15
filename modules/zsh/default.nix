@@ -61,8 +61,6 @@
       vimdiff = "nvim -d";
 
       # OpenCode
-      oc = "opencode";
-
       # k8s aliases
       kl = "kubectl";
       kx = "kubectx";
@@ -140,6 +138,49 @@
           if command -v uv > /dev/null; then
             eval "$(uv generate-shell-completion zsh)"
           fi
+
+          # OpenCode with tmux subagent support
+          oc() {
+            local base_name
+            local path_hash
+            local session_name
+            local oc_port
+
+            base_name=$(basename "$PWD")
+
+            if command -v md5sum >/dev/null 2>&1; then
+              path_hash=$(printf '%s' "$PWD" | md5sum | cut -c1-4)
+            else
+              path_hash=$(printf '%s' "$PWD" | md5 | cut -c10-13)
+            fi
+
+            session_name="$base_name-$path_hash"
+
+            # Find available port
+            oc_port=4096
+            while [ "$oc_port" -lt 5096 ]; do
+              if ! lsof -i :$oc_port >/dev/null 2>&1; then
+                break
+              fi
+              oc_port=$((oc_port + 1))
+            done
+
+            export OPENCODE_PORT=$oc_port
+
+            if [ -n "$TMUX" ]; then
+              opencode --port "$oc_port" "$@"
+            else
+              local oc_cmd
+              oc_cmd="OPENCODE_PORT=$oc_port opencode --port $oc_port $*; exec $SHELL"
+
+              if tmux has-session -t "$session_name" 2>/dev/null; then
+                tmux new-window -t "$session_name" -c "$PWD" "$oc_cmd"
+                tmux attach-session -t "$session_name"
+              else
+                tmux new-session -s "$session_name" -c "$PWD" "$oc_cmd"
+              fi
+            fi
+          }
 
           # Initialize micromamba
           if command -v micromamba > /dev/null; then

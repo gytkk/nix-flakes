@@ -69,6 +69,7 @@
       jq
       yq-go # yq 패키지는 더 이상 관리되지 않음
       ripgrep
+      lsof
       tmux
       less
       wget
