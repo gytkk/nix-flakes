@@ -1,7 +1,7 @@
 { pkgs, ... }:
 
 {
-  # Install OpenCode via gytkk/opencode-flake (pre-built binary)
+  # Install OpenCode via gytkk/flake-stores (pre-built binary)
   home.packages = [
     pkgs.opencode
   ];
