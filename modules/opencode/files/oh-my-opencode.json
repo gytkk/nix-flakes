@@ -55,9 +55,5 @@
       "extensions": [".scala", ".sc", ".sbt"],
       "priority": 10
     }
-  },
-  "tmux": {
-    "enabled": true,
-    "layout": "main-vertical"
   }
 }
