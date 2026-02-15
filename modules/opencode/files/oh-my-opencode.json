@@ -4,6 +4,9 @@
     "sisyphus": {
       "model": "openai/gpt-5.3-codex-spark"
     },
+    "sisyphus-junior": {
+      "model": "openai/gpt-5.3-codex-spark"
+    },
     "oracle": {
       "model": "anthropic/claude-opus-4-6",
       "variant": "high"

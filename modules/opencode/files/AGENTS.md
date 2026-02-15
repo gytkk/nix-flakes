@@ -35,7 +35,7 @@ For large-scale changes (e.g., new features, major refactors), ask the user whet
 
 ## Planning & Approval
 
-For single-file, low-risk changes that can be explained in one short paragraph (for example, wording/description edits or small branch tweaks), do not route through plannotator for separate plan approval; apply directly, then verify with targeted evidence (diff and relevant check results). Use formal plan approval only for multi-file, cross-module, or behavior-changing work.
+For single-file, low-risk changes that can be explained in one short paragraph (for example, wording/description edits or small branch tweaks), do not route through plannotator for separate plan approval; apply directly, then verify with targeted evidence (diff and relevant check results). Use formal plan approval through plannotator only for multi-file, cross-module, or behavior-changing work.
 
 ## Critical Rules
 
@@ -110,9 +110,9 @@ When the user's message contains any of these keywords (case-insensitive, typica
 at the end of the message), apply the associated behavior throughout the entire task.
 Strip the keyword from the message before processing the actual request.
 
-| Keyword | Behavior |
-|---------|----------|
-| `webs` | **Aggressive web search mode.** Before writing ANY code or making decisions, search the web first. Use web search to verify APIs, check latest docs, find best practices, and confirm syntax. When in doubt, search again. Prefer up-to-date web results over your training data. Search at minimum 3 times during the task. |
+| Keyword | Behavior                                                                                                                                                                                                                                                                                                                     |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `webs`  | **Aggressive web search mode.** Before writing ANY code or making decisions, search the web first. Use web search to verify APIs, check latest docs, find best practices, and confirm syntax. When in doubt, search again. Prefer up-to-date web results over your training data. Search at minimum 3 times during the task. |
 
 ## Skills
 
