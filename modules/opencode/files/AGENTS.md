@@ -33,6 +33,10 @@ For large-scale changes (e.g., new features, major refactors), ask the user whet
 - Keep commits atomic: one logical change per commit.
 - Do NOT push unless explicitly requested.
 
+## Planning & Approval
+
+For single-file, low-risk changes that can be explained in one short paragraph (for example, wording/description edits or small branch tweaks), do not route through plannotator for separate plan approval; apply directly, then verify with targeted evidence (diff and relevant check results). Use formal plan approval only for multi-file, cross-module, or behavior-changing work.
+
 ## Critical Rules
 
 - First, deeply understand and think about what you want to achieve with your code.

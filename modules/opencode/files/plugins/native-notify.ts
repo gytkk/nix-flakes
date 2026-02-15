@@ -30,7 +30,14 @@ type TerminalType = "ghostty" | "wsl" | "other"
 
 function detectTerminal(): TerminalType {
   const termProgram = (process.env.TERM_PROGRAM ?? "").toLowerCase()
-  if (termProgram === "ghostty" || process.env.GHOSTTY_RESOURCES_DIR) {
+  const term = (process.env.TERM ?? "").toLowerCase()
+
+  if (
+    termProgram === "ghostty"
+    || termProgram === "xterm-ghostty"
+    || term === "xterm-ghostty"
+    || process.env.GHOSTTY_RESOURCES_DIR
+  ) {
     return "ghostty"
   }
   if (process.env.WSL_DISTRO_NAME) {
