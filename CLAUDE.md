@@ -43,8 +43,8 @@ nixos-rebuild build --flake .#pylv-sepia
 nixos-rebuild switch --flake .#pylv-sepia
 
 # Format Nix files
-nixfmt-rfc-style <file.nix>
-nixfmt-rfc-style **/*.nix        # Format all Nix files
+nixfmt <file.nix>
+nixfmt **/*.nix        # Format all Nix files
 
 # Show available flake outputs
 nix flake show
@@ -185,7 +185,7 @@ imports = [
 - One attribute per line in attribute sets
 - Semicolons at end of each attribute
 - Closing brace `}` on separate line
-- Use 2-space indentation (enforced by nixfmt-rfc-style)
+- Use 2-space indentation (enforced by nixfmt)
 - Use `with pkgs;` for package lists
 
 ### Naming Conventions
@@ -269,7 +269,7 @@ environments.nix          # All environment definitions
 hosts.nix                 # NixOS host definitions
 hosts/<name>/configuration.nix # NixOS host configuration
 lib/builders.nix          # mkHomeConfig, mkNixOSConfig helpers
-overlays/default.nix      # nixpkgs version overlays (openclaw-fix, nixpkgs-versions)
+overlays/default.nix      # nixpkgs version overlays (nixpkgs-versions)
 secrets/secrets.nix       # Agenix secrets configuration
 ```
 
@@ -349,19 +349,19 @@ modules/<name>/
 
 #### Quick Module Reference
 
-| Module       | Purpose                  | Config Location                              | Key Files                                |
-| ------------ | ------------------------ | -------------------------------------------- | ---------------------------------------- |
+| Module       | Purpose                  | Config Location                              | Key Files                                               |
+| ------------ | ------------------------ | -------------------------------------------- | ------------------------------------------------------- |
 | `claude/`    | Claude Code AI assistant | `~/.claude/`                                 | `files/settings.json`, `files/CLAUDE.md`, `agents/*.md` |
-| `ghostty/`   | Ghostty terminal         | `~/.config/ghostty/`                         | `default.nix` (inline config)            |
-| `git/`       | Git configuration        | `~/.gitconfig`                               | `default.nix`                            |
-| `k9s/`       | Kubernetes manager       | `~/.config/k9s/`                             | `default.nix`                            |
-| `openclaw/`  | OpenClaw AI gateway      | Systemd/Launchd service                      | `default.nix`                            |
-| `opencode/`  | OpenCode AI agent        | `~/.config/opencode/`                        | `files/opencode.json`, `files/AGENTS.md` |
-| `terraform/` | Terraform versions       | direnv lazy-load                             | `default.nix`                            |
-| `vim/`       | Neovim                   | `~/.config/nvim/`                            | `default.nix`                            |
-| `vscode/`    | VSCode editor (DISABLED) | `~/.config/Code/`                            | `default.nix`, `themes/`                 |
-| `zed/`       | Zed editor               | `~/Library/Application Support/Zed/` (macOS) | `default.nix`, `themes/`                 |
-| `zsh/`       | Zsh shell                | `~/.zshrc`                                   | `default.nix`, `starship.toml`           |
+| `ghostty/`   | Ghostty terminal         | `~/.config/ghostty/`                         | `default.nix` (inline config)                           |
+| `git/`       | Git configuration        | `~/.gitconfig`                               | `default.nix`                                           |
+| `k9s/`       | Kubernetes manager       | `~/.config/k9s/`                             | `default.nix`                                           |
+| `openclaw/`  | OpenClaw AI gateway      | Systemd/Launchd service                      | `default.nix`                                           |
+| `opencode/`  | OpenCode AI agent        | `~/.config/opencode/`                        | `files/opencode.json`, `files/AGENTS.md`                |
+| `terraform/` | Terraform versions       | direnv lazy-load                             | `default.nix`                                           |
+| `vim/`       | Neovim                   | `~/.config/nvim/`                            | `default.nix`                                           |
+| `vscode/`    | VSCode editor (DISABLED) | `~/.config/Code/`                            | `default.nix`, `themes/`                                |
+| `zed/`       | Zed editor               | `~/Library/Application Support/Zed/` (macOS) | `default.nix`, `themes/`                                |
+| `zsh/`       | Zsh shell                | `~/.zshrc`                                   | `default.nix`, `starship.toml`                          |
 
 #### How to Find and Modify Settings
 

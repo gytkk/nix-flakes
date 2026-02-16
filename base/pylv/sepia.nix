@@ -8,8 +8,7 @@
 {
   # pylv-sepia 환경 전용 설정
 
-  # OpenClaw - enabled with local hasown fix overlay
-  # See: https://github.com/openclaw/nix-openclaw/issues/45
+  # OpenClaw - enabled
   modules.openclaw = {
     enable = true;
 

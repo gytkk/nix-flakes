@@ -61,8 +61,6 @@
     };
 
     # nix-openclaw - AI assistant gateway
-    # NOTE: Currently broken due to pnpm dependency issue (hasown module missing)
-    # See: https://github.com/openclaw/nix-openclaw/issues/45
     nix-openclaw = {
       url = "github:openclaw/nix-openclaw";
       inputs.nixpkgs.follows = "nixpkgs";

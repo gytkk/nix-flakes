@@ -104,7 +104,6 @@ in
       # Don't expose plugin packages to avoid conflicts
       exposePluginPackages = false;
 
-      # Use instances instead of enable to avoid unitName bug
       instances.default = {
         enable = true;
 
