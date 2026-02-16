@@ -8,8 +8,6 @@ let
     inputs.nix-openclaw.overlays.default
     inputs.opencode-flake.overlays.default
     inputs.claude-code-nix.overlays.default
-    # Fix for hasown dependency issue - must come AFTER nix-openclaw overlay
-    (import ../overlays { inherit inputs; }).openclaw-fix
     (import ../overlays { inherit inputs; }).nixpkgs-versions
   ];
 
