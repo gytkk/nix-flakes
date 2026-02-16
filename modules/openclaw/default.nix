@@ -136,6 +136,9 @@ in
             };
             port = 18789;
             bind = "loopback";
+            tailscale = {
+              mode = "serve";
+            };
           };
 
           # Agent defaults
