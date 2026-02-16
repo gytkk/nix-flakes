@@ -159,7 +159,6 @@
     8080 # Code Server
     3923 # Copyparty
     2283 # Immich
-    18789 # OpenClaw Dashboard
   ];
 
   # Security

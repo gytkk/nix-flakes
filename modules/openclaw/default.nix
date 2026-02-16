@@ -135,7 +135,7 @@ in
               mode = "token";
             };
             port = 18789;
-            bind = "tailnet";
+            bind = "loopback";
           };
 
           # Agent defaults
