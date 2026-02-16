@@ -52,6 +52,10 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    # Force-overwrite the Nix-generated config so a leftover backup file
+    # from a previous activation never blocks nixos-rebuild switch.
+    home.file.".openclaw/openclaw.json".force = true;
+
     # Create Discord token env file and daemon drop-in at activation.
     # The `openclaw gateway` command creates a SEPARATE systemd service
     # (clawdbot-gateway.service) for the actual daemon. Environment variables
