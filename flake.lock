@@ -123,6 +123,26 @@
         "type": "github"
       }
     },
+    "flake-stores": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1771318335,
+        "narHash": "sha256-o/hVIyXUmQLS+6/VXgEXv4gHVWdS51Pt5yUTAnA4EGk=",
+        "owner": "gytkk",
+        "repo": "flake-stores",
+        "rev": "86cc9da2f0898fd8c13cec1cd36bc9bfc4f6d648",
+        "type": "github"
+      },
+      "original": {
+        "owner": "gytkk",
+        "repo": "flake-stores",
+        "type": "github"
+      }
+    },
     "flake-utils": {
       "inputs": {
         "systems": "systems_2"
@@ -455,26 +475,6 @@
         "type": "github"
       }
     },
-    "flake-stores": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1771220983,
-        "narHash": "sha256-gxHwNfjik8iq2Ee64Y27OooSh+JPmcJ+ZjvLItnoDNI=",
-        "owner": "gytkk",
-        "repo": "flake-stores",
-        "rev": "fde3fdc87779ec5e6509d1f8288f9bea23e01b09",
-        "type": "github"
-      },
-      "original": {
-        "owner": "gytkk",
-        "repo": "flake-stores",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "agenix": "agenix",
@@ -482,6 +482,7 @@
         "claude-code-nix": "claude-code-nix",
         "copyparty": "copyparty",
         "disko": "disko",
+        "flake-stores": "flake-stores",
         "home-manager": "home-manager_2",
         "nix-openclaw": "nix-openclaw",
         "nix-vscode-extensions": "nix-vscode-extensions",
@@ -489,7 +490,6 @@
         "nixpkgs": "nixpkgs_3",
         "nixpkgs-25_05": "nixpkgs-25_05",
         "nixpkgs-terraform": "nixpkgs-terraform",
-        "flake-stores": "flake-stores",
         "rose-pine-ghostty": "rose-pine-ghostty"
       }
     },
