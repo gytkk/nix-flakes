@@ -66,7 +66,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    opencode-flake = {
+    flake-stores = {
       url = "github:gytkk/flake-stores";
       inputs.nixpkgs.follows = "nixpkgs";
     };

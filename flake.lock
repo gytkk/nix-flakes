@@ -455,18 +455,18 @@
         "type": "github"
       }
     },
-    "opencode-flake": {
+    "flake-stores": {
       "inputs": {
         "nixpkgs": [
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1771145901,
-        "narHash": "sha256-Ns3meHIkzNjDMgZOhiRXKd4h0k9MZxSb2en+7YAEEWs=",
+        "lastModified": 1771220983,
+        "narHash": "sha256-gxHwNfjik8iq2Ee64Y27OooSh+JPmcJ+ZjvLItnoDNI=",
         "owner": "gytkk",
         "repo": "flake-stores",
-        "rev": "d96b583672b2c2ba3ad6f0ad932f14477bd1866b",
+        "rev": "fde3fdc87779ec5e6509d1f8288f9bea23e01b09",
         "type": "github"
       },
       "original": {
@@ -489,7 +489,7 @@
         "nixpkgs": "nixpkgs_3",
         "nixpkgs-25_05": "nixpkgs-25_05",
         "nixpkgs-terraform": "nixpkgs-terraform",
-        "opencode-flake": "opencode-flake",
+        "flake-stores": "flake-stores",
         "rose-pine-ghostty": "rose-pine-ghostty"
       }
     },

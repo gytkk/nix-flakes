@@ -6,7 +6,7 @@ let
     inputs.copyparty.overlays.default
     inputs.nix-zed-extensions.overlays.default
     inputs.nix-openclaw.overlays.default
-    inputs.opencode-flake.overlays.default
+    inputs.flake-stores.overlays.default
     inputs.claude-code-nix.overlays.default
     (import ../overlays { inherit inputs; }).nixpkgs-versions
   ];
