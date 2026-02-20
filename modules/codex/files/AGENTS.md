@@ -98,36 +98,6 @@ For each finding, provide:
 - Mutable shared state without synchronization
 - String concatenation for building SQL, HTML, or shell commands
 
-## Language-Specific Notes
-
-### Python
-
-- Check type annotations are specific (no `Any` unless justified)
-- Verify `with` statements for resource management
-- Watch for mutable default arguments (`def f(x=[])`)
-- Check `==` vs `is` usage (especially with `None`)
-
-### Nix
-
-- Verify `mkIf`/`mkMerge` conditions are correct
-- Check that module options have proper types and defaults
-- Look for missing `lib.` prefixes on utility functions
-- Verify import paths are correct and not circular
-
-### JavaScript/TypeScript
-
-- Check for `===` vs `==` usage
-- Verify Promise chains handle rejections
-- Watch for closure variable capture in loops
-- Check for prototype pollution in object operations
-
-### Go
-
-- Check that errors are not discarded (`_ = err`)
-- Verify goroutine lifecycle (leaks, panics)
-- Check for data races on shared state
-- Verify defer ordering for cleanup
-
 ## Mindset
 
 Be the reviewer you'd want before shipping to production. It's better to flag
