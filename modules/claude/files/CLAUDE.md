@@ -83,7 +83,8 @@ For single-file, low-risk changes that can be explained in one short paragraph (
 > 다른 스킬로 대체하거나 건너뛰는 것은 허용되지 않는다.
 
 계획 수립 또는 구현 작업을 완료한 후에는 **반드시** `/codex-critic` 스킬을 실행하여
-독립적인 리뷰와 피드백을 받아야 한다.
+독립적인 리뷰와 피드백을 받아야 한다. 코드 변경사항(diff)뿐만 아니라 계획, 설계 문서,
+또는 임의의 콘텐츠도 검증할 수 있다.
 
 ### 필수 실행 시점
 
@@ -100,6 +101,8 @@ For single-file, low-risk changes that can be explained in one short paragraph (
 ```text
 /codex-critic "<원래 사용자 요청 요약>"
 ```
+
+입력은 자동 감지된다: git diff가 있으면 diff 모드, 명시적 콘텐츠가 있으면 임의 입력 모드.
 
 ### 후속 조치
 
