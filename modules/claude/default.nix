@@ -19,6 +19,7 @@ let
     ];
     text = ''
       export CRITIC_SCHEMA="''${CRITIC_SCHEMA:-${./files/critic.schema.json}}"
+      export CODEX_HOME="''${CODEX_HOME:-$HOME/.codex-critic}"
       exec ${pkgs.bash}/bin/bash ${./files/codex_critic.sh} "$@"
     '';
   };
@@ -76,6 +77,16 @@ in
     source = ./skills;
     recursive = true;
   };
+
+  # Critic-specific codex home with dedicated AGENTS.md
+  home.file.".codex-critic/AGENTS.md".source = ./files/codex-critic-agents.md;
+
+  # Symlink codex auth and config into critic home directory
+  home.activation.setupCodexCritic = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    mkdir -p "$HOME/.codex-critic"
+    ln -sf "$HOME/.codex/config.toml" "$HOME/.codex-critic/config.toml"
+    ln -sf "$HOME/.codex/auth.json" "$HOME/.codex-critic/auth.json"
+  '';
 
   # Install marketplaces, plugins, and MCP servers
   home.activation.setupClaudeCode = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
