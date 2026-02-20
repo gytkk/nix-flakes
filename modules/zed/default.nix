@@ -25,6 +25,7 @@ let
     scala
     sql
     nix
+    proto
     toml
     html
     terraform

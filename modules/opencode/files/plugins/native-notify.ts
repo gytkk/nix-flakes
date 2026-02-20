@@ -6,7 +6,7 @@
  */
 
 import { writeFileSync } from "node:fs"
-import { execFile } from "node:child_process"
+import { execFile, execFileSync } from "node:child_process"
 
 interface Event {
   type: string
@@ -28,6 +28,37 @@ interface OpencodeClient {
 
 type TerminalType = "ghostty" | "wsl" | "other"
 
+function hasGhosttyInParentProcessTree(): boolean {
+  if (process.platform !== "darwin") {
+    return false
+  }
+
+  let currentPid = process.pid
+  for (let depth = 0; depth < 8 && currentPid > 1; depth += 1) {
+    try {
+      const command = execFileSync("ps", ["-o", "comm=", "-p", String(currentPid)], {
+        encoding: "utf8",
+      }).trim().toLowerCase()
+      if (command.includes("ghostty")) {
+        return true
+      }
+
+      const parentPidRaw = execFileSync("ps", ["-o", "ppid=", "-p", String(currentPid)], {
+        encoding: "utf8",
+      }).trim()
+      const parentPid = Number.parseInt(parentPidRaw, 10)
+      if (!Number.isFinite(parentPid) || parentPid <= 1 || parentPid === currentPid) {
+        break
+      }
+      currentPid = parentPid
+    } catch {
+      break
+    }
+  }
+
+  return false
+}
+
 function detectTerminal(): TerminalType {
   const termProgram = (process.env.TERM_PROGRAM ?? "").toLowerCase()
   const term = (process.env.TERM ?? "").toLowerCase()
@@ -42,6 +73,9 @@ function detectTerminal(): TerminalType {
   }
   if (process.env.WSL_DISTRO_NAME) {
     return "wsl"
+  }
+  if (hasGhosttyInParentProcessTree()) {
+    return "ghostty"
   }
   return "other"
 }
