@@ -58,6 +58,10 @@ in
   home.sessionPath = [ "${config.xdg.dataHome}/bin" ];
 
   home.file.".claude/CLAUDE.md".source = ./files/CLAUDE.md;
+  home.file.".claude/skills" = {
+    source = ./skills;
+    recursive = true;
+  };
 
   # Install marketplaces, plugins, and MCP servers
   home.activation.setupClaudeCode = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
