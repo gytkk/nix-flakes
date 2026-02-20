@@ -1,15 +1,14 @@
-# Claude Module
+# Claude Code Module
 
-This module installs and configures Claude Code, an AI coding assistant from Anthropic,
-with a Sisyphus-style agent orchestration system.
+This module installs and configures Claude Code, Anthropic's AI coding assistant.
 
 ## What it does
 
 - Installs `claude-code` from [sadjow/claude-code-nix](https://github.com/sadjow/claude-code-nix) flake
 - Configures Claude Code settings (`~/.claude/settings.json`)
-- Installs global orchestration instructions (`~/.claude/CLAUDE.md`)
-- Deploys 6 custom subagents to `~/.claude/agents/`
+- Installs global development guidelines (`~/.claude/CLAUDE.md`)
 - Installs plugin marketplaces, plugins, and MCP servers via activation scripts
+- Installs plannotator CLI for visual plan review
 
 ## Configuration Files
 
@@ -17,56 +16,45 @@ with a Sisyphus-style agent orchestration system.
 
 - **Model**: `opus` (default)
 - **Agent Teams**: Enabled (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`)
-- **MCP**: Enables all project MCP servers
-- **Permissions**: Pre-approved commands for common operations
-  - File operations: `find`, `grep`, `cp`, `ls`, `mv`, `mkdir`, `rm`, `cat`, `sed`, `chmod`
-  - Web fetch: `github.com`
-  - MCP tools: `context7` library resolution and docs
+- **MCP**: Enables all project MCP servers, Context7, Notion
+- **Permissions**: Pre-approved tools (Bash, Read, Edit, WebFetch, Context7)
+- **Language**: Korean
 
 ### CLAUDE.md
 
-Global orchestration instructions that turn Claude into a strategic orchestrator (Sisyphus
-pattern). Includes intent classification, delegation rules, verification protocol, failure
-recovery, codebase assessment, and communication style guidelines.
+Global development guidelines deployed to `~/.claude/CLAUDE.md`. Includes:
 
-## Custom Subagents (Sisyphus Orchestration)
+- Verification & Inquiry Protocol
+- Git conventions (conventional commits, atomic changes)
+- Worktree workflow
+- Planning & Approval (plannotator integration)
+- Code style rules (TDD, type safety, error handling)
+- Python conventions (`uv run`)
+- Prompt keywords (`webs` for aggressive web search)
 
-Located in `agents/` directory, deployed to `~/.claude/agents/`:
+## Plugins
 
-| Agent | Model | Mode | Purpose |
-|-------|-------|------|---------|
-| **oracle** | opus | Read-only, memory | Strategic advisor for architecture, debugging, system design |
-| **explorer** | haiku | Read-only | Fast codebase search, call chain tracing, context gathering |
-| **librarian** | sonnet | Read-only | External docs, library APIs, OSS examples via Context7 + web |
-| **planner** | opus | Read-only | Pre-implementation analysis, requirements, risk assessment |
-| **reviewer** | opus | Read-only, memory | Code quality, security audit, pattern compliance |
-| **implementer** | opus | Read-write | Autonomous code changes, feature building, bug fixes |
+### Marketplaces
 
-### Marketplace Agents (coexist with subagents)
+- `anthropics/skills`, `anthropics/claude-code`, `anthropics/claude-plugins-official`
+- `gytkk/claude-marketplace`
+- `backnotprop/plannotator`
 
-Installed via `gytkk/claude-marketplace` plugin:
+### Installed Plugins
 
-- **code-reviewer**: Code review for quality, bugs, and security
-- **software-dev-engineer**: System design and architecture guidance
-- **test-code-writer**: Test suite generation from specs or code
+- `document-skills`, `commit-commands`, `security-guidance`
+- `ralph-loop`
+- LSP plugins: `gopls-lsp`, `rust-analyzer-lsp`, `typescript-lsp`, `metals-lsp`, `ty-lsp`, `terraform-ls`, `nixd-lsp`
+- `plannotator` (visual plan annotation and review)
+
+## MCP Servers
+
+- **context7**: Library documentation lookup
+- **notion**: Notion integration
 
 ## Usage
 
 ```bash
 # Run Claude Code
 claude
-
-# Check usage statistics
-ccusage
 ```
-
-## Architecture
-
-The orchestration follows the Sisyphus pattern:
-
-1. **Main agent** (reading CLAUDE.md) classifies intent and delegates
-2. **Read-only subagents** (oracle, explorer, librarian, planner, reviewer) gather information
-3. **Implementer subagent** executes code changes
-4. **Main agent** verifies results and reports to user
-
-Subagents cannot spawn other subagents — only the main agent orchestrates.

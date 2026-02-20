@@ -351,7 +351,7 @@ modules/<name>/
 
 | Module       | Purpose                  | Config Location                              | Key Files                                               |
 | ------------ | ------------------------ | -------------------------------------------- | ------------------------------------------------------- |
-| `claude/`    | Claude Code AI assistant | `~/.claude/`                                 | `files/settings.json`, `files/CLAUDE.md`, `agents/*.md` |
+| `claude/`    | Claude Code AI assistant | `~/.claude/`                                 | `files/settings.json`, `files/CLAUDE.md`                |
 | `ghostty/`   | Ghostty terminal         | `~/.config/ghostty/`                         | `default.nix` (inline config)                           |
 | `git/`       | Git configuration        | `~/.gitconfig`                               | `default.nix`                                           |
 | `k9s/`       | Kubernetes manager       | `~/.config/k9s/`                             | `default.nix`                                           |
@@ -463,44 +463,28 @@ When updating AI coding agent settings (agents, tools, skills, MCP servers, etc.
 
 Global configuration for Claude Code (Anthropic's AI coding assistant).
 
-| File                  | Purpose                                    | Deployed To               |
-| --------------------- | ------------------------------------------ | ------------------------- |
-| `files/settings.json` | Model selection, permissions, MCP settings | `~/.claude/settings.json` |
-| `files/CLAUDE.md`     | Global instructions for Claude behavior    | `~/.claude/CLAUDE.md`     |
-| `agents/*.md`         | Custom agent definitions (6 agents)        | `~/.claude/agents/`       |
+| File                  | Purpose                                        | Deployed To               |
+| --------------------- | ---------------------------------------------- | ------------------------- |
+| `files/settings.json` | Model selection, permissions, MCP settings     | `~/.claude/settings.json` |
+| `files/CLAUDE.md`     | Global development guidelines for Claude Code  | `~/.claude/CLAUDE.md`     |
 
-**Local Agents** (in `agents/`):
+**Plugins** are managed via marketplace system and [gytkk/claude-marketplace](https://github.com/gytkk/claude-marketplace):
 
-- `oracle.md`: Architecture/debugging advisor (read-only)
-- `explorer.md`: Codebase search specialist (read-only)
-- `librarian.md`: External docs/API researcher (read-only)
-- `planner.md`: Pre-implementation analyzer (read-only)
-- `reviewer.md`: Code quality auditor (read-only)
-- `implementer.md`: Autonomous code implementer (read-write)
-
-**Custom Agents and Plugins** are managed via [gytkk/claude-marketplace](https://github.com/gytkk/claude-marketplace):
-
-- `gytkk-agents` plugin: code-reviewer, software-dev-engineer, test-code-writer
-- `metals-lsp` plugin: Scala language server (Metals) — requires `metals` binary
-- `ty-lsp` plugin: Python type checker (ty by Astral) — requires `ty` binary
-- `terraform-ls` plugin: Terraform language server — requires `terraform-ls` binary
-- `nixd-lsp` plugin: Nix language server — requires `nixd` binary
-
-**Additional plugins** from [backnotprop/plannotator](https://github.com/backnotprop/plannotator):
-
-- `plannotator` plugin: Visual plan annotation, review, and team sharing — CLI auto-installed via activation script
+- `document-skills`, `commit-commands`, `security-guidance` (official plugins)
+- `ralph-loop` (official plugin)
+- LSP plugins: `gopls-lsp`, `rust-analyzer-lsp`, `typescript-lsp`, `metals-lsp`, `ty-lsp`, `terraform-ls`, `nixd-lsp`
+- `plannotator`: Visual plan annotation, review, and team sharing — CLI auto-installed via activation script
 
 > **Note**: Each LSP plugin requires its corresponding binary on `PATH`.
 > LSP binaries are installed via `home.packages` in `modules/claude/default.nix`.
-> See each plugin's README in the marketplace repo for standalone installation instructions.
 
 **Common modification scenarios**:
 
 - Add new MCP server → Edit `default.nix` (MCP servers configured via activation script)
-- Add new pre-approved command → Edit `files/settings.json` → `permissions.allow`
+- Add new pre-approved tool → Edit `files/settings.json` → `permissions.allow`
 - Change default model → Edit `files/settings.json` → `model`
-- Update global instructions → Edit `files/CLAUDE.md`
-- Add/modify custom agents → Edit [gytkk/claude-marketplace](https://github.com/gytkk/claude-marketplace) repo
+- Update global guidelines → Edit `files/CLAUDE.md`
+- Add/modify plugins → Edit [gytkk/claude-marketplace](https://github.com/gytkk/claude-marketplace) repo
 
 #### OpenCode Module (`modules/opencode/`)
 
@@ -508,20 +492,15 @@ Global configuration for OpenCode (open-source AI coding agent).
 
 | File                      | Purpose                                   | Deployed To                        |
 | ------------------------- | ----------------------------------------- | ---------------------------------- |
-| `files/opencode.json`     | Model, theme, plugins, MCP settings       | `~/.config/opencode/opencode.json` |
-| `files/AGENTS.md`         | Global instructions for OpenCode behavior | `~/.config/opencode/AGENTS.md`     |
-| `files/agents/*.md`       | Custom agent definitions                  | `~/.config/opencode/agents/`       |
-| `files/skills/*/SKILL.md` | Custom skill definitions                  | `~/.config/opencode/skills/`       |
+| `files/opencode.json`         | Model, theme, plugins, MCP settings       | `~/.config/opencode/opencode.json`         |
+| `files/oh-my-opencode.json`   | Oh-My-OpenCode agent/category model config| `~/.config/opencode/oh-my-opencode.json`   |
+| `files/AGENTS.md`             | Global instructions for OpenCode behavior | `~/.config/opencode/AGENTS.md`             |
+| `files/agents/*.md`           | Custom agent definitions                  | `~/.config/opencode/agents/`               |
+| `files/plugins/native-notify.ts` | Terminal notification plugin           | `~/.config/opencode/plugins/native-notify.ts` |
 
 **Custom Agents** (in `files/agents/`):
 
-- `review.md`: Code review agent
 - `troubleshoot.md`: Troubleshooting agent
-
-**Custom Skills** (in `files/skills/`):
-
-- `git-commit/SKILL.md`: Conventional commits skill
-- `git-pr/SKILL.md`: GitHub PR creation skill
 
 **Common modification scenarios**:
 
@@ -530,7 +509,6 @@ Global configuration for OpenCode (open-source AI coding agent).
 - Change default model → Edit `files/opencode.json` → `model`
 - Update global instructions → Edit `files/AGENTS.md`
 - Create new custom agent → Add `files/agents/{agent-name}.md`
-- Create new custom skill → Add `files/skills/{skill-name}/SKILL.md`
 
 ### Package Management
 
