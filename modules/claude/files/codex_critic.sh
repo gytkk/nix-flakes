@@ -4,7 +4,7 @@ set -euo pipefail
 # =============================================================================
 # codex_critic.sh - Codex CLI를 사용한 코드/계획 검증 스크립트
 #
-# Usage: bash scripts/codex_critic.sh "<original_user_prompt>"
+# Usage: bash modules/claude/files/codex_critic.sh "<original_user_prompt>"
 #
 # Environment:
 #   OPENAI_API_KEY       - Required. OpenAI API key
@@ -67,7 +67,7 @@ fi
 
 USER_PROMPT="${1:-}"
 if [ -z "$USER_PROMPT" ]; then
-  echo "[ERROR] Usage: bash scripts/codex_critic.sh \"<original_user_prompt>\"" >&2
+  echo "[ERROR] Usage: bash modules/claude/files/codex_critic.sh \"<original_user_prompt>\"" >&2
   exit 1
 fi
 
