@@ -10,6 +10,19 @@ let
   timeout = "${pkgs.coreutils}/bin/timeout";
   jq = "${pkgs.jq}/bin/jq";
 
+  codexCritic = pkgs.writeShellApplication {
+    name = "codex-critic";
+    runtimeInputs = with pkgs; [
+      jq
+      git
+      coreutils
+    ];
+    text = ''
+      export CRITIC_SCHEMA="''${CRITIC_SCHEMA:-${./files/critic.schema.json}}"
+      exec ${pkgs.bash}/bin/bash ${./files/codex_critic.sh} "$@"
+    '';
+  };
+
   marketplaces = [
     "anthropics/skills"
     "anthropics/claude-code"
@@ -48,6 +61,7 @@ in
 {
   home.packages = [
     pkgs.claude-code
+    codexCritic
 
     # rust-analyzer is provided by rustup (base/default.nix)
     pkgs.nodePackages.typescript-language-server

@@ -4,10 +4,11 @@ set -euo pipefail
 # =============================================================================
 # codex_critic.sh - Codex CLI를 사용한 코드/계획 검증 스크립트
 #
-# Usage: bash modules/claude/files/codex_critic.sh "<original_user_prompt>"
+# Usage: codex-critic "<original_user_prompt>"
 #
 # Environment:
 #   OPENAI_API_KEY       - Required. OpenAI API key
+#   CRITIC_SCHEMA        - Required. Path to JSON schema file (set by Nix wrapper)
 #   CRITIC_MAX_ITER      - Max refinement iterations (default: 5)
 #   CRITIC_MAX_DIFF_LINES - Max diff lines to include (default: 500)
 #   CRITIC_SANDBOX       - Sandbox mode (default: read-only)
@@ -15,7 +16,7 @@ set -euo pipefail
 
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 OUTPUT_DIR="${REPO_ROOT}/.ai"
-SCHEMA_FILE="${REPO_ROOT}/.ai/schemas/critic.schema.json"
+SCHEMA_FILE="${CRITIC_SCHEMA:?CRITIC_SCHEMA environment variable is required}"
 OUTPUT_FILE="${OUTPUT_DIR}/critic-result.json"
 LOG_FILE="${OUTPUT_DIR}/critic.log"
 MAX_ITERATIONS="${CRITIC_MAX_ITER:-5}"
@@ -67,7 +68,7 @@ fi
 
 USER_PROMPT="${1:-}"
 if [ -z "$USER_PROMPT" ]; then
-  echo "[ERROR] Usage: bash modules/claude/files/codex_critic.sh \"<original_user_prompt>\"" >&2
+  echo "[ERROR] Usage: codex-critic \"<original_user_prompt>\"" >&2
   exit 1
 fi
 
