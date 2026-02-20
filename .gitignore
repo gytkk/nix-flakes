@@ -4,3 +4,7 @@ result-*
 
 # Ignore automatically generated direnv output
 .direnv
+
+# Codex critic runtime outputs (schemas are tracked)
+.ai/*.json
+.ai/*.log

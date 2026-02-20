@@ -563,6 +563,49 @@ To add a new company or environment:
    home-manager build --flake .#new-environment
    ```
 
+## Codex Critic (코드 검증 스킬)
+
+Codex CLI를 사용하여 현재 변경사항을 독립적으로 검증하는 스킬입니다.
+
+### 사용법
+
+```bash
+/codex-critic "<원래 사용자 요청>"
+```
+
+### 구조
+
+| 파일 | 용도 |
+|------|------|
+| `.claude/skills/codex-critic/SKILL.md` | Claude Code 스킬 정의 |
+| `scripts/codex_critic.sh` | Codex exec 실행 스크립트 |
+| `.ai/schemas/critic.schema.json` | 출력 JSON 스키마 |
+| `.ai/critic-result.json` | 최종 결과 (런타임 생성, gitignored) |
+
+### 동작 원리
+
+1. `git diff`에서 변경사항을 수집 (staged 우선, 없으면 working tree)
+2. `codex exec --sandbox read-only`로 Codex에게 검증 요청
+3. 결과가 불충분하면 (score < 8, verdict != pass) 최대 5회 반복 개선
+4. 구조화된 JSON 결과를 `.ai/critic-result.json`에 저장
+5. Claude Code가 결과를 읽어 요약/권고 제공
+
+### 환경 변수
+
+| 변수 | 기본값 | 설명 |
+|------|--------|------|
+| `OPENAI_API_KEY` | (필수) | OpenAI API 키 |
+| `CRITIC_MAX_ITER` | 5 | 최대 반복 횟수 |
+| `CRITIC_MAX_DIFF_LINES` | 500 | diff 최대 줄 수 |
+| `CRITIC_SANDBOX` | read-only | Codex sandbox 모드 |
+
+### 규칙
+
+- 자동 호출 금지: `/codex-critic` 명시적 실행만 허용
+- Codex는 read-only sandbox에서 실행 (파일 수정 불가)
+- 결과 기반 수정은 Claude Code가 수행하며, 사용자 승인 후 진행
+- `.ai/` 디렉토리의 런타임 출력물은 gitignored
+
 ## Git Conventions
 
 - Use [Conventional Commits](https://www.conventionalcommits.org/): `feat:`, `fix:`, `docs:`, `refactor:`
