@@ -76,6 +76,15 @@ For single-file, low-risk changes that can be explained in one short paragraph (
 - Check for edge cases and proper error handling.
 - Verify that changes align with existing code patterns.
 
+### Codex Critic 리뷰
+
+중간 규모 이상의 작업(2개 이상 파일 수정, 새 기능 추가, 리팩토링, 동작 변경 등)을 완료한 후에는 커밋 전에 `/codex-critic`을 실행하여 독립적인 리뷰를 받아라.
+
+- **대상**: 단순 오타 수정이나 1줄 변경이 아닌 모든 의미 있는 작업
+- **시점**: 구현 완료 후, 커밋 직전
+- **사용법**: `/codex-critic "<원래 사용자 요청 요약>"`
+- **후속 조치**: verdict가 `fail`이면 이슈를 반영하여 수정 후 재검증, `warn`이면 사용자에게 이슈를 보고하고 판단을 요청
+
 ## Documentation
 
 - Update README.md when adding new features or changing behavior.
