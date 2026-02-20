@@ -70,12 +70,6 @@
       url = "github:gytkk/flake-stores";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    # claude-code - AI coding assistant (always up-to-date)
-    claude-code-nix = {
-      url = "github:sadjow/claude-code-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs =
