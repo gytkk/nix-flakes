@@ -73,6 +73,7 @@
       less
       wget
       curl
+      lazysql
 
       # Git
       git
