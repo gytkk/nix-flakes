@@ -352,6 +352,7 @@ modules/<name>/
 | Module       | Purpose                  | Config Location                              | Key Files                                               |
 | ------------ | ------------------------ | -------------------------------------------- | ------------------------------------------------------- |
 | `claude/`    | Claude Code AI assistant | `~/.claude/`                                 | `files/settings.json`, `files/CLAUDE.md`                |
+| `codex/`     | OpenAI Codex CLI         | `~/.codex/`                                  | `files/config.toml`, `files/AGENTS.md`                  |
 | `ghostty/`   | Ghostty terminal         | `~/.config/ghostty/`                         | `default.nix` (inline config)                           |
 | `git/`       | Git configuration        | `~/.gitconfig`                               | `default.nix`                                           |
 | `k9s/`       | Kubernetes manager       | `~/.config/k9s/`                             | `default.nix`                                           |
