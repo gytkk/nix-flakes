@@ -76,14 +76,42 @@ For single-file, low-risk changes that can be explained in one short paragraph (
 - Check for edge cases and proper error handling.
 - Verify that changes align with existing code patterns.
 
-### Codex Critic 리뷰
+## Codex Critic 리뷰 (MANDATORY)
 
-중간 규모 이상의 작업(2개 이상 파일 수정, 새 기능 추가, 리팩토링, 동작 변경 등)을 완료한 후에는 커밋 전에 `/codex-critic`을 실행하여 독립적인 리뷰를 받아라.
+> **CRITICAL**: 이 섹션은 모든 의미 있는 작업에 대해 반드시 준수해야 한다.
+> `/codex-critic` 스킬을 Skill 도구로 호출해야 한다. `plannotator-review` 등
+> 다른 스킬로 대체하거나 건너뛰는 것은 허용되지 않는다.
 
-- **대상**: 단순 오타 수정이나 1줄 변경이 아닌 모든 의미 있는 작업
-- **시점**: 구현 완료 후, 커밋 직전
-- **사용법**: `/codex-critic "<원래 사용자 요청 요약>"`
-- **후속 조치**: verdict가 `fail`이면 이슈를 반영하여 수정 후 재검증, `warn`이면 사용자에게 이슈를 보고하고 판단을 요청
+계획 수립 또는 구현 작업을 완료한 후에는 **반드시** `/codex-critic` 스킬을 실행하여
+독립적인 리뷰와 피드백을 받아야 한다.
+
+### 필수 실행 시점
+
+1. **계획 완료 후**: 구현 계획을 수립한 직후, 구현에 착수하기 전
+2. **구현 완료 후**: 코드 변경을 마친 직후, 커밋 직전
+
+### 대상
+
+- 단순 오타 수정이나 1줄 변경이 아닌 **모든 의미 있는 작업**
+- 2개 이상 파일 수정, 새 기능 추가, 리팩토링, 동작 변경 등
+
+### 사용법
+
+```text
+/codex-critic "<원래 사용자 요청 요약>"
+```
+
+### 후속 조치
+
+- `verdict: fail` → 이슈를 반영하여 수정 후 재검증
+- `verdict: warn` → 사용자에게 이슈를 보고하고 판단을 요청
+- `verdict: pass` → 커밋 진행
+
+### 금지 사항
+
+- `/codex-critic` 대신 `/plannotator-review` 또는 다른 스킬을 사용하지 말 것
+- 리뷰 없이 커밋하지 말 것 (대상 작업인 경우)
+- 사용자가 명시적으로 요청하지 않아도 위 실행 시점에 도달하면 스스로 호출할 것
 
 ## Documentation
 
