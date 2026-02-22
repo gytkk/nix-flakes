@@ -63,6 +63,14 @@ format_tokens() {
   fi
 }
 
+# Nerd Font icons
+ICON_DIR=$'\uf07b'      # nf-fa-folder
+ICON_BRANCH=$'\ue725'   # nf-dev-git_branch
+ICON_MODEL=$'\uf135'    # nf-fa-rocket
+ICON_TOKEN=$'\uf121'    # nf-fa-code
+ICON_LINES=$'\uf040'    # nf-fa-pencil
+SEP='  '                # double-space separator
+
 # Context progress bar with color coding
 context_info=""
 if [ -n "$used" ]; then
@@ -71,8 +79,8 @@ if [ -n "$used" ]; then
   FILLED=$((used_int * BAR_WIDTH / 100))
   EMPTY=$((BAR_WIDTH - FILLED))
   BAR=""
-  [ "$FILLED" -gt 0 ] && BAR=$(printf "%${FILLED}s" | tr ' ' '▓')
-  [ "$EMPTY" -gt 0 ] && BAR="${BAR}$(printf "%${EMPTY}s" | tr ' ' '░')"
+  [ "$FILLED" -gt 0 ] && BAR=$(printf "%${FILLED}s" | tr ' ' '▰')
+  [ "$EMPTY" -gt 0 ] && BAR="${BAR}$(printf "%${EMPTY}s" | tr ' ' '▱')"
 
   if [ "$used_int" -ge 90 ]; then BAR_COLOR="$RED"
   elif [ "$used_int" -ge 70 ]; then BAR_COLOR="$YELLOW"
@@ -84,21 +92,21 @@ fi
 # Token usage (arrow indicators: input↓ output↑)
 token_info=""
 if [ -n "$input_tokens" ] && [ -n "$output_tokens" ]; then
-  token_info="${DIM}tokens${RESET} ${CYAN}↓$(format_tokens "$input_tokens")${RESET} ${YELLOW}↑$(format_tokens "$output_tokens")${RESET}"
+  token_info="${DIM}${ICON_TOKEN}${RESET} ${CYAN}↓$(format_tokens "$input_tokens")${RESET} ${YELLOW}↑$(format_tokens "$output_tokens")${RESET}"
 fi
 
 # Lines changed
 lines_info=""
 if [ -n "$lines_added" ] && [ -n "$lines_removed" ]; then
-  lines_info="${DIM}lines${RESET} ${GREEN}+${lines_added}${RESET} ${RED}-${lines_removed}${RESET}"
+  lines_info="${DIM}${ICON_LINES}${RESET} ${GREEN}+${lines_added}${RESET} ${RED}-${lines_removed}${RESET}"
 fi
 
 # Compose status line
-output="${CYAN}${short_cwd}${RESET}"
-[ -n "$git_branch" ] && output="$output ${DIM}|${RESET} $git_branch"
-output="$output ${DIM}|${RESET} $model"
-[ -n "$context_info" ] && output="$output ${DIM}|${RESET} $context_info"
-[ -n "$token_info" ] && output="$output ${DIM}|${RESET} $token_info"
-[ -n "$lines_info" ] && output="$output ${DIM}|${RESET} $lines_info"
+output="${DIM}${ICON_DIR}${RESET} ${CYAN}${short_cwd}${RESET}"
+[ -n "$git_branch" ] && output="${output}${SEP}${DIM}${ICON_BRANCH}${RESET} ${git_branch}"
+output="${output}${SEP}${DIM}${ICON_MODEL}${RESET} ${model}"
+[ -n "$context_info" ] && output="${output}${SEP}${context_info}"
+[ -n "$token_info" ] && output="${output}${SEP}${token_info}"
+[ -n "$lines_info" ] && output="${output}${SEP}${lines_info}"
 
 printf '%b' "$output"
