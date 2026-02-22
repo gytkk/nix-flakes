@@ -84,7 +84,7 @@ fi
 # Token usage (arrow indicators: input↓ output↑)
 token_info=""
 if [ -n "$input_tokens" ] && [ -n "$output_tokens" ]; then
-  token_info="${DIM}tok${RESET} ${CYAN}↓$(format_tokens "$input_tokens")${RESET} ${YELLOW}↑$(format_tokens "$output_tokens")${RESET}"
+  token_info="${DIM}tokens${RESET} ${CYAN}↓$(format_tokens "$input_tokens")${RESET} ${YELLOW}↑$(format_tokens "$output_tokens")${RESET}"
 fi
 
 # Lines changed
