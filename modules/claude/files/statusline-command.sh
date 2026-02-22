@@ -81,16 +81,16 @@ if [ -n "$used" ]; then
   context_info="${BAR_COLOR}${BAR}${RESET} ${used_int}%"
 fi
 
-# Token usage
+# Token usage (arrow indicators: input↓ output↑)
 token_info=""
 if [ -n "$input_tokens" ] && [ -n "$output_tokens" ]; then
-  token_info="$(format_tokens "$input_tokens")in/$(format_tokens "$output_tokens")out"
+  token_info="${DIM}tok${RESET} ${CYAN}↓$(format_tokens "$input_tokens")${RESET} ${YELLOW}↑$(format_tokens "$output_tokens")${RESET}"
 fi
 
 # Lines changed
 lines_info=""
 if [ -n "$lines_added" ] && [ -n "$lines_removed" ]; then
-  lines_info="${GREEN}+${lines_added}${RESET} ${RED}-${lines_removed}${RESET}"
+  lines_info="${DIM}lines${RESET} ${GREEN}+${lines_added}${RESET} ${RED}-${lines_removed}${RESET}"
 fi
 
 # Compose status line
