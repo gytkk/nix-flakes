@@ -80,6 +80,7 @@
     .vscode
     .zed
     .tool-versions
+    .ai
 
     # Environment
     .direnv/
