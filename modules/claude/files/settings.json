@@ -19,6 +19,7 @@
     ],
     "defaultMode": "acceptEdits"
   },
+  "spinnerTipsEnabled": false,
   "language": "korean",
   "teammateMode": "auto",
   "model": "opus",

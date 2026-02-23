@@ -81,7 +81,7 @@ if [ -n "$used" ]; then
   else BAR_COLOR="$GREEN"; fi
 
   BAR=""
-  [ "$FILLED" -gt 0 ] && BAR="${BAR_COLOR}$(printf "%${FILLED}s" | tr ' ' '=')${RESET}"
+  [ "$FILLED" -gt 0 ] && BAR="${BAR_COLOR}$(printf "%${FILLED}s" | tr ' ' '#')${RESET}"
   [ "$EMPTY" -gt 0 ] && BAR="${BAR}${DIM}$(printf "%${EMPTY}s" | tr ' ' '-')${RESET}"
 
   context_info="${BAR} ${used_int}%"
