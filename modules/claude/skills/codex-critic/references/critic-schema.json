@@ -3,6 +3,7 @@
   "title": "Codex Critic Result",
   "description": "Structured output from Codex critic analysis",
   "type": "object",
+  "additionalProperties": false,
   "properties": {
     "verdict": {
       "type": "string",
@@ -11,8 +12,6 @@
     },
     "score": {
       "type": "number",
-      "minimum": 0,
-      "maximum": 10,
       "description": "Quality score from 0 (worst) to 10 (best)"
     },
     "summary": {
@@ -24,6 +23,7 @@
       "description": "List of identified issues",
       "items": {
         "type": "object",
+        "additionalProperties": false,
         "properties": {
           "severity": {
             "type": "string",
@@ -35,11 +35,11 @@
           },
           "file": {
             "type": "string",
-            "description": "Affected file path (if applicable)"
+            "description": "Affected file path (if applicable, empty string if not)"
           },
           "line": {
             "type": "number",
-            "description": "Approximate line number (if applicable)"
+            "description": "Approximate line number (0 if not applicable)"
           },
           "description": {
             "type": "string",
@@ -50,7 +50,7 @@
             "description": "How to fix or improve"
           }
         },
-        "required": ["severity", "category", "description"]
+        "required": ["severity", "category", "file", "line", "description", "suggestion"]
       }
     },
     "checklist": {
@@ -58,6 +58,7 @@
       "description": "Verification checklist items",
       "items": {
         "type": "object",
+        "additionalProperties": false,
         "properties": {
           "item": {
             "type": "string",
@@ -72,13 +73,13 @@
             "description": "Additional context"
           }
         },
-        "required": ["item", "passed"]
+        "required": ["item", "passed", "note"]
       }
     },
     "iteration": {
-      "type": "number",
+      "type": "integer",
       "description": "Which iteration produced this result"
     }
   },
-  "required": ["verdict", "score", "summary", "issues", "checklist"]
+  "required": ["verdict", "score", "summary", "issues", "checklist", "iteration"]
 }

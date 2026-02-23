@@ -77,6 +77,16 @@ in
     ln -sf "$HOME/.codex/auth.json" "$HOME/.codex-critic/auth.json"
   '';
 
+  # Hephaestus-specific codex home with dedicated AGENTS.md
+  home.file.".codex-hephaestus/AGENTS.md".source = ./files/codex-hephaestus-agents.md;
+
+  # Symlink codex auth and config into hephaestus home directory
+  home.activation.setupCodexHephaestus = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    mkdir -p "$HOME/.codex-hephaestus"
+    ln -sf "$HOME/.codex/config.toml" "$HOME/.codex-hephaestus/config.toml"
+    ln -sf "$HOME/.codex/auth.json" "$HOME/.codex-hephaestus/auth.json"
+  '';
+
   # Install marketplaces, plugins, and MCP servers
   home.activation.setupClaudeCode = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     # Ensure git, ssh, and which are available for plugin marketplace operations

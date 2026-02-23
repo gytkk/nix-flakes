@@ -76,6 +76,46 @@ For single-file, low-risk changes that can be explained in one short paragraph (
 - Check for edge cases and proper error handling.
 - Verify that changes align with existing code patterns.
 
+## Codex Hephaestus 위임 (PROACTIVE)
+
+복잡한 구현 작업은 `/codex-hephaestus` 스킬을 통해 Codex CLI에 **적극적으로 위임**한다.
+Codex는 `workspace-write` sandbox에서 자율적으로 탐색 → 계획 → 실행 → 검증을 수행한다.
+
+### 위임 기준
+
+다음 조건 중 **하나 이상** 해당하면 `/codex-hephaestus`에 위임한다:
+
+- 3개 이상 파일 수정이 예상되는 구현 작업
+- 새로운 기능/모듈 추가 (scaffold, boilerplate 포함)
+- 대규모 리팩토링 (패턴 변경, 구조 재편)
+- 여러 파일에 걸친 일괄 변경 (rename, migration)
+
+### 위임하지 않는 경우
+
+- 1~2개 파일의 단순 수정 (설정 변경, 오타 수정 등)
+- 탐색/조사만 필요한 작업
+- 사용자가 직접 구현을 요청한 경우 ("내가 보면서 하나씩 해줘" 등)
+
+### 사용법
+
+```text
+/codex-hephaestus "<작업 목표에 대한 구체적 설명>"
+```
+
+### 워크플로우
+
+1. 사용자 요청 분석 → 위임 기준 충족 여부 판단
+2. 충족 시 `/codex-hephaestus`로 위임 (사용자에게 위임 사실 안내)
+3. Codex 실행 완료 후 변경사항 독립 검증 (git diff 확인, 파일 리뷰)
+4. 이후 `/codex-critic`으로 최종 리뷰
+5. 결과를 사용자에게 보고
+
+### 규칙
+
+- 위임 시 사용자에게 "Codex에 위임합니다" 안내 후 진행
+- Codex가 만든 변경사항은 반드시 Claude Code가 독립 검증
+- 사용자가 `/codex-hephaestus`를 명시적으로 호출한 경우에도 동일 워크플로우 적용
+
 ## Codex Critic 리뷰 (MANDATORY)
 
 > **CRITICAL**: 이 섹션은 모든 의미 있는 작업에 대해 반드시 준수해야 한다.
