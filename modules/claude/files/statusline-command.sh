@@ -68,22 +68,28 @@ format_tokens() {
 # Section labels and separator
 SEP='  '
 
-# Context progress bar with color coding
+# Context progress bar with ANSI background colors
+BG_GRAY='\033[100m'   # dark gray background for empty
+BG_GREEN='\033[42m'
+BG_YELLOW='\033[43m'
+BG_RED='\033[41m'
+
 context_info=""
 if [ -n "$used" ]; then
   used_int=${used%.*}
   BAR_WIDTH=10
   FILLED=$((used_int * BAR_WIDTH / 100))
   EMPTY=$((BAR_WIDTH - FILLED))
+
+  if [ "$used_int" -ge 90 ]; then BG_FILL="$BG_RED"
+  elif [ "$used_int" -ge 70 ]; then BG_FILL="$BG_YELLOW"
+  else BG_FILL="$BG_GREEN"; fi
+
   BAR=""
-  [ "$FILLED" -gt 0 ] && BAR=$(printf "%${FILLED}s" | tr ' ' '#')
-  [ "$EMPTY" -gt 0 ] && BAR="${BAR}$(printf "%${EMPTY}s" | tr ' ' '-')"
+  [ "$FILLED" -gt 0 ] && BAR="${BG_FILL}$(printf "%${FILLED}s")${RESET}"
+  [ "$EMPTY" -gt 0 ] && BAR="${BAR}${BG_GRAY}$(printf "%${EMPTY}s")${RESET}"
 
-  if [ "$used_int" -ge 90 ]; then BAR_COLOR="$RED"
-  elif [ "$used_int" -ge 70 ]; then BAR_COLOR="$YELLOW"
-  else BAR_COLOR="$GREEN"; fi
-
-  context_info="${BAR_COLOR}${BAR}${RESET} ${used_int}%"
+  context_info="${BAR} ${used_int}%"
 fi
 
 # Token usage (arrow indicators: input↓ output↑)
