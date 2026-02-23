@@ -65,8 +65,8 @@ format_tokens() {
   fi
 }
 
-# Section labels and separator
-SEP='  '
+# Section separator
+SEP=" ${DIM}|${RESET} "
 
 # Context progress bar with ANSI background colors
 BG_GRAY='\033[100m'   # dark gray background for empty
