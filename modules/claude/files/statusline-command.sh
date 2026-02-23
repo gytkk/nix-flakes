@@ -76,8 +76,8 @@ if [ -n "$used" ]; then
   FILLED=$((used_int * BAR_WIDTH / 100))
   EMPTY=$((BAR_WIDTH - FILLED))
   BAR=""
-  [ "$FILLED" -gt 0 ] && BAR=$(printf "%${FILLED}s" | tr ' ' '━')
-  [ "$EMPTY" -gt 0 ] && BAR="${BAR}$(printf "%${EMPTY}s" | tr ' ' '─')"
+  [ "$FILLED" -gt 0 ] && BAR=$(printf "%${FILLED}s" | tr ' ' '#')
+  [ "$EMPTY" -gt 0 ] && BAR="${BAR}$(printf "%${EMPTY}s" | tr ' ' '-')"
 
   if [ "$used_int" -ge 90 ]; then BAR_COLOR="$RED"
   elif [ "$used_int" -ge 70 ]; then BAR_COLOR="$YELLOW"
