@@ -1,3 +1,12 @@
+#:schema https://developers.openai.com/codex/config-schema.json
+
 model = "gpt-5.3-codex"
 approval_policy = "never"
 sandbox_mode = "workspace-write"
+web_search = "live"
+
+[features]
+shell_tool = true
+
+[history]
+persistence = "save-all"

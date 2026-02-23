@@ -1,153 +1,91 @@
 # AGENTS.md
 
-## Verification & Inquiry Protocol (TOP PRIORITY)
+## Verification & Inquiry Protocol (Top Priority)
 
-> **CRITICAL**: Apply at EVERY step. This overrides all other instructions.
+> **CRITICAL**: Apply at every step. This overrides all other instructions.
 
-- **Verify before moving on.** Confirm each step succeeded with evidence (tests, diagnostics, diffs) — never assume.
-- **Ask, don't guess.** If requirements are ambiguous or context is missing, ask the user immediately.
-- **Surface blockers early.** Flag missing info, risky assumptions, or dependencies NOW — not after building on them.
-
-## Worktree Workflow
-
-By default, work on the current branch. Only use git worktree when the user explicitly requests it.
-For large-scale changes (e.g., new features, major refactors), ask the user whether to use a worktree before proceeding.
-
-**When worktree is requested:**
-
-1. Create a new branch and worktree: `git worktree add ~/trees/$(basename $PWD)/<short-task-name> -b <branch-name>`
-2. Change to the worktree directory and work there
-3. When done, create a PR from the worktree branch
-4. After merge, clean up: `git worktree remove ~/trees/$(basename $PWD)/<short-task-name>`
-
-## Git
-
-> **CRITICAL**: After completing each self-contained, logical change, immediately
-> commit it locally. Do NOT batch multiple unrelated changes.
-
-- Commit often with small, focused changes.
-- Write clear, descriptive commit messages.
-- Prefer [Conventional Commits](https://www.conventionalcommits.org/) format (e.g., `feat:`, `fix:`, `docs:`).
-- Also check git commit history for examples of good commit messages.
-- Write commit messages in imperative mood (e.g., "Add feature" not "Added feature").
-- Keep commits atomic: one logical change per commit.
-- Do NOT push unless explicitly requested.
-
-## Planning & Approval
-
-For single-file, low-risk changes that can be explained in one short paragraph (for example, wording/description edits or small branch tweaks), do not route through plannotator for separate plan approval; apply directly, then verify with targeted evidence (diff and relevant check results). Use formal plan approval through plannotator only for multi-file, cross-module, or behavior-changing work.
+- **Verify before moving on.** Confirm each step succeeded with evidence (diffs, checks, diagnostics) and never assume.
+- **Ask, don't guess.** If requirements are ambiguous or context is missing, ask for clarification before proceeding.
+- **Surface blockers early.** Flag missing information, risky assumptions, and dependency issues immediately.
 
 ## Critical Rules
 
-- First, deeply understand and think about what you want to achieve with your code.
-- Always follow existing code patterns and module structure in your working directory.
-- Be concise. Commit small, frequent changes for readable diffs.
-- Proactively use web search if there is any uncertainty or lack of knowledge.
+- First, deeply understand what the change should achieve before editing code.
+- Follow existing project patterns and module structure.
+- Keep changes concise and focused for readable diffs.
+- Use web search proactively when uncertain.
+
+## Git
+
+- Make small, focused commits for each logical change.
+- Write clear, descriptive commit messages.
+- Prefer Conventional Commits (for example, `feat:`, `fix:`, `docs:`).
+- Use imperative mood (for example, `Add feature`, not `Added feature`).
+- Keep commits atomic and avoid mixing unrelated changes.
+- Do not push unless explicitly requested.
+
+## Sandbox Awareness (Codex)
+
+- Codex commonly runs with `sandbox_mode = "workspace-write"`.
+- You can read broadly, and write only within allowed workspace paths.
+- If a task requires changes outside the writable workspace, stop and request an alternative approach.
+- Do not use destructive commands unless explicitly approved.
+
+## Exec Mode Guidelines (Codex)
+
+- Assume non-interactive execution by default (for example, `codex exec ...`).
+- Make steps reproducible and deterministic.
+- Prefer explicit command flags and stable output formats.
+- Validate each major step with command output, file diffs, or checks.
+
+## Output Expectations (Codex)
+
+- When `--output-schema` is provided, return strictly valid JSON that matches the schema.
+- Do not add markdown or prose outside the required structured output.
+- Keep fields complete, accurate, and machine-parseable.
 
 ## Writing Code
 
-- Prefer to write docstring and unit tests first (TDD approach).
-- No 'any' type hints, use specific types.
+- Prefer a test-first approach where practical.
+- Add or update docstrings/tests alongside behavior changes.
+- Use specific types; avoid `any` and broad untyped fallbacks.
 
 ## Python
 
-- Always use `uv run` instead of `python` or `python3` when executing Python scripts or commands.
-- If dependency errors occur, run `uv sync` first to install project dependencies.
+- Use `uv run` instead of `python` or `python3`.
+- If dependencies are missing, run `uv sync` first.
 - Examples:
-  - Use `uv run script.py` instead of `python script.py`
-  - Use `uv run -m pytest` instead of `python -m pytest`
-  - Use `uv run -m pip install` instead of `pip install`
+  - `uv run script.py`
+  - `uv run -m pytest`
+  - `uv run -m pip install <package>`
 
 ## Security
 
 - Never commit secrets, credentials, or API keys.
-- Use environment variables or secret management tools for sensitive data.
+- Use environment variables or a secret manager for sensitive values.
+- Review diffs for accidental secret exposure before commit.
 
 ## Testing
 
-- Write tests for new features before or alongside implementation.
-- Run existing tests before committing (e.g., `uv run -m pytest`, `npm test`).
-- Cover edge cases and error scenarios in tests.
+- Write tests for new features and behavior changes.
+- Run relevant existing tests before committing.
+- Cover edge cases and error paths.
 
 ## Code Review
 
-- Focus on: readability, maintainability, security, and performance.
-- Suggest improvements constructively with clear explanations.
-- Check for edge cases and proper error handling.
-- Verify that changes align with existing code patterns.
-
-## Codex Critic 리뷰 (MANDATORY)
-
-> **CRITICAL**: 이 섹션은 모든 의미 있는 작업에 대해 반드시 준수해야 한다.
-> `/codex-critic` 스킬을 Skill 도구로 호출해야 한다. `plannotator-review` 등
-> 다른 스킬로 대체하거나 건너뛰는 것은 허용되지 않는다.
-
-계획 수립 또는 구현 작업을 완료한 후에는 **반드시** `/codex-critic` 스킬을 실행하여
-독립적인 리뷰와 피드백을 받아야 한다.
-
-### 필수 실행 시점
-
-1. **계획 완료 후**: 구현 계획을 수립한 직후, 구현에 착수하기 전
-2. **구현 완료 후**: 코드 변경을 마친 직후, 커밋 직전
-
-### 대상
-
-- 단순 오타 수정이나 1줄 변경이 아닌 **모든 의미 있는 작업**
-- 2개 이상 파일 수정, 새 기능 추가, 리팩토링, 동작 변경 등
-
-### 사용법
-
-```text
-/codex-critic "<원래 사용자 요청 요약>"
-```
-
-### 후속 조치
-
-- `verdict: fail` → 이슈를 반영하여 수정 후 재검증
-- `verdict: warn` → 사용자에게 이슈를 보고하고 판단을 요청
-- `verdict: pass` → 커밋 진행
-
-### 금지 사항
-
-- `/codex-critic` 대신 `/plannotator-review` 또는 다른 스킬을 사용하지 말 것
-- 리뷰 없이 커밋하지 말 것 (대상 작업인 경우)
-- 사용자가 명시적으로 요청하지 않아도 위 실행 시점에 도달하면 스스로 호출할 것
+- Prioritize readability, maintainability, security, and performance.
+- Check edge cases, failure modes, and error handling.
+- Confirm consistency with existing architecture and patterns.
 
 ## Documentation
 
-- Update README.md when adding new features or changing behavior.
-- Add docstrings/comments for complex logic only when necessary.
-- Keep documentation in sync with code changes.
-- Do NOT create one-off or temporary documentation files.
+- Update `README.md` when behavior or usage changes.
+- Keep docs in sync with code and configuration.
+- Add comments only where logic is non-obvious.
+- Avoid one-off temporary documentation files.
 
 ## Error Handling
 
-- Always handle errors gracefully; avoid silent failures.
-- Use specific error types when possible.
-- Log errors with enough context for debugging.
-- Provide meaningful error messages to users.
-
-## Prompt Keywords
-
-When the user's message contains any of these keywords (case-insensitive, typically
-at the end of the message), apply the associated behavior throughout the entire task.
-Strip the keyword from the message before processing the actual request.
-
-| Keyword | Behavior                                                                                                                                                                                                                                                                                                                     |
-| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `webs`  | **Aggressive web search mode.** Before writing ANY code or making decisions, search the web first. Use web search to verify APIs, check latest docs, find best practices, and confirm syntax. When in doubt, search again. Prefer up-to-date web results over your training data. Search at minimum 3 times during the task. |
-
-## Plan Submission
-
-When you have completed your plan, you MUST call the `submit_plan` tool to submit it for user review.
-The user will be able to:
-
-- Review your plan visually in a dedicated UI
-- Annotate specific sections with feedback
-- Approve the plan to proceed with implementation
-- Request changes with detailed feedback
-
-If your plan is rejected, you will receive the user's annotated feedback. Revise your plan
-based on their feedback and call submit_plan again.
-
-Do NOT proceed with implementation until your plan is approved.
+- Handle errors explicitly and avoid silent failures.
+- Prefer specific error types and actionable messages.
+- Include enough context in logs or diagnostics for debugging.
