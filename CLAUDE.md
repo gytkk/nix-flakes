@@ -563,55 +563,24 @@ To add a new company or environment:
    home-manager build --flake .#new-environment
    ```
 
-## Codex Critic (코드 검증 스킬)
+## Codex Skills (Marketplace Plugin)
 
-Codex CLI를 사용하여 코드 변경사항, 계획, 또는 임의의 콘텐츠를 독립적으로 검증하는 스킬입니다.
-SKILL.md에 모든 오케스트레이션 로직이 포함되어 있으며, 별도의 bash script 없이 Claude Code가
-직접 `codex exec`를 호출합니다.
+Codex CLI 통합 스킬은 [gytkk/claude-marketplace](https://github.com/gytkk/claude-marketplace)의
+`codex` 플러그인으로 관리됩니다. `claude plugin install codex@gytkk`로 설치됩니다.
 
 ### 사용법
 
 ```bash
-/codex-critic "<원래 사용자 요청>"
+/codex:critic "<원래 사용자 요청>"      # 코드/계획/콘텐츠 검증
+/codex:hephaestus "<작업 목표 설명>"    # 자율적 딥 워커
 ```
-
-### 입력 모드
-
-- **Git diff** (기본): staged → working tree → last commit 순으로 diff 수집
-- **임의 콘텐츠**: 파일 경로, 텍스트 블록, 계획 등을 직접 전달하여 검증
-- **대화 컨텍스트**: 위 두 가지가 없으면 최근 작업 내용에서 추론
-
-### 구조
-
-| 파일 | 용도 |
-|------|------|
-| `modules/claude/skills/codex-critic/SKILL.md` | 스킬 정의 및 전체 오케스트레이션 로직 |
-| `modules/claude/skills/codex-critic/references/critic-schema.json` | 출력 JSON 스키마 |
-| `modules/claude/files/codex-critic-agents.md` | Codex 리뷰어 페르소나 (`~/.codex-critic/AGENTS.md`로 배포) |
-| `.ai/critic-result.json` | 최종 결과 (런타임 생성, gitignored) |
 
 ### 동작 원리
 
-1. 입력 결정: git diff, 명시적 콘텐츠, 또는 대화 컨텍스트에서 검증 대상 수집
-2. `codex exec --sandbox workspace-write`로 Codex에게 검증 요청
-3. 결과가 불충분하면 (score < 8, verdict != pass) 최대 5회 반복 개선
-4. 구조화된 JSON 결과를 `.ai/critic-result.json`에 저장
-5. Claude Code가 결과를 읽어 요약/권고 제공
-
-### 환경 변수
-
-| 변수 | 기본값 | 설명 |
-|------|--------|------|
-| `CRITIC_MAX_ITER` | 5 | 최대 반복 횟수 |
-| `CRITIC_MAX_DIFF_LINES` | 500 | diff 최대 줄 수 |
-| `CRITIC_SANDBOX` | workspace-write | Codex sandbox 모드 |
-
-### 규칙
-
-- 자동 호출 금지: `/codex-critic` 명시적 실행만 허용
-- Codex는 workspace-write sandbox에서 실행 (워크스페이스 내 파일 수정 가능)
-- 결과 기반 수정은 Claude Code가 수행하며, 사용자 승인 후 진행
-- `.ai/` 디렉토리의 런타임 출력물은 gitignored
+- **Critic**: git diff, 명시적 콘텐츠, 또는 대화 컨텍스트에서 검증 대상을 수집하여 Codex에 리뷰 요청
+- **Hephaestus**: 복잡한 구현 작업을 Codex에 위임하여 탐색 → 계획 → 실행 → 검증을 자율 수행
+- 세션별 고유 ID로 결과 파일 격리: `~/.ai/critic-{SESSION_ID}-result.json`
+- Codex home 디렉토리는 플러그인이 자동 설정 (`~/.codex-critic/`, `~/.codex-hephaestus/`)
 
 ## Git Conventions
 

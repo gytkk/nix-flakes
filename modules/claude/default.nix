@@ -33,7 +33,8 @@ let
     # backnotprop/plannotator — visual plan annotation and review
     "plannotator@plannotator"
 
-    # gytkk/claude-marketplace — custom agents, Scala LSP, Python LSP, Terraform LSP, and Nix LSP
+    # gytkk/claude-marketplace — Codex skills, Scala LSP, Python LSP, Terraform LSP, and Nix LSP
+    "codex@gytkk"
     "metals-lsp@gytkk"
     "ty-lsp@gytkk"
     "terraform-ls@gytkk"
@@ -62,31 +63,6 @@ in
     source = ./files/statusline-command.sh;
     executable = true;
   };
-  home.file.".claude/skills" = {
-    source = ./skills;
-    recursive = true;
-  };
-
-  # Critic-specific codex home with dedicated AGENTS.md
-  home.file.".codex-critic/AGENTS.md".source = ./files/codex-critic-agents.md;
-
-  # Symlink codex auth and config into critic home directory
-  home.activation.setupCodexCritic = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    mkdir -p "$HOME/.codex-critic"
-    ln -sf "$HOME/.codex/config.toml" "$HOME/.codex-critic/config.toml"
-    ln -sf "$HOME/.codex/auth.json" "$HOME/.codex-critic/auth.json"
-  '';
-
-  # Hephaestus-specific codex home with dedicated AGENTS.md
-  home.file.".codex-hephaestus/AGENTS.md".source = ./files/codex-hephaestus-agents.md;
-
-  # Symlink codex auth and config into hephaestus home directory
-  home.activation.setupCodexHephaestus = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    mkdir -p "$HOME/.codex-hephaestus"
-    ln -sf "$HOME/.codex/config.toml" "$HOME/.codex-hephaestus/config.toml"
-    ln -sf "$HOME/.codex/auth.json" "$HOME/.codex-hephaestus/auth.json"
-  '';
-
   # Install marketplaces, plugins, and MCP servers
   home.activation.setupClaudeCode = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     # Ensure git, ssh, and which are available for plugin marketplace operations
