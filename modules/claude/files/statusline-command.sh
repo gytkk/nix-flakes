@@ -24,7 +24,7 @@ BRIGHT_ORANGE='\033[1;38;5;214m'
 
 # Shorten home directory to ~
 home="$HOME"
-short_cwd="${cwd/#$home/\~}"
+short_cwd="${cwd/#$home/~}"
 
 # Git branch (cached to avoid slowness in large repos)
 CACHE_FILE="/tmp/claude-statusline-git-cache"
@@ -68,12 +68,7 @@ format_tokens() {
 # Section separator
 SEP=" ${DIM}|${RESET} "
 
-# Context progress bar with ANSI background colors
-BG_GRAY='\033[48;5;252m'  # light gray background for empty (light theme friendly)
-BG_GREEN='\033[42m'
-BG_YELLOW='\033[43m'
-BG_RED='\033[41m'
-
+# Context progress bar (colored = for filled, dim . for empty)
 context_info=""
 if [ -n "$used" ]; then
   used_int=${used%.*}
@@ -81,13 +76,13 @@ if [ -n "$used" ]; then
   FILLED=$((used_int * BAR_WIDTH / 100))
   EMPTY=$((BAR_WIDTH - FILLED))
 
-  if [ "$used_int" -ge 90 ]; then BG_FILL="$BG_RED"
-  elif [ "$used_int" -ge 70 ]; then BG_FILL="$BG_YELLOW"
-  else BG_FILL="$BG_GREEN"; fi
+  if [ "$used_int" -ge 90 ]; then BAR_COLOR="$RED"
+  elif [ "$used_int" -ge 70 ]; then BAR_COLOR="$YELLOW"
+  else BAR_COLOR="$GREEN"; fi
 
   BAR=""
-  [ "$FILLED" -gt 0 ] && BAR="${BG_FILL}$(printf "%${FILLED}s")${RESET}"
-  [ "$EMPTY" -gt 0 ] && BAR="${BAR}${BG_GRAY}$(printf "%${EMPTY}s")${RESET}"
+  [ "$FILLED" -gt 0 ] && BAR="${BAR_COLOR}$(printf "%${FILLED}s" | tr ' ' '=')${RESET}"
+  [ "$EMPTY" -gt 0 ] && BAR="${BAR}${DIM}$(printf "%${EMPTY}s" | tr ' ' '.')${RESET}"
 
   context_info="${BAR} ${used_int}%"
 fi
