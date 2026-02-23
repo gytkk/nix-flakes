@@ -58,7 +58,7 @@ command -v codex >/dev/null 2>&1 || { echo "ERROR: codex CLI not found. Install:
 ### Step 3: 출력 디렉토리 준비
 
 ```bash
-mkdir -p .ai
+mkdir -p ~/.ai
 ```
 
 ### Step 4: 초기 실행 (Iteration 1)
@@ -127,7 +127,7 @@ Output ONLY the JSON object, no markdown fences, no explanation before or after.
 CODEX_HOME="$HOME/.codex-hephaestus" codex exec \
   --sandbox "${HEPHAESTUS_SANDBOX:-workspace-write}" \
   --output-schema "$HOME/.claude/skills/codex-hephaestus/references/output-schema.json" \
-  --output-last-message .ai/hephaestus-iter-1.json \
+  --output-last-message ~/.ai/hephaestus-iter-1.json \
   - < /tmp/hephaestus-prompt.txt
 ```
 
@@ -135,12 +135,12 @@ CODEX_HOME="$HOME/.codex-hephaestus" codex exec \
 
 #### 4c. 결과 읽기 및 검증
 
-Read 도구로 `.ai/hephaestus-iter-1.json`을 읽는다.
+Read 도구로 `~/.ai/hephaestus-iter-1.json`을 읽는다.
 
 JSON이 유효하지 않으면 Bash로 추출을 시도한다:
 
 ```bash
-jq . .ai/hephaestus-iter-1.json
+jq . ~/.ai/hephaestus-iter-1.json
 ```
 
 jq도 실패하면 에러를 보고하고 중단한다.
@@ -196,7 +196,7 @@ Output ONLY the JSON object, no markdown fences, no explanation before or after.
 CODEX_HOME="$HOME/.codex-hephaestus" codex exec \
   --sandbox "${HEPHAESTUS_SANDBOX:-workspace-write}" \
   --output-schema "$HOME/.claude/skills/codex-hephaestus/references/output-schema.json" \
-  --output-last-message .ai/hephaestus-iter-{N}.json \
+  --output-last-message ~/.ai/hephaestus-iter-{N}.json \
   - < /tmp/hephaestus-prompt.txt
 ```
 
@@ -204,10 +204,10 @@ CODEX_HOME="$HOME/.codex-hephaestus" codex exec \
 
 ### Step 6: 최종 결과 저장
 
-마지막 iteration의 결과 파일을 `.ai/hephaestus-result.json`으로 복사한다:
+마지막 iteration의 결과 파일을 `~/.ai/hephaestus-result.json`으로 복사한다:
 
 ```bash
-cp .ai/hephaestus-iter-{LAST_N}.json .ai/hephaestus-result.json
+cp ~/.ai/hephaestus-iter-{LAST_N}.json ~/.ai/hephaestus-result.json
 ```
 
 임시 프롬프트 파일을 정리한다:
@@ -282,7 +282,7 @@ JSON 결과를 다음 형식으로 정리하여 사용자에게 보고한다:
 
 - 이 스킬은 사용자 명시적 호출 또는 CLAUDE.md 위임 기준에 따라 자동 호출됩니다.
 - Codex는 `workspace-write` sandbox에서 실행되어 워크스페이스 내 파일을 자유롭게 수정할 수 있습니다.
-- 결과는 `.ai/hephaestus-result.json`에 저장되며, iteration 결과는 `.ai/hephaestus-iter-{N}.json`에 보존됩니다.
-- `.ai/` 디렉토리의 런타임 출력물은 gitignored 되어야 합니다.
+- 결과는 `~/.ai/hephaestus-result.json`에 저장되며, iteration 결과는 `~/.ai/hephaestus-iter-{N}.json`에 보존됩니다.
+- `~/.ai/` 디렉토리에 런타임 출력물을 저장합니다 (프로젝트 디렉토리를 오염시키지 않음).
 - 프롬프트는 Write 도구로 파일에 작성 후 stdin redirect로 전달합니다 (shell metacharacter 안전).
 - Codex 완료 후 Claude Code가 독립적으로 변경사항을 검증합니다 (Step 7).

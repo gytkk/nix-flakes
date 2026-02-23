@@ -80,7 +80,7 @@ diff가 존재하면 `CONTENT_TYPE`을 `"diff"`로 설정한다.
 ### Step 3: 출력 디렉토리 준비
 
 ```bash
-mkdir -p .ai
+mkdir -p ~/.ai
 ```
 
 ### Step 4: 초기 분석 실행 (Iteration 1)
@@ -162,7 +162,7 @@ Output ONLY the JSON object, no markdown fences, no explanation before or after.
 CODEX_HOME="$HOME/.codex-critic" codex exec \
   --sandbox "${CRITIC_SANDBOX:-workspace-write}" \
   --output-schema "$HOME/.claude/skills/codex-critic/references/critic-schema.json" \
-  --output-last-message .ai/critic-iter-1.json \
+  --output-last-message ~/.ai/critic-iter-1.json \
   - < /tmp/critic-prompt.txt
 ```
 
@@ -170,12 +170,12 @@ CODEX_HOME="$HOME/.codex-critic" codex exec \
 
 #### 4c. 결과 읽기 및 검증
 
-Read 도구로 `.ai/critic-iter-1.json`을 읽는다.
+Read 도구로 `~/.ai/critic-iter-1.json`을 읽는다.
 
 JSON이 유효하지 않으면 Bash로 추출을 시도한다:
 
 ```bash
-jq . .ai/critic-iter-1.json
+jq . ~/.ai/critic-iter-1.json
 ```
 
 jq도 실패하면 에러를 보고하고 중단한다.
@@ -227,7 +227,7 @@ Output ONLY the JSON object, no markdown fences, no explanation before or after.
 CODEX_HOME="$HOME/.codex-critic" codex exec \
   --sandbox "${CRITIC_SANDBOX:-workspace-write}" \
   --output-schema "$HOME/.claude/skills/codex-critic/references/critic-schema.json" \
-  --output-last-message .ai/critic-iter-{N}.json \
+  --output-last-message ~/.ai/critic-iter-{N}.json \
   - < /tmp/critic-prompt.txt
 ```
 
@@ -235,10 +235,10 @@ CODEX_HOME="$HOME/.codex-critic" codex exec \
 
 ### Step 6: 최종 결과 저장
 
-마지막 iteration의 결과 파일을 `.ai/critic-result.json`으로 복사한다:
+마지막 iteration의 결과 파일을 `~/.ai/critic-result.json`으로 복사한다:
 
 ```bash
-cp .ai/critic-iter-{LAST_N}.json .ai/critic-result.json
+cp ~/.ai/critic-iter-{LAST_N}.json ~/.ai/critic-result.json
 ```
 
 임시 프롬프트 파일을 정리한다:
@@ -288,6 +288,6 @@ JSON 결과를 다음 형식으로 정리하여 사용자에게 보고한다:
 
 - 이 스킬은 자동 호출되지 않습니다 (`disable-model-invocation: true`).
 - Codex는 workspace-write sandbox에서 실행되어 워크스페이스 내 파일 수정이 가능합니다.
-- 결과는 `.ai/critic-result.json`에 저장되며, 반복(iteration) 결과는 `.ai/critic-iter-{N}.json`에 보존됩니다.
-- `.ai/` 디렉토리의 런타임 출력물은 gitignored 되어야 합니다.
+- 결과는 `~/.ai/critic-result.json`에 저장되며, 반복(iteration) 결과는 `~/.ai/critic-iter-{N}.json`에 보존됩니다.
+- `~/.ai/` 디렉토리에 런타임 출력물을 저장합니다 (프로젝트 디렉토리를 오염시키지 않음).
 - 프롬프트는 Write 도구로 파일에 작성 후 stdin redirect로 전달합니다 (shell metacharacter 안전).
