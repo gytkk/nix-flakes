@@ -19,6 +19,8 @@ RED='\033[31m'
 CYAN='\033[36m'
 DIM='\033[2m'
 RESET='\033[0m'
+BOLD_BLUE='\033[1;34m'
+BRIGHT_ORANGE='\033[1;38;5;214m'
 
 # Shorten home directory to ~
 home="$HOME"
@@ -92,7 +94,7 @@ fi
 # Token usage (arrow indicators: input↓ output↑)
 token_info=""
 if [ -n "$input_tokens" ] && [ -n "$output_tokens" ]; then
-  token_info="${DIM}${ICON_TOKEN}${RESET} ${CYAN}↓$(format_tokens "$input_tokens")${RESET} ${YELLOW}↑$(format_tokens "$output_tokens")${RESET}"
+  token_info="${DIM}${ICON_TOKEN}${RESET} ${BOLD_BLUE}↓$(format_tokens "$input_tokens")${RESET} ${BRIGHT_ORANGE}↑$(format_tokens "$output_tokens")${RESET}"
 fi
 
 # Lines changed
