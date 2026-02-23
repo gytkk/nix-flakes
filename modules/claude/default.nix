@@ -42,8 +42,18 @@ let
   ];
 
   mcpCommands = [
-    "mcp add -s user --transport http context7 https://mcp.context7.com/mcp"
-    "mcp add -s user --transport http notion https://mcp.notion.com/mcp"
+    {
+      name = "context7";
+      cmd = "mcp add -s user --transport http context7 https://mcp.context7.com/mcp";
+    }
+    {
+      name = "notion";
+      cmd = "mcp add -s user --transport http notion https://mcp.notion.com/mcp";
+    }
+    {
+      name = "codex";
+      cmd = "mcp add -s user codex -- codex mcp-server";
+    }
   ];
 in
 {
@@ -149,11 +159,10 @@ in
 
     # Register MCP servers (skip if already registered)
     ${lib.concatMapStringsSep "\n    " (
-      cmd:
+      mp:
       let
-        # Extract server name: mcp add -s user --transport http <name> <url>
-        #                       0    1  2  3     4          5    6      7
-        name = builtins.elemAt (lib.splitString " " cmd) 6;
+        name = mp.name;
+        cmd = mp.cmd;
       in
       ''
         if ! echo "$MCP_CACHE" | grep -qF "${name}"; then

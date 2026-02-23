@@ -565,22 +565,30 @@ To add a new company or environment:
 
 ## Codex Skills (Marketplace Plugin)
 
-Codex CLI 통합 스킬은 [gytkk/claude-marketplace](https://github.com/gytkk/claude-marketplace)의
+Codex MCP 통합 스킬은 [gytkk/claude-marketplace](https://github.com/gytkk/claude-marketplace)의
 `codex` 플러그인으로 관리됩니다. `claude plugin install codex@gytkk`로 설치됩니다.
+
+### Prerequisites
+
+- Codex CLI 설치: `npm install -g @openai/codex`
+- Codex MCP 서버 등록 (nix-flakes `modules/claude/default.nix`에서 자동 등록)
 
 ### 사용법
 
 ```bash
 /codex:critic "<원래 사용자 요청>"      # 코드/계획/콘텐츠 검증
 /codex:hephaestus "<작업 목표 설명>"    # 자율적 딥 워커
+/codex:analyze "<분석 대상 설명>"       # 범용 심층 분석
 ```
 
 ### 동작 원리
 
+- `codex mcp-server`를 MCP 서버로 등록하여 `mcp__codex__codex`, `mcp__codex__codex-reply` 도구를 사용
 - **Critic**: git diff, 명시적 콘텐츠, 또는 대화 컨텍스트에서 검증 대상을 수집하여 Codex에 리뷰 요청
 - **Hephaestus**: 복잡한 구현 작업을 Codex에 위임하여 탐색 → 계획 → 실행 → 검증을 자율 수행
-- 세션별 고유 ID로 결과 파일 격리: `~/.ai/critic-{SESSION_ID}-result.json`
-- Codex home 디렉토리는 플러그인이 자동 설정 (`~/.codex-critic/`, `~/.codex-hephaestus/`)
+- **Analyze**: 코드, 로그, 에러, 성능 등 임의의 대상을 심층 분석하여 구조화된 인사이트 제공
+- Thread 기반 대화로 반복 개선 (이전 컨텍스트 유지)
+- 세션별 고유 ID로 결과 파일 격리: `~/.ai/{skill}-{SESSION_ID}-result.json`
 
 ## Git Conventions
 

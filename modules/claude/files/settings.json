@@ -16,7 +16,10 @@
       "Skill(plannotator-review)",
       "Skill(plannotator:plannotator-review)",
       "Skill(codex:critic)",
-      "Skill(codex:hephaestus)"
+      "Skill(codex:hephaestus)",
+      "Skill(codex:analyze)",
+      "mcp__codex__codex",
+      "mcp__codex__codex-reply"
     ],
     "defaultMode": "acceptEdits"
   },
