@@ -1,5 +1,51 @@
 # CLAUDE.md
 
+## Codex MCP 적극 위임 정책 (PROACTIVE)
+
+> **CRITICAL**: 아래 세 가지 위임 규칙을 모든 작업에 적극적으로 적용한다.
+> 해당 조건이 충족되면 사용자 요청 없이도 자발적으로 위임한다.
+
+### 1. 분석 → `/codex:analyze`
+
+이슈, 작업, 코드, 로그, 에러, 성능 등 **분석이 필요한 모든 경우**에 위임한다.
+
+- 버그 원인 분석, 성능 병목 파악, 의존성 분석
+- 프로젝트 구조/아키텍처 분석
+- 로그/에러 패턴 분석
+- 요구사항이 모호하여 사전 조사가 필요한 경우
+
+```text
+/codex:analyze "<분석 대상 설명>"
+```
+
+### 2. 구현 → `/codex:hephaestus`
+
+**복잡한 구현 작업**을 Codex에 위임하여 자율적으로 수행한다.
+
+- 3개 이상 파일 수정이 예상되는 구현
+- 새로운 기능/모듈 추가, 대규모 리팩토링
+- 여러 파일에 걸친 일괄 변경 (rename, migration)
+- 위임하지 않는 경우: 1~2개 파일 단순 수정, 탐색만 필요한 작업, 사용자가 직접 구현을 요청한 경우
+
+```text
+/codex:hephaestus "<작업 목표 설명>"
+```
+
+### 3. 리뷰 → `/codex:critic`
+
+Claude Code main agent가 수행한 **모든 의미 있는 작업**을 독립 검증한다.
+
+- **필수 실행**: 구현 완료 직후 (커밋 전), 계획 수립 직후 (구현 착수 전)
+- **대상**: 2개 이상 파일 수정, 새 기능 추가, 리팩토링, 동작 변경
+- **verdict 후속**: fail → 수정 후 재검증, warn → 사용자에게 보고, pass → 커밋 진행
+- `/codex:critic` 대신 다른 리뷰 스킬을 사용하지 말 것
+
+```text
+/codex:critic "<원래 사용자 요청 요약>"
+```
+
+---
+
 ## Verification & Inquiry Protocol (TOP PRIORITY)
 
 > **CRITICAL**: Apply at EVERY step. This overrides all other instructions.
@@ -76,85 +122,23 @@ For single-file, low-risk changes that can be explained in one short paragraph (
 - Check for edge cases and proper error handling.
 - Verify that changes align with existing code patterns.
 
-## Codex Hephaestus 위임 (PROACTIVE)
+## Codex MCP 위임 상세 워크플로우
 
-복잡한 구현 작업은 `/codex:hephaestus` 스킬을 통해 Codex CLI에 **적극적으로 위임**한다.
-Codex는 `workspace-write` sandbox에서 자율적으로 탐색 → 계획 → 실행 → 검증을 수행한다.
+> 위임 기준과 사용법은 최상단 "Codex MCP 적극 위임 정책" 참조.
 
-### 위임 기준
-
-다음 조건 중 **하나 이상** 해당하면 `/codex:hephaestus`에 위임한다:
-
-- 3개 이상 파일 수정이 예상되는 구현 작업
-- 새로운 기능/모듈 추가 (scaffold, boilerplate 포함)
-- 대규모 리팩토링 (패턴 변경, 구조 재편)
-- 여러 파일에 걸친 일괄 변경 (rename, migration)
-
-### 위임하지 않는 경우
-
-- 1~2개 파일의 단순 수정 (설정 변경, 오타 수정 등)
-- 탐색/조사만 필요한 작업
-- 사용자가 직접 구현을 요청한 경우 ("내가 보면서 하나씩 해줘" 등)
-
-### 사용법
-
-```text
-/codex:hephaestus "<작업 목표에 대한 구체적 설명>"
-```
-
-### 워크플로우
+### Hephaestus 워크플로우
 
 1. 사용자 요청 분석 → 위임 기준 충족 여부 판단
-2. 충족 시 `/codex:hephaestus`로 위임 (사용자에게 위임 사실 안내)
+2. 충족 시 사용자에게 "Codex에 위임합니다" 안내 후 `/codex:hephaestus` 실행
 3. Codex 실행 완료 후 변경사항 독립 검증 (git diff 확인, 파일 리뷰)
-4. 이후 `/codex:critic`으로 최종 리뷰
+4. `/codex:critic`으로 최종 리뷰
 5. 결과를 사용자에게 보고
 
-### 규칙
+### Critic 규칙
 
-- 위임 시 사용자에게 "Codex에 위임합니다" 안내 후 진행
-- Codex가 만든 변경사항은 반드시 Claude Code가 독립 검증
-- 사용자가 `/codex:hephaestus`를 명시적으로 호출한 경우에도 동일 워크플로우 적용
-
-## Codex Critic 리뷰 (MANDATORY)
-
-> **CRITICAL**: 이 섹션은 모든 의미 있는 작업에 대해 반드시 준수해야 한다.
-> `/codex:critic` 스킬을 Skill 도구로 호출해야 한다. `plannotator-review` 등
-> 다른 스킬로 대체하거나 건너뛰는 것은 허용되지 않는다.
-
-계획 수립 또는 구현 작업을 완료한 후에는 **반드시** `/codex:critic` 스킬을 실행하여
-독립적인 리뷰와 피드백을 받아야 한다. 코드 변경사항(diff)뿐만 아니라 계획, 설계 문서,
-또는 임의의 콘텐츠도 검증할 수 있다.
-
-### 필수 실행 시점
-
-1. **계획 완료 후**: 구현 계획을 수립한 직후, 구현에 착수하기 전
-2. **구현 완료 후**: 코드 변경을 마친 직후, 커밋 직전
-
-### 대상
-
-- 단순 오타 수정이나 1줄 변경이 아닌 **모든 의미 있는 작업**
-- 2개 이상 파일 수정, 새 기능 추가, 리팩토링, 동작 변경 등
-
-### 사용법
-
-```text
-/codex:critic "<원래 사용자 요청 요약>"
-```
-
-입력은 자동 감지된다: git diff가 있으면 diff 모드, 명시적 콘텐츠가 있으면 임의 입력 모드.
-
-### 후속 조치
-
-- `verdict: fail` → 이슈를 반영하여 수정 후 재검증
-- `verdict: warn` → 사용자에게 이슈를 보고하고 판단을 요청
-- `verdict: pass` → 커밋 진행
-
-### 금지 사항
-
-- `/codex:critic` 대신 `/plannotator-review` 또는 다른 스킬을 사용하지 말 것
+- 사용자가 명시적으로 요청하지 않아도 실행 시점에 도달하면 자발적으로 호출할 것
 - 리뷰 없이 커밋하지 말 것 (대상 작업인 경우)
-- 사용자가 명시적으로 요청하지 않아도 위 실행 시점에 도달하면 스스로 호출할 것
+- `/codex:critic` 대신 `/plannotator-review` 또는 다른 스킬을 사용하지 말 것
 
 ## Documentation
 
