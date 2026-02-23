@@ -82,7 +82,7 @@ if [ -n "$used" ]; then
 
   BAR=""
   [ "$FILLED" -gt 0 ] && BAR="${BAR_COLOR}$(printf "%${FILLED}s" | tr ' ' '=')${RESET}"
-  [ "$EMPTY" -gt 0 ] && BAR="${BAR}${DIM}$(printf "%${EMPTY}s" | tr ' ' '.')${RESET}"
+  [ "$EMPTY" -gt 0 ] && BAR="${BAR}${DIM}$(printf "%${EMPTY}s" | tr ' ' '-')${RESET}"
 
   context_info="${BAR} ${used_int}%"
 fi
