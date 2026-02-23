@@ -126,7 +126,7 @@ in
     log "Updating marketplace index..."
     ${timeout} 30s ${claude} plugin marketplace update < /dev/null >> "$SETUP_LOG" 2>&1 || log "Marketplace update failed"
 
-    # Install plugins (skip if already installed)
+    # Install or update plugins
     ${lib.concatMapStringsSep "\n    " (plugin: ''
       if ! grep -qF "${plugin}" "$INSTALLED_PLUGINS" 2>/dev/null; then
         log "Installing plugin: ${plugin}"
@@ -136,7 +136,12 @@ in
           log "  -> FAILED (exit $?)"
         fi
       else
-        log "Plugin already installed: ${plugin}"
+        log "Updating plugin: ${plugin}"
+        if ${timeout} 60s ${claude} plugin update ${plugin} < /dev/null >> "$SETUP_LOG" 2>&1; then
+          log "  -> OK"
+        else
+          log "  -> FAILED (exit $?)"
+        fi
       fi'') plugins}
 
     # Cache MCP server list once to avoid repeated calls
