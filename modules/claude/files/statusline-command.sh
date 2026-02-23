@@ -69,7 +69,7 @@ format_tokens() {
 SEP=" ${DIM}|${RESET} "
 
 # Context progress bar with ANSI background colors
-BG_GRAY='\033[100m'   # dark gray background for empty
+BG_GRAY='\033[48;5;252m'  # light gray background for empty (light theme friendly)
 BG_GREEN='\033[42m'
 BG_YELLOW='\033[43m'
 BG_RED='\033[41m'
