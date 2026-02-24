@@ -2,17 +2,18 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Critical Rules
+## Operational Rules
+
+### Critical Rules
 
 - DO NOT use git worktree for this repository
 - Follow existing code patterns and module structure in this repository
-- Use `nixfmt` to format all Nix files before committing (you should delegate this task to subagent using sonnet model)
+- Use `nixfmt` to format all Nix files before committing (delegate to subagent using sonnet model)
 - Do NOT run build tests directly - ask the user to test instead (builds can take several minutes)
-- Skip `nix flake check` unless explicitly requested - it often takes too long
+- Run `nix flake check` only for complex changes (multi-module, architecture changes); skip for simple edits unless explicitly requested
 - Do NOT push unless explicitly requested
-- Commit changes after completing a logical unit of work (when possible)
 
-## Documentation Guidelines
+### Documentation Guidelines
 
 - **NO ONE-OFF DOCUMENTATION FILES**: Do not create temporary or one-off documentation files (e.g., CHANGES.md, NOTES.md, etc.)
 - All documentation belongs in:
@@ -23,129 +24,55 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - If you need to document something, update the appropriate existing file
 - When you work on markdown files, ensure they are following markdownlint rules
 
-## Build/Test/Lint Commands
+### Git Conventions
+
+- Use [Conventional Commits](https://www.conventionalcommits.org/): `feat:`, `fix:`, `docs:`, `refactor:`
+- Write in imperative mood: "Add feature" not "Added feature"
+- Keep commits atomic: one logical change per commit
+- Commit changes after completing a logical unit of work (when possible)
+
+### Security
+
+- Never commit secrets or credentials
+- Use agenix for secrets management (see [Secrets Management](#secrets-management-agenix) for details)
+- Secrets decrypt to `/run/agenix/<secretName>`
+
+### Build/Test/Lint Commands
+
+**Agent-safe commands** (Claude Code can run these directly):
 
 ```bash
-# Validate flake configuration (run this first)
-nix flake check
+nixfmt <file.nix>                  # Format Nix files
+nixfmt **/*.nix                    # Format all Nix files
+nix flake show                     # Show available flake outputs
+nix flake check --no-build         # Validate syntax without building
 
-# Test build specific environment (without applying)
+# Only for complex changes (multi-module, flake outputs, architecture-level):
+nix flake check                    # Full validation including builds
+
+# Check evaluation errors for a specific environment:
+nix eval .#homeConfigurations.pylv-denim.config.home.packages --apply 'x: map (p: p.name) x'
+```
+
+**User-run commands** (ask the user to run these):
+
+```bash
 home-manager build --flake .#pylv-denim
 home-manager build --flake .#pylv-sepia
 home-manager build --flake .#devsisters-macbook
 home-manager build --flake .#devsisters-macstudio
-
-# Apply configuration (after successful build)
 home-manager switch --flake .#<environment>
-
-# NixOS build and apply (for pylv-sepia)
 nixos-rebuild build --flake .#pylv-sepia
 nixos-rebuild switch --flake .#pylv-sepia
-
-# Format Nix files
-nixfmt <file.nix>
-nixfmt **/*.nix        # Format all Nix files
-
-# Show available flake outputs
-nix flake show
 ```
 
-### Testing a Single Module
+---
 
-```bash
-# Build and check specific environment to test module changes
-home-manager build --flake .#pylv-denim 2>&1 | head -50
+## Reference
 
-# Check for evaluation errors without building
-nix eval .#homeConfigurations.pylv-denim.config.home.packages --apply 'x: map (p: p.name) x'
-```
+### Nix Code Style Guidelines
 
-### Terraform Version Management
-
-Terraform uses **lazy loading** - only the default version is installed during `home-manager switch`. Other versions are loaded on-demand via direnv.
-
-```bash
-# Default terraform (configured in modules.terraform.defaultVersion)
-terraform version
-```
-
-#### Directory-specific Terraform Versions (with direnv)
-
-Create `.envrc` files in Terraform project directories:
-
-```bash
-echo "use_terraform" > .envrc
-direnv allow
-```
-
-The `use_terraform` function automatically:
-
-- Reads `required_version` from backend.tf/versions.tf/main.tf
-- If different from default, loads the version via nix-direnv (cached in /nix/store)
-- First load builds the version; subsequent loads are instant
-
-### Java Version Management
-
-```bash
-# Switch Java versions globally
-java8          # Switch to Java 8
-java17         # Switch to Java 17
-java-switch 8  # Alternative syntax
-java-switch 17 # Alternative syntax
-
-# Check current Java version
-java -version
-echo $JAVA_HOME
-```
-
-#### Directory-specific Java Versions (with direnv)
-
-Create `.envrc` files in project directories:
-
-```bash
-# For Java 8 projects
-echo "use_java_8" > .envrc
-direnv allow
-
-# For Java 17 projects
-echo "use_java_17" > .envrc
-direnv allow
-
-# Combined with Terraform
-cat > .envrc << 'EOF'
-use_java_8
-use_terraform
-EOF
-direnv allow
-```
-
-### Secrets Management (agenix)
-
-This repository uses [agenix](https://github.com/ryantm/agenix) for managing secrets in NixOS configurations.
-
-```bash
-# Edit or create a secret (opens $EDITOR)
-agenix -e secrets/secret-name.age
-
-# Re-encrypt all secrets after adding new keys
-agenix -r
-```
-
-**Workflow:**
-
-1. Add public keys to `secrets/secrets.nix`
-2. Define which keys can decrypt each secret
-3. Create encrypted secret: `agenix -e secrets/my-secret.age`
-4. Reference in NixOS config:
-
-   ```nix
-   age.secrets.mySecret.file = ../../secrets/my-secret.age;
-   # Decrypted file available at /run/agenix/mySecret
-   ```
-
-## Nix Code Style Guidelines
-
-### File Structure
+#### File Structure
 
 ```nix
 {
@@ -167,7 +94,7 @@ in
 }
 ```
 
-### Imports
+#### Imports
 
 ```nix
 imports = [
@@ -179,7 +106,7 @@ imports = [
 - Use relative paths for imports within the repository
 - Import directories containing `default.nix` by directory name
 
-### Formatting Rules
+#### Formatting Rules
 
 - Opening brace `{` on same line for function parameters
 - One attribute per line in attribute sets
@@ -188,7 +115,7 @@ imports = [
 - Use 2-space indentation (enforced by nixfmt)
 - Use `with pkgs;` for package lists
 
-### Naming Conventions
+#### Naming Conventions
 
 | Type              | Convention      | Example                               |
 | ----------------- | --------------- | ------------------------------------- |
@@ -198,7 +125,7 @@ imports = [
 | Directories       | lowercase/kebab | `modules/`, `base/devsisters/`        |
 | Environment names | kebab-case      | `pylv-denim`, `devsisters-macbook`    |
 
-### Module Pattern
+#### Module Pattern
 
 ```nix
 let
@@ -219,7 +146,7 @@ in
 }
 ```
 
-### Package Lists
+#### Package Lists
 
 ```nix
 home.packages = with pkgs; [
@@ -232,7 +159,7 @@ home.packages = with pkgs; [
 ];
 ```
 
-### Conditional Configuration
+#### Conditional Configuration
 
 ```nix
 config = lib.mkIf cfg.enable { ... };                              # Single condition
@@ -240,7 +167,7 @@ lib.mkMerge [ (lib.mkIf (!isWSL) { ... }) (lib.mkIf isWSL { ... }) ] # Multiple
 programs.git.settings.user.email = lib.mkForce "x@example.com";    # Force override
 ```
 
-### Environment Definition (environments.nix)
+#### Environment Definition (environments.nix)
 
 ```nix
 {
@@ -255,56 +182,41 @@ programs.git.settings.user.email = lib.mkForce "x@example.com";    # Force overr
 }
 ```
 
-## Architecture
+### Architecture
 
 This is a Nix flakes-based Home Manager configuration supporting multiple environments (macOS and Linux). The configuration uses a layered base system with company-specific customizations.
 
-### Quick Reference
+#### Directory Structure
 
 ```text
-base/default.nix          # Common configuration for all environments
-base/<company>/home.nix   # Company-specific extensions
-modules/<name>/default.nix # Reusable module
-environments.nix          # All environment definitions
-hosts.nix                 # NixOS host definitions
-hosts/<name>/configuration.nix # NixOS host configuration
-lib/builders.nix          # mkHomeConfig, mkNixOSConfig helpers
-overlays/default.nix      # nixpkgs version overlays (nixpkgs-versions)
-secrets/secrets.nix       # Agenix secrets configuration
+flake.nix                         # Main flake configuration
+environments.nix                  # All environment definitions
+hosts.nix                         # NixOS host definitions
+base/default.nix                  # Common configuration for all environments
+base/<company>/home.nix           # Company-specific extensions
+modules/<name>/default.nix        # Reusable module
+hosts/<name>/configuration.nix    # NixOS host configuration
+lib/builders.nix                  # mkHomeConfig, mkNixOSConfig helpers
+overlays/default.nix              # nixpkgs version overlays (nixpkgs-versions)
+secrets/secrets.nix               # Agenix secrets configuration
 ```
 
-### Core Structure
+#### Environment Configurations
 
-- `flake.nix`: Main flake configuration with inputs, outputs, and environment definitions
-- `environments.nix`: All environment configurations in a single file
-- `hosts.nix`: NixOS host definitions (currently pylv-sepia)
-- `base/`: Layered Home Manager configurations
-  - `base/default.nix`: Common base configuration for all environments
-  - `base/devsisters/`: Devsisters-specific extensions
-  - `base/pylv/`: Pylv-specific extensions
-- `hosts/`: NixOS host configurations
-  - `hosts/pylv-sepia/`: NixOS server configuration (configuration.nix, disk-config.nix, hardware-configuration.nix)
-- `modules/`: Modular configuration components
-- `lib/`: Helper functions and environment loaders
-- `secrets/`: Encrypted secrets management (agenix)
-### Environment Configurations
-
-All environments are defined in `environments.nix` with the following structure:
+All environments are defined in `environments.nix`:
 
 - **`devsisters-macbook`**: ARM64 macOS (gyutak@/Users/gyutak) with devsisters base profile
 - **`devsisters-macstudio`**: ARM64 macOS (gyutak@/Users/gyutak) with devsisters base profile
 - **`pylv-denim`**: x86_64 Linux/WSL (gytkk@/home/gytkk) with pylv base profile
 - **`pylv-sepia`**: x86_64 Linux/NixOS server (gytkk@/home/gytkk) with pylv base profile + OpenClaw
 
-Each environment specifies a `baseProfile` which determines which base configuration to load.
+#### NixOS Host Configurations
 
-### NixOS Host Configurations
-
-NixOS hosts are defined in `hosts.nix` with full system configurations:
+NixOS hosts are defined in `hosts.nix`:
 
 - **`pylv-sepia`**: x86_64 Linux NixOS server with Disko, agenix, Home Manager, copyparty, and OpenClaw AI gateway
 
-### Base System Architecture
+#### Base System Architecture
 
 The layered base system provides inheritance and customization:
 
@@ -489,13 +401,13 @@ Global configuration for Claude Code (Anthropic's AI coding assistant).
 
 Global configuration for OpenCode (open-source AI coding agent).
 
-| File                      | Purpose                                   | Deployed To                        |
-| ------------------------- | ----------------------------------------- | ---------------------------------- |
-| `files/opencode.json`         | Model, theme, plugins, MCP settings       | `~/.config/opencode/opencode.json`         |
-| `files/oh-my-opencode.json`   | Oh-My-OpenCode agent/category model config| `~/.config/opencode/oh-my-opencode.json`   |
-| `files/AGENTS.md`             | Global instructions for OpenCode behavior | `~/.config/opencode/AGENTS.md`             |
-| `files/agents/*.md`           | Custom agent definitions                  | `~/.config/opencode/agents/`               |
-| `files/plugins/native-notify.ts` | Terminal notification plugin           | `~/.config/opencode/plugins/native-notify.ts` |
+| File                             | Purpose                                    | Deployed To                                   |
+| -------------------------------- | ------------------------------------------ | --------------------------------------------- |
+| `files/opencode.json`           | Model, theme, plugins, MCP settings        | `~/.config/opencode/opencode.json`            |
+| `files/oh-my-opencode.json`     | Oh-My-OpenCode agent/category model config | `~/.config/opencode/oh-my-opencode.json`      |
+| `files/AGENTS.md`               | Global instructions for OpenCode behavior  | `~/.config/opencode/AGENTS.md`                |
+| `files/agents/*.md`             | Custom agent definitions                   | `~/.config/opencode/agents/`                  |
+| `files/plugins/native-notify.ts` | Terminal notification plugin              | `~/.config/opencode/plugins/native-notify.ts` |
 
 **Custom Agents** (in `files/agents/`):
 
@@ -508,6 +420,54 @@ Global configuration for OpenCode (open-source AI coding agent).
 - Change default model → Edit `files/opencode.json` → `model`
 - Update global instructions → Edit `files/AGENTS.md`
 - Create new custom agent → Add `files/agents/{agent-name}.md`
+
+### Terraform Version Management
+
+Terraform uses **lazy loading** - only the default version is installed during `home-manager switch`. Other versions are loaded on-demand via direnv.
+
+```bash
+# Default terraform (configured in modules.terraform.defaultVersion)
+terraform version
+```
+
+#### Directory-specific Terraform Versions (with direnv)
+
+Create `.envrc` files in Terraform project directories:
+
+```bash
+echo "use_terraform" > .envrc
+direnv allow
+```
+
+The `use_terraform` function automatically:
+
+- Reads `required_version` from backend.tf/versions.tf/main.tf
+- If different from default, loads the version via nix-direnv (cached in /nix/store)
+- First load builds the version; subsequent loads are instant
+
+### Secrets Management (agenix)
+
+This repository uses [agenix](https://github.com/ryantm/agenix) for managing secrets in NixOS configurations.
+
+```bash
+# Edit or create a secret (opens $EDITOR)
+agenix -e secrets/secret-name.age
+
+# Re-encrypt all secrets after adding new keys
+agenix -r
+```
+
+**Workflow:**
+
+1. Add public keys to `secrets/secrets.nix`
+2. Define which keys can decrypt each secret
+3. Create encrypted secret: `agenix -e secrets/my-secret.age`
+4. Reference in NixOS config:
+
+   ```nix
+   age.secrets.mySecret.file = ../../secrets/my-secret.age;
+   # Decrypted file available at /run/agenix/mySecret
+   ```
 
 ### Package Management
 
@@ -560,17 +520,17 @@ To add a new company or environment:
    home-manager build --flake .#new-environment
    ```
 
-## Codex Skills (Marketplace Plugin)
+### Codex Skills (Marketplace Plugin)
 
 Codex MCP 통합 스킬은 [gytkk/claude-marketplace](https://github.com/gytkk/claude-marketplace)의
 `codex` 플러그인으로 관리됩니다. `claude plugin install codex@gytkk`로 설치됩니다.
 
-### Prerequisites
+#### Prerequisites
 
 - Codex CLI 설치: `npm install -g @openai/codex`
 - Codex MCP 서버 등록 (nix-flakes `modules/claude/default.nix`에서 자동 등록)
 
-### 사용법
+#### 사용법
 
 ```bash
 /codex:critic "<원래 사용자 요청>"      # 코드/계획/콘텐츠 검증
@@ -578,7 +538,7 @@ Codex MCP 통합 스킬은 [gytkk/claude-marketplace](https://github.com/gytkk/c
 /codex:analyze "<분석 대상 설명>"       # 범용 심층 분석
 ```
 
-### 동작 원리
+#### 동작 원리
 
 - `codex mcp-server`를 MCP 서버로 등록하여 `mcp__codex__codex`, `mcp__codex__codex-reply` 도구를 사용
 - **Critic**: git diff, 명시적 콘텐츠, 또는 대화 컨텍스트에서 검증 대상을 수집하여 Codex에 리뷰 요청
@@ -586,20 +546,3 @@ Codex MCP 통합 스킬은 [gytkk/claude-marketplace](https://github.com/gytkk/c
 - **Analyze**: 코드, 로그, 에러, 성능 등 임의의 대상을 심층 분석하여 구조화된 인사이트 제공
 - Thread 기반 대화로 반복 개선 (이전 컨텍스트 유지)
 - 세션별 고유 ID로 결과 파일 격리: `~/.ai/{skill}-{SESSION_ID}-result.json`
-
-## Git Conventions
-
-- Use [Conventional Commits](https://www.conventionalcommits.org/): `feat:`, `fix:`, `docs:`, `refactor:`
-- Write in imperative mood: "Add feature" not "Added feature"
-- Keep commits atomic: one logical change per commit
-
-## Security
-
-- Never commit secrets or credentials
-- Use agenix for secrets management:
-
-  ```nix
-  age.secrets.secretName.file = ../../secrets/secret-name.age;
-  ```
-
-- Secrets decrypt to `/run/agenix/<secretName>`
