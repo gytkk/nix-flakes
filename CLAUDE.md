@@ -287,8 +287,6 @@ secrets/secrets.nix       # Agenix secrets configuration
 - `modules/`: Modular configuration components
 - `lib/`: Helper functions and environment loaders
 - `secrets/`: Encrypted secrets management (agenix)
-- `docs/`: Additional documentation
-
 ### Environment Configurations
 
 All environments are defined in `environments.nix` with the following structure:
@@ -515,19 +513,18 @@ Global configuration for OpenCode (open-source AI coding agent).
 
 Base packages defined in `base/default.nix`:
 
+- **Nix**: nixfmt, nixd
 - **System**: coreutils, findutils, gnupg, libiconv, direnv, tmux, less, wget, curl
 - **Development**: docker, gcc, awscli2, jq, yq-go, ripgrep
 - **Git**: git, gh, lazygit, delta, bat
-- **Java**: OpenJDK 17 (default), OpenJDK 8 via direnv
 - **JavaScript/TypeScript**: nodejs, bun, typescript, pnpm, turbo
-- **Go**: go compiler and tools
+- **Go**: go, gopls
 - **Python**: uv package manager, ty type checker
 - **Rust**: rustup
-- **Kubernetes**: kubectl, kubectx, k9s, helm
+- **Kubernetes**: kubectl, kubectx, helm (k9s is provided via `modules/k9s` program module)
 - **Secrets**: 1password-cli, keybase
 - **Media**: ffmpeg, yt-dlp
 - **ML**: micromamba
-- **Nix**: nixfmt, nixd
 - **Fonts**: nerd-fonts (fira-code, jetbrains-mono), sarasa-gothic
 
 Company-specific packages:
