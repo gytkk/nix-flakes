@@ -76,9 +76,7 @@ Claude Code main agent가 수행한 작업을 독립 검증한다.
 ```text
 사용자 요청 → 위임 기준 판단
   ├─ 분석 필요 → /codex:analyze → 결과 보고
-  ├─ 구현 위임 대상
-  │   ├─ 복잡한 변경 → 사용자 승인(Planning & Approval) → /codex:hephaestus → git diff 검증 → /codex:critic → 커밋
-  │   └─ 간단한 변경 → /codex:hephaestus → git diff 검증 → /codex:critic → 커밋
+  ├─ 구현 위임 대상 → 사용자 승인(Planning & Approval) → /codex:hephaestus → git diff 검증 → 리뷰 대상이면 /codex:critic → 커밋
   └─ 직접 구현
       ├─ 복잡한 변경 → 사용자 승인(Planning & Approval) → 구현 → 리뷰 대상이면 /codex:critic → 커밋
       └─ 간단한 변경 → 구현 완료 → 리뷰 대상이면 /codex:critic → 커밋
@@ -110,11 +108,13 @@ Claude Code main agent가 수행한 작업을 독립 검증한다.
 
 ## Planning & Approval
 
-**간단한 변경** (단일 파일, 저위험, 한 문단으로 설명 가능):
+> 복잡도 판단은 위임 기준(§Codex MCP 위임 정책)과 동일한 기준을 적용한다.
 
-- plannotator 없이 즉시 적용 → diff와 검증 결과로 확인
+**간단한 변경** (위임 기준 미충족: 1~2개 파일 단순 수정, 저위험):
 
-**복잡한 변경** (다중 파일, 크로스 모듈, 동작 변경):
+- 즉시 적용 → diff와 검증 결과로 확인
+
+**복잡한 변경** (위임 기준 충족: 3개 이상 파일, 새 기능/모듈, 공개 인터페이스 변경 등):
 
 - `submit_plan` 도구로 계획을 제출하여 사용자 승인을 받은 후 구현
 - 사용자가 피드백을 주면 계획을 수정하고 재제출
@@ -184,13 +184,3 @@ By default, work on the current branch. Only use git worktree when the user expl
 - Use specific error types when possible.
 - Log errors with enough context for debugging.
 - Provide meaningful error messages to users.
-
-## Prompt Keywords
-
-When the user's message contains any of these keywords (case-insensitive, typically
-at the end of the message), apply the associated behavior throughout the entire task.
-Strip the keyword from the message before processing the actual request.
-
-| Keyword | Behavior |
-| ------- | -------- |
-| `webs` | **Aggressive web search mode.** Before writing ANY code or making decisions, search the web first. Use web search to verify APIs, check latest docs, find best practices, and confirm syntax. Search at minimum 3 times, maximum 10 times per task. Stop searching when two independent sources confirm the same answer or when results start repeating. Prefer up-to-date web results over training data. |
