@@ -76,8 +76,12 @@ Claude Code main agent가 수행한 작업을 독립 검증한다.
 ```text
 사용자 요청 → 위임 기준 판단
   ├─ 분석 필요 → /codex:analyze → 결과 보고
-  ├─ 구현 위임 대상 → 사용자에게 안내 → /codex:hephaestus → git diff 검증 → /codex:critic → 커밋
-  └─ 직접 구현 → 구현 완료 → 리뷰 대상이면 /codex:critic → 커밋
+  ├─ 구현 위임 대상
+  │   ├─ 복잡한 변경 → 사용자 승인(Planning & Approval) → /codex:hephaestus → git diff 검증 → /codex:critic → 커밋
+  │   └─ 간단한 변경 → /codex:hephaestus → git diff 검증 → /codex:critic → 커밋
+  └─ 직접 구현
+      ├─ 복잡한 변경 → 사용자 승인(Planning & Approval) → 구현 → 리뷰 대상이면 /codex:critic → 커밋
+      └─ 간단한 변경 → 구현 완료 → 리뷰 대상이면 /codex:critic → 커밋
 ```
 
 - 사용자가 명시적으로 요청하지 않아도 실행 시점에 도달하면 자발적으로 호출할 것
@@ -119,7 +123,6 @@ Claude Code main agent가 수행한 작업을 독립 검증한다.
 ## Worktree Workflow
 
 By default, work on the current branch. Only use git worktree when the user explicitly requests it.
-For large-scale changes (e.g., new features, major refactors), ask the user whether to use a worktree before proceeding.
 
 **When worktree is requested:**
 
