@@ -84,6 +84,7 @@ User request → Evaluate delegation criteria
 
 - Invoke proactively when the execution point is reached, even without explicit user request
 - Do NOT use `/plannotator-review` or other review skills in place of `/codex:critic`
+- If Codex MCP tools are unavailable or unresponsive, fall back to direct execution by the main agent
 
 ---
 
@@ -116,13 +117,14 @@ User request → Evaluate delegation criteria
 
 **Complex changes** (delegation criteria met: 3+ files, new feature/module, public interface changes, etc.):
 
-- Submit a plan via `submit_plan` tool for user approval before implementation
-- If the user provides feedback, revise and resubmit the plan
-- If `submit_plan` tool is unavailable: Present the plan as text and request user approval
+- Use `EnterPlanMode` to design the approach, then `ExitPlanMode` to submit for user approval
+- If the user provides feedback, revise the plan accordingly
+- If plan mode tools are unavailable: Present the plan as text and request user approval
 
 ## Worktree Workflow
 
 By default, work on the current branch. Only use git worktree when the user explicitly requests it.
+Individual projects may override this policy (e.g., banning worktree entirely). Project-level CLAUDE.md rules take precedence.
 
 **When worktree is requested:**
 
@@ -161,7 +163,8 @@ By default, work on the current branch. Only use git worktree when the user expl
 ## Testing
 
 - Write tests for new features before or alongside implementation.
-- Run existing tests before committing (e.g., `uv run -m pytest`, `npm test`).
+- Run existing tests before committing when the project has a test suite (e.g., `uv run -m pytest`, `npm test`).
+- For Nix-only projects, defer to project-specific build/test rules.
 - Cover edge cases and error scenarios in tests.
 
 ## Code Review

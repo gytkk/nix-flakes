@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+> **Precedence**: General development rules (commit workflow, security, testing, etc.) are defined in the global `~/.claude/CLAUDE.md`. This file contains project-specific rules and reference documentation. **Project-specific rules take precedence** over global rules when they conflict.
+
 ## Operational Rules
 
 ### Critical Rules
@@ -522,27 +524,26 @@ To add a new company or environment:
 
 ### Codex Skills (Marketplace Plugin)
 
-Codex MCP 통합 스킬은 [gytkk/claude-marketplace](https://github.com/gytkk/claude-marketplace)의
-`codex` 플러그인으로 관리됩니다. `claude plugin install codex@gytkk`로 설치됩니다.
+Codex MCP integration skills are managed as the `codex` plugin in [gytkk/claude-marketplace](https://github.com/gytkk/claude-marketplace). Install via `claude plugin install codex@gytkk`.
 
 #### Prerequisites
 
-- Codex CLI 설치: `npm install -g @openai/codex`
-- Codex MCP 서버 등록 (nix-flakes `modules/claude/default.nix`에서 자동 등록)
+- Codex CLI installed: `npm install -g @openai/codex`
+- Codex MCP server registered (auto-registered in nix-flakes `modules/claude/default.nix`)
 
-#### 사용법
+#### Usage
 
 ```bash
-/codex:critic "<원래 사용자 요청>"      # 코드/계획/콘텐츠 검증
-/codex:hephaestus "<작업 목표 설명>"    # 자율적 딥 워커
-/codex:analyze "<분석 대상 설명>"       # 범용 심층 분석
+/codex:critic "<original user request>"      # Verify code/plans/content
+/codex:hephaestus "<task objective>"          # Autonomous deep worker
+/codex:analyze "<analysis target>"            # General-purpose deep analysis
 ```
 
-#### 동작 원리
+#### How It Works
 
-- `codex mcp-server`를 MCP 서버로 등록하여 `mcp__codex__codex`, `mcp__codex__codex-reply` 도구를 사용
-- **Critic**: git diff, 명시적 콘텐츠, 또는 대화 컨텍스트에서 검증 대상을 수집하여 Codex에 리뷰 요청
-- **Hephaestus**: 복잡한 구현 작업을 Codex에 위임하여 탐색 → 계획 → 실행 → 검증을 자율 수행
-- **Analyze**: 코드, 로그, 에러, 성능 등 임의의 대상을 심층 분석하여 구조화된 인사이트 제공
-- Thread 기반 대화로 반복 개선 (이전 컨텍스트 유지)
-- 세션별 고유 ID로 결과 파일 격리: `~/.ai/{skill}-{SESSION_ID}-result.json`
+- Registers `codex mcp-server` as an MCP server, providing `mcp__codex__codex` and `mcp__codex__codex-reply` tools
+- **Critic**: Collects review targets from git diff, explicit content, or conversation context and requests Codex review
+- **Hephaestus**: Delegates complex implementation tasks to Codex for autonomous explore → plan → execute → verify
+- **Analyze**: Performs deep analysis on code, logs, errors, performance, etc. to deliver structured insights
+- Thread-based conversations enable iterative refinement (previous context retained)
+- Session-scoped unique IDs isolate result files: `~/.ai/{skill}-{SESSION_ID}-result.json`
