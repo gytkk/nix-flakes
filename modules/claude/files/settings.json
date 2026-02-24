@@ -35,28 +35,5 @@
     "type": "command",
     "command": "bash ~/.claude/statusline-command.sh"
   },
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "mcp__codex__*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/codex-debug-hook.sh pre"
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "mcp__codex__*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/codex-debug-hook.sh post"
-          }
-        ]
-      }
-    ]
-  }
+  "hooks": {}
 }

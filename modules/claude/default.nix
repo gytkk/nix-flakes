@@ -73,10 +73,6 @@ in
     source = ./files/statusline-command.sh;
     executable = true;
   };
-  home.file.".claude/codex-debug-hook.sh" = {
-    source = ./files/codex-debug-hook.sh;
-    executable = true;
-  };
   # Install marketplaces, plugins, and MCP servers
   home.activation.setupClaudeCode = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     # Ensure git, ssh, and which are available for plugin marketplace operations
