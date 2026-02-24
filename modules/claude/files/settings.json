@@ -19,7 +19,11 @@
       "Skill(codex:hephaestus)",
       "Skill(codex:analyze)",
       "mcp__codex__codex",
-      "mcp__codex__codex-reply"
+      "mcp__codex__codex-reply",
+      "Write(~/.ai)",
+      "Write(~/.config)",
+      "Write(~/workspace)",
+      "Write(~/development)"
     ],
     "defaultMode": "acceptEdits"
   },
