@@ -11,31 +11,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - DO NOT use git worktree for this repository
 - Follow existing code patterns and module structure in this repository
 - Use `nixfmt` to format all Nix files before committing (delegate to subagent using sonnet model)
-- Do NOT run build tests directly - ask the user to test instead (builds can take several minutes)
 - Run `nix flake check` only for complex changes (multi-module, architecture changes); skip for simple edits unless explicitly requested
 - Do NOT push unless explicitly requested
 
 ### Documentation Guidelines
 
-- **NO ONE-OFF DOCUMENTATION FILES**: Do not create temporary or one-off documentation files (e.g., CHANGES.md, NOTES.md, etc.)
 - All documentation belongs in:
   - CLAUDE.md - Primary source of truth for development guidelines
   - README.md - User-facing documentation
   - Code comments - Only when absolutely necessary
   - Commit messages - For change history
-- If you need to document something, update the appropriate existing file
 - When you work on markdown files, ensure they are following markdownlint rules
-
-### Git Conventions
-
-- Use [Conventional Commits](https://www.conventionalcommits.org/): `feat:`, `fix:`, `docs:`, `refactor:`
-- Write in imperative mood: "Add feature" not "Added feature"
-- Keep commits atomic: one logical change per commit
-- Commit changes after completing a logical unit of work (when possible)
 
 ### Security
 
-- Never commit secrets or credentials
 - Use agenix for secrets management (see [Secrets Management](#secrets-management-agenix) for details)
 - Secrets decrypt to `/run/agenix/<secretName>`
 

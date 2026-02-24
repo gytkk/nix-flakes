@@ -61,11 +61,11 @@ Independently verify work performed by the Claude Code main agent.
 
 **Verdict criteria**:
 
-| Verdict | Criteria | Follow-up Action |
-| ------- | -------- | ---------------- |
-| `fail` | Functional error, unmet requirements, security vulnerability, build/test failure | Fix and re-verify |
-| `warn` | Style inconsistency, minor edge case, improvement suggestion | Report to user for decision |
-| `pass` | Requirements met, follows existing patterns, no side effects | Proceed to commit |
+| Verdict | Criteria                                                                         | Follow-up Action            |
+| ------- | -------------------------------------------------------------------------------- | --------------------------- |
+| `fail`  | Functional error, unmet requirements, security vulnerability, build/test failure | Fix and re-verify           |
+| `warn`  | Style inconsistency, minor edge case, improvement suggestion                     | Report to user for decision |
+| `pass`  | Requirements met, follows existing patterns, no side effects                     | Proceed to commit           |
 
 ```text
 /codex:critic "<summary of original user request>"
