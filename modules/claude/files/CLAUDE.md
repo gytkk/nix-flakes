@@ -8,117 +8,117 @@
 - **Ask, don't guess.** If requirements are ambiguous or context is missing, ask the user immediately.
 - **Surface blockers early.** Flag missing info, risky assumptions, or dependencies NOW — not after building on them.
 
-## Codex MCP 위임 정책 (PROACTIVE)
+## Codex MCP Delegation Policy (PROACTIVE)
 
-> **CRITICAL**: 아래 세 가지 위임 규칙을 모든 작업에 적극적으로 적용한다.
-> 해당 조건이 충족되면 사용자 요청 없이도 자발적으로 위임한다.
+> **CRITICAL**: Apply the three delegation rules below to all tasks proactively.
+> When conditions are met, delegate autonomously without waiting for user request.
 
-### 1. 분석 → `/codex:analyze`
+### 1. Analysis → `/codex:analyze`
 
-이슈, 작업, 코드, 로그, 에러, 성능 등 **분석이 필요한 모든 경우**에 위임한다.
+Delegate whenever **analysis is needed** — issues, tasks, code, logs, errors, performance, etc.
 
-- 버그 원인 분석, 성능 병목 파악, 의존성 분석
-- 프로젝트 구조/아키텍처 분석
-- 로그/에러 패턴 분석
-- 요구사항이 모호하여 사전 조사가 필요한 경우
-
-```text
-/codex:analyze "<분석 대상 설명>"
-```
-
-### 2. 구현 → `/codex:hephaestus`
-
-**복잡한 구현 작업**을 Codex에 위임하여 자율적으로 수행한다.
-
-**위임 기준** (하나 이상 해당 시):
-
-- 3개 이상 파일 수정이 예상되는 구현
-- 새로운 기능/모듈 추가, 대규모 리팩토링
-- 여러 파일에 걸친 일괄 변경 (rename, migration)
-- 공개 인터페이스(API, export, option) 변경을 수반하는 작업
-
-**위임하지 않는 경우**: 1~2개 파일 단순 수정, 탐색만 필요한 작업, 사용자가 직접 구현을 요청한 경우
-
-> **우선순위**: 위임 기준과 비위임 기준이 겹치는 경우 (예: 1개 파일이지만 공개 인터페이스 변경),
-> 위임 기준이 우선한다.
+- Bug root-cause analysis, performance bottleneck identification, dependency analysis
+- Project structure / architecture analysis
+- Log / error pattern analysis
+- Ambiguous requirements requiring preliminary investigation
 
 ```text
-/codex:hephaestus "<작업 목표 설명>"
+/codex:analyze "<description of analysis target>"
 ```
 
-### 3. 리뷰 → `/codex:critic`
+### 2. Implementation → `/codex:hephaestus`
 
-Claude Code main agent가 수행한 작업을 독립 검증한다.
+Delegate **complex implementation tasks** to Codex for autonomous execution.
 
-**리뷰 대상** (하나 이상 해당 시):
+**Delegation criteria** (delegate when one or more apply):
 
-- 2개 이상 파일 수정
-- 새 기능/모듈 추가
-- 리팩토링 또는 기존 동작 변경
-- 공개 인터페이스(API, export, option) 변경
+- Implementation expected to modify 3+ files
+- Adding new features/modules, large-scale refactoring
+- Bulk changes across multiple files (rename, migration)
+- Changes involving public interfaces (API, export, option)
 
-**리뷰 비대상**: 단일 파일 내 오타/문구 수정, 주석/문서만 변경, 포맷팅만 변경
+**Do NOT delegate**: Simple 1–2 file edits, exploration-only tasks, or when the user explicitly requests direct implementation
 
-**verdict 판정 기준**:
-
-| Verdict | 기준 | 후속 조치 |
-| ------- | ---- | --------- |
-| `fail` | 기능 오류, 요구사항 미충족, 보안 취약점, 빌드/테스트 실패 | 수정 후 재검증 |
-| `warn` | 스타일 불일치, 미미한 엣지케이스, 개선 권장 사항 | 사용자에게 보고 후 판단 |
-| `pass` | 요구사항 충족, 기존 패턴 준수, 부작용 없음 | 커밋 진행 |
+> **Priority**: When delegation and non-delegation criteria overlap (e.g., single file but public interface change),
+> delegation criteria take precedence.
 
 ```text
-/codex:critic "<원래 사용자 요청 요약>"
+/codex:hephaestus "<description of task objective>"
 ```
 
-### Codex 위임 워크플로우
+### 3. Review → `/codex:critic`
+
+Independently verify work performed by the Claude Code main agent.
+
+**Review targets** (review when one or more apply):
+
+- 2+ files modified
+- New feature/module added
+- Refactoring or existing behavior changes
+- Public interface (API, export, option) changes
+
+**Not subject to review**: Single-file typo/wording fixes, comment/docs-only changes, formatting-only changes
+
+**Verdict criteria**:
+
+| Verdict | Criteria | Follow-up Action |
+| ------- | -------- | ---------------- |
+| `fail` | Functional error, unmet requirements, security vulnerability, build/test failure | Fix and re-verify |
+| `warn` | Style inconsistency, minor edge case, improvement suggestion | Report to user for decision |
+| `pass` | Requirements met, follows existing patterns, no side effects | Proceed to commit |
 
 ```text
-사용자 요청 → 위임 기준 판단
-  ├─ 분석 필요 → /codex:analyze → 결과 보고
-  ├─ 구현 위임 대상 → 사용자 승인(Planning & Approval) → /codex:hephaestus → git diff 검증 → 리뷰 대상이면 /codex:critic → 커밋
-  └─ 직접 구현
-      ├─ 복잡한 변경 → 사용자 승인(Planning & Approval) → 구현 → 리뷰 대상이면 /codex:critic → 커밋
-      └─ 간단한 변경 → 구현 완료 → 리뷰 대상이면 /codex:critic → 커밋
+/codex:critic "<summary of original user request>"
 ```
 
-- 사용자가 명시적으로 요청하지 않아도 실행 시점에 도달하면 자발적으로 호출할 것
-- `/codex:critic` 대신 `/plannotator-review` 또는 다른 리뷰 스킬을 사용하지 말 것
+### Codex Delegation Workflow
+
+```text
+User request → Evaluate delegation criteria
+  ├─ Analysis needed → /codex:analyze → Report results
+  ├─ Delegation target → User approval (Planning & Approval) → /codex:hephaestus → git diff verification → Review if applicable → /codex:critic → Commit
+  └─ Direct implementation
+      ├─ Complex change → User approval (Planning & Approval) → Implement → Review if applicable → /codex:critic → Commit
+      └─ Simple change → Implement → Review if applicable → /codex:critic → Commit
+```
+
+- Invoke proactively when the execution point is reached, even without explicit user request
+- Do NOT use `/plannotator-review` or other review skills in place of `/codex:critic`
 
 ---
 
 ## Git & Commit Workflow
 
-> **CRITICAL**: 변경 완료 후 커밋까지의 단일 흐름을 따른다.
+> **CRITICAL**: Follow the single flow from change completion through commit.
 
-1. 하나의 논리적 변경을 완료한다
-2. 리뷰 대상이면 → `/codex:critic` 실행
-   - `pass` → 커밋 진행
-   - `warn` → 사용자에게 보고 후 명시적 승인을 받으면 커밋
-   - `fail` → 수정 후 재검증
-3. 리뷰 비대상이면 → 즉시 커밋
-4. 여러 무관한 변경을 하나의 커밋에 묶지 않는다
+1. Complete one logical change
+2. If subject to review → Run `/codex:critic`
+   - `pass` → Proceed to commit
+   - `warn` → Report to user; commit only after explicit approval
+   - `fail` → Fix and re-verify
+3. If not subject to review → Commit immediately
+4. Do not bundle unrelated changes into a single commit
 
-**커밋 규칙**:
+**Commit rules**:
 
-- [Conventional Commits](https://www.conventionalcommits.org/) 형식 (e.g., `feat:`, `fix:`, `docs:`)
-- git commit history를 참고하여 일관된 메시지 스타일 유지
-- 명령형 어조 (e.g., "Add feature" not "Added feature")
+- [Conventional Commits](https://www.conventionalcommits.org/) format (e.g., `feat:`, `fix:`, `docs:`)
+- Reference git commit history to maintain consistent message style
+- Imperative mood (e.g., "Add feature" not "Added feature")
 - Do NOT push unless explicitly requested
 
 ## Planning & Approval
 
-> 복잡도 판단은 위임 기준(§Codex MCP 위임 정책)과 동일한 기준을 적용한다.
+> Complexity assessment uses the same criteria as the delegation policy (see Codex MCP Delegation Policy).
 
-**간단한 변경** (위임 기준 미충족: 1~2개 파일 단순 수정, 저위험):
+**Simple changes** (delegation criteria not met: 1–2 file simple edits, low risk):
 
-- 즉시 적용 → diff와 검증 결과로 확인
+- Apply immediately → Confirm with diff and verification results
 
-**복잡한 변경** (위임 기준 충족: 3개 이상 파일, 새 기능/모듈, 공개 인터페이스 변경 등):
+**Complex changes** (delegation criteria met: 3+ files, new feature/module, public interface changes, etc.):
 
-- `submit_plan` 도구로 계획을 제출하여 사용자 승인을 받은 후 구현
-- 사용자가 피드백을 주면 계획을 수정하고 재제출
-- `submit_plan` 도구가 사용 불가능한 경우: 계획을 텍스트로 사용자에게 제시하고 승인을 요청
+- Submit a plan via `submit_plan` tool for user approval before implementation
+- If the user provides feedback, revise and resubmit the plan
+- If `submit_plan` tool is unavailable: Present the plan as text and request user approval
 
 ## Worktree Workflow
 
