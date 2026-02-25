@@ -2,11 +2,12 @@
 
 model = "gpt-5.3-codex"
 approval_policy = "never"
-sandbox_mode = "workspace-write"
+sandbox_mode = "danger-full-access"
 web_search = "live"
 
 [features]
 shell_tool = true
+multi_agent = true
 
 [history]
 persistence = "save-all"
