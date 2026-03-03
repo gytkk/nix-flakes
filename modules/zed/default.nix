@@ -47,43 +47,38 @@ let
 
   # 공통 설정
   userSettings = {
-    # Telemetry
+
+    # ── Telemetry ──
     telemetry = {
       diagnostics = false;
       metrics = false;
     };
 
-    # UI
+    # ── UI ──
     ui_font_family = "JetBrainsMono Nerd Font";
     ui_font_size = 14;
     buffer_font_family = "JetBrainsMono Nerd Font";
     buffer_font_size = 14;
-
-    # Theme (커스텀 One Half Light 테마 사용)
     theme = {
       mode = "system";
       light = "One Half Light Custom";
       dark = "One Dark";
     };
 
-    # Editor
+    # ── Editor ──
     tab_size = 2;
     format_on_save = "on";
     remove_trailing_whitespace_on_save = true;
     ensure_final_newline_on_save = true;
     show_whitespaces = "boundary";
-
-    # Vim mode
     vim_mode = true;
     vim = {
       use_system_clipboard = "always";
       use_smartcase_find = true;
     };
-
-    # Base keymap (for non-vim keybindings)
     base_keymap = "VSCode";
 
-    # Terminal
+    # ── Terminal ──
     terminal = {
       shell = {
         program = "zsh";
@@ -92,14 +87,12 @@ let
       font_size = 14;
     };
 
-    # File types
+    # ── Languages ──
     file_types = {
       "JSON" = [
         "flake.lock"
       ];
     };
-
-    # Languages
     languages = {
       Nix = {
         tab_size = 2;
@@ -140,7 +133,7 @@ let
       };
     };
 
-    # LSP
+    # ── LSP ──
     lsp = {
       nixd = {
         settings = {
@@ -159,7 +152,7 @@ let
       };
     };
 
-    # Files
+    # ── Files ──
     file_scan_exclusions = [
       "**/.git"
       "**/.svn"
@@ -175,23 +168,19 @@ let
       "**/.idea"
     ];
 
-    # Git
+    # ── Git ──
     git = {
       inline_blame = {
         enabled = true;
       };
     };
 
-    # Inlay hints
+    # ── Misc ──
     inlay_hints = {
       enabled = true;
     };
-
-    # Completions
     show_completions_on_input = true;
     show_completion_documentation = true;
-
-    # Auto update
     auto_update = false;
   };
 
@@ -202,6 +191,36 @@ let
   # Windows Zed 경로 (WSL에서 접근)
   windowsZedConfigPath = "/mnt/c/Users/${username}/AppData/Roaming/Zed";
   windowsZedDataPath = "/mnt/c/Users/${username}/AppData/Local/Zed";
+
+  # WSL: Windows Zed에 설정, 테마, 확장 배포 스크립트
+  wslActivationScript = ''
+    mkdir -p "${windowsZedConfigPath}/themes"
+    mkdir -p "${windowsZedDataPath}/extensions/installed"
+
+    # settings.json 백업 후 복사
+    if [ -f "${windowsZedConfigPath}/settings.json" ] && [ ! -f "${windowsZedConfigPath}/settings.json.bak" ]; then
+      cp "${windowsZedConfigPath}/settings.json" "${windowsZedConfigPath}/settings.json.bak"
+      echo "Backed up existing settings to settings.json.bak"
+    fi
+    rm -f "${windowsZedConfigPath}/settings.json"
+    cp "${settingsFile}" "${windowsZedConfigPath}/settings.json"
+
+    # 테마 파일 복사
+    rm -f "${windowsZedConfigPath}/themes/one-half-light-custom.json"
+    cp "${themeFile}" "${windowsZedConfigPath}/themes/one-half-light-custom.json"
+
+    # 확장 복사 (Nix store → Windows 경로)
+    for ext in ${extensionsDir}/*; do
+      ext_name=$(basename "$ext")
+      target="${windowsZedDataPath}/extensions/installed/$ext_name"
+      rm -rf "$target"
+      cp -rL "$ext" "$target"
+    done
+
+    echo "Zed config deployed to Windows:"
+    echo "  - Settings: ${windowsZedConfigPath}"
+    echo "  - Extensions: ${windowsZedDataPath}/extensions/installed"
+  '';
 in
 {
   options.modules.zed = {
@@ -239,9 +258,7 @@ in
           };
         };
 
-        # Nix로 확장 관리 (nix-zed-extensions Home Manager 모듈 방식)
-        # macOS: ~/Library/Application Support/Zed/extensions/installed/
-        # Linux: ~/.local/share/zed/extensions/installed/
+        # Nix로 확장 관리 (macOS/Linux 경로 자동 분기)
         home.file."${
           if pkgs.stdenv.isDarwin then
             "Library/Application Support/Zed/extensions/installed"
@@ -253,49 +270,12 @@ in
             force = true;
             source = extensionsDir;
           };
-
       })
 
-      # WSL: Windows Zed에 설정, 테마, 확장 배포 (Zed는 Windows에서 실행)
+      # WSL: Windows Zed에 설정, 테마, 확장 배포
       (lib.mkIf isWSL {
-        # WSL에서는 Zed 패키지 설치하지 않음 (Windows에서 실행)
         programs.zed-editor.enable = false;
-
-        # activation 스크립트로 Windows 경로에 설정, 테마, 확장 복사
-        home.activation.zedWindowsConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-          # Windows Zed 설정 디렉토리 생성
-          mkdir -p "${windowsZedConfigPath}/themes"
-          mkdir -p "${windowsZedDataPath}/extensions/installed"
-
-          # settings.json 복사 (Zed는 JSON5를 사용하므로 병합이 어려움)
-          if [ -f "${windowsZedConfigPath}/settings.json" ] && [ ! -f "${windowsZedConfigPath}/settings.json.bak" ]; then
-            cp "${windowsZedConfigPath}/settings.json" "${windowsZedConfigPath}/settings.json.bak"
-            echo "Backed up existing settings to settings.json.bak"
-          fi
-          rm -f "${windowsZedConfigPath}/settings.json"
-          cp "${settingsFile}" "${windowsZedConfigPath}/settings.json"
-
-          # 테마 파일 복사 (기존 읽기 전용 파일 제거 후 복사)
-          rm -f "${windowsZedConfigPath}/themes/one-half-light-custom.json"
-          cp "${themeFile}" "${windowsZedConfigPath}/themes/one-half-light-custom.json"
-
-          # 확장 복사 (Nix store에서 Windows 경로로)
-          # 기존 Nix 관리 확장 제거 후 새로 복사
-          for ext in ${extensionsDir}/*; do
-            ext_name=$(basename "$ext")
-            target="${windowsZedDataPath}/extensions/installed/$ext_name"
-
-            # 기존 확장 제거 (심볼릭 링크든 디렉토리든)
-            rm -rf "$target"
-
-            # 새 확장 복사 (-L: 심볼릭 링크를 따라가서 실제 파일 복사)
-            cp -rL "$ext" "$target"
-          done
-
-          echo "Zed config deployed to Windows:"
-          echo "  - Settings: ${windowsZedConfigPath}"
-          echo "  - Extensions: ${windowsZedDataPath}/extensions/installed"
-        '';
+        home.activation.zedWindowsConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] wslActivationScript;
       })
     ]
   );
