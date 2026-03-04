@@ -140,6 +140,11 @@ Individual projects may override this policy (e.g., banning worktree entirely). 
   - Use `uv run -m pytest` instead of `python -m pytest`
   - Use `uv run -m pip install` instead of `pip install`
 
+## QMD (Local Knowledge Search)
+
+- QMD MCP 서버가 등록되어 있음. 마크다운 노트/문서 검색 시 QMD 도구를 우선 활용할 것.
+- 코드베이스 내 파일 검색에는 기존 Grep/Glob 사용, 개인 노트/문서/지식 검색에는 QMD 사용.
+
 ## Security
 
 - Never commit secrets, credentials, or API keys.

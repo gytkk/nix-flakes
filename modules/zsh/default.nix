@@ -70,6 +70,9 @@
 
       # antigravity
       agy = "antigravity";
+
+      # QMD (local markdown search)
+      qmd = "bunx @tobilu/qmd";
     }
     // lib.optionalAttrs (!pkgs.stdenv.isDarwin) {
       zed = if isWSL then "zed.exe" else "zeditor";

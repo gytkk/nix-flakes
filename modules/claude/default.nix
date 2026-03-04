@@ -54,6 +54,10 @@ let
       name = "codex";
       cmd = "mcp add -s user codex -- codex mcp-server";
     }
+    {
+      name = "qmd";
+      cmd = "mcp add -s user qmd -- bunx @tobilu/qmd mcp";
+    }
   ];
 in
 {
@@ -203,6 +207,22 @@ in
         echo "[$(date '+%H:%M:%S')] plannotator installed to $PLANNOTATOR_BIN" >> "$SETUP_LOG"
       else
         echo "[$(date '+%H:%M:%S')] plannotator installation FAILED (exit $?)" >> "$SETUP_LOG"
+      fi
+    fi
+  '';
+
+  # Set up QMD collection (home directory markdown files)
+  # Note: Run `qmd embed` manually after first setup (~2GB model download)
+  home.activation.setupQmd = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    SETUP_LOG="$HOME/.claude/nix-setup.log"
+    log() { echo "[$(date '+%H:%M:%S')] $*" >> "$SETUP_LOG"; }
+    QMD="${pkgs.bun}/bin/bunx @tobilu/qmd"
+    if ! $QMD collection list 2>/dev/null | grep -q "home"; then
+      log "Adding QMD collection: home (~/ **/*.md)"
+      if $QMD collection add "$HOME" --name home --mask "**/*.md" >> "$SETUP_LOG" 2>&1; then
+        log "  -> QMD collection added"
+      else
+        log "  -> QMD collection add FAILED (exit $?)"
       fi
     fi
   '';
