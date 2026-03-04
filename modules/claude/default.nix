@@ -223,7 +223,8 @@ in
     QMD="$HOME/.cache/.bun/bin/qmd"
     if [ ! -x "$QMD" ]; then
       log "Installing QMD via bun..."
-      if ${pkgs.bun}/bin/bun install -g @tobilu/qmd >> "$SETUP_LOG" 2>&1; then
+      # Use system clang for native module compilation (Nix gcc doesn't support -stdlib=libc++)
+      if CXX=clang++ CC=clang ${pkgs.bun}/bin/bun install -g --trust @tobilu/qmd >> "$SETUP_LOG" 2>&1; then
         log "  -> QMD installed"
       else
         log "  -> QMD install FAILED (exit $?)"
