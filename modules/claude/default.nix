@@ -56,7 +56,7 @@ let
     }
     {
       name = "qmd";
-      cmd = "mcp add -s user qmd -- bunx @tobilu/qmd mcp";
+      cmd = "mcp add -s user qmd -- qmd mcp";
     }
   ];
 in
@@ -70,7 +70,11 @@ in
   ];
 
   # Add XDG data bin to PATH (for plannotator CLI installed via install.sh)
-  home.sessionPath = [ "${config.xdg.dataHome}/bin" ];
+  # Add ~/.bun/bin to PATH (for QMD installed via bun install -g)
+  home.sessionPath = [
+    "${config.xdg.dataHome}/bin"
+    "$HOME/.bun/bin"
+  ];
 
   home.file.".claude/CLAUDE.md".source = ./files/CLAUDE.md;
   home.file.".claude/statusline-command.sh" = {
@@ -211,13 +215,21 @@ in
     fi
   '';
 
-  # Set up QMD collection (home directory markdown files)
+  # Install QMD via bun and set up collection (home directory markdown files)
   # Note: Run `qmd embed` manually after first setup (~2GB model download)
   home.activation.setupQmd = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     SETUP_LOG="$HOME/.claude/nix-setup.log"
     log() { echo "[$(date '+%H:%M:%S')] $*" >> "$SETUP_LOG"; }
-    QMD="${pkgs.bun}/bin/bunx @tobilu/qmd"
-    if ! $QMD collection list 2>/dev/null | grep -q "home"; then
+    QMD="$HOME/.bun/bin/qmd"
+    if [ ! -x "$QMD" ]; then
+      log "Installing QMD via bun..."
+      if ${pkgs.bun}/bin/bun install -g @tobilu/qmd >> "$SETUP_LOG" 2>&1; then
+        log "  -> QMD installed"
+      else
+        log "  -> QMD install FAILED (exit $?)"
+      fi
+    fi
+    if [ -x "$QMD" ] && ! $QMD collection list 2>/dev/null | grep -q "home"; then
       log "Adding QMD collection: home (~/ **/*.md)"
       if $QMD collection add "$HOME" --name home --mask "**/*.md" >> "$SETUP_LOG" 2>&1; then
         log "  -> QMD collection added"
