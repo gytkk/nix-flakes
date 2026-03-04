@@ -8,6 +8,45 @@
 - **Ask, don't guess.** If requirements are ambiguous or context is missing, ask the user immediately.
 - **Surface blockers early.** Flag missing info, risky assumptions, or dependencies NOW — not after building on them.
 
+## Git & Commit Workflow
+
+> **CRITICAL**: Follow the single flow from change completion through commit.
+
+1. Complete one logical change
+2. If subject to review → Use `@review` agent
+   - No issues → Proceed to commit
+   - Issues found → Fix and re-verify
+3. If not subject to review → Commit immediately
+4. Do not bundle unrelated changes into a single commit
+
+**Review targets** (review when one or more apply):
+
+- 2+ files modified
+- New feature/module added
+- Refactoring or existing behavior changes
+- Public interface (API, export, option) changes
+
+**Not subject to review**: Single-file typo/wording fixes, comment/docs-only changes, formatting-only changes
+
+**Commit rules**:
+
+- [Conventional Commits](https://www.conventionalcommits.org/) format (e.g., `feat:`, `fix:`, `docs:`)
+- Reference git commit history to maintain consistent message style
+- Imperative mood (e.g., "Add feature" not "Added feature")
+- Do NOT push unless explicitly requested
+
+## Planning & Approval
+
+**Simple changes** (1–2 file edits, low risk, explainable in one short paragraph):
+
+- Apply immediately → Confirm with diff and verification results
+
+**Complex changes** (3+ files, new feature/module, cross-module, behavior-changing, public interface changes):
+
+- Submit plan for user approval via `submit_plan` tool
+- If the user provides feedback, revise the plan accordingly
+- Do NOT proceed with implementation until plan is approved
+
 ## Worktree Workflow
 
 By default, work on the current branch. Only use git worktree when the user explicitly requests it.
@@ -20,29 +59,12 @@ For large-scale changes (e.g., new features, major refactors), ask the user whet
 3. When done, create a PR from the worktree branch
 4. After merge, clean up: `git worktree remove ~/trees/$(basename $PWD)/<short-task-name>`
 
-## Git
-
-> **CRITICAL**: After completing each self-contained, logical change, immediately
-> commit it locally using `/git-commit`. Do NOT batch multiple unrelated changes.
-
-- Commit often with small, focused changes.
-- Write clear, descriptive commit messages.
-- Prefer [Conventional Commits](https://www.conventionalcommits.org/) format (e.g., `feat:`, `fix:`, `docs:`).
-- Also check git commit history for examples of good commit messages.
-- Write commit messages in imperative mood (e.g., "Add feature" not "Added feature").
-- Keep commits atomic: one logical change per commit.
-- Do NOT push unless explicitly requested.
-
-## Planning & Approval
-
-For single-file, low-risk changes that can be explained in one short paragraph (for example, wording/description edits or small branch tweaks), do not route through plannotator for separate plan approval; apply directly, then verify with targeted evidence (diff and relevant check results). Use formal plan approval through plannotator only for multi-file, cross-module, or behavior-changing work.
-
 ## Critical Rules
 
 - First, deeply understand and think about what you want to achieve with your code.
 - Always follow existing code patterns and module structure in your working directory.
 - Be concise. Commit small, frequent changes for readable diffs.
-- Proactively use web search if there is any uncertainity or lack of knowledge.
+- Proactively use web search if there is any uncertainty or lack of knowledge.
 
 ## Writing Code
 
@@ -62,11 +84,13 @@ For single-file, low-risk changes that can be explained in one short paragraph (
 
 - Never commit secrets, credentials, or API keys.
 - Use environment variables or secret management tools for sensitive data.
+- Review dependency changes for known vulnerabilities before committing.
 
 ## Testing
 
 - Write tests for new features before or alongside implementation.
-- Run existing tests before committing (e.g., `uv run -m pytest`, `npm test`).
+- Run existing tests before committing when the project has a test suite (e.g., `uv run -m pytest`, `npm test`).
+- For Nix-only projects, defer to project-specific build/test rules.
 - Cover edge cases and error scenarios in tests.
 
 ## Code Review
