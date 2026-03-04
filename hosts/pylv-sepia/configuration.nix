@@ -282,5 +282,11 @@
     ];
   };
 
+  # Locale - SSH 접속 시 클라이언트에서 전달되는 ko_KR.UTF-8 지원
+  i18n.supportedLocales = [
+    "en_US.UTF-8/UTF-8"
+    "ko_KR.UTF-8/UTF-8"
+  ];
+
   system.stateVersion = "25.11";
 }
