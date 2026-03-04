@@ -196,18 +196,9 @@
       };
     };
 
-  # Ensure openclaw-gateway starts after agenix decrypts secrets
-  systemd.services.openclaw-gateway = {
-    after = [ "agenix.service" ];
-    requires = [ "agenix.service" ];
-  };
-
   systemd.services.cloudflared-tunnel = {
     description = "Cloudflare Tunnel";
-    after = [
-      "network-online.target"
-      "agenix.service"
-    ];
+    after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
     wantedBy = [ "multi-user.target" ];
     script = ''
