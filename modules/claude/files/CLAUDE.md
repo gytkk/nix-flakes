@@ -10,23 +10,10 @@
 
 ## Codex MCP Delegation Policy (PROACTIVE)
 
-> **CRITICAL**: Apply the three delegation rules below to all tasks proactively.
+> **CRITICAL**: Apply the two delegation rules below to all tasks proactively.
 > When conditions are met, delegate autonomously without waiting for user request.
 
-### 1. Analysis → `/codex:analyze`
-
-Delegate whenever **analysis is needed** — issues, tasks, code, logs, errors, performance, etc.
-
-- Bug root-cause analysis, performance bottleneck identification, dependency analysis
-- Project structure / architecture analysis
-- Log / error pattern analysis
-- Ambiguous requirements requiring preliminary investigation
-
-```text
-/codex:analyze "<description of analysis target>"
-```
-
-### 2. Implementation → `/codex:hephaestus`
+### 1. Implementation → `/codex:hephaestus`
 
 Delegate **complex implementation tasks** to Codex for autonomous execution.
 
@@ -46,7 +33,7 @@ Delegate **complex implementation tasks** to Codex for autonomous execution.
 /codex:hephaestus "<description of task objective>"
 ```
 
-### 3. Review → `/codex:critic`
+### 2. Review → `/codex:critic`
 
 Independently verify work performed by the Claude Code main agent.
 
@@ -75,7 +62,6 @@ Independently verify work performed by the Claude Code main agent.
 
 ```text
 User request → Evaluate delegation criteria
-  ├─ Analysis needed → /codex:analyze → Report results
   ├─ Delegation target → User approval (Planning & Approval) → /codex:hephaestus → git diff verification → Review if applicable → /codex:critic → Commit
   └─ Direct implementation
       ├─ Complex change → User approval (Planning & Approval) → Implement → Review if applicable → /codex:critic → Commit
