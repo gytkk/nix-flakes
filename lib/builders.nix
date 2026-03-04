@@ -104,6 +104,7 @@ rec {
           inputs.home-manager.nixosModules.home-manager
           inputs.agenix.nixosModules.default
           inputs.copyparty.nixosModules.default
+          inputs.nix-openclaw.nixosModules.openclaw-gateway
           (../hosts + "/${name}/configuration.nix")
           {
             nixpkgs.hostPlatform = config.system;

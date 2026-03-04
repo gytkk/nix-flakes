@@ -94,12 +94,99 @@
     group = "cloudflared";
   };
 
-  # Discord bot token for openclaw (readable by user)
+  # Discord bot token for openclaw (readable by openclaw system user)
   age.secrets.discord-bot-token = {
     file = ../../secrets/discord-bot-token.age;
-    owner = "gytkk";
-    group = "users";
+    owner = "openclaw";
+    group = "openclaw";
     mode = "0400";
+  };
+
+  # OpenClaw Gateway - NixOS system service
+  services.openclaw-gateway = {
+    enable = true;
+    package = pkgs.openclaw-gateway;
+    port = 18789;
+    stateDir = "/var/lib/openclaw";
+
+    # Convert raw agenix token to KEY=VALUE format (runs as root via + prefix)
+    execStartPre = [
+      "+${pkgs.writeShellScript "openclaw-discord-env" ''
+        TOKEN_FILE="/run/agenix/discord-bot-token"
+        ENV_DIR="/run/openclaw"
+        ENV_FILE="$ENV_DIR/env"
+        ${pkgs.coreutils}/bin/mkdir -p "$ENV_DIR"
+        if [ -f "$TOKEN_FILE" ]; then
+          echo "DISCORD_BOT_TOKEN=$(${pkgs.coreutils}/bin/cat "$TOKEN_FILE")" > "$ENV_FILE"
+          ${pkgs.coreutils}/bin/chmod 600 "$ENV_FILE"
+          ${pkgs.coreutils}/bin/chown openclaw:openclaw "$ENV_FILE"
+        else
+          : > "$ENV_FILE"
+        fi
+      ''}"
+    ];
+    environmentFiles = [ "-/run/openclaw/env" ];
+
+    servicePath = with pkgs; [
+      bun
+      nodejs
+    ];
+
+    config = {
+      gateway = {
+        mode = "local";
+        auth = {
+          token = "local-gateway-token";
+          mode = "token";
+        };
+        port = 18789;
+        bind = "loopback";
+        tailscale.mode = "serve";
+      };
+
+      agents.defaults = {
+        workspace = "/var/lib/openclaw/workspace";
+        maxConcurrent = 4;
+        subagents.maxConcurrent = 8;
+        model.primary = "anthropic/claude-sonnet-4-5";
+      };
+
+      commands = {
+        native = "auto";
+        nativeSkills = "auto";
+      };
+
+      messages.ackReactionScope = "group-mentions";
+
+      plugins.entries.discord.enabled = true;
+
+      channels.discord = {
+        enabled = true;
+        groupPolicy = "allowlist";
+        dm = {
+          enabled = true;
+          policy = "pairing";
+        };
+        guilds."1467867949657227318" = {
+          requireMention = true;
+          channels."1467867998655217850" = {
+            allow = true;
+            requireMention = true;
+          };
+        };
+      };
+
+      hooks.internal = {
+        enabled = true;
+        entries = {
+          session-memory.enabled = true;
+          command-logger.enabled = true;
+          boot-md.enabled = true;
+        };
+      };
+
+      skills.install.nodeManager = "bun";
+    };
   };
 
   systemd.services.cloudflared-tunnel = {

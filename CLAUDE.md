@@ -199,20 +199,20 @@ All environments are defined in `environments.nix`:
 - **`devsisters-macbook`**: ARM64 macOS (gyutak@/Users/gyutak) with devsisters base profile
 - **`devsisters-macstudio`**: ARM64 macOS (gyutak@/Users/gyutak) with devsisters base profile
 - **`pylv-denim`**: x86_64 Linux/WSL (gytkk@/home/gytkk) with pylv base profile
-- **`pylv-sepia`**: x86_64 Linux/NixOS server (gytkk@/home/gytkk) with pylv base profile + OpenClaw
+- **`pylv-sepia`**: x86_64 Linux/NixOS server (gytkk@/home/gytkk) with pylv base profile
 
 #### NixOS Host Configurations
 
 NixOS hosts are defined in `hosts.nix`:
 
-- **`pylv-sepia`**: x86_64 Linux NixOS server with Disko, agenix, Home Manager, copyparty, and OpenClaw AI gateway
+- **`pylv-sepia`**: x86_64 Linux NixOS server with Disko, agenix, Home Manager, copyparty, and OpenClaw AI gateway (NixOS system service via `services.openclaw-gateway`)
 
 #### Base System Architecture
 
 The layered base system provides inheritance and customization:
 
 1. **`base/default.nix`**: Common configuration imported by all company bases
-   - Core modules (claude, ghostty, git, k9s, openclaw, opencode, terraform, vim, vscode, zed, zsh)
+   - Core modules (claude, ghostty, git, k9s, opencode, terraform, vim, vscode, zed, zsh)
    - Standard development packages
    - Basic programs configuration
 
@@ -227,7 +227,7 @@ The layered base system provides inheritance and customization:
    - Ready for company-specific customizations
 
 4. **`base/pylv/sepia.nix`**: Environment-specific config for pylv-sepia NixOS server
-   - OpenClaw AI gateway (Discord integration enabled)
+   - Currently minimal (OpenClaw moved to NixOS system service)
    - Only imported by pylv-sepia environment via `extraModules`
 
 ### Module System
@@ -257,7 +257,6 @@ modules/<name>/
 | `ghostty/`   | Ghostty terminal         | `~/.config/ghostty/`                         | `default.nix` (inline config)                           |
 | `git/`       | Git configuration        | `~/.gitconfig`                               | `default.nix`                                           |
 | `k9s/`       | Kubernetes manager       | `~/.config/k9s/`                             | `default.nix`                                           |
-| `openclaw/`  | OpenClaw AI gateway      | Systemd/Launchd service                      | `default.nix`                                           |
 | `opencode/`  | OpenCode AI agent        | `~/.config/opencode/`                        | `files/opencode.json`, `files/AGENTS.md`                |
 | `terraform/` | Terraform versions       | direnv lazy-load                             | `default.nix`                                           |
 | `vim/`       | Neovim                   | `~/.config/nvim/`                            | `default.nix`                                           |
