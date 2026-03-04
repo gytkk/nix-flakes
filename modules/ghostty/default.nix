@@ -60,5 +60,8 @@ in
     window-padding-balance = true
 
     link-url = true
+
+    # SSH 접속 시 COLORTERM, TERM_PROGRAM 등 환경 변수 자동 전달 + terminfo 자동 설치
+    shell-integration-features = cursor,sudo,title,ssh-env,ssh-terminfo
   '';
 }
