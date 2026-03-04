@@ -70,10 +70,10 @@ in
   ];
 
   # Add XDG data bin to PATH (for plannotator CLI installed via install.sh)
-  # Add ~/.bun/bin to PATH (for QMD installed via bun install -g)
+  # Add bun global bin to PATH (for QMD installed via bun install -g)
   home.sessionPath = [
     "${config.xdg.dataHome}/bin"
-    "$HOME/.bun/bin"
+    "$HOME/.cache/.bun/bin"
   ];
 
   home.file.".claude/CLAUDE.md".source = ./files/CLAUDE.md;
@@ -220,7 +220,7 @@ in
   home.activation.setupQmd = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     SETUP_LOG="$HOME/.claude/nix-setup.log"
     log() { echo "[$(date '+%H:%M:%S')] $*" >> "$SETUP_LOG"; }
-    QMD="$HOME/.bun/bin/qmd"
+    QMD="$HOME/.cache/.bun/bin/qmd"
     if [ ! -x "$QMD" ]; then
       log "Installing QMD via bun..."
       if ${pkgs.bun}/bin/bun install -g @tobilu/qmd >> "$SETUP_LOG" 2>&1; then
