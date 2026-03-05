@@ -215,8 +215,7 @@ in
     fi
   '';
 
-  # Install QMD via bun and set up collection (home directory markdown files)
-  # Note: Run `qmd embed` manually after first setup (~2GB model download)
+  # Install QMD via bun, set up collection, and build indexes
   home.activation.setupQmd = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     SETUP_LOG="$HOME/.claude/nix-setup.log"
     log() { echo "[$(date '+%H:%M:%S')] $*" >> "$SETUP_LOG"; }
@@ -236,6 +235,20 @@ in
         log "  -> QMD collection added"
       else
         log "  -> QMD collection add FAILED (exit $?)"
+      fi
+    fi
+    if [ -x "$QMD" ]; then
+      log "Updating QMD index (BM25)..."
+      if $QMD update >> "$SETUP_LOG" 2>&1; then
+        log "  -> QMD index updated"
+      else
+        log "  -> QMD index update FAILED (exit $?)"
+      fi
+      log "Building QMD vector embeddings..."
+      if $QMD embed >> "$SETUP_LOG" 2>&1; then
+        log "  -> QMD embeddings built"
+      else
+        log "  -> QMD embed FAILED (exit $?)"
       fi
     fi
   '';
