@@ -10,6 +10,10 @@ let
   timeout = "${pkgs.coreutils}/bin/timeout";
   jq = "${pkgs.jq}/bin/jq";
 
+  # QMD collection glob mask — covers all common text file types
+  # QMD internally excludes: node_modules, .git, .cache, vendor, dist, build, and all dot-directories
+  qmdMask = "**/*.{md,txt,org,rst,adoc,nix,py,js,ts,tsx,jsx,mjs,cjs,go,rs,rb,java,scala,kt,sh,bash,zsh,lua,sql,html,css,scss,json,jsonc,toml,yaml,yml,xml,tf,hcl,conf,cfg,ini,graphql,proto,c,cpp,h,hpp,swift,el,vim,ex,exs}";
+
   marketplaces = [
     "anthropics/skills"
     "anthropics/claude-code"
@@ -246,7 +250,8 @@ in
         log "Removing legacy QMD collection: home"
         $QMD collection remove home >> "$SETUP_LOG" 2>&1
       fi
-      # Register per-directory collections
+      # Register per-directory collections with text file mask
+      QMD_MASK="${qmdMask}"
       for pair in \
         "development:$HOME/development" \
         "workspace:$HOME/workspace" \
@@ -254,12 +259,21 @@ in
         "dotconfig:$HOME/.config"; do
         name="''${pair%%:*}"
         dir="''${pair#*:}"
-        if [ -d "$dir" ] && ! $QMD collection list 2>/dev/null | grep -q "^$name "; then
-          log "Adding QMD collection: $name ($dir **/*.md)"
-          if $QMD collection add "$dir" --name "$name" --mask "**/*.md" >> "$SETUP_LOG" 2>&1; then
-            log "  -> QMD collection '$name' added"
-          else
-            log "  -> QMD collection '$name' add FAILED (exit $?)"
+        if [ -d "$dir" ]; then
+          # Check if collection exists and whether its mask needs updating
+          current_pattern=$($QMD collection list 2>/dev/null | grep -A1 "^$name " | grep "Pattern:" | sed 's/.*Pattern:  *//' || true)
+          if [ -n "$current_pattern" ] && [ "$current_pattern" != "$QMD_MASK" ]; then
+            log "Migrating QMD collection: $name (mask: $current_pattern -> $QMD_MASK)"
+            $QMD collection remove "$name" >> "$SETUP_LOG" 2>&1
+            current_pattern=""
+          fi
+          if [ -z "$current_pattern" ]; then
+            log "Adding QMD collection: $name ($dir $QMD_MASK)"
+            if $QMD collection add "$dir" --name "$name" --mask "$QMD_MASK" >> "$SETUP_LOG" 2>&1; then
+              log "  -> QMD collection '$name' added"
+            else
+              log "  -> QMD collection '$name' add FAILED (exit $?)"
+            fi
           fi
         fi
       done
