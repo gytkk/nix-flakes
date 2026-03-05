@@ -222,11 +222,20 @@ in
     SETUP_LOG="$HOME/.claude/nix-setup.log"
     log() { echo "[$(date '+%H:%M:%S')] $*" >> "$SETUP_LOG"; }
     QMD="$HOME/.cache/.bun/bin/qmd"
-    if [ ! -x "$QMD" ]; then
-      log "Installing QMD via bun..."
+    QMD_NODE_VERSION_FILE="$HOME/.cache/.bun/install/global/.qmd-node-version"
+    CURRENT_NODE_VERSION="$(${pkgs.nodejs}/bin/node --version)"
+    STORED_NODE_VERSION="$(cat "$QMD_NODE_VERSION_FILE" 2>/dev/null || echo "")"
+
+    if [ ! -x "$QMD" ] || [ "$CURRENT_NODE_VERSION" != "$STORED_NODE_VERSION" ]; then
+      if [ -x "$QMD" ]; then
+        log "Rebuilding QMD native modules (Node.js changed: $STORED_NODE_VERSION -> $CURRENT_NODE_VERSION)"
+      else
+        log "Installing QMD via bun..."
+      fi
       # Use system clang for native module compilation (Nix gcc doesn't support -stdlib=libc++)
       if CXX=clang++ CC=clang ${pkgs.bun}/bin/bun install -g --trust @tobilu/qmd >> "$SETUP_LOG" 2>&1; then
-        log "  -> QMD installed"
+        echo "$CURRENT_NODE_VERSION" > "$QMD_NODE_VERSION_FILE"
+        log "  -> QMD installed (Node.js $CURRENT_NODE_VERSION)"
       else
         log "  -> QMD install FAILED (exit $?)"
       fi
