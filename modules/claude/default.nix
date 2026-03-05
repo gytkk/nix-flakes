@@ -217,6 +217,8 @@ in
 
   # Install QMD via bun, set up collection, and build indexes
   home.activation.setupQmd = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    # QMD internally uses node; ensure Nix nodejs is found before asdf shims
+    export PATH="${lib.makeBinPath [ pkgs.nodejs ]}:$PATH"
     SETUP_LOG="$HOME/.claude/nix-setup.log"
     log() { echo "[$(date '+%H:%M:%S')] $*" >> "$SETUP_LOG"; }
     QMD="$HOME/.cache/.bun/bin/qmd"
@@ -229,13 +231,29 @@ in
         log "  -> QMD install FAILED (exit $?)"
       fi
     fi
-    if [ -x "$QMD" ] && ! $QMD collection list 2>/dev/null | grep -q "home"; then
-      log "Adding QMD collection: home (~/ **/*.md)"
-      if $QMD collection add "$HOME" --name home --mask "**/*.md" >> "$SETUP_LOG" 2>&1; then
-        log "  -> QMD collection added"
-      else
-        log "  -> QMD collection add FAILED (exit $?)"
+    if [ -x "$QMD" ]; then
+      # Remove legacy whole-home collection if it exists
+      if $QMD collection list 2>/dev/null | grep -q "^home "; then
+        log "Removing legacy QMD collection: home"
+        $QMD collection remove home >> "$SETUP_LOG" 2>&1
       fi
+      # Register per-directory collections
+      for pair in \
+        "development:$HOME/development" \
+        "workspace:$HOME/workspace" \
+        "worktrees:$HOME/worktrees" \
+        "dotconfig:$HOME/.config"; do
+        name="''${pair%%:*}"
+        dir="''${pair#*:}"
+        if [ -d "$dir" ] && ! $QMD collection list 2>/dev/null | grep -q "^$name "; then
+          log "Adding QMD collection: $name ($dir **/*.md)"
+          if $QMD collection add "$dir" --name "$name" --mask "**/*.md" >> "$SETUP_LOG" 2>&1; then
+            log "  -> QMD collection '$name' added"
+          else
+            log "  -> QMD collection '$name' add FAILED (exit $?)"
+          fi
+        fi
+      done
     fi
     if [ -x "$QMD" ]; then
       log "Updating QMD index (BM25)..."

@@ -114,10 +114,10 @@ Individual projects may override this policy (e.g., banning worktree entirely). 
 
 **When worktree is requested:**
 
-1. Create a new branch and worktree: `git worktree add ~/trees/$(basename $PWD)/<short-task-name> -b <branch-name>`
+1. Create a new branch and worktree: `git worktree add ~/worktrees/$(basename $PWD)/<short-task-name> -b <branch-name>`
 2. Change to the worktree directory and work there
 3. When done, create a PR from the worktree branch
-4. After merge, clean up: `git worktree remove ~/trees/$(basename $PWD)/<short-task-name>`
+4. After merge, clean up: `git worktree remove ~/worktrees/$(basename $PWD)/<short-task-name>`
 
 ## Critical Rules
 
@@ -144,6 +144,7 @@ Individual projects may override this policy (e.g., banning worktree entirely). 
 
 - QMD MCP 서버가 등록되어 있음. 마크다운 노트/문서 검색 시 QMD 도구를 우선 활용할 것.
 - 코드베이스 내 파일 검색에는 기존 Grep/Glob 사용, 개인 노트/문서/지식 검색에는 QMD 사용.
+- 인덱싱 대상 컬렉션: `development`, `workspace`, `worktrees`, `dotconfig`(~/.config)
 
 ## Security
 
