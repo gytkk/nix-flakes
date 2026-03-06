@@ -12,6 +12,42 @@ output_tokens=$(echo "$input" | jq -r '.context_window.total_output_tokens // em
 lines_added=$(echo "$input" | jq -r '.cost.total_lines_added // empty')
 lines_removed=$(echo "$input" | jq -r '.cost.total_lines_removed // empty')
 
+# Active LSP servers (cached to avoid frequent process scans)
+LSP_CACHE_FILE="/tmp/claude-statusline-lsp-cache"
+LSP_CACHE_MAX_AGE=10
+
+lsp_cache_is_stale() {
+  [ ! -f "$LSP_CACHE_FILE" ] && return 0
+  local file_age
+  if file_age=$(stat -c %Y "$LSP_CACHE_FILE" 2>/dev/null); then
+    [ $(($(date +%s) - file_age)) -gt $LSP_CACHE_MAX_AGE ]
+  elif file_age=$(stat -f %m "$LSP_CACHE_FILE" 2>/dev/null); then
+    [ $(($(date +%s) - file_age)) -gt $LSP_CACHE_MAX_AGE ]
+  else
+    return 0
+  fi
+}
+
+if lsp_cache_is_stale; then
+  active_lsps=""
+  for lsp_name in gopls rust-analyzer typescript-language-server nixd terraform-ls metals pyright ty-server; do
+    if pgrep -x "$lsp_name" > /dev/null 2>&1; then
+      # Use short display names
+      case "$lsp_name" in
+        typescript-language-server) short="ts" ;;
+        rust-analyzer) short="rust" ;;
+        terraform-ls) short="tf" ;;
+        ty-server) short="ty" ;;
+        *) short="$lsp_name" ;;
+      esac
+      active_lsps="${active_lsps:+$active_lsps,}$short"
+    fi
+  done
+  echo "$active_lsps" > "$LSP_CACHE_FILE"
+else
+  active_lsps=$(cat "$LSP_CACHE_FILE")
+fi
+
 # ANSI colors
 GREEN='\033[32m'
 YELLOW='\033[33m'
@@ -99,6 +135,12 @@ if [ -n "$lines_added" ] && [ -n "$lines_removed" ]; then
   lines_info="${DIM}lines${RESET} ${GREEN}+${lines_added}${RESET} ${RED}-${lines_removed}${RESET}"
 fi
 
+# LSP info
+lsp_info=""
+if [ -n "$active_lsps" ]; then
+  lsp_info="${DIM}lsp${RESET} ${GREEN}${active_lsps}${RESET}"
+fi
+
 # Compose status line
 output="${CYAN}${short_cwd}${RESET}"
 [ -n "$git_branch" ] && output="${output}${SEP}${git_branch}"
@@ -106,5 +148,6 @@ output="${output}${SEP}${model}"
 [ -n "$context_info" ] && output="${output}${SEP}${context_info}"
 [ -n "$token_info" ] && output="${output}${SEP}${token_info}"
 [ -n "$lines_info" ] && output="${output}${SEP}${lines_info}"
+[ -n "$lsp_info" ] && output="${output}${SEP}${lsp_info}"
 
 printf '%b' "$output"
