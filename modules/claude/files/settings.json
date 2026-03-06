@@ -34,6 +34,7 @@
     "defaultMode": "acceptEdits"
   },
   "spinnerTipsEnabled": false,
+  "theme": "light",
   "language": "korean",
   "teammateMode": "auto",
   "model": "opus",
