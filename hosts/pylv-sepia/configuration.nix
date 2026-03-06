@@ -159,7 +159,12 @@
           };
           port = gatewayPort;
           bind = "loopback";
+          trustedProxies = [
+            "127.0.0.1"
+            "::1"
+          ];
           tailscale.mode = "serve";
+          controlUi.dangerouslyDisableDeviceAuth = true;
         };
 
         agents.defaults = {
@@ -235,6 +240,7 @@
     cloudflared
     curl
     dnsutils
+    openclaw-gateway
     wget
     vim
     # Kubernetes tools
