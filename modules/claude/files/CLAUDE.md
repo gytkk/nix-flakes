@@ -143,9 +143,9 @@ Individual projects may override this policy (e.g., banning worktree entirely). 
 
 ## QMD (Local Knowledge Search)
 
-- QMD MCP 서버가 등록되어 있음. 마크다운 노트/문서 검색 시 QMD 도구를 우선 활용할 것.
-- 코드베이스 내 파일 검색에는 기존 Grep/Glob 사용, 개인 노트/문서/지식 검색에는 QMD 사용.
-- 인덱싱 대상 컬렉션: `development`, `workspace`, `worktrees`
+- QMD MCP server is registered. Prefer QMD tools when searching markdown notes and documents.
+- Use Grep/Glob for codebase file searches; use QMD for personal notes, documents, and knowledge searches.
+- Indexed collections: `development`, `workspace`, `worktrees` (markdown files only)
 
 ## Security
 
