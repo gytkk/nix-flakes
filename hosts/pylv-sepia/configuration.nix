@@ -8,6 +8,7 @@
     (modulesPath + "/installer/scan/not-detected.nix")
     (modulesPath + "/profiles/qemu-guest.nix")
     ./disk-config.nix
+    ./openclaw.nix
   ];
 
   boot.loader.grub = {
@@ -105,167 +106,6 @@
     group = "cloudflared";
   };
 
-  # Discord bot token for openclaw (readable by openclaw system user)
-  age.secrets.discord-bot-token = {
-    file = ../../secrets/discord-bot-token.age;
-    owner = "openclaw";
-    group = "openclaw";
-    mode = "0400";
-  };
-
-  # OpenClaw Gateway - NixOS system service
-  services.openclaw-gateway =
-    let
-      gatewayPort = 18789;
-    in
-    {
-      enable = true;
-      package = pkgs.openclaw-gateway;
-      port = gatewayPort;
-      stateDir = "/var/lib/openclaw";
-
-      # Convert raw agenix token to KEY=VALUE format (runs as root via + prefix)
-      # Fail-closed: service won't start if Discord token is missing
-      execStartPre = [
-        "+${pkgs.writeShellScript "openclaw-discord-env" ''
-          TOKEN_FILE="/run/agenix/discord-bot-token"
-          ENV_DIR="/run/openclaw"
-          ENV_FILE="$ENV_DIR/env"
-          ${pkgs.coreutils}/bin/mkdir -p "$ENV_DIR"
-          if [ -f "$TOKEN_FILE" ] && [ -s "$TOKEN_FILE" ]; then
-            echo "DISCORD_BOT_TOKEN=$(${pkgs.coreutils}/bin/cat "$TOKEN_FILE")" > "$ENV_FILE"
-          else
-            echo "ERROR: Discord bot token not found or empty at $TOKEN_FILE" >&2
-            exit 1
-          fi
-          ${pkgs.coreutils}/bin/chmod 600 "$ENV_FILE"
-          ${pkgs.coreutils}/bin/chown openclaw:openclaw "$ENV_FILE"
-        ''}"
-      ];
-      environmentFiles = [ "-/run/openclaw/env" ];
-
-      servicePath = with pkgs; [
-        bun
-        nodejs
-      ];
-
-      config = {
-        gateway = {
-          mode = "local";
-          auth = {
-            # Loopback-only token: not externally reachable (bind = "loopback" + Tailscale serve)
-            token = "local-gateway-token";
-            mode = "token";
-          };
-          port = gatewayPort;
-          bind = "loopback";
-          trustedProxies = [
-            "127.0.0.1"
-            "::1"
-          ];
-          tailscale.mode = "serve";
-          controlUi.dangerouslyDisableDeviceAuth = true;
-        };
-
-        agents = {
-          defaults = {
-            workspace = "/var/lib/openclaw/workspace";
-            maxConcurrent = 4;
-            subagents.maxConcurrent = 8;
-            model.primary = "openai/gpt-5.4";
-            thinkingDefault = "xhigh";
-          };
-          list = [
-            {
-              id = "main";
-              default = true;
-              name = "Main";
-              model.primary = "openai/gpt-5.4";
-            }
-            {
-              id = "gpt-pro";
-              name = "GPT Pro";
-              model.primary = "openai/gpt-5.4-pro";
-            }
-            {
-              id = "sonnet";
-              name = "Sonnet";
-              model.primary = "anthropic/claude-sonnet-4-6";
-            }
-            {
-              id = "opus";
-              name = "Opus";
-              model.primary = "anthropic/claude-opus-4-6";
-            }
-          ];
-        };
-
-        commands = {
-          native = "auto";
-          nativeSkills = "auto";
-        };
-
-        messages.ackReactionScope = "group-mentions";
-
-        plugins.entries.discord.enabled = true;
-
-        channels.discord = {
-          enabled = true;
-          groupPolicy = "allowlist";
-          dm = {
-            enabled = true;
-            policy = "pairing";
-          };
-          guilds."1467867949657227318" = {
-            requireMention = true;
-            channels."1467867998655217850" = {
-              allow = true;
-              requireMention = true;
-            };
-          };
-        };
-
-        hooks.internal = {
-          enabled = true;
-          entries = {
-            session-memory.enabled = true;
-            command-logger.enabled = true;
-            boot-md.enabled = true;
-          };
-        };
-
-        # Explicit model registration (for models not yet in the built-in catalog)
-        models.providers = {
-          openai = {
-            models = [
-              {
-                id = "gpt-5.4";
-                name = "GPT 5.4";
-                reasoning = true;
-                input = [
-                  "text"
-                  "image"
-                ];
-                contextWindow = 1048576;
-              }
-              {
-                id = "gpt-5.4-pro";
-                name = "GPT 5.4 Pro";
-                reasoning = true;
-                input = [
-                  "text"
-                  "image"
-                ];
-                contextWindow = 1048576;
-              }
-            ];
-          };
-        };
-
-        skills.install.nodeManager = "bun";
-      };
-    };
-
   systemd.services.cloudflared-tunnel = {
     description = "Cloudflare Tunnel";
     after = [ "network-online.target" ];
@@ -294,7 +134,6 @@
     cloudflared
     curl
     dnsutils
-    openclaw-gateway
     wget
     vim
     # Kubernetes tools
