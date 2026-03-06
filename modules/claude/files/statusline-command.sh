@@ -82,7 +82,14 @@ cache_is_stale() {
 
 if cache_is_stale; then
   if git -C "$cwd" rev-parse --is-inside-work-tree > /dev/null 2>&1; then
-    git_branch=$(git -C "$cwd" symbolic-ref --short HEAD 2>/dev/null || git -C "$cwd" rev-parse --short HEAD 2>/dev/null)
+    git_dir=$(git -C "$cwd" rev-parse --git-dir 2>/dev/null)
+    git_common_dir=$(git -C "$cwd" rev-parse --git-common-dir 2>/dev/null)
+    if [ "$git_dir" != "$git_common_dir" ]; then
+      wt_name=$(basename "$(git -C "$cwd" rev-parse --show-toplevel 2>/dev/null)")
+      git_branch="worktree(${wt_name})"
+    else
+      git_branch=$(git -C "$cwd" symbolic-ref --short HEAD 2>/dev/null || git -C "$cwd" rev-parse --short HEAD 2>/dev/null)
+    fi
   fi
   echo "$git_branch" > "$CACHE_FILE"
 else
