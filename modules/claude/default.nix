@@ -241,17 +241,18 @@ in
       fi
     fi
     if [ -x "$QMD" ]; then
-      # Remove legacy whole-home collection if it exists
-      if $QMD collection list 2>/dev/null | grep -q "^home "; then
-        log "Removing legacy QMD collection: home"
-        $QMD collection remove home >> "$SETUP_LOG" 2>&1
-      fi
+      # Remove legacy collections
+      for legacy in home dotconfig; do
+        if $QMD collection list 2>/dev/null | grep -q "^$legacy "; then
+          log "Removing legacy QMD collection: $legacy"
+          $QMD collection remove "$legacy" >> "$SETUP_LOG" 2>&1
+        fi
+      done
       # Register per-directory collections
       for pair in \
         "development:$HOME/development" \
         "workspace:$HOME/workspace" \
-        "worktrees:$HOME/worktrees" \
-        "dotconfig:$HOME/.config"; do
+        "worktrees:$HOME/worktrees"; do
         name="''${pair%%:*}"
         dir="''${pair#*:}"
         if [ -d "$dir" ] && ! $QMD collection list 2>/dev/null | grep -q "^$name "; then
