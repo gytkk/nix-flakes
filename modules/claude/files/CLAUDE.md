@@ -125,6 +125,7 @@ Individual projects may override this policy (e.g., banning worktree entirely). 
 - Always follow existing code patterns and module structure in your working directory.
 - Be concise. Commit small, frequent changes for readable diffs.
 - Proactively use web search if there is any uncertainty or lack of knowledge.
+- Always use `rg` (ripgrep) instead of `grep`. This applies to all contexts: shell commands, scripts, and Nix expressions.
 
 ## Writing Code
 
