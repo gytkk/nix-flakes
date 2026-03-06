@@ -77,6 +77,11 @@
     ];
   };
 
+  # /bin/bash shebang 호환성 (서드파티 스크립트용)
+  system.activationScripts.binbash = ''
+    ln -sfn ${pkgs.bash}/bin/bash /bin/bash
+  '';
+
   # K3s kubeconfig for non-root users
   environment.variables.KUBECONFIG = "/etc/rancher/k3s/k3s.yaml";
 
