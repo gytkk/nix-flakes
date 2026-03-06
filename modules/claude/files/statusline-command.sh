@@ -28,20 +28,28 @@ lsp_cache_is_stale() {
   fi
 }
 
+# Check if a process is a descendant of Claude Code ($PPID)
+is_claude_descendant() {
+  local current
+  current=$(ps -o ppid= -p "$1" 2>/dev/null | tr -d ' ')
+  while [ -n "$current" ] && [ "$current" != "0" ] && [ "$current" != "1" ]; do
+    [ "$current" = "$PPID" ] && return 0
+    current=$(ps -o ppid= -p "$current" 2>/dev/null | tr -d ' ')
+  done
+  return 1
+}
+
 if lsp_cache_is_stale; then
   active_lsps=""
-  for lsp_name in gopls rust-analyzer typescript-language-server nixd terraform-ls metals pyright ty-server; do
-    if pgrep -x "$lsp_name" > /dev/null 2>&1; then
-      # Use short display names
-      case "$lsp_name" in
-        typescript-language-server) short="ts" ;;
-        rust-analyzer) short="rust" ;;
-        terraform-ls) short="tf" ;;
-        ty-server) short="ty" ;;
-        *) short="$lsp_name" ;;
-      esac
-      active_lsps="${active_lsps:+$active_lsps,}$short"
-    fi
+  for lsp_entry in "gopls:gopls" "rust-analyzer:rust" "typescript-language-server:ts" "nixd:nixd" "terraform-ls:tf" "metals:metals" "pyright:pyright" "ty-server:ty"; do
+    lsp_proc="${lsp_entry%%:*}"
+    lsp_short="${lsp_entry#*:}"
+    for pid in $(pgrep -f "$lsp_proc" 2>/dev/null); do
+      if is_claude_descendant "$pid"; then
+        active_lsps="${active_lsps:+$active_lsps,}$lsp_short"
+        break
+      fi
+    done
   done
   echo "$active_lsps" > "$LSP_CACHE_FILE"
 else
