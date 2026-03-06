@@ -28,28 +28,39 @@ lsp_cache_is_stale() {
   fi
 }
 
-# Check if a process is a descendant of Claude Code ($PPID)
-is_claude_descendant() {
-  local current
-  current=$(ps -o ppid= -p "$1" 2>/dev/null | tr -d ' ')
-  while [ -n "$current" ] && [ "$current" != "0" ] && [ "$current" != "1" ]; do
-    [ "$current" = "$PPID" ] && return 0
-    current=$(ps -o ppid= -p "$current" 2>/dev/null | tr -d ' ')
-  done
-  return 1
-}
-
+# Collect command lines of Claude Code's descendant processes only
+# (avoids false positives from LSP servers spawned by other editors)
 if lsp_cache_is_stale; then
   active_lsps=""
+  claude_child_cmds=$(ps -e -o pid=,ppid=,args= | awk -v root="$PPID" '
+    {
+      pid = $1 + 0; ppid = $2 + 0
+      args = ""
+      for (i = 3; i <= NF; i++) args = args (i > 3 ? " " : "") $i
+      parent[pid] = ppid
+      cmd[pid] = args
+    }
+    END {
+      pids[root] = 1
+      do {
+        changed = 0
+        for (p in parent) {
+          if ((parent[p] in pids) && !(p in pids)) {
+            pids[p] = 1
+            changed = 1
+          }
+        }
+      } while (changed)
+      for (p in pids) if (p + 0 != root + 0) print cmd[p]
+    }
+  ')
+
   for lsp_entry in "gopls:gopls" "rust-analyzer:rust" "typescript-language-server:ts" "nixd:nixd" "terraform-ls:tf" "metals:metals" "pyright:pyright" "ty-server:ty"; do
     lsp_proc="${lsp_entry%%:*}"
     lsp_short="${lsp_entry#*:}"
-    for pid in $(pgrep -f "$lsp_proc" 2>/dev/null); do
-      if is_claude_descendant "$pid"; then
-        active_lsps="${active_lsps:+$active_lsps,}$lsp_short"
-        break
-      fi
-    done
+    if echo "$claude_child_cmds" | grep -qF "$lsp_proc"; then
+      active_lsps="${active_lsps:+$active_lsps,}$lsp_short"
+    fi
   done
   echo "$active_lsps" > "$LSP_CACHE_FILE"
 else
