@@ -31,6 +31,10 @@
 - Present the plan to the user and request approval before implementing.
 - If the user provides feedback, revise the plan accordingly.
 
+## Critical Rules
+
+- Always use `rg` (ripgrep) instead of `grep`. This applies to all contexts: shell commands, scripts, and Nix expressions.
+
 ## Sandbox Awareness (Codex)
 
 - Codex runs with `sandbox_mode = "danger-full-access"`.
