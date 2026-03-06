@@ -1,22 +1,31 @@
-{ pkgs, ... }:
+{
+  pkgs,
+  username,
+  homeDirectory,
+  ...
+}:
 let
   gatewayPort = 18789;
+  stateDir = "${homeDirectory}/.openclaw";
 in
 {
-  # Discord bot token for openclaw (readable by openclaw system user)
+  # Discord bot token for openclaw
   age.secrets.discord-bot-token = {
     file = ../../secrets/discord-bot-token.age;
-    owner = "openclaw";
-    group = "openclaw";
+    owner = username;
+    group = "users";
     mode = "0400";
   };
 
-  # OpenClaw Gateway - NixOS system service
+  # OpenClaw Gateway - NixOS system service (runs as the primary user)
   services.openclaw-gateway = {
     enable = true;
     package = pkgs.openclaw-gateway;
     port = gatewayPort;
-    stateDir = "/var/lib/openclaw";
+    user = username;
+    group = "users";
+    createUser = false;
+    stateDir = stateDir;
 
     # Convert raw agenix token to KEY=VALUE format (runs as root via + prefix)
     # Fail-closed: service won't start if Discord token is missing
@@ -33,7 +42,7 @@ in
           exit 1
         fi
         ${pkgs.coreutils}/bin/chmod 600 "$ENV_FILE"
-        ${pkgs.coreutils}/bin/chown openclaw:openclaw "$ENV_FILE"
+        ${pkgs.coreutils}/bin/chown ${username}:users "$ENV_FILE"
       ''}"
     ];
     environmentFiles = [ "-/run/openclaw/env" ];
@@ -63,7 +72,7 @@ in
 
       agents = {
         defaults = {
-          workspace = "/var/lib/openclaw/workspace";
+          workspace = "${stateDir}/workspace";
           maxConcurrent = 4;
           subagents.maxConcurrent = 8;
           model.primary = "openai-codex/gpt-5.4";
