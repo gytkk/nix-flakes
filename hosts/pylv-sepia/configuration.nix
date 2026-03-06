@@ -167,11 +167,37 @@
           controlUi.dangerouslyDisableDeviceAuth = true;
         };
 
-        agents.defaults = {
-          workspace = "/var/lib/openclaw/workspace";
-          maxConcurrent = 4;
-          subagents.maxConcurrent = 8;
-          model.primary = "anthropic/claude-sonnet-4-5";
+        agents = {
+          defaults = {
+            workspace = "/var/lib/openclaw/workspace";
+            maxConcurrent = 4;
+            subagents.maxConcurrent = 8;
+            model.primary = "openai/gpt-5.4";
+            thinkingDefault = "xhigh";
+          };
+          list = [
+            {
+              id = "main";
+              default = true;
+              name = "Main";
+              model.primary = "openai/gpt-5.4";
+            }
+            {
+              id = "gpt-pro";
+              name = "GPT Pro";
+              model.primary = "openai/gpt-5.4-pro";
+            }
+            {
+              id = "sonnet";
+              name = "Sonnet";
+              model.primary = "anthropic/claude-sonnet-4-6";
+            }
+            {
+              id = "opus";
+              name = "Opus";
+              model.primary = "anthropic/claude-opus-4-6";
+            }
+          ];
         };
 
         commands = {
@@ -205,6 +231,34 @@
             session-memory.enabled = true;
             command-logger.enabled = true;
             boot-md.enabled = true;
+          };
+        };
+
+        # Explicit model registration (for models not yet in the built-in catalog)
+        models.providers = {
+          openai = {
+            models = [
+              {
+                id = "gpt-5.4";
+                name = "GPT 5.4";
+                reasoning = true;
+                input = [
+                  "text"
+                  "image"
+                ];
+                contextWindow = 1048576;
+              }
+              {
+                id = "gpt-5.4-pro";
+                name = "GPT 5.4 Pro";
+                reasoning = true;
+                input = [
+                  "text"
+                  "image"
+                ];
+                contextWindow = 1048576;
+              }
+            ];
           };
         };
 
