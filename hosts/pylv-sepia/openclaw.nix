@@ -67,7 +67,10 @@ in
           "::1"
         ];
         tailscale.mode = "serve";
-        controlUi.dangerouslyDisableDeviceAuth = true;
+        controlUi = {
+          dangerouslyDisableDeviceAuth = true;
+          allowedOrigins = [ "https://pylv-sepia.tailbbb9bf.ts.net:8443" ];
+        };
       };
 
       agents = {
