@@ -78,6 +78,7 @@
     # Environment variables
     sessionVariables = {
       SHELL = "${pkgs.zsh}/bin/zsh";
+      COLORTERM = "truecolor";
     };
 
     # Zsh initialization
@@ -162,6 +163,12 @@
   # Starship configuration from TOML file
   # Style: Jetpack (minimalist) + Catppuccin Latte colors
   xdg.configFile."starship.toml".source = ./starship.toml;
+
+  # dircolors for LS_COLORS
+  programs.dircolors = {
+    enable = true;
+    enableZshIntegration = true;
+  };
 
   # zoxide (replacement for z)
   programs.zoxide = {
