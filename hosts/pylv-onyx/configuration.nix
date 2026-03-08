@@ -1,0 +1,97 @@
+{
+  pkgs,
+  ...
+}@args:
+{
+  imports = [ ./hardware-configuration.nix ];
+
+  boot.loader = {
+    systemd-boot.enable = true;
+    efi.canTouchEfiVariables = true;
+  };
+
+  networking.networkmanager.enable = true;
+
+  services.desktopManager.plasma6.enable = true;
+  services.displayManager.sddm = {
+    enable = true;
+    wayland.enable = true;
+  };
+
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+  };
+  security.rtkit.enable = true;
+
+  services.openssh = {
+    enable = true;
+    # Ghostty ssh-env가 전달하는 터미널 환경 변수 수락 (Claude Code TUI 렌더링에 필요)
+    extraConfig = ''
+      AcceptEnv COLORTERM TERM_PROGRAM TERM_PROGRAM_VERSION
+    '';
+  };
+  services.tailscale.enable = true;
+
+  # /bin/bash shebang 호환성 (서드파티 스크립트용)
+  system.activationScripts.binbash = ''
+    ln -sfn ${pkgs.bash}/bin/bash /bin/bash
+  '';
+
+  # Minimal system packages (most packages managed by Home Manager)
+  environment.systemPackages = with pkgs; [
+    cloudflared
+    curl
+    dnsutils
+    wget
+    vim
+    # Kubernetes tools
+    kubectl
+    k9s
+    # Ghostty terminfo (SSH 접속 시 xterm-ghostty TERM 인식용)
+    ghostty.terminfo
+  ];
+
+  # Enable zsh system-wide (configuration via Home Manager)
+  programs.zsh.enable = true;
+
+  # Enable nix-ld for running dynamically linked binaries (e.g., bun plugins)
+  programs.nix-ld.enable = true;
+
+  # Enable flakes
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
+
+  # Security
+  security.sudo = {
+    enable = true;
+    wheelNeedsPassword = false;
+  };
+
+  # Users
+  users.users.root.openssh.authorizedKeys.keys = [
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJhE4Uakcz7usa0aetMqb99LYybOQ0I+sWKOiAidmBio gytk.kim@gmail.com"
+  ]
+  ++ (args.extraPublicKeys or [ ]);
+
+  users.users.gytkk = {
+    isNormalUser = true;
+    extraGroups = [ "wheel" ];
+    shell = pkgs.zsh;
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJhE4Uakcz7usa0aetMqb99LYybOQ0I+sWKOiAidmBio gytk.kim@gmail.com"
+    ];
+  };
+
+  # Locale - SSH 접속 시 클라이언트에서 전달되는 ko_KR.UTF-8 지원
+  i18n.supportedLocales = [
+    "en_US.UTF-8/UTF-8"
+    "ko_KR.UTF-8/UTF-8"
+  ];
+
+  system.stateVersion = "25.11";
+}

@@ -42,4 +42,15 @@
 
     extraModules = [ ./base/pylv/sepia.nix ];
   };
+
+  "pylv-onyx" = {
+    baseProfile = "pylv";
+
+    system = "x86_64-linux";
+
+    username = "gytkk";
+    homeDirectory = "/home/gytkk";
+
+    isWSL = false;
+  };
 }
