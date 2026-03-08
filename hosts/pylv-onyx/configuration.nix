@@ -40,16 +40,15 @@
     ln -sfn ${pkgs.bash}/bin/bash /bin/bash
   '';
 
+  # Hostname
+  networking.hostName = "pylv-onyx";
+
   # Minimal system packages (most packages managed by Home Manager)
   environment.systemPackages = with pkgs; [
-    cloudflared
     curl
     dnsutils
     wget
     vim
-    # Kubernetes tools
-    kubectl
-    k9s
     # Ghostty terminfo (SSH 접속 시 xterm-ghostty TERM 인식용)
     ghostty.terminfo
   ];
