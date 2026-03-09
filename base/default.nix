@@ -73,6 +73,7 @@
       less
       wget
       curl
+      zellij
 
       # Git
       git
