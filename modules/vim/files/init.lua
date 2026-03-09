@@ -68,15 +68,21 @@ require("lazy").setup({
       "folke/which-key.nvim",
       event = "VeryLazy",
       opts = {
-        preset = "modern",
+        preset = "helix",
       },
     },
     {
-      "sonph/onehalf",
+      "ClearAspect/onehalf",
       priority = 1000,
-      config = function(plugin)
-        vim.opt.rtp:append(plugin.dir .. "/vim")
-        vim.o.background = "light"
+      opts = {
+        terminal_colors = true,
+        integrations = {
+          whichkey = true,
+          indent_blankline = true,
+        },
+      },
+      config = function(_, opts)
+        require("onehalf").setup(opts)
         vim.cmd.colorscheme("onehalflight")
       end,
     },
