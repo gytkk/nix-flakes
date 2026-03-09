@@ -192,23 +192,58 @@ in
   # Binary installs to ${XDG_DATA_HOME}/bin/plannotator via install.sh
   home.activation.installPlannotator = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     PLANNOTATOR_BIN="${config.xdg.dataHome}/bin/plannotator"
+    PLANNOTATOR_VERSION_FILE="${config.xdg.dataHome}/bin/.plannotator-version"
     SETUP_LOG="$HOME/.claude/nix-setup.log"
+    export PATH="${
+      lib.makeBinPath (
+        with pkgs;
+        [
+          curl
+          coreutils
+          gnugrep
+          gawk
+          perl
+        ]
+      )
+    }:$PATH"
+
+    NEEDS_INSTALL=0
     if [ ! -x "$PLANNOTATOR_BIN" ]; then
-      export PATH="${
-        lib.makeBinPath (
-          with pkgs;
-          [
-            curl
-            coreutils
-            gnugrep
-            gawk
-            perl
-          ]
-        )
-      }:$PATH"
+      NEEDS_INSTALL=1
+    else
+      # Check latest version from GitHub
+      LATEST_TAG=$(${pkgs.curl}/bin/curl -fsSL "https://api.github.com/repos/backnotprop/plannotator/releases/latest" 2>/dev/null | ${pkgs.gnugrep}/bin/grep '"tag_name"' | ${pkgs.coreutils}/bin/cut -d'"' -f4)
+      LOCAL_VERSION=""
+      if [ -f "$PLANNOTATOR_VERSION_FILE" ]; then
+        LOCAL_VERSION=$(${pkgs.coreutils}/bin/cat "$PLANNOTATOR_VERSION_FILE")
+      fi
+      if [ -n "$LATEST_TAG" ] && [ "$LATEST_TAG" != "$LOCAL_VERSION" ]; then
+        NEEDS_INSTALL=1
+        echo "[$(date '+%H:%M:%S')] plannotator update available: $LOCAL_VERSION -> $LATEST_TAG" >> "$SETUP_LOG"
+      fi
+    fi
+
+    if [ "$NEEDS_INSTALL" = "1" ]; then
       echo "[$(date '+%H:%M:%S')] Installing plannotator CLI..." >> "$SETUP_LOG"
+      # install.sh installs to $HOME/.local/bin; copy to XDG_DATA_HOME/bin afterwards
       if ${pkgs.curl}/bin/curl -fsSL https://plannotator.ai/install.sh | ${pkgs.bash}/bin/bash >> "$SETUP_LOG" 2>&1; then
-        echo "[$(date '+%H:%M:%S')] plannotator installed to $PLANNOTATOR_BIN" >> "$SETUP_LOG"
+        # Copy to XDG data bin if install.sh installed to a different location
+        INSTALL_SH_BIN="$HOME/.local/bin/plannotator"
+        if [ -x "$INSTALL_SH_BIN" ] && [ "$INSTALL_SH_BIN" != "$PLANNOTATOR_BIN" ]; then
+          ${pkgs.coreutils}/bin/mkdir -p "$(${pkgs.coreutils}/bin/dirname "$PLANNOTATOR_BIN")"
+          ${pkgs.coreutils}/bin/cp -f "$INSTALL_SH_BIN" "$PLANNOTATOR_BIN"
+        fi
+        # Record installed version
+        if [ -n "$LATEST_TAG" ]; then
+          echo "$LATEST_TAG" > "$PLANNOTATOR_VERSION_FILE"
+          echo "[$(date '+%H:%M:%S')] plannotator installed ($LATEST_TAG) to $PLANNOTATOR_BIN" >> "$SETUP_LOG"
+        else
+          INSTALLED_TAG=$(${pkgs.curl}/bin/curl -fsSL "https://api.github.com/repos/backnotprop/plannotator/releases/latest" 2>/dev/null | ${pkgs.gnugrep}/bin/grep '"tag_name"' | ${pkgs.coreutils}/bin/cut -d'"' -f4)
+          if [ -n "$INSTALLED_TAG" ]; then
+            echo "$INSTALLED_TAG" > "$PLANNOTATOR_VERSION_FILE"
+          fi
+          echo "[$(date '+%H:%M:%S')] plannotator installed ($INSTALLED_TAG) to $PLANNOTATOR_BIN" >> "$SETUP_LOG"
+        fi
       else
         echo "[$(date '+%H:%M:%S')] plannotator installation FAILED (exit $?)" >> "$SETUP_LOG"
       fi
