@@ -2,6 +2,7 @@
   config,
   pkgs,
   lib,
+  flakeDirectory,
   ...
 }:
 
@@ -20,7 +21,9 @@ in
   config = lib.mkIf cfg.enable {
     home.packages = [ pkgs.codex ];
 
-    home.file.".codex/config.toml".source = ./files/config.toml;
-    home.file.".codex/AGENTS.md".source = ./files/AGENTS.md;
+    home.file.".codex/config.toml".source =
+      config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/codex/files/config.toml";
+    home.file.".codex/AGENTS.md".source =
+      config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/codex/files/AGENTS.md";
   };
 }

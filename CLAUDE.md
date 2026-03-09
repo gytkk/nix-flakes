@@ -168,6 +168,7 @@ programs.git.settings.user.email = lib.mkForce "x@example.com";    # Force overr
     username = "user";             # Required: user account
     homeDirectory = "/home/user";  # Required: home path
     isWSL = true;                  # Optional: WSL detection
+    # flakeDirectory is auto-derived: ${homeDirectory}/development/nix-flakes
     extraModules = [ ./extra.nix ]; # Optional: additional modules
   };
 }
@@ -250,19 +251,23 @@ modules/<name>/
 
 #### Quick Module Reference
 
-| Module       | Purpose                  | Config Location                              | Key Files                                               |
-| ------------ | ------------------------ | -------------------------------------------- | ------------------------------------------------------- |
-| `claude/`    | Claude Code AI assistant | `~/.claude/`                                 | `files/settings.json`, `files/CLAUDE.md`                |
-| `codex/`     | OpenAI Codex CLI         | `~/.codex/`                                  | `files/config.toml`, `files/AGENTS.md`                  |
-| `ghostty/`   | Ghostty terminal         | `~/.config/ghostty/`                         | `default.nix` (inline config)                           |
-| `git/`       | Git configuration        | `~/.gitconfig`                               | `default.nix`                                           |
-| `k9s/`       | Kubernetes manager       | `~/.config/k9s/`                             | `default.nix`                                           |
-| `opencode/`  | OpenCode AI agent        | `~/.config/opencode/`                        | `files/opencode.json`, `files/AGENTS.md`                |
-| `terraform/` | Terraform versions       | direnv lazy-load                             | `default.nix`                                           |
-| `vim/`       | Neovim                   | `~/.config/nvim/`                            | `default.nix`                                           |
-| `vscode/`    | VSCode editor (DISABLED) | `~/.config/Code/`                            | `default.nix`, `themes/`                                |
-| `zed/`       | Zed editor               | `~/Library/Application Support/Zed/` (macOS) | `default.nix`, `themes/`                                |
-| `zsh/`       | Zsh shell                | `~/.zshrc`                                   | `default.nix`, `starship.toml`                          |
+| Module       | Purpose                  | Config Location                              | Key Files                                | Mutable |
+| ------------ | ------------------------ | -------------------------------------------- | ---------------------------------------- | ------- |
+| `claude/`    | Claude Code AI assistant | `~/.claude/`                                 | `files/settings.json`, `files/CLAUDE.md` | 부분적  |
+| `codex/`     | OpenAI Codex CLI         | `~/.codex/`                                  | `files/config.toml`, `files/AGENTS.md`   | YES     |
+| `ghostty/`   | Ghostty terminal         | `~/.config/ghostty/`                         | `files/config`                           | YES     |
+| `git/`       | Git configuration        | `~/.gitconfig`                               | `default.nix`                            | NO      |
+| `helix/`     | Helix editor             | `~/.config/helix/`                           | `files/config.toml`                      | YES     |
+| `k9s/`       | Kubernetes manager       | `~/.config/k9s/`                             | `default.nix`                            | NO      |
+| `opencode/`  | OpenCode AI agent        | `~/.config/opencode/`                        | `files/opencode.json`, `files/AGENTS.md` | YES     |
+| `terraform/` | Terraform versions       | direnv lazy-load                             | `default.nix`                            | NO      |
+| `vim/`       | Neovim                   | `~/.config/nvim/`                            | `default.nix`                            | NO      |
+| `vscode/`    | VSCode editor (DISABLED) | `~/.config/Code/`                            | `default.nix`, `themes/`                 | NO      |
+| `zed/`       | Zed editor               | `~/Library/Application Support/Zed/` (macOS) | `files/settings.json`, `themes/`         | YES     |
+| `zsh/`       | Zsh shell                | `~/.zshrc`                                   | `default.nix`, `starship.toml`           | NO      |
+
+> **Mutable**: `mkOutOfStoreSymlink`을 사용해 설정 파일이 repo로 직접 symlink됨.
+> 앱 UI에서 자유롭게 수정 가능하며, 변경이 즉시 repo에 반영됨. `nfc` alias로 빠르게 커밋.
 
 #### How to Find and Modify Settings
 
@@ -314,33 +319,34 @@ nix flake check --no-build  # Validate syntax
 
 #### Zed Module (`modules/zed/`)
 
-| File                         | Purpose                                                 |
-| ---------------------------- | ------------------------------------------------------- |
-| `default.nix`                | All settings defined inline in `userSettings` attribute |
-| `themes/one-half-light.json` | Custom theme definition                                 |
+| File                         | Purpose                                                   |
+| ---------------------------- | --------------------------------------------------------- |
+| `default.nix`                | Extensions, platform paths, symlink setup                 |
+| `files/settings.json`        | Editor settings (mutable, symlinked to Zed config path)   |
+| `files/keymap.json`          | Keybindings (mutable, symlinked to Zed config path)       |
+| `themes/one-half-light.json` | Custom theme definition (mutable, symlinked to Zed theme) |
 
 **Common modification scenarios**:
 
-- Change editor settings → Edit `default.nix` → `userSettings` attribute set
-- Modify vim settings → Edit `default.nix` → `userSettings.vim`
-- Change theme → Edit `default.nix` → `userSettings.theme` or `themes/one-half-light.json`
-- Add language config → Edit `default.nix` → `userSettings.languages`
-- Add LSP config → Edit `default.nix` → `userSettings.lsp`
+- Change editor settings → Edit `files/settings.json` directly (or from Zed UI)
+- Change theme → Edit `themes/one-half-light.json` directly
+- Add keybinding → Edit `files/keymap.json` directly (or from Zed UI)
 - Add extensions → Edit `default.nix` → `nixExtensions` list (uses `pkgs.zed-extensions`)
 
-**Note**: Zed settings are defined as Nix attribute sets in `default.nix`, not separate JSON files. The module converts them to JSON automatically.
+**Note**: Settings, keymaps, themes are JSON files symlinked to the repo via `mkOutOfStoreSymlink`. Editable from Zed UI, changes are immediately reflected in the repo.
 
 #### Ghostty Module (`modules/ghostty/`)
 
-| File          | Purpose                              |
-| ------------- | ------------------------------------ |
-| `default.nix` | All terminal settings defined inline |
+| File           | Purpose                                                      |
+| -------------- | ------------------------------------------------------------ |
+| `default.nix`  | Theme symlinks, config symlink setup                         |
+| `files/config` | Terminal settings (mutable, symlinked to Ghostty config dir) |
 
 **Common modification scenarios**:
 
-- Change font → Edit `default.nix` → `programs.ghostty.settings.font-family`
-- Change theme/colors → Edit `default.nix` → `programs.ghostty.settings`
-- Add keybindings → Edit `default.nix` → `programs.ghostty.settings`
+- Change font → Edit `files/config` → `font-family`
+- Change theme/colors → Edit `files/config`
+- Add keybindings → Edit `files/config`
 
 #### Zsh Module (`modules/zsh/`)
 

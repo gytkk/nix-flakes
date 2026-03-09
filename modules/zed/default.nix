@@ -3,6 +3,7 @@
   lib,
   pkgs,
   username,
+  flakeDirectory,
   isWSL ? false,
   ...
 }:
@@ -10,8 +11,7 @@
 let
   cfg = config.modules.zed;
 
-  # 커스텀 One Half Light 테마
-  oneHalfLightTheme = lib.importJSON ./themes/one-half-light.json;
+  mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/zed/${path}";
 
   # Nix로 관리할 확장 목록 (pkgs.zed-extensions에서 가져옴)
   nixExtensions = with pkgs.zed-extensions; [
@@ -45,152 +45,21 @@ let
     '') nixExtensions}
   '';
 
-  # 공통 설정
-  userSettings = {
+  # Zed config/data 경로 (플랫폼별)
+  zedConfigPath = if pkgs.stdenv.isDarwin then "Library/Application Support/Zed" else ".config/zed";
 
-    # ── Telemetry ──
-    telemetry = {
-      diagnostics = false;
-      metrics = false;
-    };
+  zedDataPath =
+    if pkgs.stdenv.isDarwin then "Library/Application Support/Zed" else ".local/share/zed";
 
-    # ── UI ──
-    ui_font_family = "JetBrainsMono Nerd Font";
-    ui_font_size = 14;
-    buffer_font_family = "JetBrainsMono Nerd Font";
-    buffer_font_size = 14;
-    theme = {
-      mode = "system";
-      light = "One Half Light Custom";
-      dark = "One Dark";
-    };
-
-    # ── Editor ──
-    tab_size = 2;
-    format_on_save = "on";
-    remove_trailing_whitespace_on_save = true;
-    ensure_final_newline_on_save = true;
-    show_whitespaces = "boundary";
-    vim_mode = true;
-    vim = {
-      use_system_clipboard = "always";
-      use_smartcase_find = true;
-    };
-    base_keymap = "VSCode";
-
-    # ── Terminal ──
-    terminal = {
-      shell = {
-        program = "zsh";
-      };
-      font_family = "JetBrainsMono Nerd Font";
-      font_size = 14;
-    };
-
-    # ── Languages ──
-    file_types = {
-      "JSON" = [
-        "flake.lock"
-      ];
-    };
-    languages = {
-      Nix = {
-        tab_size = 2;
-        formatter = {
-          external = {
-            command = "nixfmt";
-          };
-        };
-        language_servers = [
-          "nixd"
-        ];
-      };
-      Python = {
-        tab_size = 4;
-        format_on_save = "on";
-        language_servers = [
-          "ty"
-        ];
-      };
-      Scala = {
-        formatter = "language_server";
-        format_on_save = "on";
-      };
-      Terraform = {
-        formatter = "language_server";
-        format_on_save = "on";
-      };
-      HCL = {
-        formatter = "language_server";
-        format_on_save = "on";
-      };
-      "Terraform Vars" = {
-        formatter = "language_server";
-        format_on_save = "on";
-      };
-      Markdown = {
-        soft_wrap = "editor_width";
-      };
-    };
-
-    # ── LSP ──
-    lsp = {
-      nixd = {
-        settings = {
-          nixpkgs = {
-            expr = "import <nixpkgs> {}";
-          };
-        };
-      };
-      metals = {
-        binary = {
-          path = "${pkgs.metals}/bin/metals";
-        };
-        initialization_options = {
-          isHttpEnabled = true;
-        };
-      };
-    };
-
-    # ── Files ──
-    file_scan_exclusions = [
-      "**/.git"
-      "**/.svn"
-      "**/.hg"
-      "**/CVS"
-      "**/.DS_Store"
-      "**/Thumbs.db"
-      "**/.direnv"
-      "**/node_modules"
-      "**/__pycache__"
-      "**/.pytest_cache"
-      "**/dist"
-      "**/.idea"
-    ];
-
-    # ── Git ──
-    git = {
-      inline_blame = {
-        enabled = true;
-      };
-    };
-
-    # ── Misc ──
-    inlay_hints = {
-      enabled = true;
-    };
-    show_completions_on_input = true;
-    show_completion_documentation = true;
-    auto_update = false;
-  };
-
-  # JSON 파일 생성
-  settingsFile = pkgs.writeText "zed-settings.json" (builtins.toJSON userSettings);
-  themeFile = pkgs.writeText "one-half-light-custom.json" (builtins.toJSON oneHalfLightTheme);
-
-  # Windows Zed 경로 (WSL에서 접근)
+  # WSL: Windows Zed 경로
   windowsZedConfigPath = "/mnt/c/Users/${username}/AppData/Roaming/Zed";
   windowsZedDataPath = "/mnt/c/Users/${username}/AppData/Local/Zed";
+
+  # JSON 파일 생성 (WSL activation script용)
+  settingsFile = pkgs.writeText "zed-settings.json" (builtins.readFile ./files/settings.json);
+  themeFile = pkgs.writeText "one-half-light-custom.json" (
+    builtins.toJSON (lib.importJSON ./themes/one-half-light.json)
+  );
 
   # WSL: Windows Zed에 설정, 테마, 확장 배포 스크립트
   wslActivationScript = ''
@@ -233,48 +102,29 @@ in
 
   config = lib.mkIf cfg.enable (
     lib.mkMerge [
-      # macOS/Linux (non-WSL): 전체 Zed 설정
+      # LSP 바이너리 (settings.json에서 참조)
+      { home.packages = [ pkgs.metals ]; }
+
+      # macOS/Linux (non-WSL): 설정 파일을 repo에 직접 symlink
       (lib.mkIf (!isWSL) {
-        programs.zed-editor = {
-          enable = true;
-          package = null;
+        # settings.json, keymap.json → repo 파일로 직접 symlink (mutable)
+        home.file."${zedConfigPath}/settings.json".source = mkSymlink "files/settings.json";
+        home.file."${zedConfigPath}/keymap.json".source = mkSymlink "files/keymap.json";
 
-          inherit userSettings;
+        # 커스텀 테마 → repo 파일로 직접 symlink (mutable)
+        home.file."${zedConfigPath}/themes/one-half-light-custom.json".source =
+          mkSymlink "themes/one-half-light.json";
 
-          userKeymaps = [
-            {
-              context = "ProjectPanel";
-              bindings = {
-                "cmd-w" = null;
-              };
-            }
-          ];
-
-          mutableUserSettings = true;
-          mutableUserKeymaps = true;
-
-          themes = {
-            "one-half-light-custom" = oneHalfLightTheme;
-          };
+        # Nix로 확장 관리 (읽기 전용 — Nix 패키지 기반)
+        home.file."${zedDataPath}/extensions/installed" = {
+          recursive = true;
+          force = true;
+          source = extensionsDir;
         };
-
-        # Nix로 확장 관리 (macOS/Linux 경로 자동 분기)
-        home.file."${
-          if pkgs.stdenv.isDarwin then
-            "Library/Application Support/Zed/extensions/installed"
-          else
-            ".local/share/zed/extensions/installed"
-        }" =
-          {
-            recursive = true;
-            force = true;
-            source = extensionsDir;
-          };
       })
 
       # WSL: Windows Zed에 설정, 테마, 확장 배포
       (lib.mkIf isWSL {
-        programs.zed-editor.enable = false;
         home.activation.zedWindowsConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] wslActivationScript;
       })
     ]

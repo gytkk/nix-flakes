@@ -1,0 +1,9 @@
+theme = "zed_onelight"
+
+[editor]
+true-color = true
+color-modes = true
+
+[editor.lsp]
+display-messages = true
+display-inlay-hints = true

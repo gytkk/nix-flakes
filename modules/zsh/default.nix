@@ -67,9 +67,6 @@
       kl = "kubectl";
       kx = "kubectx";
       kn = "kubens";
-
-      # antigravity
-      agy = "antigravity";
     }
     // lib.optionalAttrs (!pkgs.stdenv.isDarwin) {
       zed = if isWSL then "zed.exe" else "zeditor";

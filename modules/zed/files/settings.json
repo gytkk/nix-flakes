@@ -1,0 +1,113 @@
+{
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false
+  },
+  "ui_font_family": "JetBrainsMono Nerd Font",
+  "ui_font_size": 14,
+  "buffer_font_family": "JetBrainsMono Nerd Font",
+  "buffer_font_size": 14,
+  "theme": {
+    "mode": "system",
+    "light": "One Half Light Custom",
+    "dark": "One Dark"
+  },
+  "tab_size": 2,
+  "format_on_save": "on",
+  "remove_trailing_whitespace_on_save": true,
+  "ensure_final_newline_on_save": true,
+  "show_whitespaces": "boundary",
+  "vim_mode": true,
+  "vim": {
+    "use_system_clipboard": "always",
+    "use_smartcase_find": true
+  },
+  "base_keymap": "VSCode",
+  "terminal": {
+    "shell": {
+      "program": "zsh"
+    },
+    "font_family": "JetBrainsMono Nerd Font",
+    "font_size": 14
+  },
+  "file_types": {
+    "JSON": ["flake.lock"]
+  },
+  "languages": {
+    "Nix": {
+      "tab_size": 2,
+      "formatter": {
+        "external": {
+          "command": "nixfmt"
+        }
+      },
+      "language_servers": ["nixd"]
+    },
+    "Python": {
+      "tab_size": 4,
+      "format_on_save": "on",
+      "language_servers": ["ty"]
+    },
+    "Scala": {
+      "formatter": "language_server",
+      "format_on_save": "on"
+    },
+    "Terraform": {
+      "formatter": "language_server",
+      "format_on_save": "on"
+    },
+    "HCL": {
+      "formatter": "language_server",
+      "format_on_save": "on"
+    },
+    "Terraform Vars": {
+      "formatter": "language_server",
+      "format_on_save": "on"
+    },
+    "Markdown": {
+      "soft_wrap": "editor_width"
+    }
+  },
+  "lsp": {
+    "nixd": {
+      "settings": {
+        "nixpkgs": {
+          "expr": "import <nixpkgs> {}"
+        }
+      }
+    },
+    "metals": {
+      "binary": {
+        "path": "metals"
+      },
+      "initialization_options": {
+        "isHttpEnabled": true
+      }
+    }
+  },
+  "file_scan_exclusions": [
+    "**/.git",
+    "**/.svn",
+    "**/.hg",
+    "**/CVS",
+    "**/.DS_Store",
+    "**/Thumbs.db",
+    "**/.direnv",
+    "**/node_modules",
+    "**/__pycache__",
+    "**/.pytest_cache",
+    "**/dist",
+    "**/.idea"
+  ],
+  "git": {
+    "inline_blame": {
+      "enabled": true
+    }
+  },
+  "inlay_hints": {
+    "enabled": true
+  },
+  "show_completions_on_input": true,
+  "show_completion_documentation": true,
+  "auto_update": false
+}

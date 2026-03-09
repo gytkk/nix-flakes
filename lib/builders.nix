@@ -23,6 +23,9 @@ let
       overlays = commonOverlays;
     };
   };
+
+  # flakeDirectory는 homeDirectory에서 자동 파생
+  mkFlakeDirectory = homeDirectory: "${homeDirectory}/development/nix-flakes";
 in
 rec {
   # 패키지 생성 헬퍼 함수 - systemPkgs 재사용
@@ -52,6 +55,8 @@ rec {
       missingFields = builtins.filter (field: !(builtins.hasAttr field config)) requiredFields;
       pkgs = systemPkgs.${config.system};
 
+      flakeDirectory = config.flakeDirectory or (mkFlakeDirectory config.homeDirectory);
+
       # Dynamic base module loading based on baseProfile
       baseHomeModule = ../base + "/${config.baseProfile}/home.nix";
       dynamicModules =
@@ -67,7 +72,7 @@ rec {
         inherit pkgs;
         extraSpecialArgs = {
           inherit (config) username homeDirectory;
-          inherit inputs;
+          inherit inputs flakeDirectory;
           isWSL = config.isWSL or false;
         };
         modules = dynamicModules ++ (config.extraModules or [ ]);
@@ -85,8 +90,10 @@ rec {
       ];
       missingFields = builtins.filter (field: !(builtins.hasAttr field config)) requiredFields;
 
+      flakeDirectory = config.flakeDirectory or (mkFlakeDirectory config.homeDirectory);
+
       specialArgs = {
-        inherit inputs;
+        inherit inputs flakeDirectory;
         inherit (config) username homeDirectory;
         isWSL = config.isWSL or false;
       };
