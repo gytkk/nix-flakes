@@ -2,14 +2,13 @@
   config,
   pkgs,
   lib,
+  flakeDirectory,
   ...
 }:
 
 let
   claude = "${pkgs.claude-code}/bin/claude";
   timeout = "${pkgs.coreutils}/bin/timeout";
-  jq = "${pkgs.jq}/bin/jq";
-
   marketplaces = [
     "anthropics/skills"
     "anthropics/claude-code"
@@ -76,6 +75,8 @@ in
     "$HOME/.cache/.bun/bin"
   ];
 
+  home.file.".claude/settings.json".source =
+    config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/claude/files/settings.json";
   home.file.".claude/CLAUDE.md".source = ./files/CLAUDE.md;
   home.file.".claude/statusline-command.sh" = {
     source = ./files/statusline-command.sh;
@@ -97,28 +98,9 @@ in
     }:$PATH"
 
     SETUP_LOG="$HOME/.claude/nix-setup.log"
-    SETTINGS_FILE="$HOME/.claude/settings.json"
 
     log() { echo "[$(date '+%H:%M:%S')] $*" >> "$SETUP_LOG"; }
     log "=== Claude Code setup started ==="
-
-    # Remove read-only symlink from previous nix setup
-    if [ -L "$SETTINGS_FILE" ]; then
-      rm "$SETTINGS_FILE"
-      log "Removed settings.json symlink"
-    fi
-
-    # Merge nix settings into existing settings.json (nix takes precedence)
-    mkdir -p "$(dirname "$SETTINGS_FILE")"
-    if [ -f "$SETTINGS_FILE" ]; then
-      ${jq} -s '.[0] * .[1]' "$SETTINGS_FILE" ${./files/settings.json} > "$SETTINGS_FILE.tmp"
-      mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
-      log "Merged settings.json"
-    else
-      cp ${./files/settings.json} "$SETTINGS_FILE"
-      chmod 644 "$SETTINGS_FILE"
-      log "Copied initial settings.json"
-    fi
 
     INSTALLED_PLUGINS="$HOME/.claude/plugins/installed_plugins.json"
 

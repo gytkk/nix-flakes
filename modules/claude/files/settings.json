@@ -25,6 +25,7 @@
       "mcp__qmd__get",
       "mcp__qmd__multi_get",
       "mcp__qmd__status",
+      "mcp__qmd__query",
       "Write(~/.ai)",
       "Write(~/.config)",
       "Write(~/workspace)",
@@ -41,5 +42,20 @@
     "type": "command",
     "command": "bash ~/.claude/statusline-command.sh"
   },
-  "hooks": {}
+  "hooks": {},
+  "enabledPlugins": {
+    "document-skills@anthropic-agent-skills": true,
+    "commit-commands@claude-code-plugins": true,
+    "security-guidance@claude-code-plugins": true,
+    "ralph-loop@claude-plugins-official": true,
+    "gopls-lsp@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "plannotator@plannotator": true,
+    "codex@gytkk": true,
+    "metals-lsp@gytkk": true,
+    "ty-lsp@gytkk": true,
+    "terraform-ls@gytkk": true,
+    "nixd-lsp@gytkk": true
+  }
 }
