@@ -132,12 +132,11 @@ require("lazy").setup({
       event = { "BufReadPre", "BufNewFile" },
       config = function()
         local capabilities = require("blink.cmp").get_lsp_capabilities()
-        local lspconfig = require("lspconfig")
-        lspconfig.nixd.setup({ capabilities = capabilities })
-        lspconfig.gopls.setup({ capabilities = capabilities })
-        lspconfig.rust_analyzer.setup({ capabilities = capabilities })
-        lspconfig.ts_ls.setup({ capabilities = capabilities })
-        lspconfig.terraformls.setup({ capabilities = capabilities })
+        local servers = { "nixd", "gopls", "rust_analyzer", "ts_ls", "terraformls" }
+        for _, server in ipairs(servers) do
+          vim.lsp.config(server, { capabilities = capabilities })
+        end
+        vim.lsp.enable(servers)
 
         vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Previous Diagnostic" })
         vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Next Diagnostic" })
