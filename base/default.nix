@@ -16,6 +16,7 @@
     ../modules/codex
     ../modules/ghostty
     ../modules/git
+    ../modules/helix
     ../modules/k9s
     ../modules/opencode
     ../modules/terraform
@@ -73,7 +74,6 @@
       less
       wget
       curl
-      zellij
 
       # Git
       git
