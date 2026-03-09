@@ -65,6 +65,13 @@ require("lazy").setup({
     },
     { "nvim-tree/nvim-web-devicons", lazy = true },
     {
+      "folke/which-key.nvim",
+      event = "VeryLazy",
+      opts = {
+        preset = "modern",
+      },
+    },
+    {
       "sonph/onehalf",
       priority = 1000,
       config = function(plugin)
