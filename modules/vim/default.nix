@@ -1,6 +1,4 @@
 {
-  config,
-  lib,
   pkgs,
   ...
 }:
@@ -12,7 +10,16 @@
     viAlias = true;
     vimAlias = true;
 
+    extraPackages = with pkgs; [
+      fd
+      ripgrep
+    ];
+
     extraConfig = ''
+      " Leader key
+      let mapleader = " "
+      let maplocalleader = " "
+
       " Basic settings
       syntax enable
       syntax sync fromstart
@@ -26,9 +33,10 @@
       set nu
       set ru
 
-      " Use terminal 16-color palette
-      set notermguicolors
-      set t_Co=16
+      " True color support
+      set termguicolors
     '';
+
+    initLua = builtins.readFile ./files/init.lua;
   };
 }
