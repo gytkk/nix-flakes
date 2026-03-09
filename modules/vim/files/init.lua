@@ -84,6 +84,7 @@ require("lazy").setup({
       config = function(_, opts)
         require("onehalf").setup(opts)
         vim.cmd.colorscheme("onehalflight")
+        vim.api.nvim_set_hl(0, "NonText", { fg = "#666666" })
       end,
     },
   },

@@ -21,8 +21,7 @@
       "Write(~/.ai)",
       "Write(~/.config)",
       "Write(~/workspace)",
-      "Write(~/development)",
-      "Bash(git *)"
+      "Write(~/development)"
     ],
     "defaultMode": "acceptEdits"
   },
