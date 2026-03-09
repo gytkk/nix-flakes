@@ -14,7 +14,6 @@
       "Skill(plannotator-review)",
       "Skill(plannotator:plannotator-review)",
       "Skill(codex:*)",
-      "Skill(commit-commands:*)",
       "mcp__context7__*",
       "mcp__codex__*",
       "mcp__qmd__*",
@@ -37,7 +36,6 @@
   "hooks": {},
   "enabledPlugins": {
     "document-skills@anthropic-agent-skills": true,
-    "commit-commands@claude-code-plugins": true,
     "security-guidance@claude-code-plugins": true,
     "ralph-loop@claude-plugins-official": true,
     "gopls-lsp@claude-plugins-official": true,

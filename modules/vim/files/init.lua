@@ -68,7 +68,7 @@ require("lazy").setup({
       "folke/which-key.nvim",
       event = "VeryLazy",
       opts = {
-        preset = "helix",
+        preset = "modern",
       },
     },
     {
@@ -86,6 +86,148 @@ require("lazy").setup({
         vim.cmd.colorscheme("onehalflight")
         vim.api.nvim_set_hl(0, "NonText", { fg = "#666666" })
       end,
+    },
+    {
+      "nvim-treesitter/nvim-treesitter",
+      build = ":TSUpdate",
+      event = { "BufReadPost", "BufNewFile" },
+      main = "nvim-treesitter.configs",
+      opts = {
+        ensure_installed = {
+          "go", "gomod", "gosum",
+          "rust",
+          "typescript", "tsx", "javascript",
+          "nix",
+          "hcl", "terraform",
+          "lua", "vim", "vimdoc", "query",
+          "json", "yaml", "toml", "markdown", "markdown_inline",
+          "bash", "dockerfile", "html", "css",
+        },
+        auto_install = true,
+        highlight = { enable = true },
+        indent = { enable = true },
+      },
+    },
+    {
+      "saghen/blink.cmp",
+      version = "1.*",
+      dependencies = { "rafamadriz/friendly-snippets" },
+      event = "InsertEnter",
+      opts = {
+        keymap = { preset = "default" },
+        appearance = { nerd_font_variant = "mono" },
+        completion = {
+          documentation = { auto_show = true, auto_show_delay_ms = 300 },
+          ghost_text = { enabled = true },
+        },
+        sources = {
+          default = { "lsp", "path", "snippets", "buffer" },
+        },
+        signature = { enabled = true },
+      },
+      opts_extend = { "sources.default" },
+    },
+    {
+      "neovim/nvim-lspconfig",
+      dependencies = { "saghen/blink.cmp" },
+      event = { "BufReadPre", "BufNewFile" },
+      config = function()
+        local capabilities = require("blink.cmp").get_lsp_capabilities()
+        local lspconfig = require("lspconfig")
+        lspconfig.nixd.setup({ capabilities = capabilities })
+        lspconfig.gopls.setup({ capabilities = capabilities })
+        lspconfig.rust_analyzer.setup({ capabilities = capabilities })
+        lspconfig.ts_ls.setup({ capabilities = capabilities })
+        lspconfig.terraformls.setup({ capabilities = capabilities })
+
+        vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Previous Diagnostic" })
+        vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Next Diagnostic" })
+        vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, { desc = "Line Diagnostics" })
+        vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Diagnostics List" })
+
+        vim.api.nvim_create_autocmd("LspAttach", {
+          callback = function(args)
+            local opts = { buffer = args.buf }
+            vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+            vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
+            vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts)
+          end,
+        })
+      end,
+    },
+    {
+      "nvim-lualine/lualine.nvim",
+      dependencies = { "nvim-tree/nvim-web-devicons" },
+      event = "VeryLazy",
+      opts = {
+        options = {
+          theme = "auto",
+          component_separators = { left = "|", right = "|" },
+          section_separators = { left = "", right = "" },
+        },
+        sections = {
+          lualine_a = { "mode" },
+          lualine_b = { "branch", "diff", "diagnostics" },
+          lualine_c = { "filename" },
+          lualine_x = { "encoding", "fileformat", "filetype" },
+          lualine_y = { "progress" },
+          lualine_z = { "location" },
+        },
+      },
+    },
+    {
+      "lewis6991/gitsigns.nvim",
+      event = { "BufReadPre", "BufNewFile" },
+      opts = {
+        signs = {
+          add = { text = "+" },
+          change = { text = "~" },
+          delete = { text = "_" },
+          topdelete = { text = "\u{203e}" },
+          changedelete = { text = "~" },
+        },
+        on_attach = function(bufnr)
+          local gs = package.loaded.gitsigns
+          local function map(mode, l, r, desc)
+            vim.keymap.set(mode, l, r, { buffer = bufnr, desc = desc })
+          end
+          map("n", "]h", gs.next_hunk, "Next Hunk")
+          map("n", "[h", gs.prev_hunk, "Previous Hunk")
+          map("n", "<leader>hs", gs.stage_hunk, "Stage Hunk")
+          map("n", "<leader>hr", gs.reset_hunk, "Reset Hunk")
+          map("n", "<leader>hp", gs.preview_hunk, "Preview Hunk")
+          map("n", "<leader>hb", function() gs.blame_line({ full = true }) end, "Blame Line")
+        end,
+      },
+    },
+    {
+      "stevearc/conform.nvim",
+      event = "BufWritePre",
+      cmd = "ConformInfo",
+      keys = {
+        { "<leader>cf", function() require("conform").format({ async = true }) end, mode = "", desc = "Format Buffer" },
+      },
+      opts = {
+        format_on_save = {
+          lsp_format = "fallback",
+          timeout_ms = 500,
+        },
+        formatters_by_ft = {
+          nix = { "nixfmt" },
+          go = { "gofmt" },
+          rust = { "rustfmt" },
+          javascript = { "prettier" },
+          javascriptreact = { "prettier" },
+          typescript = { "prettier" },
+          typescriptreact = { "prettier" },
+          json = { "prettier" },
+          yaml = { "prettier" },
+          markdown = { "prettier" },
+          html = { "prettier" },
+          css = { "prettier" },
+          python = { "ruff_format" },
+        },
+      },
     },
   },
 })

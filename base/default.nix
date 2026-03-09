@@ -85,6 +85,7 @@
       # Python
       uv
       ty
+      ruff
 
       # Rust
       rustup
@@ -95,6 +96,7 @@
       typescript
       pnpm
       turbo
+      nodePackages.prettier
 
       # Go
       go
