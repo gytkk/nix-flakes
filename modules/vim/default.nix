@@ -16,10 +16,6 @@
     ];
 
     extraConfig = ''
-      " Leader key
-      let mapleader = " "
-      let maplocalleader = " "
-
       " Basic settings
       syntax enable
       syntax sync fromstart

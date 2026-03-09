@@ -1,3 +1,7 @@
+-- Leader key (must be set before lazy.nvim loads plugins)
+vim.g.mapleader = " "
+vim.g.maplocalleader = " "
+
 -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
@@ -60,5 +64,14 @@ require("lazy").setup({
       },
     },
     { "nvim-tree/nvim-web-devicons", lazy = true },
+    {
+      "sonph/onehalf",
+      priority = 1000,
+      config = function(plugin)
+        vim.opt.rtp:append(plugin.dir .. "/vim")
+        vim.o.background = "light"
+        vim.cmd.colorscheme("onehalflight")
+      end,
+    },
   },
 })
