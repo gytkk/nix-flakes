@@ -1,4 +1,4 @@
-theme = "zed_onelight"
+theme = "onelight"
 
 [editor]
 true-color = true
