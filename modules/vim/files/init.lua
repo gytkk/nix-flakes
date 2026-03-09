@@ -69,22 +69,18 @@ require("lazy").setup({
       event = "VeryLazy",
       opts = {
         preset = "modern",
+        delay = 100,
       },
     },
     {
-      "ClearAspect/onehalf",
+      "zed_onelight",
+      virtual = true,
       priority = 1000,
-      opts = {
-        terminal_colors = true,
-        integrations = {
-          whichkey = true,
-          indent_blankline = true,
-        },
-      },
-      config = function(_, opts)
-        require("onehalf").setup(opts)
-        vim.cmd.colorscheme("onehalflight")
-        vim.api.nvim_set_hl(0, "NonText", { fg = "#666666" })
+      config = function()
+        -- Load colorscheme from local file
+        local cfg_dir = vim.fn.stdpath("config")
+        package.loaded["zed_onelight"] = nil
+        dofile(cfg_dir .. "/zed_onelight.lua").setup()
       end,
     },
     {

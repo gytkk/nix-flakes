@@ -4,6 +4,8 @@
 }:
 
 {
+  xdg.configFile."nvim/zed_onelight.lua".source = ./files/zed_onelight.lua;
+
   programs.neovim = {
     enable = true;
     defaultEditor = true;
