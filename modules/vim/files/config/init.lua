@@ -45,7 +45,10 @@ require("lazy").setup({
       lazy = false,
       ---@type snacks.Config
       opts = {
-        explorer = { enabled = true },
+        explorer = {
+          enabled = true,
+          layout = { preset = "sidebar", preview = false, hidden = { "input" } },
+        },
         picker = { enabled = true },
         notifier = { enabled = true },
         bigfile = { enabled = true },
@@ -219,7 +222,7 @@ require("lazy").setup({
           map("n", "<leader>hs", gs.stage_hunk, "Stage Hunk")
           map("n", "<leader>hr", gs.reset_hunk, "Reset Hunk")
           map("n", "<leader>hp", gs.preview_hunk, "Preview Hunk")
-          map("n", "<leader>hb", function() gs.blame_line({ full = true }) end, "Blame Line")
+          map("n", "<leader>hb", function() gs.blame_line() end, "Blame Line")
         end,
       },
     },
