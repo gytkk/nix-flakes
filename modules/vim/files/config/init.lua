@@ -170,6 +170,10 @@ require("lazy").setup({
         end
         vim.lsp.enable(servers)
 
+        vim.diagnostic.config({
+          virtual_lines = { current_line_only = true },
+        })
+
         vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Previous Diagnostic" })
         vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Next Diagnostic" })
         vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, { desc = "Line Diagnostics" })
