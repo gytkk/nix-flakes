@@ -213,7 +213,7 @@ NixOS hosts are defined in `hosts.nix`:
 The layered base system provides inheritance and customization:
 
 1. **`base/default.nix`**: Common configuration imported by all company bases
-   - Core modules (claude, ghostty, git, k9s, opencode, terraform, vim, vscode, zed, zsh)
+   - Core modules (claude, ghostty, git, k9s, lsp, opencode, terraform, vim, vscode, zed, zsh)
    - Standard development packages
    - Basic programs configuration
 
@@ -253,18 +253,19 @@ modules/<name>/
 
 | Module       | Purpose                  | Config Location                              | Key Files                                | Mutable |
 | ------------ | ------------------------ | -------------------------------------------- | ---------------------------------------- | ------- |
-| `claude/`    | Claude Code AI assistant | `~/.claude/`                                 | `files/settings.json`, `files/CLAUDE.md` | 부분적  |
-| `codex/`     | OpenAI Codex CLI         | `~/.codex/`                                  | `files/config.toml`, `files/AGENTS.md`   | YES     |
-| `ghostty/`   | Ghostty terminal         | `~/.config/ghostty/`                         | `files/config`                           | YES     |
-| `git/`       | Git configuration        | `~/.gitconfig`                               | `default.nix`                            | NO      |
-| `helix/`     | Helix editor             | `~/.config/helix/`                           | `files/config.toml`                      | YES     |
-| `k9s/`       | Kubernetes manager       | `~/.config/k9s/`                             | `default.nix`                            | NO      |
-| `opencode/`  | OpenCode AI agent        | `~/.config/opencode/`                        | `files/opencode.json`, `files/AGENTS.md` | YES     |
-| `terraform/` | Terraform versions       | direnv lazy-load                             | `default.nix`                            | NO      |
-| `vim/`       | Neovim                   | `~/.config/nvim/`                            | `default.nix`                            | NO      |
-| `vscode/`    | VSCode editor (DISABLED) | `~/.config/Code/`                            | `default.nix`, `themes/`                 | NO      |
-| `zed/`       | Zed editor               | `~/Library/Application Support/Zed/` (macOS) | `files/settings.json`, `themes/`         | YES     |
-| `zsh/`       | Zsh shell                | `~/.zshrc`                                   | `default.nix`, `starship.toml`           | NO      |
+| `claude/`    | Claude Code AI assistant | `~/.claude/`                                 | `files/settings.json`, `files/CLAUDE.md`    | 부분적  |
+| `codex/`     | OpenAI Codex CLI         | `~/.codex/`                                  | `files/config.toml`, `files/AGENTS.md`      | YES     |
+| `ghostty/`   | Ghostty terminal         | `~/.config/ghostty/`                         | `files/config`                              | YES     |
+| `git/`       | Git configuration        | `~/.gitconfig`                               | `default.nix`                               | NO      |
+| `helix/`     | Helix editor             | `~/.config/helix/`                           | `files/config.toml`                         | YES     |
+| `k9s/`       | Kubernetes manager       | `~/.config/k9s/`                             | `default.nix`                               | NO      |
+| `lsp/`       | LSP server packages      | system PATH                                  | `default.nix`                               | NO      |
+| `opencode/`  | OpenCode AI agent        | `~/.config/opencode/`                        | `files/opencode.json`, `files/AGENTS.md`    | YES     |
+| `terraform/` | Terraform versions       | direnv lazy-load                             | `default.nix`                               | NO      |
+| `vim/`       | Neovim                   | `~/.config/nvim/`                            | `files/config/init.lua`, `files/onelight.lua` | YES     |
+| `vscode/`    | VSCode editor (DISABLED) | `~/.config/Code/`                            | `default.nix`, `themes/`                    | NO      |
+| `zed/`       | Zed editor               | `~/Library/Application Support/Zed/` (macOS) | `files/settings.json`, `themes/`            | YES     |
+| `zsh/`       | Zsh shell                | `~/.zshrc`                                   | `default.nix`, `starship.toml`              | NO      |
 
 > **Mutable**: `mkOutOfStoreSymlink`을 사용해 설정 파일이 repo로 직접 symlink됨.
 > 앱 UI에서 자유롭게 수정 가능하며, 변경이 즉시 repo에 반영됨. `nfc` alias로 빠르게 커밋.
@@ -298,6 +299,23 @@ nix flake check --no-build  # Validate syntax
 ```
 
 ### Editor Configurations
+
+#### Neovim Module (`modules/vim/`)
+
+| File                    | Purpose                                                        |
+| ----------------------- | -------------------------------------------------------------- |
+| `default.nix`           | programs.neovim setup, symlink configuration                   |
+| `files/config/init.lua` | Full Neovim config: plugins, LSP, keybindings (mutable)        |
+| `files/onelight.lua`    | Custom onelight colorscheme (mutable)                          |
+
+**Architecture**: `programs.neovim.initLua` bootstraps with `require('config')`. Actual config lives in `files/config/` symlinked to `~/.config/nvim/lua/config/` via `mkOutOfStoreSymlink`. Changes take effect on Neovim restart without `home-manager switch`.
+
+**Common modification scenarios**:
+
+- Change editor settings → Edit `files/config/init.lua` → `vim.cmd` block at top
+- Add/modify plugins → Edit `files/config/init.lua` → `lazy.setup` spec
+- Add LSP server → Edit `files/config/init.lua` → `servers` table + add binary to `modules/lsp/default.nix`
+- Change colorscheme → Edit `files/onelight.lua`
 
 #### VSCode Module (`modules/vscode/`) - DISABLED
 
@@ -383,7 +401,7 @@ Global configuration for Claude Code (Anthropic's AI coding assistant).
 - `plannotator`: Visual plan annotation, review, and team sharing — CLI auto-installed via activation script
 
 > **Note**: Each LSP plugin requires its corresponding binary on `PATH`.
-> LSP binaries are installed via `home.packages` in `modules/claude/default.nix`.
+> LSP binaries are centralized in `modules/lsp/default.nix`.
 
 **Common modification scenarios**:
 
@@ -469,13 +487,13 @@ agenix -r
 
 Base packages defined in `base/default.nix`:
 
-- **Nix**: nixfmt, nixd
+- **Nix**: nixfmt
 - **System**: coreutils, findutils, gnupg, libiconv, direnv, tmux, less, wget, curl
-- **Development**: docker, gcc, awscli2, jq, yq-go, ripgrep
+- **Development**: docker, gcc, awscli2, jq, yq-go, fd, ripgrep
 - **Git**: git, gh, lazygit, delta, bat
 - **JavaScript/TypeScript**: nodejs, bun, typescript, pnpm, turbo
-- **Go**: go, gopls
-- **Python**: uv package manager, ty type checker
+- **Go**: go
+- **Python**: uv, ruff
 - **Rust**: rustup
 - **Kubernetes**: kubectl, kubectx, helm (k9s is provided via `modules/k9s` program module)
 - **Secrets**: 1password-cli, keybase
@@ -483,9 +501,14 @@ Base packages defined in `base/default.nix`:
 - **ML**: micromamba
 - **Fonts**: nerd-fonts (fira-code, jetbrains-mono), sarasa-gothic
 
+LSP server packages (centralized in `modules/lsp/`):
+
+- nixd, gopls, typescript-language-server, terraform-ls, metals, ty, yaml-language-server, marksman
+- rust-analyzer is provided by rustup (not in modules/lsp)
+
 Company-specific packages:
 
-- **Devsisters**: saml2aws, vault, databricks-cli, scala_2_12, metals, ruby_3_2, custom scripts (login, sign)
+- **Devsisters**: saml2aws, vault, databricks-cli, scala_2_12, ruby_3_2, custom scripts (login, sign)
 - **Pylv**: Currently none (inherits base only)
 
 ### Adding New Environments
