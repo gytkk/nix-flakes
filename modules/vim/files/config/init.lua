@@ -171,7 +171,7 @@ require("lazy").setup({
         vim.lsp.enable(servers)
 
         vim.diagnostic.config({
-          virtual_lines = { current_line_only = true },
+          virtual_lines = { current_line = true },
         })
 
         vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Previous Diagnostic" })
