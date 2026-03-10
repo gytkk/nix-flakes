@@ -33,6 +33,12 @@
 
       " True color support
       set termguicolors
+
+      " Smooth scrolling: 1 line per mouse wheel tick
+      map <ScrollWheelUp> <C-Y>
+      map <ScrollWheelDown> <C-E>
+      imap <ScrollWheelUp> <C-O><C-Y>
+      imap <ScrollWheelDown> <C-O><C-E>
     '';
 
     initLua = builtins.readFile ./files/init.lua;
