@@ -50,7 +50,7 @@ require("lazy").setup({
           enabled = true,
           sources = {
             explorer = {
-              layout = { preset = "sidebar", preview = false, hidden = { "input" } },
+              layout = { preset = "sidebar" },
             },
           },
         },
