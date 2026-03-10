@@ -1,4 +1,4 @@
--- zed_onelight.lua — Neovim colorscheme based on Helix's zed_onelight
+-- onelight.lua — Neovim colorscheme based on Helix's zed_onelight
 -- Ported from: https://github.com/helix-editor/helix/blob/master/runtime/themes/zed_onelight.toml
 
 local M = {}
@@ -33,7 +33,7 @@ function M.setup()
   end
   vim.o.termguicolors = true
   vim.o.background = "light"
-  vim.g.colors_name = "zed_onelight"
+  vim.g.colors_name = "onelight"
 
   local hl = function(group, opts)
     vim.api.nvim_set_hl(0, group, opts)

@@ -1,10 +1,15 @@
 {
-  pkgs,
+  config,
+  flakeDirectory,
   ...
 }:
 
+let
+  mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/vim/${path}";
+in
 {
-  xdg.configFile."nvim/zed_onelight.lua".source = ./files/zed_onelight.lua;
+  xdg.configFile."nvim/lua/config".source = mkSymlink "files/config";
+  xdg.configFile."nvim/onelight.lua".source = mkSymlink "files/onelight.lua";
 
   programs.neovim = {
     enable = true;
@@ -12,32 +17,6 @@
     viAlias = true;
     vimAlias = true;
 
-    extraPackages = with pkgs; [
-      fd
-      ripgrep
-    ];
-
-    extraConfig = ''
-      " Basic settings
-      syntax enable
-      syntax sync fromstart
-      filetype plugin indent on
-
-      " Editor settings
-      set encoding=utf-8
-      set fileencoding=utf-8
-      set mouse=a
-      set ruler
-      set nu
-      set ru
-
-      " True color support
-      set termguicolors
-
-      " Smooth scrolling: 1 line per mouse wheel tick
-      set mousescroll=ver:1,hor:1
-    '';
-
-    initLua = builtins.readFile ./files/init.lua;
+    initLua = "require('config')";
   };
 }

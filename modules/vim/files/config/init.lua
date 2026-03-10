@@ -1,3 +1,18 @@
+-- Basic vim settings (migrated from extraConfig vimscript)
+vim.cmd([[
+  syntax enable
+  syntax sync fromstart
+  filetype plugin indent on
+  set encoding=utf-8
+  set fileencoding=utf-8
+  set mouse=a
+  set ruler
+  set nu
+  set ru
+  set termguicolors
+  set mousescroll=ver:1,hor:1
+]])
+
 -- Leader key (must be set before lazy.nvim loads plugins)
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
@@ -88,14 +103,13 @@ require("lazy").setup({
       },
     },
     {
-      "zed_onelight",
+      "onelight",
       virtual = true,
       priority = 1000,
       config = function()
-        -- Load colorscheme from local file
         local cfg_dir = vim.fn.stdpath("config")
-        package.loaded["zed_onelight"] = nil
-        dofile(cfg_dir .. "/zed_onelight.lua").setup()
+        package.loaded["onelight"] = nil
+        dofile(cfg_dir .. "/onelight.lua").setup()
       end,
     },
     {
