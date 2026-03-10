@@ -15,11 +15,11 @@ local p = {
   gold = "#ad6e25",
   cyan = "#3882b7",
   light_black = "#2e323a",
-  gray = "#f0f0f2",
-  dark_gray = "#f2f2f3",
+  gray = "#eff0f2",
+  dark_gray = "#f0f0f1",
   light_gray = "#a2a3a7",
-  blue_gray = "#e4e8f2",
-  faint_gray = "#f7f7f7",
+  blue_gray = "#e0e2ee",
+  faint_gray = "#f5f5f5",
   linenr = "#b0b1b3",
   black = "#383a41",
   white = "#ffffff",
@@ -43,17 +43,17 @@ function M.setup()
   hl("Normal", { fg = p.black, bg = p.white })
   hl("NormalFloat", { fg = p.black, bg = p.dark_gray })
   hl("FloatBorder", { fg = p.light_gray, bg = p.dark_gray })
-  hl("Cursor", { fg = p.white, bg = p.dark_blue })
+  hl("Cursor", { fg = p.dark_blue, reverse = true })
   hl("CursorLine", { bg = p.faint_gray })
   hl("CursorColumn", { bg = p.faint_gray })
   hl("ColorColumn", { bg = p.faint_gray })
   hl("LineNr", { fg = p.linenr })
   hl("CursorLineNr", { fg = p.black, bold = true })
-  hl("SignColumn", { bg = p.white })
-  hl("VertSplit", { fg = p.gray })
-  hl("WinSeparator", { fg = p.gray })
+  hl("SignColumn", { bg = p.gray })
+  hl("VertSplit", { fg = p.dark_gray })
+  hl("WinSeparator", { fg = p.dark_gray })
   hl("StatusLine", { fg = p.black, bg = p.gray })
-  hl("StatusLineNC", { fg = p.light_gray, bg = p.gray })
+  hl("StatusLineNC", { fg = p.white, bg = p.light_black })
   hl("TabLine", { fg = p.light_gray, bg = p.gray })
   hl("TabLineFill", { bg = p.gray })
   hl("TabLineSel", { fg = p.black, bg = p.white, bold = true })
@@ -66,13 +66,13 @@ function M.setup()
   hl("Search", { fg = p.white, bg = p.blue })
   hl("IncSearch", { fg = p.white, bg = p.dark_blue })
   hl("CurSearch", { fg = p.white, bg = p.dark_blue, bold = true })
-  hl("MatchParen", { fg = p.dark_blue, underline = true })
+  hl("MatchParen", { fg = p.blue, underline = true })
   hl("Folded", { fg = p.light_gray, bg = p.faint_gray })
   hl("FoldColumn", { fg = p.linenr, bg = p.white })
   hl("NonText", { fg = p.light_gray })
   hl("SpecialKey", { fg = p.light_gray })
-  hl("Whitespace", { fg = p.gray })
-  hl("EndOfBuffer", { fg = p.gray })
+  hl("Whitespace", { fg = p.light_gray })
+  hl("EndOfBuffer", { fg = p.faint_gray })
   hl("Directory", { fg = p.blue })
   hl("Title", { fg = p.blue, bold = true })
   hl("Question", { fg = p.green })
@@ -177,8 +177,8 @@ function M.setup()
   hl("@markup.heading", { fg = p.orange, bold = true })
   hl("@markup.list", { fg = p.orange })
   hl("@markup.quote", { fg = p.green, italic = true })
-  hl("@markup.strong", { bold = true })
-  hl("@markup.italic", { italic = true })
+  hl("@markup.strong", { fg = p.yellow, bold = true })
+  hl("@markup.italic", { fg = p.purple, italic = true })
   hl("@markup.strikethrough", { strikethrough = true })
   hl("@markup.link.url", { fg = p.cyan, underline = true })
   hl("@markup.link.label", { fg = p.purple })
@@ -202,6 +202,9 @@ function M.setup()
   hl("@lsp.type.decorator", { fg = p.green })
   hl("@lsp.mod.deprecated", { strikethrough = true })
 
+  -- LSP inlay hints
+  hl("LspInlayHint", { fg = p.violet, bold = true })
+
   -- Diagnostics
   hl("DiagnosticError", { fg = p.red })
   hl("DiagnosticWarn", { fg = p.yellow })
@@ -215,6 +218,8 @@ function M.setup()
   hl("DiagnosticVirtualTextWarn", { fg = p.yellow, italic = true })
   hl("DiagnosticVirtualTextInfo", { fg = p.blue, italic = true })
   hl("DiagnosticVirtualTextHint", { fg = p.green, italic = true })
+  hl("DiagnosticUnnecessary", { link = "Comment" })
+  hl("DiagnosticDeprecated", { strikethrough = true })
 
   -- Git signs
   hl("GitSignsAdd", { fg = p.green })
