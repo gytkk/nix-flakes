@@ -45,11 +45,15 @@ require("lazy").setup({
       lazy = false,
       ---@type snacks.Config
       opts = {
-        explorer = {
+        explorer = { enabled = true },
+        picker = {
           enabled = true,
-          layout = { preset = "sidebar", preview = false, hidden = { "input" } },
+          sources = {
+            explorer = {
+              layout = { preset = "sidebar", preview = false, hidden = { "input" } },
+            },
+          },
         },
-        picker = { enabled = true },
         notifier = { enabled = true },
         bigfile = { enabled = true },
         indent = { enabled = true },
