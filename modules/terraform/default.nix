@@ -50,7 +50,6 @@ in
       (
         if cfg.defaultVersion == "latest" then pkgs.terraform else pkgs.${"terraform-${cfg.defaultVersion}"}
       )
-      pkgs.terraform-ls
     ];
 
     # Configure nixpkgs to allow unfree for terraform

@@ -62,10 +62,6 @@ in
 {
   home.packages = [
     pkgs.claude-code
-
-    # rust-analyzer is provided by rustup (base/default.nix)
-    pkgs.nodePackages.typescript-language-server
-    pkgs.terraform-ls
   ];
 
   # Add XDG data bin to PATH (for plannotator CLI installed via install.sh)

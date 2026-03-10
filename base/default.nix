@@ -18,6 +18,7 @@
     ../modules/git
     ../modules/helix
     ../modules/k9s
+    ../modules/lsp
     ../modules/opencode
     ../modules/terraform
     ../modules/vim
@@ -53,7 +54,6 @@
     packages = with pkgs; [
       # Nix
       nixfmt
-      nixd
 
       # System utilities
       coreutils
@@ -85,7 +85,6 @@
 
       # Python
       uv
-      ty
       ruff
 
       # Rust
@@ -101,7 +100,6 @@
 
       # Go
       go
-      gopls
 
       # Kubernetes
       kubectl

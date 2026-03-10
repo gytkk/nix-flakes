@@ -102,9 +102,6 @@ in
 
   config = lib.mkIf cfg.enable (
     lib.mkMerge [
-      # LSP 바이너리 (settings.json에서 참조)
-      { home.packages = [ pkgs.metals ]; }
-
       # macOS/Linux (non-WSL): 설정 파일을 repo에 직접 symlink
       (lib.mkIf (!isWSL) {
         # settings.json, keymap.json → repo 파일로 직접 symlink (mutable)

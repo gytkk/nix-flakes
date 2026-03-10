@@ -160,7 +160,7 @@ require("lazy").setup({
       event = { "BufReadPre", "BufNewFile" },
       config = function()
         local capabilities = require("blink.cmp").get_lsp_capabilities()
-        local servers = { "nixd", "gopls", "rust_analyzer", "ts_ls", "terraformls" }
+        local servers = { "nixd", "gopls", "rust_analyzer", "ts_ls", "terraformls", "yamlls", "marksman" }
         for _, server in ipairs(servers) do
           vim.lsp.config(server, { capabilities = capabilities })
         end
