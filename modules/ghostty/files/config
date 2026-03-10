@@ -1,7 +1,7 @@
 auto-update = check
 
 # One Half Light theme
-background = #fafafa
+background = #fdfdfd
 foreground = #383a42
 selection-background = #bfceff
 selection-foreground = #383a42
@@ -17,7 +17,7 @@ palette = 3=#c18401
 palette = 4=#0184bc
 palette = 5=#a626a4
 palette = 6=#0997b3
-palette = 7=#fafafa
+palette = 7=#fdfdfd
 palette = 8=#4f525e
 palette = 9=#e06c75
 palette = 10=#98c379
