@@ -58,9 +58,11 @@ require("lazy").setup({
         bigfile = { enabled = true },
         indent = { enabled = true },
         input = { enabled = true },
+        lazygit = { enabled = true },
         quickfile = { enabled = true },
         scope = { enabled = true },
         statuscolumn = { enabled = true },
+        toggle = { enabled = true },
         words = { enabled = true },
       },
       keys = {
@@ -77,6 +79,7 @@ require("lazy").setup({
         -- Picker: git
         { "<leader>gs", function() Snacks.picker.git_status() end, desc = "Git Status" },
         { "<leader>gl", function() Snacks.picker.git_log() end, desc = "Git Log" },
+        { "<leader>gg", function() Snacks.lazygit() end, desc = "Lazygit" },
         -- Picker: LSP
         { "gd", function() Snacks.picker.lsp_definitions() end, desc = "Goto Definition" },
         { "gr", function() Snacks.picker.lsp_references() end, nowait = true, desc = "References" },
@@ -86,6 +89,8 @@ require("lazy").setup({
         { "<leader>fh", function() Snacks.picker.help() end, desc = "Help Pages" },
         -- Notifier
         { "<leader>n", function() Snacks.notifier.show_history() end, desc = "Notification History" },
+        -- Toggles
+        { "<leader>uh", function() Snacks.toggle.inlay_hints():toggle() end, desc = "Toggle Inlay Hints" },
       },
     },
     { "nvim-tree/nvim-web-devicons", lazy = true },
@@ -164,7 +169,7 @@ require("lazy").setup({
       event = { "BufReadPre", "BufNewFile" },
       config = function()
         local capabilities = require("blink.cmp").get_lsp_capabilities()
-        local servers = { "nixd", "gopls", "rust_analyzer", "ts_ls", "terraformls", "yamlls", "marksman" }
+        local servers = { "nixd", "gopls", "rust_analyzer", "ts_ls", "terraformls", "yamlls", "marksman", "ty" }
         for _, server in ipairs(servers) do
           vim.lsp.config(server, { capabilities = capabilities })
         end
@@ -181,7 +186,11 @@ require("lazy").setup({
 
         vim.api.nvim_create_autocmd("LspAttach", {
           callback = function(args)
+            local client = vim.lsp.get_client_by_id(args.data.client_id)
             local opts = { buffer = args.buf }
+            if client and client:supports_method("textDocument/inlayHint") then
+              vim.lsp.inlay_hint.enable(true, { bufnr = args.buf })
+            end
             vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
             vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
             vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts)

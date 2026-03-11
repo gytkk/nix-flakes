@@ -1,62 +1,45 @@
 # Vim Module
 
-This module configures Neovim as the primary text editor with essential settings for development work.
+This module configures Neovim as the primary editor with a modern Lua-based setup managed through Home Manager.
 
 ## What it does
 
 - Installs and configures Neovim as the default editor
-- Sets up basic editing configurations for productivity
-- Creates convenient aliases (`vi`, `vim`) that point to Neovim
-- Enables essential features like syntax highlighting and file type detection
+- Creates `vi` and `vim` aliases that point to `nvim`
+- Loads the Neovim configuration from `modules/vim/files/config/init.lua`
+- Applies the custom `onelight` colorscheme
 
-## Features
+## Included Features
 
-### Editor Configuration
+- `lazy.nvim` plugin management
+- `snacks.nvim` for file picking, explorer, notifications, status column, inlay hint toggles, and lazygit integration
+- `blink.cmp` completion with LSP, snippets, path, and buffer sources
+- Built-in Neovim LSP configuration for Nix, Go, Rust, TypeScript, Terraform, YAML, Markdown, and Python via `ty`
+- `nvim-treesitter` syntax parsing for the main languages used in this repository
+- `conform.nvim` formatting on save, including `nixfmt`, `prettier`, `rustfmt`, `gofmt`, and `ruff_format`
+- `gitsigns.nvim`, `lualine.nvim`, `flash.nvim`, `which-key.nvim`, `trouble.nvim`, and `render-markdown.nvim`
 
-- **Default Editor**: Sets Neovim as the system's default editor
-- **Aliases**: `vi` and `vim` commands redirect to `nvim`
-- **Syntax Highlighting**: Enabled with `syntax enable` and optimized sync
-- **File Type Detection**: Automatic file type detection with appropriate plugins and indentation
+## Notable Keymaps
 
-### Basic Settings
-
-- **Mouse Support**: Full mouse integration (`set mouse=a`)
-- **Line Numbers**: Display line numbers (`set nu`)
-- **Ruler**: Show cursor position (`set ruler`, `set ru`)
-- **File Type Support**: Plugin and indent support for all file types
-
-## Requirements
-
-- Nix package manager
-- Home Manager
-- Neovim package from nixpkgs
-
-## Configuration Details
-
-The module provides a minimal but functional Neovim setup with:
-
-- Syntax highlighting with optimized synchronization (`syntax sync fromstart`)
-- File type detection and appropriate plugin/indent loading
-- Basic editor settings for line numbers and cursor position
-- Mouse support for enhanced interaction
+- `<leader>e`: file explorer
+- `<leader>ff`: find files
+- `<leader>sg`: grep
+- `<leader>gs`: git status picker
+- `<leader>gl`: git log picker
+- `<leader>gg`: lazygit
+- `<leader>uh`: toggle LSP inlay hints
+- `<leader>cf`: format current buffer
 
 ## Usage
 
-After applying this module, you can use any of these commands to edit files:
-
 ```bash
-nvim filename.txt    # Direct Neovim command
-vim filename.txt     # Alias to Neovim
-vi filename.txt      # Alias to Neovim
+nvim filename.txt
+vim filename.txt
+vi filename.txt
 ```
 
-The configuration automatically:
+## Files
 
-- Enables syntax highlighting for supported file types
-- Shows line numbers and cursor position
-- Provides mouse support for navigation and selection
-- Loads appropriate plugins and indentation for different file types
-
-## Extending the Configuration
-
-This module provides a foundation that can be extended with additional Neovim configuration. You can add more settings to the `extraConfig` section or install additional plugins as needed.
+- `modules/vim/default.nix`: Home Manager wiring
+- `modules/vim/files/config/init.lua`: main Neovim configuration
+- `modules/vim/files/onelight.lua`: colorscheme definition
