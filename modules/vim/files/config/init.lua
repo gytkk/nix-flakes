@@ -55,6 +55,7 @@ require("lazy").setup({
           },
         },
         notifier = { enabled = true },
+        notify = { enabled = true },
         bigfile = { enabled = true },
         gh = { enabled = true },
         gitbrowse = { enabled = true },
