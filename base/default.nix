@@ -112,6 +112,7 @@
 
       # Modeling
       ffmpeg
+      imagemagick
       pkgs.stable-25_05.micromamba
       yt-dlp
 
