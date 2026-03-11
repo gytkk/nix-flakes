@@ -108,8 +108,6 @@ require("lazy").setup({
         { "<leader>fh", function() Snacks.picker.help() end, desc = "Help Pages" },
         -- Notifier
         { "<leader>n", function() Snacks.notifier.show_history() end, desc = "Notification History" },
-        -- Toggles
-        { "<leader>uh", function() Snacks.toggle.inlay_hints():toggle() end, desc = "Toggle Inlay Hints" },
       },
     },
     { "nvim-tree/nvim-web-devicons", lazy = true },
@@ -312,3 +310,10 @@ require("lazy").setup({
     },
   },
 })
+
+-- Snacks toggles integrate with which-key and keep their labels in sync with state.
+Snacks.toggle.diagnostics():map("<leader>ud")
+Snacks.toggle.inlay_hints():map("<leader>uh")
+Snacks.toggle.line_number():map("<leader>ul")
+Snacks.toggle.scroll():map("<leader>uS")
+Snacks.toggle.option("wrap", { name = "Wrap" }):map("<leader>uw")
