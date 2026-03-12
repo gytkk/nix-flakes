@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  flakeDirectory,
   isWSL ? false,
   ...
 }:
@@ -160,7 +161,8 @@
 
   # Starship configuration from TOML file
   # Style: Jetpack (minimalist) + Catppuccin Latte colors
-  xdg.configFile."starship.toml".source = ./starship.toml;
+  xdg.configFile."starship.toml".source =
+    config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/zsh/starship.toml";
 
   # dircolors for LS_COLORS
   programs.dircolors = {
