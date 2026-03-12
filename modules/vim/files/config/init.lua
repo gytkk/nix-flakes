@@ -77,6 +77,7 @@ require("lazy").setup({
         -- Picker: files
         { "<leader>ff", function() Snacks.picker.files() end, desc = "Find Files" },
         { "<leader>fr", function() Snacks.picker.recent() end, desc = "Recent Files" },
+        { "<leader>b", function() Snacks.picker.buffers() end, desc = "Buffers" },
         { "<leader>fb", function() Snacks.picker.buffers() end, desc = "Buffers" },
         -- Picker: search
         { "<leader>sg", function() Snacks.picker.grep() end, desc = "Grep" },
