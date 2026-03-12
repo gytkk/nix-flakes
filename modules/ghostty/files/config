@@ -30,7 +30,7 @@ palette = 15=#ffffff
 background-opacity = 0.95
 
 font-size = 13
-font-family = "JetBrainsMono Nerd Font Mono"
+font-family = "JetBrains Mono"
 
 # CJK Fallback
 font-family = "Sarasa Mono CL"
