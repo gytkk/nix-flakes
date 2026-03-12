@@ -7,9 +7,9 @@
 palette = 'one_half_light'
 
 format = """
-[](iris_deep)\
-[ 󰉋 ](bg:iris_deep fg:base)\
-[](bg:foam fg:iris_deep)\
+[](iris)\
+[ 󰉋 ](bg:iris fg:base)\
+[](bg:foam fg:iris)\
 $directory\
 [](fg:foam bg:overlay)\
 $git_branch\
@@ -167,7 +167,7 @@ vimcmd_visual_symbol = '[❮](bold fg:gold)'
 [palettes.one_half_light]
 base = "#fafafa"
 surface = "#f0f0f0"
-overlay = "#e5e5e5"
+overlay = "#d8d8d8"
 muted = "#4f525e"
 subtle = "#383a42"
 text = "#383a42"
@@ -177,7 +177,6 @@ rose = "#e06c75"
 pine = "#0184bc"
 foam = "#0997b3"
 iris = "#a626a4"
-iris_deep = "#8f2291"
 highlight_low = "#f5f5f5"
 highlight_med = "#e8e8e8"
 highlight_high = "#d0d0d0"
