@@ -111,6 +111,50 @@ require("lazy").setup({
       },
     },
     { "nvim-tree/nvim-web-devicons", lazy = true },
+    { "MunifTanjim/nui.nvim", lazy = true },
+    {
+      "folke/noice.nvim",
+      event = "VeryLazy",
+      dependencies = { "MunifTanjim/nui.nvim" },
+      opts = {
+        cmdline = {
+          enabled = true,
+          view = "cmdline_popup",
+        },
+        messages = {
+          enabled = true,
+          view = "notify",
+          view_error = "notify",
+          view_warn = "notify",
+        },
+        lsp = {
+          override = {
+            ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
+            ["vim.lsp.util.stylize_markdown"] = true,
+          },
+          hover = { enabled = true },
+          signature = { enabled = false }, -- blink.cmp handles signature
+          progress = { enabled = true, view = "mini" },
+        },
+        presets = {
+          bottom_search = true,
+          command_palette = true,
+          long_message_to_split = true,
+          lsp_doc_border = true,
+        },
+        routes = {
+          -- skip "written" messages
+          { filter = { event = "msg_show", kind = "", find = "written" }, opts = { skip = true } },
+        },
+      },
+      keys = {
+        { "<leader>sn", "", desc = "+noice" },
+        { "<leader>snl", function() require("noice").cmd("last") end, desc = "Noice Last Message" },
+        { "<leader>snh", function() require("noice").cmd("history") end, desc = "Noice History" },
+        { "<leader>sna", function() require("noice").cmd("all") end, desc = "Noice All" },
+        { "<leader>snd", function() require("noice").cmd("dismiss") end, desc = "Dismiss All" },
+      },
+    },
     {
       "folke/flash.nvim",
       event = "VeryLazy",
