@@ -20,6 +20,7 @@
     ../modules/k9s
     ../modules/lsp
     ../modules/opencode
+    ../modules/rio
     ../modules/terraform
     ../modules/vim
     ../modules/vscode

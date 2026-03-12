@@ -1,0 +1,79 @@
+# Rio terminal configuration
+# Colors: One Half Light (ported from Ghostty)
+
+padding-x = 10
+padding-y = [10, 10]
+line-height = 1.0
+confirm-before-quit = false
+hide-mouse-cursor-when-typing = true
+
+[cursor]
+shape = "beam"
+blinking = false
+
+[window]
+opacity = 0.95
+blur = false
+decorations = "Buttonless"
+
+[fonts]
+size = 13
+
+[fonts.regular]
+family = "JetBrains Mono"
+style = "Normal"
+weight = 400
+
+[fonts.bold]
+family = "JetBrains Mono"
+style = "Normal"
+weight = 700
+
+[fonts.italic]
+family = "JetBrains Mono"
+style = "Italic"
+weight = 400
+
+[fonts.bold-italic]
+family = "JetBrains Mono"
+style = "Italic"
+weight = 700
+
+# CJK fallback
+[fonts.extras]
+family = "Sarasa Mono CL"
+
+[keyboard]
+disable-ctlseqs-alt = false
+
+[navigation]
+mode = "NativeTab"
+hide-if-single = true
+
+[scroll]
+multiplier = 3.0
+divider = 1.0
+
+# One Half Light theme
+[colors]
+background = "#fdfdfd"
+foreground = "#383a42"
+cursor = "#0184bc"
+selection-background = "#bfceff"
+selection-foreground = "#383a42"
+black = "#383a42"
+red = "#e45649"
+green = "#50a14f"
+yellow = "#c18401"
+blue = "#0184bc"
+magenta = "#a626a4"
+cyan = "#0997b3"
+white = "#fdfdfd"
+light-black = "#4f525e"
+light-red = "#e06c75"
+light-green = "#98c379"
+light-yellow = "#e5c07b"
+light-blue = "#61afef"
+light-magenta = "#c678dd"
+light-cyan = "#56b6c2"
+light-white = "#ffffff"
