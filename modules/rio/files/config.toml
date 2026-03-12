@@ -1,0 +1,59 @@
+option-as-alt = 'both'
+
+[window]
+opacity = 0.95
+
+[cursor]
+shape = 'beam'
+
+[fonts]
+family = "JetBrainsMono Nerd Font Mono"
+size = 13
+extras = [{ family = "Sarasa Mono CL" }]
+
+[colors]
+background = '#fdfdfd'
+foreground = '#383a42'
+cursor = '#0184bc'
+vi-cursor = '#a626a4'
+tabs = '#f0f0f0'
+tabs-foreground = '#4f525e'
+tabs-active = '#fdfdfd'
+tabs-active-highlight = '#0184bc'
+tabs-active-foreground = '#383a42'
+bar = '#f0f0f0'
+split = '#e5e5e5'
+search-match-background = '#e5c07b'
+search-match-foreground = '#383a42'
+search-focused-match-background = '#0184bc'
+search-focused-match-foreground = '#ffffff'
+hint-foreground = '#383a42'
+hint-background = '#e5c07b'
+selection-background = '#bfceff'
+selection-foreground = '#383a42'
+black = '#383a42'
+blue = '#0184bc'
+cyan = '#0997b3'
+green = '#50a14f'
+magenta = '#a626a4'
+red = '#e45649'
+white = '#fdfdfd'
+yellow = '#c18401'
+dim-black = '#696b77'
+dim-blue = '#016896'
+dim-cyan = '#077990'
+dim-foreground = '#a0a1a7'
+dim-green = '#3d7a3c'
+dim-magenta = '#841e83'
+dim-red = '#a7545a'
+dim-white = '#d0d0d0'
+dim-yellow = '#9a6a01'
+light-black = '#4f525e'
+light-blue = '#61afef'
+light-cyan = '#56b6c2'
+light-foreground = '#383a42'
+light-green = '#98c379'
+light-magenta = '#c678dd'
+light-red = '#e06c75'
+light-white = '#ffffff'
+light-yellow = '#e5c07b'
