@@ -98,21 +98,21 @@ modules/<name>/
 
 #### Module Reference
 
-| Module       | Purpose              | Key Files                                       | Mutable |
-| ------------ | -------------------- | ----------------------------------------------- | ------- |
-| `claude/`    | Claude Code          | `files/settings.json`, `files/CLAUDE.md`        | 부분적  |
-| `codex/`     | OpenAI Codex CLI     | `files/config.toml`, `files/AGENTS.md`          | YES     |
-| `ghostty/`   | Ghostty terminal     | `files/config`                                  | YES     |
-| `git/`       | Git configuration    | `default.nix`                                   | NO      |
-| `helix/`     | Helix editor         | `files/config.toml`                             | YES     |
-| `k9s/`       | Kubernetes manager   | `default.nix`                                   | NO      |
-| `lsp/`       | LSP server packages  | `default.nix`                                   | NO      |
-| `opencode/`  | OpenCode AI agent    | `files/opencode.json`, `files/AGENTS.md`        | YES     |
-| `terraform/` | Terraform versions   | `default.nix` (direnv lazy-load)                | NO      |
-| `vim/`       | Neovim               | `files/config/init.lua`, `files/onelight.lua`   | YES     |
-| `vscode/`    | VSCode (DISABLED)    | `default.nix`, `one-half-light-theme/`          | NO      |
-| `zed/`       | Zed editor           | `files/settings.json`, `themes/one-half-light.json` | YES     |
-| `zsh/`       | Zsh shell            | `default.nix`, `starship.toml`                  | NO      |
+| Module       | Purpose             | Key Files                                           | Mutable |
+| ------------ | ------------------- | --------------------------------------------------- | ------- |
+| `claude/`    | Claude Code         | `files/settings.json`, `files/CLAUDE.md`            | 부분적  |
+| `codex/`     | OpenAI Codex CLI    | `files/config.toml`, `files/AGENTS.md`              | YES     |
+| `ghostty/`   | Ghostty terminal    | `files/config`                                      | YES     |
+| `git/`       | Git configuration   | `default.nix`                                       | NO      |
+| `helix/`     | Helix editor        | `files/config.toml`                                 | YES     |
+| `k9s/`       | Kubernetes manager  | `default.nix`                                       | NO      |
+| `lsp/`       | LSP server packages | `default.nix`                                       | NO      |
+| `opencode/`  | OpenCode AI agent   | `files/opencode.json`, `files/AGENTS.md`            | YES     |
+| `terraform/` | Terraform versions  | `default.nix` (direnv lazy-load)                    | NO      |
+| `vim/`       | Neovim              | `files/config/init.lua`, `files/onelight.lua`       | YES     |
+| `vscode/`    | VSCode (DISABLED)   | `default.nix`, `one-half-light-theme/`              | NO      |
+| `zed/`       | Zed editor          | `files/settings.json`, `themes/one-half-light.json` | YES     |
+| `zsh/`       | Zsh shell           | `default.nix`, `starship.toml`                      | NO      |
 
 > **Mutable**: `mkOutOfStoreSymlink`로 설정 파일이 repo로 직접 symlink됨. 앱 UI에서 수정 가능, 변경이 즉시 repo에 반영. `nfc` alias로 커밋.
 
