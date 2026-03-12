@@ -339,9 +339,9 @@ require("lazy").setup({
       dependencies = { "nvim-treesitter/nvim-treesitter", "nvim-tree/nvim-web-devicons" },
       ft = { "markdown" },
       opts = {
-        -- Avoid duplicate heading markers in the sign column and buffer text.
-        heading = {
-          sign = false,
+        -- Keep markdown decorations inline and avoid duplicated gutter markers.
+        sign = {
+          enabled = false,
         },
       },
     },
