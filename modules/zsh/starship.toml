@@ -33,11 +33,11 @@ $pixi\
 $fill\
 [](fg:highlight_low)\
 $kubernetes\
-[](fg:surface bg:highlight_low)\
+[](fg:highlight_med bg:highlight_low)\
 $hostname\
-[](fg:highlight_med bg:surface)\
+[](fg:overlay bg:highlight_med)\
 $time\
-[](fg:highlight_med)
+[](fg:overlay)
 $character"""
 
 [fill]
@@ -146,13 +146,13 @@ format = '[[ $symbol$context ](fg:foam bg:highlight_low)]($style)'
 [time]
 disabled = false
 time_format = "%R"
-style = "bg:highlight_med"
-format = '[[ 󰥔 $time ](fg:muted bg:highlight_med)]($style)'
+style = "bg:overlay"
+format = '[[ 󰥔 $time ](fg:muted bg:overlay)]($style)'
 
 [hostname]
 ssh_only = true
-style = "bg:surface"
-format = '[[  $hostname ](fg:love bg:surface)]($style)'
+style = "bg:highlight_med"
+format = '[[  $hostname ](fg:love bg:highlight_med)]($style)'
 
 [character]
 disabled = false
