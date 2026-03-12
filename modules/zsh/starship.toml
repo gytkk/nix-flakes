@@ -1,6 +1,10 @@
 # Starship configuration
 # Style: Tokyo Night layout with rounded edges
 # Colors: One Half Light palette
+#
+# Powerline layers (fill 기준, 안쪽 → 바깥쪽):
+#   layer1 (#f5f5f5) → layer2 (#e8e8e8) → layer3 (#d8d8d8)
+#   좌우 프롬프트 모두 동일한 layer alias 사용
 
 "$schema" = 'https://starship.rs/config-schema.json'
 
@@ -11,10 +15,10 @@ format = """
 [ 󰉋 ](bg:iris fg:base)\
 [](bg:foam fg:iris)\
 $directory\
-[](fg:foam bg:overlay)\
+[](fg:foam bg:layer3)\
 $git_branch\
 $git_status\
-[](fg:overlay bg:highlight_med)\
+[](fg:layer3 bg:layer2)\
 $c\
 $cpp\
 $rust\
@@ -25,19 +29,19 @@ $java\
 $kotlin\
 $haskell\
 $python\
-[](fg:highlight_med bg:highlight_low)\
+[](fg:layer2 bg:layer1)\
 $docker_context\
 $conda\
 $pixi\
-[](fg:highlight_low)\
+[](fg:layer1)\
 $fill\
-[](fg:highlight_low)\
+[](fg:layer1)\
 $kubernetes\
-[](fg:highlight_med bg:highlight_low)\
+[](fg:layer2 bg:layer1)\
 $hostname\
-[](fg:overlay bg:highlight_med)\
+[](fg:layer3 bg:layer2)\
 $time\
-[](fg:overlay)
+[](fg:layer3)
 $character"""
 
 [fill]
@@ -58,12 +62,12 @@ truncation_symbol = "…/"
 
 [git_branch]
 symbol = ""
-style = "bg:overlay"
-format = '[[ $symbol $branch ](fg:pine bg:overlay)]($style)'
+style = "bg:layer3"
+format = '[[ $symbol $branch ](fg:pine bg:layer3)]($style)'
 
 [git_status]
-style = "bg:overlay"
-format = '[[($conflicted$staged$modified$untracked$renamed$deleted$stashed$ahead_behind )](fg:pine bg:overlay)]($style)'
+style = "bg:layer3"
+format = '[[($conflicted$staged$modified$untracked$renamed$deleted$stashed$ahead_behind )](fg:pine bg:layer3)]($style)'
 conflicted = "=$count "
 staged = "+$count "
 modified = "!$count "
@@ -74,85 +78,85 @@ stashed = "*$count "
 
 [c]
 symbol = " "
-style = "bg:highlight_med"
-format = '[[ $symbol($version) ](fg:foam bg:highlight_med)]($style)'
+style = "bg:layer2"
+format = '[[ $symbol($version) ](fg:foam bg:layer2)]($style)'
 
 [cpp]
 symbol = " "
-style = "bg:highlight_med"
-format = '[[ $symbol($version) ](fg:foam bg:highlight_med)]($style)'
+style = "bg:layer2"
+format = '[[ $symbol($version) ](fg:foam bg:layer2)]($style)'
 
 [nodejs]
 symbol = " "
-style = "bg:highlight_med"
-format = '[[ $symbol($version) ](fg:pine bg:highlight_med)]($style)'
+style = "bg:layer2"
+format = '[[ $symbol($version) ](fg:pine bg:layer2)]($style)'
 
 [rust]
 symbol = "󱘗 "
-style = "bg:highlight_med"
-format = '[[ $symbol($version) ](fg:rose bg:highlight_med)]($style)'
+style = "bg:layer2"
+format = '[[ $symbol($version) ](fg:rose bg:layer2)]($style)'
 
 [golang]
 symbol = " "
-style = "bg:highlight_med"
-format = '[[ $symbol($version) ](fg:foam bg:highlight_med)]($style)'
+style = "bg:layer2"
+format = '[[ $symbol($version) ](fg:foam bg:layer2)]($style)'
 
 [php]
 symbol = " "
-style = "bg:highlight_med"
-format = '[[ $symbol($version) ](fg:iris bg:highlight_med)]($style)'
+style = "bg:layer2"
+format = '[[ $symbol($version) ](fg:iris bg:layer2)]($style)'
 
 [java]
 symbol = " "
-style = "bg:highlight_med"
-format = '[[ $symbol($version) ](fg:love bg:highlight_med)]($style)'
+style = "bg:layer2"
+format = '[[ $symbol($version) ](fg:love bg:layer2)]($style)'
 
 [kotlin]
 symbol = " "
-style = "bg:highlight_med"
-format = '[[ $symbol($version) ](fg:iris bg:highlight_med)]($style)'
+style = "bg:layer2"
+format = '[[ $symbol($version) ](fg:iris bg:layer2)]($style)'
 
 [haskell]
 symbol = " "
-style = "bg:highlight_med"
-format = '[[ $symbol($version) ](fg:iris bg:highlight_med)]($style)'
+style = "bg:layer2"
+format = '[[ $symbol($version) ](fg:iris bg:layer2)]($style)'
 
 [python]
 symbol = " "
-style = "bg:highlight_med"
-format = '[[ $symbol($version) ](fg:gold bg:highlight_med)]($style)'
+style = "bg:layer2"
+format = '[[ $symbol($version) ](fg:gold bg:layer2)]($style)'
 
 [docker_context]
 symbol = " "
-style = "bg:highlight_low"
-format = '[[ $symbol($context) ](fg:foam bg:highlight_low)]($style)'
+style = "bg:layer1"
+format = '[[ $symbol($context) ](fg:foam bg:layer1)]($style)'
 
 [conda]
 symbol = " "
-style = "bg:highlight_low"
-format = '[[ $symbol($environment) ](fg:pine bg:highlight_low)]($style)'
+style = "bg:layer1"
+format = '[[ $symbol($environment) ](fg:pine bg:layer1)]($style)'
 
 [pixi]
 symbol = "󰏗 "
-style = "bg:highlight_low"
-format = '[[ $symbol($version) ($environment) ](fg:pine bg:highlight_low)]($style)'
+style = "bg:layer1"
+format = '[[ $symbol($version) ($environment) ](fg:pine bg:layer1)]($style)'
 
 [kubernetes]
 disabled = false
 symbol = "󱃾 "
-style = "bg:highlight_low"
-format = '[[ $symbol$context ](fg:foam bg:highlight_low)]($style)'
+style = "bg:layer1"
+format = '[[ $symbol$context ](fg:foam bg:layer1)]($style)'
 
 [time]
 disabled = false
 time_format = "%R"
-style = "bg:overlay"
-format = '[[ 󰥔 $time ](fg:muted bg:overlay)]($style)'
+style = "bg:layer3"
+format = '[[ 󰥔 $time ](fg:muted bg:layer3)]($style)'
 
 [hostname]
 ssh_only = true
-style = "bg:highlight_med"
-format = '[[  $hostname ](fg:love bg:highlight_med)]($style)'
+style = "bg:layer2"
+format = '[[  $hostname ](fg:love bg:layer2)]($style)'
 
 [character]
 disabled = false
@@ -181,3 +185,7 @@ highlight_low = "#f5f5f5"
 highlight_med = "#e8e8e8"
 highlight_high = "#d0d0d0"
 green = "#50a14f"
+# Powerline layer aliases (안쪽 → 바깥쪽)
+layer1 = "#f5f5f5"   # = highlight_low
+layer2 = "#e8e8e8"   # = highlight_med
+layer3 = "#d8d8d8"   # = overlay
