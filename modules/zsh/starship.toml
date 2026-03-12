@@ -31,13 +31,11 @@ $conda\
 $pixi\
 [](fg:highlight_low)\
 $fill\
-[](fg:highlight_low)\
+[](fg:overlay)\
 $kubernetes\
-[](fg:surface bg:highlight_low)\
 $hostname\
-[](fg:highlight_med bg:surface)\
 $time\
-[](fg:highlight_med)
+[](fg:overlay)
 $character"""
 
 [fill]
@@ -140,19 +138,19 @@ format = '[[ $symbol($version) ($environment) ](fg:pine bg:highlight_low)]($styl
 [kubernetes]
 disabled = false
 symbol = "󱃾 "
-style = "bg:highlight_low"
-format = '[[ $symbol$context ](fg:foam bg:highlight_low)]($style)'
+style = "bg:overlay"
+format = '[[ $symbol$context ](fg:foam bg:overlay)]($style)'
 
 [time]
 disabled = false
 time_format = "%R"
-style = "bg:highlight_med"
-format = '[[ 󰥔 $time ](fg:muted bg:highlight_med)]($style)'
+style = "bg:overlay"
+format = '[[ 󰥔 $time ](fg:muted bg:overlay)]($style)'
 
 [hostname]
 ssh_only = true
-style = "bg:surface"
-format = '[[  $hostname ](fg:love bg:surface)]($style)'
+style = "bg:overlay"
+format = '[[  $hostname ](fg:love bg:overlay)]($style)'
 
 [character]
 disabled = false
