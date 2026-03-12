@@ -102,7 +102,7 @@
           buttonFgColor = "#ffffff";
           buttonBgColor = "#0184bc";
           buttonFocusFgColor = "#ffffff";
-          buttonFocusBgColor = "#a626a4";
+          buttonFocusBgColor = "#d65d0e";
           labelFgColor = "#c18401";
           fieldFgColor = "#383a42";
         };
@@ -114,7 +114,7 @@
           menu = {
             fgColor = "#383a42";
             keyColor = "#0184bc";
-            numKeyColor = "#a626a4";
+            numKeyColor = "#d65d0e";
           };
           crumbs = {
             fgColor = "#383a42";
@@ -127,7 +127,7 @@
             addColor = "#50a14f";
             errorColor = "#e45649";
             highlightcolor = "#c18401";
-            killColor = "#a626a4";
+            killColor = "#d65d0e";
             completedColor = "#a0a1a7";
           };
           title = {
@@ -135,7 +135,7 @@
             bgColor = "#f0f0f0";
             highlightColor = "#c18401";
             counterColor = "#0184bc";
-            filterColor = "#a626a4";
+            filterColor = "#d65d0e";
           };
         };
         views = {
