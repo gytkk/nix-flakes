@@ -49,5 +49,5 @@
   "alwaysThinkingEnabled": true,
   "theme": "light",
   "teammateMode": "auto",
-  "reasoningEffort": "high"
+  "effortLevel": "high"
 }
