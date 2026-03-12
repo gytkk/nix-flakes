@@ -54,6 +54,7 @@
       gsw = "git switch";
       gco = "git checkout";
       gd = "git diff";
+      lg = "lazygit";
 
       # Neovim
       vim = "nvim";
