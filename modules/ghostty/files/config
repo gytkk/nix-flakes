@@ -7,7 +7,7 @@ selection-background = #bfceff
 selection-foreground = #383a42
 adjust-cursor-thickness = 250%
 cursor-style = bar
-cursor-color = #0184bc
+cursor-color = #3a9a88
 cursor-text = #ffffff
 cursor-click-to-move = true
 palette = 0=#383a42
