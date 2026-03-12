@@ -20,6 +20,7 @@ This module configures Neovim as the primary editor with a modern Lua-based setu
 - `nvim-treesitter` syntax parsing for the main languages used in this repository
 - `conform.nvim` formatting on save, including `nixfmt`, `prettier`, `rustfmt`, `gofmt`, and `ruff_format`
 - `gitsigns.nvim`, `lualine.nvim`, `flash.nvim`, `which-key.nvim`, `trouble.nvim`, and `render-markdown.nvim`
+- Markdown headings render with inline icons only, with sign-column heading markers disabled to avoid duplicates
 
 ## Notable Keymaps
 

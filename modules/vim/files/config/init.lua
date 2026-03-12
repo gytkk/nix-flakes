@@ -338,7 +338,12 @@ require("lazy").setup({
       "MeanderingProgrammer/render-markdown.nvim",
       dependencies = { "nvim-treesitter/nvim-treesitter", "nvim-tree/nvim-web-devicons" },
       ft = { "markdown" },
-      opts = {},
+      opts = {
+        -- Avoid duplicate heading markers in the sign column and buffer text.
+        heading = {
+          sign = false,
+        },
+      },
     },
     {
       "folke/trouble.nvim",
