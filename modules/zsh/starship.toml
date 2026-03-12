@@ -7,9 +7,9 @@
 palette = 'one_half_light'
 
 format = """
-[](iris)\
-[ 󰉋 ](bg:iris fg:base)\
-[](bg:foam fg:iris)\
+[](iris_deep)\
+[ 󰉋 ](bg:iris_deep fg:base)\
+[](bg:foam fg:iris_deep)\
 $directory\
 [](fg:foam bg:overlay)\
 $git_branch\
@@ -177,6 +177,7 @@ rose = "#e06c75"
 pine = "#0184bc"
 foam = "#0997b3"
 iris = "#a626a4"
+iris_deep = "#8f2291"
 highlight_low = "#f5f5f5"
 highlight_med = "#e8e8e8"
 highlight_high = "#d0d0d0"
