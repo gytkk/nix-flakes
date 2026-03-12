@@ -65,7 +65,7 @@ require("lazy").setup({
         lazygit = { enabled = true },
         quickfile = { enabled = true },
         rename = { enabled = true },
-        scroll = { enabled = true },
+        scroll = { enabled = false },
         scope = { enabled = true },
         statuscolumn = { enabled = true },
         toggle = { enabled = true },
