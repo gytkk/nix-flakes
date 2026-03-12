@@ -1,6 +1,4 @@
 {
-  "enableAllProjectMcpServers": true,
-  "alwaysThinkingEnabled": true,
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
@@ -25,16 +23,13 @@
     ],
     "defaultMode": "acceptEdits"
   },
-  "spinnerTipsEnabled": false,
-  "theme": "light",
-  "language": "korean",
-  "teammateMode": "auto",
   "model": "opus",
+  "enableAllProjectMcpServers": true,
+  "hooks": {},
   "statusLine": {
     "type": "command",
     "command": "bash ~/.claude/statusline-command.sh"
   },
-  "hooks": {},
   "enabledPlugins": {
     "document-skills@anthropic-agent-skills": true,
     "security-guidance@claude-code-plugins": true,
@@ -48,5 +43,11 @@
     "ty-lsp@gytkk": true,
     "terraform-ls@gytkk": true,
     "nixd-lsp@gytkk": true
-  }
+  },
+  "language": "korean",
+  "spinnerTipsEnabled": false,
+  "alwaysThinkingEnabled": true,
+  "theme": "light",
+  "teammateMode": "auto",
+  "reasoningEffort": "high"
 }
