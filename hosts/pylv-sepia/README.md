@@ -39,11 +39,41 @@ home.packages = with pkgs; [
 ];
 ```
 
+## Obsidian Sync (Headless) Setup
+
+서버 배포 후 1회 실행이 필요합니다.
+
+```bash
+# 1. SSH로 서버 접속
+ssh pylv-sepia
+
+# 2. Obsidian 계정 로그인
+ob login
+
+# 3. 원격 vault 목록 확인
+ob sync-list-remote
+
+# 4. vault 연결 (vault 이름은 ob sync-list-remote 결과 참고)
+ob sync-setup --vault "<Vault Name>" --path ~/obsidian
+
+# 5. pull-only 모드 설정 (서버는 읽기 전용)
+ob sync-config --path ~/obsidian --sync-mode pull-only
+
+# 6. systemd 서비스 재시작
+sudo systemctl restart obsidian-sync
+
+# 7. 상태 확인
+systemctl status obsidian-sync
+ob sync-status --path ~/obsidian
+```
+
 ## File Structure
 
 | File | Description |
 |------|-------------|
 | `configuration.nix` | NixOS system configuration (services, users) |
+| `obsidian-headless.nix` | Obsidian Headless Sync service |
+| `openclaw.nix` | OpenClaw Gateway AI assistant service |
 | `disk-config.nix` | Disk partitioning configuration (disko) |
 | `hardware-configuration.nix` | Auto-generated hardware configuration |
 
@@ -56,5 +86,3 @@ This configuration uses shared modules from the main flake:
 - `modules/vim` - Neovim configuration
 - `modules/claude` - Claude Code configuration
 - `modules/terraform` - Terraform version management
-
-
