@@ -29,7 +29,7 @@ palette = 15=#ffffff
 
 background-opacity = 0.95
 
-font-size = 13
+font-size = 12
 font-family = "JetBrains Mono"
 
 # CJK Fallback
