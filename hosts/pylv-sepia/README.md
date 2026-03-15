@@ -64,22 +64,24 @@ systemctl status obsidian-sync
 ob sync-status --path ~/obsidian
 ```
 
-## Obsidian Tasks Maintenance
+## Obsidian Maintenance
 
-매일 KST 0시에 `personal/todos/active.md`를 자동 관리합니다:
+매시간 `personal/todos/active.md`와 `personal/events/active.md`를 자동 관리합니다:
 
-- **Due date 롤오버**: 미완료 아이템의 due date가 오늘 이전이면 오늘로 업데이트
-- **아카이빙**: 완료 후 7일 넘은 아이템을 월별 파일(`personal/todos/YYYY/MM.md`)로 이동
+- **Tasks due date 롤오버**: 미완료 아이템의 due date가 오늘 이전이면 오늘로 업데이트
+- **Tasks 아카이빙**: 완료 후 7일 넘은 아이템을 월별 파일(`personal/todos/YYYY/MM.md`)로 이동
+- **Events 자동 완료**: 미완료 이벤트의 `[date::]`가 오늘 이전이면 `- [x]`로 업데이트
+- **Events 아카이빙**: 이벤트 날짜 기준 7일 지난 완료 이벤트를 월별 파일(`personal/events/YYYY/MM.md`)로 이동
 
 ```bash
 # 수동 실행
-sudo systemctl start obsidian-tasks-maintenance
+sudo systemctl start obsidian-maintenance
 
 # 로그 확인
-journalctl -u obsidian-tasks-maintenance
+journalctl -u obsidian-maintenance
 
 # timer 상태 확인
-systemctl list-timers | rg obsidian-tasks
+systemctl list-timers | rg obsidian-maintenance
 ```
 
 ## File Structure
@@ -88,7 +90,7 @@ systemctl list-timers | rg obsidian-tasks
 |------|-------------|
 | `configuration.nix` | NixOS system configuration (services, users) |
 | `obsidian-headless.nix` | Obsidian Headless Sync service |
-| `obsidian-tasks-maintenance/` | Obsidian Tasks daily maintenance (timer + script) |
+| `obsidian-maintenance/` | Obsidian tasks/events hourly maintenance (timer + scripts) |
 | `openclaw.nix` | OpenClaw Gateway AI assistant service |
 | `disk-config.nix` | Disk partitioning configuration (disko) |
 | `hardware-configuration.nix` | Auto-generated hardware configuration |

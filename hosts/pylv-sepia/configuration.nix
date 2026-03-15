@@ -9,7 +9,7 @@
     (modulesPath + "/profiles/qemu-guest.nix")
     ./disk-config.nix
     ./obsidian-headless.nix
-    ./obsidian-tasks-maintenance
+    ./obsidian-maintenance
     ./openclaw.nix
   ];
 
