@@ -49,7 +49,9 @@ def rollover_due_date(line: str, today: date) -> str:
         return line
     due = parse_date(m.group(1))
     if due < today:
-        return line[: m.start(1)] + today.isoformat() + line[m.end(1) :]
+        before = line[:m.start(1)]
+        after = line[m.end(1):]
+        return before + today.isoformat() + after
     return line
 
 
@@ -69,7 +71,7 @@ def should_archive(line: str, cutoff: date) -> date | None:
 def insert_into_archive(
     sections: dict[str, list[str]], date_key: str, task_line: str
 ) -> None:
-    """Insert a task line into the archive sections dict under the given date key."""
+    """Insert a task into the archive sections under date_key."""
     sections.setdefault(date_key, []).append(task_line)
 
 
@@ -79,7 +81,7 @@ def write_archive_file(
     month: int,
     new_sections: dict[str, list[str]],
 ) -> int:
-    """Write or append tasks to a monthly archive file. Returns count of archived tasks."""
+    """Write or append tasks to a monthly archive file."""
     archive_path.parent.mkdir(parents=True, exist_ok=True)
     existing_sections: dict[str, list[str]] = {}
     header = ""
@@ -205,7 +207,7 @@ def main() -> None:
     # Clean empty sections from active.md
     new_lines = clean_empty_sections(new_lines)
 
-    # Write archive files first (before active.md) to prevent task loss on failure
+    # Write archives first to prevent task loss on failure
     for (year, month), sections in archive_tasks.items():
         archive_path = todos_dir / str(year) / f"{month:02d}.md"
         count = write_archive_file(archive_path, year, month, sections)
@@ -214,7 +216,10 @@ def main() -> None:
     # Write updated active.md only after archives succeed
     active_file.write_text("\n".join(new_lines), encoding="utf-8")
 
-    print(f"Done: {rollover_count} due dates rolled over, {archive_count} tasks archived")
+    print(
+        f"Done: {rollover_count} rolled over,"
+        f" {archive_count} archived"
+    )
 
 
 if __name__ == "__main__":
