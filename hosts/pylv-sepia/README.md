@@ -53,16 +53,13 @@ ob login
 # 3. 원격 vault 목록 확인
 ob sync-list-remote
 
-# 4. vault 연결 (vault 이름은 ob sync-list-remote 결과 참고)
+# 4. vault 연결 (vault 이름은 ob sync-list-remote 결과 참고, 기본 bidirectional 모드)
 ob sync-setup --vault "<Vault Name>" --path ~/obsidian
 
-# 5. bidirectional 모드 설정 (tasks maintenance에서 파일 수정 필요)
-ob sync-config --path ~/obsidian --sync-mode bidirectional
-
-# 6. systemd 서비스 재시작
+# 5. systemd 서비스 재시작
 sudo systemctl restart obsidian-sync
 
-# 7. 상태 확인
+# 6. 상태 확인
 systemctl status obsidian-sync
 ob sync-status --path ~/obsidian
 ```
