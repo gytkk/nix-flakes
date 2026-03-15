@@ -56,8 +56,8 @@ ob sync-list-remote
 # 4. vault 연결 (vault 이름은 ob sync-list-remote 결과 참고)
 ob sync-setup --vault "<Vault Name>" --path ~/obsidian
 
-# 5. pull-only 모드 설정 (서버는 읽기 전용)
-ob sync-config --path ~/obsidian --sync-mode pull-only
+# 5. bidirectional 모드 설정 (tasks maintenance에서 파일 수정 필요)
+ob sync-config --path ~/obsidian --sync-mode bidirectional
 
 # 6. systemd 서비스 재시작
 sudo systemctl restart obsidian-sync
@@ -67,12 +67,31 @@ systemctl status obsidian-sync
 ob sync-status --path ~/obsidian
 ```
 
+## Obsidian Tasks Maintenance
+
+매일 KST 0시에 `personal/todos/active.md`를 자동 관리합니다:
+
+- **Due date 롤오버**: 미완료 아이템의 due date가 오늘 이전이면 오늘로 업데이트
+- **아카이빙**: 완료 후 7일 넘은 아이템을 월별 파일(`personal/todos/YYYY/MM.md`)로 이동
+
+```bash
+# 수동 실행
+sudo systemctl start obsidian-tasks-maintenance
+
+# 로그 확인
+journalctl -u obsidian-tasks-maintenance
+
+# timer 상태 확인
+systemctl list-timers | rg obsidian-tasks
+```
+
 ## File Structure
 
 | File | Description |
 |------|-------------|
 | `configuration.nix` | NixOS system configuration (services, users) |
 | `obsidian-headless.nix` | Obsidian Headless Sync service |
+| `obsidian-tasks-maintenance/` | Obsidian Tasks daily maintenance (timer + script) |
 | `openclaw.nix` | OpenClaw Gateway AI assistant service |
 | `disk-config.nix` | Disk partitioning configuration (disko) |
 | `hardware-configuration.nix` | Auto-generated hardware configuration |

@@ -9,8 +9,11 @@
     (modulesPath + "/profiles/qemu-guest.nix")
     ./disk-config.nix
     ./obsidian-headless.nix
+    ./obsidian-tasks-maintenance
     ./openclaw.nix
   ];
+
+  time.timeZone = "Asia/Seoul";
 
   boot.loader.grub = {
     efiSupport = true;
