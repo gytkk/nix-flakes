@@ -14,13 +14,13 @@ let
   );
 in
 {
-  # systemd timer - KST 자정 실행 (time.timeZone = "Asia/Seoul" 필요)
+  # systemd timer - 1시간마다 실행
   systemd.timers.obsidian-tasks-maintenance = {
     description = "Obsidian Tasks Maintenance Timer";
     wantedBy = [ "timers.target" ];
     timerConfig = {
-      OnCalendar = "*-*-* 00:00:00";
-      Persistent = true; # 서버 다운 시 부팅 후 실행
+      OnCalendar = "hourly";
+      Persistent = true;
       Unit = "obsidian-tasks-maintenance.service";
     };
   };
