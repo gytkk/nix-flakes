@@ -7,7 +7,7 @@
 let
   vaultPath = "${homeDirectory}/obsidian";
 
-  obsidian-maintenance = pkgs.writers.writePython3Bin "obsidian-maintenance" { } (
+  obsidian-maintenance = pkgs.writers.writePython3Bin "obsidian-maintenance" { flakeIgnore = [ "E501" "E203" ]; } (
     builtins.readFile ./scripts/maintenance.py
   );
 in

@@ -6,7 +6,8 @@
 }:
 let
   obsidian-headless = pkgs.callPackage ../../packages/obsidian-headless/package.nix { };
-  vaultPath = "${homeDirectory}/obsidian";
+  vaultName = "personal";
+  vaultPath = "${homeDirectory}/obsidian/${vaultName}";
 in
 {
   # Vault 디렉토리 생성
@@ -21,7 +22,7 @@ in
     wants = [ "network-online.target" ];
     wantedBy = [ "multi-user.target" ];
     script = ''
-      ${obsidian-headless}/bin/ob sync --continuous --path ${vaultPath}
+      ${obsidian-headless}/bin/ob sync --continuous --path ${vaultPath} --vault ${vaultName}
     '';
     serviceConfig = {
       Type = "simple";
