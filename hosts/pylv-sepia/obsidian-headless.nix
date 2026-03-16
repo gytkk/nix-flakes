@@ -22,7 +22,7 @@ in
     wants = [ "network-online.target" ];
     wantedBy = [ "multi-user.target" ];
     script = ''
-      ${obsidian-headless}/bin/ob sync --continuous --path ${vaultPath} --vault ${vaultName}
+      ${obsidian-headless}/bin/ob sync --continuous --path ${vaultPath}
     '';
     serviceConfig = {
       Type = "simple";
