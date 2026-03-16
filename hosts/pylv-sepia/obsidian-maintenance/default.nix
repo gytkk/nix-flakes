@@ -16,14 +16,6 @@ let
   } (builtins.readFile ./scripts/maintenance.py);
 in
 {
-  # agenix secret for Google Workspace CLI credentials (OAuth2)
-  age.secrets.gws-credentials = {
-    file = ../../../secrets/gws-credentials.age;
-    owner = username;
-    group = "users";
-    mode = "0400";
-  };
-
   # systemd timer - 1시간마다 실행
   systemd.timers.obsidian-maintenance = {
     description = "Obsidian Maintenance Timer";
@@ -48,11 +40,11 @@ in
       User = username;
       Group = "users";
     };
-    environment = {
-      GOOGLE_WORKSPACE_CLI_CREDENTIALS_FILE = "/run/agenix/gws-credentials";
-    };
+    environment = { };
     script = ''
-      ${obsidian-maintenance}/bin/obsidian-maintenance ${vaultPath} ${inputs.gws.packages.${pkgs.system}.default}/bin/gws
+      ${obsidian-maintenance}/bin/obsidian-maintenance ${vaultPath} ${
+        inputs.gws.packages.${pkgs.system}.default
+      }/bin/gws
     '';
   };
 }
