@@ -8,43 +8,22 @@
 - **Ask, don't guess.** If requirements are ambiguous or context is missing, ask the user immediately.
 - **Surface blockers early.** Flag missing info, risky assumptions, or dependencies NOW — not after building on them.
 
-## Codex MCP Delegation Policy (PROACTIVE)
+## Codex MCP Usage Policy
 
-> **CRITICAL**: Apply the two delegation rules below to all tasks proactively.
-> When conditions are met, delegate autonomously without waiting for user request.
+> Codex tools (`/codex:hephaestus`, `/codex:critic`, `/codex:analyze`, `/codex:debate`) are **only used when the user explicitly requests them**.
+> Do NOT invoke Codex tools proactively or autonomously.
 
-### 1. Implementation → `/codex:hephaestus`
+### Review with `/codex:critic`
 
-Delegate **complex implementation tasks** to Codex for autonomous execution.
+When the user requests a review, or when changes are large-scale, use `/codex:critic` to independently verify work.
 
-**Delegation criteria** (delegate when one or more apply):
+**Large-scale change criteria** (review when ALL apply):
 
-- Implementation expected to modify 3+ files
-- Adding new features/modules, large-scale refactoring
-- Bulk changes across multiple files (rename, migration)
-- Changes involving public interfaces (API, export, option)
-
-**Do NOT delegate**: Simple 1–2 file edits, exploration-only tasks, or when the user explicitly requests direct implementation
-
-> **Priority**: When delegation and non-delegation criteria overlap (e.g., single file but public interface change),
-> delegation criteria take precedence.
-
-```text
-/codex:hephaestus "<description of task objective>"
-```
-
-### 2. Review → `/codex:critic`
-
-Independently verify work performed by the Claude Code main agent.
-
-**Review targets** (review when one or more apply):
-
-- 2+ files modified
-- New feature/module added
-- Refactoring or existing behavior changes
+- 5+ files modified
+- New module/feature added or major architectural refactoring
 - Public interface (API, export, option) changes
 
-**Not subject to review**: Single-file typo/wording fixes, comment/docs-only changes, formatting-only changes
+**Not subject to review**: Changes that do not meet all of the above criteria, unless the user explicitly requests a review.
 
 **Verdict criteria**:
 
@@ -58,20 +37,6 @@ Independently verify work performed by the Claude Code main agent.
 /codex:critic "<summary of original user request>"
 ```
 
-### Codex Delegation Workflow
-
-```text
-User request → Evaluate delegation criteria
-  ├─ Delegation target → User approval (Planning & Approval) → /codex:hephaestus → git diff verification → Review if applicable → /codex:critic → Commit
-  └─ Direct implementation
-      ├─ Complex change → User approval (Planning & Approval) → Implement → Review if applicable → /codex:critic → Commit
-      └─ Simple change → Implement → Review if applicable → /codex:critic → Commit
-```
-
-- Invoke proactively when the execution point is reached, even without explicit user request
-- Do NOT use `/plannotator-review` or other review skills in place of `/codex:critic`
-- If Codex MCP tools are unavailable or unresponsive, fall back to direct execution by the main agent
-
 ---
 
 ## Git & Commit Workflow
@@ -79,11 +44,11 @@ User request → Evaluate delegation criteria
 > **CRITICAL**: Follow the single flow from change completion through commit.
 
 1. Complete one logical change
-2. If subject to review → Run `/codex:critic`
+2. If large-scale change (see Codex MCP Usage Policy) → Run `/codex:critic`
    - `pass` → Proceed to commit
    - `warn` → Report to user; commit only after explicit approval
    - `fail` → Fix and re-verify
-3. If not subject to review → Commit immediately
+3. Otherwise → Commit immediately
 4. Do not bundle unrelated changes into a single commit
 
 **Commit rules**:
@@ -95,13 +60,11 @@ User request → Evaluate delegation criteria
 
 ## Planning & Approval
 
-> Complexity assessment uses the same criteria as the delegation policy (see Codex MCP Delegation Policy).
-
-**Simple changes** (delegation criteria not met: 1–2 file simple edits, low risk):
+**Simple changes** (1–2 file simple edits, low risk):
 
 - Apply immediately → Confirm with diff and verification results
 
-**Complex changes** (delegation criteria met: 3+ files, new feature/module, public interface changes, etc.):
+**Complex changes** (3+ files, new feature/module, public interface changes, etc.):
 
 - Use `EnterPlanMode` to design the approach, then `ExitPlanMode` to submit for user approval
 - If the user provides feedback, revise the plan accordingly
