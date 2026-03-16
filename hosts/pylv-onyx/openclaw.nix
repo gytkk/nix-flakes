@@ -69,7 +69,7 @@ in
         tailscale.mode = "serve";
         controlUi = {
           dangerouslyDisableDeviceAuth = true;
-          allowedOrigins = [ "https://pylv-sepia.tailbbb9bf.ts.net:8443" ];
+          allowedOrigins = [ "https://pylv-onyx.tailbbb9bf.ts.net:8443" ];
         };
       };
 

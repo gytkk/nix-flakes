@@ -10,7 +10,6 @@
     ./disk-config.nix
     ./obsidian-headless.nix
     ./obsidian-maintenance
-    ./openclaw.nix
   ];
 
   time.timeZone = "Asia/Seoul";

@@ -3,7 +3,10 @@
   ...
 }@args:
 {
-  imports = [ ./hardware-configuration.nix ];
+  imports = [
+    ./hardware-configuration.nix
+    ./openclaw.nix
+  ];
 
   boot.loader = {
     systemd-boot.enable = true;

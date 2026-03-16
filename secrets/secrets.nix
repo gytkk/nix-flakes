@@ -13,10 +13,14 @@ let
 
   # Host SSH public keys (for host-specific secrets)
   pylv-sepia = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIC6EAZczgXONlXiwh946SidpRKSMw7fehg0u2L5SkHmd";
+  # TODO: pylv-onyx host key 추가 후 `agenix -r` 재암호화 필요
+  # pylv-onyx = "ssh-ed25519 ...";
 
   # Key groups
   allUsers = [ gytkk ];
-  allHosts = [ pylv-sepia ];
+  allHosts = [
+    pylv-sepia # pylv-onyx
+  ];
 in
 {
   # Cloudflare Tunnel token for pylv-sepia
