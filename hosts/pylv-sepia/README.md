@@ -66,7 +66,8 @@ ob sync-status --path ~/obsidian
 
 ## Obsidian Maintenance
 
-매시간 `personal/todos/active.md`와 `personal/events/active.md`를 자동 관리합니다:
+매시간 `personal/todos/active.md`와 `personal/events/active.md`를 자동 관리합니다.
+`obsidian-sync.service`가 continuous 모드로 vault 동기화를 담당하므로, maintenance 서비스는 파일 처리만 수행합니다.
 
 - **Tasks due date 롤오버**: 미완료 아이템의 due date가 오늘 이전이면 오늘로 업데이트
 - **Tasks 아카이빙**: 완료 후 7일 넘은 아이템을 월별 파일(`personal/todos/YYYY/MM.md`)로 이동
