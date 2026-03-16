@@ -23,7 +23,6 @@
     ],
     "defaultMode": "acceptEdits"
   },
-  "model": "opus",
   "enableAllProjectMcpServers": true,
   "hooks": {},
   "statusLine": {
@@ -47,7 +46,7 @@
   "language": "korean",
   "spinnerTipsEnabled": false,
   "alwaysThinkingEnabled": true,
+  "effortLevel": "high",
   "theme": "light",
-  "teammateMode": "auto",
-  "effortLevel": "high"
+  "teammateMode": "auto"
 }
