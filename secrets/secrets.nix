@@ -28,4 +28,7 @@ in
 
   # Discord bot token for openclaw
   "discord-bot-token.age".publicKeys = allUsers ++ allHosts;
+
+  # Google Workspace CLI credentials for obsidian-maintenance calendar sync
+  "gws-credentials.age".publicKeys = allUsers ++ allHosts;
 }

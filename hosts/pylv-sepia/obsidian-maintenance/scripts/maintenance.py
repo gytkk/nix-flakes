@@ -1,14 +1,17 @@
 """Obsidian maintenance script.
 
 Processes active.md files in an Obsidian vault:
-1. Tasks: Rolls over past-due dates, archives completed tasks older than 7 days
-2. Events: Auto-completes past events, archives completed events older than 7 days
+1. Calendar sync: Syncs active events to Google Calendar via gws CLI
+2. Tasks: Rolls over past-due dates, archives completed tasks older than 7 days
+3. Events: Auto-completes past events, archives completed events older than 7 days
 """
 
+import json
 import re
+import subprocess
 import sys
 import traceback
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 # Shared patterns
@@ -23,6 +26,12 @@ RECURRENCE_RE = re.compile(r"\[recurrence::|🔁")
 
 # Events-specific patterns
 DATE_RE = re.compile(r"\[date::\s*(\d{4}-\d{2}-\d{2})\]")
+START_RE = re.compile(r"\[start::\s*(\d{2}:\d{2})\]")
+END_RE = re.compile(r"\[end::\s*(\d{2}:\d{2})\]")
+TAG_RE = re.compile(r"\s*\[[a-z]+::\s*[^\]]*\]")
+
+TIMEZONE = "Asia/Seoul"
+TIMEZONE_OFFSET = "+09:00"
 
 MONTH_NAMES = [
     "",
@@ -43,6 +52,199 @@ MONTH_NAMES = [
 
 def parse_date(s: str) -> date:
     return date.fromisoformat(s)
+
+
+# --- Google Calendar sync ---
+
+
+def parse_event_line(line: str) -> dict | None:
+    """Parse an active event line into a structured dict for calendar sync.
+
+    Returns None if the line is not an active uncompleted event or has no date.
+    """
+    if not ACTIVE_RE.match(line):
+        return None
+    date_match = DATE_RE.search(line)
+    if not date_match:
+        return None
+
+    name = ACTIVE_RE.sub("", line)
+    name = TAG_RE.sub("", name).strip()
+
+    start_match = START_RE.search(line)
+    end_match = END_RE.search(line)
+
+    return {
+        "name": name,
+        "date": date_match.group(1),
+        "start": start_match.group(1) if start_match else None,
+        "end": end_match.group(1) if end_match else None,
+    }
+
+
+def event_key(event: dict) -> str:
+    """Generate a unique key for an event (name + date)."""
+    return f"{event['name']}|{event['date']}"
+
+
+def build_gcal_request_body(event: dict) -> dict:
+    """Build a Google Calendar API event request body.
+
+    All-day events use 'date' fields. Timed events use 'dateTime' fields.
+    If start is given but no end, defaults to 1 hour duration.
+    """
+    body: dict = {"summary": event["name"]}
+
+    if event["start"] is None:
+        body["start"] = {"date": event["date"]}
+        body["end"] = {"date": event["date"]}
+    else:
+        start_dt = f"{event['date']}T{event['start']}:00{TIMEZONE_OFFSET}"
+        body["start"] = {"dateTime": start_dt, "timeZone": TIMEZONE}
+
+        if event["end"] is not None:
+            end_dt = f"{event['date']}T{event['end']}:00{TIMEZONE_OFFSET}"
+        else:
+            start = datetime.fromisoformat(start_dt)
+            end = start + timedelta(hours=1)
+            end_dt = end.isoformat()
+        body["end"] = {"dateTime": end_dt, "timeZone": TIMEZONE}
+
+    return body
+
+
+def create_gcal_event(gws_path: str, body: dict) -> str | None:
+    """Create a Google Calendar event via gws CLI. Returns event ID or None."""
+    result = subprocess.run(
+        [
+            gws_path,
+            "calendar",
+            "events",
+            "insert",
+            "--params",
+            json.dumps({"calendarId": "primary"}),
+            "--json",
+            json.dumps(body),
+        ],
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    if result.returncode != 0:
+        print(f"    gws error: {result.stderr.strip()}")
+        return None
+
+    response = json.loads(result.stdout)
+    return response.get("id")
+
+
+def update_gcal_event(gws_path: str, event_id: str, body: dict) -> bool:
+    """Update an existing Google Calendar event. Returns True on success."""
+    result = subprocess.run(
+        [
+            gws_path,
+            "calendar",
+            "events",
+            "patch",
+            "--params",
+            json.dumps({"calendarId": "primary", "eventId": event_id}),
+            "--json",
+            json.dumps(body),
+        ],
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    if result.returncode != 0:
+        print(f"    gws error: {result.stderr.strip()}")
+        return False
+    return True
+
+
+def load_sync_state(state_path: Path) -> dict:
+    """Load calendar sync state from JSON file."""
+    if not state_path.exists():
+        return {}
+    try:
+        return json.loads(state_path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        print("  Warning: corrupt sync state, starting fresh")
+        return {}
+
+
+def save_sync_state(state_path: Path, state: dict) -> None:
+    """Save calendar sync state to JSON file."""
+    state_path.write_text(
+        json.dumps(state, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+
+def event_changed(event: dict, stored: dict) -> bool:
+    """Check if event's start/end differs from stored state."""
+    return event["start"] != stored.get("start") or event["end"] != stored.get("end")
+
+
+def sync_events_to_gcal(vault_path: Path, gws_path: str) -> None:
+    """Sync active events to Google Calendar via gws CLI.
+
+    Iterates all active events, creates new ones, updates changed ones.
+    Individual failures are logged but do not stop other events.
+    """
+    events_dir = vault_path / "personal" / "events"
+    active_file = events_dir / "active.md"
+    state_path = events_dir / ".gcal-sync.json"
+
+    if not active_file.exists():
+        print("Google Calendar: events/active.md not found, skipping sync")
+        return
+
+    state = load_sync_state(state_path)
+    lines = active_file.read_text(encoding="utf-8").splitlines()
+
+    active_keys: set[str] = set()
+    created = 0
+    updated = 0
+
+    for line in lines:
+        event = parse_event_line(line)
+        if event is None:
+            continue
+
+        key = event_key(event)
+        active_keys.add(key)
+
+        if key not in state:
+            try:
+                body = build_gcal_request_body(event)
+                gcal_id = create_gcal_event(gws_path, body)
+                if gcal_id:
+                    state[key] = {
+                        "gcal_id": gcal_id,
+                        "start": event["start"],
+                        "end": event["end"],
+                    }
+                    created += 1
+                    print(f"  Created: {event['name']} -> {gcal_id}")
+            except Exception as e:
+                print(f"  Failed to create '{event['name']}': {e}")
+
+        elif event_changed(event, state[key]):
+            try:
+                body = build_gcal_request_body(event)
+                if update_gcal_event(gws_path, state[key]["gcal_id"], body):
+                    state[key]["start"] = event["start"]
+                    state[key]["end"] = event["end"]
+                    updated += 1
+                    print(f"  Updated: {event['name']}")
+            except Exception as e:
+                print(f"  Failed to update '{event['name']}': {e}")
+
+    # Remove state entries for events no longer in active.md
+    state = {k: v for k, v in state.items() if k in active_keys}
+
+    save_sync_state(state_path, state)
+    print(f"Google Calendar: {created} created, {updated} updated")
 
 
 # --- Shared archive functions ---
@@ -296,13 +498,24 @@ def process_events(vault_path: Path, today: date, cutoff: date) -> None:
 
 
 def main() -> None:
-    if len(sys.argv) != 2:
-        print(f"Usage: {sys.argv[0]} <vault-path>", file=sys.stderr)
+    if len(sys.argv) < 2:
+        print(f"Usage: {sys.argv[0]} <vault-path> [gws-path]", file=sys.stderr)
         sys.exit(1)
 
     vault_path = Path(sys.argv[1])
+    gws_path = sys.argv[2] if len(sys.argv) > 2 else None
     today = date.today()
     cutoff = today - timedelta(days=7)
+
+    # Calendar sync (fault-tolerant: failure does not affect maintenance)
+    if gws_path:
+        try:
+            sync_events_to_gcal(vault_path, gws_path)
+        except Exception:
+            traceback.print_exc()
+            print("Google Calendar sync failed, continuing with maintenance")
+    else:
+        print("gws not provided, skipping calendar sync")
 
     failed = False
     for processor in [process_tasks, process_events]:
