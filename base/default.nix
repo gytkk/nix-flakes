@@ -94,9 +94,6 @@
       bun
       nodejs
       typescript
-      pnpm
-      turbo
-      nodePackages.prettier
 
       # Go
       go
