@@ -1,5 +1,6 @@
 {
   pkgs,
+  inputs,
   username,
   homeDirectory,
   ...
@@ -51,7 +52,7 @@ in
       GOOGLE_WORKSPACE_CLI_CREDENTIALS_FILE = "/run/agenix/gws-credentials";
     };
     script = ''
-      ${obsidian-maintenance}/bin/obsidian-maintenance ${vaultPath} ${pkgs.gws}/bin/gws
+      ${obsidian-maintenance}/bin/obsidian-maintenance ${vaultPath} ${inputs.gws.packages.${pkgs.system}.default}/bin/gws
     '';
   };
 }

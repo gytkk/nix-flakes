@@ -70,6 +70,12 @@
       url = "github:gytkk/flake-stores";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # gws - Google Workspace CLI
+    gws = {
+      url = "github:googleworkspace/cli";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
