@@ -65,6 +65,11 @@
         pruneTags = true;
       };
 
+      filter.codex-clean = {
+        clean = "sed '/^\\[projects\\./,/^$/d'";
+        smudge = "cat";
+      };
+
       url = {
         "ssh://git@github.com/" = {
           insteadOf = "https://github.com/";

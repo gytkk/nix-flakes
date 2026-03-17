@@ -14,9 +14,3 @@ multi_agent = true
 [history]
 persistence = "save-all"
 
-# Trusted project directories
-[projects."/Users/gyutak/workspace"]
-trust_level = "trusted"
-
-[projects."/Users/gyutak/development"]
-trust_level = "trusted"
