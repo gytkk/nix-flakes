@@ -141,5 +141,14 @@
       enableZshIntegration = true;
       nix-direnv.enable = true;
     };
+
+    ssh = {
+      enable = true;
+      matchBlocks."*" = {
+        setEnv = {
+          TERM = "xterm-256color";
+        };
+      };
+    };
   };
 }
