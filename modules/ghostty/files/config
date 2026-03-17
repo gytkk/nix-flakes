@@ -1,5 +1,4 @@
 auto-update = check
-term = xterm-256color
 
 # One Half Light theme
 background = #fdfdfd
