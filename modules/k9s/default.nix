@@ -26,7 +26,7 @@
           logoless = false;
           crumbsless = false;
           splashless = false;
-          reactive = false;
+          reactive = true;
           noIcons = false;
           defaultsToFullScreen = false;
         };
