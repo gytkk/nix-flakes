@@ -78,6 +78,8 @@
     sessionVariables = {
       SHELL = "${pkgs.zsh}/bin/zsh";
       COLORTERM = "truecolor";
+      LANG = "en_US.UTF-8";
+      LC_CTYPE = "en_US.UTF-8";
     };
 
     # Zsh initialization
@@ -89,6 +91,9 @@
           if [[ ! $(command -v nix) && -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]]; then
             source '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
           fi
+
+          # Prevent LC_ALL from overriding LANG/LC_CTYPE
+          unset LC_ALL
         '';
 
         zshConfig = lib.mkOrder 1000 ''
