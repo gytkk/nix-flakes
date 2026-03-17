@@ -141,15 +141,5 @@
       enableZshIntegration = true;
       nix-direnv.enable = true;
     };
-
-    ssh = {
-      enable = true;
-      enableDefaultConfig = false;
-      matchBlocks."*" = {
-        setEnv = {
-          TERM = "xterm-256color";
-        };
-      };
-    };
   };
 }
