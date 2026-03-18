@@ -1,0 +1,15 @@
+[
+  {
+    "context": "ProjectPanel",
+    "bindings": {
+      "cmd-w": null
+    }
+  },
+  {
+    "context": "vim_mode == helix_normal && !menu",
+    "bindings": {
+      "space e": "project_panel::ToggleFocus",
+      "space s g": "pane::DeploySearch"
+    }
+  }
+]
