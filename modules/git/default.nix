@@ -25,7 +25,7 @@
       };
 
       core = {
-        editor = "hx";
+        editor = "nvim";
         excludesfile = "~/.gitignore";
         quotepath = "false";
       };
