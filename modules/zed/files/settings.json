@@ -110,5 +110,5 @@
   },
   "show_completions_on_input": true,
   "show_completion_documentation": true,
-  "auto_update": false
+  "auto_update": true
 }
