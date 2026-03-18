@@ -57,6 +57,7 @@ let
 
   # JSON 파일 생성 (WSL activation script용)
   settingsFile = pkgs.writeText "zed-settings.json" (builtins.readFile ./files/settings.json);
+  keymapFile = pkgs.writeText "zed-keymap.json" (builtins.readFile ./files/keymap.json);
   themeFile = pkgs.writeText "one-half-light-custom.json" (
     builtins.toJSON (lib.importJSON ./themes/one-half-light.json)
   );
@@ -74,6 +75,14 @@ let
     rm -f "${windowsZedConfigPath}/settings.json"
     cp "${settingsFile}" "${windowsZedConfigPath}/settings.json"
 
+    # keymap.json 백업 후 복사
+    if [ -f "${windowsZedConfigPath}/keymap.json" ] && [ ! -f "${windowsZedConfigPath}/keymap.json.bak" ]; then
+      cp "${windowsZedConfigPath}/keymap.json" "${windowsZedConfigPath}/keymap.json.bak"
+      echo "Backed up existing keymap to keymap.json.bak"
+    fi
+    rm -f "${windowsZedConfigPath}/keymap.json"
+    cp "${keymapFile}" "${windowsZedConfigPath}/keymap.json"
+
     # 테마 파일 복사
     rm -f "${windowsZedConfigPath}/themes/one-half-light-custom.json"
     cp "${themeFile}" "${windowsZedConfigPath}/themes/one-half-light-custom.json"
@@ -88,6 +97,7 @@ let
 
     echo "Zed config deployed to Windows:"
     echo "  - Settings: ${windowsZedConfigPath}"
+    echo "  - Keymap: ${windowsZedConfigPath}"
     echo "  - Extensions: ${windowsZedDataPath}/extensions/installed"
   '';
 in

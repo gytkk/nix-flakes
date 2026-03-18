@@ -4,5 +4,13 @@
     "bindings": {
       "cmd-w": null
     }
+  },
+  {
+    "context": "vim_mode == normal && !menu",
+    "bindings": {
+      "space": null,
+      "space e": "project_panel::ToggleFocus",
+      "space s g": "pane::DeploySearch"
+    }
   }
 ]
