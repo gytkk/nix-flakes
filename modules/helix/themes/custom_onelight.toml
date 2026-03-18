@@ -1,6 +1,8 @@
 inherits = "zed_onelight"
 
-"ui.cursor" = { fg = "#0184bc", modifiers = ["reversed"] }
-"ui.cursor.primary" = { fg = "#0184bc", modifiers = ["reversed"] }
-"ui.cursor.insert" = { fg = "#0184bc" }
-"ui.cursor.select" = { fg = "#0184bc", modifiers = ["reversed"] }
+"ui.cursor" = { fg = "teal", modifiers = ["reversed"] }
+"ui.cursor.primary" = { fg = "teal", modifiers = ["reversed"] }
+"ui.cursor.insert" = { fg = "teal" }
+
+[palette]
+teal = "#0184bc"
