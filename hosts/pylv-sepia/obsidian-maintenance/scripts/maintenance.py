@@ -222,6 +222,33 @@ def delete_gcal_event(gws_path: str, calendar_id: str, event_id: str) -> bool:
     return True
 
 
+def list_gcal_event_ids(gws_path: str, calendar_id: str) -> set[str]:
+    """List all event IDs from a Google Calendar. Returns a set of event IDs."""
+    result = subprocess.run(
+        [
+            gws_path,
+            "calendar",
+            "events",
+            "list",
+            "--params",
+            json.dumps({
+                "calendarId": calendar_id,
+                "maxResults": 2500,
+                "singleEvents": True,
+            }),
+        ],
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    if result.returncode != 0:
+        print(f"    gws error: {result.stderr.strip()}")
+        return set()
+
+    response = json.loads(result.stdout)
+    return {item["id"] for item in response.get("items", [])}
+
+
 def event_type_changed(event: dict, stored: dict) -> bool:
     """Check if event changed between all-day and timed (requires delete+recreate)."""
     was_allday = stored.get("start") is None
@@ -274,6 +301,18 @@ def sync_events_to_gcal(vault_path: Path, gws_path: str) -> None:
         print("Google Calendar: failed to get/create Obsidian calendar, skipping sync")
         save_sync_state(state_path, state)
         return
+
+    # Prune state entries whose events no longer exist in the calendar
+    existing_ids = list_gcal_event_ids(gws_path, calendar_id)
+    pruned = 0
+    for key in list(state):
+        if key == GCAL_STATE_CALENDAR_ID_KEY:
+            continue
+        if state[key].get("gcal_id") not in existing_ids:
+            del state[key]
+            pruned += 1
+    if pruned:
+        print(f"  Pruned {pruned} stale state entries (events missing from calendar)")
 
     lines = active_file.read_text(encoding="utf-8").splitlines()
 
