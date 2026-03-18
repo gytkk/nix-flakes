@@ -27,6 +27,13 @@ in
     };
   };
 
+  # agenix secret - gws credentials
+  age.secrets.gws-credentials = {
+    file = ../../../secrets/gws-credentials.age;
+    owner = username;
+    mode = "0400";
+  };
+
   # systemd service (obsidian-sync.service가 continuous 모드로 동기화 담당)
   systemd.services.obsidian-maintenance = {
     description = "Obsidian Maintenance (tasks + events)";
@@ -40,7 +47,9 @@ in
       User = username;
       Group = "users";
     };
-    environment = { };
+    environment = {
+      GOOGLE_WORKSPACE_CLI_CREDENTIALS_FILE = "/run/agenix/gws-credentials";
+    };
     script = ''
       ${obsidian-maintenance}/bin/obsidian-maintenance ${vaultPath} ${
         inputs.gws.packages.${pkgs.system}.default
