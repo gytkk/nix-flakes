@@ -57,7 +57,6 @@ let
 
   # JSON 파일 생성 (WSL activation script용)
   settingsFile = pkgs.writeText "zed-settings.json" (builtins.readFile ./files/settings.json);
-  keymapFile = pkgs.writeText "zed-keymap.json" (builtins.readFile ./files/keymap.json);
   themeFile = pkgs.writeText "one-half-light-custom.json" (
     builtins.toJSON (lib.importJSON ./themes/one-half-light.json)
   );
@@ -75,13 +74,8 @@ let
     rm -f "${windowsZedConfigPath}/settings.json"
     cp "${settingsFile}" "${windowsZedConfigPath}/settings.json"
 
-    # keymap.json 백업 후 복사
-    if [ -f "${windowsZedConfigPath}/keymap.json" ] && [ ! -f "${windowsZedConfigPath}/keymap.json.bak" ]; then
-      cp "${windowsZedConfigPath}/keymap.json" "${windowsZedConfigPath}/keymap.json.bak"
-      echo "Backed up existing keymap to keymap.json.bak"
-    fi
+    # keymap.json 제거하여 Zed 기본 키맵 사용
     rm -f "${windowsZedConfigPath}/keymap.json"
-    cp "${keymapFile}" "${windowsZedConfigPath}/keymap.json"
 
     # 테마 파일 복사
     rm -f "${windowsZedConfigPath}/themes/one-half-light-custom.json"
@@ -97,7 +91,6 @@ let
 
     echo "Zed config deployed to Windows:"
     echo "  - Settings: ${windowsZedConfigPath}"
-    echo "  - Keymap: ${windowsZedConfigPath}"
     echo "  - Extensions: ${windowsZedDataPath}/extensions/installed"
   '';
 in
@@ -114,9 +107,8 @@ in
     lib.mkMerge [
       # macOS/Linux (non-WSL): 설정 파일을 repo에 직접 symlink
       (lib.mkIf (!isWSL) {
-        # settings.json, keymap.json → repo 파일로 직접 symlink (mutable)
+        # settings.json → repo 파일로 직접 symlink (mutable)
         home.file."${zedConfigPath}/settings.json".source = mkSymlink "files/settings.json";
-        home.file."${zedConfigPath}/keymap.json".source = mkSymlink "files/keymap.json";
 
         # 커스텀 테마 → repo 파일로 직접 symlink (mutable)
         home.file."${zedConfigPath}/themes/one-half-light-custom.json".source =
