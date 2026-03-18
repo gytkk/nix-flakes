@@ -77,6 +77,8 @@
     # Environment variables
     sessionVariables = {
       SHELL = "${pkgs.zsh}/bin/zsh";
+      EDITOR = "hx";
+      VISUAL = "hx";
       COLORTERM = "truecolor";
       LANG = "en_US.UTF-8";
       LC_CTYPE = "en_US.UTF-8";

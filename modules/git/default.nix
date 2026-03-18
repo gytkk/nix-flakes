@@ -1,9 +1,4 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}:
+{ ... }:
 
 {
   programs.delta = {
@@ -30,7 +25,7 @@
       };
 
       core = {
-        editor = "nvim";
+        editor = "hx";
         excludesfile = "~/.gitignore";
         quotepath = "false";
       };
