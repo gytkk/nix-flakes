@@ -34,9 +34,39 @@ in
     mode = "0400";
   };
 
-  # systemd service (obsidian-sync.service가 continuous 모드로 동기화 담당)
+  # systemd service - 매시간 tasks/events 처리
   systemd.services.obsidian-maintenance = {
     description = "Obsidian Maintenance (tasks + events)";
+    after = [
+      "obsidian-sync.service"
+      "network-online.target"
+    ];
+    wants = [ "network-online.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      User = username;
+      Group = "users";
+    };
+    script = ''
+      ${obsidian-maintenance}/bin/obsidian-maintenance ${vaultPath}
+    '';
+  };
+
+  # systemd timer - 30초마다 Google Calendar 동기화
+  systemd.timers.obsidian-gcal-sync = {
+    description = "Obsidian Google Calendar Sync Timer";
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnBootSec = "30s";
+      OnUnitActiveSec = "30s";
+      AccuracySec = "1s";
+      Unit = "obsidian-gcal-sync.service";
+    };
+  };
+
+  # systemd service - Google Calendar 동기화
+  systemd.services.obsidian-gcal-sync = {
+    description = "Obsidian Google Calendar Sync";
     after = [
       "obsidian-sync.service"
       "network-online.target"
@@ -51,7 +81,7 @@ in
       GOOGLE_WORKSPACE_CLI_CREDENTIALS_FILE = "/run/agenix/gws-credentials";
     };
     script = ''
-      ${obsidian-maintenance}/bin/obsidian-maintenance ${vaultPath} ${
+      ${obsidian-maintenance}/bin/obsidian-maintenance ${vaultPath} --calendar-only ${
         inputs.gws.packages.${pkgs.system}.default
       }/bin/gws
     '';

@@ -98,6 +98,10 @@ def build_gcal_request_body(event: dict) -> dict:
     if event["start"] is None:
         body["start"] = {"date": event["date"]}
         body["end"] = {"date": event["date"]}
+        body["reminders"] = {
+            "useDefault": False,
+            "overrides": [{"method": "popup", "minutes": 60}],
+        }
     else:
         start_dt = f"{event['date']}T{event['start']}:00{TIMEZONE_OFFSET}"
         body["start"] = {"dateTime": start_dt, "timeZone": TIMEZONE}
@@ -499,23 +503,20 @@ def process_events(vault_path: Path, today: date, cutoff: date) -> None:
 
 def main() -> None:
     if len(sys.argv) < 2:
-        print(f"Usage: {sys.argv[0]} <vault-path> [gws-path]", file=sys.stderr)
+        print(f"Usage: {sys.argv[0]} <vault-path> [--calendar-only <gws-path>]", file=sys.stderr)
         sys.exit(1)
 
     vault_path = Path(sys.argv[1])
-    gws_path = sys.argv[2] if len(sys.argv) > 2 else None
+
+    # Calendar-only mode: sync events to Google Calendar and exit
+    if len(sys.argv) >= 4 and sys.argv[2] == "--calendar-only":
+        gws_path = sys.argv[3]
+        sync_events_to_gcal(vault_path, gws_path)
+        return
+
+    # Full maintenance mode: tasks + events processing
     today = date.today()
     cutoff = today - timedelta(days=7)
-
-    # Calendar sync (fault-tolerant: failure does not affect maintenance)
-    if gws_path:
-        try:
-            sync_events_to_gcal(vault_path, gws_path)
-        except Exception:
-            traceback.print_exc()
-            print("Google Calendar sync failed, continuing with maintenance")
-    else:
-        print("gws not provided, skipping calendar sync")
 
     failed = False
     for processor in [process_tasks, process_events]:
