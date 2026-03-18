@@ -17,8 +17,7 @@
   "remove_trailing_whitespace_on_save": true,
   "ensure_final_newline_on_save": true,
   "show_whitespaces": "boundary",
-  "vim_mode": false,
-  "helix_mode": true,
+  "vim_mode": true,
   "autosave": "on_focus_change",
   "vim": {
     "use_system_clipboard": "always",
