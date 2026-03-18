@@ -53,10 +53,6 @@ let
       name = "codex";
       cmd = "mcp add -s user codex -- codex mcp-server";
     }
-    {
-      name = "qmd";
-      cmd = "mcp add -s user qmd -- qmd mcp";
-    }
   ];
 in
 {
@@ -65,10 +61,8 @@ in
   ];
 
   # Add XDG data bin to PATH (for plannotator CLI installed via install.sh)
-  # Add bun global bin to PATH (for QMD installed via bun install -g)
   home.sessionPath = [
     "${config.xdg.dataHome}/bin"
-    "$HOME/.cache/.bun/bin"
   ];
 
   home.file.".claude/settings.json".source =
@@ -228,69 +222,4 @@ in
     fi
   '';
 
-  # Install QMD via bun, set up collection, and build indexes
-  home.activation.setupQmd = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    # QMD internally uses node; ensure Nix nodejs is found before asdf shims
-    export PATH="${lib.makeBinPath [ pkgs.nodejs ]}:$PATH"
-    SETUP_LOG="$HOME/.claude/nix-setup.log"
-    log() { echo "[$(date '+%H:%M:%S')] $*" >> "$SETUP_LOG"; }
-    QMD="$HOME/.cache/.bun/bin/qmd"
-    QMD_NODE_VERSION_FILE="$HOME/.cache/.bun/install/global/.qmd-node-version"
-    CURRENT_NODE_VERSION="$(${pkgs.nodejs}/bin/node --version)"
-    STORED_NODE_VERSION="$(cat "$QMD_NODE_VERSION_FILE" 2>/dev/null || echo "")"
-
-    if [ ! -x "$QMD" ] || [ "$CURRENT_NODE_VERSION" != "$STORED_NODE_VERSION" ]; then
-      if [ -x "$QMD" ]; then
-        log "Rebuilding QMD native modules (Node.js changed: $STORED_NODE_VERSION -> $CURRENT_NODE_VERSION)"
-      else
-        log "Installing QMD via bun..."
-      fi
-      # Use system clang for native module compilation (Nix gcc doesn't support -stdlib=libc++)
-      if CXX=clang++ CC=clang ${pkgs.bun}/bin/bun install -g --trust @tobilu/qmd >> "$SETUP_LOG" 2>&1; then
-        echo "$CURRENT_NODE_VERSION" > "$QMD_NODE_VERSION_FILE"
-        log "  -> QMD installed (Node.js $CURRENT_NODE_VERSION)"
-      else
-        log "  -> QMD install FAILED (exit $?)"
-      fi
-    fi
-    if [ -x "$QMD" ]; then
-      # Remove legacy collections
-      for legacy in home dotconfig; do
-        if $QMD collection list 2>/dev/null | grep -q "^$legacy "; then
-          log "Removing legacy QMD collection: $legacy"
-          $QMD collection remove "$legacy" >> "$SETUP_LOG" 2>&1
-        fi
-      done
-      # Register per-directory collections
-      for pair in \
-        "development:$HOME/development" \
-        "workspace:$HOME/workspace" \
-        "worktrees:$HOME/worktrees"; do
-        name="''${pair%%:*}"
-        dir="''${pair#*:}"
-        if [ -d "$dir" ] && ! $QMD collection list 2>/dev/null | grep -q "^$name "; then
-          log "Adding QMD collection: $name ($dir **/*.md)"
-          if $QMD collection add "$dir" --name "$name" --mask "**/*.md" >> "$SETUP_LOG" 2>&1; then
-            log "  -> QMD collection '$name' added"
-          else
-            log "  -> QMD collection '$name' add FAILED (exit $?)"
-          fi
-        fi
-      done
-    fi
-    if [ -x "$QMD" ]; then
-      log "Updating QMD index (BM25)..."
-      if $QMD update >> "$SETUP_LOG" 2>&1; then
-        log "  -> QMD index updated"
-      else
-        log "  -> QMD index update FAILED (exit $?)"
-      fi
-      log "Building QMD vector embeddings..."
-      if $QMD embed >> "$SETUP_LOG" 2>&1; then
-        log "  -> QMD embeddings built"
-      else
-        log "  -> QMD embed FAILED (exit $?)"
-      fi
-    fi
-  '';
 }

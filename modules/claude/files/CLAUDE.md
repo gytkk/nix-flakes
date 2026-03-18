@@ -104,12 +104,6 @@ Individual projects may override this policy (e.g., banning worktree entirely). 
   - Use `uv run -m pytest` instead of `python -m pytest`
   - Use `uv run -m pip install` instead of `pip install`
 
-## QMD (Local Knowledge Search)
-
-- QMD MCP server is registered. Prefer QMD tools when searching markdown notes and documents.
-- Use Grep/Glob for codebase file searches; use QMD for personal notes, documents, and knowledge searches.
-- Indexed collections: `development`, `workspace`, `worktrees` (markdown files only)
-
 ## Security
 
 - Never commit secrets, credentials, or API keys.
