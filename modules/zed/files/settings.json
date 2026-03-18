@@ -18,6 +18,7 @@
   "ensure_final_newline_on_save": true,
   "show_whitespaces": "boundary",
   "vim_mode": true,
+  "autosave": "on_focus_change",
   "vim": {
     "use_system_clipboard": "always",
     "use_smartcase_find": true
