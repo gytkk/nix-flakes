@@ -1,14 +1,12 @@
 [
   {
-    "context": "ProjectPanel"
-  },
-  {
-    "context": "vim_mode == normal && !menu",
+    "context": "VimControl && !menu",
     "bindings": {
       "space": null,
       "space e": "project_panel::ToggleFocus",
       "space b": "tab_switcher::Toggle",
-      "space /": "pane::DeploySearch"
+      "space /": "pane::DeploySearch",
+      "space f": "file_finder::Toggle"
     }
   }
 ]
