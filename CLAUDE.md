@@ -104,7 +104,6 @@ modules/<name>/
 | `codex/`     | OpenAI Codex CLI    | `files/config.toml`, `files/AGENTS.md`              | YES     |
 | `ghostty/`   | Ghostty terminal    | `files/config`                                      | YES     |
 | `git/`       | Git configuration   | `default.nix`                                       | NO      |
-| `helix/`     | Helix editor        | `files/config.toml`                                 | YES     |
 | `k9s/`       | Kubernetes manager  | `default.nix`                                       | NO      |
 | `lsp/`       | LSP server packages | `default.nix`                                       | NO      |
 | `opencode/`  | OpenCode AI agent   | `files/opencode.json`, `files/AGENTS.md`            | YES     |
