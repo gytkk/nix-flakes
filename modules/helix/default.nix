@@ -23,5 +23,9 @@ in
     # config.toml → repo 파일로 직접 symlink (mutable)
     xdg.configFile."helix/config.toml".source =
       config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/helix/files/config.toml";
+
+    # 커스텀 테마 → repo 파일로 직접 symlink (mutable)
+    xdg.configFile."helix/themes/custom_onelight.toml".source =
+      config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/helix/themes/custom_onelight.toml";
   };
 }
