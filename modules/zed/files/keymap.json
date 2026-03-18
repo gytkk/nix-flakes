@@ -6,10 +6,14 @@
     }
   },
   {
-    "context": "vim_mode == helix_normal && !menu",
+    "context": "(vim_mode == helix_normal || vim_mode == helix_select) && !menu",
     "bindings": {
       "space e": "project_panel::ToggleFocus",
-      "space s g": "pane::DeploySearch"
+      "space b": "tab_switcher::Toggle",
+      "space g": "git::Diff",
+      "space ?": "command_palette::Toggle",
+      "space w v": "pane::SplitRight",
+      "space w s": "pane::SplitDown"
     }
   }
 ]
