@@ -46,7 +46,8 @@ let
   '';
 
   # Zed config/data 경로 (플랫폼별)
-  zedConfigPath = if pkgs.stdenv.isDarwin then "Library/Application Support/Zed" else ".config/zed";
+  # Zed 0.222+ 부터 macOS에서도 config 경로가 ~/.config/zed 로 변경됨
+  zedConfigPath = ".config/zed";
 
   zedDataPath =
     if pkgs.stdenv.isDarwin then "Library/Application Support/Zed" else ".local/share/zed";
