@@ -367,3 +367,12 @@ Snacks.toggle.inlay_hints():map("<leader>uh")
 Snacks.toggle.line_number():map("<leader>ul")
 Snacks.toggle.scroll():map("<leader>uS")
 Snacks.toggle.option("wrap", { name = "Wrap" }):map("<leader>uw")
+
+-- Open file picker when neovim starts with no arguments
+vim.api.nvim_create_autocmd("VimEnter", {
+  callback = function()
+    if vim.fn.argc() == 0 then
+      Snacks.picker.files()
+    end
+  end,
+})
