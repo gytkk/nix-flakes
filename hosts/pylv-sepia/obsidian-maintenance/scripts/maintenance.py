@@ -117,7 +117,43 @@ def build_gcal_request_body(event: dict) -> dict:
     return body
 
 
-def create_gcal_event(gws_path: str, body: dict) -> str | None:
+GCAL_CALENDAR_NAME = "Obsidian"
+GCAL_STATE_CALENDAR_ID_KEY = "__calendar_id__"
+
+
+def get_or_create_calendar(gws_path: str, state: dict) -> str | None:
+    """Get the Obsidian calendar ID from state, or create a new calendar."""
+    calendar_id = state.get(GCAL_STATE_CALENDAR_ID_KEY)
+    if calendar_id:
+        return calendar_id
+
+    print(f"  Creating '{GCAL_CALENDAR_NAME}' calendar...")
+    result = subprocess.run(
+        [
+            gws_path,
+            "calendar",
+            "calendars",
+            "insert",
+            "--json",
+            json.dumps({"summary": GCAL_CALENDAR_NAME}),
+        ],
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    if result.returncode != 0:
+        print(f"    gws error: {result.stderr.strip()}")
+        return None
+
+    response = json.loads(result.stdout)
+    calendar_id = response.get("id")
+    if calendar_id:
+        state[GCAL_STATE_CALENDAR_ID_KEY] = calendar_id
+        print(f"  Created calendar: {calendar_id}")
+    return calendar_id
+
+
+def create_gcal_event(gws_path: str, calendar_id: str, body: dict) -> str | None:
     """Create a Google Calendar event via gws CLI. Returns event ID or None."""
     result = subprocess.run(
         [
@@ -126,7 +162,7 @@ def create_gcal_event(gws_path: str, body: dict) -> str | None:
             "events",
             "insert",
             "--params",
-            json.dumps({"calendarId": "primary"}),
+            json.dumps({"calendarId": calendar_id}),
             "--json",
             json.dumps(body),
         ],
@@ -142,7 +178,7 @@ def create_gcal_event(gws_path: str, body: dict) -> str | None:
     return response.get("id")
 
 
-def update_gcal_event(gws_path: str, event_id: str, body: dict) -> bool:
+def update_gcal_event(gws_path: str, calendar_id: str, event_id: str, body: dict) -> bool:
     """Update an existing Google Calendar event. Returns True on success."""
     result = subprocess.run(
         [
@@ -151,7 +187,7 @@ def update_gcal_event(gws_path: str, event_id: str, body: dict) -> bool:
             "events",
             "patch",
             "--params",
-            json.dumps({"calendarId": "primary", "eventId": event_id}),
+            json.dumps({"calendarId": calendar_id, "eventId": event_id}),
             "--json",
             json.dumps(body),
         ],
@@ -163,6 +199,34 @@ def update_gcal_event(gws_path: str, event_id: str, body: dict) -> bool:
         print(f"    gws error: {result.stderr.strip()}")
         return False
     return True
+
+
+def delete_gcal_event(gws_path: str, calendar_id: str, event_id: str) -> bool:
+    """Delete a Google Calendar event. Returns True on success."""
+    result = subprocess.run(
+        [
+            gws_path,
+            "calendar",
+            "events",
+            "delete",
+            "--params",
+            json.dumps({"calendarId": calendar_id, "eventId": event_id}),
+        ],
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    if result.returncode != 0:
+        print(f"    gws error: {result.stderr.strip()}")
+        return False
+    return True
+
+
+def event_type_changed(event: dict, stored: dict) -> bool:
+    """Check if event changed between all-day and timed (requires delete+recreate)."""
+    was_allday = stored.get("start") is None
+    is_allday = event["start"] is None
+    return was_allday != is_allday
 
 
 def load_sync_state(state_path: Path) -> dict:
@@ -204,11 +268,19 @@ def sync_events_to_gcal(vault_path: Path, gws_path: str) -> None:
         return
 
     state = load_sync_state(state_path)
+
+    calendar_id = get_or_create_calendar(gws_path, state)
+    if not calendar_id:
+        print("Google Calendar: failed to get/create Obsidian calendar, skipping sync")
+        save_sync_state(state_path, state)
+        return
+
     lines = active_file.read_text(encoding="utf-8").splitlines()
 
     active_keys: set[str] = set()
     created = 0
     updated = 0
+    deleted = 0
 
     for line in lines:
         event = parse_event_line(line)
@@ -221,7 +293,7 @@ def sync_events_to_gcal(vault_path: Path, gws_path: str) -> None:
         if key not in state:
             try:
                 body = build_gcal_request_body(event)
-                gcal_id = create_gcal_event(gws_path, body)
+                gcal_id = create_gcal_event(gws_path, calendar_id, body)
                 if gcal_id:
                     state[key] = {
                         "gcal_id": gcal_id,
@@ -233,10 +305,30 @@ def sync_events_to_gcal(vault_path: Path, gws_path: str) -> None:
             except Exception as e:
                 print(f"  Failed to create '{event['name']}': {e}")
 
+        elif event_type_changed(event, state[key]):
+            # All-day <-> timed: delete and recreate (patch can't change date/dateTime type)
+            try:
+                old_id = state[key]["gcal_id"]
+                delete_gcal_event(gws_path, calendar_id, old_id)
+                body = build_gcal_request_body(event)
+                gcal_id = create_gcal_event(gws_path, calendar_id, body)
+                if gcal_id:
+                    state[key] = {
+                        "gcal_id": gcal_id,
+                        "start": event["start"],
+                        "end": event["end"],
+                    }
+                    updated += 1
+                    print(f"  Recreated (type changed): {event['name']} -> {gcal_id}")
+                else:
+                    del state[key]
+            except Exception as e:
+                print(f"  Failed to recreate '{event['name']}': {e}")
+
         elif event_changed(event, state[key]):
             try:
                 body = build_gcal_request_body(event)
-                if update_gcal_event(gws_path, state[key]["gcal_id"], body):
+                if update_gcal_event(gws_path, calendar_id, state[key]["gcal_id"], body):
                     state[key]["start"] = event["start"]
                     state[key]["end"] = event["end"]
                     updated += 1
@@ -244,11 +336,20 @@ def sync_events_to_gcal(vault_path: Path, gws_path: str) -> None:
             except Exception as e:
                 print(f"  Failed to update '{event['name']}': {e}")
 
-    # Remove state entries for events no longer in active.md
-    state = {k: v for k, v in state.items() if k in active_keys}
+    # Delete Google Calendar events for items removed from active.md
+    removed_keys = {k for k in state if k != GCAL_STATE_CALENDAR_ID_KEY} - active_keys
+    for key in removed_keys:
+        try:
+            if delete_gcal_event(gws_path, calendar_id, state[key]["gcal_id"]):
+                deleted += 1
+                print(f"  Deleted: {key}")
+        except Exception as e:
+            print(f"  Failed to delete '{key}': {e}")
+    for key in removed_keys:
+        del state[key]
 
     save_sync_state(state_path, state)
-    print(f"Google Calendar: {created} created, {updated} updated")
+    print(f"Google Calendar: {created} created, {updated} updated, {deleted} deleted")
 
 
 # --- Shared archive functions ---
