@@ -8,5 +8,11 @@
       "space /": "pane::DeploySearch",
       "space f": "file_finder::Toggle"
     }
+  },
+  {
+    "context": "EmptyPane",
+    "bindings": {
+      "space e": "project_panel::ToggleFocus"
+    }
   }
 ]
