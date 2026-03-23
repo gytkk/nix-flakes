@@ -382,6 +382,25 @@ Snacks.toggle.line_number():map("<leader>ul")
 Snacks.toggle.scroll():map("<leader>uS")
 Snacks.toggle.option("wrap", { name = "Wrap" }):map("<leader>uw")
 
+-- Reset winhighlight when a normal buffer enters a window that still
+-- carries Snacks picker/explorer highlights (gray sidebar background).
+-- Uses vim.schedule to run after Snacks finishes setting winhighlight.
+vim.api.nvim_create_autocmd("BufEnter", {
+  callback = function()
+    vim.schedule(function()
+      local win = vim.api.nvim_get_current_win()
+      if not vim.api.nvim_win_is_valid(win) then return end
+      local buf = vim.api.nvim_win_get_buf(win)
+      if vim.bo[buf].buftype == "" and vim.bo[buf].buflisted then
+        local whl = vim.wo[win].winhighlight
+        if whl and whl:find("Snacks") then
+          vim.wo[win].winhighlight = ""
+        end
+      end
+    end)
+  end,
+})
+
 -- Open file picker when neovim starts with no arguments
 vim.api.nvim_create_autocmd("VimEnter", {
   callback = function()
