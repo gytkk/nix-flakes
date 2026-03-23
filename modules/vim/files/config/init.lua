@@ -51,6 +51,44 @@ require("lazy").setup({
           sources = {
             explorer = {
               layout = { preset = "sidebar" },
+              actions = {
+                -- When the explorer is the sole window, open files in a new
+                -- split instead of replacing the explorer.
+                confirm_with_window = function(picker, item)
+                  if not item or item.dir then
+                    picker:action("confirm")
+                    return
+                  end
+                  -- Check for a non-sidebar edit window
+                  for _, w in ipairs(vim.api.nvim_list_wins()) do
+                    if vim.api.nvim_win_is_valid(w)
+                      and vim.api.nvim_win_get_config(w).relative == ""
+                      and not vim.w[w].snacks_layout
+                    then
+                      picker:action("confirm")
+                      return
+                    end
+                  end
+                  -- No edit window: open the file directly in a new split
+                  local file = item.file or item.text
+                  if not file then return end
+                  local explorer_win = vim.api.nvim_get_current_win()
+                  vim.cmd("botright vsplit " .. vim.fn.fnameescape(file))
+                  vim.schedule(function()
+                    if vim.api.nvim_win_is_valid(explorer_win) then
+                      vim.api.nvim_win_set_width(explorer_win, 40)
+                    end
+                  end)
+                end,
+              },
+              win = {
+                list = {
+                  keys = {
+                    ["<CR>"] = "confirm_with_window",
+                    ["l"] = "confirm_with_window",
+                  },
+                },
+              },
             },
           },
         },
