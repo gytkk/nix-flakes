@@ -20,6 +20,20 @@ vim.g.maplocalleader = " "
 -- Use system clipboard
 vim.opt.clipboard:append("unnamedplus")
 
+-- Indentation
+vim.opt.expandtab = true
+vim.opt.tabstop = 2
+vim.opt.softtabstop = 2
+vim.opt.shiftwidth = 2
+vim.opt.smartindent = true
+vim.opt.autoindent = true
+
+-- Search
+vim.opt.ignorecase = true
+vim.opt.smartcase = true
+vim.opt.hlsearch = true
+vim.opt.incsearch = true
+
 -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
@@ -28,7 +42,7 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
   if vim.v.shell_error ~= 0 then
     vim.api.nvim_echo({
       { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
-      { out, "WarningMsg" },
+      { out,                            "WarningMsg" },
       { "\nPress any key to exit..." },
     }, true, {})
     vim.fn.getchar()
@@ -62,8 +76,8 @@ require("lazy").setup({
                   -- Check for a non-sidebar edit window
                   for _, w in ipairs(vim.api.nvim_list_wins()) do
                     if vim.api.nvim_win_is_valid(w)
-                      and vim.api.nvim_win_get_config(w).relative == ""
-                      and not vim.w[w].snacks_layout
+                        and vim.api.nvim_win_get_config(w).relative == ""
+                        and not vim.w[w].snacks_layout
                     then
                       picker:action("confirm")
                       return
@@ -111,47 +125,47 @@ require("lazy").setup({
       },
       keys = {
         -- Explorer
-        { "<leader>e", function() Snacks.explorer() end, desc = "File Explorer" },
+        { "<leader>e",  function() Snacks.explorer() end,                         desc = "File Explorer" },
         -- Picker: files
-        { "<leader>ff", function() Snacks.picker.files() end, desc = "Find Files" },
-        { "<leader>fr", function() Snacks.picker.recent() end, desc = "Recent Files" },
-        { "<leader>b", function() Snacks.picker.buffers() end, desc = "Buffers" },
-        { "<leader>fb", function() Snacks.picker.buffers() end, desc = "Buffers" },
+        { "<leader>ff", function() Snacks.picker.files() end,                     desc = "Find Files" },
+        { "<leader>fr", function() Snacks.picker.recent() end,                    desc = "Recent Files" },
+        { "<leader>b",  function() Snacks.picker.buffers() end,                   desc = "Buffers" },
+        { "<leader>fb", function() Snacks.picker.buffers() end,                   desc = "Buffers" },
         -- Picker: search
-        { "<leader>/", function() Snacks.picker.grep() end, desc = "Grep (Project)" },
-        { "<leader>sg", function() Snacks.picker.grep() end, desc = "Grep" },
-        { "<leader>sw", function() Snacks.picker.grep_word() end, desc = "Grep Word", mode = { "n", "x" } },
-        { "<leader>s/", function() Snacks.picker.lines() end, desc = "Buffer Lines" },
+        { "<leader>/",  function() Snacks.picker.grep() end,                      desc = "Grep (Project)" },
+        { "<leader>sg", function() Snacks.picker.grep() end,                      desc = "Grep" },
+        { "<leader>sw", function() Snacks.picker.grep_word() end,                 desc = "Grep Word",                  mode = { "n", "x" } },
+        { "<leader>s/", function() Snacks.picker.lines() end,                     desc = "Buffer Lines" },
         -- Picker: git
-        { "<leader>gb", function() Snacks.picker.git_branches() end, desc = "Git Branches" },
-        { "<leader>gd", function() Snacks.picker.git_diff() end, desc = "Git Diff (Hunks)" },
-        { "<leader>gf", function() Snacks.picker.git_log_file() end, desc = "Git Log File" },
-        { "<leader>gs", function() Snacks.picker.git_status() end, desc = "Git Status" },
-        { "<leader>gS", function() Snacks.picker.git_stash() end, desc = "Git Stash" },
-        { "<leader>gl", function() Snacks.picker.git_log() end, desc = "Git Log" },
-        { "<leader>gL", function() Snacks.picker.git_log_line() end, desc = "Git Log Line" },
-        { "<leader>gg", function() Snacks.lazygit() end, desc = "Lazygit" },
-        { "<leader>gB", function() Snacks.gitbrowse() end, desc = "Git Browse", mode = { "n", "v" } },
-        { "<leader>gh", function() Snacks.git.blame_line() end, desc = "Git Blame Line" },
+        { "<leader>gb", function() Snacks.picker.git_branches() end,              desc = "Git Branches" },
+        { "<leader>gd", function() Snacks.picker.git_diff() end,                  desc = "Git Diff (Hunks)" },
+        { "<leader>gf", function() Snacks.picker.git_log_file() end,              desc = "Git Log File" },
+        { "<leader>gs", function() Snacks.picker.git_status() end,                desc = "Git Status" },
+        { "<leader>gS", function() Snacks.picker.git_stash() end,                 desc = "Git Stash" },
+        { "<leader>gl", function() Snacks.picker.git_log() end,                   desc = "Git Log" },
+        { "<leader>gL", function() Snacks.picker.git_log_line() end,              desc = "Git Log Line" },
+        { "<leader>gg", function() Snacks.lazygit() end,                          desc = "Lazygit" },
+        { "<leader>gB", function() Snacks.gitbrowse() end,                        desc = "Git Browse",                 mode = { "n", "v" } },
+        { "<leader>gh", function() Snacks.git.blame_line() end,                   desc = "Git Blame Line" },
         -- Picker: GitHub
-        { "<leader>gi", function() Snacks.picker.gh_issue() end, desc = "GitHub Issues (Open)" },
+        { "<leader>gi", function() Snacks.picker.gh_issue() end,                  desc = "GitHub Issues (Open)" },
         { "<leader>gI", function() Snacks.picker.gh_issue({ state = "all" }) end, desc = "GitHub Issues (All)" },
-        { "<leader>gp", function() Snacks.picker.gh_pr() end, desc = "GitHub Pull Requests (Open)" },
-        { "<leader>gP", function() Snacks.picker.gh_pr({ state = "all" }) end, desc = "GitHub Pull Requests (All)" },
+        { "<leader>gp", function() Snacks.picker.gh_pr() end,                     desc = "GitHub Pull Requests (Open)" },
+        { "<leader>gP", function() Snacks.picker.gh_pr({ state = "all" }) end,    desc = "GitHub Pull Requests (All)" },
         -- Picker: LSP
-        { "gd", function() Snacks.picker.lsp_definitions() end, desc = "Goto Definition" },
-        { "gr", function() Snacks.picker.lsp_references() end, nowait = true, desc = "References" },
-        { "gi", function() Snacks.picker.lsp_implementations() end, desc = "Goto Implementation" },
+        { "gd",         function() Snacks.picker.lsp_definitions() end,           desc = "Goto Definition" },
+        { "gr",         function() Snacks.picker.lsp_references() end,            nowait = true,                       desc = "References" },
+        { "gi",         function() Snacks.picker.lsp_implementations() end,       desc = "Goto Implementation" },
         -- Picker: misc
-        { "<leader>:", function() Snacks.picker.command_history() end, desc = "Command History" },
-        { "<leader>cR", function() Snacks.rename.rename_file() end, desc = "Rename File" },
-        { "<leader>fh", function() Snacks.picker.help() end, desc = "Help Pages" },
+        { "<leader>:",  function() Snacks.picker.command_history() end,           desc = "Command History" },
+        { "<leader>cR", function() Snacks.rename.rename_file() end,               desc = "Rename File" },
+        { "<leader>fh", function() Snacks.picker.help() end,                      desc = "Help Pages" },
         -- Notifier
-        { "<leader>n", function() Snacks.notifier.show_history() end, desc = "Notification History" },
+        { "<leader>n",  function() Snacks.notifier.show_history() end,            desc = "Notification History" },
       },
     },
     { "nvim-tree/nvim-web-devicons", lazy = true },
-    { "MunifTanjim/nui.nvim", lazy = true },
+    { "MunifTanjim/nui.nvim",        lazy = true },
     {
       "folke/noice.nvim",
       event = "VeryLazy",
@@ -188,10 +202,10 @@ require("lazy").setup({
         },
       },
       keys = {
-        { "<leader>sn", "", desc = "+noice" },
-        { "<leader>snl", function() require("noice").cmd("last") end, desc = "Noice Last Message" },
+        { "<leader>sn",  "",                                             desc = "+noice" },
+        { "<leader>snl", function() require("noice").cmd("last") end,    desc = "Noice Last Message" },
         { "<leader>snh", function() require("noice").cmd("history") end, desc = "Noice History" },
-        { "<leader>sna", function() require("noice").cmd("all") end, desc = "Noice All" },
+        { "<leader>sna", function() require("noice").cmd("all") end,     desc = "Noice All" },
         { "<leader>snd", function() require("noice").cmd("dismiss") end, desc = "Dismiss All" },
       },
     },
@@ -200,10 +214,10 @@ require("lazy").setup({
       event = "VeryLazy",
       opts = {},
       keys = {
-        { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
-        { "S", mode = { "n", "x", "o" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
-        { "r", mode = "o", function() require("flash").remote() end, desc = "Remote Flash" },
-        { "R", mode = { "o", "x" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
+        { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end,              desc = "Flash" },
+        { "S", mode = { "n", "x", "o" }, function() require("flash").treesitter() end,        desc = "Flash Treesitter" },
+        { "r", mode = "o",               function() require("flash").remote() end,            desc = "Remote Flash" },
+        { "R", mode = { "o", "x" },      function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
       },
     },
     {
@@ -402,12 +416,12 @@ require("lazy").setup({
       cmd = "Trouble",
       opts = {},
       keys = {
-        { "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>", desc = "Diagnostics (Trouble)" },
-        { "<leader>xX", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", desc = "Buffer Diagnostics (Trouble)" },
-        { "<leader>cs", "<cmd>Trouble symbols toggle focus=false<cr>", desc = "Symbols (Trouble)" },
+        { "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>",                        desc = "Diagnostics (Trouble)" },
+        { "<leader>xX", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>",           desc = "Buffer Diagnostics (Trouble)" },
+        { "<leader>cs", "<cmd>Trouble symbols toggle focus=false<cr>",                desc = "Symbols (Trouble)" },
         { "<leader>cl", "<cmd>Trouble lsp toggle focus=false win.position=right<cr>", desc = "LSP Definitions / References (Trouble)" },
-        { "<leader>xL", "<cmd>Trouble loclist toggle<cr>", desc = "Location List (Trouble)" },
-        { "<leader>xQ", "<cmd>Trouble qflist toggle<cr>", desc = "Quickfix List (Trouble)" },
+        { "<leader>xL", "<cmd>Trouble loclist toggle<cr>",                            desc = "Location List (Trouble)" },
+        { "<leader>xQ", "<cmd>Trouble qflist toggle<cr>",                             desc = "Quickfix List (Trouble)" },
       },
     },
   },
