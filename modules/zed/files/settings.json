@@ -18,6 +18,10 @@
   "ensure_final_newline_on_save": true,
   "show_whitespaces": "boundary",
   "vim_mode": true,
+  "which_key": {
+    "enabled": true,
+    "delay_ms": 0
+  },
   "autosave": "on_focus_change",
   "vim": {
     "use_system_clipboard": "always",
