@@ -2,7 +2,6 @@
 let
   # Common overlays for both Home Manager and NixOS
   commonOverlays = [
-    inputs.nixpkgs-terraform.overlays.default
     inputs.copyparty.overlays.default
     inputs.nix-zed-extensions.overlays.default
     inputs.nix-openclaw.overlays.default

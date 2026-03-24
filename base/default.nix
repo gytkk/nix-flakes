@@ -19,7 +19,6 @@
     ../modules/k9s
     ../modules/lsp
     ../modules/opencode
-    ../modules/terraform
     ../modules/vim
     ../modules/vscode
     ../modules/zed

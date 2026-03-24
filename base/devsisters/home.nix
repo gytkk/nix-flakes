@@ -9,7 +9,10 @@
 
 {
   # Import base configuration
-  imports = [ ../default.nix ];
+  imports = [
+    ../default.nix
+    ../../modules/terraform
+  ];
 
   # Devsisters 특화 패키지 추가
   home.packages = with pkgs; [
@@ -33,6 +36,7 @@
 
   # Terraform 모듈 설정
   modules.terraform = {
+    enable = true;
     versions = [
       "1.12.2"
       "1.11.4"

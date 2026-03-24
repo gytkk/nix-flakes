@@ -2,17 +2,20 @@
   config,
   lib,
   pkgs,
+  inputs,
   ...
 }:
 
 let
   cfg = config.modules.terraform;
+  system = pkgs.stdenv.hostPlatform.system;
+  terraformPkgs = inputs.nixpkgs-terraform.packages.${system};
 in
 {
   options.modules.terraform = {
     enable = lib.mkOption {
       type = lib.types.bool;
-      default = true;
+      default = false;
       description = "Enable Terraform version management with nixpkgs-terraform";
     };
 
@@ -48,7 +51,10 @@ in
     # Other versions are loaded lazily via direnv + nix-direnv
     home.packages = [
       (
-        if cfg.defaultVersion == "latest" then pkgs.terraform else pkgs.${"terraform-${cfg.defaultVersion}"}
+        if cfg.defaultVersion == "latest" then
+          pkgs.terraform
+        else
+          terraformPkgs.${"terraform-${cfg.defaultVersion}"}
       )
     ];
 
