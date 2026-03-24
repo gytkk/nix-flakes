@@ -5,12 +5,13 @@
 {
   imports = [
     ./hardware-configuration.nix
+    ./disk-config.nix
     ./openclaw.nix
   ];
 
-  boot.loader = {
-    systemd-boot.enable = true;
-    efi.canTouchEfiVariables = true;
+  boot.loader.grub = {
+    efiSupport = true;
+    efiInstallAsRemovable = true;
   };
 
   networking.networkmanager.enable = true;
@@ -37,6 +38,11 @@
     '';
   };
   services.tailscale.enable = true;
+
+  # 노트북 덮개를 닫아도 suspend하지 않음 (서버 용도)
+  services.logind.lidSwitch = "ignore";
+  services.logind.lidSwitchExternalPower = "ignore";
+  services.logind.lidSwitchDocked = "ignore";
 
   # /bin/bash shebang 호환성 (서드파티 스크립트용)
   system.activationScripts.binbash = ''
