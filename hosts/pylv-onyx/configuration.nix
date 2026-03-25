@@ -5,11 +5,11 @@
 {
   imports = [
     ./hardware-configuration.nix
-    ./disk-config.nix
     ./openclaw.nix
   ];
 
   boot.loader.grub = {
+    device = "nodev";
     efiSupport = true;
     efiInstallAsRemovable = true;
   };

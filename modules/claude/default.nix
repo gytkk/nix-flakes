@@ -87,6 +87,7 @@ in
       )
     }:$PATH"
 
+    ${pkgs.coreutils}/bin/mkdir -p "$HOME/.claude"
     SETUP_LOG="$HOME/.claude/nix-setup.log"
 
     log() { echo "[$(date '+%H:%M:%S')] $*" >> "$SETUP_LOG"; }
@@ -178,6 +179,8 @@ in
         ]
       )
     }:$PATH"
+
+    ${pkgs.coreutils}/bin/mkdir -p "$(${pkgs.coreutils}/bin/dirname "$PLANNOTATOR_BIN")"
 
     NEEDS_INSTALL=0
     if [ ! -x "$PLANNOTATOR_BIN" ]; then
