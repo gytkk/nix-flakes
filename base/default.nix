@@ -20,7 +20,6 @@
     ../modules/lsp
     ../modules/opencode
     ../modules/vim
-    ../modules/vscode
     ../modules/zed
     ../modules/zsh
   ];
