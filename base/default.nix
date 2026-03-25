@@ -18,7 +18,6 @@
     ../modules/git
     ../modules/k9s
     ../modules/lsp
-    ../modules/opencode
     ../modules/vim
     ../modules/zed
     ../modules/zsh
