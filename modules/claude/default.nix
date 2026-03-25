@@ -182,6 +182,7 @@ in
 
     ${pkgs.coreutils}/bin/mkdir -p "$(${pkgs.coreutils}/bin/dirname "$PLANNOTATOR_BIN")"
 
+    LATEST_TAG=""
     NEEDS_INSTALL=0
     if [ ! -x "$PLANNOTATOR_BIN" ]; then
       NEEDS_INSTALL=1
