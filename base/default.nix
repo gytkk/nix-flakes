@@ -16,7 +16,6 @@
     ../modules/codex
     ../modules/ghostty
     ../modules/git
-    ../modules/kitty
     ../modules/k9s
     ../modules/lsp
     ../modules/vim
