@@ -4,6 +4,7 @@
   pkgs,
   inputs,
   flakeDirectory,
+  isWSL ? false,
   ...
 }:
 
@@ -18,6 +19,8 @@ let
   };
 in
 {
+  home.packages = lib.optionals (!isWSL && pkgs.stdenv.isLinux) [ pkgs.ghostty ];
+
   xdg.configFile."ghostty/themes".source = combinedThemes;
 
   # config → repo 파일로 직접 symlink (mutable)

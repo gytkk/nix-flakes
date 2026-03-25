@@ -117,6 +117,8 @@
       nerd-fonts.fira-code
       nerd-fonts.jetbrains-mono
       sarasa-gothic
+      noto-fonts-cjk-sans
+      noto-fonts-cjk-serif
     ];
 
     stateVersion = "26.05";
