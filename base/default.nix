@@ -104,6 +104,7 @@
       # Secrets
       _1password-cli
       keybase
+      inputs.agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
 
       # Modeling
       ffmpeg
