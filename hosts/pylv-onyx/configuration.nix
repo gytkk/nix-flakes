@@ -102,5 +102,15 @@
     "ko_KR.UTF-8/UTF-8"
   ];
 
+  # 한글 입력기
+  i18n.inputMethod = {
+    enable = true;
+    type = "fcitx5";
+    fcitx5.addons = with pkgs; [
+      fcitx5-hangul
+      fcitx5-gtk
+    ];
+  };
+
   system.stateVersion = "25.11";
 }
