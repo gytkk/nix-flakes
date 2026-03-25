@@ -37,8 +37,15 @@ font-family = "JetBrains Mono"
 font-family = "Sarasa Mono CL"
 
 window-padding-balance = true
+window-save-state = always
+window-inherit-working-directory = true
+
+macos-titlebar-style = tabs
+
+unfocused-split-opacity = 0.85
 
 link-url = true
+clipboard-trim-trailing-spaces = true
 
 # SSH 접속 시 COLORTERM, TERM_PROGRAM 등 환경 변수 자동 전달
 shell-integration-features = cursor,sudo,title,ssh-env
