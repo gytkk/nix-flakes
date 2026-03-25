@@ -23,6 +23,11 @@
     wayland.enable = true;
   };
 
+  services.libinput = {
+    enable = true;
+    touchpad.naturalScrolling = true;
+  };
+
   services.pipewire = {
     enable = true;
     alsa.enable = true;
@@ -103,6 +108,13 @@
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJhE4Uakcz7usa0aetMqb99LYybOQ0I+sWKOiAidmBio gytk.kim@gmail.com"
     ];
+  };
+
+  # CJK fallback 글꼴
+  fonts.fontconfig.defaultFonts = {
+    sansSerif = [ "Sarasa Gothic K" ];
+    serif = [ "Sarasa Gothic K" ];
+    monospace = [ "Sarasa Mono K" ];
   };
 
   # Locale - SSH 접속 시 클라이언트에서 전달되는 ko_KR.UTF-8 지원
