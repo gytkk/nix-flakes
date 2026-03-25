@@ -75,6 +75,15 @@
     "flakes"
   ];
 
+  # Caps Lock → Left Ctrl (커널 레벨, 모든 DE/TTY에서 동작)
+  services.keyd = {
+    enable = true;
+    keyboards.default = {
+      ids = [ "*" ];
+      settings.main.capslock = "leftcontrol";
+    };
+  };
+
   # Security
   security.sudo = {
     enable = true;
