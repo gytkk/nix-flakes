@@ -11,6 +11,9 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = false;
 
+  hardware.enableRedistributableFirmware = true;
+  hardware.graphics.enable = true;
+
   networking.networkmanager.enable = true;
 
   services.desktopManager.plasma6.enable = true;
