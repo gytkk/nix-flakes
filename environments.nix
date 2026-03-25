@@ -52,5 +52,7 @@
     homeDirectory = "/home/gytkk";
 
     isWSL = false;
+
+    extraModules = [ ./base/pylv/onyx.nix ];
   };
 }

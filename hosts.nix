@@ -20,5 +20,7 @@
 
     # Home Manager configuration for this host
     homeConfig = ./base/pylv/home.nix;
+
+    extraHomeModules = [ ./base/pylv/onyx.nix ];
   };
 }

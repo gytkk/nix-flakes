@@ -257,6 +257,27 @@
         "type": "github"
       }
     },
+    "home-manager_4": {
+      "inputs": {
+        "nixpkgs": [
+          "zen-browser",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1773422513,
+        "narHash": "sha256-MPjR48roW7CUMU6lu0+qQGqj92Kuh3paIulMWFZy+NQ=",
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "rev": "ef12a9a2b0f77c8fa3dda1e7e494fca668909056",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "type": "github"
+      }
+    },
     "nix-openclaw": {
       "inputs": {
         "flake-utils": "flake-utils_3",
@@ -490,7 +511,8 @@
         "nixpkgs": "nixpkgs_3",
         "nixpkgs-25_05": "nixpkgs-25_05",
         "nixpkgs-terraform": "nixpkgs-terraform",
-        "rose-pine-ghostty": "rose-pine-ghostty"
+        "rose-pine-ghostty": "rose-pine-ghostty",
+        "zen-browser": "zen-browser"
       }
     },
     "rose-pine-ghostty": {
@@ -584,6 +606,27 @@
       "original": {
         "owner": "nix-systems",
         "repo": "default",
+        "type": "github"
+      }
+    },
+    "zen-browser": {
+      "inputs": {
+        "home-manager": "home-manager_4",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1774352774,
+        "narHash": "sha256-gibUM0pSnLxEeuFrYA8T1oEaixk+fjQpqXbYaxcEX/4=",
+        "owner": "0xc000022070",
+        "repo": "zen-browser-flake",
+        "rev": "a0f3d47dbd8f8618a1920d5a5ca09b7993415895",
+        "type": "github"
+      },
+      "original": {
+        "owner": "0xc000022070",
+        "repo": "zen-browser-flake",
         "type": "github"
       }
     }

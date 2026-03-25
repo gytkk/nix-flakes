@@ -115,8 +115,6 @@ in
     lib.mkMerge [
       # macOS/Linux (non-WSL): 설정 파일을 repo에 직접 symlink
       (lib.mkIf (!isWSL) {
-        home.packages = lib.optionals pkgs.stdenv.isLinux [ pkgs.zed-editor ];
-
         # settings.json, keymap.json → repo 파일로 직접 symlink (mutable)
         home.file."${zedConfigPath}/settings.json".source = mkSymlink "files/settings.json";
         home.file."${zedConfigPath}/keymap.json".source = mkSymlink "files/keymap.json";
