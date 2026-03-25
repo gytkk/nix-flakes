@@ -75,6 +75,9 @@ untracked = "?$count "
 renamed = "»$count "
 deleted = "-$count "
 stashed = "*$count "
+ahead = "↑$count"
+behind = "↓$count"
+diverged = "↑$ahead_count↓$behind_count"
 
 [c]
 symbol = " "
