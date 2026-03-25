@@ -10,6 +10,7 @@
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = false;
+  boot.kernelPackages = pkgs.linuxPackages_6_12;
 
   hardware.enableRedistributableFirmware = true;
   hardware.graphics.enable = true;
