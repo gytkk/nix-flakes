@@ -74,7 +74,11 @@ rec {
           inherit inputs flakeDirectory;
           isWSL = config.isWSL or false;
         };
-        modules = dynamicModules ++ (config.extraModules or [ ]);
+        modules = [
+          inputs.agenix.homeManagerModules.default
+        ]
+        ++ dynamicModules
+        ++ (config.extraModules or [ ]);
       };
 
   # NixOS Configuration helper function

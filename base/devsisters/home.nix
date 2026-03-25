@@ -59,7 +59,32 @@
     VAULT_ADDR = "https://vault.devsisters.cloud";
     # SBT Java 호환성 설정
     SBT_OPTS = "-Xmx2G -XX:+UseG1GC";
+    # OTEL telemetry (Databricks)
+    OTEL_METRICS_EXPORTER = "otlp";
+    OTEL_EXPORTER_OTLP_METRICS_PROTOCOL = "http/protobuf";
+    OTEL_EXPORTER_OTLP_METRICS_ENDPOINT = "https://devsisters-dsusw2.cloud.databricks.com/api/2.0/otel/v1/metrics";
+    OTEL_METRIC_EXPORT_INTERVAL = "10000";
+    OTEL_LOGS_EXPORTER = "otlp";
+    OTEL_EXPORTER_OTLP_LOGS_PROTOCOL = "http/protobuf";
+    OTEL_EXPORTER_OTLP_LOGS_ENDPOINT = "https://devsisters-dsusw2.cloud.databricks.com/api/2.0/otel/v1/logs";
+    OTEL_LOGS_EXPORT_INTERVAL = "5000";
+    OTEL_LOG_USER_PROMPTS = "1";
   };
+
+  # Databricks OTEL token (decrypted by agenix)
+  age.secrets.databricks-token = {
+    file = ../../secrets/databricks-token.age;
+  };
+
+  # Construct OTEL headers at runtime using the decrypted token
+  programs.zsh.initContent = lib.mkAfter ''
+    if [ -f "${config.age.secrets.databricks-token.path}" ]; then
+      _dbx_token=$(cat "${config.age.secrets.databricks-token.path}")
+      export OTEL_EXPORTER_OTLP_METRICS_HEADERS="content-type=application/x-protobuf,Authorization=Bearer $_dbx_token,X-Databricks-UC-Table-Name=ml.ai_observability.cc_otel_metrics"
+      export OTEL_EXPORTER_OTLP_LOGS_HEADERS="content-type=application/x-protobuf,Authorization=Bearer $_dbx_token,X-Databricks-UC-Table-Name=ml.ai_observability.cc_otel_logs"
+      unset _dbx_token
+    fi
+  '';
 
   # Add gem binaries to PATH
   home.sessionPath = [

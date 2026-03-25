@@ -16,10 +16,18 @@ let
   # TODO: pylv-onyx host key 추가 후 `agenix -r` 재암호화 필요
   # pylv-onyx = "ssh-ed25519 ...";
 
+  # Devsisters machine SSH public keys
+  devsisters-macbook = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDdeZoty0uKpSDJ8sUGFwsMEEBYcuajo30lHlUHh8RMi";
+  devsisters-macstudio = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHGIGT6Zgg4TW74umgyjlpk1b056LXDoC1kbBfPcqRuz";
+
   # Key groups
   allUsers = [ gytkk ];
   allHosts = [
     pylv-sepia # pylv-onyx
+  ];
+  devsistersHosts = [
+    devsisters-macbook
+    devsisters-macstudio
   ];
 in
 {
@@ -32,4 +40,6 @@ in
   # Google Workspace CLI credentials for obsidian-maintenance calendar sync
   "gws-credentials.age".publicKeys = allUsers ++ allHosts;
 
+  # Databricks OTEL token (devsisters environments only)
+  "databricks-token.age".publicKeys = allUsers ++ devsistersHosts;
 }
