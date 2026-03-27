@@ -1,4 +1,5 @@
 {
+  config,
   pkgs,
   ...
 }@args:
@@ -14,6 +15,22 @@
 
   hardware.enableRedistributableFirmware = true;
   hardware.graphics.enable = true;
+
+  # NVIDIA GTX 1650 Mobile (Turing) — offload 모드: 평소 Intel iGPU, 필요 시 nvidia-offload 명령으로 사용
+  hardware.nvidia = {
+    modesetting.enable = true;
+    open = false;
+    nvidiaSettings = true;
+    package = config.boot.kernelPackages.nvidiaPackages.stable;
+    prime = {
+      offload = {
+        enable = true;
+        enableOffloadCmd = true;
+      };
+      intelBusId = "PCI:0:2:0";
+      nvidiaBusId = "PCI:87:0:0";
+    };
+  };
 
   networking.networkmanager.enable = true;
 
