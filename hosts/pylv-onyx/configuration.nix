@@ -10,7 +10,6 @@
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = false;
-  boot.loader.systemd-boot.efiInstallAsRemovable = true;
   boot.kernelPackages = pkgs.linuxPackages_6_12;
 
   hardware.enableRedistributableFirmware = true;
@@ -19,7 +18,6 @@
   networking.networkmanager.enable = true;
 
   services.desktopManager.plasma6.enable = true;
-  services.desktopManager.cosmic.enable = true;
   services.displayManager.sddm = {
     enable = true;
     wayland.enable = true;
