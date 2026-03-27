@@ -38,7 +38,7 @@
   programs.niri.enable = true;
 
   # DankMaterialShell greeter (SDDM 대체)
-  services.dank-material-shell.greeter = {
+  programs.dank-material-shell.greeter = {
     enable = true;
     compositor.name = "niri";
   };
