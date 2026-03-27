@@ -6,6 +6,7 @@ let
     inputs.nix-zed-extensions.overlays.default
     inputs.nix-openclaw.overlays.default
     inputs.flake-stores.overlays.default
+    inputs.niri.overlays.niri
     (import ../overlays { inherit inputs; }).nixpkgs-versions
   ];
 
@@ -115,6 +116,9 @@ rec {
           inputs.agenix.nixosModules.default
           inputs.copyparty.nixosModules.default
           inputs.nix-openclaw.nixosModules.openclaw-gateway
+          inputs.niri.nixosModules.niri
+          inputs.dms.nixosModules.dank-material-shell
+          inputs.dms.nixosModules.greeter
           (../hosts + "/${name}/configuration.nix")
           {
             nixpkgs.hostPlatform = config.system;

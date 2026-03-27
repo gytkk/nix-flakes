@@ -82,6 +82,15 @@
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # niri - scrollable tiling Wayland compositor
+    niri.url = "github:sodiboo/niri-flake";
+
+    # DankMaterialShell - all-in-one desktop shell for niri
+    dms = {
+      url = "github:AvengeMedia/DankMaterialShell";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =

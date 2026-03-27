@@ -34,10 +34,13 @@
 
   networking.networkmanager.enable = true;
 
-  services.desktopManager.plasma6.enable = true;
-  services.displayManager.sddm = {
+  # niri compositor
+  programs.niri.enable = true;
+
+  # DankMaterialShell greeter (SDDM 대체)
+  services.dank-material-shell.greeter = {
     enable = true;
-    wayland.enable = true;
+    compositor.name = "niri";
   };
 
   services.libinput = {
@@ -83,7 +86,12 @@
     vim
     # Ghostty terminfo (SSH 접속 시 xterm-ghostty TERM 인식용)
     ghostty.terminfo
+    # X11 앱 호환 (Electron 등)
+    xwayland-satellite-stable
   ];
+
+  # Wayland 네이티브 Electron 앱 지원
+  environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
   # Enable zsh system-wide (configuration via Home Manager)
   programs.zsh.enable = true;
