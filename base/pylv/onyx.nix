@@ -24,6 +24,7 @@
     pkgs.ghostty
     pkgs.zed-editor
     pkgs.pretendard
+    pkgs.moonlight-qt
   ];
 
   programs.zen-browser.enable = true;
