@@ -137,7 +137,10 @@
 
   # CJK fallback 글꼴
   fonts.fontconfig.defaultFonts = {
-    sansSerif = [ "Sarasa Gothic K" ];
+    sansSerif = [
+      "Pretendard"
+      "Sarasa Gothic K"
+    ];
     serif = [ "Sarasa Gothic K" ];
     monospace = [ "Sarasa Mono K" ];
   };

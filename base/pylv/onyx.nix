@@ -23,6 +23,7 @@
   home.packages = [
     pkgs.ghostty
     pkgs.zed-editor
+    pkgs.pretendard
   ];
 
   programs.zen-browser.enable = true;
