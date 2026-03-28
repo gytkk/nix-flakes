@@ -40,7 +40,6 @@ window-padding-balance = true
 window-save-state = always
 window-inherit-working-directory = true
 
-window-decoration = false
 macos-titlebar-style = tabs
 
 unfocused-split-opacity = 0.85
