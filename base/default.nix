@@ -47,79 +47,84 @@
     };
 
     # 기본 패키지 (모든 환경에서 공통)
-    packages = with pkgs; [
-      # Nix
-      nixfmt
+    packages =
+      with pkgs;
+      [
+        # Nix
+        nixfmt
 
-      # System utilities
-      coreutils
-      findutils
-      gnupg
-      libiconv
+        # System utilities
+        coreutils
+        findutils
+        gnupg
+        libiconv
 
-      # Development (common)
-      docker
-      gcc
+        # Development (common)
+        docker
+        gcc
 
-      # Dev tools
-      awscli2
-      jq
-      yq-go # yq 패키지는 더 이상 관리되지 않음
-      fd
-      ripgrep
-      tmux
-      less
-      wget
-      curl
+        # Dev tools
+        awscli2
+        jq
+        yq-go # yq 패키지는 더 이상 관리되지 않음
+        fd
+        ripgrep
+        tmux
+        less
+        wget
+        curl
 
-      # Git
-      git
-      gh
-      lazygit
-      delta
-      bat
+        # Git
+        git
+        gh
+        lazygit
+        delta
+        bat
 
-      # Python
-      uv
-      ruff
+        # Python
+        uv
+        ruff
 
-      # Rust
-      rustup
+        # Rust
+        rustup
 
-      # JavaScript + Node.js
-      bun
-      nodejs
-      typescript
+        # JavaScript + Node.js
+        bun
+        nodejs
+        typescript
 
-      # Go
-      go
+        # Go
+        go
 
-      # Kubernetes
-      kubectl
-      kubectx
-      kubernetes-helm
+        # Kubernetes
+        kubectl
+        kubectx
+        kubernetes-helm
 
-      # Secrets
-      _1password-cli
-      keybase
-      inputs.agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
+        # Secrets
+        _1password-cli
+        keybase
+        inputs.agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
 
-      # Modeling
-      ffmpeg
-      imagemagick
-      pkgs.stable-25_05.micromamba
-      yt-dlp
+        # Modeling
+        ffmpeg
+        imagemagick
+        pkgs.stable-25_05.micromamba
+        yt-dlp
 
-      # etc
-      direnv
+        # etc
+        direnv
 
-      # Fonts
-      nerd-fonts.fira-code
-      nerd-fonts.jetbrains-mono
-      sarasa-gothic
-      noto-fonts-cjk-sans
-      noto-fonts-cjk-serif
-    ];
+        # Fonts
+        nerd-fonts.fira-code
+        nerd-fonts.jetbrains-mono
+        sarasa-gothic
+        noto-fonts-cjk-sans
+        noto-fonts-cjk-serif
+      ]
+      ++ lib.optionals pkgs.stdenv.isDarwin [
+        sketchybar
+      ];
 
     stateVersion = "26.05";
 
