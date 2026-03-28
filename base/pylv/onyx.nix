@@ -20,9 +20,6 @@
     };
   };
 
-  # DMS가 자체 polkit agent를 제공하므로 niri-flake의 polkit agent 비활성화
-  systemd.user.services.niri-flake-polkit.enable = false;
-
   home.packages = [
     pkgs.alacritty
     pkgs.fuzzel
