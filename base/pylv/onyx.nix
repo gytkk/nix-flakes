@@ -21,6 +21,8 @@
   };
 
   home.packages = [
+    pkgs.alacritty
+    pkgs.fuzzel
     pkgs.ghostty
     pkgs.zed-editor
     pkgs.pretendard
