@@ -68,6 +68,7 @@
       fd
       ripgrep
       tmux
+      zellij
       less
       wget
       curl
