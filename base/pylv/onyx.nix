@@ -22,12 +22,21 @@
 
   home.packages = [
     pkgs.alacritty
-    pkgs.fuzzel
+    pkgs.btop
+    pkgs.walker
     pkgs.ghostty
+    pkgs.obsidian
+    pkgs.wl-clipboard
+    pkgs.yazi
     pkgs.zed-editor
     pkgs.pretendard
     pkgs.moonlight-qt
   ];
+
+  # Alt+Space로 walker 실행 (Spotlight 스타일)
+  programs.niri.settings.binds = {
+    "Alt+Space".action.spawn = "walker";
+  };
 
   programs.zen-browser.enable = true;
 }
