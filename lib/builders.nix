@@ -136,4 +136,52 @@ rec {
         ]
         ++ (config.extraModules or [ ]);
       };
+
+  # Darwin Configuration helper function
+  mkDarwinConfig =
+    name: config:
+    let
+      requiredFields = [
+        "system"
+        "username"
+        "homeDirectory"
+        "homeConfig"
+      ];
+      missingFields = builtins.filter (field: !(builtins.hasAttr field config)) requiredFields;
+
+      flakeDirectory = config.flakeDirectory or (mkFlakeDirectory config.homeDirectory);
+
+      specialArgs = {
+        inherit inputs flakeDirectory;
+        inherit (config) username homeDirectory;
+        isWSL = false;
+      };
+
+      homeModules = [ config.homeConfig ] ++ (config.extraHomeModules or [ ]);
+    in
+    if missingFields != [ ] then
+      throw "Missing required fields for darwin host ${name}: ${builtins.toString missingFields}"
+    else
+      inputs.nix-darwin.lib.darwinSystem {
+        inherit specialArgs;
+        modules = [
+          inputs.home-manager.darwinModules.home-manager
+          inputs.agenix.darwinModules.default
+          (../hosts + "/${name}/configuration.nix")
+          {
+            nixpkgs.hostPlatform = config.system;
+            nixpkgs.overlays = commonOverlays;
+            nixpkgs.config.allowUnfree = true;
+
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.backupFileExtension = "backup";
+            home-manager.extraSpecialArgs = specialArgs;
+            home-manager.users.${config.username} = {
+              imports = homeModules;
+            };
+          }
+        ]
+        ++ (config.extraModules or [ ]);
+      };
 }

@@ -12,6 +12,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # nix-darwin - macOS system configuration
+    nix-darwin = {
+      url = "github:nix-darwin/nix-darwin/master";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Disko - declarative disk partitioning
     disko = {
       url = "github:nix-community/disko";
@@ -108,20 +114,24 @@
       # 환경별 설정 (라이브러리에서 자동 로드)
       environmentConfigs = lib.environments.allEnvironments;
       hostConfigs = lib.environments.allHosts;
-
-      baseModules = [ ./home.nix ];
+      darwinHostConfigs = lib.environments.allDarwinHosts;
 
       # 홈 설정 생성 함수
       mkHomeConfig = lib.builders.mkHomeConfig {
-        inherit baseModules;
+        baseModules = [ ];
       };
 
       # NixOS 설정 생성 함수
       mkNixOSConfig = lib.builders.mkNixOSConfig;
+
+      # Darwin 설정 생성 함수
+      mkDarwinConfig = lib.builders.mkDarwinConfig;
     in
     {
       homeConfigurations = builtins.mapAttrs mkHomeConfig environmentConfigs;
 
       nixosConfigurations = builtins.mapAttrs mkNixOSConfig hostConfigs;
+
+      darwinConfigurations = builtins.mapAttrs mkDarwinConfig darwinHostConfigs;
     };
 }

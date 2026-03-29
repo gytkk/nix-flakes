@@ -23,4 +23,21 @@
 
     extraHomeModules = [ ./base/pylv/onyx.nix ];
   };
+
+  # Darwin hosts
+  "devsisters-macbook" = {
+    system = "aarch64-darwin";
+    username = "gyutak";
+    homeDirectory = "/Users/gyutak";
+    homeConfig = ./base/devsisters/home.nix;
+    isDarwin = true;
+  };
+
+  "devsisters-macstudio" = {
+    system = "aarch64-darwin";
+    username = "gyutak";
+    homeDirectory = "/Users/gyutak";
+    homeConfig = ./base/devsisters/home.nix;
+    isDarwin = true;
+  };
 }

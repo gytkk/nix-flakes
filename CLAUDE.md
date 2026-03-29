@@ -35,6 +35,7 @@ nix eval .#homeConfigurations.pylv-denim.config.home.packages --apply 'x: map (p
 
 ```bash
 home-manager switch --flake .#<environment>   # pylv-denim, pylv-sepia, devsisters-macbook, devsisters-macstudio
+darwin-rebuild switch --flake .#<host>        # devsisters-macbook, devsisters-macstudio (nix-darwin)
 nixos-rebuild switch --flake .#pylv-sepia     # NixOS only
 ```
 
@@ -54,26 +55,26 @@ nixos-rebuild switch --flake .#pylv-sepia     # NixOS only
 
 ### Architecture
 
-Nix flakes-based Home Manager configuration supporting multiple environments (macOS and Linux) with layered base system.
+Nix flakes-based Home Manager, nix-darwin, and NixOS configuration supporting multiple environments (macOS and Linux) with layered base system.
 
 ```text
 flake.nix                         # Main flake configuration
 environments.nix                  # All environment definitions
-hosts.nix                         # NixOS host definitions
+hosts.nix                         # NixOS and Darwin host definitions
 base/default.nix                  # Common configuration for all environments
 base/<company>/home.nix           # Company-specific extensions (devsisters, pylv)
 modules/<name>/default.nix        # Reusable module
-hosts/<name>/configuration.nix    # NixOS host configuration
-lib/builders.nix                  # mkHomeConfig, mkNixOSConfig helpers
+hosts/<name>/configuration.nix    # NixOS/Darwin host configuration
+lib/builders.nix                  # mkHomeConfig, mkNixOSConfig, mkDarwinConfig helpers
 overlays/default.nix              # nixpkgs version overlays
 secrets/secrets.nix               # Agenix secrets configuration
 ```
 
 #### Environments
 
-Defined in `environments.nix`:
+Defined in `environments.nix` (Home Manager) and `hosts.nix` (system-level):
 
-- **devsisters-macbook / devsisters-macstudio**: ARM64 macOS, devsisters base
+- **devsisters-macbook / devsisters-macstudio**: ARM64 macOS, devsisters base, nix-darwin (AeroSpace)
 - **pylv-denim**: x86_64 Linux/WSL, pylv base
 - **pylv-sepia**: x86_64 Linux/NixOS server, pylv base (with Disko, agenix, copyparty, OpenClaw)
 
