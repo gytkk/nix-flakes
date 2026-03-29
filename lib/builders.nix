@@ -104,6 +104,7 @@ rec {
 
       # Combine base home config with extra home modules
       homeModules = [ config.homeConfig ] ++ (config.extraHomeModules or [ ]);
+      sharedHomeModules = [ inputs.agenix.homeManagerModules.default ];
     in
     if missingFields != [ ] then
       throw "Missing required fields for NixOS host ${name}: ${builtins.toString missingFields}"
@@ -129,6 +130,7 @@ rec {
             home-manager.useUserPackages = true;
             home-manager.backupFileExtension = "backup";
             home-manager.extraSpecialArgs = specialArgs;
+            home-manager.sharedModules = sharedHomeModules;
             home-manager.users.${config.username} = {
               imports = homeModules;
             };
@@ -158,6 +160,7 @@ rec {
       };
 
       homeModules = [ config.homeConfig ] ++ (config.extraHomeModules or [ ]);
+      sharedHomeModules = [ inputs.agenix.homeManagerModules.default ];
     in
     if missingFields != [ ] then
       throw "Missing required fields for darwin host ${name}: ${builtins.toString missingFields}"
@@ -173,10 +176,13 @@ rec {
             nixpkgs.overlays = commonOverlays;
             nixpkgs.config.allowUnfree = true;
 
+            users.users.${config.username}.home = nixpkgs.lib.mkDefault config.homeDirectory;
+
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.backupFileExtension = "backup";
             home-manager.extraSpecialArgs = specialArgs;
+            home-manager.sharedModules = sharedHomeModules;
             home-manager.users.${config.username} = {
               imports = homeModules;
             };
