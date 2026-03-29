@@ -27,7 +27,10 @@
       AcceptEnv COLORTERM TERM_PROGRAM TERM_PROGRAM_VERSION
     '';
   };
-  services.tailscale.enable = true;
+  services.tailscale = {
+    enable = true;
+    extraSetFlags = [ "--ssh" ];
+  };
 
   # Code Server
   services.code-server = {

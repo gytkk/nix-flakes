@@ -66,7 +66,10 @@
       AcceptEnv COLORTERM TERM_PROGRAM TERM_PROGRAM_VERSION
     '';
   };
-  services.tailscale.enable = true;
+  services.tailscale = {
+    enable = true;
+    extraSetFlags = [ "--ssh" ];
+  };
 
   # 노트북 덮개를 닫아도 suspend하지 않음 (서버 용도)
   services.logind.lidSwitch = "ignore";
