@@ -1,21 +1,62 @@
 # nix-flakes
 
-Home Manager configuration using Nix flakes for multiple environments.
+Nix flake configuration for Home Manager, nix-darwin, and NixOS.
 
-## Usage
+## Prerequisites
 
-### Install Nix, Home Manager
+- Install Nix: <https://nixos.org/download>
+- Enable flakes:
 
-- Nix: <https://nixos.org/download>
-- Home Manager: <https://nix-community.github.io/home-manager/index.xhtml#sec-install-standalone>
-
-Home manager 실행을 위한 config를 줘야 한다.
-
-```text
+```bash
+sudo mkdir -p /etc/nix
 echo "experimental-features = nix-command flakes" | sudo tee -a /etc/nix/nix.conf
 ```
 
-### Install Home Manager profile for specific environment
+- This repo assumes the checkout lives at `~/development/nix-flakes`.
+  Several modules create out-of-store symlinks from that path.
+
+## macOS (`nix-darwin`)
+
+Available Darwin hosts:
+
+- `devsisters-macbook`
+- `devsisters-macstudio`
+
+### First bootstrap
+
+Run this once from the repo root to install and invoke `darwin-rebuild` through the flake:
+
+```bash
+sudo nix run github:nix-darwin/nix-darwin/master#darwin-rebuild -- switch --flake .#devsisters-macbook
+```
+
+For the Mac Studio host:
+
+```bash
+sudo nix run github:nix-darwin/nix-darwin/master#darwin-rebuild -- switch --flake .#devsisters-macstudio
+```
+
+If the Darwin profile uses agenix-managed secrets, make sure the decrypting SSH key already exists at `~/.ssh/id_ed25519` or `~/.ssh/id_rsa` before the first switch.
+
+### Rebuild after bootstrap
+
+```bash
+sudo darwin-rebuild switch --flake .#devsisters-macbook
+
+sudo darwin-rebuild switch --flake .#devsisters-macstudio
+```
+
+### Build without switching
+
+```bash
+nix build .#darwinConfigurations.devsisters-macbook.system
+
+nix build .#darwinConfigurations.devsisters-macstudio.system
+```
+
+## Standalone Home Manager
+
+Standalone Home Manager outputs are still available for profile-only testing:
 
 ```bash
 home-manager switch --flake .#devsisters-macbook
@@ -24,25 +65,43 @@ home-manager switch --flake .#devsisters-macstudio
 
 home-manager switch --flake .#pylv-denim
 
+home-manager switch --flake .#pylv-onyx
+
 home-manager switch --flake .#pylv-sepia
 ```
 
 ### Build without switching
 
 ```bash
-# Build configuration for specific environment
 home-manager build --flake .#devsisters-macbook
 ```
 
-### List available configurations
+## NixOS
+
+Available NixOS hosts:
+
+- `pylv-onyx`
+- `pylv-sepia`
+
+```bash
+sudo nixos-rebuild switch --flake .#pylv-onyx
+
+sudo nixos-rebuild switch --flake .#pylv-sepia
+```
+
+### Build without switching
+
+```bash
+nix build .#nixosConfigurations.pylv-onyx.config.system.build.toplevel
+
+nix build .#nixosConfigurations.pylv-sepia.config.system.build.toplevel
+```
+
+## Helpers
 
 ```bash
 nix flake show
-```
 
-### Update flake inputs
-
-```bash
 nix flake update
 ```
 
