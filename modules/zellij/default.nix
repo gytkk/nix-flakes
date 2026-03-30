@@ -5,7 +5,7 @@
     enable = true;
 
     settings = {
-      theme = "catppuccin-latte";
+      theme = "one-half-light";
       show_startup_tips = false;
     };
 
@@ -21,6 +21,6 @@
   xdg.configFile."zellij/plugins/zellij_sidebar.wasm".source =
     "${pkgs.zellij-sidebar}/share/zellij/plugins/zellij_sidebar.wasm";
 
-  xdg.configFile."zellij/themes/ayu-light.kdl".source = ./files/ayu-light.kdl;
+  xdg.configFile."zellij/themes/one-half-light.kdl".source = ./files/one-half-light.kdl;
 
 }
