@@ -23,6 +23,11 @@ echo "experimental-features = nix-command flakes" | sudo tee -a /etc/nix/nix.con
 - If `/etc/codex/config.toml` already exists as a regular file, activation stops instead of overwriting it.
 - `~/.codex/config.toml` stays writable for user-local state such as `[projects."..."]` trust entries.
 
+## Zellij config
+
+- Zellij is managed through `modules/zellij/default.nix`.
+- The current default theme is `ayu-light`.
+
 ## macOS (`nix-darwin`)
 
 Available Darwin hosts:

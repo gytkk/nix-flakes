@@ -20,6 +20,7 @@
     ../modules/lsp
     ../modules/vim
     ../modules/zed
+    ../modules/zellij
     ../modules/zsh
   ];
 
@@ -68,7 +69,6 @@
       fd
       ripgrep
       tmux
-      zellij
       less
       wget
       curl
