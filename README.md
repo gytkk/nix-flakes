@@ -18,8 +18,10 @@ echo "experimental-features = nix-command flakes" | sudo tee -a /etc/nix/nix.con
 ## Codex config
 
 - On NixOS and nix-darwin hosts, the static Codex base config is installed to `/etc/codex/config.toml`.
+- On standalone Home Manager environments, `home-manager switch` ensures `/etc/codex/config.toml` is a symlink to this repo's `modules/codex/files/config.toml`.
+- Standalone activation may prompt for `sudo` on the first switch, when the repo path changes, or after the symlink is removed.
+- If `/etc/codex/config.toml` already exists as a regular file, activation stops instead of overwriting it.
 - `~/.codex/config.toml` stays writable for user-local state such as `[projects."..."]` trust entries.
-- On standalone Home Manager environments, activation rebuilds `~/.codex/config.toml` from the repo base while preserving existing project trust entries.
 
 ## macOS (`nix-darwin`)
 
