@@ -26,10 +26,8 @@ echo "experimental-features = nix-command flakes" | sudo tee -a /etc/nix/nix.con
 ## Zellij config
 
 - Zellij is managed through `modules/zellij/default.nix`.
-- The current default theme is `one-half-light`, matching the repo's light palette and Ghostty tab background more closely.
+- The current theme is `ayu-light`.
 - Startup tips are disabled, and `Ctrl+b` is passed through to terminal apps like Neovim instead of entering Zellij's tmux mode.
-- The default layout is `project-sidebar`, which loads the vendored `zellij-project-sidebar` plugin and scans projects from `~/development` and `~/workspace` via a generated symlink farm in `~/.local/share/zellij/sidebar-projects`.
-- Ghostty leaves `Cmd+O` unbound so the Zellij project sidebar shortcut reaches the terminal app.
 - Local interactive shells started from Ghostty automatically `exec zellij`.
 - SSH sessions and shells already inside `zellij` or `tmux` are excluded from that auto-start.
 

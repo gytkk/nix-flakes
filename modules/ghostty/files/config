@@ -48,9 +48,6 @@ unfocused-split-opacity = 0.85
 link-url = true
 clipboard-trim-trailing-spaces = true
 
-# Let Zellij handle the project sidebar shortcut.
-keybind = cmd+o=unbind
-
 # IME(한글 등) 활성 상태에서도 Zellij Ctrl 단축키가 동작하도록
 # keybind는 IME보다 먼저 처리되므로 raw control character를 직접 전송
 keybind = ctrl+c=text:\x03
