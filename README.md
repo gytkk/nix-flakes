@@ -15,6 +15,12 @@ echo "experimental-features = nix-command flakes" | sudo tee -a /etc/nix/nix.con
 - This repo assumes the checkout lives at `~/development/nix-flakes`.
   Several modules create out-of-store symlinks from that path.
 
+## Codex config
+
+- On NixOS and nix-darwin hosts, the static Codex base config is installed to `/etc/codex/config.toml`.
+- `~/.codex/config.toml` stays writable for user-local state such as `[projects."..."]` trust entries.
+- On standalone Home Manager environments, activation rebuilds `~/.codex/config.toml` from the repo base while preserving existing project trust entries.
+
 ## macOS (`nix-darwin`)
 
 Available Darwin hosts:
