@@ -5,7 +5,7 @@
     enable = true;
 
     settings = {
-      theme = "ayu-light";
+      theme = "catppuccin-latte";
       show_startup_tips = false;
     };
 
