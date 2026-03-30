@@ -27,8 +27,6 @@ echo "experimental-features = nix-command flakes" | sudo tee -a /etc/nix/nix.con
 
 - Zellij is managed through `modules/zellij/default.nix`.
 - The current default theme is `ayu-light`.
-- Local interactive shells started from Ghostty automatically `exec zellij`.
-- SSH sessions and shells already inside `zellij` or `tmux` are excluded from that auto-start.
 
 ## macOS (`nix-darwin`)
 
