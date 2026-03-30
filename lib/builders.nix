@@ -74,6 +74,7 @@ rec {
           inherit (config) username homeDirectory;
           inherit inputs flakeDirectory;
           isWSL = config.isWSL or false;
+          hasSystemCodexConfig = false;
         };
         modules = [
           inputs.agenix.homeManagerModules.default
@@ -100,6 +101,7 @@ rec {
         inherit inputs flakeDirectory;
         inherit (config) username homeDirectory;
         isWSL = config.isWSL or false;
+        hasSystemCodexConfig = true;
       };
 
       # Combine base home config with extra home modules
@@ -112,6 +114,7 @@ rec {
       nixpkgs.lib.nixosSystem {
         inherit specialArgs;
         modules = [
+          ../modules/codex/system.nix
           inputs.disko.nixosModules.disko
           inputs.home-manager.nixosModules.home-manager
           inputs.agenix.nixosModules.default
@@ -157,6 +160,7 @@ rec {
         inherit inputs flakeDirectory;
         inherit (config) username homeDirectory;
         isWSL = false;
+        hasSystemCodexConfig = true;
       };
 
       homeModules = [ config.homeConfig ] ++ (config.extraHomeModules or [ ]);
@@ -168,6 +172,7 @@ rec {
       inputs.nix-darwin.lib.darwinSystem {
         inherit specialArgs;
         modules = [
+          ../modules/codex/system.nix
           inputs.home-manager.darwinModules.home-manager
           inputs.agenix.darwinModules.default
           (../hosts + "/${name}/configuration.nix")

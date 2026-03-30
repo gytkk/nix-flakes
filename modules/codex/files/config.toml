@@ -13,4 +13,3 @@ multi_agent = true
 
 [history]
 persistence = "save-all"
-
