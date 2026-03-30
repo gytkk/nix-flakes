@@ -48,17 +48,35 @@ unfocused-split-opacity = 0.85
 link-url = true
 clipboard-trim-trailing-spaces = true
 
-# IME(한글 등) 활성 상태에서도 Zellij Ctrl 단축키가 동작하도록
-# keybind는 IME보다 먼저 처리되므로 raw control character를 직접 전송
-keybind = ctrl+c=text:\x03
-keybind = ctrl+g=text:\x07
-keybind = ctrl+h=text:\x08
-keybind = ctrl+n=text:\x0e
-keybind = ctrl+o=text:\x0f
-keybind = ctrl+p=text:\x10
-keybind = ctrl+q=text:\x11
-keybind = ctrl+s=text:\x13
-keybind = ctrl+t=text:\x14
+# IME(한글 등) 활성 상태에서 Ctrl+key가 자모로 변환되어 CSI u 시퀀스
+# (예: 12613;5u = Ctrl+ㅅ)가 그대로 찍히는 문제 방지.
+# W3C 물리 키 코드를 사용하면 레이아웃/IME에 관계없이 물리 키 위치로 매칭됨.
+keybind = ctrl+key_a=text:\x01
+keybind = ctrl+key_b=text:\x02
+keybind = ctrl+key_c=text:\x03
+keybind = ctrl+key_d=text:\x04
+keybind = ctrl+key_e=text:\x05
+keybind = ctrl+key_f=text:\x06
+keybind = ctrl+key_g=text:\x07
+keybind = ctrl+key_h=text:\x08
+keybind = ctrl+key_i=text:\x09
+keybind = ctrl+key_j=text:\x0a
+keybind = ctrl+key_k=text:\x0b
+keybind = ctrl+key_l=text:\x0c
+keybind = ctrl+key_m=text:\x0d
+keybind = ctrl+key_n=text:\x0e
+keybind = ctrl+key_o=text:\x0f
+keybind = ctrl+key_p=text:\x10
+keybind = ctrl+key_q=text:\x11
+keybind = ctrl+key_r=text:\x12
+keybind = ctrl+key_s=text:\x13
+keybind = ctrl+key_t=text:\x14
+keybind = ctrl+key_u=text:\x15
+keybind = ctrl+key_v=text:\x16
+keybind = ctrl+key_w=text:\x17
+keybind = ctrl+key_x=text:\x18
+keybind = ctrl+key_y=text:\x19
+keybind = ctrl+key_z=text:\x1a
 
 # SSH 접속 시 COLORTERM, TERM_PROGRAM 등 환경 변수 자동 전달
 shell-integration-features = cursor,sudo,title,ssh-env
