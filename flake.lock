@@ -843,11 +843,11 @@
         "rust-overlay": "rust-overlay_2"
       },
       "locked": {
-        "lastModified": 1774876807,
-        "narHash": "sha256-T+iKqpBJD3jMPAq9ergxdjSSAgE2p+gQkNP2VPlP0YU=",
+        "lastModified": 1774877982,
+        "narHash": "sha256-ExX4M2/rukwDUYEUeQEHecB0hBJKCckJQBsZ6b28mgA=",
         "owner": "gytkk",
         "repo": "zellij-sidebar",
-        "rev": "45daa4f7546b77235d4d1deaa13b9ea3e9be3c32",
+        "rev": "ff25da4d35630f8d0fa1cc5f929dbc0e770402b3",
         "type": "github"
       },
       "original": {
