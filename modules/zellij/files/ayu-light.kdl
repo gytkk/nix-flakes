@@ -1,7 +1,7 @@
 themes {
     ayu-light {
         text_unselected {
-            base 92 97 102
+            base 252 252 252
             background 231 234 237
             emphasis_0 250 141 62
             emphasis_1 71 138 204
@@ -49,7 +49,7 @@ themes {
             emphasis_3 163 122 204
         }
         table_cell_unselected {
-            base 92 97 102
+            base 252 252 252
             background 231 234 237
             emphasis_0 250 141 62
             emphasis_1 71 138 204
@@ -65,7 +65,7 @@ themes {
             emphasis_3 163 122 204
         }
         list_unselected {
-            base 92 97 102
+            base 252 252 252
             background 231 234 237
             emphasis_0 250 141 62
             emphasis_1 71 138 204
