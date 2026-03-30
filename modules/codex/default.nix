@@ -88,7 +88,7 @@ let
           run "$sudo_bin" ${coreutils}/bin/mkdir -p ${lib.escapeShellArg systemCodexConfigDirectory}
           run "$sudo_bin" ${coreutils}/bin/ln -sfn "$desired_target" ${lib.escapeShellArg systemCodexConfigPath}
 
-          if [ -n "$DRY_RUN" ]; then
+          if [ -n "''${DRY_RUN:-}" ]; then
             return 0
           fi
 
