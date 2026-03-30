@@ -58,7 +58,7 @@ in
 
     settings = {
       default_layout = "project-sidebar";
-      theme = "one-half-light";
+      theme = "ayu-light";
       show_startup_tips = false;
     };
 
@@ -98,7 +98,7 @@ in
 
   xdg.configFile."zellij/plugins/zellij-project-sidebar.wasm".source =
     ./files/zellij-project-sidebar.wasm;
-  xdg.configFile."zellij/themes/one-half-light.kdl".source = ./files/one-half-light.kdl;
+  xdg.configFile."zellij/themes/ayu-light.kdl".source = ./files/ayu-light.kdl;
 
   programs.zsh.initContent = lib.mkAfter ''
     if [[ -o interactive ]] \
