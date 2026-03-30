@@ -1,4 +1,6 @@
 {
+  config,
+  lib,
   ...
 }:
 
@@ -8,7 +10,16 @@
 
     settings = {
       theme = "one-half-light";
+      show_startup_tips = false;
     };
+
+    extraConfig = ''
+      keybinds {
+          shared_except "tmux" "locked" {
+              unbind "Ctrl b"
+          }
+      }
+    '';
   };
 
   xdg.configFile."zellij/themes/one-half-light.kdl".source = ./files/one-half-light.kdl;
