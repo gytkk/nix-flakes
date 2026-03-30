@@ -48,5 +48,8 @@ unfocused-split-opacity = 0.85
 link-url = true
 clipboard-trim-trailing-spaces = true
 
+# Let Zellij handle the project sidebar shortcut.
+keybind = cmd+o=unbind
+
 # SSH 접속 시 COLORTERM, TERM_PROGRAM 등 환경 변수 자동 전달
 shell-integration-features = cursor,sudo,title,ssh-env
