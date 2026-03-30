@@ -74,7 +74,7 @@ secrets/secrets.nix               # Agenix secrets configuration
 
 Defined in `environments.nix` (Home Manager) and `hosts.nix` (system-level):
 
-- **devsisters-macbook / devsisters-macstudio**: ARM64 macOS, devsisters base, nix-darwin (AeroSpace)
+- **devsisters-macbook / devsisters-macstudio**: ARM64 macOS, devsisters base, nix-darwin
 - **pylv-denim**: x86_64 Linux/WSL, pylv base
 - **pylv-sepia**: x86_64 Linux/NixOS server, pylv base (with Disko, agenix, copyparty, OpenClaw)
 
