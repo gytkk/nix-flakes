@@ -77,6 +77,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # zellij-sidebar - session/tab management WASM plugin
+    zellij-sidebar = {
+      url = "github:gytkk/zellij-sidebar";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # gws - Google Workspace CLI
     gws = {
       url = "github:googleworkspace/cli";

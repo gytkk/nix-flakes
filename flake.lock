@@ -60,6 +60,21 @@
         "type": "github"
       }
     },
+    "crane": {
+      "locked": {
+        "lastModified": 1774313767,
+        "narHash": "sha256-hy0XTQND6avzGEUFrJtYBBpFa/POiiaGBr2vpU6Y9tY=",
+        "owner": "ipetkov",
+        "repo": "crane",
+        "rev": "3d9df76e29656c679c744968b17fbaf28f0e923d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ipetkov",
+        "repo": "crane",
+        "type": "github"
+      }
+    },
     "darwin": {
       "inputs": {
         "nixpkgs": [
@@ -667,6 +682,7 @@
         "nixpkgs-25_05": "nixpkgs-25_05",
         "nixpkgs-terraform": "nixpkgs-terraform",
         "rose-pine-ghostty": "rose-pine-ghostty",
+        "zellij-sidebar": "zellij-sidebar",
         "zen-browser": "zen-browser"
       }
     },
@@ -696,6 +712,27 @@
         "owner": "oxalica",
         "repo": "rust-overlay",
         "rev": "91e1f7a0017065360f447622d11b7ce6ed04772f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "rust-overlay_2": {
+      "inputs": {
+        "nixpkgs": [
+          "zellij-sidebar",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1774840424,
+        "narHash": "sha256-3Oi4mBKzOCFQYLUyEjyc0s5cnlNj1MzmhpVKoLptpe8=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "d9f52b51548e76ab8b6e7d647763047ebdec835c",
         "type": "github"
       },
       "original": {
@@ -794,6 +831,28 @@
       "original": {
         "owner": "Supreeeme",
         "repo": "xwayland-satellite",
+        "type": "github"
+      }
+    },
+    "zellij-sidebar": {
+      "inputs": {
+        "crane": "crane",
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "rust-overlay": "rust-overlay_2"
+      },
+      "locked": {
+        "lastModified": 1774876807,
+        "narHash": "sha256-T+iKqpBJD3jMPAq9ergxdjSSAgE2p+gQkNP2VPlP0YU=",
+        "owner": "gytkk",
+        "repo": "zellij-sidebar",
+        "rev": "45daa4f7546b77235d4d1deaa13b9ea3e9be3c32",
+        "type": "github"
+      },
+      "original": {
+        "owner": "gytkk",
+        "repo": "zellij-sidebar",
         "type": "github"
       }
     },

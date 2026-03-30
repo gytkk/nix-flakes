@@ -1,4 +1,4 @@
-{ ... }:
+{ pkgs, ... }:
 
 {
   programs.zellij = {
@@ -17,6 +17,9 @@
       }
     '';
   };
+
+  xdg.configFile."zellij/plugins/zellij_sidebar.wasm".source =
+    "${pkgs.zellij-sidebar}/share/zellij/plugins/zellij_sidebar.wasm";
 
   xdg.configFile."zellij/themes/ayu-light.kdl".source = ./files/ayu-light.kdl;
 
