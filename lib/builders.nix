@@ -8,6 +8,7 @@ let
     inputs.flake-stores.overlays.default
     inputs.niri.overlays.niri
     (import ../overlays { inherit inputs; }).nixpkgs-versions
+    (import ../overlays { inherit inputs; }).package-fixes
   ];
 
   # Pre-evaluated pkgs per system (evaluated once, reused everywhere)
