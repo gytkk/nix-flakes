@@ -1,8 +1,4 @@
-{
-  config,
-  lib,
-  ...
-}:
+{ ... }:
 
 {
   programs.zellij = {
@@ -24,15 +20,4 @@
 
   xdg.configFile."zellij/themes/ayu-light.kdl".source = ./files/ayu-light.kdl;
 
-  programs.zsh.initContent = lib.mkAfter ''
-    if [[ -o interactive ]] \
-      && [[ -z "$ZELLIJ" ]] \
-      && [[ -z "$TMUX" ]] \
-      && [[ -z "$SSH_CONNECTION" ]] \
-      && [[ -z "$SSH_CLIENT" ]] \
-      && [[ -z "$SSH_TTY" ]] \
-      && { [[ "$TERM_PROGRAM" == "ghostty" ]] || [[ "$TERM_PROGRAM" == "xterm-ghostty" ]] || [[ "$TERM" == "xterm-ghostty" ]] || [[ -n "$GHOSTTY_RESOURCES_DIR" ]]; }; then
-      exec ${lib.getExe config.programs.zellij.package}
-    fi
-  '';
 }
