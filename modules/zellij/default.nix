@@ -9,7 +9,10 @@
       show_startup_tips = false;
     };
 
-    extraConfig = ''
+    # XXX: theme inlined as workaround for theme_dir not being picked up on startup
+    # https://github.com/zellij-org/zellij/pull/4892
+    extraConfig = builtins.readFile ./files/one-half-light.kdl + ''
+
       keybinds {
           shared_except "tmux" "locked" {
               unbind "Ctrl b"
@@ -20,7 +23,5 @@
 
   xdg.configFile."zellij/plugins/zellij_sidebar.wasm".source =
     "${pkgs.zellij-sidebar}/share/zellij/plugins/zellij_sidebar.wasm";
-
-  xdg.configFile."zellij/themes/one-half-light.kdl".source = ./files/one-half-light.kdl;
 
 }
