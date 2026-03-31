@@ -54,10 +54,10 @@ For large-scale changes (e.g., new features, major refactors), ask the user whet
 
 **When worktree is requested:**
 
-1. Create a new branch and worktree: `git worktree add ~/trees/$(basename $PWD)/<short-task-name> -b <branch-name>`
+1. Create a new branch and worktree: `git worktree add ~/worktrees/$(basename $PWD)/<short-task-name> -b <branch-name>`
 2. Change to the worktree directory and work there
 3. When done, create a PR from the worktree branch
-4. After merge, clean up: `git worktree remove ~/trees/$(basename $PWD)/<short-task-name>`
+4. After merge, clean up: `git worktree remove ~/worktrees/$(basename $PWD)/<short-task-name>`
 
 ## Critical Rules
 
@@ -65,6 +65,7 @@ For large-scale changes (e.g., new features, major refactors), ask the user whet
 - Always follow existing code patterns and module structure in your working directory.
 - Be concise. Commit small, frequent changes for readable diffs.
 - Proactively use web search if there is any uncertainty or lack of knowledge.
+- Always use `rg` (ripgrep) instead of `grep`. This applies to all contexts: shell commands, scripts, and Nix expressions.
 
 ## Writing Code
 
