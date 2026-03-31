@@ -17,7 +17,7 @@ themes {
             emphasis_3 212 73 108
         }
         ribbon_selected {
-            base 245 245 245
+            base 232 232 232
             background 59 172 110
             emphasis_0 220 185 80
             emphasis_1 232 134 47
