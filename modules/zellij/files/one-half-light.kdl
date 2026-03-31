@@ -19,7 +19,7 @@ themes {
         ribbon_selected {
             base 245 245 245
             background 59 172 110
-            emphasis_0 228 86 73
+            emphasis_0 217 68 82
             emphasis_1 232 134 47
             emphasis_2 212 73 108
             emphasis_3 71 138 204
@@ -27,7 +27,7 @@ themes {
         ribbon_unselected {
             base 245 245 245
             background 92 97 102
-            emphasis_0 228 86 73
+            emphasis_0 217 68 82
             emphasis_1 250 250 250
             emphasis_2 71 138 204
             emphasis_3 212 73 108
@@ -97,7 +97,7 @@ themes {
             emphasis_3 58 154 136
         }
         exit_code_error {
-            base 228 86 73
+            base 217 68 82
             background 0
             emphasis_0 212 162 22
             emphasis_1 0
@@ -111,7 +111,7 @@ themes {
             player_4 212 162 22
             player_5 58 154 136
             player_6 0
-            player_7 228 86 73
+            player_7 217 68 82
             player_8 0
             player_9 0
             player_10 0
