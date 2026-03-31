@@ -28,6 +28,9 @@ interface OpencodeClient {
 
 type TerminalType = "ghostty" | "wsl" | "other"
 
+const NOTIFICATION_DEDUP_WINDOW_MS = 15000
+const recentNotifications = new Map<string, number>()
+
 function hasGhosttyInParentProcessTree(): boolean {
   if (process.platform !== "darwin") {
     return false
@@ -59,6 +62,23 @@ function hasGhosttyInParentProcessTree(): boolean {
   return false
 }
 
+function hasRunningGhosttyApp(): boolean {
+  if (process.platform !== "darwin") {
+    return false
+  }
+
+  try {
+    const result = execFileSync(
+      "osascript",
+      ["-e", 'if application "Ghostty" is running then return "true"'],
+      { encoding: "utf8" },
+    ).trim().toLowerCase()
+    return result === "true"
+  } catch {
+    return false
+  }
+}
+
 function detectTerminal(): TerminalType {
   const termProgram = (process.env.TERM_PROGRAM ?? "").toLowerCase()
   const term = (process.env.TERM ?? "").toLowerCase()
@@ -75,6 +95,9 @@ function detectTerminal(): TerminalType {
     return "wsl"
   }
   if (hasGhosttyInParentProcessTree()) {
+    return "ghostty"
+  }
+  if (hasRunningGhosttyApp()) {
     return "ghostty"
   }
   return "other"
@@ -105,15 +128,54 @@ function sendWslToast(title: string, message: string): void {
   execFile("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], { timeout: 10000 }, () => {})
 }
 
+function sendMacOsNotification(title: string, message: string): void {
+  execFile(
+    "osascript",
+    [
+      "-e",
+      `display notification ${JSON.stringify(message)} with title ${JSON.stringify(title)}`,
+    ],
+    { timeout: 10000 },
+    () => {},
+  )
+}
+
+function shouldSendNotification(key: string): boolean {
+  const now = Date.now()
+
+  for (const [existingKey, timestamp] of recentNotifications.entries()) {
+    if (now - timestamp > NOTIFICATION_DEDUP_WINDOW_MS) {
+      recentNotifications.delete(existingKey)
+    }
+  }
+
+  const lastSentAt = recentNotifications.get(key)
+  if (typeof lastSentAt === "number" && now - lastSentAt < NOTIFICATION_DEDUP_WINDOW_MS) {
+    return false
+  }
+
+  recentNotifications.set(key, now)
+  return true
+}
+
 function sendNotification(terminal: TerminalType, title: string, message: string): void {
+  const dedupKey = `${terminal}:${title}:${message}`
+  if (!shouldSendNotification(dedupKey)) {
+    return
+  }
+
   if (terminal === "wsl") {
     sendWslToast(title, message)
+    return
+  }
+  if (process.platform === "darwin" && terminal !== "ghostty") {
+    sendMacOsNotification(title, message)
     return
   }
   try {
     writeFileSync("/dev/tty", buildOscSequence(terminal, title, message))
   } catch {
-    // /dev/tty unavailable (e.g. not running in a terminal)
+    return
   }
 }
 
@@ -139,7 +201,7 @@ async function getSessionTitle(
       }
     }
   } catch {
-    // fall back to default
+    return "Task"
   }
   return "Task"
 }
@@ -152,11 +214,6 @@ export const NativeNotifyPlugin = async ({
   const terminal = detectTerminal()
 
   return {
-    "tool.execute.before": async (input: { tool: string }) => {
-      if (input.tool === "question") {
-        sendNotification(terminal, "Question", "OpenCode has a question for you")
-      }
-    },
     event: async ({ event }: { event: Event }): Promise<void> => {
       switch (event.type) {
         case "session.idle": {
@@ -177,10 +234,6 @@ export const NativeNotifyPlugin = async ({
             const message = errorMsg ? `${title}: ${errorMsg}` : title
             sendNotification(terminal, "Error occurred", message)
           }
-          break
-        }
-        case "permission.asked": {
-          sendNotification(terminal, "Permission needed", "Waiting for your approval")
           break
         }
       }
