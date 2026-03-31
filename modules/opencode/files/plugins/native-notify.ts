@@ -79,58 +79,6 @@ function hasRunningGhosttyApp(): boolean {
   }
 }
 
-function isGhosttyFrontmost(): boolean {
-  if (process.platform !== "darwin") {
-    return false
-  }
-
-  try {
-    const result = execFileSync(
-      "osascript",
-      ["-e", 'tell application "System Events" to return frontmost of process "Ghostty"'],
-      { encoding: "utf8" },
-    ).trim().toLowerCase()
-    return result === "true"
-  } catch {
-    return false
-  }
-}
-
-function isWindowsTerminalFrontmost(): boolean {
-  if (!process.env.WSL_DISTRO_NAME) {
-    return false
-  }
-
-  const script = [
-    "Add-Type -TypeDefinition @'",
-    "using System;",
-    "using System.Runtime.InteropServices;",
-    "using System.Text;",
-    "public static class Win32ForegroundWindow {",
-    '  [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();',
-    '  [DllImport("user32.dll", CharSet = CharSet.Unicode)] public static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);',
-    "}",
-    "'@",
-    "$hwnd = [Win32ForegroundWindow]::GetForegroundWindow()",
-    'if ($hwnd -eq [IntPtr]::Zero) { return "false" }',
-    "$buffer = New-Object System.Text.StringBuilder 256",
-    "[void][Win32ForegroundWindow]::GetClassName($hwnd, $buffer, $buffer.Capacity)",
-    'if ($buffer.ToString() -eq "CASCADIA_HOSTING_WINDOW_CLASS") { return "true" }',
-    'return "false"',
-  ].join("; ")
-
-  try {
-    const result = execFileSync(
-      "powershell.exe",
-      ["-NoProfile", "-NonInteractive", "-Command", script],
-      { encoding: "utf8", timeout: 10000 },
-    ).trim().toLowerCase()
-    return result === "true"
-  } catch {
-    return false
-  }
-}
-
 function detectTerminal(): TerminalType {
   const termProgram = (process.env.TERM_PROGRAM ?? "").toLowerCase()
   const term = (process.env.TERM ?? "").toLowerCase()
@@ -210,23 +158,7 @@ function shouldSendNotification(key: string): boolean {
   return true
 }
 
-function shouldSuppressNotification(terminal: TerminalType): boolean {
-  if (terminal === "ghostty") {
-    return isGhosttyFrontmost()
-  }
-
-  if (terminal === "wsl") {
-    return isWindowsTerminalFrontmost()
-  }
-
-  return false
-}
-
 function sendNotification(terminal: TerminalType, title: string, message: string): void {
-  if (shouldSuppressNotification(terminal)) {
-    return
-  }
-
   const dedupKey = `${terminal}:${title}:${message}`
   if (!shouldSendNotification(dedupKey)) {
     return
