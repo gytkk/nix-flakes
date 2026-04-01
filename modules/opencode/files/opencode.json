@@ -13,7 +13,6 @@
   "autoupdate": true,
   "plugin": [
     "@plannotator/opencode@latest",
-    "opencode-anthropic-auth",
     "oh-my-opencode"
   ],
   "compaction": {
