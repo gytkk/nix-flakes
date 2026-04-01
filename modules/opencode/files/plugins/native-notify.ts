@@ -1,12 +1,5 @@
-/**
- * Terminal-native notification plugin for OpenCode.
- * Ghostty: OSC 777 — ESC]777;notify;TITLE;MESSAGE BEL
- * WSL:     PowerShell toast via Windows notification API
- * Fallback: OSC 9  — ESC]9;TITLE: MESSAGE BEL
- */
-
 import { writeFileSync } from "node:fs"
-import { execFile, execFileSync } from "node:child_process"
+import { execFile } from "node:child_process"
 
 interface Event {
   type: string
@@ -26,118 +19,45 @@ interface OpencodeClient {
   }
 }
 
-type TerminalType = "ghostty" | "wsl" | "other"
+interface NotificationPayload {
+  dedupKey: string
+  title: string
+  message: string
+}
 
 const NOTIFICATION_DEDUP_WINDOW_MS = 15000
 const recentNotifications = new Map<string, number>()
 
-function hasGhosttyInParentProcessTree(): boolean {
-  if (process.platform !== "darwin") {
-    return false
-  }
-
-  let currentPid = process.pid
-  for (let depth = 0; depth < 8 && currentPid > 1; depth += 1) {
-    try {
-      const command = execFileSync("ps", ["-o", "comm=", "-p", String(currentPid)], {
-        encoding: "utf8",
-      }).trim().toLowerCase()
-      if (command.includes("ghostty")) {
-        return true
-      }
-
-      const parentPidRaw = execFileSync("ps", ["-o", "ppid=", "-p", String(currentPid)], {
-        encoding: "utf8",
-      }).trim()
-      const parentPid = Number.parseInt(parentPidRaw, 10)
-      if (!Number.isFinite(parentPid) || parentPid <= 1 || parentPid === currentPid) {
-        break
-      }
-      currentPid = parentPid
-    } catch {
-      break
-    }
-  }
-
-  return false
+function getString(value: unknown): string | undefined {
+  return typeof value === "string" && value.length > 0 ? value : undefined
 }
 
-function hasRunningGhosttyApp(): boolean {
-  if (process.platform !== "darwin") {
-    return false
-  }
-
-  try {
-    const result = execFileSync(
-      "osascript",
-      ["-e", 'if application "Ghostty" is running then return "true"'],
-      { encoding: "utf8" },
-    ).trim().toLowerCase()
-    return result === "true"
-  } catch {
-    return false
-  }
+function normalizeWhitespace(value: string): string {
+  return value.replace(/[\x00-\x1f\x7f]+/g, " ").replace(/\s+/g, " ").trim()
 }
 
-function detectTerminal(): TerminalType {
+function isGhosttyTerminal(): boolean {
   const termProgram = (process.env.TERM_PROGRAM ?? "").toLowerCase()
   const term = (process.env.TERM ?? "").toLowerCase()
 
-  if (
+  return (
     termProgram === "ghostty"
     || termProgram === "xterm-ghostty"
     || term === "xterm-ghostty"
-    || process.env.GHOSTTY_RESOURCES_DIR
-  ) {
-    return "ghostty"
-  }
-  if (process.env.WSL_DISTRO_NAME) {
-    return "wsl"
-  }
-  if (hasGhosttyInParentProcessTree()) {
-    return "ghostty"
-  }
-  if (hasRunningGhosttyApp()) {
-    return "ghostty"
-  }
-  return "other"
-}
-
-function buildOscSequence(terminal: TerminalType, title: string, message: string): string {
-  const safeTitle = title.replace(/[;\x07\x1b]/g, "")
-  const safeMessage = message.replace(/[;\x07\x1b]/g, "")
-  if (terminal === "ghostty") {
-    return `\x1b]777;notify;${safeTitle};${safeMessage}\x07`
-  }
-  return `\x1b]9;${safeTitle}: ${safeMessage}\x07`
-}
-
-function sendWslToast(title: string, message: string): void {
-  const safeTitle = title.replace(/'/g, "''").replace(/`/g, "``")
-  const safeMessage = message.replace(/'/g, "''").replace(/`/g, "``")
-  const script = [
-    "[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null",
-    "[Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime] | Out-Null",
-    `$xml = '<toast><visual><binding template="ToastText02"><text id="1">${safeTitle}</text><text id="2">${safeMessage}</text></binding></visual></toast>'`,
-    "$doc = [Windows.Data.Xml.Dom.XmlDocument]::new()",
-    "$doc.LoadXml($xml)",
-    '$notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("OpenCode")',
-    "$notifier.Show([Windows.UI.Notifications.ToastNotification]::new($doc))",
-  ].join("; ")
-
-  execFile("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], { timeout: 10000 }, () => {})
-}
-
-function sendMacOsNotification(title: string, message: string): void {
-  execFile(
-    "osascript",
-    [
-      "-e",
-      `display notification ${JSON.stringify(message)} with title ${JSON.stringify(title)}`,
-    ],
-    { timeout: 10000 },
-    () => {},
+    || Boolean(process.env.GHOSTTY_RESOURCES_DIR)
   )
+}
+
+function isInsideZellij(): boolean {
+  return Boolean(process.env.ZELLIJ || process.env.ZELLIJ_SESSION_NAME)
+}
+
+function sanitizeOscText(value: string): string {
+  return normalizeWhitespace(value.replace(/[\x1b\x07]/g, ""))
+}
+
+function formatGhosttyText(title: string, message: string): string {
+  return sanitizeOscText(`OpenCode: ${title} — ${message}`)
 }
 
 function shouldSendNotification(key: string): boolean {
@@ -154,28 +74,100 @@ function shouldSendNotification(key: string): boolean {
     return false
   }
 
-  recentNotifications.set(key, now)
   return true
 }
 
-function sendNotification(terminal: TerminalType, title: string, message: string): void {
-  const dedupKey = `${terminal}:${title}:${message}`
+function markNotificationSent(key: string): void {
+  recentNotifications.set(key, Date.now())
+}
+
+function writeGhosttyDesktopNotification(title: string, message: string): boolean {
+  const text = formatGhosttyText(title, message)
+  if (!text) {
+    return false
+  }
+
+  try {
+    writeFileSync("/dev/tty", `\x1b]9;${text}\x1b\\`)
+    return true
+  } catch {
+    return false
+  }
+}
+
+function sendMacOsNotification(title: string, message: string): boolean {
+  try {
+    execFile(
+      "osascript",
+      [
+        "-e",
+        `display notification ${JSON.stringify(message)} with title ${JSON.stringify(title)}`,
+      ],
+      { timeout: 10000 },
+      () => {},
+    )
+    return true
+  } catch {
+    return false
+  }
+}
+
+function escapeXml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;")
+}
+
+function sendWslToast(title: string, message: string): boolean {
+  const safeTitle = escapeXml(normalizeWhitespace(title)).replace(/'/g, "''").replace(/`/g, "``")
+  const safeMessage = escapeXml(normalizeWhitespace(message)).replace(/'/g, "''").replace(/`/g, "``")
+  const script = [
+    "[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null",
+    "[Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime] | Out-Null",
+    `$xml = '<toast><visual><binding template="ToastText02"><text id="1">${safeTitle}</text><text id="2">${safeMessage}</text></binding></visual></toast>'`,
+    "$doc = [Windows.Data.Xml.Dom.XmlDocument]::new()",
+    "$doc.LoadXml($xml)",
+    '$notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("OpenCode")',
+    "$notifier.Show([Windows.UI.Notifications.ToastNotification]::new($doc))",
+  ].join("; ")
+
+  try {
+    execFile("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], { timeout: 10000 }, () => {})
+    return true
+  } catch {
+    return false
+  }
+}
+
+function deliverNotification(dedupKey: string, title: string, message: string): void {
   if (!shouldSendNotification(dedupKey)) {
     return
   }
 
-  if (terminal === "wsl") {
-    sendWslToast(title, message)
+  if (process.env.WSL_DISTRO_NAME) {
+    if (sendWslToast(title, message)) {
+      markNotificationSent(dedupKey)
+    }
     return
   }
-  if (process.platform === "darwin" && terminal !== "ghostty") {
-    sendMacOsNotification(title, message)
+
+  if (process.platform === "darwin") {
+    if (isGhosttyTerminal() && !isInsideZellij() && writeGhosttyDesktopNotification(title, message)) {
+      markNotificationSent(dedupKey)
+      return
+    }
+
+    if (sendMacOsNotification(title, message)) {
+      markNotificationSent(dedupKey)
+    }
     return
   }
-  try {
-    writeFileSync("/dev/tty", buildOscSequence(terminal, title, message))
-  } catch {
-    return
+
+  if (writeGhosttyDesktopNotification(title, message)) {
+    markNotificationSent(dedupKey)
   }
 }
 
@@ -187,56 +179,64 @@ async function getSessionTitle(
     const response = await client.session.messages({
       params: { sessionID },
     })
-    const messages = response.body
-    const firstUserMessage = messages.find(
-      (m: SessionMessage) => m.role === "user",
-    )
-    if (firstUserMessage?.parts) {
-      const textPart = firstUserMessage.parts.find(
-        (p: { type: string; content?: string }) => p.type === "text",
-      )
-      if (textPart?.content) {
-        const content = textPart.content.trim()
-        return content.length > 80 ? content.slice(0, 77) + "..." : content
-      }
+    const firstUserMessage = response.body.find((message) => message.role === "user")
+    const textPart = firstUserMessage?.parts?.find((part) => part.type === "text")
+    const content = getString(textPart?.content)
+
+    if (!content) {
+      return "Task"
     }
+
+    const normalizedContent = normalizeWhitespace(content)
+    return normalizedContent.length > 80 ? `${normalizedContent.slice(0, 77)}...` : normalizedContent
   } catch {
     return "Task"
   }
-  return "Task"
+}
+
+async function buildNotificationPayload(
+  client: OpencodeClient,
+  event: Event,
+): Promise<NotificationPayload | null> {
+  const sessionID = getString(event.properties.sessionID)
+  if (!sessionID) {
+    return null
+  }
+
+  const sessionTitle = await getSessionTitle(client, sessionID)
+
+  if (event.type === "session.idle") {
+    return {
+      dedupKey: `${sessionID}:idle`,
+      title: "Ready for review",
+      message: sessionTitle,
+    }
+  }
+
+  if (event.type === "session.error") {
+    const errorMessage = getString(event.properties.error)
+
+    return {
+      dedupKey: `${sessionID}:error:${normalizeWhitespace(errorMessage ?? "")}`,
+      title: "Error occurred",
+      message: errorMessage ? `${sessionTitle}: ${normalizeWhitespace(errorMessage)}` : sessionTitle,
+    }
+  }
+
+  return null
 }
 
 export const NativeNotifyPlugin = async ({
   client,
 }: {
   client: OpencodeClient
-}) => {
-  const terminal = detectTerminal()
+}) => ({
+  event: async ({ event }: { event: Event }): Promise<void> => {
+    const payload = await buildNotificationPayload(client, event)
+    if (!payload) {
+      return
+    }
 
-  return {
-    event: async ({ event }: { event: Event }): Promise<void> => {
-      switch (event.type) {
-        case "session.idle": {
-          const sessionID = event.properties.sessionID as string | undefined
-          if (sessionID) {
-            const title = await getSessionTitle(client, sessionID)
-            sendNotification(terminal, "Ready for review", title)
-          }
-          break
-        }
-        case "session.error": {
-          const sessionID = event.properties.sessionID as string | undefined
-          const error = event.properties.error
-          const errorMsg =
-            typeof error === "string" ? error : error ? String(error) : undefined
-          if (sessionID) {
-            const title = await getSessionTitle(client, sessionID)
-            const message = errorMsg ? `${title}: ${errorMsg}` : title
-            sendNotification(terminal, "Error occurred", message)
-          }
-          break
-        }
-      }
-    },
-  }
-}
+    deliverNotification(payload.dedupKey, payload.title, payload.message)
+  },
+})
