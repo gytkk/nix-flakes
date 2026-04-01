@@ -24,8 +24,8 @@ opencode auth login
 
 ### opencode.json
 
-- **기본 모델**: `openai/gpt-5.4`
-- **small model**: `openai/gpt-5.4`
+- **기본 모델**: `opencode/claude-opus-4-6`
+- **small model**: `opencode/minimax-m2.7-highspeed`
 - **테마**: `opencode`
 - **자동 업데이트**: 활성화
 - **플러그인**: `@plannotator/opencode`, `opencode-anthropic-auth`, `oh-my-opencode`
@@ -35,7 +35,8 @@ opencode auth login
 ### oh-my-opencode.json
 
 - oh-my-opencode 플러그인의 에이전트/카테고리 모델 오버라이드를 정의합니다.
-- 현재 이 저장소는 GPT-5.4 중심 구성을 유지하면서, 시각 작업은 Gemini 계열로 분리합니다.
+- 현재 이 저장소는 OpenAI + OpenCode Zen 혼합 구성을 유지합니다.
+- 메인 오케스트레이터(`sisyphus`)와 검색 유틸리티(`librarian`, `explore`)는 OpenCode Zen 모델을 사용하고, 깊은 추론/검토 역할은 GPT-5.4 계열을 유지합니다.
 - 최신 upstream 역할명과의 호환을 위해 `hephaestus`, `multimodal-looker`, `unspecified-low`, `unspecified-high`를 함께 정의합니다.
 
 ### AGENTS.md
