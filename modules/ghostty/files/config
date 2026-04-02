@@ -1,5 +1,10 @@
 auto-update = check
 
+# Fix Forward Delete key and other compatibility issues
+# Ghostty's default xterm-ghostty terminfo causes key binding issues with zsh
+# https://github.com/ghostty-org/ghostty/discussions/4415
+term = xterm-256color
+
 # One Half Light theme
 background = #fdfdfd
 foreground = #383a42
