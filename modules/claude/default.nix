@@ -15,6 +15,7 @@ let
     "anthropics/claude-plugins-official"
     "gytkk/claude-marketplace"
     "backnotprop/plannotator"
+    "openai/codex-plugin-cc"
   ];
 
   # plugin-name@marketplace-name
@@ -32,8 +33,10 @@ let
     # backnotprop/plannotator — visual plan annotation and review
     "plannotator@plannotator"
 
-    # gytkk/claude-marketplace — Codex skills, Scala LSP, Python LSP, Terraform LSP, and Nix LSP
-    "codex@gytkk"
+    # openai/codex-plugin-cc — Official Codex plugin for Claude Code
+    "codex@openai-codex"
+
+    # gytkk/claude-marketplace — Scala LSP, Python LSP, Terraform LSP, and Nix LSP
     "metals-lsp@gytkk"
     "ty-lsp@gytkk"
     "terraform-ls@gytkk"
@@ -48,10 +51,6 @@ let
     {
       name = "notion";
       cmd = "mcp add -s user --transport http notion https://mcp.notion.com/mcp";
-    }
-    {
-      name = "codex";
-      cmd = "mcp add -s user codex -- codex mcp-server";
     }
   ];
 in

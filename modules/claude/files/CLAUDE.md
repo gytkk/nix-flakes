@@ -8,48 +8,25 @@
 - **Ask, don't guess.** If requirements are ambiguous or context is missing, ask the user immediately.
 - **Surface blockers early.** Flag missing info, risky assumptions, or dependencies NOW — not after building on them.
 
-## Codex MCP Usage Policy
-
-> Codex tools (`/codex:hephaestus`, `/codex:critic`, `/codex:analyze`, `/codex:debate`) are **only used when the user explicitly requests them**.
-> Do NOT invoke Codex tools proactively or autonomously.
-
-### Review with `/codex:critic`
-
-When the user requests a review, or when changes are large-scale, use `/codex:critic` to independently verify work.
-
-**Large-scale change criteria** (review when ALL apply):
-
-- 5+ files modified
-- New module/feature added or major architectural refactoring
-- Public interface (API, export, option) changes
-
-**Not subject to review**: Changes that do not meet all of the above criteria, unless the user explicitly requests a review.
-
-**Verdict criteria**:
-
-| Verdict | Criteria                                                                         | Follow-up Action            |
-| ------- | -------------------------------------------------------------------------------- | --------------------------- |
-| `fail`  | Functional error, unmet requirements, security vulnerability, build/test failure | Fix and re-verify           |
-| `warn`  | Style inconsistency, minor edge case, improvement suggestion                     | Report to user for decision |
-| `pass`  | Requirements met, follows existing patterns, no side effects                     | Proceed to commit           |
-
-```text
-/codex:critic "<summary of original user request>"
-```
-
----
-
 ## Git & Commit Workflow
 
 > **CRITICAL**: Follow the single flow from change completion through commit.
 
 1. Complete one logical change
-2. If large-scale change (see Codex MCP Usage Policy) → Run `/codex:critic`
-   - `pass` → Proceed to commit
-   - `warn` → Report to user; commit only after explicit approval
-   - `fail` → Fix and re-verify
+2. If subject to review → Use `@review` agent
+   - No issues → Proceed to commit
+   - Issues found → Fix and re-verify
 3. Otherwise → Commit immediately
 4. Do not bundle unrelated changes into a single commit
+
+**Review targets** (review when one or more apply):
+
+- 2+ files modified
+- New feature/module added
+- Refactoring or existing behavior changes
+- Public interface (API, export, option) changes
+
+**Not subject to review**: Single-file typo/wording fixes, comment/docs-only changes, formatting-only changes
 
 **Commit rules**:
 
