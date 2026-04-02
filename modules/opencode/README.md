@@ -24,20 +24,20 @@ opencode auth login
 
 ### opencode.json
 
-- **기본 모델**: `opencode/claude-opus-4-6`
-- **small model**: `opencode/minimax-m2.7-highspeed`
+- **기본 모델**: `opencode-go/kimi-k2.5`
+- **small model**: `opencode-go/minimax-m2.5`
 - **테마**: `opencode`
 - **자동 업데이트**: 활성화
-- **플러그인**: `@plannotator/opencode`, `opencode-anthropic-auth`, `oh-my-opencode`
+- **플러그인**: `@plannotator/opencode`, `oh-my-opencode`
 - **MCP**: `context7`, `notion`
 - **권한**: 모든 skill 및 task 허용
 
 ### oh-my-opencode.json
 
 - oh-my-opencode 플러그인의 에이전트/카테고리 모델 오버라이드를 정의합니다.
-- 현재 이 저장소는 OpenAI + OpenCode Zen 혼합 구성을 유지합니다.
-- 메인 오케스트레이터(`sisyphus`)와 검색 유틸리티(`librarian`, `explore`)는 OpenCode Zen 모델을 사용하고, 깊은 추론/검토 역할은 GPT-5.4 계열을 유지합니다.
-- 최신 upstream 역할명과의 호환을 위해 `hephaestus`, `multimodal-looker`, `unspecified-low`, `unspecified-high`를 함께 정의합니다.
+- 현재 이 저장소는 OpenCode Go + ChatGPT Pro 혼합 구성을 유지합니다.
+- 오케스트레이션(`sisyphus`, `atlas`)과 검색 유틸리티(`librarian`, `explore`)는 OpenCode Go 모델(Kimi K2.5, MiniMax M2.7)을 사용하고, 깊은 추론/검토 역할(`oracle`, `momus`, `hephaestus`)은 ChatGPT Pro의 GPT-5.4 계열을 사용합니다.
+
 
 ### AGENTS.md
 
@@ -73,13 +73,13 @@ oh-my-opencode 플러그인이 제공하는 주요 에이전트/카테고리와,
 
 이 저장소의 `oh-my-opencode.json`은 다음 카테고리를 오버라이드합니다.
 
-- **visual-engineering**: Gemini 기반 시각 작업
+- **visual-engineering**: GLM-5 기반 시각 작업
 - **ultrabrain**: GPT-5.4 `xhigh`
-- **artistry**: Gemini 기반 창의 작업
-- **quick**: GPT-5.4 기반 경량 작업
-- **unspecified-low**: GPT-5.4 기반 일반 저강도 작업
-- **unspecified-high**: GPT-5.4 `xhigh` 기반 일반 고강도 작업
-- **writing**: GPT-5.4 기반 문서 작업
+- **artistry**: Kimi K2.5 기반 창의 작업
+- **quick**: GPT-5.4 Mini 기반 경량 작업
+- **unspecified-low**: Kimi K2.5 기반 일반 저강도 작업
+- **unspecified-high**: GPT-5.4 `high` 기반 일반 고강도 작업
+- **writing**: Kimi K2.5 기반 문서 작업
 
 ## Skills
 
