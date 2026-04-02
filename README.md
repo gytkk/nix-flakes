@@ -15,7 +15,21 @@ echo "experimental-features = nix-command flakes" | sudo tee -a /etc/nix/nix.con
 - This repo assumes the checkout lives at `~/development/nix-flakes`.
   Several modules create out-of-store symlinks from that path.
 
-## Codex config
+## Codex Plugin for Claude Code
+
+The official [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc) plugin is installed, enabling Codex integration from within Claude Code.
+
+### Available Commands
+
+- `/codex:review` — Code review of current changes or branch
+- `/codex:adversarial-review` — Challenge-based review questioning design decisions
+- `/codex:rescue` — Delegate tasks to Codex (investigate bugs, fixes, etc.)
+- `/codex:status` — Check running and recent Codex jobs
+- `/codex:result` — View results of completed jobs
+- `/codex:cancel` — Cancel active background jobs
+- `/codex:setup` — Verify Codex installation and configuration
+
+### Codex CLI Config
 
 - On NixOS and nix-darwin hosts, the static Codex base config is installed to `/etc/codex/config.toml`.
 - On standalone Home Manager environments, `home-manager switch` ensures `/etc/codex/config.toml` is a symlink to this repo's `modules/codex/files/config.toml`.
