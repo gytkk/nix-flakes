@@ -188,6 +188,47 @@ function M.setup()
   hl("@markup.raw", { fg = p.green })
   hl("@markup.raw.markdown_inline", { fg = p.green })
 
+  -- YAML (treesitter specific)
+  hl("@property.yaml", { fg = p.red })
+  hl("@string.yaml", { fg = p.green })
+  hl("@number.yaml", { fg = p.yellow })
+  hl("@boolean.yaml", { fg = p.yellow })
+  hl("@punctuation.delimiter.yaml", { fg = p.fg })
+  hl("@punctuation.special.yaml", { fg = p.fg })
+  hl("@label.yaml", { fg = p.blue })
+
+  -- Comment annotations (all languages)
+  hl("@comment.documentation", { fg = p.comment, italic = true })
+  hl("@comment.error", { fg = p.red, bold = true })
+  hl("@comment.warning", { fg = p.yellow })
+  hl("@comment.todo", { fg = p.orange, bold = true })
+  hl("@comment.note", { fg = p.blue })
+
+  -- String special variants
+  hl("@string.special.path", { fg = p.cyan })
+  hl("@string.special.symbol", { fg = p.yellow })
+
+  -- TypeScript/JSX/TSX
+  hl("@tag.tsx", { fg = p.red })
+  hl("@tag.javascript", { fg = p.red })
+  hl("@tag.attribute.typescript", { fg = p.yellow })
+  hl("@constructor.tsx", { fg = p.blue })
+
+  -- Function calls (distinguish from definitions)
+  hl("@function.call", { fg = p.blue })
+  hl("@function.method.call", { fg = p.blue })
+
+  -- Diff (treesitter)
+  hl("@diff.plus", { fg = p.green })
+  hl("@diff.minus", { fg = p.red })
+  hl("@diff.delta", { fg = p.yellow })
+
+  -- Type definition (Go, C, Rust)
+  hl("@type.definition", { fg = p.yellow })
+
+  -- Label (Nix, Lua, HCL)
+  hl("@label", { fg = p.blue })
+
   -- LSP semantic tokens
   hl("@lsp.type.class", { fg = p.yellow })
   hl("@lsp.type.struct", { fg = p.yellow })
