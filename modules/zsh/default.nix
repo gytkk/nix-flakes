@@ -65,6 +65,9 @@
       # OpenCode
       oc = "opencode";
 
+      # Zellij
+      zj = "zellij-attach";
+
       # k8s aliases
       kl = "kubectl";
       kx = "kubectx";
@@ -112,6 +115,19 @@
                 chmod 600 ~/.netrc
                 echo "Updated ~/.netrc with GitHub token for Nix"
               fi
+            fi
+          }
+
+          # Zellij session selector: list sessions with fzf, or auto attach/create
+          zellij-attach() {
+            local sessions
+            sessions=$(zellij list-sessions 2>/dev/null)
+            local count=$(echo "$sessions" | rg -c "." 2>/dev/null || echo "0")
+
+            if [[ "$count" -ge 2 ]]; then
+              zellij attach "$(echo "$sessions" | fzf)"
+            else
+              zellij attach -c
             fi
           }
 
