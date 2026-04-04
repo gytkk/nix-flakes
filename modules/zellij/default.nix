@@ -5,6 +5,7 @@
     enable = true;
 
     settings = {
+      default_layout = "welcome";
       theme = "one-half-light";
       show_startup_tips = false;
     };
