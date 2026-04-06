@@ -27,8 +27,4 @@ in
 
   # Create ~/.config/opencode/AGENTS.md file
   home.file.".config/opencode/AGENTS.md".source = mkSymlink "files/AGENTS.md";
-
-  # Create ~/.config/opencode/agents/ directory
-  home.file.".config/opencode/agents/troubleshoot.md".source =
-    mkSymlink "files/agents/troubleshoot.md";
 }

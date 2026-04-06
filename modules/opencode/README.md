@@ -17,19 +17,19 @@ opencode auth login
 - oh-my-opencode 설정 파일 구성 (`~/.config/opencode/oh-my-opencode.json`)
 - MCP 서버 설정 (라이브러리 문서화를 위한 `context7`)
 - 전역 지침 설치 (`~/.config/opencode/AGENTS.md`)
-- Custom agents 설치 (`~/.config/opencode/agents/`)
 - 로컬 플러그인 설치 (`~/.config/opencode/plugins/`)
 
 ## 설정 파일
 
 ### opencode.json
 
-- **기본 모델**: `opencode-go/kimi-k2.5`
-- **small model**: `opencode-go/minimax-m2.5`
+- **기본 모델**: `opencode-go/glm-5`
+- **small model**: `opencode-go/minimax-m2.7`
 - **테마**: `opencode`
 - **자동 업데이트**: 활성화
-- **플러그인**: `@plannotator/opencode`, `oh-my-opencode`
-- **MCP**: `context7`, `notion`
+- **플러그인**: `@plannotator/opencode@latest`, `oh-my-opencode`
+- **MCP**: `context7`
+- **LSP**: `metals` (Scala)
 - **권한**: 모든 skill 및 task 허용
 
 ### oh-my-opencode.json
@@ -45,9 +45,7 @@ opencode auth login
 
 ## Agents
 
-oh-my-opencode 플러그인이 제공하는 주요 에이전트/카테고리와, 이 저장소가 로컬로 추가하는 에이전트가 함께 동작합니다.
-
-### Plugin-provided agents (configured via `oh-my-opencode.json`)
+oh-my-opencode 플러그인이 제공하는 에이전트들입니다:
 
 - **sisyphus**: 메인 오케스트레이터. 전략적 위임, TODO 관리, 코드베이스 평가
 - **hephaestus**: 집중 구현 실행자
@@ -61,13 +59,7 @@ oh-my-opencode 플러그인이 제공하는 주요 에이전트/카테고리와,
 - **multimodal-looker**: 미디어 파일 분석 (PDF, 이미지, 다이어그램)
 - **sisyphus-junior**: 집중 작업 실행자 (위임 불가)
 
-### Local custom agents (installed from this repo)
-
-- **troubleshoot**: 트러블슈팅 에이전트 (에러 분석 및 디버깅)
-
-사용법: `@sisyphus`, `@hephaestus`, `@atlas`, `@prometheus`, `@oracle`, `@librarian`, `@explore`, `@metis`, `@momus`, `@multimodal-looker`, `@sisyphus-junior`, `@troubleshoot`
-
-현재 Nix 모듈이 직접 설치하는 로컬 agent 파일은 `agents/troubleshoot.md` 하나입니다. 나머지 기본 에이전트는 oh-my-opencode 플러그인이 제공합니다.
+사용법: `@sisyphus`, `@hephaestus`, `@atlas`, `@prometheus`, `@oracle`, `@librarian`, `@explore`, `@metis`, `@momus`, `@multimodal-looker`, `@sisyphus-junior`
 
 ## Categories
 

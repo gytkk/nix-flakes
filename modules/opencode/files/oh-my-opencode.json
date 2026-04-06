@@ -66,12 +66,5 @@
     "writing": {
       "model": "opencode-go/kimi-k2.5"
     }
-  },
-  "lsp": {
-    "metals": {
-      "command": ["metals"],
-      "extensions": [".scala", ".sc", ".sbt"],
-      "priority": 10
-    }
   }
 }

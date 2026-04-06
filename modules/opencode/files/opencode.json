@@ -13,7 +13,8 @@
   "autoupdate": true,
   "plugin": [
     "@plannotator/opencode@latest",
-    "oh-my-opencode"
+    "oh-my-opencode",
+    "@mohak34/opencode-notifier@latest"
   ],
   "compaction": {
     "auto": true,
@@ -37,7 +38,8 @@
   "lsp": {
     "metals": {
       "command": ["metals"],
-      "extensions": [".scala", ".sc", ".sbt"]
+      "extensions": [".scala", ".sc", ".sbt"],
+      "priority": 10
     }
   },
   "permission": {
