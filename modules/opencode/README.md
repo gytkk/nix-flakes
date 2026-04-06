@@ -14,7 +14,7 @@ opencode auth login
 
 - nixpkgs에서 `opencode` 설치
 - OpenCode 설정 파일 구성 (`~/.config/opencode/opencode.json`)
-- oh-my-opencode 설정 파일 구성 (`~/.config/opencode/oh-my-opencode.json`)
+- oh-my-opencode 설정 파일 구성 (`~/.config/opencode/oh-my-openagent.json`)
 - MCP 서버 설정 (라이브러리 문서화를 위한 `context7`)
 - 전역 지침 설치 (`~/.config/opencode/AGENTS.md`)
 - 로컬 플러그인 설치 (`~/.config/opencode/plugins/`)
@@ -32,7 +32,7 @@ opencode auth login
 - **LSP**: `metals` (Scala)
 - **권한**: 모든 skill 및 task 허용
 
-### oh-my-opencode.json
+### oh-my-openagent.json
 
 - oh-my-opencode 플러그인의 에이전트/카테고리 모델 오버라이드를 정의합니다.
 - 현재 이 저장소는 OpenCode Go + ChatGPT Pro 혼합 구성을 유지합니다.
@@ -63,7 +63,7 @@ oh-my-opencode 플러그인이 제공하는 에이전트들입니다:
 
 ## Categories
 
-이 저장소의 `oh-my-opencode.json`은 다음 카테고리를 오버라이드합니다.
+이 저장소의 `oh-my-openagent.json`은 다음 카테고리를 오버라이드합니다.
 
 - **visual-engineering**: GLM-5 기반 시각 작업
 - **ultrabrain**: GPT-5.4 `xhigh`
