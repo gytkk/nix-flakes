@@ -13,7 +13,7 @@
   "autoupdate": true,
   "plugin": [
     "@plannotator/opencode@latest",
-    "oh-my-opencode",
+    "oh-my-openagent",
     "@mohak34/opencode-notifier@latest"
   ],
   "compaction": {
