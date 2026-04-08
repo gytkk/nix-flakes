@@ -157,6 +157,14 @@ in
         fi''
     ) mcpCommands}
 
+    # Fix permissions on all shell scripts in plugins (Claude Code doesn't preserve +x)
+    log "Fixing plugin script permissions..."
+    if [ -d "$HOME/.claude/plugins" ]; then
+      find "$HOME/.claude/plugins" -type f -name "*.sh" ! -perm -111 -exec chmod +x {} + 2>/dev/null || true
+      PLUGIN_SCRIPTS=$(find "$HOME/.claude/plugins" -type f -name "*.sh" 2>/dev/null | wc -l)
+      log "  -> Fixed permissions for $PLUGIN_SCRIPTS shell scripts"
+    fi
+
     log "=== Claude Code setup finished ==="
   '';
 
