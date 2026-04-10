@@ -13,7 +13,6 @@
   "autoupdate": true,
   "plugin": [
     "@plannotator/opencode@latest",
-    "oh-my-openagent",
     "@mohak34/opencode-notifier@latest",
     "@tarquinen/opencode-dcp@latest",
     "opencode-mem"
