@@ -59,6 +59,8 @@ Individual projects may override this policy (e.g., banning worktree entirely). 
 3. When done, create a PR from the worktree branch
 4. After merge, clean up: `git worktree remove ~/worktrees/$(basename $PWD)/<short-task-name>`
 
+**Worktree agent permissions:** When spawning an agent with `isolation: "worktree"`, ALWAYS use `mode: "bypassPermissions"`. Worktree는 격리된 환경이므로 메인 repo에 영향이 없어 안전합니다.
+
 ## Critical Rules
 
 - First, deeply understand and think about what you want to achieve with your code.
