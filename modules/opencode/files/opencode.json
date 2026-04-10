@@ -14,7 +14,9 @@
   "plugin": [
     "@plannotator/opencode@latest",
     "oh-my-openagent",
-    "@mohak34/opencode-notifier@latest"
+    "@mohak34/opencode-notifier@latest",
+    "@tarquinen/opencode-dcp@latest",
+    "opencode-mem"
   ],
   "compaction": {
     "auto": true,
@@ -36,10 +38,42 @@
     }
   },
   "lsp": {
+    "nixd": {
+      "command": ["nixd"],
+      "extensions": [".nix"]
+    },
+    "gopls": {
+      "command": ["gopls"],
+      "extensions": [".go"]
+    },
+    "typescript-language-server": {
+      "command": ["typescript-language-server", "--stdio"],
+      "extensions": [".ts", ".tsx", ".js", ".jsx"]
+    },
+    "terraform-ls": {
+      "command": ["terraform-ls", "serve"],
+      "extensions": [".tf", ".tfvars"]
+    },
     "metals": {
       "command": ["metals"],
       "extensions": [".scala", ".sc", ".sbt"],
       "priority": 10
+    },
+    "ty": {
+      "command": ["ty", "server"],
+      "extensions": [".py", ".pyi"]
+    },
+    "yaml-language-server": {
+      "command": ["yaml-language-server", "--stdio"],
+      "extensions": [".yaml", ".yml"]
+    },
+    "marksman": {
+      "command": ["marksman", "server"],
+      "extensions": [".md"]
+    },
+    "rust-analyzer": {
+      "command": ["rust-analyzer"],
+      "extensions": [".rs"]
     }
   },
   "permission": {
