@@ -6,7 +6,6 @@ let
     inputs.nix-zed-extensions.overlays.default
     inputs.nix-openclaw.overlays.default
     inputs.flake-stores.overlays.default
-    inputs.zellij-sidebar.overlays.default
     inputs.niri.overlays.niri
     (import ../overlays { inherit inputs; }).nixpkgs-versions
     (import ../overlays { inherit inputs; }).package-fixes

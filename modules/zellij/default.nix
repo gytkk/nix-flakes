@@ -21,8 +21,4 @@
       }
     '';
   };
-
-  xdg.configFile."zellij/plugins/zellij_sidebar.wasm".source =
-    "${pkgs.zellij-sidebar}/share/zellij/plugins/zellij_sidebar.wasm";
-
 }
