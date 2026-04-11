@@ -73,9 +73,11 @@
   };
 
   # 노트북 덮개를 닫아도 suspend하지 않음 (서버 용도)
-  services.logind.lidSwitch = "ignore";
-  services.logind.lidSwitchExternalPower = "ignore";
-  services.logind.lidSwitchDocked = "ignore";
+  services.logind.settings.Login = {
+    HandleLidSwitch = "ignore";
+    HandleLidSwitchExternalPower = "ignore";
+    HandleLidSwitchDocked = "ignore";
+  };
 
   # /bin/bash shebang 호환성 (서드파티 스크립트용)
   system.activationScripts.binbash = ''
