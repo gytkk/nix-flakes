@@ -10,9 +10,10 @@
 let
   cfg = config.modules.codex;
   codexConfigPath = "${config.home.homeDirectory}/.codex/config.toml";
-  systemCodexConfigPath = "/etc/codex/config.toml";
+  legacySystemCodexConfigPath = "/etc/codex/config.toml";
+  systemCodexConfigPath = "/etc/codex/managed_config.toml";
   systemCodexConfigDirectory = "/etc/codex";
-  managedConfigSource = "${flakeDirectory}/modules/codex/files/config.toml";
+  managedConfigSource = ./files/config.toml;
   coreutils = pkgs.coreutils;
   extractProjectsFunction = ''
     extract_projects() {
@@ -54,6 +55,7 @@ let
         ensure_system_codex_config() {
           local desired_target=${lib.escapeShellArg managedConfigSource}
           local current_target=""
+          local legacy_target=""
           local sudo_bin=""
 
           if [ -L ${lib.escapeShellArg systemCodexConfigPath} ]; then
@@ -86,6 +88,16 @@ let
           fi
 
           run "$sudo_bin" ${coreutils}/bin/mkdir -p ${lib.escapeShellArg systemCodexConfigDirectory}
+          if [ -L ${lib.escapeShellArg legacySystemCodexConfigPath} ]; then
+            legacy_target="$(${coreutils}/bin/readlink ${lib.escapeShellArg legacySystemCodexConfigPath} || true)"
+            if [ -n "$legacy_target" ]; then
+              run "$sudo_bin" ${coreutils}/bin/rm -f ${lib.escapeShellArg legacySystemCodexConfigPath}
+            fi
+          elif [ -e ${lib.escapeShellArg legacySystemCodexConfigPath} ]; then
+            errorEcho "${legacySystemCodexConfigPath} exists and is not a symlink. Move it aside and rerun home-manager switch."
+            exit 1
+          fi
+
           run "$sudo_bin" ${coreutils}/bin/ln -sfn "$desired_target" ${lib.escapeShellArg systemCodexConfigPath}
 
           if [ -n "''${DRY_RUN:-}" ]; then
