@@ -7,6 +7,7 @@
   imports = [
     ./hardware-configuration.nix
     ./openclaw.nix
+    ./open-webui.nix
   ];
 
   boot.loader.systemd-boot.enable = true;

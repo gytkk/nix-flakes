@@ -127,6 +127,12 @@ nix build .#nixosConfigurations.pylv-onyx.config.system.build.toplevel
 nix build .#nixosConfigurations.pylv-sepia.config.system.build.toplevel
 ```
 
+### `pylv-onyx` Open WebUI access
+
+- Tailscale: `https://pylv-onyx.tailbbb9bf.ts.net:8444`
+- Main desktop or any LAN-only client: `ssh -N -L 3000:127.0.0.1:8080 gytkk@pylv-onyx`, then browse `http://localhost:3000`
+- Direct LAN exposure is intentionally disabled; Open WebUI listens only on `127.0.0.1`
+
 ## Helpers
 
 ```bash
