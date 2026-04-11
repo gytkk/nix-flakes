@@ -20,7 +20,7 @@ Last verified on `2026-04-11` from an SSH session on `pylv-onyx`.
 
 #### 1. SSH tunnel and localhost login are currently broken
 
-The current Open WebUI configuration in [`open-webui.nix`](./open-webui.nix) enables both:
+The current Open WebUI configuration in [`hosts/pylv-onyx/open-webui.nix`](./hosts/pylv-onyx/open-webui.nix) enables both:
 
 - `ENABLE_LOGIN_FORM = "true"`
 - `WEBUI_AUTH_TRUSTED_EMAIL_HEADER = "Tailscale-User-Login"`
@@ -54,7 +54,7 @@ Result:
 
 #### 3. There is a port mismatch in the OpenClaw browser-origin settings
 
-[`openclaw.nix`](./openclaw.nix) currently allows:
+[`hosts/pylv-onyx/openclaw.nix`](./hosts/pylv-onyx/openclaw.nix) currently allows:
 
 - `https://pylv-onyx.tailbbb9bf.ts.net:8443`
 
@@ -68,7 +68,7 @@ This mismatch does not block the Open WebUI landing page itself, but it is a ris
 
 If local SSH tunnel login is the priority, the simplest fix is:
 
-1. Remove `WEBUI_AUTH_TRUSTED_EMAIL_HEADER` and `WEBUI_AUTH_TRUSTED_NAME_HEADER` from [`open-webui.nix`](./open-webui.nix).
+1. Remove `WEBUI_AUTH_TRUSTED_EMAIL_HEADER` and `WEBUI_AUTH_TRUSTED_NAME_HEADER` from [`hosts/pylv-onyx/open-webui.nix`](./hosts/pylv-onyx/open-webui.nix).
 2. Rebuild and restart the host configuration.
 3. Verify that password login works through `http://localhost:3000`.
 
