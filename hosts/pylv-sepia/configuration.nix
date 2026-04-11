@@ -135,6 +135,31 @@
   };
   users.groups.cloudflared = { };
 
+  # Claude Code daily - 매일 오전 6시 (KST) 실행
+  systemd.timers.claude-daily = {
+    description = "Claude Code Daily Timer";
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnCalendar = "*-*-* 06:00:00";
+      Persistent = true;
+      Unit = "claude-daily.service";
+    };
+  };
+
+  systemd.services.claude-daily = {
+    description = "Claude Code Daily Hello";
+    after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      User = "gytkk";
+      Group = "users";
+    };
+    script = ''
+      ${pkgs.claude-code}/bin/claude -p "Hello"
+    '';
+  };
+
   # Minimal system packages (most packages managed by Home Manager)
   environment.systemPackages = with pkgs; [
     cloudflared
