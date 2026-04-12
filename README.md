@@ -160,6 +160,7 @@ nix build .#nixosConfigurations.pylv-sepia.config.system.build.toplevel
 - On `pylv-onyx`, the upstream system service runs as the primary host user so the CLI can read the same state directory that the gateway uses.
 - The system-managed Hermes home is `/var/lib/hermes/.hermes`, which is also what the CLI uses on hosts where `addToSystemPackages` is enabled.
 - Discord mention/channel/user gating now lives in that writable runtime `.env`, so Hermes can adjust it without editing the Nix module.
+- The local Hermes package is patched so bundled skills copied from the Nix store stay editable instead of inheriting read-only file modes.
 
 ## Helpers
 

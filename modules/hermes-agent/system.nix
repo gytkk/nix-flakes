@@ -2,12 +2,14 @@
   config,
   lib,
   pkgs,
+  inputs,
   username,
   homeDirectory,
   ...
 }:
 let
   isOnyx = config.networking.hostName == "pylv-onyx";
+  hermesPackage = import ./package.nix { inherit pkgs inputs; };
   hermesStateDir = "/var/lib/hermes";
   hermesHome = "${hermesStateDir}/.hermes";
   hermesEnvFile = "${hermesHome}/.env";
@@ -70,6 +72,7 @@ in
       group = "users";
       createUser = false;
       addToSystemPackages = true;
+      package = hermesPackage;
       stateDir = hermesStateDir;
       authFile = "${homeDirectory}/.codex/auth.json";
       extraPackages = with pkgs; [
@@ -110,6 +113,7 @@ in
       TOKEN_FILE=${lib.escapeShellArg config.age.secrets.hermes-discord-bot-token.path}
       HERMES_ENV_FILE=${lib.escapeShellArg hermesEnvFile}
       SEED_MARKER=${lib.escapeShellArg discordEnvSeedMarker}
+      SKILLS_DIR=${lib.escapeShellArg "${hermesHome}/skills"}
 
       if [ ! -f "$TOKEN_FILE" ] || [ ! -s "$TOKEN_FILE" ]; then
         echo "ERROR: Hermes Discord bot token not found or empty at $TOKEN_FILE" >&2
@@ -142,6 +146,13 @@ in
       ${pkgs.gnused}/bin/sed -i '/^DISCORD_BOT_TOKEN=/d' "$HERMES_ENV_FILE"
       printf 'DISCORD_BOT_TOKEN=%s\n' "$(${pkgs.coreutils}/bin/cat "$TOKEN_FILE")" >> "$HERMES_ENV_FILE"
       chmod 0640 "$HERMES_ENV_FILE"
+
+      if [ -d "$SKILLS_DIR" ]; then
+        ${pkgs.findutils}/bin/find "$SKILLS_DIR" -type d \
+          -exec ${pkgs.coreutils}/bin/chmod u+rwx,g+rws,o-rwx {} + 2>/dev/null || true
+        ${pkgs.findutils}/bin/find "$SKILLS_DIR" -type f \
+          -exec ${pkgs.coreutils}/bin/chmod u+rw,g+rw,o-rwx {} + 2>/dev/null || true
+      fi
     '';
 
     system.activationScripts."hermes-agent-10-one-half-light-skin" =

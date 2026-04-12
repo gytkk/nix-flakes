@@ -9,7 +9,7 @@
 
 let
   cfg = config.modules.hermes-agent;
-  hermesPackage = inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default;
+  hermesPackage = import ./package.nix { inherit pkgs inputs; };
   hermesHome = "${config.home.homeDirectory}/.hermes";
   exampleConfig = "${inputs.hermes-agent}/cli-config.yaml.example";
   systemManaged =
