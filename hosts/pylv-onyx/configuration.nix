@@ -1,6 +1,7 @@
 {
   config,
   pkgs,
+  username,
   ...
 }:
 {
@@ -85,8 +86,17 @@
     xwayland-satellite-stable
   ];
 
-  # Wayland 네이티브 Electron 앱 지원
-  environment.sessionVariables.NIXOS_OZONE_WL = "1";
+  # Wayland Electron support and OpenClaw CLI defaults for login shells.
+  environment.sessionVariables = {
+    NIXOS_OZONE_WL = "1";
+    OPENCLAW_CONFIG_PATH = "/etc/openclaw/openclaw.json";
+    CLAWDBOT_CONFIG_PATH = "/etc/openclaw/openclaw.json";
+    OPENCLAW_STATE_DIR = "/home/gytkk/.openclaw";
+    CLAWDBOT_STATE_DIR = "/home/gytkk/.openclaw";
+  };
+
+  home-manager.users.${username}.home.file.".openclaw/openclaw.json".source =
+    config.environment.etc."openclaw/openclaw.json".source;
 
   # CJK fallback 글꼴
   fonts.fontconfig.defaultFonts = {

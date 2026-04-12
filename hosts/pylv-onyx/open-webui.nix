@@ -10,8 +10,8 @@ let
   tailscaleServePort = 8444;
   tailscaleFqdn = "${config.networking.hostName}.tailbbb9bf.ts.net";
   lanInterface = "wlo1";
-  openclawGatewayPort = 18789;
-  openclawGatewayToken = "local-gateway-token";
+  openclawProxyPort = 18790;
+  openclawProxyApiKey = "lan-admin-proxy";
   openclawDefaultModel = "openclaw/default";
   openWebUiDataDir = "${config.services.open-webui.stateDir}/data";
   openWebUiSeedConfig = builtins.toJSON {
@@ -53,11 +53,11 @@ in
       ENABLE_OLLAMA_API = "false";
       ENABLE_OPENAI_API = "true";
 
-      # Route all OpenAI-compatible traffic to the local OpenClaw gateway.
-      OPENAI_API_BASE_URL = "http://127.0.0.1:${toString openclawGatewayPort}/v1";
-      OPENAI_API_KEY = openclawGatewayToken;
-      OPENAI_API_BASE_URLS = "http://127.0.0.1:${toString openclawGatewayPort}/v1";
-      OPENAI_API_KEYS = openclawGatewayToken;
+      # Route all OpenAI-compatible traffic through the local trusted proxy.
+      OPENAI_API_BASE_URL = "http://127.0.0.1:${toString openclawProxyPort}/v1";
+      OPENAI_API_KEY = openclawProxyApiKey;
+      OPENAI_API_BASE_URLS = "http://127.0.0.1:${toString openclawProxyPort}/v1";
+      OPENAI_API_KEYS = openclawProxyApiKey;
       DEFAULT_MODELS = openclawDefaultModel;
       TASK_MODEL_EXTERNAL = openclawDefaultModel;
       FORWARDED_ALLOW_IPS = "127.0.0.1,::1";

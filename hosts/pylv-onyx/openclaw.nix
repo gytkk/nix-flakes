@@ -9,6 +9,10 @@ let
   lanProxyPort = 18790;
   lanInterface = "wlo1";
   stateDir = "${homeDirectory}/.openclaw";
+  trustedProxyUser = "lan-admin";
+  trustedProxyUserHeader = "x-openclaw-user";
+  trustedProxyRequiredHeader = "x-openclaw-proxy";
+  trustedProxyRequiredValue = "1";
 in
 {
   # Discord bot token for openclaw
@@ -58,9 +62,12 @@ in
       gateway = {
         mode = "local";
         auth = {
-          # Loopback-only token: not externally reachable (bind = "loopback" + Tailscale serve)
-          token = "local-gateway-token";
-          mode = "token";
+          mode = "trusted-proxy";
+          trustedProxy = {
+            userHeader = trustedProxyUserHeader;
+            requiredHeaders = [ trustedProxyRequiredHeader ];
+            allowUsers = [ trustedProxyUser ];
+          };
         };
         port = gatewayPort;
         bind = "loopback";
@@ -71,11 +78,10 @@ in
         http = {
           endpoints.chatCompletions.enabled = true;
         };
-        tailscale.mode = "serve";
+        tailscale.mode = "off";
         controlUi = {
           dangerouslyDisableDeviceAuth = true;
           dangerouslyAllowHostHeaderOriginFallback = true;
-          allowedOrigins = [ "https://pylv-onyx.tailbbb9bf.ts.net:8444" ];
         };
       };
 
@@ -170,6 +176,8 @@ in
         extraConfig = ''
           proxy_set_header Host $host:$server_port;
           proxy_set_header X-Forwarded-Host $host:$server_port;
+          proxy_set_header ${trustedProxyUserHeader} ${trustedProxyUser};
+          proxy_set_header ${trustedProxyRequiredHeader} ${trustedProxyRequiredValue};
         '';
       };
     };
