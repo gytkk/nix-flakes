@@ -167,6 +167,10 @@ in
       locations."/" = {
         proxyPass = "http://127.0.0.1:${toString gatewayPort}";
         proxyWebsockets = true;
+        extraConfig = ''
+          proxy_set_header Host $host:$server_port;
+          proxy_set_header X-Forwarded-Host $host:$server_port;
+        '';
       };
     };
   };
