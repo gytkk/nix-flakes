@@ -45,8 +45,6 @@ in
       display.tool_progress = "off";
     };
 
-    environmentFiles = [ "/run/hermes/env" ];
-
     environment = {
       DISCORD_ALLOWED_USERS = "392300972023611392";
       DISCORD_HOME_CHANNEL = "1492784291049115760";
@@ -68,21 +66,22 @@ in
     ];
   };
 
-  system.activationScripts.hermes-discord-env = ''
+  systemd.services.hermes-agent.preStart = ''
     TOKEN_FILE="/run/agenix/hermes-discord-bot-token"
-    ENV_DIR="/run/hermes"
-    ENV_FILE="$ENV_DIR/env"
+    HERMES_ENV_FILE="${stateDir}/.hermes/.env"
 
-    mkdir -p "$ENV_DIR"
-
-    if [ -f "$TOKEN_FILE" ] && [ -s "$TOKEN_FILE" ]; then
-      printf 'DISCORD_BOT_TOKEN=%s\n' "$(cat "$TOKEN_FILE")" > "$ENV_FILE"
-      chown ${username}:users "$ENV_FILE"
-      chmod 600 "$ENV_FILE"
-    else
+    if [ ! -f "$TOKEN_FILE" ] || [ ! -s "$TOKEN_FILE" ]; then
       echo "ERROR: Hermes Discord bot token not found or empty at $TOKEN_FILE" >&2
       exit 1
     fi
+
+    mkdir -p "$(dirname "$HERMES_ENV_FILE")"
+    touch "$HERMES_ENV_FILE"
+
+    ${pkgs.gnused}/bin/sed -i '/^DISCORD_BOT_TOKEN=/d' "$HERMES_ENV_FILE"
+    printf 'DISCORD_BOT_TOKEN=%s\n' "$(cat "$TOKEN_FILE")" >> "$HERMES_ENV_FILE"
+    chown ${username}:users "$HERMES_ENV_FILE"
+    chmod 640 "$HERMES_ENV_FILE"
   '';
 
   environment.systemPackages = [ hermesPackage ];
