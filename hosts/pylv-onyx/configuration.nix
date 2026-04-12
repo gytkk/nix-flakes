@@ -7,8 +7,8 @@
 {
   imports = [
     ./hardware-configuration.nix
-    ./openclaw.nix
     ./open-webui.nix
+    ../../modules/openclaw
     ../../modules/nixos
   ];
 
@@ -89,14 +89,11 @@
   # Wayland Electron support and OpenClaw CLI defaults for login shells.
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
-    OPENCLAW_CONFIG_PATH = "/etc/openclaw/openclaw.json";
-    CLAWDBOT_CONFIG_PATH = "/etc/openclaw/openclaw.json";
+    OPENCLAW_CONFIG_PATH = "/home/gytkk/.openclaw/openclaw.json";
+    CLAWDBOT_CONFIG_PATH = "/home/gytkk/.openclaw/openclaw.json";
     OPENCLAW_STATE_DIR = "/home/gytkk/.openclaw";
     CLAWDBOT_STATE_DIR = "/home/gytkk/.openclaw";
   };
-
-  home-manager.users.${username}.home.file.".openclaw/openclaw.json".source =
-    config.environment.etc."openclaw/openclaw.json".source;
 
   # CJK fallback 글꼴
   fonts.fontconfig.defaultFonts = {
