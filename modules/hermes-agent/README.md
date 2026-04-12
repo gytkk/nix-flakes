@@ -17,7 +17,6 @@ Hermes 관련 설정은 이 디렉터리 아래로 모읍니다.
 ### `system.nix`
 - `pylv-onyx`에서 Hermes gateway/systemd service 활성화
 - systemd service를 명시적으로 `HERMES_HOME=~/.hermes`로 실행
-- 기존 `~/.hermes-service` 상태를 `~/.hermes`로 migration
 - `hermes-discord-bot-token.age`를 agenix로 복호화
 - Discord bot token을 service 시작 직전에 `.env`에 주입
 - Discord 허용 유저/허용 채널 제한

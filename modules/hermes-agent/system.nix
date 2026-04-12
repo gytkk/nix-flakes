@@ -10,8 +10,6 @@
 let
   hermesPackage = inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default;
   hermesHome = "${homeDirectory}/.hermes";
-  legacyServiceRoot = "${homeDirectory}/.hermes-service";
-  legacyServiceHome = "${legacyServiceRoot}/.hermes";
   workingDirectory = "${hermesHome}/workspace";
   configMergeScript = pkgs.callPackage "${inputs.hermes-agent}/nix/configMergeScript.nix" { };
   generatedConfigFile = pkgs.writeText "hermes-config.json" (
@@ -54,18 +52,12 @@ in
       lib.stringAfter
         ([ "users" ] ++ lib.optional (config.system.activationScripts ? setupSecrets) "setupSecrets")
         ''
-          LEGACY_ROOT=${lib.escapeShellArg legacyServiceRoot}
-          LEGACY_HOME=${lib.escapeShellArg legacyServiceHome}
           HERMES_HOME=${lib.escapeShellArg hermesHome}
           WORKSPACE=${lib.escapeShellArg workingDirectory}
           GENERATED_CONFIG=${lib.escapeShellArg generatedConfigFile}
 
           if [ -L "$HERMES_HOME" ]; then
             ${pkgs.coreutils}/bin/rm -f "$HERMES_HOME"
-          fi
-
-          if [ -d "$LEGACY_HOME" ] && [ ! -e "$HERMES_HOME" ]; then
-            ${pkgs.coreutils}/bin/mv "$LEGACY_HOME" "$HERMES_HOME"
           fi
 
           ${pkgs.coreutils}/bin/mkdir -p \
@@ -115,15 +107,6 @@ in
             "$WORKSPACE"
           ${pkgs.coreutils}/bin/chmod 0640 "$HERMES_HOME/.env" "$HERMES_HOME/config.yaml"
           ${pkgs.coreutils}/bin/chmod 0644 "$HERMES_HOME/.managed"
-
-          if [ -d "$LEGACY_ROOT" ] && [ ! -d "$LEGACY_HOME" ] && [ "$LEGACY_ROOT" != "$HERMES_HOME" ]; then
-            ${pkgs.coreutils}/bin/rm -rf \
-              "$LEGACY_ROOT/.cache" \
-              "$LEGACY_ROOT/.local" \
-              "$LEGACY_ROOT/home" \
-              "$LEGACY_ROOT/workspace"
-            ${pkgs.coreutils}/bin/rmdir "$LEGACY_ROOT" 2>/dev/null || true
-          fi
         '';
 
     systemd.services.hermes-agent = {
