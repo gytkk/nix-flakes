@@ -72,6 +72,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Hermes Agent - self-improving AI agent by Nous Research
+    hermes-agent = {
+      url = "github:NousResearch/hermes-agent";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     flake-stores = {
       url = "github:gytkk/flake-stores";
       inputs.nixpkgs.follows = "nixpkgs";

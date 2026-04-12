@@ -122,6 +122,7 @@ rec {
           inputs.agenix.nixosModules.default
           inputs.copyparty.nixosModules.default
           inputs.nix-openclaw.nixosModules.openclaw-gateway
+          inputs.hermes-agent.nixosModules.default
           inputs.niri.nixosModules.niri
           inputs.dms.nixosModules.dank-material-shell
           inputs.dms.nixosModules.greeter

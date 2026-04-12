@@ -16,6 +16,7 @@
     ../modules/codex
     ../modules/ghostty
     ../modules/git
+    ../modules/hermes
     ../modules/k9s
     ../modules/opencode
     ../modules/lsp

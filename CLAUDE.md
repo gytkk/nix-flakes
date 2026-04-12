@@ -103,6 +103,7 @@ modules/<name>/
 | `nixos/`     | NixOS common config | `baseline.nix`, `remote-access.nix`, `user.nix`     | NO      |
 | `claude/`    | Claude Code         | `files/settings.json`, `files/CLAUDE.md`            | 부분적  |
 | `codex/`     | OpenAI Codex CLI    | `files/config.toml`, `files/AGENTS.md`              | YES     |
+| `hermes/`    | Hermes Agent CLI    | `default.nix`, `README.md`                          | 부분적  |
 | `ghostty/`   | Ghostty terminal    | `files/config`                                      | YES     |
 | `git/`       | Git configuration   | `default.nix`                                       | NO      |
 | `k9s/`       | Kubernetes manager  | `default.nix`                                       | NO      |
@@ -140,6 +141,7 @@ AI 코딩 에이전트 설정 변경 시 **로컬 프로젝트 파일이 아닌 
 
 - **Claude Code** (`modules/claude/`): Plugins은 [gytkk/claude-marketplace](https://github.com/gytkk/claude-marketplace)로 관리. LSP plugins은 `modules/lsp/default.nix`의 바이너리 필요.
 - **OpenCode** (`modules/opencode/`): `files/opencode.json`으로 모델/MCP/플러그인 설정.
+- **Hermes** (`modules/hermes/`): upstream `hermes-agent` flake를 사용해 CLI와 초기 `~/.hermes` 상태를 declarative하게 준비.
 - **Codex Skills**: `codex` plugin — `/codex:critic`, `/codex:hephaestus`, `/codex:analyze`
 
 ### Package Management

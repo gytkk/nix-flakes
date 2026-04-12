@@ -146,6 +146,14 @@ nix build .#nixosConfigurations.pylv-sepia.config.system.build.toplevel
 - OpenClaw bootstrap and guardrails live in [`modules/openclaw/default.nix`](./modules/openclaw/default.nix)
 - Nix now seeds `/etc/openclaw/openclaw.seed.json` and `/etc/openclaw/openclaw.guardrails.json`, while the mutable runtime config lives at `~/.openclaw/openclaw.json`
 
+## Hermes Agent
+
+- `hermes-agent` flake input is wired into Home Manager, so all configured environments get the Hermes CLI declaratively.
+- First activation seeds `~/.hermes/config.yaml` from the upstream example and creates the standard Hermes state directories.
+- Run `hermes setup` for first-time provider/tool configuration.
+- If you want to import your existing OpenClaw persona/memory/workspace context, run `hermes claw migrate`.
+- The upstream NixOS module is also imported, so host-specific `services.hermes-agent` wiring can be added later without extra flake plumbing.
+
 ## Helpers
 
 ```bash
