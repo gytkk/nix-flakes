@@ -1,94 +1,60 @@
 # pylv-onyx
 
-NixOS configuration for `pylv-onyx`, managed from the main flake.
+Open WebUI and OpenClaw are now wired together declaratively on `pylv-onyx`.
 
-## Open WebUI Status
+Last verified on `2026-04-12` from a shell on `pylv-onyx`.
 
-Last verified on `2026-04-11` from an SSH session on `pylv-onyx`.
+## Verified working
 
-### Verified working
-
-- `open-webui.service` is enabled and active.
-- `tailscale-serve-open-webui.service` is enabled and active.
-- `openclaw-gateway.service` is enabled and active.
+- `open-webui.service` is active.
+- `tailscale-serve-open-webui.service` is active.
+- `openclaw-gateway.service` is active.
 - Open WebUI responds on `http://127.0.0.1:8080/`.
 - Tailscale Serve exposes Open WebUI on `https://pylv-onyx.tailbbb9bf.ts.net:8444/`.
-- OpenClaw Control UI responds on `http://127.0.0.1:18789/`.
-- Open WebUI completed first-run migrations and created the admin account from environment variables.
+- Password login works through both the Tailscale URL and an SSH tunnel to `http://localhost:3000`.
+- Open WebUI exposes `openclaw/default` from its own `/api/models` endpoint.
+- A real `POST /openai/chat/completions` request sent to Open WebUI returned a successful response from OpenClaw.
 
-### Confirmed problems
+## Current design
 
-#### 1. SSH tunnel and localhost login are currently broken
+### Open WebUI
 
-The current Open WebUI configuration in [`hosts/pylv-onyx/open-webui.nix`](./hosts/pylv-onyx/open-webui.nix) enables both:
+- [`hosts/pylv-onyx/open-webui.nix`](./hosts/pylv-onyx/open-webui.nix) uses standard email/password login only.
+- Trusted-header login was removed because Open WebUI `0.8.10` blocks localhost sign-in when `WEBUI_AUTH_TRUSTED_*` headers are required.
+- The OpenAI-compatible backend points at `http://127.0.0.1:18789/v1` with the local gateway token.
+- `ENABLE_EVALUATION_ARENA_MODELS` is disabled so the UI only shows the real OpenClaw model.
 
-- `ENABLE_LOGIN_FORM = "true"`
-- `WEBUI_AUTH_TRUSTED_EMAIL_HEADER = "Tailscale-User-Login"`
+### Why the config seed exists
 
-On Open WebUI `0.8.10`, these do not work together the way the current comments imply. When `WEBUI_AUTH_TRUSTED_EMAIL_HEADER` is set, the `/api/v1/auths/signin` endpoint requires that header on every sign-in request. A plain localhost request from an SSH tunnel does not provide it, so password login fails.
+Current OpenClaw `2026.3.8` exposes `POST /v1/chat/completions`, but it does not expose `GET /v1/models`.
 
-Observed error:
+Open WebUI `0.8.10` can work around that, but only if `openai.api_configs.<idx>.model_ids` is present in its persistent config. In this version, `OPENAI_API_CONFIGS` is not read from environment variables, so [`hosts/pylv-onyx/open-webui.nix`](./hosts/pylv-onyx/open-webui.nix) seeds `/var/lib/open-webui/data/config.json` during `preStart` on every boot with:
 
 ```json
-{"detail":"Your provider has not provided a trusted header. Please contact your administrator for assistance."}
+{
+  "version": 0,
+  "ui": {},
+  "openai": {
+    "api_configs": {
+      "0": {
+        "enable": true,
+        "model_ids": [
+          "openclaw/default"
+        ]
+      }
+    }
+  }
+}
 ```
 
-Result:
+That keeps the runtime declarative even though Open WebUI stores the value in its SQLite config table at startup.
 
-- `ssh -N -L 3000:127.0.0.1:8080 gytkk@pylv-onyx` opens the UI
-- but logging in through `http://localhost:3000` does not work yet
+### OpenClaw
 
-#### 2. Open WebUI does not appear to be connected to a model backend yet
+- [`hosts/pylv-onyx/openclaw.nix`](./hosts/pylv-onyx/openclaw.nix) enables `gateway.http.endpoints.chatCompletions`.
+- The OpenClaw Control UI browser origin now matches the actual Tailscale Serve port: `8444`.
 
-The Open WebUI database exists at `/var/lib/open-webui/data/webui.db`, but the persisted config only contained top-level keys:
-
-- `ui`
-- `version`
-
-There was no persisted `openai` or `ollama` provider config, and the `model` table was empty at verification time.
-
-Result:
-
-- the web app is reachable
-- but it should not be considered ready for real chat usage until a backend is configured and verified
-
-#### 3. There is a port mismatch in the OpenClaw browser-origin settings
-
-[`hosts/pylv-onyx/openclaw.nix`](./hosts/pylv-onyx/openclaw.nix) currently allows:
-
-- `https://pylv-onyx.tailbbb9bf.ts.net:8443`
-
-But Open WebUI is actually exposed on:
-
-- `https://pylv-onyx.tailbbb9bf.ts.net:8444`
-
-This mismatch does not block the Open WebUI landing page itself, but it is a risk if browser-origin checks matter during OpenClaw integration.
-
-## Recommended next step
-
-If local SSH tunnel login is the priority, the simplest fix is:
-
-1. Remove `WEBUI_AUTH_TRUSTED_EMAIL_HEADER` and `WEBUI_AUTH_TRUSTED_NAME_HEADER` from [`hosts/pylv-onyx/open-webui.nix`](./hosts/pylv-onyx/open-webui.nix).
-2. Rebuild and restart the host configuration.
-3. Verify that password login works through `http://localhost:3000`.
-
-Tradeoff:
-
-- Tailscale users will also use the standard email/password login form.
-- Automatic trusted-header login through Tailscale Serve will no longer be active.
-
-This is the right direction if the goal is "SSH tunnel and local login first."
-
-## Follow-up work after login is fixed
-
-After the login path works, the remaining work is:
-
-1. Configure Open WebUI to use OpenClaw as its backend.
-2. Verify that models appear in the UI.
-3. Send one real test prompt through the UI.
-4. Reconcile the `8443` vs `8444` origin mismatch if browser-origin checks become relevant.
-
-## How to access the service today
+## Access
 
 ### Tailscale
 
@@ -98,14 +64,7 @@ Use:
 https://pylv-onyx.tailbbb9bf.ts.net:8444/
 ```
 
-Current state:
-
-- the URL is reachable
-- HTTPS is working
-- the app loads
-- but backend configuration is still incomplete
-
-### SSH tunnel from a LAN machine
+### SSH tunnel
 
 Use:
 
@@ -119,20 +78,6 @@ Then open:
 http://localhost:3000
 ```
 
-Current state:
-
-- the page loads
-- password login is blocked by the trusted-header setting described above
-
-## What you need to decide later
-
-When you return to this work, the main decision is:
-
-- keep trusted-header login for Tailscale and give up localhost password login
-- or remove trusted-header login and standardize on email/password login for both Tailscale and SSH tunnel access
-
-For the stated priority of "SSH tunnel and local login first", the second option is the recommended one.
-
 ## Useful verification commands
 
 ```bash
@@ -140,10 +85,14 @@ systemctl is-active open-webui.service tailscale-serve-open-webui.service opencl
 
 ss -ltn | rg ':8080|:8444|:18789'
 
-curl -I http://127.0.0.1:8080/
+curl -sS -H 'Authorization: Bearer <open-webui-jwt>' \
+  http://127.0.0.1:8080/openai/config
 
-curl -kvI --resolve pylv-onyx.tailbbb9bf.ts.net:8444:100.84.249.30 \
-  https://pylv-onyx.tailbbb9bf.ts.net:8444/
+curl -sS -H 'Authorization: Bearer <open-webui-jwt>' \
+  http://127.0.0.1:8080/api/models
 
-journalctl -u open-webui.service -n 60 --no-pager
+curl -sS -H 'Authorization: Bearer <open-webui-jwt>' \
+  -H 'Content-Type: application/json' \
+  -d '{"model":"openclaw/default","messages":[{"role":"user","content":"Reply with the single word OK."}],"stream":false}' \
+  http://127.0.0.1:8080/openai/chat/completions
 ```
