@@ -38,7 +38,5 @@
     "Alt+Space".action.spawn = "walker";
   };
 
-  modules.hermes-agent.useServiceHome = true;
-
   programs.zen-browser.enable = true;
 }

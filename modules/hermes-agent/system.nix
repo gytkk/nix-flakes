@@ -9,8 +9,8 @@
 }:
 let
   hermesPackage = inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default;
-  stateDir = "${homeDirectory}/.hermes-service";
-  hermesHome = "${stateDir}/.hermes";
+  stateDir = "${homeDirectory}/.hermes";
+  hermesHome = stateDir;
   workingDirectory = "${stateDir}/workspace";
   isOnyx = config.networking.hostName == "pylv-onyx";
 in
@@ -66,7 +66,7 @@ in
 
       preStart = ''
         TOKEN_FILE="/run/agenix/hermes-discord-bot-token"
-        HERMES_ENV_FILE="${stateDir}/.hermes/.env"
+        HERMES_ENV_FILE="${hermesHome}/.env"
 
         if [ ! -f "$TOKEN_FILE" ] || [ ! -s "$TOKEN_FILE" ]; then
           echo "ERROR: Hermes Discord bot token not found or empty at $TOKEN_FILE" >&2
