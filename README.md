@@ -149,6 +149,9 @@ nix build .#nixosConfigurations.pylv-sepia.config.system.build.toplevel
 ## Hermes Agent
 
 - `hermes-agent` flake input is wired into Home Manager, so all configured environments get the Hermes CLI declaratively.
+- Hermes-related local config now lives under `modules/hermes-agent/`:
+  - `default.nix` for CLI/Home Manager bootstrap
+  - `system.nix` for NixOS service wiring (currently used by `pylv-onyx`)
 - First activation seeds `~/.hermes/config.yaml` from the upstream example and creates the standard Hermes state directories.
 - Run `hermes setup` for first-time provider/tool configuration.
 - If you want to import your existing OpenClaw persona/memory/workspace context, run `hermes claw migrate`.

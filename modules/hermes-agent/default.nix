@@ -7,13 +7,13 @@
 }:
 
 let
-  cfg = config.modules.hermes;
+  cfg = config.modules.hermes-agent;
   hermesPackage = inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default;
   hermesHome = "${config.home.homeDirectory}/.hermes";
   exampleConfig = "${inputs.hermes-agent}/cli-config.yaml.example";
 in
 {
-  options.modules.hermes = {
+  options.modules.hermes-agent = {
     enable = lib.mkOption {
       type = lib.types.bool;
       default = true;
