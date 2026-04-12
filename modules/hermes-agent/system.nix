@@ -46,18 +46,6 @@ in
         DISCORD_REQUIRE_MENTION = "true";
       };
 
-      extraPackages = with pkgs; [
-        git
-        nodejs
-        bun
-        uv
-        ripgrep
-        fd
-        jq
-        wget
-        curl
-        ffmpeg
-      ];
     };
 
     systemd.services.hermes-agent.preStart = ''
@@ -78,11 +66,6 @@ in
       chmod 640 "$HERMES_ENV_FILE"
     '';
 
-    environment.systemPackages = [ hermesPackage ];
-
-    environment.sessionVariables = {
-      HERMES_SERVICE_STATE_DIR = stateDir;
-      HERMES_SERVICE_HOME = hermesHome;
-    };
+    environment.sessionVariables.HERMES_SERVICE_HOME = hermesHome;
   };
 }
