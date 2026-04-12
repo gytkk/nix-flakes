@@ -134,7 +134,7 @@ nix build .#nixosConfigurations.pylv-sepia.config.system.build.toplevel
 - Main desktop or any LAN-only client: `ssh -N -L 3000:127.0.0.1:8080 gytkk@pylv-onyx`, then browse `http://localhost:3000`
 - Direct LAN exposure is enabled only on `wlo1` port `8080`; the raw Open WebUI backend stays loopback-only on `127.0.0.1:8081`
 - `nginx` injects fixed trusted-auth headers, so LAN, Tailscale, and SSH-tunneled clients are auto-signed in as `gytk.kim@gmail.com`
-- The configured backend model is `openclaw/default` via the local trusted proxy on `127.0.0.1:18790`
+- The configured backend model is `openclaw/main` via the local trusted proxy on `127.0.0.1:18790`
 
 ### `pylv-onyx` OpenClaw Control UI access
 

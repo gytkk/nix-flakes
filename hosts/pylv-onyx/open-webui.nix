@@ -13,7 +13,7 @@ let
   lanInterface = "wlo1";
   openclawProxyPort = 18790;
   openclawProxyApiKey = "lan-admin-proxy";
-  openclawDefaultModel = "openclaw/default";
+  openclawDefaultModel = "openclaw/main";
   openWebUiTrustedEmail = "gytk.kim@gmail.com";
   openWebUiTrustedEmailHeader = "x-open-webui-email";
   openWebUiTrustedNameHeader = "x-open-webui-name";

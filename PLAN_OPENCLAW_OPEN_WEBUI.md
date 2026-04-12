@@ -15,7 +15,7 @@ Last verified on `2026-04-12` from a shell on `pylv-onyx`.
 - OpenClaw Control UI responds on the current LAN proxy address `http://192.168.0.10:18790/`.
 - A real `POST /api/v1/auths/signin` request sent through `http://127.0.0.1:8080` returned the fixed admin user `gytk.kim@gmail.com` even with ignored credentials in the body.
 - A real `POST /api/v1/auths/signin` request sent directly to `http://127.0.0.1:8081` failed with `Your provider has not provided a trusted header`.
-- Open WebUI exposes `openclaw/default` from its own `/api/models` endpoint.
+- Open WebUI exposes `openclaw/main` from its own `/api/models` endpoint.
 - A real `POST /openai/chat/completions` request sent to Open WebUI returned a successful response from OpenClaw.
 - A real unauthenticated `POST /v1/chat/completions` request sent through the LAN OpenClaw proxy returned a successful response from OpenClaw.
 - A real unauthenticated `openclaw status` call to `ws://127.0.0.1:18790` succeeded, while the raw gateway at `ws://127.0.0.1:18789` still rejected the same call with `unauthorized`.
@@ -49,7 +49,7 @@ Open WebUI `0.8.10` can work around that, but only if `openai.api_configs.<idx>.
       "0": {
         "enable": true,
         "model_ids": [
-          "openclaw/default"
+          "openclaw/main"
         ]
       }
     }
@@ -155,13 +155,13 @@ curl -sS -H 'Content-Type: application/json' \
 
 curl -sS -H 'Authorization: Bearer <open-webui-jwt>' \
   -H 'Content-Type: application/json' \
-  -d '{"model":"openclaw/default","messages":[{"role":"user","content":"Reply with the single word OK."}],"stream":false}' \
+  -d '{"model":"openclaw/main","messages":[{"role":"user","content":"Reply with the single word OK."}],"stream":false}' \
   http://127.0.0.1:8080/openai/chat/completions
 
 curl -sS http://192.168.0.10:18790/health
 
 curl -sS -H 'Content-Type: application/json' \
-  -d '{"model":"openclaw/default","messages":[{"role":"user","content":"Reply with the single word OK."}]}' \
+  -d '{"model":"openclaw/main","messages":[{"role":"user","content":"Reply with the single word OK."}]}' \
   http://192.168.0.10:18790/v1/chat/completions
 
 env -u OPENCLAW_GATEWAY_TOKEN -u CLAWDBOT_GATEWAY_TOKEN \
