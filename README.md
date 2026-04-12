@@ -152,10 +152,11 @@ nix build .#nixosConfigurations.pylv-sepia.config.system.build.toplevel
 - Hermes-related local config now lives under `modules/hermes-agent/`:
   - `default.nix` for CLI/Home Manager bootstrap
   - `system.nix` for NixOS service wiring (currently used by `pylv-onyx`)
+- Both the CLI and the `pylv-onyx` gateway use `~/.hermes` as the single Hermes home.
 - First activation seeds `~/.hermes/config.yaml` from the upstream example and creates the standard Hermes state directories.
 - Run `hermes setup` for first-time provider/tool configuration.
 - If you want to import your existing OpenClaw persona/memory/workspace context, run `hermes claw migrate`.
-- The upstream NixOS module is also imported, so host-specific `services.hermes-agent` wiring can be added later without extra flake plumbing.
+- The upstream flake still provides the package input, but the `pylv-onyx` service unit is managed locally so its runtime home stays exactly `~/.hermes`.
 
 ## Helpers
 
