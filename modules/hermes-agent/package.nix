@@ -94,13 +94,13 @@ let
         _display.reset_diff_colors()
 
 
-    def _patch_completion_menu_colors() -> None:
+    def _patch_prompt_toolkit_colors() -> None:
         try:
             import hermes_cli.skin_engine as _skin_engine
         except Exception:
             return
 
-        if getattr(_skin_engine, "_nix_flakes_completion_patch", False):
+        if getattr(_skin_engine, "_nix_flakes_prompt_toolkit_patch", False):
             return
 
         _orig_get_overrides = _skin_engine.get_prompt_toolkit_style_overrides
@@ -109,6 +109,7 @@ let
             overrides = dict(_orig_get_overrides())
             try:
                 skin = _skin_engine.get_active_skin()
+                prompt_fg = _skin_hex(skin, "prompt", _skin_hex(skin, "banner_text", "#FFF8DC"))
                 menu_fg = _skin_hex(skin, "completion_fg", _skin_hex(skin, "banner_text", "#FFF8DC"))
                 menu_bg = _skin_hex(skin, "completion_bg", "#f5f5f5")
                 current_fg = _skin_hex(skin, "completion_current_fg", menu_fg)
@@ -118,6 +119,11 @@ let
                 current_meta_fg = _skin_hex(skin, "completion_current_meta_fg", _skin_hex(skin, "ui_accent", current_fg))
                 current_meta_bg = _skin_hex(skin, "completion_current_meta_bg", current_bg)
                 overrides.update({
+                    "input-area": prompt_fg,
+                    "prompt": prompt_fg,
+                    "prompt-working": prompt_fg,
+                    "text-area": prompt_fg,
+                    "text-area.prompt": prompt_fg,
                     "completion-menu": f"bg:{menu_bg} {menu_fg}",
                     "completion-menu.completion": f"bg:{menu_bg} {menu_fg}",
                     "completion-menu.completion.current": f"bg:{current_bg} {current_fg}",
@@ -129,11 +135,11 @@ let
             return overrides
 
         _skin_engine.get_prompt_toolkit_style_overrides = _patched_get_prompt_toolkit_style_overrides
-        _skin_engine._nix_flakes_completion_patch = True
+        _skin_engine._nix_flakes_prompt_toolkit_patch = True
 
 
     _patch_inline_diff_colors()
-    _patch_completion_menu_colors()
+    _patch_prompt_toolkit_colors()
   '';
 in
 basePackage.overrideAttrs (old: {
@@ -146,7 +152,10 @@ basePackage.overrideAttrs (old: {
   };
   postFixup = (old.postFixup or "") + ''
     for bin in $out/bin/hermes $out/bin/hermes-agent $out/bin/hermes-acp; do
-      wrapProgram "$bin" --prefix PYTHONPATH : ${pkgs.lib.escapeShellArg hermesSitecustomize}
+      wrapProgram "$bin" \
+        --unset NO_COLOR \
+        --set-default PROMPT_TOOLKIT_COLOR_DEPTH DEPTH_24_BIT \
+        --prefix PYTHONPATH : ${pkgs.lib.escapeShellArg hermesSitecustomize}
     done
   '';
 })

@@ -11,17 +11,17 @@ Hermes 관련 설정은 이 디렉터리 아래로 모읍니다.
 
 ### `default.nix`
 - Home Manager 환경에서 `hermes` CLI와 `~/.hermes` bootstrap 제공
+- `package.nix`의 patched Hermes package를 사용해 one-half-light skin 보정 적용
 - bundled skills sync 뒤 local `~/.hermes/skills` tree를 writable로 정규화하는 patched Hermes package 사용
+- `NO_COLOR`가 잡힌 셸에서도 prompt_toolkit 색이 꺼지지 않도록 wrapper에서 보정
 - NixOS에서 공식 `services.hermes-agent.addToSystemPackages = true`가 켜진 경우에만 `HERMES_HOME`을 system state dir로 맞춤
 
 ### `system.nix`
-- 현재 `pylv-onyx`에서는 사용하지 않음
-- `pylv-onyx`에서 공식 upstream `services.hermes-agent` NixOS 모듈 사용
-- `addToSystemPackages = true`로 CLI와 service가 `/var/lib/hermes/.hermes` 상태를 공유
-- upstream cron 권한 모델 때문에 service는 `pylv-onyx`의 주 사용자로 실행해 CLI 접근을 유지
+- 현재 `pylv-onyx`의 Hermes CLI runtime path와는 분리된, system-managed gateway 템플릿
+- upstream `services.hermes-agent` 기반으로 `/var/lib/hermes/.hermes` 상태를 관리할 때 사용
 - `~/.codex/auth.json`을 Hermes auth seed로 사용
 - `one-half-light` custom skin을 `/var/lib/hermes/.hermes/skins/`에 설치하고 기본 skin으로 고정
-- inline diff add/remove colors와 `@` context picker completion menu colors를 light palette로 오버라이드
+- inline diff add/remove colors, input prompt, `@` context picker completion menu colors를 light palette로 오버라이드
 - Hermes bundled skill sync 뒤 local skill tree를 writable로 정규화하는 patched package 사용
 - `hermes-discord-bot-token.age`를 agenix로 복호화
 - Discord bot token은 서비스 시작 전 writable `~/.hermes/.env`로 동기화
