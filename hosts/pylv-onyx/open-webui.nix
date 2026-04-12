@@ -6,13 +6,17 @@
   ...
 }:
 let
-  openWebUiPort = 8080;
+  openWebUiFrontendPort = 8080;
+  openWebUiBackendPort = 8081;
   tailscaleServePort = 8444;
   tailscaleFqdn = "${config.networking.hostName}.tailbbb9bf.ts.net";
   lanInterface = "wlo1";
   openclawProxyPort = 18790;
   openclawProxyApiKey = "lan-admin-proxy";
   openclawDefaultModel = "openclaw/default";
+  openWebUiTrustedEmail = "gytk.kim@gmail.com";
+  openWebUiTrustedEmailHeader = "x-open-webui-email";
+  openWebUiTrustedNameHeader = "x-open-webui-name";
   openWebUiDataDir = "${config.services.open-webui.stateDir}/data";
   openWebUiSeedConfig = builtins.toJSON {
     version = 0;
@@ -35,23 +39,25 @@ in
 
   services.open-webui = {
     enable = true;
-    host = "0.0.0.0";
-    port = openWebUiPort;
+    host = "127.0.0.1";
+    port = openWebUiBackendPort;
     environment = {
       # Seed the persistent config on every start so Open WebUI stays declarative.
       ENABLE_PERSISTENT_CONFIG = "true";
 
       # Seed the admin account so the first authenticated visitor does not
       # become admin by accident.
-      WEBUI_ADMIN_EMAIL = "gytk.kim@gmail.com";
+      WEBUI_ADMIN_EMAIL = openWebUiTrustedEmail;
       WEBUI_ADMIN_NAME = username;
       ENABLE_SIGNUP = "false";
       DEFAULT_USER_ROLE = "pending";
-      ENABLE_LOGIN_FORM = "true";
+      ENABLE_LOGIN_FORM = "false";
       ENABLE_PASSWORD_AUTH = "true";
       ENABLE_EVALUATION_ARENA_MODELS = "false";
       ENABLE_OLLAMA_API = "false";
       ENABLE_OPENAI_API = "true";
+      WEBUI_AUTH_TRUSTED_EMAIL_HEADER = openWebUiTrustedEmailHeader;
+      WEBUI_AUTH_TRUSTED_NAME_HEADER = openWebUiTrustedNameHeader;
 
       # Route all OpenAI-compatible traffic through the local trusted proxy.
       OPENAI_API_BASE_URL = "http://127.0.0.1:${toString openclawProxyPort}/v1";
@@ -65,9 +71,9 @@ in
       # The app is reachable through Tailscale, the LAN, or a local SSH tunnel.
       CORS_ALLOW_ORIGIN = lib.concatStringsSep ";" [
         "https://${tailscaleFqdn}:${toString tailscaleServePort}"
-        "http://${config.networking.hostName}:${toString openWebUiPort}"
-        "http://${config.networking.hostName}.local:${toString openWebUiPort}"
-        "http://192.168.0.10:${toString openWebUiPort}"
+        "http://${config.networking.hostName}:${toString openWebUiFrontendPort}"
+        "http://${config.networking.hostName}.local:${toString openWebUiFrontendPort}"
+        "http://192.168.0.10:${toString openWebUiFrontendPort}"
         "http://localhost:3000"
         "http://127.0.0.1:3000"
       ];
@@ -80,8 +86,33 @@ in
     environmentFile = config.age.secrets.open-webui-env.path;
   };
 
+  services.nginx.virtualHosts."open-webui-lan" = {
+    serverName = "_";
+    listen = [
+      {
+        addr = "0.0.0.0";
+        port = openWebUiFrontendPort;
+      }
+    ];
+    locations."/ws/socket.io/" = {
+      proxyPass = "http://127.0.0.1:${toString openWebUiBackendPort}";
+      proxyWebsockets = true;
+      extraConfig = ''
+        proxy_set_header ${openWebUiTrustedEmailHeader} ${openWebUiTrustedEmail};
+        proxy_set_header ${openWebUiTrustedNameHeader} ${username};
+      '';
+    };
+    locations."/" = {
+      proxyPass = "http://127.0.0.1:${toString openWebUiBackendPort}";
+      extraConfig = ''
+        proxy_set_header ${openWebUiTrustedEmailHeader} ${openWebUiTrustedEmail};
+        proxy_set_header ${openWebUiTrustedNameHeader} ${username};
+      '';
+    };
+  };
+
   networking.firewall.interfaces = {
-    "${lanInterface}".allowedTCPPorts = [ openWebUiPort ];
+    "${lanInterface}".allowedTCPPorts = [ openWebUiFrontendPort ];
   };
 
   systemd.services.open-webui.preStart = lib.mkForce ''
@@ -101,15 +132,18 @@ in
     after = [
       "network-online.target"
       "tailscaled.service"
+      "nginx.service"
       "open-webui.service"
     ];
     wants = [
       "network-online.target"
       "tailscaled.service"
+      "nginx.service"
       "open-webui.service"
     ];
     partOf = [
       "tailscaled.service"
+      "nginx.service"
       "open-webui.service"
     ];
     wantedBy = [ "multi-user.target" ];
@@ -136,9 +170,9 @@ in
       }
 
       wait_for "tailscaled" tailscale status --json >/dev/null 2>&1
-      wait_for "Open WebUI" curl --fail --silent --show-error "http://127.0.0.1:${toString openWebUiPort}/" >/dev/null
+      wait_for "Open WebUI frontend" curl --fail --silent --show-error "http://127.0.0.1:${toString openWebUiFrontendPort}/" >/dev/null
 
-      tailscale serve --yes --bg --https=${toString tailscaleServePort} "127.0.0.1:${toString openWebUiPort}"
+      tailscale serve --yes --bg --https=${toString tailscaleServePort} "127.0.0.1:${toString openWebUiFrontendPort}"
       tailscale serve status --json >/dev/null
     '';
     serviceConfig = {

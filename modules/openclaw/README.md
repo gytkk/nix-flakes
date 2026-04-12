@@ -9,7 +9,9 @@
 - OpenClaw Gateway 원본 서비스는 `127.0.0.1:18789`와 `[::1]:18789`에만 바인딩됩니다.
 - OpenClaw Control UI 및 OpenAI 호환 API는 `nginx` 프록시를 통해 `0.0.0.0:18790`으로 노출됩니다.
 - 이 `18790` 포트는 NixOS 방화벽에서 `wlo1` 인터페이스에만 열려 있습니다.
-- Open WebUI는 `0.0.0.0:8080`에서 수신하고, Tailscale Serve가 `https://pylv-onyx.tailbbb9bf.ts.net:8444`를 `127.0.0.1:8080`으로 프록시합니다.
+- Open WebUI 원본 서비스는 `127.0.0.1:8081`에만 바인딩됩니다.
+- `nginx` 프론트 프록시가 `0.0.0.0:8080`에서 Open WebUI를 노출하고, 고정 trusted-auth 헤더를 주입합니다.
+- Tailscale Serve는 `https://pylv-onyx.tailbbb9bf.ts.net:8444`를 `127.0.0.1:8080`으로 프록시합니다.
 - OpenClaw는 `gateway.tailscale.mode = "off"`라서 Tailscale Serve로 직접 노출되지 않습니다.
 
 ## 접근 방법
@@ -19,6 +21,7 @@
 - Tailscale에서 바로 접속: `https://pylv-onyx.tailbbb9bf.ts.net:8444/`
 - LAN에서 접속: `http://pylv-onyx:8080`
 - LAN 이름 해석이 안 되면: `http://192.168.0.10:8080`
+- 위 세 경로는 모두 `gytk.kim@gmail.com` 사용자로 자동 로그인됩니다.
 
 ### OpenClaw Control UI / API
 
@@ -64,7 +67,9 @@ http://localhost:3000
 
 ## 인증 모델
 
-- Open WebUI는 이메일/비밀번호 로그인을 사용합니다.
+- Open WebUI의 노출 경로(`8080`, `8444`, `localhost:3000`)는 `nginx` trusted-header 프록시 뒤에 있습니다.
+- 그래서 브라우저에서는 이메일/비밀번호를 묻지 않고, 항상 `gytk.kim@gmail.com` 사용자로 자동 로그인됩니다.
+- 반대로 raw 백엔드 `127.0.0.1:8081`은 trusted header 없이는 로그인 요청을 거부합니다.
 - OpenClaw `18790` 경로는 `trusted-proxy` 헤더를 `nginx`가 주입하므로, 해당 포트에 도달한 클라이언트는 OpenClaw 관리자처럼 취급됩니다.
 - 그래서 `18790`은 LAN 전용으로 제한되어 있습니다.
 
@@ -81,14 +86,21 @@ systemctl is-active open-webui.service tailscale-serve-open-webui.service opencl
 
 tailscale serve status --json
 
-ss -ltn | rg ':8080|:8444|:18789|:18790'
+ss -ltn | rg ':8080|:8081|:8444|:18789|:18790'
 
 curl --silent --show-error --output /dev/null --write-out '%{http_code} %{url_effective}\n' \
   http://127.0.0.1:8080/
+
+curl --silent --show-error --output /dev/null --write-out '%{http_code} %{url_effective}\n' \
+  http://127.0.0.1:8081/
 
 curl --silent --show-error --output /dev/null --write-out '%{http_code} %{url_effective}\n' \
   http://127.0.0.1:18790/health
 
 curl --silent --show-error --output /dev/null --write-out '%{http_code} %{url_effective}\n' \
   https://pylv-onyx.tailbbb9bf.ts.net:8444/
+
+curl -sS -H 'Content-Type: application/json' \
+  -d '{"email":"ignored@example.com","password":"ignored"}' \
+  http://127.0.0.1:8080/api/v1/auths/signin
 ```

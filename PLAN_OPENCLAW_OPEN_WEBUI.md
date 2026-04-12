@@ -10,11 +10,11 @@ Last verified on `2026-04-12` from a shell on `pylv-onyx`.
 - `nginx.service` is active.
 - `tailscale-serve-open-webui.service` is active.
 - `openclaw-gateway.service` is active.
-- Open WebUI responds on both `http://127.0.0.1:8080/` and the current LAN address `http://192.168.0.10:8080/`.
+- Open WebUI frontend responds on `http://127.0.0.1:8080/`, the current LAN address `http://192.168.0.10:8080/`, and the Tailscale URL `https://pylv-onyx.tailbbb9bf.ts.net:8444/`.
+- The raw Open WebUI backend responds on `http://127.0.0.1:8081/`.
 - OpenClaw Control UI responds on the current LAN proxy address `http://192.168.0.10:18790/`.
-- Tailscale Serve exposes Open WebUI on `https://pylv-onyx.tailbbb9bf.ts.net:8444/`.
-- Password login works through both the Tailscale URL and an SSH tunnel to `http://localhost:3000`.
-- Password login also works directly through the LAN URL.
+- A real `POST /api/v1/auths/signin` request sent through `http://127.0.0.1:8080` returned the fixed admin user `gytk.kim@gmail.com` even with ignored credentials in the body.
+- A real `POST /api/v1/auths/signin` request sent directly to `http://127.0.0.1:8081` failed with `Your provider has not provided a trusted header`.
 - Open WebUI exposes `openclaw/default` from its own `/api/models` endpoint.
 - A real `POST /openai/chat/completions` request sent to Open WebUI returned a successful response from OpenClaw.
 - A real unauthenticated `POST /v1/chat/completions` request sent through the LAN OpenClaw proxy returned a successful response from OpenClaw.
@@ -26,9 +26,11 @@ Last verified on `2026-04-12` from a shell on `pylv-onyx`.
 
 ### Open WebUI
 
-- [`hosts/pylv-onyx/open-webui.nix`](./hosts/pylv-onyx/open-webui.nix) uses standard email/password login only.
-- Trusted-header login was removed because Open WebUI `0.8.10` blocks localhost sign-in when `WEBUI_AUTH_TRUSTED_*` headers are required.
-- Open WebUI now listens on `0.0.0.0:8080`, but the NixOS firewall only allows that port on interface `wlo1`.
+- [`hosts/pylv-onyx/open-webui.nix`](./hosts/pylv-onyx/open-webui.nix) keeps the raw Open WebUI service on loopback `127.0.0.1:8081`.
+- An `nginx` frontend listens on `0.0.0.0:8080`, but the NixOS firewall only allows that port on interface `wlo1`.
+- That frontend injects `x-open-webui-email: gytk.kim@gmail.com` and `x-open-webui-name: gytkk`, so LAN, Tailscale, and SSH-tunneled clients are auto-signed in as the same Open WebUI admin.
+- `ENABLE_LOGIN_FORM = false` hides the browser login form on the exposed path, while the raw backend still requires the trusted header.
+- Tailscale Serve now proxies to the `nginx` frontend on `127.0.0.1:8080`, so trusted-header auth also applies on the Tailscale URL.
 - The OpenAI-compatible backend points at `http://127.0.0.1:18790/v1`, which is the local trusted-proxy path into OpenClaw.
 - `ENABLE_EVALUATION_ARENA_MODELS` is disabled so the UI only shows the real OpenClaw model.
 
@@ -128,6 +130,12 @@ Then open:
 http://localhost:3000
 ```
 
+Authentication note:
+
+- `http://localhost:3000` goes through the same trusted-header `nginx` frontend as LAN and Tailscale.
+- The exposed path therefore auto-signs in as `gytk.kim@gmail.com`.
+- Do not tunnel directly to `127.0.0.1:8081` unless you intentionally want the raw backend that requires trusted headers.
+
 ## Useful verification commands
 
 ```bash
@@ -135,13 +143,15 @@ systemctl is-active open-webui.service tailscale-serve-open-webui.service opencl
 
 ls -l ~/.openclaw/openclaw.json /etc/openclaw/openclaw.seed.json /etc/openclaw/openclaw.guardrails.json
 
-ss -ltn | rg ':8080|:8444|:18789|:18790'
+ss -ltn | rg ':8080|:8081|:8444|:18789|:18790'
 
-curl -sS -H 'Authorization: Bearer <open-webui-jwt>' \
-  http://127.0.0.1:8080/openai/config
+curl -sS -H 'Content-Type: application/json' \
+  -d '{"email":"ignored@example.com","password":"ignored"}' \
+  http://127.0.0.1:8080/api/v1/auths/signin
 
-curl -sS -H 'Authorization: Bearer <open-webui-jwt>' \
-  http://127.0.0.1:8080/api/models
+curl -sS -H 'Content-Type: application/json' \
+  -d '{"email":"ignored@example.com","password":"ignored"}' \
+  http://127.0.0.1:8081/api/v1/auths/signin
 
 curl -sS -H 'Authorization: Bearer <open-webui-jwt>' \
   -H 'Content-Type: application/json' \
