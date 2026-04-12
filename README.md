@@ -143,6 +143,8 @@ nix build .#nixosConfigurations.pylv-sepia.config.system.build.toplevel
 - Any LAN client that reaches `18790` is intentionally treated as an admin/operator through OpenClaw `trusted-proxy` auth
 - No token or email/password is required on the LAN URL
 - `openclaw dashboard --no-open` on the host now prints the bare local URL `http://127.0.0.1:18789/`; for a remote LAN browser, just open `http://pylv-onyx:18790` or `http://192.168.0.10:18790`
+- OpenClaw bootstrap and guardrails live in [`modules/openclaw/default.nix`](./modules/openclaw/default.nix)
+- Nix now seeds `/etc/openclaw/openclaw.seed.json` and `/etc/openclaw/openclaw.guardrails.json`, while the mutable runtime config lives at `~/.openclaw/openclaw.json`
 
 ## Helpers
 

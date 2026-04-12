@@ -20,7 +20,7 @@ Last verified on `2026-04-12` from a shell on `pylv-onyx`.
 - A real unauthenticated `POST /v1/chat/completions` request sent through the LAN OpenClaw proxy returned a successful response from OpenClaw.
 - A real unauthenticated `openclaw status` call to `ws://127.0.0.1:18790` succeeded, while the raw gateway at `ws://127.0.0.1:18789` still rejected the same call with `unauthorized`.
 - A WebSocket upgrade with `Origin: http://192.168.0.10:18790` succeeded against the LAN OpenClaw proxy.
-- `openclaw dashboard --no-open` now prints the bare local Control UI URL `http://127.0.0.1:18789/` instead of a `#token=...` URL because `~/.openclaw/openclaw.json` is managed from the system config.
+- `openclaw dashboard --no-open` now prints the bare local Control UI URL `http://127.0.0.1:18789/` instead of a `#token=...` URL because LAN access uses trusted-proxy auth and the runtime config lives at `~/.openclaw/openclaw.json`.
 
 ## Current design
 
@@ -59,14 +59,16 @@ That keeps the runtime declarative even though Open WebUI stores the value in it
 
 ### OpenClaw
 
-- [`hosts/pylv-onyx/openclaw.nix`](./hosts/pylv-onyx/openclaw.nix) enables `gateway.http.endpoints.chatCompletions`.
+- [`modules/openclaw/default.nix`](./modules/openclaw/default.nix) enables `gateway.http.endpoints.chatCompletions`.
 - The gateway itself stays on loopback `127.0.0.1:18789`.
 - `gateway.auth.mode = "trusted-proxy"` is enabled, so the gateway only trusts requests that come from loopback proxy IPs and include the injected proxy headers.
 - A local-network `nginx` reverse proxy listens on `0.0.0.0:18790`, but the firewall only allows that port on interface `wlo1`.
 - That proxy injects `x-openclaw-user: lan-admin` and `x-openclaw-proxy: 1`, which intentionally makes any LAN client on `18790` an OpenClaw admin/operator.
 - `gateway.controlUi.dangerouslyAllowHostHeaderOriginFallback = true` is enabled so the Control UI WebSocket handshake works whether LAN clients open the proxy via hostname or IP.
 - OpenClaw Tailscale Serve is disabled because OpenClaw `trusted-proxy` auth is incompatible with `gateway.tailscale.mode = "serve"`.
-- [`hosts/pylv-onyx/configuration.nix`](./hosts/pylv-onyx/configuration.nix) also makes the user-side CLI read the same system config by exporting `OPENCLAW_CONFIG_PATH` and managing `~/.openclaw/openclaw.json` from Home Manager.
+- Nix seeds `/etc/openclaw/openclaw.seed.json` and `/etc/openclaw/openclaw.guardrails.json`, but the service and CLI both read the mutable runtime file `~/.openclaw/openclaw.json`.
+- [`hosts/pylv-onyx/configuration.nix`](./hosts/pylv-onyx/configuration.nix) exports `OPENCLAW_CONFIG_PATH` and `CLAWDBOT_CONFIG_PATH` to that runtime file path for login shells.
+- `openclaw-gateway.service` bootstraps `~/.openclaw/openclaw.json` from the seed on first start, migrates the old symlink if present, and deep-merges guardrails back into the runtime file on every restart.
 
 ## Access
 
@@ -130,6 +132,8 @@ http://localhost:3000
 
 ```bash
 systemctl is-active open-webui.service tailscale-serve-open-webui.service openclaw-gateway.service
+
+ls -l ~/.openclaw/openclaw.json /etc/openclaw/openclaw.seed.json /etc/openclaw/openclaw.guardrails.json
 
 ss -ltn | rg ':8080|:8444|:18789|:18790'
 
