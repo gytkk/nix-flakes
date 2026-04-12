@@ -5,16 +5,17 @@ Hermes 관련 설정은 이 디렉터리 아래로 모읍니다.
 ## 파일 구성
 
 - `default.nix` — Home Manager용 최소 CLI 설정
-- `system.nix` — NixOS용 최소 gateway/service 설정 (`pylv-onyx`)
+- `system.nix` — NixOS용 managed gateway/service 설정 템플릿
 
 ## 현재 역할
 
 ### `default.nix`
-- standalone Home Manager 환경에서만 `hermes` CLI와 `~/.hermes` bootstrap 제공
+- Home Manager 환경에서 `hermes` CLI와 `~/.hermes` bootstrap 제공
 - bundled skills sync 뒤 local `~/.hermes/skills` tree를 writable로 정규화하는 patched Hermes package 사용
-- NixOS에서 공식 `services.hermes-agent.addToSystemPackages = true`가 켜진 경우에는 충돌 방지를 위해 비활성화
+- NixOS에서 공식 `services.hermes-agent.addToSystemPackages = true`가 켜진 경우에만 `HERMES_HOME`을 system state dir로 맞춤
 
 ### `system.nix`
+- 현재 `pylv-onyx`에서는 사용하지 않음
 - `pylv-onyx`에서 공식 upstream `services.hermes-agent` NixOS 모듈 사용
 - `addToSystemPackages = true`로 CLI와 service가 `/var/lib/hermes/.hermes` 상태를 공유
 - upstream cron 권한 모델 때문에 service는 `pylv-onyx`의 주 사용자로 실행해 CLI 접근을 유지
