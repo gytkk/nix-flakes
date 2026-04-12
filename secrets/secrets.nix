@@ -48,6 +48,13 @@ in
   ]
   ++ allHosts;
 
+  # Hermes WebUI runtime environment file
+  "hermes-webui-env.age".publicKeys = [
+    gytkk
+    gytkkCurrent
+  ]
+  ++ allHosts;
+
   # Google Workspace CLI credentials for obsidian-maintenance calendar sync
   "gws-credentials.age".publicKeys = allUsers ++ allHosts;
 
