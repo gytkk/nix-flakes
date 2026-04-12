@@ -113,6 +113,7 @@ in
     locations."/" = {
       proxyPass = "http://127.0.0.1:${toString openWebUiBackendPort}";
       extraConfig = ''
+        proxy_read_timeout 10m;
         proxy_set_header ${openWebUiTrustedEmailHeader} ${openWebUiTrustedEmail};
         proxy_set_header ${openWebUiTrustedNameHeader} ${username};
       '';
