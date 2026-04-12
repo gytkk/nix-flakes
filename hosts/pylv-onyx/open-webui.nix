@@ -9,6 +9,7 @@ let
   openWebUiPort = 8080;
   tailscaleServePort = 8444;
   tailscaleFqdn = "${config.networking.hostName}.tailbbb9bf.ts.net";
+  lanInterface = "wlo1";
   openclawGatewayPort = 18789;
   openclawGatewayToken = "local-gateway-token";
   openclawDefaultModel = "openclaw/default";
@@ -34,7 +35,7 @@ in
 
   services.open-webui = {
     enable = true;
-    host = "127.0.0.1";
+    host = "0.0.0.0";
     port = openWebUiPort;
     environment = {
       # Seed the persistent config on every start so Open WebUI stays declarative.
@@ -61,7 +62,7 @@ in
       TASK_MODEL_EXTERNAL = openclawDefaultModel;
       FORWARDED_ALLOW_IPS = "127.0.0.1,::1";
 
-      # The app is reachable only through the Tailscale URL or a local SSH tunnel.
+      # The app is reachable through Tailscale, the LAN, or a local SSH tunnel.
       CORS_ALLOW_ORIGIN = lib.concatStringsSep ";" [
         "https://${tailscaleFqdn}:${toString tailscaleServePort}"
         "http://localhost:3000"
@@ -74,6 +75,10 @@ in
       PERMISSIONS_POLICY = "camera=(),microphone=(),geolocation=()";
     };
     environmentFile = config.age.secrets.open-webui-env.path;
+  };
+
+  networking.firewall.interfaces = {
+    "${lanInterface}".allowedTCPPorts = [ openWebUiPort ];
   };
 
   systemd.services.open-webui.preStart = lib.mkForce ''
