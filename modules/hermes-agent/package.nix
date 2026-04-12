@@ -38,6 +38,53 @@ let
             return result
 
         _skills_sync.sync_skills = _patched_sync_skills
+
+
+    def _hex_triplet(value: str):
+        if isinstance(value, str) and len(value) == 7 and value.startswith("#"):
+            return tuple(int(value[i:i + 2], 16) for i in (1, 3, 5))
+        return None
+
+
+    def _patch_inline_diff_colors() -> None:
+        try:
+            import agent.display as _display
+            from hermes_cli.skin_engine import get_active_skin
+        except Exception:
+            return
+
+        if getattr(_display, "_nix_flakes_diff_patch", False):
+            return
+
+        _orig_diff_ansi = _display._diff_ansi
+
+        def _patched_diff_ansi():
+            colors = dict(_orig_diff_ansi())
+            try:
+                skin = get_active_skin()
+                minus_fg = _hex_triplet(skin.get_color("diff_minus_fg", ""))
+                minus_bg = _hex_triplet(skin.get_color("diff_minus_bg", ""))
+                plus_fg = _hex_triplet(skin.get_color("diff_plus_fg", ""))
+                plus_bg = _hex_triplet(skin.get_color("diff_plus_bg", ""))
+
+                if minus_fg and minus_bg:
+                    fr, fg, fb = minus_fg
+                    br, bg, bb = minus_bg
+                    colors["minus"] = f"\033[38;2;{fr};{fg};{fb};48;2;{br};{bg};{bb}m"
+                if plus_fg and plus_bg:
+                    fr, fg, fb = plus_fg
+                    br, bg, bb = plus_bg
+                    colors["plus"] = f"\033[38;2;{fr};{fg};{fb};48;2;{br};{bg};{bb}m"
+            except Exception:
+                pass
+            return colors
+
+        _display._diff_ansi = _patched_diff_ansi
+        _display._nix_flakes_diff_patch = True
+        _display.reset_diff_colors()
+
+
+    _patch_inline_diff_colors()
   '';
 in
 basePackage.overrideAttrs (old: {
