@@ -38,9 +38,7 @@
     "Alt+Space".action.spawn = "walker";
   };
 
-  home.shellAliases = {
-    hermes-service = "env HERMES_HOME=/home/gytkk/.hermes-service/.hermes hermes";
-  };
+  modules.hermes-agent.useServiceHome = true;
 
   programs.zen-browser.enable = true;
 }

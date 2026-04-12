@@ -9,7 +9,9 @@
 let
   cfg = config.modules.hermes-agent;
   hermesPackage = inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default;
-  hermesHome = "${config.home.homeDirectory}/.hermes";
+  defaultHermesHome = "${config.home.homeDirectory}/.hermes";
+  serviceHermesHome = "${config.home.homeDirectory}/.hermes-service/.hermes";
+  hermesHome = if cfg.useServiceHome then serviceHermesHome else defaultHermesHome;
   exampleConfig = "${inputs.hermes-agent}/cli-config.yaml.example";
 in
 {
@@ -18,6 +20,12 @@ in
       type = lib.types.bool;
       default = true;
       description = "Enable Hermes Agent CLI module";
+    };
+
+    useServiceHome = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Use ~/.hermes-service/.hermes as the default HERMES_HOME for CLI sessions.";
     };
   };
 
@@ -36,6 +44,8 @@ in
 
     home.activation.hermesBootstrap = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       HERMES_HOME=${lib.escapeShellArg hermesHome}
+      DEFAULT_HERMES_HOME=${lib.escapeShellArg defaultHermesHome}
+      SERVICE_HERMES_HOME=${lib.escapeShellArg serviceHermesHome}
 
       ${pkgs.coreutils}/bin/mkdir -p \
         "$HERMES_HOME" \
@@ -54,6 +64,14 @@ in
       if [ ! -e "$HERMES_HOME/config.yaml" ]; then
         ${pkgs.coreutils}/bin/install -m 600 ${lib.escapeShellArg exampleConfig} "$HERMES_HOME/config.yaml"
       fi
+
+      ${lib.optionalString cfg.useServiceHome ''
+        if [ -d "$DEFAULT_HERMES_HOME" ] && [ ! -L "$DEFAULT_HERMES_HOME" ] && [ "$DEFAULT_HERMES_HOME" != "$SERVICE_HERMES_HOME" ]; then
+          backup="$HOME/.hermes.backup.$(${pkgs.coreutils}/bin/date +%Y%m%d-%H%M%S)"
+          ${pkgs.coreutils}/bin/mv "$DEFAULT_HERMES_HOME" "$backup"
+        fi
+        ${pkgs.coreutils}/bin/ln -sfn "$SERVICE_HERMES_HOME" "$DEFAULT_HERMES_HOME"
+      ''}
     '';
   };
 }

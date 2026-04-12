@@ -12,13 +12,16 @@ Hermes 관련 설정은 이 디렉터리 아래로 모읍니다.
 
 ### `default.nix`
 - `hermes` CLI 설치
-- `HERMES_HOME=~/.hermes` 설정
-- 최초 1회 `~/.hermes/config.yaml` seed
+- 기본 `HERMES_HOME` 설정
+- 필요 시 `modules.hermes-agent.useServiceHome = true`로 `~/.hermes-service/.hermes`를 CLI 기본 홈으로 사용
+- service home 사용 시 기존 `~/.hermes`는 백업 후 symlink로 정리
+- 최초 1회 `config.yaml` seed
 - 기본 디렉터리 생성 (`cron/`, `logs/`, `memories/`, `profiles/`, `sessions/`, `skills/`)
 - 편의 alias 제공 (`hermes-setup`, `hermes-doctor`, `hermes-migrate-openclaw`)
 
 ### `system.nix`
 - `pylv-onyx`에서 Hermes gateway/systemd service 활성화
+- onyx에서는 CLI도 같은 service home을 기본 사용하도록 구성 가능
 - `hermes-discord-bot-token.age`를 agenix로 복호화
 - service state 디렉터리(`~/.hermes-service`) 관리
 - Discord bot token을 service 시작 직전에 `.env`에 주입
