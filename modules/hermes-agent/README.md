@@ -20,6 +20,7 @@ Hermes 관련 설정은 이 디렉터리 아래로 모읍니다.
 - upstream cron 권한 모델 때문에 service는 `pylv-onyx`의 주 사용자로 실행해 CLI 접근을 유지
 - `~/.codex/auth.json`을 Hermes auth seed로 사용
 - `one-half-light` custom skin을 `/var/lib/hermes/.hermes/skins/`에 설치하고 기본 skin으로 고정
+- inline diff add/remove colors와 `@` context picker completion menu colors를 light palette로 오버라이드
 - Hermes bundled skill sync 뒤 local skill tree를 writable로 정규화하는 patched package 사용
 - `hermes-discord-bot-token.age`를 agenix로 복호화
 - Discord bot token은 서비스 시작 전 writable `~/.hermes/.env`로 동기화

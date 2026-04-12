@@ -38,6 +38,99 @@ let
             return result
 
         _skills_sync.sync_skills = _patched_sync_skills
+
+
+    def _hex_triplet(value: str):
+        if isinstance(value, str) and len(value) == 7 and value.startswith("#"):
+            return tuple(int(value[i:i + 2], 16) for i in (1, 3, 5))
+        return None
+
+
+    def _skin_hex(skin, key: str, fallback: str) -> str:
+        value = skin.get_color(key, fallback)
+        if isinstance(value, str) and len(value) == 7 and value.startswith("#"):
+            return value
+        return fallback
+
+
+    def _patch_inline_diff_colors() -> None:
+        try:
+            import agent.display as _display
+            from hermes_cli.skin_engine import get_active_skin
+        except Exception:
+            return
+
+        if getattr(_display, "_nix_flakes_diff_patch", False):
+            return
+
+        _orig_diff_ansi = _display._diff_ansi
+
+        def _patched_diff_ansi():
+            colors = dict(_orig_diff_ansi())
+            try:
+                skin = get_active_skin()
+                minus_fg = _hex_triplet(skin.get_color("diff_minus_fg", ""))
+                minus_bg = _hex_triplet(skin.get_color("diff_minus_bg", ""))
+                plus_fg = _hex_triplet(skin.get_color("diff_plus_fg", ""))
+                plus_bg = _hex_triplet(skin.get_color("diff_plus_bg", ""))
+
+                if minus_fg and minus_bg:
+                    fr, fg, fb = minus_fg
+                    br, bg, bb = minus_bg
+                    colors["minus"] = f"\033[38;2;{fr};{fg};{fb};48;2;{br};{bg};{bb}m"
+                if plus_fg and plus_bg:
+                    fr, fg, fb = plus_fg
+                    br, bg, bb = plus_bg
+                    colors["plus"] = f"\033[38;2;{fr};{fg};{fb};48;2;{br};{bg};{bb}m"
+            except Exception:
+                pass
+            return colors
+
+        _display._diff_ansi = _patched_diff_ansi
+        _display._nix_flakes_diff_patch = True
+        _display.reset_diff_colors()
+
+
+    def _patch_completion_menu_colors() -> None:
+        try:
+            import hermes_cli.skin_engine as _skin_engine
+        except Exception:
+            return
+
+        if getattr(_skin_engine, "_nix_flakes_completion_patch", False):
+            return
+
+        _orig_get_overrides = _skin_engine.get_prompt_toolkit_style_overrides
+
+        def _patched_get_prompt_toolkit_style_overrides():
+            overrides = dict(_orig_get_overrides())
+            try:
+                skin = _skin_engine.get_active_skin()
+                menu_fg = _skin_hex(skin, "completion_fg", _skin_hex(skin, "banner_text", "#FFF8DC"))
+                menu_bg = _skin_hex(skin, "completion_bg", "#f5f5f5")
+                current_fg = _skin_hex(skin, "completion_current_fg", menu_fg)
+                current_bg = _skin_hex(skin, "completion_current_bg", "#bfceff")
+                meta_fg = _skin_hex(skin, "completion_meta_fg", _skin_hex(skin, "banner_dim", "#555555"))
+                meta_bg = _skin_hex(skin, "completion_meta_bg", menu_bg)
+                current_meta_fg = _skin_hex(skin, "completion_current_meta_fg", _skin_hex(skin, "ui_accent", current_fg))
+                current_meta_bg = _skin_hex(skin, "completion_current_meta_bg", current_bg)
+                overrides.update({
+                    "completion-menu": f"bg:{menu_bg} {menu_fg}",
+                    "completion-menu.completion": f"bg:{menu_bg} {menu_fg}",
+                    "completion-menu.completion.current": f"bg:{current_bg} {current_fg}",
+                    "completion-menu.meta.completion": f"bg:{meta_bg} {meta_fg}",
+                    "completion-menu.meta.completion.current": f"bg:{current_meta_bg} {current_meta_fg}",
+                })
+            except Exception:
+                pass
+            return overrides
+
+        _skin_engine.get_prompt_toolkit_style_overrides = _patched_get_prompt_toolkit_style_overrides
+        _skin_engine._nix_flakes_completion_patch = True
+
+
+    _patch_inline_diff_colors()
+    _patch_completion_menu_colors()
   '';
 in
 basePackage.overrideAttrs (old: {
