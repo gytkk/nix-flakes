@@ -155,10 +155,11 @@ nix build .#nixosConfigurations.pylv-sepia.config.system.build.toplevel
 - `pylv-onyx` now follows the upstream NixOS module flow from the Hermes docs:
   - `services.hermes-agent.enable = true`
   - `services.hermes-agent.addToSystemPackages = true`
-  - declarative `settings` and `environment`
-  - `environmentFiles` for secret-backed gateway env
+  - declarative `settings`
+  - token sync into the writable runtime `.env` under `/var/lib/hermes/.hermes`
 - On `pylv-onyx`, the upstream system service runs as the primary host user so the CLI can read the same state directory that the gateway uses.
 - The system-managed Hermes home is `/var/lib/hermes/.hermes`, which is also what the CLI uses on hosts where `addToSystemPackages` is enabled.
+- Discord mention/channel/user gating now lives in that writable runtime `.env`, so Hermes can adjust it without editing the Nix module.
 
 ## Helpers
 

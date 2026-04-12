@@ -19,9 +19,9 @@ Hermes 관련 설정은 이 디렉터리 아래로 모읍니다.
 - upstream cron 권한 모델 때문에 service는 `pylv-onyx`의 주 사용자로 실행해 CLI 접근을 유지
 - `~/.codex/auth.json`을 Hermes auth seed로 사용
 - `one-half-light` custom skin을 `/var/lib/hermes/.hermes/skins/`에 설치하고 기본 skin으로 고정
-- raw Discord token agenix secret을 공식 `environmentFiles` 흐름에 맞는 env 파일로 변환
 - `hermes-discord-bot-token.age`를 agenix로 복호화
-- Discord bot token과 Discord gateway 제한값을 declarative config로 주입
-- Discord 허용 유저/허용 채널 제한
+- Discord bot token은 서비스 시작 전 writable `~/.hermes/.env`로 동기화
+- Discord 허용 유저/허용 채널/mention 제약값은 최초 한 번만 seed하고 이후에는 Hermes가 직접 수정 가능
+- 더 이상 upstream `environment/environmentFiles`로 `.env`를 매 rebuild마다 덮어쓰지 않음
 
 원칙: 편의 기능보다 실제 동작에 필요한 최소 설정만 둡니다.

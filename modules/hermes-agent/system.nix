@@ -9,7 +9,9 @@
 let
   isOnyx = config.networking.hostName == "pylv-onyx";
   hermesStateDir = "/var/lib/hermes";
-  discordEnvFile = "/var/lib/hermes/discord.env";
+  hermesHome = "${hermesStateDir}/.hermes";
+  hermesEnvFile = "${hermesHome}/.env";
+  discordEnvSeedMarker = "${hermesHome}/.discord-env-seeded";
   oneHalfLightSkin = pkgs.writeText "hermes-one-half-light.yaml" ''
     name: one-half-light
     description: One Half Light palette aligned with pylv-onyx terminal tooling
@@ -57,8 +59,8 @@ in
   config = lib.mkIf isOnyx {
     age.secrets.hermes-discord-bot-token = {
       file = ../../secrets/hermes-discord-bot-token.age;
-      owner = "root";
-      group = "root";
+      owner = username;
+      group = "users";
       mode = "0400";
     };
 
@@ -68,15 +70,8 @@ in
       group = "users";
       createUser = false;
       addToSystemPackages = true;
+      stateDir = hermesStateDir;
       authFile = "${homeDirectory}/.codex/auth.json";
-      environmentFiles = [ discordEnvFile ];
-      environment = {
-        DISCORD_ALLOWED_CHANNELS = "1492848425090285668,1492848439510433833,1492848457348812821,1492848476210331770";
-        DISCORD_ALLOWED_USERS = "392300972023611392";
-        DISCORD_HOME_CHANNEL = "1492848425090285668";
-        DISCORD_HOME_CHANNEL_NAME = "hermes-config";
-        DISCORD_REQUIRE_MENTION = "true";
-      };
       extraPackages = with pkgs; [
         bun
         curl
@@ -104,16 +99,50 @@ in
       };
     };
 
-    system.activationScripts."hermes-agent-00-discord-env" =
+    system.activationScripts."hermes-agent-00-cleanup-obsolete-discord-env" =
       lib.stringAfter
         ([ "users" ] ++ lib.optional (config.system.activationScripts ? setupSecrets) "setupSecrets")
         ''
-          ${pkgs.coreutils}/bin/mkdir -p ${hermesStateDir}
-          ${pkgs.coreutils}/bin/chown -R ${username}:users ${hermesStateDir}
-          printf 'DISCORD_BOT_TOKEN=%s\n' "$(${pkgs.coreutils}/bin/cat ${config.age.secrets.hermes-discord-bot-token.path})" > ${discordEnvFile}
-          ${pkgs.coreutils}/bin/chown root:root ${discordEnvFile}
-          ${pkgs.coreutils}/bin/chmod 0600 ${discordEnvFile}
+          ${pkgs.coreutils}/bin/rm -f ${hermesStateDir}/discord.env
         '';
+
+    systemd.services.hermes-agent.preStart = ''
+      TOKEN_FILE=${lib.escapeShellArg config.age.secrets.hermes-discord-bot-token.path}
+      HERMES_ENV_FILE=${lib.escapeShellArg hermesEnvFile}
+      SEED_MARKER=${lib.escapeShellArg discordEnvSeedMarker}
+
+      if [ ! -f "$TOKEN_FILE" ] || [ ! -s "$TOKEN_FILE" ]; then
+        echo "ERROR: Hermes Discord bot token not found or empty at $TOKEN_FILE" >&2
+        exit 1
+      fi
+
+      mkdir -p "$(dirname "$HERMES_ENV_FILE")"
+      touch "$HERMES_ENV_FILE"
+      chmod 0640 "$HERMES_ENV_FILE"
+
+      seed_env_if_missing() {
+        key="$1"
+        value="$2"
+
+        if ! ${pkgs.gnugrep}/bin/grep -q "^''${key}=" "$HERMES_ENV_FILE"; then
+          printf '%s=%s\n' "$key" "$value" >> "$HERMES_ENV_FILE"
+        fi
+      }
+
+      if [ ! -e "$SEED_MARKER" ]; then
+        seed_env_if_missing "DISCORD_ALLOWED_CHANNELS" "1492848425090285668,1492848439510433833,1492848457348812821,1492848476210331770"
+        seed_env_if_missing "DISCORD_ALLOWED_USERS" "392300972023611392"
+        seed_env_if_missing "DISCORD_HOME_CHANNEL" "1492848425090285668"
+        seed_env_if_missing "DISCORD_HOME_CHANNEL_NAME" "hermes-config"
+        seed_env_if_missing "DISCORD_REQUIRE_MENTION" "true"
+        touch "$SEED_MARKER"
+        chmod 0644 "$SEED_MARKER"
+      fi
+
+      ${pkgs.gnused}/bin/sed -i '/^DISCORD_BOT_TOKEN=/d' "$HERMES_ENV_FILE"
+      printf 'DISCORD_BOT_TOKEN=%s\n' "$(${pkgs.coreutils}/bin/cat "$TOKEN_FILE")" >> "$HERMES_ENV_FILE"
+      chmod 0640 "$HERMES_ENV_FILE"
+    '';
 
     system.activationScripts."hermes-agent-10-one-half-light-skin" =
       lib.stringAfter [ "hermes-agent-setup" ] ''
