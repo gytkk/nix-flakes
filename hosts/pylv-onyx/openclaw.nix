@@ -66,10 +66,13 @@ in
           "127.0.0.1"
           "::1"
         ];
+        http = {
+          endpoints.chatCompletions.enabled = true;
+        };
         tailscale.mode = "serve";
         controlUi = {
           dangerouslyDisableDeviceAuth = true;
-          allowedOrigins = [ "https://pylv-onyx.tailbbb9bf.ts.net:8443" ];
+          allowedOrigins = [ "https://pylv-onyx.tailbbb9bf.ts.net:8444" ];
         };
       };
 

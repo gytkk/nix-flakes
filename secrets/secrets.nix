@@ -10,6 +10,7 @@
 let
   # User SSH public keys (for encrypting secrets)
   gytkk = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJhE4Uakcz7usa0aetMqb99LYybOQ0I+sWKOiAidmBio";
+  gytkkCurrent = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH4fQ+YuQEWjtoSxCYydHbmerei0EQ2QC/z7GQZWjZmU";
 
   # Host SSH public keys (for host-specific secrets)
   pylv-sepia = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIC6EAZczgXONlXiwh946SidpRKSMw7fehg0u2L5SkHmd";
@@ -38,7 +39,10 @@ in
   "discord-bot-token.age".publicKeys = allUsers ++ allHosts;
 
   # Open WebUI initial admin environment file
-  "open-webui-env.age".publicKeys = allUsers ++ allHosts;
+  "open-webui-env.age".publicKeys = [
+    gytkk
+    gytkkCurrent
+  ] ++ allHosts;
 
   # Google Workspace CLI credentials for obsidian-maintenance calendar sync
   "gws-credentials.age".publicKeys = allUsers ++ allHosts;

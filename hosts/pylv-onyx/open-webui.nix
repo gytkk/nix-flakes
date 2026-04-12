@@ -9,6 +9,20 @@ let
   openWebUiPort = 8080;
   tailscaleServePort = 8444;
   tailscaleFqdn = "${config.networking.hostName}.tailbbb9bf.ts.net";
+  openclawGatewayPort = 18789;
+  openclawGatewayToken = "local-gateway-token";
+  openclawDefaultModel = "openclaw/default";
+  openWebUiDataDir = "${config.services.open-webui.stateDir}/data";
+  openWebUiSeedConfig = builtins.toJSON {
+    version = 0;
+    ui = { };
+    openai.api_configs = {
+      "0" = {
+        enable = true;
+        model_ids = [ openclawDefaultModel ];
+      };
+    };
+  };
 in
 {
   age.secrets.open-webui-env = {
@@ -23,8 +37,8 @@ in
     host = "127.0.0.1";
     port = openWebUiPort;
     environment = {
-      # Keep security-sensitive settings declarative instead of UI-persisted.
-      ENABLE_PERSISTENT_CONFIG = "false";
+      # Seed the persistent config on every start so Open WebUI stays declarative.
+      ENABLE_PERSISTENT_CONFIG = "true";
 
       # Seed the admin account so the first authenticated visitor does not
       # become admin by accident.
@@ -34,11 +48,17 @@ in
       DEFAULT_USER_ROLE = "pending";
       ENABLE_LOGIN_FORM = "true";
       ENABLE_PASSWORD_AUTH = "true";
+      ENABLE_EVALUATION_ARENA_MODELS = "false";
+      ENABLE_OLLAMA_API = "false";
+      ENABLE_OPENAI_API = "true";
 
-      # Tailscale Serve injects these headers; localhost access still uses the
-      # standard login form over an SSH tunnel.
-      WEBUI_AUTH_TRUSTED_EMAIL_HEADER = "Tailscale-User-Login";
-      WEBUI_AUTH_TRUSTED_NAME_HEADER = "Tailscale-User-Name";
+      # Route all OpenAI-compatible traffic to the local OpenClaw gateway.
+      OPENAI_API_BASE_URL = "http://127.0.0.1:${toString openclawGatewayPort}/v1";
+      OPENAI_API_KEY = openclawGatewayToken;
+      OPENAI_API_BASE_URLS = "http://127.0.0.1:${toString openclawGatewayPort}/v1";
+      OPENAI_API_KEYS = openclawGatewayToken;
+      DEFAULT_MODELS = openclawDefaultModel;
+      TASK_MODEL_EXTERNAL = openclawDefaultModel;
       FORWARDED_ALLOW_IPS = "127.0.0.1,::1";
 
       # The app is reachable only through the Tailscale URL or a local SSH tunnel.
@@ -55,6 +75,18 @@ in
     };
     environmentFile = config.age.secrets.open-webui-env.path;
   };
+
+  systemd.services.open-webui.preStart = lib.mkForce ''
+    mkdir -p "${openWebUiDataDir}"
+
+    [ -f "${config.services.open-webui.stateDir}/webui.db" ] && mv "${config.services.open-webui.stateDir}/webui.db" "${openWebUiDataDir}/"
+
+    for dir in cache uploads vector_db; do
+      [ -d "${config.services.open-webui.stateDir}/$dir" ] && mv "${config.services.open-webui.stateDir}/$dir" "${openWebUiDataDir}/"
+    done
+
+    printf '%s\n' ${lib.escapeShellArg openWebUiSeedConfig} > "${openWebUiDataDir}/config.json"
+  '';
 
   systemd.services.tailscale-serve-open-webui = {
     description = "Expose Open WebUI through Tailscale Serve";
