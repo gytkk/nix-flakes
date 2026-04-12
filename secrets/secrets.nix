@@ -38,11 +38,15 @@ in
   # Discord bot token for openclaw
   "discord-bot-token.age".publicKeys = allUsers ++ allHosts;
 
+  # Discord bot token for hermes-agent
+  "hermes-discord-bot-token.age".publicKeys = allUsers ++ allHosts;
+
   # Open WebUI initial admin environment file
   "open-webui-env.age".publicKeys = [
     gytkk
     gytkkCurrent
-  ] ++ allHosts;
+  ]
+  ++ allHosts;
 
   # Google Workspace CLI credentials for obsidian-maintenance calendar sync
   "gws-credentials.age".publicKeys = allUsers ++ allHosts;
