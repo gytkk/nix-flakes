@@ -146,6 +146,16 @@ nix build .#nixosConfigurations.pylv-sepia.config.system.build.toplevel
 - OpenClaw bootstrap and guardrails live in [`modules/openclaw/default.nix`](./modules/openclaw/default.nix)
 - Nix now seeds `/etc/openclaw/openclaw.seed.json` and `/etc/openclaw/openclaw.guardrails.json`, while the mutable runtime config lives at `~/.openclaw/openclaw.json`
 
+### `pylv-onyx` Hermes WebUI access
+
+- Tailscale: `https://pylv-onyx.tailbbb9bf.ts.net:8445`
+- Local network: `http://pylv-onyx:8787` when LAN DNS/mDNS resolves, otherwise use the current Wi-Fi address `http://192.168.0.10:8787`
+- Main desktop or any LAN-only client: `ssh -N -L 8787:127.0.0.1:8787 gytkk@pylv-onyx`, then browse `http://localhost:8787`
+- Direct LAN exposure is enabled only on `wlo1` port `8787`; the raw Hermes WebUI backend stays loopback-only on `127.0.0.1:8788`
+- Hermes WebUI uses its own password auth; the runtime password is seeded from `secrets/hermes-webui-env.age`
+- The WebUI reads the live Hermes runtime at `/home/gytkk/.hermes`, so it sees the same `openai-codex / gpt-5.4` provider setup that the running Hermes gateway already uses
+- Mutable Hermes WebUI session/state data lives under `/var/lib/hermes-webui`
+
 ## Hermes Agent
 
 - `hermes-agent` flake input is imported both as a package source and as the upstream NixOS module.
