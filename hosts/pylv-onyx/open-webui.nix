@@ -65,6 +65,9 @@ in
       # The app is reachable through Tailscale, the LAN, or a local SSH tunnel.
       CORS_ALLOW_ORIGIN = lib.concatStringsSep ";" [
         "https://${tailscaleFqdn}:${toString tailscaleServePort}"
+        "http://${config.networking.hostName}:${toString openWebUiPort}"
+        "http://${config.networking.hostName}.local:${toString openWebUiPort}"
+        "http://192.168.0.10:${toString openWebUiPort}"
         "http://localhost:3000"
         "http://127.0.0.1:3000"
       ];
