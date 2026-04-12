@@ -16,6 +16,7 @@ Last verified on `2026-04-12` from a shell on `pylv-onyx`.
 - A real `POST /api/v1/auths/signin` request sent through `http://127.0.0.1:8080` returned the fixed admin user `gytk.kim@gmail.com` even with ignored credentials in the body.
 - A real `POST /api/v1/auths/signin` request sent directly to `http://127.0.0.1:8081` failed with `Your provider has not provided a trusted header`.
 - Open WebUI exposes `openclaw/main` from its own `/api/models` endpoint.
+- Open WebUI is configured to expose both `openclaw/main` and `openclaw/pro`, and seeds per-agent model metadata so each can carry its own icon.
 - A real `POST /openai/chat/completions` request sent to Open WebUI returned a successful response from OpenClaw.
 - A real unauthenticated `POST /v1/chat/completions` request sent through the LAN OpenClaw proxy returned a successful response from OpenClaw.
 - A real unauthenticated `openclaw status` call to `ws://127.0.0.1:18790` succeeded, while the raw gateway at `ws://127.0.0.1:18789` still rejected the same call with `unauthorized`.
@@ -58,6 +59,8 @@ Open WebUI `0.8.10` can work around that, but only if `openai.api_configs.<idx>.
 ```
 
 That keeps the runtime declarative even though Open WebUI stores the value in its SQLite config table at startup.
+
+Additionally, `open-webui-openclaw-model-metadata.service` signs into the trusted local frontend after boot and upserts Open WebUI model metadata overrides for `openclaw/main` and `openclaw/pro`. Those overrides keep the OpenClaw model IDs intact while attaching per-agent icons via `meta.profile_image_url`, so the model picker can show a distinct badge for each agent.
 
 ### OpenClaw
 

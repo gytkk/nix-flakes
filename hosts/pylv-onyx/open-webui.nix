@@ -18,12 +18,14 @@ let
     "openclaw/main"
     "openclaw/pro"
   ];
+  openclawModelIcons = {
+    "openclaw/main" = "data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20rx='18'%20fill='%23111827'/%3E%3Ctext%20x='32'%20y='43'%20text-anchor='middle'%20font-family='Inter,Arial,sans-serif'%20font-size='30'%20font-weight='700'%20fill='%23f9fafb'%3EM%3C/text%3E%3C/svg%3E";
+    "openclaw/pro" = "data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20rx='18'%20fill='%234c1d95'/%3E%3Ctext%20x='32'%20y='43'%20text-anchor='middle'%20font-family='Inter,Arial,sans-serif'%20font-size='30'%20font-weight='700'%20fill='%23f5f3ff'%3EP%3C/text%3E%3C/svg%3E";
+  };
   openWebUiTrustedEmail = "gytk.kim@gmail.com";
   openWebUiTrustedEmailHeader = "x-open-webui-email";
   openWebUiTrustedNameHeader = "x-open-webui-name";
   openWebUiDataDir = "${config.services.open-webui.stateDir}/data";
-  openWebUiMainIcon = "data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20rx='18'%20fill='%230f172a'/%3E%3Ctext%20x='32'%20y='43'%20text-anchor='middle'%20font-family='Inter,Arial,sans-serif'%20font-size='30'%20font-weight='700'%20fill='white'%3EM%3C/text%3E%3C/svg%3E";
-  openWebUiProIcon = "data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20rx='18'%20fill='%237c3aed'/%3E%3Ctext%20x='32'%20y='43'%20text-anchor='middle'%20font-family='Inter,Arial,sans-serif'%20font-size='30'%20font-weight='700'%20fill='white'%3EP%3C/text%3E%3C/svg%3E";
   openWebUiSeedConfig = builtins.toJSON {
     version = 0;
     ui = { };
@@ -133,28 +135,39 @@ in
     printf '%s\n' ${lib.escapeShellArg openWebUiSeedConfig} > "${openWebUiDataDir}/config.json"
   '';
 
-  systemd.services.open-webui-openclaw-models = {
-    description = "Seed Open WebUI model metadata for OpenClaw agents";
+  systemd.services.open-webui-openclaw-model-metadata = {
+    description = "Seed Open WebUI metadata for OpenClaw models";
     after = [
-      "open-webui.service"
       "nginx.service"
+      "open-webui.service"
     ];
     wants = [
-      "open-webui.service"
       "nginx.service"
+      "open-webui.service"
     ];
     partOf = [
-      "open-webui.service"
       "nginx.service"
+      "open-webui.service"
     ];
     wantedBy = [ "multi-user.target" ];
     path = with pkgs; [
       coreutils
       curl
-      gnused
       jq
     ];
-    script = ''
+    script = let
+      modelPayloads = builtins.toJSON (
+        lib.mapAttrsToList (modelId: profileImageUrl: {
+          id = modelId;
+          name = modelId;
+          meta = {
+            profile_image_url = profileImageUrl;
+          };
+          params = { };
+          is_active = true;
+        }) openclawModelIcons
+      );
+    in ''
       set -euo pipefail
 
       wait_for() {
@@ -173,152 +186,51 @@ in
         return 1
       }
 
-      make_icon_data_url() {
-        local fill="$1"
-        local glyph="$2"
-        local svg
+      wait_for "Open WebUI trusted frontend" curl --fail --silent --show-error http://127.0.0.1:${toString openWebUiFrontendPort}/ >/dev/null
 
-        svg="<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='16' fill='$fill'/><text x='32' y='42' font-family='Inter,Arial,sans-serif' font-size='30' font-weight='700' text-anchor='middle' fill='white'>$glyph</text></svg>"
-
-        printf 'data:image/svg+xml;base64,%s' "$(printf '%s' "$svg" | base64 -w0)"
-      }
-
-      wait_for "Open WebUI trusted sign-in" sh -c '
-        curl --fail --silent --show-error \
-          -H "Content-Type: application/json" \
-          -d "{\"email\":\"ignored@example.com\",\"password\":\"ignored\"}" \
-          "http://127.0.0.1:${toString openWebUiFrontendPort}/api/v1/auths/signin" >/dev/null
-      '
-
-      token="$(${pkgs.curl}/bin/curl --fail --silent --show-error \
+      signin_response=$(curl --fail --silent --show-error \
         -H 'Content-Type: application/json' \
         -d '{"email":"ignored@example.com","password":"ignored"}' \
-        "http://127.0.0.1:${toString openWebUiFrontendPort}/api/v1/auths/signin" \
-        | ${pkgs.jq}/bin/jq -r '.token')"
+        http://127.0.0.1:${toString openWebUiFrontendPort}/api/v1/auths/signin)
+      token=$(jq -er '.token' <<<"$signin_response")
 
-      if [ -z "$token" ] || [ "$token" = "null" ]; then
-        echo "ERROR: Open WebUI trusted sign-in did not return a token" >&2
-        exit 1
-      fi
+      jq -c '.[]' <<'JSON' | while read -r payload; do
+${modelPayloads}
+JSON
+        model_id=$(jq -r '.id' <<<"$payload")
+        create_status=$(curl --silent --show-error -o /tmp/open-webui-model.$$.json -w '%{http_code}' \
+          -H "Authorization: Bearer $token" \
+          -H 'Content-Type: application/json' \
+          -d "$payload" \
+          http://127.0.0.1:${toString openWebUiFrontendPort}/api/v1/models/create)
 
-      main_icon="$(make_icon_data_url '#1f6feb' 'M')"
-      pro_icon="$(make_icon_data_url '#9b59b6' 'P')"
-
-      payload="$(${pkgs.jq}/bin/jq -n \
-        --arg mainIcon "$main_icon" \
-        --arg proIcon "$pro_icon" \
-        '{
-          models: [
-            {
-              id: "openclaw/main",
-              base_model_id: "openclaw/main",
-              name: "openclaw/main",
-              meta: {
-                profile_image_url: $mainIcon,
-                description: "OpenClaw main agent"
-              },
-              params: {},
-              is_active: true
-            },
-            {
-              id: "openclaw/pro",
-              base_model_id: "openclaw/pro",
-              name: "openclaw/pro",
-              meta: {
-                profile_image_url: $proIcon,
-                description: "OpenClaw pro agent"
-              },
-              params: {},
-              is_active: true
-            }
-          ]
-        }')"
-
-      ${pkgs.curl}/bin/curl \
-        --fail --silent --show-error \
-        -H "Authorization: Bearer $token" \
-        -H 'Content-Type: application/json' \
-        -d "$payload" \
-        "http://127.0.0.1:${toString openWebUiFrontendPort}/api/v1/models/import" >/dev/null
+        case "$create_status" in
+          200)
+            ;;
+          401)
+            update_status=$(curl --silent --show-error -o /tmp/open-webui-model.$$.json -w '%{http_code}' \
+              -H "Authorization: Bearer $token" \
+              -H 'Content-Type: application/json' \
+              -d "$payload" \
+              http://127.0.0.1:${toString openWebUiFrontendPort}/api/v1/models/model/update)
+            if [ "$update_status" != 200 ]; then
+              echo "ERROR: failed to update Open WebUI model metadata for $model_id (HTTP $update_status)" >&2
+              cat /tmp/open-webui-model.$$.json >&2
+              exit 1
+            fi
+            ;;
+          *)
+            echo "ERROR: failed to create Open WebUI model metadata for $model_id (HTTP $create_status)" >&2
+            cat /tmp/open-webui-model.$$.json >&2
+            exit 1
+            ;;
+        esac
+      done
     '';
     serviceConfig = {
       Type = "oneshot";
-      RemainAfterExit = true;
-    };
-  };
-
-  systemd.services.open-webui-seed-model-icons = {
-    description = "Seed Open WebUI model icons for OpenClaw agents";
-    after = [
-      "nginx.service"
-      "open-webui.service"
-    ];
-    wants = [
-      "nginx.service"
-      "open-webui.service"
-    ];
-    partOf = [
-      "nginx.service"
-      "open-webui.service"
-    ];
-    wantedBy = [ "multi-user.target" ];
-    path = with pkgs; [
-      coreutils
-      curl
-    ];
-    script = let
-      payload = builtins.toJSON {
-        models = [
-          {
-            id = "openclaw/main";
-            name = "openclaw/main";
-            meta = {
-              profile_image_url = openWebUiMainIcon;
-              description = "OpenClaw main agent";
-            };
-            params = { };
-          }
-          {
-            id = "openclaw/pro";
-            name = "openclaw/pro";
-            meta = {
-              profile_image_url = openWebUiProIcon;
-              description = "OpenClaw pro agent";
-            };
-            params = { };
-          }
-        ];
-      };
-    in ''
-      wait_for() {
-        local name="$1"
-        shift
-
-        for _ in $(seq 1 60); do
-          if "$@"; then
-            return 0
-          fi
-
-          sleep 1
-        done
-
-        echo "ERROR: $name did not become ready in time" >&2
-        return 1
-      }
-
-      wait_for "Open WebUI frontend" curl --fail --silent --show-error "http://127.0.0.1:${toString openWebUiFrontendPort}/" >/dev/null
-
-      curl \
-        --fail \
-        --silent \
-        --show-error \
-        --header 'Content-Type: application/json' \
-        --data ${lib.escapeShellArg payload} \
-        "http://127.0.0.1:${toString openWebUiFrontendPort}/api/v1/models/import" >/dev/null
-    '';
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
+      User = "open-webui";
+      Group = "open-webui";
     };
   };
 
