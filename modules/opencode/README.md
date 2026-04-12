@@ -14,10 +14,9 @@ opencode auth login
 
 - nixpkgs에서 `opencode` 설치
 - OpenCode 설정 파일 구성 (`~/.config/opencode/opencode.json`)
-- oh-my-opencode 설정 파일 구성 (`~/.config/opencode/oh-my-openagent.json`)
 - MCP 서버 설정 (라이브러리 문서화를 위한 `context7`)
 - 전역 지침 설치 (`~/.config/opencode/AGENTS.md`)
-- 로컬 플러그인 설치 (`~/.config/opencode/plugins/`)
+- 로컬 플러그인 설치 (`~/.config/opencode/plugins/native-notify.ts`)
 
 ## 설정 파일
 
@@ -25,56 +24,28 @@ opencode auth login
 
 - **기본 모델**: `opencode-go/glm-5`
 - **small model**: `opencode-go/minimax-m2.7`
-- **테마**: `opencode`
 - **자동 업데이트**: 활성화
-- **플러그인**: `@plannotator/opencode@latest`, `oh-my-opencode`
+- **기본 primary agent**: OpenCode 내장 `build`, `plan`
+- **플러그인**: `@plannotator/opencode@latest`, `@mohak34/opencode-notifier@latest`, `@tarquinen/opencode-dcp@latest`, `opencode-mem`, 로컬 `native-notify`
 - **MCP**: `context7`
-- **LSP**: `metals` (Scala)
+- **LSP**: `nixd`, `gopls`, `typescript-language-server`, `terraform-ls`, `metals`, `ty`, `yaml-language-server`, `marksman`, `rust-analyzer`
 - **권한**: 모든 skill 및 task 허용
 
-### oh-my-openagent.json
+이 모듈은 별도의 외부 에이전트 하네스를 설치하지 않으며, OpenCode 기본 에이전트를 그대로 사용합니다.
 
-- oh-my-opencode 플러그인의 에이전트/카테고리 모델 오버라이드를 정의합니다.
-- 현재 이 저장소는 OpenCode Go + ChatGPT Pro 혼합 구성을 유지합니다.
-- 오케스트레이션(`sisyphus`, `atlas`)과 검색 유틸리티(`librarian`, `explore`)는 OpenCode Go 모델(Kimi K2.5, MiniMax M2.7)을 사용하고, 깊은 추론/검토 역할(`oracle`, `momus`, `hephaestus`)은 ChatGPT Pro의 GPT-5.4 계열을 사용합니다.
+### 기본 에이전트
 
+- **build**: 기본 작업 에이전트. 일반적인 코드 수정과 도구 실행을 담당합니다.
+- **plan**: 계획 전용 에이전트. 편집 도구 없이 조사와 계획 수립에 사용합니다.
+- **general**: 범용 서브에이전트. 병렬 작업이나 복합 조사에 사용됩니다.
+- **explore**: 빠른 코드베이스 탐색용 서브에이전트입니다.
 
 ### AGENTS.md
 
 모든 프로젝트에서 OpenCode 동작을 설정하는 전역 지침 파일입니다.
 
-## Agents
-
-oh-my-opencode 플러그인이 제공하는 에이전트들입니다:
-
-- **sisyphus**: 메인 오케스트레이터. 전략적 위임, TODO 관리, 코드베이스 평가
-- **hephaestus**: 집중 구현 실행자
-- **atlas**: 워크 플랜 마스터 오케스트레이터. TODO 리스트의 모든 작업 완료까지 실행
-- **prometheus**: 전략적 플래닝 컨설턴트. 요구사항 인터뷰 및 상세 워크 플랜 생성
-- **oracle**: 고난이도 추론 전문가 (아키텍처 설계, 디버깅). 읽기 전용 상담
-- **librarian**: 원격 코드베이스 검색, 공식 문서 조회, 구현 예시 탐색
-- **explore**: 코드베이스 문맥 검색 ("X는 어디에?", "Z를 하는 코드 찾기")
-- **metis**: 사전 계획 분석 (숨겨진 의도, 모호성 식별)
-- **momus**: 플랜 검토 전문가 (명확성, 검증 가능성, 완전성)
-- **multimodal-looker**: 미디어 파일 분석 (PDF, 이미지, 다이어그램)
-- **sisyphus-junior**: 집중 작업 실행자 (위임 불가)
-
-사용법: `@sisyphus`, `@hephaestus`, `@atlas`, `@prometheus`, `@oracle`, `@librarian`, `@explore`, `@metis`, `@momus`, `@multimodal-looker`, `@sisyphus-junior`
-
-## Categories
-
-이 저장소의 `oh-my-openagent.json`은 다음 카테고리를 오버라이드합니다.
-
-- **visual-engineering**: GLM-5 기반 시각 작업
-- **ultrabrain**: GPT-5.4 `xhigh`
-- **artistry**: Kimi K2.5 기반 창의 작업
-- **quick**: GPT-5.4 Mini 기반 경량 작업
-- **unspecified-low**: Kimi K2.5 기반 일반 저강도 작업
-- **unspecified-high**: GPT-5.4 `high` 기반 일반 고강도 작업
-- **writing**: Kimi K2.5 기반 문서 작업
-
 ## Skills
 
 이 저장소에는 현재 `modules/opencode/files/skills/` 아래에 배포되는 로컬 skill 파일이 없습니다.
 
-OpenCode/oh-my-opencode에서 제공하는 built-in skills는 런타임에서 사용할 수 있지만, 이 모듈이 별도 로컬 skill 파일을 설치하지는 않습니다.
+OpenCode가 제공하는 built-in skills는 런타임에서 사용할 수 있지만, 이 모듈이 별도 로컬 skill 파일을 설치하지는 않습니다.
