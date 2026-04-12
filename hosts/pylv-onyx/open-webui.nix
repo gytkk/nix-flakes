@@ -14,6 +14,10 @@ let
   openclawProxyPort = 18790;
   openclawProxyApiKey = "lan-admin-proxy";
   openclawDefaultModel = "openclaw/main";
+  openclawAvailableModels = [
+    "openclaw/main"
+    "openclaw/pro"
+  ];
   openWebUiTrustedEmail = "gytk.kim@gmail.com";
   openWebUiTrustedEmailHeader = "x-open-webui-email";
   openWebUiTrustedNameHeader = "x-open-webui-name";
@@ -24,7 +28,7 @@ let
     openai.api_configs = {
       "0" = {
         enable = true;
-        model_ids = [ openclawDefaultModel ];
+        model_ids = openclawAvailableModels;
       };
     };
   };
@@ -126,6 +130,120 @@ in
 
     printf '%s\n' ${lib.escapeShellArg openWebUiSeedConfig} > "${openWebUiDataDir}/config.json"
   '';
+
+  systemd.services.open-webui-openclaw-models = {
+    description = "Seed Open WebUI model metadata for OpenClaw agents";
+    after = [
+      "open-webui.service"
+      "nginx.service"
+    ];
+    wants = [
+      "open-webui.service"
+      "nginx.service"
+    ];
+    partOf = [
+      "open-webui.service"
+      "nginx.service"
+    ];
+    wantedBy = [ "multi-user.target" ];
+    path = with pkgs; [
+      coreutils
+      curl
+      gnused
+      jq
+    ];
+    script = ''
+      set -euo pipefail
+
+      wait_for() {
+        local name="$1"
+        shift
+
+        for _ in $(seq 1 60); do
+          if "$@"; then
+            return 0
+          fi
+
+          sleep 1
+        done
+
+        echo "ERROR: $name did not become ready in time" >&2
+        return 1
+      }
+
+      make_icon_data_url() {
+        local fill="$1"
+        local glyph="$2"
+        local svg
+
+        svg="<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='16' fill='$fill'/><text x='32' y='42' font-family='Inter,Arial,sans-serif' font-size='30' font-weight='700' text-anchor='middle' fill='white'>$glyph</text></svg>"
+
+        printf 'data:image/svg+xml;base64,%s' "$(printf '%s' "$svg" | base64 -w0)"
+      }
+
+      wait_for "Open WebUI trusted sign-in" sh -c '
+        curl --fail --silent --show-error \
+          -H "Content-Type: application/json" \
+          -d "{\"email\":\"ignored@example.com\",\"password\":\"ignored\"}" \
+          "http://127.0.0.1:${toString openWebUiFrontendPort}/api/v1/auths/signin" >/dev/null
+      '
+
+      token="$(${pkgs.curl}/bin/curl --fail --silent --show-error \
+        -H 'Content-Type: application/json' \
+        -d '{"email":"ignored@example.com","password":"ignored"}' \
+        "http://127.0.0.1:${toString openWebUiFrontendPort}/api/v1/auths/signin" \
+        | ${pkgs.jq}/bin/jq -r '.token')"
+
+      if [ -z "$token" ] || [ "$token" = "null" ]; then
+        echo "ERROR: Open WebUI trusted sign-in did not return a token" >&2
+        exit 1
+      fi
+
+      main_icon="$(make_icon_data_url '#1f6feb' 'M')"
+      pro_icon="$(make_icon_data_url '#9b59b6' 'P')"
+
+      payload="$(${pkgs.jq}/bin/jq -n \
+        --arg mainIcon "$main_icon" \
+        --arg proIcon "$pro_icon" \
+        '{
+          models: [
+            {
+              id: "openclaw/main",
+              base_model_id: "openclaw/main",
+              name: "openclaw/main",
+              meta: {
+                profile_image_url: $mainIcon,
+                description: "OpenClaw main agent"
+              },
+              params: {},
+              is_active: true
+            },
+            {
+              id: "openclaw/pro",
+              base_model_id: "openclaw/pro",
+              name: "openclaw/pro",
+              meta: {
+                profile_image_url: $proIcon,
+                description: "OpenClaw pro agent"
+              },
+              params: {},
+              is_active: true
+            }
+          ]
+        }')"
+
+      ${pkgs.curl}/bin/curl \
+        --fail --silent --show-error \
+        -H "Authorization: Bearer $token" \
+        -H 'Content-Type: application/json' \
+        -d "$payload" \
+        "http://127.0.0.1:${toString openWebUiFrontendPort}/api/v1/models/import" >/dev/null
+    '';
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
+  };
 
   systemd.services.tailscale-serve-open-webui = {
     description = "Expose Open WebUI through Tailscale Serve";
