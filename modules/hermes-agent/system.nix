@@ -36,11 +36,17 @@ in
       addToSystemPackages = false;
 
       settings = {
+        model = {
+          default = "openclaw/main";
+          provider = "custom";
+          base_url = "http://127.0.0.1:18790/v1";
+        };
         terminal.backend = "local";
         display.tool_progress = "off";
       };
 
       environment = {
+        OPENAI_API_KEY = "lan-admin-proxy";
         DISCORD_ALLOWED_CHANNELS = "1492848425090285668,1492848439510433833,1492848457348812821,1492848476210331770";
         DISCORD_ALLOWED_USERS = "392300972023611392";
         DISCORD_REQUIRE_MENTION = "true";
