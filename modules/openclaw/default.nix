@@ -7,13 +7,51 @@
 }:
 let
   gatewayPort = 18789;
+  lanProxyPort = 18790;
+  lanInterface = "wlo1";
   stateDir = "${homeDirectory}/.openclaw";
   runtimeConfigPath = "${stateDir}/openclaw.json";
   seedConfigPath = "/etc/openclaw/openclaw.seed.json";
+  trustedProxyUser = "lan-admin";
+  trustedProxyUserHeader = "x-openclaw-user";
+  trustedProxyRequiredHeader = "x-openclaw-proxy";
+  trustedProxyRequiredValue = "1";
 
-  seedConfig = { };
+  seedConfig = {
+    gateway = {
+      mode = "local";
+      auth = {
+        mode = "trusted-proxy";
+        trustedProxy = {
+          userHeader = trustedProxyUserHeader;
+          requiredHeaders = [ trustedProxyRequiredHeader ];
+          allowUsers = [ trustedProxyUser ];
+        };
+      };
+      port = gatewayPort;
+      bind = "loopback";
+      trustedProxies = [
+        "127.0.0.1"
+        "::1"
+      ];
+      http = {
+        endpoints.chatCompletions.enabled = true;
+      };
+      tailscale.mode = "off";
+      controlUi = {
+        dangerouslyDisableDeviceAuth = true;
+        dangerouslyAllowHostHeaderOriginFallback = true;
+      };
+    };
+  };
 in
 {
+  age.secrets.discord-bot-token = {
+    file = ../../secrets/discord-bot-token.age;
+    owner = username;
+    group = "users";
+    mode = "0400";
+  };
   services.openclaw-gateway = {
     enable = true;
     package = pkgs.openclaw-gateway;
@@ -31,6 +69,20 @@ in
     };
 
     execStartPre = [
+      "+${pkgs.writeShellScript "openclaw-discord-env" ''
+        TOKEN_FILE="/run/agenix/discord-bot-token"
+        ENV_DIR="/run/openclaw"
+        ENV_FILE="$ENV_DIR/env"
+        ${pkgs.coreutils}/bin/mkdir -p "$ENV_DIR"
+        if [ -f "$TOKEN_FILE" ] && [ -s "$TOKEN_FILE" ]; then
+          echo "DISCORD_BOT_TOKEN=$(${pkgs.coreutils}/bin/cat "$TOKEN_FILE")" > "$ENV_FILE"
+        else
+          echo "ERROR: Discord bot token not found or empty at $TOKEN_FILE" >&2
+          exit 1
+        fi
+        ${pkgs.coreutils}/bin/chmod 600 "$ENV_FILE"
+        ${pkgs.coreutils}/bin/chown ${username}:users "$ENV_FILE"
+      ''}"
       "${pkgs.writeShellScript "openclaw-runtime-config" ''
         set -euo pipefail
 
@@ -57,6 +109,7 @@ in
         ${pkgs.jq}/bin/jq -e . "$runtime_config" >/dev/null
       ''}"
     ];
+    environmentFiles = [ "-/run/openclaw/env" ];
 
     servicePath = with pkgs; [
       bun
@@ -66,4 +119,31 @@ in
 
   environment.systemPackages = [ pkgs.openclaw-gateway ];
 
+  services.nginx = {
+    enable = true;
+    recommendedProxySettings = true;
+    virtualHosts."openclaw-lan" = {
+      serverName = "_";
+      listen = [
+        {
+          addr = "0.0.0.0";
+          port = lanProxyPort;
+        }
+      ];
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:${toString gatewayPort}";
+        proxyWebsockets = true;
+        extraConfig = ''
+          proxy_set_header Host $host:$server_port;
+          proxy_set_header X-Forwarded-Host $host:$server_port;
+          proxy_set_header ${trustedProxyUserHeader} ${trustedProxyUser};
+          proxy_set_header ${trustedProxyRequiredHeader} ${trustedProxyRequiredValue};
+        '';
+      };
+    };
+  };
+
+  networking.firewall.interfaces = {
+    "${lanInterface}".allowedTCPPorts = [ lanProxyPort ];
+  };
 }
