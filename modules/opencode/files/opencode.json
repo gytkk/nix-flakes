@@ -2,14 +2,6 @@
   "$schema": "https://opencode.ai/config.json",
   "model": "opencode-go/glm-5",
   "small_model": "opencode-go/minimax-m2.7",
-  "agent": {
-    "build": {
-      "disable": true
-    },
-    "plan": {
-      "disable": true
-    }
-  },
   "autoupdate": true,
   "plugin": [
     "@plannotator/opencode@latest",

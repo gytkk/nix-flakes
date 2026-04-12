@@ -17,9 +17,6 @@ in
   # Create ~/.config/opencode/opencode.json file
   home.file.".config/opencode/opencode.json".source = mkSymlink "files/opencode.json";
 
-  # Create ~/.config/opencode/oh-my-openagent.json file (oh-my-opencode plugin config)
-  home.file.".config/opencode/oh-my-openagent.json".source = mkSymlink "files/oh-my-openagent.json";
-
   # Deploy native notification plugin (uses OSC 777 for Ghostty desktop notifications)
   home.file.".config/opencode/plugins/native-notify.ts".source =
     mkSymlink "files/plugins/native-notify.ts";
