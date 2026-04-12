@@ -9,9 +9,10 @@ Last verified on `2026-04-12` from a shell on `pylv-onyx`.
 - `open-webui.service` is active.
 - `tailscale-serve-open-webui.service` is active.
 - `openclaw-gateway.service` is active.
-- Open WebUI responds on `http://127.0.0.1:8080/`.
+- Open WebUI responds on both `http://127.0.0.1:8080/` and the current LAN address `http://192.168.0.10:8080/`.
 - Tailscale Serve exposes Open WebUI on `https://pylv-onyx.tailbbb9bf.ts.net:8444/`.
 - Password login works through both the Tailscale URL and an SSH tunnel to `http://localhost:3000`.
+- Password login also works directly through the LAN URL.
 - Open WebUI exposes `openclaw/default` from its own `/api/models` endpoint.
 - A real `POST /openai/chat/completions` request sent to Open WebUI returned a successful response from OpenClaw.
 
@@ -21,6 +22,7 @@ Last verified on `2026-04-12` from a shell on `pylv-onyx`.
 
 - [`hosts/pylv-onyx/open-webui.nix`](./hosts/pylv-onyx/open-webui.nix) uses standard email/password login only.
 - Trusted-header login was removed because Open WebUI `0.8.10` blocks localhost sign-in when `WEBUI_AUTH_TRUSTED_*` headers are required.
+- Open WebUI now listens on `0.0.0.0:8080`, but the NixOS firewall only allows that port on interface `wlo1`.
 - The OpenAI-compatible backend points at `http://127.0.0.1:18789/v1` with the local gateway token.
 - `ENABLE_EVALUATION_ARENA_MODELS` is disabled so the UI only shows the real OpenClaw model.
 
@@ -62,6 +64,20 @@ Use:
 
 ```text
 https://pylv-onyx.tailbbb9bf.ts.net:8444/
+```
+
+### Local network
+
+Use:
+
+```text
+http://pylv-onyx:8080
+```
+
+If local name resolution does not work on a client, use the current Wi-Fi address instead:
+
+```text
+http://192.168.0.10:8080
 ```
 
 ### SSH tunnel

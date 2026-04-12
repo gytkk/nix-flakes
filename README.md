@@ -130,8 +130,9 @@ nix build .#nixosConfigurations.pylv-sepia.config.system.build.toplevel
 ### `pylv-onyx` Open WebUI access
 
 - Tailscale: `https://pylv-onyx.tailbbb9bf.ts.net:8444`
+- Local network: `http://pylv-onyx:8080` when LAN DNS/mDNS resolves, otherwise use the current Wi-Fi address `http://192.168.0.10:8080`
 - Main desktop or any LAN-only client: `ssh -N -L 3000:127.0.0.1:8080 gytkk@pylv-onyx`, then browse `http://localhost:3000`
-- Direct LAN exposure is intentionally disabled; Open WebUI listens only on `127.0.0.1`
+- Direct LAN exposure is enabled only on `wlo1` port `8080`; OpenClaw itself remains loopback-only on `127.0.0.1:18789`
 - Authentication is standard Open WebUI email/password login; trusted-header login is intentionally disabled
 - The configured backend model is `openclaw/default` via the local OpenClaw gateway on `127.0.0.1:18789`
 
