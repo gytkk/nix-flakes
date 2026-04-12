@@ -6,6 +6,8 @@
 }:
 let
   gatewayPort = 18789;
+  lanProxyPort = 18790;
+  lanInterface = "wlo1";
   stateDir = "${homeDirectory}/.openclaw";
 in
 {
@@ -72,6 +74,7 @@ in
         tailscale.mode = "serve";
         controlUi = {
           dangerouslyDisableDeviceAuth = true;
+          dangerouslyAllowHostHeaderOriginFallback = true;
           allowedOrigins = [ "https://pylv-onyx.tailbbb9bf.ts.net:8444" ];
         };
       };
@@ -149,4 +152,26 @@ in
 
   # OpenClaw CLI
   environment.systemPackages = [ pkgs.openclaw-gateway ];
+
+  services.nginx = {
+    enable = true;
+    recommendedProxySettings = true;
+    virtualHosts."openclaw-lan" = {
+      serverName = "_";
+      listen = [
+        {
+          addr = "0.0.0.0";
+          port = lanProxyPort;
+        }
+      ];
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:${toString gatewayPort}";
+        proxyWebsockets = true;
+      };
+    };
+  };
+
+  networking.firewall.interfaces = {
+    "${lanInterface}".allowedTCPPorts = [ lanProxyPort ];
+  };
 }
