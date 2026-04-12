@@ -198,33 +198,37 @@ in
 ${modelPayloads}
 JSON
         model_id=$(jq -r '.id' <<<"$payload")
-        create_status=$(curl --silent --show-error -o /tmp/open-webui-model.$$.json -w '%{http_code}' \
+        get_status=$(curl --silent --show-error -o /tmp/open-webui-model.$$.json -w '%{http_code}' \
           -H "Authorization: Bearer $token" \
-          -H 'Content-Type: application/json' \
-          -d "$payload" \
-          http://127.0.0.1:${toString openWebUiFrontendPort}/api/v1/models/create)
+          --get \
+          --data-urlencode "id=$model_id" \
+          http://127.0.0.1:${toString openWebUiFrontendPort}/api/v1/models/model)
 
-        case "$create_status" in
+        case "$get_status" in
           200)
+            endpoint="model/update"
             ;;
-          401)
-            update_status=$(curl --silent --show-error -o /tmp/open-webui-model.$$.json -w '%{http_code}' \
-              -H "Authorization: Bearer $token" \
-              -H 'Content-Type: application/json' \
-              -d "$payload" \
-              http://127.0.0.1:${toString openWebUiFrontendPort}/api/v1/models/model/update)
-            if [ "$update_status" != 200 ]; then
-              echo "ERROR: failed to update Open WebUI model metadata for $model_id (HTTP $update_status)" >&2
-              cat /tmp/open-webui-model.$$.json >&2
-              exit 1
-            fi
+          404)
+            endpoint="create"
             ;;
           *)
-            echo "ERROR: failed to create Open WebUI model metadata for $model_id (HTTP $create_status)" >&2
+            echo "ERROR: failed to probe Open WebUI model metadata for $model_id (HTTP $get_status)" >&2
             cat /tmp/open-webui-model.$$.json >&2
             exit 1
             ;;
         esac
+
+        write_status=$(curl --silent --show-error -o /tmp/open-webui-model.$$.json -w '%{http_code}' \
+          -H "Authorization: Bearer $token" \
+          -H 'Content-Type: application/json' \
+          -d "$payload" \
+          http://127.0.0.1:${toString openWebUiFrontendPort}/api/v1/models/$endpoint)
+
+        if [ "$write_status" != 200 ]; then
+          echo "ERROR: failed to upsert Open WebUI model metadata for $model_id via $endpoint (HTTP $write_status)" >&2
+          cat /tmp/open-webui-model.$$.json >&2
+          exit 1
+        fi
       done
     '';
     serviceConfig = {
