@@ -113,6 +113,9 @@
       pkgs.stable-25_05.micromamba
       yt-dlp
 
+      # AI / Browser automation
+      agent-browser
+
       # etc
       direnv
 

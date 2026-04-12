@@ -9,10 +9,9 @@ let
   mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/opencode/${path}";
 in
 {
-  # Install OpenCode and agent-browser via gytkk/flake-stores (pre-built binaries)
+  # Install OpenCode via gytkk/flake-stores (pre-built binaries)
   home.packages = [
     pkgs.opencode
-    pkgs.agent-browser
   ];
 
   # Create ~/.config/opencode/opencode.json file
