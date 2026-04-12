@@ -134,14 +134,15 @@ nix build .#nixosConfigurations.pylv-sepia.config.system.build.toplevel
 - Main desktop or any LAN-only client: `ssh -N -L 3000:127.0.0.1:8080 gytkk@pylv-onyx`, then browse `http://localhost:3000`
 - Direct LAN exposure is enabled only on `wlo1` port `8080`; OpenClaw itself remains loopback-only on `127.0.0.1:18789`
 - Authentication is standard Open WebUI email/password login; trusted-header login is intentionally disabled
-- The configured backend model is `openclaw/default` via the local OpenClaw gateway on `127.0.0.1:18789`
+- The configured backend model is `openclaw/default` via the local trusted proxy on `127.0.0.1:18790`
 
 ### `pylv-onyx` OpenClaw Control UI access
 
 - Local network: `http://pylv-onyx:18790` when LAN DNS/mDNS resolves, otherwise use the current Wi-Fi address `http://192.168.0.10:18790`
 - The LAN path is an `nginx` reverse proxy on `wlo1` only; the real gateway stays loopback-only on `127.0.0.1:18789`
-- Authentication is gateway-token based, not email/password
-- Get the current tokenized dashboard URL with `openclaw dashboard --no-open`, then replace `127.0.0.1:18789` with the LAN URL if needed
+- Any LAN client that reaches `18790` is intentionally treated as an admin/operator through OpenClaw `trusted-proxy` auth
+- No token or email/password is required on the LAN URL
+- `openclaw dashboard --no-open` on the host now prints the bare local URL `http://127.0.0.1:18789/`; for a remote LAN browser, just open `http://pylv-onyx:18790` or `http://192.168.0.10:18790`
 
 ## Helpers
 

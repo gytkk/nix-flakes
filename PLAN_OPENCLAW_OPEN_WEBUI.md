@@ -17,8 +17,10 @@ Last verified on `2026-04-12` from a shell on `pylv-onyx`.
 - Password login also works directly through the LAN URL.
 - Open WebUI exposes `openclaw/default` from its own `/api/models` endpoint.
 - A real `POST /openai/chat/completions` request sent to Open WebUI returned a successful response from OpenClaw.
-- A real `POST /v1/chat/completions` request sent through the LAN OpenClaw proxy returned a successful response from OpenClaw.
+- A real unauthenticated `POST /v1/chat/completions` request sent through the LAN OpenClaw proxy returned a successful response from OpenClaw.
+- A real unauthenticated `openclaw status` call to `ws://127.0.0.1:18790` succeeded, while the raw gateway at `ws://127.0.0.1:18789` still rejected the same call with `unauthorized`.
 - A WebSocket upgrade with `Origin: http://192.168.0.10:18790` succeeded against the LAN OpenClaw proxy.
+- `openclaw dashboard --no-open` now prints the bare local Control UI URL `http://127.0.0.1:18789/` instead of a `#token=...` URL because `~/.openclaw/openclaw.json` is managed from the system config.
 
 ## Current design
 
@@ -27,7 +29,7 @@ Last verified on `2026-04-12` from a shell on `pylv-onyx`.
 - [`hosts/pylv-onyx/open-webui.nix`](./hosts/pylv-onyx/open-webui.nix) uses standard email/password login only.
 - Trusted-header login was removed because Open WebUI `0.8.10` blocks localhost sign-in when `WEBUI_AUTH_TRUSTED_*` headers are required.
 - Open WebUI now listens on `0.0.0.0:8080`, but the NixOS firewall only allows that port on interface `wlo1`.
-- The OpenAI-compatible backend points at `http://127.0.0.1:18789/v1` with the local gateway token.
+- The OpenAI-compatible backend points at `http://127.0.0.1:18790/v1`, which is the local trusted-proxy path into OpenClaw.
 - `ENABLE_EVALUATION_ARENA_MODELS` is disabled so the UI only shows the real OpenClaw model.
 
 ### Why the config seed exists
@@ -58,10 +60,13 @@ That keeps the runtime declarative even though Open WebUI stores the value in it
 ### OpenClaw
 
 - [`hosts/pylv-onyx/openclaw.nix`](./hosts/pylv-onyx/openclaw.nix) enables `gateway.http.endpoints.chatCompletions`.
-- The gateway itself stays on loopback `127.0.0.1:18789` so Open WebUI and Tailscale Serve can keep using the same backend.
+- The gateway itself stays on loopback `127.0.0.1:18789`.
+- `gateway.auth.mode = "trusted-proxy"` is enabled, so the gateway only trusts requests that come from loopback proxy IPs and include the injected proxy headers.
 - A local-network `nginx` reverse proxy listens on `0.0.0.0:18790`, but the firewall only allows that port on interface `wlo1`.
+- That proxy injects `x-openclaw-user: lan-admin` and `x-openclaw-proxy: 1`, which intentionally makes any LAN client on `18790` an OpenClaw admin/operator.
 - `gateway.controlUi.dangerouslyAllowHostHeaderOriginFallback = true` is enabled so the Control UI WebSocket handshake works whether LAN clients open the proxy via hostname or IP.
-- The OpenClaw Control UI browser origin still allows the actual Tailscale Serve port: `8444`.
+- OpenClaw Tailscale Serve is disabled because OpenClaw `trusted-proxy` auth is incompatible with `gateway.tailscale.mode = "serve"`.
+- [`hosts/pylv-onyx/configuration.nix`](./hosts/pylv-onyx/configuration.nix) also makes the user-side CLI read the same system config by exporting `OPENCLAW_CONFIG_PATH` and managing `~/.openclaw/openclaw.json` from Home Manager.
 
 ## Access
 
@@ -103,8 +108,9 @@ http://192.168.0.10:18790
 
 Authentication note:
 
-- OpenClaw Control UI uses the gateway token, not an email/password form.
-- Run `openclaw dashboard --no-open` on `pylv-onyx` to print the current tokenized URL, then replace `127.0.0.1:18789` with the LAN URL if needed.
+- The Control UI is intentionally tokenless on the LAN URL.
+- Open `http://pylv-onyx:18790` or `http://192.168.0.10:18790` directly.
+- If you run `openclaw dashboard --no-open` on `pylv-onyx`, it now prints the bare local URL `http://127.0.0.1:18789/`; for another LAN client, just replace host and port with the LAN proxy URL.
 
 ### SSH tunnel
 
@@ -140,8 +146,11 @@ curl -sS -H 'Authorization: Bearer <open-webui-jwt>' \
 
 curl -sS http://192.168.0.10:18790/health
 
-curl -sS -H 'Authorization: Bearer <gateway-token>' \
-  -H 'Content-Type: application/json' \
+curl -sS -H 'Content-Type: application/json' \
   -d '{"model":"openclaw/default","messages":[{"role":"user","content":"Reply with the single word OK."}]}' \
   http://192.168.0.10:18790/v1/chat/completions
+
+env -u OPENCLAW_GATEWAY_TOKEN -u CLAWDBOT_GATEWAY_TOKEN \
+  OPENCLAW_GATEWAY_URL=ws://127.0.0.1:18790 \
+  openclaw status
 ```
