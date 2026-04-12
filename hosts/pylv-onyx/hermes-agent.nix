@@ -12,6 +12,13 @@ let
   workingDirectory = "${stateDir}/workspace";
 in
 {
+  age.secrets.hermes-discord-bot-token = {
+    file = ../../secrets/hermes-discord-bot-token.age;
+    owner = username;
+    group = "users";
+    mode = "0400";
+  };
+
   services.hermes-agent = {
     enable = true;
     package = hermesPackage;
@@ -38,6 +45,15 @@ in
       display.tool_progress = "off";
     };
 
+    environmentFiles = [ "/run/hermes/env" ];
+
+    environment = {
+      DISCORD_ALLOWED_USERS = "392300972023611392";
+      DISCORD_HOME_CHANNEL = "1492784291049115760";
+      DISCORD_HOME_CHANNEL_NAME = "#claw-dev";
+      DISCORD_REQUIRE_MENTION = "true";
+    };
+
     extraPackages = with pkgs; [
       git
       nodejs
@@ -51,6 +67,23 @@ in
       ffmpeg
     ];
   };
+
+  system.activationScripts.hermes-discord-env = ''
+    TOKEN_FILE="/run/agenix/hermes-discord-bot-token"
+    ENV_DIR="/run/hermes"
+    ENV_FILE="$ENV_DIR/env"
+
+    mkdir -p "$ENV_DIR"
+
+    if [ -f "$TOKEN_FILE" ] && [ -s "$TOKEN_FILE" ]; then
+      printf 'DISCORD_BOT_TOKEN=%s\n' "$(cat "$TOKEN_FILE")" > "$ENV_FILE"
+      chown ${username}:users "$ENV_FILE"
+      chmod 600 "$ENV_FILE"
+    else
+      echo "ERROR: Hermes Discord bot token not found or empty at $TOKEN_FILE" >&2
+      exit 1
+    fi
+  '';
 
   environment.systemPackages = [ hermesPackage ];
 
