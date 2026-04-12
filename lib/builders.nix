@@ -51,20 +51,20 @@ rec {
         "system"
         "username"
         "homeDirectory"
-        "baseProfile"
+        "profile"
       ];
       missingFields = builtins.filter (field: !(builtins.hasAttr field config)) requiredFields;
       pkgs = systemPkgs.${config.system};
 
       flakeDirectory = config.flakeDirectory or (mkFlakeDirectory config.homeDirectory);
 
-      # Dynamic base module loading based on baseProfile
-      baseHomeModule = ../base + "/${config.baseProfile}/home.nix";
+      # Dynamic base module loading based on profile
+      baseHomeModule = ../base + "/${config.profile}/home.nix";
       dynamicModules =
         if builtins.pathExists baseHomeModule then
           [ baseHomeModule ]
         else
-          throw "Base profile '${config.baseProfile}' not found at ${baseHomeModule}";
+          throw "Base profile '${config.profile}' not found at ${baseHomeModule}";
     in
     if missingFields != [ ] then
       throw "Missing required fields for ${name}: ${builtins.toString missingFields}"
@@ -81,7 +81,7 @@ rec {
           inputs.agenix.homeManagerModules.default
         ]
         ++ dynamicModules
-        ++ (config.extraModules or [ ]);
+        ++ (config.homeModules or [ ]);
       };
 
   # NixOS Configuration helper function
@@ -92,7 +92,7 @@ rec {
         "system"
         "username"
         "homeDirectory"
-        "homeConfig"
+        "profile"
       ];
       missingFields = builtins.filter (field: !(builtins.hasAttr field config)) requiredFields;
 
@@ -105,8 +105,9 @@ rec {
         hasSystemCodexConfig = true;
       };
 
-      # Combine base home config with extra home modules
-      homeModules = [ config.homeConfig ] ++ (config.extraHomeModules or [ ]);
+      # Derive home config from profile, combine with extra home modules
+      homeConfig = ../base + "/${config.profile}/home.nix";
+      homeModules = [ homeConfig ] ++ (config.homeModules or [ ]);
       sharedHomeModules = [ inputs.agenix.homeManagerModules.default ];
     in
     if missingFields != [ ] then
@@ -143,57 +144,4 @@ rec {
         ++ (config.extraModules or [ ]);
       };
 
-  # Darwin Configuration helper function
-  mkDarwinConfig =
-    name: config:
-    let
-      requiredFields = [
-        "system"
-        "username"
-        "homeDirectory"
-        "homeConfig"
-      ];
-      missingFields = builtins.filter (field: !(builtins.hasAttr field config)) requiredFields;
-
-      flakeDirectory = config.flakeDirectory or (mkFlakeDirectory config.homeDirectory);
-
-      specialArgs = {
-        inherit inputs flakeDirectory;
-        inherit (config) username homeDirectory;
-        isWSL = false;
-        hasSystemCodexConfig = true;
-      };
-
-      homeModules = [ config.homeConfig ] ++ (config.extraHomeModules or [ ]);
-      sharedHomeModules = [ inputs.agenix.homeManagerModules.default ];
-    in
-    if missingFields != [ ] then
-      throw "Missing required fields for darwin host ${name}: ${builtins.toString missingFields}"
-    else
-      inputs.nix-darwin.lib.darwinSystem {
-        inherit specialArgs;
-        modules = [
-          ../modules/codex/system.nix
-          inputs.home-manager.darwinModules.home-manager
-          inputs.agenix.darwinModules.default
-          (../hosts + "/${name}/configuration.nix")
-          {
-            nixpkgs.hostPlatform = config.system;
-            nixpkgs.overlays = commonOverlays;
-            nixpkgs.config.allowUnfree = true;
-
-            users.users.${config.username}.home = nixpkgs.lib.mkDefault config.homeDirectory;
-
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.backupFileExtension = "backup";
-            home-manager.extraSpecialArgs = specialArgs;
-            home-manager.sharedModules = sharedHomeModules;
-            home-manager.users.${config.username} = {
-              imports = homeModules;
-            };
-          }
-        ]
-        ++ (config.extraModules or [ ]);
-      };
 }

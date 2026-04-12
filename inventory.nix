@@ -1,43 +1,44 @@
 {
   "pylv-sepia" = {
+    kind = "nixos";
     system = "x86_64-linux";
-
     username = "gytkk";
     homeDirectory = "/home/gytkk";
-
-    # Home Manager configuration for this host
-    homeConfig = ./base/pylv/home.nix;
-
-    # Extra home manager modules for this host
-    extraHomeModules = [ ./base/pylv/sepia.nix ];
+    profile = "pylv";
+    homeModules = [ ./base/pylv/sepia.nix ];
   };
 
   "pylv-onyx" = {
+    kind = "nixos";
     system = "x86_64-linux";
-
     username = "gytkk";
     homeDirectory = "/home/gytkk";
-
-    # Home Manager configuration for this host
-    homeConfig = ./base/pylv/home.nix;
-
-    extraHomeModules = [ ./base/pylv/onyx.nix ];
+    profile = "pylv";
+    homeModules = [ ./base/pylv/onyx.nix ];
   };
 
-  # Darwin hosts
+  "pylv-denim" = {
+    kind = "home-only";
+    system = "x86_64-linux";
+    username = "gytkk";
+    homeDirectory = "/home/gytkk";
+    profile = "pylv";
+    isWSL = true;
+  };
+
   "devsisters-macbook" = {
+    kind = "home-only";
     system = "aarch64-darwin";
     username = "gyutak";
     homeDirectory = "/Users/gyutak";
-    homeConfig = ./base/devsisters/home.nix;
-    isDarwin = true;
+    profile = "devsisters";
   };
 
   "devsisters-macstudio" = {
+    kind = "home-only";
     system = "aarch64-darwin";
     username = "gyutak";
     homeDirectory = "/Users/gyutak";
-    homeConfig = ./base/devsisters/home.nix;
-    isDarwin = true;
+    profile = "devsisters";
   };
 }

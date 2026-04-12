@@ -1,14 +1,11 @@
 { pkgs, lib, ... }:
 let
-  allHostsRaw = import ../hosts.nix;
+  inventory = import ../inventory.nix;
 in
 {
-  # Home Manager 환경 설정
-  allEnvironments = import ../environments.nix;
+  # Home Manager 환경 설정 (모든 호스트)
+  allEnvironments = inventory;
 
   # NixOS 호스트 설정
-  allHosts = lib.filterAttrs (_: config: !(config.isDarwin or false)) allHostsRaw;
-
-  # Darwin 호스트 설정
-  allDarwinHosts = lib.filterAttrs (_: config: config.isDarwin or false) allHostsRaw;
+  allHosts = lib.filterAttrs (_: config: config.kind == "nixos") inventory;
 }

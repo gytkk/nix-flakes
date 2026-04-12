@@ -114,7 +114,6 @@
       # 환경별 설정 (라이브러리에서 자동 로드)
       environmentConfigs = lib.environments.allEnvironments;
       hostConfigs = lib.environments.allHosts;
-      darwinHostConfigs = lib.environments.allDarwinHosts;
 
       # 홈 설정 생성 함수
       mkHomeConfig = lib.builders.mkHomeConfig {
@@ -123,15 +122,10 @@
 
       # NixOS 설정 생성 함수
       mkNixOSConfig = lib.builders.mkNixOSConfig;
-
-      # Darwin 설정 생성 함수
-      mkDarwinConfig = lib.builders.mkDarwinConfig;
     in
     {
       homeConfigurations = builtins.mapAttrs mkHomeConfig environmentConfigs;
 
       nixosConfigurations = builtins.mapAttrs mkNixOSConfig hostConfigs;
-
-      darwinConfigurations = builtins.mapAttrs mkDarwinConfig darwinHostConfigs;
     };
 }

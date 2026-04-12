@@ -35,8 +35,7 @@ nix eval .#homeConfigurations.pylv-denim.config.home.packages --apply 'x: map (p
 
 ```bash
 home-manager switch --flake .#<environment>   # pylv-denim, pylv-sepia, devsisters-macbook, devsisters-macstudio
-darwin-rebuild switch --flake .#<host>        # devsisters-macbook, devsisters-macstudio (nix-darwin)
-nixos-rebuild switch --flake .#pylv-sepia     # NixOS only
+nixos-rebuild switch --flake .#<host>         # pylv-sepia, pylv-onyx (NixOS only)
 ```
 
 ---
@@ -50,33 +49,33 @@ nixos-rebuild switch --flake .#pylv-sepia     # NixOS only
 - **Module pattern**: `let cfg = config.modules.name; in { options.modules.name = { enable = lib.mkOption { ... }; }; config = lib.mkIf cfg.enable { ... }; }`
 - **Imports**: Use relative paths, import directories by name (e.g., `../modules/claude`)
 - **Conditionals**: `lib.mkIf`, `lib.mkMerge`, `lib.mkForce`
-- **Environment definition**: See `environments.nix` for required fields (`baseProfile`, `system`, `username`, `homeDirectory`)
+- **Host definition**: See `inventory.nix` for required fields (`kind`, `system`, `username`, `homeDirectory`, `profile`)
 - **Secrets**: Use [agenix](https://github.com/ryantm/agenix) — `agenix -e secrets/name.age`, decrypts to `/run/agenix/<secretName>`
 
 ### Architecture
 
-Nix flakes-based Home Manager, nix-darwin, and NixOS configuration supporting multiple environments (macOS and Linux) with layered base system.
+Nix flakes-based Home Manager and NixOS configuration supporting multiple environments (macOS and Linux) with layered base system.
 
 ```text
 flake.nix                         # Main flake configuration
-environments.nix                  # All environment definitions
-hosts.nix                         # NixOS and Darwin host definitions
+inventory.nix                     # All host/environment definitions (kind, system, profile)
 base/default.nix                  # Common configuration for all environments
 base/<company>/home.nix           # Company-specific extensions (devsisters, pylv)
 modules/<name>/default.nix        # Reusable module
-hosts/<name>/configuration.nix    # NixOS/Darwin host configuration
-lib/builders.nix                  # mkHomeConfig, mkNixOSConfig, mkDarwinConfig helpers
+hosts/<name>/configuration.nix    # NixOS host configuration
+lib/builders.nix                  # mkHomeConfig, mkNixOSConfig helpers
 overlays/default.nix              # nixpkgs version overlays
 secrets/secrets.nix               # Agenix secrets configuration
 ```
 
 #### Environments
 
-Defined in `environments.nix` (Home Manager) and `hosts.nix` (system-level):
+Defined in `inventory.nix` (single source of truth). `kind` field determines build type:
 
-- **devsisters-macbook / devsisters-macstudio**: ARM64 macOS, devsisters base, nix-darwin
-- **pylv-denim**: x86_64 Linux/WSL, pylv base
+- **devsisters-macbook / devsisters-macstudio**: ARM64 macOS, devsisters base, home-only
+- **pylv-denim**: x86_64 Linux/WSL, pylv base, home-only
 - **pylv-sepia**: x86_64 Linux/NixOS server, pylv base (with Disko, agenix, copyparty, OpenClaw)
+- **pylv-onyx**: x86_64 Linux/NixOS, pylv base
 
 #### Base System
 
@@ -101,6 +100,7 @@ modules/<name>/
 
 | Module       | Purpose             | Key Files                                           | Mutable |
 | ------------ | ------------------- | --------------------------------------------------- | ------- |
+| `nixos/`     | NixOS common config | `baseline.nix`, `remote-access.nix`, `user.nix`     | NO      |
 | `claude/`    | Claude Code         | `files/settings.json`, `files/CLAUDE.md`            | 부분적  |
 | `codex/`     | OpenAI Codex CLI    | `files/config.toml`, `files/AGENTS.md`              | YES     |
 | `ghostty/`   | Ghostty terminal    | `files/config`                                      | YES     |
