@@ -1,6 +1,9 @@
 { pkgs, inputs }:
 let
   basePackage = inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default;
+  hermesPythonEnv = pkgs.callPackage "${inputs.hermes-agent}/nix/python.nix" {
+    inherit (inputs.hermes-agent.inputs) uv2nix pyproject-nix pyproject-build-systems;
+  };
   hermesSitecustomize = pkgs.writeTextDir "sitecustomize.py" ''
     import os
     import stat
@@ -135,6 +138,12 @@ let
 in
 basePackage.overrideAttrs (old: {
   nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ pkgs.makeWrapper ];
+  passthru = (old.passthru or { }) // {
+    pythonEnv = hermesPythonEnv;
+    pythonExecutable = "${hermesPythonEnv}/bin/python";
+    pythonSitePackages = "${hermesPythonEnv}/${pkgs.python311.sitePackages}";
+    sitecustomize = hermesSitecustomize;
+  };
   postFixup = (old.postFixup or "") + ''
     for bin in $out/bin/hermes $out/bin/hermes-agent $out/bin/hermes-acp; do
       wrapProgram "$bin" --prefix PYTHONPATH : ${pkgs.lib.escapeShellArg hermesSitecustomize}

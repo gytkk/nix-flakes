@@ -78,6 +78,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    hermes-webui = {
+      url = "github:nesquena/hermes-webui";
+      flake = false;
+    };
+
     flake-stores = {
       url = "github:gytkk/flake-stores";
       inputs.nixpkgs.follows = "nixpkgs";
