@@ -82,6 +82,7 @@
       bat
 
       # Python
+      python3
       uv
       ruff
 
