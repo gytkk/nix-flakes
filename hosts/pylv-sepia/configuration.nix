@@ -88,8 +88,8 @@
   };
 
   # Cloudflare Tunnel (token-based, managed via Zero Trust dashboard)
-  age.secrets.cloudflare-tunnel-token = {
-    file = ../../secrets/cloudflare-tunnel-token.age;
+  age.secrets.cloudflare-tunnel-sepia-token = {
+    file = ../../secrets/cloudflare-tunnel-sepia-token.age;
     owner = "cloudflared";
     group = "cloudflared";
   };
@@ -101,7 +101,7 @@
     wantedBy = [ "multi-user.target" ];
     script = ''
       ${pkgs.cloudflared}/bin/cloudflared tunnel --no-autoupdate run \
-        --token "$(cat /run/agenix/cloudflare-tunnel-token)"
+        --token "$(cat /run/agenix/cloudflare-tunnel-sepia-token)"
     '';
     serviceConfig = {
       Restart = "always";
