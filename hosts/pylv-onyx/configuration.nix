@@ -87,13 +87,17 @@
     xwayland-satellite-stable
   ];
 
-  # Wayland Electron support and OpenClaw CLI defaults for login shells.
+  # Wayland Electron support and headless user-systemd defaults for login shells.
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
     OPENCLAW_CONFIG_PATH = "/home/gytkk/.openclaw/openclaw.json";
     CLAWDBOT_CONFIG_PATH = "/home/gytkk/.openclaw/openclaw.json";
     OPENCLAW_STATE_DIR = "/home/gytkk/.openclaw";
     CLAWDBOT_STATE_DIR = "/home/gytkk/.openclaw";
+    # Temporary workaround for headless Hermes CLI sessions so `systemctl --user`
+    # can reach the user's bus and correctly detect the running gateway service.
+    XDG_RUNTIME_DIR = "/run/user/1000";
+    DBUS_SESSION_BUS_ADDRESS = "unix:path=/run/user/1000/bus";
   };
 
   # CJK fallback 글꼴

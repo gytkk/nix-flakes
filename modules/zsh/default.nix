@@ -99,6 +99,15 @@
 
           # Prevent LC_ALL from overriding LANG/LC_CTYPE
           unset LC_ALL
+
+          # Temporary workaround for headless user-systemd sessions so Hermes CLI
+          # can discover the running gateway service via `systemctl --user`.
+          if [[ -z "''${XDG_RUNTIME_DIR:-}" ]]; then
+            export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+          fi
+          if [[ -z "''${DBUS_SESSION_BUS_ADDRESS:-}" && -S "$XDG_RUNTIME_DIR/bus" ]]; then
+            export DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR/bus"
+          fi
         '';
 
         zshConfig = lib.mkOrder 1000 ''
