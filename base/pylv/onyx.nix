@@ -3,6 +3,7 @@
   # pylv-onyx 데스크톱 환경 전용 설정
 
   imports = [
+    ../../modules/hermes-agent
     inputs.zen-browser.homeModules.beta
     inputs.dms.homeModules.dank-material-shell
     inputs.dms.homeModules.niri
