@@ -19,6 +19,8 @@ let
   hermesWorkspace = "${hermesHome}/workspace";
   hermesPackage = import ../../modules/hermes-agent/package.nix { inherit pkgs inputs; };
   hermesWebUiSrc = inputs.hermes-webui.outPath;
+  hermesWebUiThemeAssets = ../../modules/hermes-agent/files;
+  hermesWebUiThemeName = "one-half-light";
   proxyPassTarget = "http://127.0.0.1:${toString hermesWebUiBackendPort}";
   proxyHeaders = ''
     proxy_set_header Host $host;
@@ -88,6 +90,35 @@ in
     };
   };
 
+  system.activationScripts."hermes-webui-10-one-half-light-seed" = lib.stringAfter [ "users" ] ''
+    state_dir=${lib.escapeShellArg hermesWebUiStateDir}
+    settings_file="$state_dir/settings.json"
+    seed_marker="$state_dir/.one-half-light-theme-seeded"
+
+    ${pkgs.coreutils}/bin/install -d -o ${username} -g users -m 0750 "$state_dir"
+
+    if [ ! -e "$seed_marker" ]; then
+      tmp_file="$(${pkgs.coreutils}/bin/mktemp)"
+
+      if [ -s "$settings_file" ]; then
+        if ! ${pkgs.jq}/bin/jq '.theme = "${hermesWebUiThemeName}"' \
+          "$settings_file" > "$tmp_file"; then
+          printf '{\n  "theme": "%s"\n}\n' ${lib.escapeShellArg hermesWebUiThemeName} > "$tmp_file"
+        fi
+      else
+        printf '{\n  "theme": "%s"\n}\n' ${lib.escapeShellArg hermesWebUiThemeName} > "$tmp_file"
+      fi
+
+      ${pkgs.coreutils}/bin/install -o ${username} -g users -m 0600 \
+        "$tmp_file" "$settings_file"
+      ${pkgs.coreutils}/bin/rm -f "$tmp_file"
+
+      ${pkgs.coreutils}/bin/touch "$seed_marker"
+      ${pkgs.coreutils}/bin/chown ${username}:users "$seed_marker"
+      ${pkgs.coreutils}/bin/chmod 0640 "$seed_marker"
+    fi
+  '';
+
   services.nginx.virtualHosts."hermes-webui-origin" = {
     serverName = "_";
     listen = [
@@ -96,6 +127,12 @@ in
         port = hermesWebUiPort;
       }
     ];
+    locations."/static/nix-flakes/" = {
+      alias = "${hermesWebUiThemeAssets}/";
+      extraConfig = ''
+        add_header Cache-Control "no-store";
+      '';
+    };
     locations."/api/chat/stream" = {
       proxyPass = proxyPassTarget;
       extraConfig = ''
@@ -120,6 +157,11 @@ in
         client_max_body_size 25m;
         proxy_buffering off;
         proxy_read_timeout 10m;
+        proxy_set_header Accept-Encoding "";
+        sub_filter_once on;
+        sub_filter_types text/html;
+        sub_filter '</head>' '<link rel="stylesheet" href="/static/nix-flakes/hermes-webui-one-half-light.css"></head>';
+        sub_filter '</body>' '<script src="/static/nix-flakes/hermes-webui-one-half-light.js"></script></body>';
         ${proxyHeaders}
       '';
     };

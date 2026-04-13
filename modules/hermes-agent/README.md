@@ -6,6 +6,7 @@ Hermes 관련 설정은 이 디렉터리 아래로 모읍니다.
 
 - `default.nix` — Home Manager용 최소 CLI 설정
 - `system.nix` — NixOS용 managed gateway/service 설정 템플릿
+- `files/` — Hermes WebUI overlay assets
 
 ## 현재 역할
 
@@ -38,3 +39,4 @@ Hermes 관련 설정은 이 디렉터리 아래로 모읍니다.
 - **LAN**: `http://192.168.0.10:8787/` (`wlo1` 인터페이스)
 - **Tailscale**: `https://pylv-onyx.tailbbb9bf.ts.net:8445/` 또는 `http://pylv-onyx:8787/`
 - **Backend**: `127.0.0.1:8788` (loopback 전용)
+- **Theme overlay**: nginx가 `one-half-light` CSS/JS를 주입하고, `/var/lib/hermes-webui/settings.json`에는 최초 1회만 기본 theme을 seed
