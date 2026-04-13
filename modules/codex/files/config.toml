@@ -11,5 +11,8 @@ personality = "pragmatic"
 shell_tool = true
 multi_agent = true
 
+[tui]
+alternate_screen = "never"
+
 [history]
 persistence = "save-all"
