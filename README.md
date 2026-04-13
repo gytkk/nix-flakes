@@ -137,15 +137,15 @@ nix build .#nixosConfigurations.pylv-sepia.config.system.build.toplevel
 - OpenClaw bootstrap and guardrails live in [`modules/openclaw/default.nix`](./modules/openclaw/default.nix)
 - Nix now seeds `/etc/openclaw/openclaw.seed.json` and `/etc/openclaw/openclaw.guardrails.json`, while the mutable runtime config lives at `~/.openclaw/openclaw.json`
 
-### `pylv-onyx` Hermes Open WebUI access
+### `pylv-onyx` OpenClaw Open WebUI access
 
 - Public hostname: `https://openwebui.pylv.dev` once the existing `pylv-onyx` Cloudflare Tunnel is mapped to that hostname in Cloudflare Zero Trust
 - Access control: protect the public hostname with a Cloudflare Access self-hosted app; for your current plan, allow only `gytk.kim@gmail.com` and keep Google MFA/passkey enabled on that account
-- Tailscale fallback remains available at `https://pylv-onyx.tailbbb9bf.ts.net:8445`
 - The nginx origin listens only on loopback `127.0.0.1:8787`; the raw Open WebUI backend stays loopback-only on `127.0.0.1:8788`
-- Hermes Agent now exposes its OpenAI-compatible API on `http://127.0.0.1:8642/v1`; Open WebUI connects to that loopback endpoint with the bearer token derived from `secrets/hermes-webui-env.age`
-- The same secret also seeds the initial Open WebUI admin password for `gytk.kim@gmail.com`
-- Mutable Hermes Open WebUI data lives under `/var/lib/hermes-open-webui`
+- Open WebUI talks to the local OpenClaw trusted proxy on `http://127.0.0.1:18790/v1` and defaults to `openclaw/main`
+- `nginx` injects fixed trusted-auth headers, so the public path auto-signs in as `gytk.kim@gmail.com` after Cloudflare Access admits the request
+- `secrets/open-webui-env.age` seeds the initial Open WebUI admin environment
+- Mutable Open WebUI data lives under `/var/lib/open-webui`
 - Suggested Cloudflare origin target: `http://127.0.0.1:8787`
 
 ## Hermes Agent

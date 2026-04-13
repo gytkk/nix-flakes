@@ -7,7 +7,7 @@
 {
   imports = [
     ./hardware-configuration.nix
-    ./hermes-webui.nix
+    ./open-webui.nix
     ../../modules/openclaw
     ../../modules/nixos
   ];

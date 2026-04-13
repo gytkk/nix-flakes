@@ -30,14 +30,3 @@ Hermes 관련 설정은 이 디렉터리 아래로 모읍니다.
 - 서비스 시작 전 기존 `~/.hermes/skills` tree도 writable 권한으로 정규화
 
 원칙: 편의 기능보다 실제 동작에 필요한 최소 설정만 둡니다.
-
-## Hermes Open WebUI 엔드포인트
-
-`pylv-onyx`에서 Hermes Open WebUI 접속:
-
-- **Public**: `https://openwebui.pylv.dev` after the existing `pylv-onyx` Cloudflare Tunnel is mapped to that hostname
-- **Tailscale**: `https://pylv-onyx.tailbbb9bf.ts.net:8445/`
-- **Frontend origin**: `127.0.0.1:8787` (loopback 전용)
-- **Backend**: `127.0.0.1:8788` (loopback 전용)
-- **Hermes API**: `127.0.0.1:8642/v1` (loopback 전용, bearer token required)
-- **Auth/bootstrap**: `secrets/hermes-webui-env.age` provides the shared secret used for both the Hermes API bearer token and the initial Open WebUI admin password
