@@ -23,6 +23,13 @@ new_modified=$(jq -r ".nodes.\"${INPUT_NAME}\".locked.lastModified" "$FLAKE_LOCK
 
 if [[ "$old_rev" == "$new_rev" ]]; then
   echo "No updates available for ${INPUT_NAME}."
+  echo ""
+  echo "Current package versions:"
+  while IFS='=' read -r pkg full_name; do
+    [[ -z "$pkg" ]] && continue
+    ver="${full_name#"${pkg}-"}"
+    echo "  - ${pkg}: ${ver}"
+  done <<< "$old_packages"
   exit 0
 fi
 
