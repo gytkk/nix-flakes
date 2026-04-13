@@ -51,6 +51,7 @@ in
       HERMES_WEBUI_DEFAULT_WORKSPACE = hermesWorkspace;
       HERMES_WEBUI_HOST = "127.0.0.1";
       HERMES_WEBUI_PORT = toString hermesWebUiBackendPort;
+      HERMES_WEBUI_SKIP_ONBOARDING = "1";
       HERMES_WEBUI_STATE_DIR = hermesWebUiStateDir;
       PYTHONPATH = lib.concatStringsSep ":" [
         hermesPackage.sitecustomize
