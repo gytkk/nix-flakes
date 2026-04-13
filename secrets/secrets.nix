@@ -35,6 +35,9 @@ in
   # Cloudflare Tunnel token for pylv-sepia
   "cloudflare-tunnel-sepia-token.age".publicKeys = allUsers ++ allHosts;
 
+  # Cloudflare Tunnel token for pylv-onyx Hermes WebUI
+  "cloudflare-tunnel-onyx-token.age".publicKeys = allUsers ++ allHosts;
+
   # Discord bot token for openclaw
   "discord-bot-token.age".publicKeys = allUsers ++ allHosts;
 

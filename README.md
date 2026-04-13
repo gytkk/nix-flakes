@@ -148,14 +148,15 @@ nix build .#nixosConfigurations.pylv-sepia.config.system.build.toplevel
 
 ### `pylv-onyx` Hermes WebUI access
 
-- Tailscale: `https://pylv-onyx.tailbbb9bf.ts.net:8445`
-- Local network: `http://pylv-onyx:8787` when LAN DNS/mDNS resolves, otherwise use the current Wi-Fi address `http://192.168.0.10:8787`
-- Main desktop or any LAN-only client: `ssh -N -L 8787:127.0.0.1:8787 gytkk@pylv-onyx`, then browse `http://localhost:8787`
-- Direct LAN exposure is enabled only on `wlo1` port `8787`; the raw Hermes WebUI backend stays loopback-only on `127.0.0.1:8788`
-- Hermes WebUI uses its own password auth; the runtime password is seeded from `secrets/hermes-webui-env.age`
+- Public hostname: served through a dedicated Cloudflare Tunnel on `pylv-onyx` once `secrets/cloudflare-tunnel-onyx-token.age` is created and the tunnel/public hostname is configured in Cloudflare Zero Trust
+- Access control: protect the public hostname with a Cloudflare Access self-hosted app; for your current plan, allow only `gytk.kim@gmail.com` and keep Google MFA/passkey enabled on that account
+- Tailscale fallback remains available at `https://pylv-onyx.tailbbb9bf.ts.net:8445`
+- The nginx origin now listens only on loopback `127.0.0.1:8787`; the raw Hermes WebUI backend stays loopback-only on `127.0.0.1:8788`
+- Hermes WebUI uses its own password auth; the runtime password is seeded from `secrets/hermes-webui-env.age`, but the public path should rely on Cloudflare Access as the main gate
 - The WebUI reads the live Hermes runtime at `/home/gytkk/.hermes`, so it sees the same `openai-codex / gpt-5.4` provider setup that the running Hermes gateway already uses
 - First-run onboarding is auto-skipped when Hermes is already `chat_ready`, via `HERMES_WEBUI_SKIP_ONBOARDING=1`
 - Mutable Hermes WebUI session/state data lives under `/var/lib/hermes-webui`
+- Suggested Cloudflare origin target: `http://127.0.0.1:8787`
 
 ## Hermes Agent
 

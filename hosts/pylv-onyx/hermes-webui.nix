@@ -11,8 +11,8 @@ let
   hermesWebUiPort = 8787;
   hermesWebUiBackendPort = 8788;
   tailscaleServePort = 8445;
-  tailscaleFqdn = "${config.networking.hostName}.tailbbb9bf.ts.net";
-  lanInterface = "wlo1";
+  cloudflareTunnelTokenFile = ../../secrets/cloudflare-tunnel-onyx-token.age;
+  cloudflareTunnelEnabled = builtins.pathExists cloudflareTunnelTokenFile;
   hermesWebUiStateDir = "/var/lib/hermes-webui";
   hermesHome = "${homeDirectory}/.hermes";
   hermesConfigPath = "${hermesHome}/config.yaml";
@@ -36,6 +36,21 @@ in
     group = "root";
     mode = "0400";
   };
+
+  age.secrets.cloudflare-tunnel-onyx-token = lib.mkIf cloudflareTunnelEnabled {
+    file = cloudflareTunnelTokenFile;
+    owner = "cloudflared";
+    group = "cloudflared";
+  };
+
+  users.users.cloudflared = lib.mkIf cloudflareTunnelEnabled {
+    isSystemUser = true;
+    group = "cloudflared";
+  };
+
+  users.groups.cloudflared = lib.mkIf cloudflareTunnelEnabled { };
+
+  environment.systemPackages = lib.mkIf cloudflareTunnelEnabled [ pkgs.cloudflared ];
 
   systemd.services.hermes-webui = {
     description = "Hermes WebUI";
@@ -73,11 +88,11 @@ in
     };
   };
 
-  services.nginx.virtualHosts."hermes-webui-lan" = {
+  services.nginx.virtualHosts."hermes-webui-origin" = {
     serverName = "_";
     listen = [
       {
-        addr = "0.0.0.0";
+        addr = "127.0.0.1";
         port = hermesWebUiPort;
       }
     ];
@@ -110,8 +125,29 @@ in
     };
   };
 
-  networking.firewall.interfaces = {
-    "${lanInterface}".allowedTCPPorts = [ hermesWebUiPort ];
+  systemd.services.cloudflared-tunnel-hermes-webui = lib.mkIf cloudflareTunnelEnabled {
+    description = "Cloudflare Tunnel for Hermes WebUI";
+    after = [
+      "network-online.target"
+      "nginx.service"
+      "hermes-webui.service"
+    ];
+    wants = [
+      "network-online.target"
+      "nginx.service"
+      "hermes-webui.service"
+    ];
+    wantedBy = [ "multi-user.target" ];
+    script = ''
+      ${pkgs.cloudflared}/bin/cloudflared tunnel --no-autoupdate run \
+        --token "$(cat ${config.age.secrets.cloudflare-tunnel-onyx-token.path})"
+    '';
+    serviceConfig = {
+      Restart = "always";
+      RestartSec = 5;
+      User = "cloudflared";
+      Group = "cloudflared";
+    };
   };
 
   systemd.services.tailscale-serve-hermes-webui = {
