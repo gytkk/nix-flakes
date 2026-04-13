@@ -10,6 +10,11 @@ GITHUB_REPO="gytkk/flake-stores"
 old_rev=$(jq -r ".nodes.\"${INPUT_NAME}\".locked.rev" "$FLAKE_LOCK")
 old_modified=$(jq -r ".nodes.\"${INPUT_NAME}\".locked.lastModified" "$FLAKE_LOCK")
 
+# Capture package versions from current (old) flake-stores
+echo "Capturing current package versions..."
+old_packages=$(nix flake show "github:${GITHUB_REPO}/${old_rev}" --json 2>/dev/null \
+  | jq -r '.packages["aarch64-darwin"] // {} | to_entries[] | select(.key != "default") | "\(.key)=\(.value.name // "")"')
+
 echo "Updating ${INPUT_NAME}..."
 nix flake update "$INPUT_NAME"
 
@@ -30,25 +35,39 @@ new_date=$(format_date "$new_modified")
 old_short="${old_rev:0:12}"
 new_short="${new_rev:0:12}"
 
-echo ""
-echo "Fetching package changes..."
+# Capture package versions from new flake-stores
+echo "Capturing new package versions..."
+new_packages=$(nix flake show "github:${GITHUB_REPO}/${new_rev}" --json 2>/dev/null \
+  | jq -r '.packages["aarch64-darwin"] // {} | to_entries[] | select(.key != "default") | "\(.key)=\(.value.name // "")"')
 
-fetch_commit_info() {
-  local rev="$1"
-  curl -s "https://api.github.com/repos/${GITHUB_REPO}/commits/${rev}" \
-    -H "Accept: application/vnd.github.v3+json" 2>/dev/null | \
-    jq -r '.commit.message // empty' 2>/dev/null || echo ""
-}
+# Compare old vs new package versions and build change summary
+package_changes=""
+while IFS='=' read -r pkg new_full_name; do
+  [[ -z "$pkg" ]] && continue
+  old_full_name=$(echo "$old_packages" | rg "^${pkg}=" | head -1 | cut -d= -f2-)
+  # Extract version: strip package name prefix (handle names with hyphens)
+  new_ver="${new_full_name#"${pkg}-"}"
+  old_ver="${old_full_name#"${pkg}-"}"
+  if [[ "$old_ver" != "$new_ver" ]]; then
+    if [[ -z "$old_ver" ]]; then
+      package_changes+="  - ${pkg}: (new) ${new_ver}"$'\n'
+    else
+      package_changes+="  - ${pkg}: ${old_ver} -> ${new_ver}"$'\n'
+    fi
+  fi
+done <<< "$new_packages"
 
-fetch_commits_between() {
-  local old="$1"
-  local new="$2"
-  curl -s "https://api.github.com/repos/${GITHUB_REPO}/compare/${old}...${new}" \
-    -H "Accept: application/vnd.github.v3+json" 2>/dev/null | \
-    jq -r '.commits[] | select(.commit.message | test("^(Update|Add|Remove|Bump|Upgrade|Downgrade)"; "i")) | "  - " + (.commit.message | split("\n")[0])' 2>/dev/null || echo ""
-}
+# Check for removed packages
+while IFS='=' read -r pkg old_full_name; do
+  [[ -z "$pkg" ]] && continue
+  if ! echo "$new_packages" | rg -q "^${pkg}="; then
+    old_ver="${old_full_name#"${pkg}-"}"
+    package_changes+="  - ${pkg}: ${old_ver} (removed)"$'\n'
+  fi
+done <<< "$old_packages"
 
-package_changes=$(fetch_commits_between "$old_rev" "$new_rev")
+# Remove trailing newline
+package_changes="${package_changes%$'\n'}"
 
 echo ""
 echo "=== ${INPUT_NAME} updated ==="
@@ -61,12 +80,8 @@ if [[ -n "$package_changes" ]]; then
   echo "Package changes:"
   echo "$package_changes"
 else
-  new_commit_msg=$(fetch_commit_info "$new_rev")
-  if [[ -n "$new_commit_msg" ]]; then
-    echo ""
-    echo "Latest commit:"
-    echo "  $(echo "$new_commit_msg" | head -1)"
-  fi
+  echo ""
+  echo "No package version changes."
 fi
 
 echo ""
