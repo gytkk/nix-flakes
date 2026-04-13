@@ -154,6 +154,7 @@ nix build .#nixosConfigurations.pylv-sepia.config.system.build.toplevel
 - Direct LAN exposure is enabled only on `wlo1` port `8787`; the raw Hermes WebUI backend stays loopback-only on `127.0.0.1:8788`
 - Hermes WebUI uses its own password auth; the runtime password is seeded from `secrets/hermes-webui-env.age`
 - The WebUI reads the live Hermes runtime at `/home/gytkk/.hermes`, so it sees the same `openai-codex / gpt-5.4` provider setup that the running Hermes gateway already uses
+- First-run onboarding is auto-skipped when Hermes is already `chat_ready`, via `HERMES_WEBUI_SKIP_ONBOARDING=1`
 - Mutable Hermes WebUI session/state data lives under `/var/lib/hermes-webui`
 
 ## Hermes Agent
