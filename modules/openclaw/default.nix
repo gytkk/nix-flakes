@@ -52,72 +52,20 @@ in
     group = "users";
     mode = "0400";
   };
-  services.openclaw-gateway = {
-    enable = true;
-    package = pkgs.openclaw-gateway;
-    port = gatewayPort;
-    user = username;
-    group = "users";
-    createUser = false;
-    stateDir = stateDir;
-    configPath = seedConfigPath;
-    config = seedConfig;
 
-    environment = {
-      OPENCLAW_CONFIG_PATH = runtimeConfigPath;
-      CLAWDBOT_CONFIG_PATH = runtimeConfigPath;
-    };
+  environment.etc."openclaw/openclaw.seed.json".text = builtins.toJSON seedConfig;
 
-    execStartPre = [
-      "+${pkgs.writeShellScript "openclaw-discord-env" ''
-        TOKEN_FILE="/run/agenix/discord-bot-token"
-        ENV_DIR="/run/openclaw"
-        ENV_FILE="$ENV_DIR/env"
-        ${pkgs.coreutils}/bin/mkdir -p "$ENV_DIR"
-        if [ -f "$TOKEN_FILE" ] && [ -s "$TOKEN_FILE" ]; then
-          echo "DISCORD_BOT_TOKEN=$(${pkgs.coreutils}/bin/cat "$TOKEN_FILE")" > "$ENV_FILE"
-        else
-          echo "ERROR: Discord bot token not found or empty at $TOKEN_FILE" >&2
-          exit 1
-        fi
-        ${pkgs.coreutils}/bin/chmod 600 "$ENV_FILE"
-        ${pkgs.coreutils}/bin/chown ${username}:users "$ENV_FILE"
-      ''}"
-      "${pkgs.writeShellScript "openclaw-runtime-config" ''
-        set -euo pipefail
+  environment.etc."profile.d/openclaw-discord-token.sh".text = ''
+    if [ -z "''${DISCORD_BOT_TOKEN-}" ] && [ -r /run/agenix/discord-bot-token ]; then
+      export DISCORD_BOT_TOKEN="$(cat /run/agenix/discord-bot-token)"
+    fi
+  '';
 
-        runtime_config=${pkgs.lib.escapeShellArg runtimeConfigPath}
-        seed_config=${pkgs.lib.escapeShellArg seedConfigPath}
-        state_dir=${pkgs.lib.escapeShellArg stateDir}
-
-        mkdir -p "$state_dir"
-
-        if [ -L "$runtime_config" ]; then
-          migrated_file="$(${pkgs.coreutils}/bin/mktemp "$state_dir/openclaw.json.migrate.XXXXXX")"
-          ${pkgs.coreutils}/bin/cp --dereference "$runtime_config" "$migrated_file"
-          ${pkgs.coreutils}/bin/chmod 600 "$migrated_file"
-          ${pkgs.coreutils}/bin/mv -f "$migrated_file" "$runtime_config"
-        fi
-
-        if [ ! -e "$runtime_config" ]; then
-          seeded_file="$(${pkgs.coreutils}/bin/mktemp "$state_dir/openclaw.json.seed.XXXXXX")"
-          ${pkgs.coreutils}/bin/cp "$seed_config" "$seeded_file"
-          ${pkgs.coreutils}/bin/chmod 600 "$seeded_file"
-          ${pkgs.coreutils}/bin/mv -f "$seeded_file" "$runtime_config"
-        fi
-
-        ${pkgs.jq}/bin/jq -e . "$runtime_config" >/dev/null
-      ''}"
-    ];
-    environmentFiles = [ "-/run/openclaw/env" ];
-
-    servicePath = with pkgs; [
-      bun
-      nodejs
-    ];
-  };
-
-  environment.systemPackages = [ pkgs.openclaw-gateway ];
+  environment.systemPackages = with pkgs; [
+    openclaw-gateway
+    bun
+    nodejs
+  ];
 
   services.nginx = {
     enable = true;

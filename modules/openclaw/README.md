@@ -2,11 +2,17 @@
 
 `pylv-onyx` 기준으로 OpenClaw Gateway와 Control UI/API를 노출하는 설정입니다.
 
-마지막 검증: `2026-04-12`
+현재 운영 모드:
+- **Nix는 OpenClaw 패키지 / seed config / nginx 프록시만 관리**
+- **실제 OpenClaw gateway 서비스는 OpenClaw CLI가 설치한 user service가 관리**
+
+마지막 검증: `2026-04-13`
 
 ## 구성 요약
 
-- OpenClaw Gateway 원본 서비스는 `127.0.0.1:18789`와 `[::1]:18789`에만 바인딩됩니다.
+- OpenClaw Gateway 원본 프로세스는 user-managed OpenClaw service가 `127.0.0.1:18789`와 `[::1]:18789`에 바인딩하도록 기대합니다.
+- OpenClaw seed config는 `/etc/openclaw/openclaw.seed.json`으로 Nix가 제공합니다.
+- Mutable runtime config는 `~/.openclaw/openclaw.json`을 사용합니다.
 - OpenClaw Control UI 및 OpenAI 호환 API는 `nginx` 프록시를 통해 `0.0.0.0:18790`으로 노출됩니다.
 - 이 `18790` 포트는 NixOS 방화벽에서 `wlo1` 인터페이스에만 열려 있습니다.
 - OpenClaw는 `gateway.tailscale.mode = "off"`라서 Tailscale Serve로 직접 노출되지 않습니다.
@@ -46,6 +52,27 @@ http://localhost:18790
 - OpenClaw `18790` 경로는 `trusted-proxy` 헤더를 `nginx`가 주입하므로, 해당 포트에 도달한 클라이언트는 OpenClaw 관리자처럼 취급됩니다.
 - 그래서 `18790`은 LAN 전용으로 제한되어 있습니다.
 
+## user-managed gateway service bootstrap
+
+NixOS rebuild 후 최초 1회 또는 service를 다시 만들고 싶을 때:
+
+```bash
+# 새 로그인 셸에서 실행 (DISCORD_BOT_TOKEN export 반영)
+openclaw gateway install
+openclaw gateway start
+```
+
+이미 user service가 있다면:
+
+```bash
+openclaw gateway restart
+```
+
+주의:
+- 이 모드는 system-level `openclaw-gateway.service`가 아니라 OpenClaw CLI가 설치한 user service를 기준으로 한다.
+- Discord 토큰은 `/run/agenix/discord-bot-token`에서 읽어 login shell에 export되도록 `/etc/profile.d/openclaw-discord-token.sh`를 제공한다.
+- `OPENCLAW_CONFIG_PATH` / `OPENCLAW_STATE_DIR`는 host session variables로 고정되어 있다.
+
 ## 관련 설정 파일
 
 - [`default.nix`](./default.nix)
@@ -54,7 +81,8 @@ http://localhost:18790
 ## 검증에 사용한 명령
 
 ```bash
-systemctl is-active openclaw-gateway.service nginx.service
+systemctl --user is-active openclaw-gateway.service
+systemctl is-active nginx.service
 
 ss -ltn | rg ':18789|:18790'
 
