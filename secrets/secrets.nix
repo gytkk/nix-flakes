@@ -44,7 +44,7 @@ in
   # Discord bot token for hermes-agent
   "hermes-discord-bot-token.age".publicKeys = allUsers ++ allHosts;
 
-  # Hermes WebUI runtime environment file
+  # Hermes Open WebUI runtime secret seed
   "hermes-webui-env.age".publicKeys = [
     gytkk
     gytkkCurrent

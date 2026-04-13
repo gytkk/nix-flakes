@@ -137,16 +137,15 @@ nix build .#nixosConfigurations.pylv-sepia.config.system.build.toplevel
 - OpenClaw bootstrap and guardrails live in [`modules/openclaw/default.nix`](./modules/openclaw/default.nix)
 - Nix now seeds `/etc/openclaw/openclaw.seed.json` and `/etc/openclaw/openclaw.guardrails.json`, while the mutable runtime config lives at `~/.openclaw/openclaw.json`
 
-### `pylv-onyx` Hermes WebUI access
+### `pylv-onyx` Hermes Open WebUI access
 
-- Public hostname: served through a dedicated Cloudflare Tunnel on `pylv-onyx` once `secrets/cloudflare-tunnel-onyx-token.age` is created and the tunnel/public hostname is configured in Cloudflare Zero Trust
+- Public hostname: `https://openwebui.pylv.dev` once the existing `pylv-onyx` Cloudflare Tunnel is mapped to that hostname in Cloudflare Zero Trust
 - Access control: protect the public hostname with a Cloudflare Access self-hosted app; for your current plan, allow only `gytk.kim@gmail.com` and keep Google MFA/passkey enabled on that account
 - Tailscale fallback remains available at `https://pylv-onyx.tailbbb9bf.ts.net:8445`
-- The nginx origin now listens only on loopback `127.0.0.1:8787`; the raw Hermes WebUI backend stays loopback-only on `127.0.0.1:8788`
-- Hermes WebUI uses its own password auth; the runtime password is seeded from `secrets/hermes-webui-env.age`, but the public path should rely on Cloudflare Access as the main gate
-- The WebUI reads the live Hermes runtime at `/home/gytkk/.hermes`, so it sees the same `openai-codex / gpt-5.4` provider setup that the running Hermes gateway already uses
-- First-run onboarding is auto-skipped when Hermes is already `chat_ready`, via `HERMES_WEBUI_SKIP_ONBOARDING=1`
-- Mutable Hermes WebUI session/state data lives under `/var/lib/hermes-webui`
+- The nginx origin listens only on loopback `127.0.0.1:8787`; the raw Open WebUI backend stays loopback-only on `127.0.0.1:8788`
+- Hermes Agent now exposes its OpenAI-compatible API on `http://127.0.0.1:8642/v1`; Open WebUI connects to that loopback endpoint with the bearer token derived from `secrets/hermes-webui-env.age`
+- The same secret also seeds the initial Open WebUI admin password for `gytk.kim@gmail.com`
+- Mutable Hermes Open WebUI data lives under `/var/lib/hermes-open-webui`
 - Suggested Cloudflare origin target: `http://127.0.0.1:8787`
 
 ## Hermes Agent
@@ -160,6 +159,7 @@ nix build .#nixosConfigurations.pylv-sepia.config.system.build.toplevel
   - `services.hermes-agent.addToSystemPackages = true`
   - declarative `settings`
   - token sync into the writable runtime `.env` under `/var/lib/hermes/.hermes`
+- Hermes API server bootstrap on `pylv-onyx` is seeded through that same writable `.env` because upstream currently supports API server config only via environment variables, not `config.yaml`
 - On `pylv-onyx`, the upstream system service runs as the primary host user so the CLI can read the same state directory that the gateway uses.
 - The system-managed Hermes home is `/var/lib/hermes/.hermes`, which is also what the CLI uses on hosts where `addToSystemPackages` is enabled.
 - Discord mention/channel/user gating now lives in that writable runtime `.env`, so Hermes can adjust it without editing the Nix module.
