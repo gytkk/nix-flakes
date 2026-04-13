@@ -36,6 +36,7 @@
     "typescript-lsp@claude-plugins-official": true,
     "plannotator@plannotator": true,
     "codex@openai-codex": true,
+    "claude-mem@claude-mem": true,
     "metals-lsp@gytkk": true,
     "ty-lsp@gytkk": true,
     "terraform-ls@gytkk": true,

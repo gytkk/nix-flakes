@@ -40,6 +40,7 @@ Global development guidelines deployed to `~/.claude/CLAUDE.md`. Includes:
 - `gytkk/claude-marketplace`
 - `backnotprop/plannotator`
 - `openai/codex-plugin-cc`
+- `thedotmack/claude-mem`
 
 ### Installed Plugins
 
@@ -48,6 +49,7 @@ Global development guidelines deployed to `~/.claude/CLAUDE.md`. Includes:
 - LSP plugins: `gopls-lsp`, `rust-analyzer-lsp`, `typescript-lsp`, `metals-lsp`, `ty-lsp`, `terraform-ls`, `nixd-lsp`
 - `plannotator` (visual plan annotation and review)
 - `codex` (official OpenAI Codex plugin — provides `/codex:review`, `/codex:rescue`, etc.)
+- `claude-mem` (persistent memory compression across Claude Code sessions)
 
 ## MCP Servers
 

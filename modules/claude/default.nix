@@ -16,6 +16,7 @@ let
     "gytkk/claude-marketplace"
     "backnotprop/plannotator"
     "openai/codex-plugin-cc"
+    "thedotmack/claude-mem"
   ];
 
   # plugin-name@marketplace-name
@@ -35,6 +36,9 @@ let
 
     # openai/codex-plugin-cc — Official Codex plugin for Claude Code
     "codex@openai-codex"
+
+    # thedotmack/claude-mem — persistent memory compression for Claude Code
+    "claude-mem@claude-mem"
 
     # gytkk/claude-marketplace — Scala LSP, Python LSP, Terraform LSP, and Nix LSP
     "metals-lsp@gytkk"
