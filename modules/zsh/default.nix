@@ -4,9 +4,15 @@
   pkgs,
   flakeDirectory,
   isWSL ? false,
+  osConfig ? null,
   ...
 }:
 
+let
+  isPylvOnyx =
+    osConfig != null
+    && (osConfig.networking.hostName or null) == "pylv-onyx";
+in
 {
   home.packages = with pkgs; [
     zsh
@@ -164,7 +170,8 @@
           if command -v micromamba > /dev/null; then
             eval "$(micromamba shell hook --shell zsh)"
           fi
-
+        ''
+        + lib.optionalString isPylvOnyx ''
           # OpenClaw completion is managed declaratively here so the CLI's
           # one-shot installer does not get reverted by Home Manager.
           if command -v openclaw > /dev/null; then
