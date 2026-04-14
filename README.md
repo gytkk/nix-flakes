@@ -149,23 +149,6 @@ nix build .#nixosConfigurations.pylv-sepia.config.system.build.toplevel
 - Mutable Open WebUI data lives under `/var/lib/open-webui`
 - Suggested Cloudflare origin target: `http://127.0.0.1:8787`
 
-## Hermes Agent
-
-- `hermes-agent` flake input is imported both as a package source and as the upstream NixOS module.
-- Hermes-related local config now lives under `modules/hermes-agent/`:
-  - `default.nix` for standalone Home Manager bootstrap
-  - `system.nix` for the `pylv-onyx` NixOS module wiring
-- `pylv-onyx` now follows the upstream NixOS module flow from the Hermes docs:
-  - `services.hermes-agent.enable = true`
-  - `services.hermes-agent.addToSystemPackages = true`
-  - declarative `settings`
-  - token sync into the writable runtime `.env` under `/var/lib/hermes/.hermes`
-- Hermes API server bootstrap on `pylv-onyx` is seeded through that same writable `.env` because upstream currently supports API server config only via environment variables, not `config.yaml`
-- On `pylv-onyx`, the upstream system service runs as the primary host user so the CLI can read the same state directory that the gateway uses.
-- The system-managed Hermes home is `/var/lib/hermes/.hermes`, which is also what the CLI uses on hosts where `addToSystemPackages` is enabled.
-- Discord mention/channel/user gating now lives in that writable runtime `.env`, so Hermes can adjust it without editing the Nix module.
-- The local Hermes package is patched so bundled skills copied from the Nix store stay editable instead of inheriting read-only file modes.
-
 ## Helpers
 
 ```bash
