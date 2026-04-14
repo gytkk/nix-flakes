@@ -1,5 +1,6 @@
 {
   config,
+  lib,
   pkgs,
   username,
   homeDirectory,
@@ -11,7 +12,7 @@ let
   lanInterface = "wlo1";
   stateDir = "${homeDirectory}/.openclaw";
   gatewayTokenPath = "${stateDir}/gateway-auth-token";
-  gatewayNginxAuthIncludePath = "/run/openclaw/nginx-gateway-auth.conf";
+  gatewayNginxAuthIncludePath = "/etc/openclaw/nginx-gateway-auth.conf";
   openclawBootstrapPath = "/etc/openclaw/bootstrap.sh";
   openclawHybridCli = pkgs.writeShellScriptBin "openclaw" ''
     export OPENCLAW_NIX_MODE=
@@ -34,24 +35,14 @@ let
         endpoints.chatCompletions.enabled = true;
       };
       tailscale.mode = "off";
-      controlUi = {
-        dangerouslyDisableDeviceAuth = true;
-        dangerouslyAllowHostHeaderOriginFallback = true;
-      };
     };
   };
-in
-{
-  age.secrets.discord-bot-token = {
-    file = ../../secrets/discord-bot-token.age;
-    owner = username;
-    group = "users";
-    mode = "0400";
-  };
 
-  environment.etc."openclaw/openclaw.seed.json".text = builtins.toJSON seedConfig;
-
-  environment.etc."openclaw/bootstrap.sh".text = ''
+  # Static files for /etc/openclaw/ — written by activationScript, not environment.etc,
+  # because nginx-gateway-auth.conf is generated dynamically and shares this directory.
+  # environment.etc would symlink the entire directory to the read-only Nix store.
+  seedConfigFile = pkgs.writeText "openclaw-seed.json" (builtins.toJSON seedConfig);
+  bootstrapScriptFile = pkgs.writeText "openclaw-bootstrap.sh" ''
     # OpenClaw runtime bootstrap for the hybrid Nix + user-managed service setup.
     # Nix provides secret file locations; the wrapper loads only what exists.
 
@@ -63,6 +54,14 @@ in
       export BRAVE_API_KEY="$(cat /run/agenix/brave-search-api-key)"
     fi
   '';
+in
+{
+  age.secrets.discord-bot-token = {
+    file = ../../secrets/discord-bot-token.age;
+    owner = username;
+    group = "users";
+    mode = "0400";
+  };
 
   environment.systemPackages = with pkgs; [
     openclawHybridCli
@@ -70,58 +69,59 @@ in
     nodejs
   ];
 
-  system.activationScripts.openclawSyncGatewayConfig = ''
-        CONFIG_FILE=${pkgs.lib.escapeShellArg "${stateDir}/openclaw.json"}
-        TOKEN_FILE=${pkgs.lib.escapeShellArg gatewayTokenPath}
-        NGINX_AUTH_FILE=${pkgs.lib.escapeShellArg gatewayNginxAuthIncludePath}
+  system.activationScripts.openclawSyncGatewayConfig = lib.stringAfter [ "etc" ] ''
+    # Ensure /etc/openclaw is a real writable directory.
+    # Previous configs used environment.etc which created it as a read-only
+    # symlink to the Nix store — incompatible with the dynamic auth conf file.
+    if [ -L /etc/openclaw ]; then
+      ${pkgs.coreutils}/bin/rm /etc/openclaw
+    fi
+    ${pkgs.coreutils}/bin/mkdir -p /etc/openclaw
 
-        gateway_token=
-        if [ ! -s "$TOKEN_FILE" ] && [ -f "$CONFIG_FILE" ]; then
-          gateway_token="$(${pkgs.jq}/bin/jq -er '.gateway.auth.token // empty' "$CONFIG_FILE" 2>/dev/null || true)"
-        fi
+    # Install static Nix-generated config files
+    ${pkgs.coreutils}/bin/install -m 444 ${seedConfigFile} /etc/openclaw/openclaw.seed.json
+    ${pkgs.coreutils}/bin/install -m 444 ${bootstrapScriptFile} /etc/openclaw/bootstrap.sh
 
-        if [ -z "$gateway_token" ]; then
-          if [ -s "$TOKEN_FILE" ]; then
-            gateway_token="$(${pkgs.coreutils}/bin/cat "$TOKEN_FILE")"
-          else
-            gateway_token="$(${pkgs.openssl}/bin/openssl rand -hex 24)"
-          fi
-        fi
+    CONFIG_FILE=${pkgs.lib.escapeShellArg "${stateDir}/openclaw.json"}
+    TOKEN_FILE=${pkgs.lib.escapeShellArg gatewayTokenPath}
+    NGINX_AUTH_FILE=${pkgs.lib.escapeShellArg gatewayNginxAuthIncludePath}
 
-        tmp_token="$(${pkgs.coreutils}/bin/mktemp)"
-        printf '%s' "$gateway_token" > "$tmp_token"
-        ${pkgs.coreutils}/bin/install -D -o ${username} -g users -m 600 "$tmp_token" "$TOKEN_FILE"
-        ${pkgs.coreutils}/bin/rm -f "$tmp_token"
+    gateway_token=
+    if [ -f "$CONFIG_FILE" ]; then
+      gateway_token="$(${pkgs.jq}/bin/jq -er '.gateway.auth.token // empty' "$CONFIG_FILE" 2>/dev/null || true)"
+    fi
 
-        tmp_auth="$(${pkgs.coreutils}/bin/mktemp)"
-        cat > "$tmp_auth" <<EOF
+    if [ -z "$gateway_token" ] && [ -s "$TOKEN_FILE" ]; then
+      gateway_token="$(${pkgs.coreutils}/bin/cat "$TOKEN_FILE")"
+    fi
+
+    if [ -z "$gateway_token" ]; then
+      gateway_token="$(${pkgs.openssl}/bin/openssl rand -hex 24)"
+    fi
+
+    tmp_token="$(${pkgs.coreutils}/bin/mktemp)"
+    printf '%s' "$gateway_token" > "$tmp_token"
+    ${pkgs.coreutils}/bin/install -D -o ${username} -g users -m 600 "$tmp_token" "$TOKEN_FILE"
+    ${pkgs.coreutils}/bin/rm -f "$tmp_token"
+
+    tmp_auth="$(${pkgs.coreutils}/bin/mktemp)"
+    cat > "$tmp_auth" <<EOF
     proxy_set_header Authorization "Bearer $gateway_token";
     EOF
-        ${pkgs.coreutils}/bin/install -D -o root -g ${config.services.nginx.group} -m 440 "$tmp_auth" "$NGINX_AUTH_FILE"
-        ${pkgs.coreutils}/bin/rm -f "$tmp_auth"
+    ${pkgs.coreutils}/bin/install -m 440 -o root -g ${config.services.nginx.group} "$tmp_auth" "$NGINX_AUTH_FILE"
+    ${pkgs.coreutils}/bin/rm -f "$tmp_auth"
 
-        if [ -f "$CONFIG_FILE" ]; then
-          tmp="$(${pkgs.coreutils}/bin/mktemp)"
-          ${pkgs.jq}/bin/jq \
-            --arg token "$gateway_token" \
-            --argjson port ${toString gatewayPort} \
-            '
-              .gateway.mode = "local"
-              | .gateway.port = $port
-              | .gateway.bind = "loopback"
-              | .gateway.auth.mode = "token"
-              | .gateway.auth.token = $token
-              | del(.gateway.auth.trustedProxy)
-              | del(.gateway.trustedProxies)
-              | .gateway.http.endpoints.chatCompletions.enabled = true
-              | .gateway.tailscale.mode = "off"
-              | .gateway.controlUi.dangerouslyDisableDeviceAuth = true
-              | .gateway.controlUi.dangerouslyAllowHostHeaderOriginFallback = true
-            ' \
-            "$CONFIG_FILE" > "$tmp"
-          ${pkgs.coreutils}/bin/install -o ${username} -g users -m 600 "$tmp" "$CONFIG_FILE"
-          ${pkgs.coreutils}/bin/rm -f "$tmp"
-        fi
+    if [ ! -f "$CONFIG_FILE" ]; then
+      tmp="$(${pkgs.coreutils}/bin/mktemp)"
+      ${pkgs.jq}/bin/jq \
+        --arg token "$gateway_token" \
+        '
+          .gateway.auth.token = $token
+        ' \
+        ${seedConfigFile} > "$tmp"
+      ${pkgs.coreutils}/bin/install -D -o ${username} -g users -m 600 "$tmp" "$CONFIG_FILE"
+      ${pkgs.coreutils}/bin/rm -f "$tmp"
+    fi
   '';
 
   services.nginx = {

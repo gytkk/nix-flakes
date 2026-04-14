@@ -6,6 +6,7 @@
 - **Nix는 OpenClaw 패키지 / seed config / secret-delivery bootstrap / nginx 프록시만 관리**
 - **실제 OpenClaw gateway 서비스는 OpenClaw CLI가 설치한 user service가 관리**
 - **시스템의 `openclaw` 명령은 하이브리드 wrapper라서 upstream의 `OPENCLAW_NIX_MODE=1` 기본값을 빈 값으로 덮어씀**
+- **Nix activation은 `~/.openclaw/openclaw.json`이 없을 때만 초기 config를 seed에서 생성하고, 기존 mutable user config는 덮어쓰지 않습니다.**
 
 마지막 검증: `2026-04-14`
 
@@ -15,6 +16,7 @@
 - OpenClaw seed config는 `/etc/openclaw/openclaw.seed.json`으로 Nix가 제공합니다.
 - Secret bootstrap script는 `/etc/openclaw/bootstrap.sh`로 제공되며, OpenClaw wrapper만 이를 source합니다.
 - Mutable runtime config는 `~/.openclaw/openclaw.json`을 사용합니다.
+- Nix는 기존 `~/.openclaw/openclaw.json` 내용을 재작성하지 않고, 파일이 없을 때만 seed + gateway token으로 초기 config를 생성합니다.
 - OpenClaw Control UI 및 OpenAI 호환 API는 gateway bearer token을 주입하는 `nginx` 프록시를 통해 `0.0.0.0:18790`으로 노출됩니다.
 - 이 `18790` 포트는 NixOS 방화벽에서 `wlo1` 인터페이스에만 열려 있습니다.
 - OpenClaw는 `gateway.tailscale.mode = "off"`라서 Tailscale Serve로 직접 노출되지 않습니다.
@@ -77,6 +79,7 @@ openclaw gateway restart
 - Discord bot token, Brave API key 같은 secret은 `/run/agenix/*`에 두고, `/etc/openclaw/bootstrap.sh`를 OpenClaw wrapper만 source해서 process env로 주입한다.
 - 따라서 login shell 전체에 secret을 export하지 않는다.
 - `OPENCLAW_CONFIG_PATH` / `OPENCLAW_STATE_DIR`는 host session variables로 고정되어 있다.
+- Gateway token의 source of truth는 기존 `~/.openclaw/openclaw.json`이 있으면 그 파일이고, config가 없을 때는 token file/랜덤 토큰을 기반으로 초기 config를 만든다.
 
 ## 관련 설정 파일
 
