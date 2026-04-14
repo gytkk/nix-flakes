@@ -14,8 +14,15 @@ let
   trustedProxyUserHeader = "x-openclaw-user";
   trustedProxyRequiredHeader = "x-openclaw-proxy";
   trustedProxyRequiredValue = "1";
+  openclawBootstrapPath = "/etc/openclaw/bootstrap.sh";
   openclawHybridCli = pkgs.writeShellScriptBin "openclaw" ''
     export OPENCLAW_NIX_MODE=
+    export OPENCLAW_PATH_BOOTSTRAPPED=1
+
+    if [ -r ${pkgs.lib.escapeShellArg openclawBootstrapPath} ]; then
+      . ${pkgs.lib.escapeShellArg openclawBootstrapPath}
+    fi
+
     exec ${pkgs."openclaw-gateway"}/bin/openclaw "$@"
   '';
 
@@ -57,9 +64,16 @@ in
 
   environment.etc."openclaw/openclaw.seed.json".text = builtins.toJSON seedConfig;
 
-  environment.etc."profile.d/openclaw-discord-token.sh".text = ''
+  environment.etc."openclaw/bootstrap.sh".text = ''
+    # OpenClaw runtime bootstrap for the hybrid Nix + user-managed service setup.
+    # Nix provides secret file locations; the wrapper loads only what exists.
+
     if [ -z "''${DISCORD_BOT_TOKEN-}" ] && [ -r /run/agenix/discord-bot-token ]; then
       export DISCORD_BOT_TOKEN="$(cat /run/agenix/discord-bot-token)"
+    fi
+
+    if [ -z "''${BRAVE_API_KEY-}" ] && [ -r /run/agenix/brave-search-api-key ]; then
+      export BRAVE_API_KEY="$(cat /run/agenix/brave-search-api-key)"
     fi
   '';
 

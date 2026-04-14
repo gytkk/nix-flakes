@@ -3,7 +3,7 @@
 `pylv-onyx` 기준으로 OpenClaw Gateway와 Control UI/API를 노출하는 설정입니다.
 
 현재 운영 모드:
-- **Nix는 OpenClaw 패키지 / seed config / nginx 프록시만 관리**
+- **Nix는 OpenClaw 패키지 / seed config / secret-delivery bootstrap / nginx 프록시만 관리**
 - **실제 OpenClaw gateway 서비스는 OpenClaw CLI가 설치한 user service가 관리**
 - **시스템의 `openclaw` 명령은 하이브리드 wrapper라서 upstream의 `OPENCLAW_NIX_MODE=1` 기본값을 빈 값으로 덮어씀**
 
@@ -13,6 +13,7 @@
 
 - OpenClaw Gateway 원본 프로세스는 user-managed OpenClaw service가 `127.0.0.1:18789`와 `[::1]:18789`에 바인딩하도록 기대합니다.
 - OpenClaw seed config는 `/etc/openclaw/openclaw.seed.json`으로 Nix가 제공합니다.
+- Secret bootstrap script는 `/etc/openclaw/bootstrap.sh`로 제공되며, OpenClaw wrapper만 이를 source합니다.
 - Mutable runtime config는 `~/.openclaw/openclaw.json`을 사용합니다.
 - OpenClaw Control UI 및 OpenAI 호환 API는 `nginx` 프록시를 통해 `0.0.0.0:18790`으로 노출됩니다.
 - 이 `18790` 포트는 NixOS 방화벽에서 `wlo1` 인터페이스에만 열려 있습니다.
@@ -72,7 +73,8 @@ openclaw gateway restart
 주의:
 - 이 모드는 system-level `openclaw-gateway.service`가 아니라 OpenClaw CLI가 설치한 user service를 기준으로 한다.
 - Nix가 설치하는 `openclaw` 명령은 내부적으로 upstream 패키지 wrapper의 `OPENCLAW_NIX_MODE=1` 기본값을 빈 값으로 덮어써 CLI-managed service 경로를 사용한다.
-- Discord 토큰은 `/run/agenix/discord-bot-token`에서 읽어 login shell에 export되도록 `/etc/profile.d/openclaw-discord-token.sh`를 제공한다.
+- Discord bot token, Brave API key 같은 secret은 `/run/agenix/*`에 두고, `/etc/openclaw/bootstrap.sh`를 OpenClaw wrapper만 source해서 process env로 주입한다.
+- 따라서 login shell 전체에 secret을 export하지 않는다.
 - `OPENCLAW_CONFIG_PATH` / `OPENCLAW_STATE_DIR`는 host session variables로 고정되어 있다.
 
 ## 관련 설정 파일
