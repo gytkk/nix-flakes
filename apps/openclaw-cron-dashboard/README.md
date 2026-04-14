@@ -1,31 +1,60 @@
-# OpenClaw Cron Dashboard
+# openclaw-cron-dashboard
 
-Small read-only dashboard for OpenClaw cron jobs.
+Read-only OpenClaw cron dashboard intended to sit next to Open WebUI.
 
-## Stack
+## Shape
 
-- Backend: FastAPI
-- Frontend: React + Vite
-- Reverse proxy: nginx under the existing Open WebUI origin
+- **backend/** — FastAPI bridge that reads OpenClaw cron data
+- **frontend/** — React + Vite dashboard UI
+- **hosts/pylv-onyx/openclaw-cron-dashboard.nix** — NixOS service + nginx wiring
 
-## Routes
+## URLs
 
+When the host module is enabled:
+
+- `/admin/openclaw-cron` → lightweight entry route from the Open WebUI side
+- `/apps/openclaw-cron/` → actual dashboard UI
 - `/api/openclaw/cron/summary`
 - `/api/openclaw/cron/jobs`
-- `/api/openclaw/cron/jobs/:id/runs`
-- `/apps/openclaw-cron/`
-- `/admin/openclaw-cron` → redirects to `/apps/openclaw-cron/`
+- `/api/openclaw/cron/jobs/:jobId/runs`
 
-## Notes
+## Data source strategy
 
-The FastAPI bridge prefers `openclaw cron ... --json` and falls back to reading
-`~/.openclaw/cron/jobs.json` plus run logs if CLI JSON output is unavailable.
+The bridge tries, in order:
 
-The active backend entrypoint is `backend/app.py` and the active frontend entrypoint
-is `frontend/src/main.tsx`.
+1. `openclaw cron ... --json`
+2. fallback reads from `~/.openclaw/cron/jobs.json`
+3. fallback run history reads from `~/.openclaw/cron/runs/*.jsonl`
 
-Nix builds the frontend bundle from `frontend/package-lock.json` and injects the
-final dist path into the backend with `OPENCLAW_CRON_FRONTEND_DIST`.
+That keeps the dashboard usable even if direct CLI access is incomplete.
 
-The backend serves a fallback HTML page only when the configured frontend dist path
-is missing.
+## Local frontend dev
+
+```bash
+cd apps/openclaw-cron-dashboard/frontend
+npm install
+npm run dev
+```
+
+Vite proxies `/api/openclaw/cron/*` to `http://127.0.0.1:18813`.
+
+## Local backend dev
+
+```bash
+cd apps/openclaw-cron-dashboard/backend
+uvicorn app:app --reload --host 127.0.0.1 --port 18813
+```
+
+Useful environment variables:
+
+- `OPENCLAW_BIN`
+- `OPENCLAW_STATE_DIR`
+- `OPENCLAW_CRON_DASHBOARD_CORS`
+- `OPENCLAW_CRON_DASHBOARD_FRONTEND_DIST`
+
+## UI goals
+
+- feels like a small embedded admin app, not a chat tool result
+- highlights failures/running jobs first
+- exposes recent runs in a side drawer
+- stays read-only for now

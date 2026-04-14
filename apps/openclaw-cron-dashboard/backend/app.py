@@ -10,12 +10,13 @@ from typing import Any
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 APP_ROOT = Path(__file__).resolve().parent
-DEFAULT_FRONTEND_DIST = (APP_ROOT.parent / "frontend" / "dist").resolve()
-FRONTEND_DIST = Path(os.environ.get("OPENCLAW_CRON_FRONTEND_DIST", str(DEFAULT_FRONTEND_DIST))).expanduser()
+FRONTEND_DIST = Path(
+    os.environ.get("OPENCLAW_CRON_DASHBOARD_FRONTEND_DIST", str((APP_ROOT.parent / "frontend" / "dist").resolve()))
+).expanduser()
 STATE_DIR = Path(os.environ.get("OPENCLAW_STATE_DIR", str(Path.home() / ".openclaw"))).expanduser()
 CRON_DIR = STATE_DIR / "cron"
 RUNS_DIR = CRON_DIR / "runs"
@@ -282,6 +283,11 @@ def summarize_jobs(jobs: list[dict[str, Any]], raw_status: dict[str, Any] | None
     }
 
 
+@app.get("/")
+def root() -> RedirectResponse:
+    return RedirectResponse(url="/apps/openclaw-cron/", status_code=307)
+
+
 @app.get("/health")
 def health() -> dict[str, Any]:
     jobs, source, _ = get_jobs()
@@ -339,7 +345,7 @@ def dashboard_index() -> HTMLResponse | FileResponse:
     if index_file.exists():
         return FileResponse(index_file)
     return HTMLResponse(
-        f"""
+        """
 <!doctype html>
 <html lang=\"en\">
   <head>
@@ -359,13 +365,13 @@ def dashboard_index() -> HTMLResponse | FileResponse:
       <div class=\"card\">
         <h1>OpenClaw Cron Dashboard</h1>
         <p>The FastAPI bridge is running, but the React/Vite frontend hasn't been built yet.</p>
-        <p>Expected static bundle path: <code>{FRONTEND_DIST}</code></p>
+        <p>Expected static bundle path: <code>{frontend_dist}</code></p>
         <p>API is ready at <a href=\"/api/openclaw/cron/summary\">/api/openclaw/cron/summary</a>.</p>
       </div>
     </main>
   </body>
 </html>
-        """.strip()
+        """.strip().format(frontend_dist=FRONTEND_DIST)
     )
 
 
