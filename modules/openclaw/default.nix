@@ -10,6 +10,7 @@ let
   gatewayPort = 18789;
   lanProxyPort = 18790;
   lanInterface = "wlo1";
+  openclawPackage = pkgs.openclaw;
   stateDir = "${homeDirectory}/.openclaw";
   gatewayTokenPath = "${stateDir}/gateway-auth-token";
   gatewayNginxAuthIncludePath = "/etc/openclaw/nginx-gateway-auth.conf";
@@ -55,11 +56,9 @@ let
       . ${pkgs.lib.escapeShellArg openclawBootstrapPath}
     fi
 
-    # Call the CLI entrypoint directly instead of the packaged wrapper.
-    # The packaged wrapper currently jumps into dist/index.js, while the real
-    # entrypoint (dist/entry.js) installs the warning filter that suppresses the
-    # noisy Node DEP0040 punycode deprecation warning.
-    exec ${pkgs.nodejs}/bin/node ${pkgs."openclaw-gateway"}/lib/openclaw/dist/entry.js "$@"
+    # Use the upstream-layout package from flake-stores so bundled skills resolve
+    # correctly, while keeping the local bootstrap and PATH handling in this wrapper.
+    exec ${openclawPackage}/bin/openclaw "$@"
   '';
 
   seedConfig = {

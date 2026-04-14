@@ -5,7 +5,7 @@
 현재 운영 모드:
 - **Nix는 OpenClaw 패키지 / seed config / secret-delivery bootstrap / nginx 프록시 / user-service PATH drop-in을 관리**
 - **실제 OpenClaw gateway 서비스는 OpenClaw CLI가 설치한 user service가 관리**
-- **시스템의 `openclaw` 명령은 하이브리드 wrapper라서 upstream의 `OPENCLAW_NIX_MODE=1` 기본값을 빈 값으로 덮어씀**
+- **시스템의 `openclaw` 명령은 하이브리드 wrapper이며, 실제 실행 파일은 `flake-stores`의 upstream npm 기반 `pkgs.openclaw`를 사용합니다**
 - **Nix activation은 `~/.openclaw/openclaw.json`이 없을 때만 초기 config를 seed에서 생성하고, 기존 mutable user config는 덮어쓰지 않습니다.**
 
 마지막 검증: `2026-04-14`
@@ -77,7 +77,7 @@ openclaw gateway restart
 
 주의:
 - 이 모드는 system-level `openclaw-gateway.service`가 아니라 OpenClaw CLI가 설치한 user service를 기준으로 한다.
-- Nix가 설치하는 `openclaw` 명령은 내부적으로 upstream 패키지 wrapper의 `OPENCLAW_NIX_MODE=1` 기본값을 빈 값으로 덮어써 CLI-managed service 경로를 사용한다.
+- Nix가 설치하는 `openclaw` 명령은 `/etc/openclaw/bootstrap.sh`와 NixOS PATH 보정을 먼저 적용한 뒤, `flake-stores`의 upstream npm 기반 `pkgs.openclaw` wrapper를 실행한다.
 - Discord bot token, Brave API key 같은 secret은 `/run/agenix/*`에 두고, `/etc/openclaw/bootstrap.sh`를 OpenClaw wrapper만 source해서 process env로 주입한다.
 - 따라서 login shell 전체에 secret을 export하지 않는다.
 - `OPENCLAW_CONFIG_PATH` / `OPENCLAW_STATE_DIR`는 host session variables로 고정되어 있다.
