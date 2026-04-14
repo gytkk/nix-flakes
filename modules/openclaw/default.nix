@@ -10,10 +10,8 @@ let
   lanProxyPort = 18790;
   lanInterface = "wlo1";
   stateDir = "${homeDirectory}/.openclaw";
-  trustedProxyUser = "lan-admin";
-  trustedProxyUserHeader = "x-openclaw-user";
-  trustedProxyRequiredHeader = "x-openclaw-proxy";
-  trustedProxyRequiredValue = "1";
+  gatewayTokenPath = "${stateDir}/gateway-auth-token";
+  gatewayNginxAuthIncludePath = "/run/openclaw/nginx-gateway-auth.conf";
   openclawBootstrapPath = "/etc/openclaw/bootstrap.sh";
   openclawHybridCli = pkgs.writeShellScriptBin "openclaw" ''
     export OPENCLAW_NIX_MODE=
@@ -29,20 +27,9 @@ let
   seedConfig = {
     gateway = {
       mode = "local";
-      auth = {
-        mode = "trusted-proxy";
-        trustedProxy = {
-          userHeader = trustedProxyUserHeader;
-          requiredHeaders = [ trustedProxyRequiredHeader ];
-          allowUsers = [ trustedProxyUser ];
-        };
-      };
+      auth.mode = "token";
       port = gatewayPort;
       bind = "loopback";
-      trustedProxies = [
-        "127.0.0.1"
-        "::1"
-      ];
       http = {
         endpoints.chatCompletions.enabled = true;
       };
@@ -84,33 +71,57 @@ in
   ];
 
   system.activationScripts.openclawSyncGatewayConfig = ''
-    CONFIG_FILE=${pkgs.lib.escapeShellArg "${stateDir}/openclaw.json"}
+        CONFIG_FILE=${pkgs.lib.escapeShellArg "${stateDir}/openclaw.json"}
+        TOKEN_FILE=${pkgs.lib.escapeShellArg gatewayTokenPath}
+        NGINX_AUTH_FILE=${pkgs.lib.escapeShellArg gatewayNginxAuthIncludePath}
 
-    if [ -f "$CONFIG_FILE" ]; then
-      tmp="$(${pkgs.coreutils}/bin/mktemp)"
-      ${pkgs.jq}/bin/jq \
-        --arg userHeader ${pkgs.lib.escapeShellArg trustedProxyUserHeader} \
-        --arg requiredHeader ${pkgs.lib.escapeShellArg trustedProxyRequiredHeader} \
-        --arg allowUser ${pkgs.lib.escapeShellArg trustedProxyUser} \
-        --argjson port ${toString gatewayPort} \
-        '
-          .gateway.mode = "local"
-          | .gateway.port = $port
-          | .gateway.bind = "loopback"
-          | .gateway.auth.mode = "trusted-proxy"
-          | .gateway.auth.trustedProxy.userHeader = $userHeader
-          | .gateway.auth.trustedProxy.requiredHeaders = [$requiredHeader]
-          | .gateway.auth.trustedProxy.allowUsers = [$allowUser]
-          | .gateway.trustedProxies = ["127.0.0.1", "::1"]
-          | .gateway.http.endpoints.chatCompletions.enabled = true
-          | .gateway.tailscale.mode = "off"
-          | .gateway.controlUi.dangerouslyDisableDeviceAuth = true
-          | .gateway.controlUi.dangerouslyAllowHostHeaderOriginFallback = true
-        ' \
-        "$CONFIG_FILE" > "$tmp"
-      ${pkgs.coreutils}/bin/install -o ${username} -g users -m 600 "$tmp" "$CONFIG_FILE"
-      ${pkgs.coreutils}/bin/rm -f "$tmp"
-    fi
+        gateway_token=
+        if [ ! -s "$TOKEN_FILE" ] && [ -f "$CONFIG_FILE" ]; then
+          gateway_token="$(${pkgs.jq}/bin/jq -er '.gateway.auth.token // empty' "$CONFIG_FILE" 2>/dev/null || true)"
+        fi
+
+        if [ -z "$gateway_token" ]; then
+          if [ -s "$TOKEN_FILE" ]; then
+            gateway_token="$(${pkgs.coreutils}/bin/cat "$TOKEN_FILE")"
+          else
+            gateway_token="$(${pkgs.openssl}/bin/openssl rand -hex 24)"
+          fi
+        fi
+
+        tmp_token="$(${pkgs.coreutils}/bin/mktemp)"
+        printf '%s' "$gateway_token" > "$tmp_token"
+        ${pkgs.coreutils}/bin/install -D -o ${username} -g users -m 600 "$tmp_token" "$TOKEN_FILE"
+        ${pkgs.coreutils}/bin/rm -f "$tmp_token"
+
+        tmp_auth="$(${pkgs.coreutils}/bin/mktemp)"
+        cat > "$tmp_auth" <<EOF
+    proxy_set_header Authorization "Bearer $gateway_token";
+    EOF
+        ${pkgs.coreutils}/bin/install -D -o root -g ${config.services.nginx.group} -m 440 "$tmp_auth" "$NGINX_AUTH_FILE"
+        ${pkgs.coreutils}/bin/rm -f "$tmp_auth"
+
+        if [ -f "$CONFIG_FILE" ]; then
+          tmp="$(${pkgs.coreutils}/bin/mktemp)"
+          ${pkgs.jq}/bin/jq \
+            --arg token "$gateway_token" \
+            --argjson port ${toString gatewayPort} \
+            '
+              .gateway.mode = "local"
+              | .gateway.port = $port
+              | .gateway.bind = "loopback"
+              | .gateway.auth.mode = "token"
+              | .gateway.auth.token = $token
+              | del(.gateway.auth.trustedProxy)
+              | del(.gateway.trustedProxies)
+              | .gateway.http.endpoints.chatCompletions.enabled = true
+              | .gateway.tailscale.mode = "off"
+              | .gateway.controlUi.dangerouslyDisableDeviceAuth = true
+              | .gateway.controlUi.dangerouslyAllowHostHeaderOriginFallback = true
+            ' \
+            "$CONFIG_FILE" > "$tmp"
+          ${pkgs.coreutils}/bin/install -o ${username} -g users -m 600 "$tmp" "$CONFIG_FILE"
+          ${pkgs.coreutils}/bin/rm -f "$tmp"
+        fi
   '';
 
   services.nginx = {
@@ -138,8 +149,7 @@ in
           proxy_read_timeout 10m;
           proxy_set_header Host $host:$server_port;
           proxy_set_header X-Forwarded-Host $host:$server_port;
-          proxy_set_header ${trustedProxyUserHeader} ${trustedProxyUser};
-          proxy_set_header ${trustedProxyRequiredHeader} ${trustedProxyRequiredValue};
+          include ${gatewayNginxAuthIncludePath};
         '';
       };
       locations."/" = {
@@ -149,8 +159,7 @@ in
           proxy_read_timeout 10m;
           proxy_set_header Host $host:$server_port;
           proxy_set_header X-Forwarded-Host $host:$server_port;
-          proxy_set_header ${trustedProxyUserHeader} ${trustedProxyUser};
-          proxy_set_header ${trustedProxyRequiredHeader} ${trustedProxyRequiredValue};
+          include ${gatewayNginxAuthIncludePath};
         '';
       };
     };

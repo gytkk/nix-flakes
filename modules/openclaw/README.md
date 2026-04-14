@@ -15,7 +15,7 @@
 - OpenClaw seed config는 `/etc/openclaw/openclaw.seed.json`으로 Nix가 제공합니다.
 - Secret bootstrap script는 `/etc/openclaw/bootstrap.sh`로 제공되며, OpenClaw wrapper만 이를 source합니다.
 - Mutable runtime config는 `~/.openclaw/openclaw.json`을 사용합니다.
-- OpenClaw Control UI 및 OpenAI 호환 API는 `nginx` 프록시를 통해 `0.0.0.0:18790`으로 노출됩니다.
+- OpenClaw Control UI 및 OpenAI 호환 API는 gateway bearer token을 주입하는 `nginx` 프록시를 통해 `0.0.0.0:18790`으로 노출됩니다.
 - 이 `18790` 포트는 NixOS 방화벽에서 `wlo1` 인터페이스에만 열려 있습니다.
 - OpenClaw는 `gateway.tailscale.mode = "off"`라서 Tailscale Serve로 직접 노출되지 않습니다.
 
@@ -51,7 +51,8 @@ http://localhost:18790
 
 ## 인증 모델
 
-- OpenClaw `18790` 경로는 `trusted-proxy` 헤더를 `nginx`가 주입하므로, 해당 포트에 도달한 클라이언트는 OpenClaw 관리자처럼 취급됩니다.
+- OpenClaw 원본 gateway `127.0.0.1:18789`는 token auth를 사용합니다.
+- OpenClaw `18790` 경로는 `nginx`가 loopback gateway bearer token을 upstream에 주입하므로, 해당 포트에 도달한 클라이언트는 OpenClaw 관리자처럼 취급됩니다.
 - 그래서 `18790`은 LAN 전용으로 제한되어 있습니다.
 
 ## user-managed gateway service bootstrap
