@@ -8,6 +8,7 @@
   imports = [
     ./hardware-configuration.nix
     ./open-webui.nix
+    ./openclaw-cron-dashboard.nix
     ../../modules/openclaw
     ../../modules/nixos
   ];
