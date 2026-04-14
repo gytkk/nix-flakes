@@ -16,6 +16,9 @@ let
   openclawBootstrapPath = "/etc/openclaw/bootstrap.sh";
   openclawHybridCli = pkgs.writeShellScriptBin "openclaw" ''
     export OPENCLAW_NIX_MODE=
+    # Temporary NixOS-specific PATH shim for this hybrid setup.
+    # Upstream PATH bootstrap does not currently cover /run/current-system/sw/bin.
+    export PATH="/run/current-system/sw/bin:${homeDirectory}/.nix-profile/bin:/etc/profiles/per-user/${username}/bin:$PATH"
     export OPENCLAW_PATH_BOOTSTRAPPED=1
 
     if [ -r ${pkgs.lib.escapeShellArg openclawBootstrapPath} ]; then
