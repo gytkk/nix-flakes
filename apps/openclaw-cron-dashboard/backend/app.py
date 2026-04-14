@@ -338,8 +338,8 @@ def cron_job_runs(job_id: str, limit: int = Query(default=20, ge=1, le=200)) -> 
     }
 
 
-@app.get("/apps/openclaw-cron")
-@app.get("/apps/openclaw-cron/")
+@app.get("/apps/openclaw-cron", response_model=None)
+@app.get("/apps/openclaw-cron/", response_model=None)
 def dashboard_index() -> HTMLResponse | FileResponse:
     index_file = FRONTEND_DIST / "index.html"
     if index_file.exists():

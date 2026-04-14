@@ -1,10 +1,18 @@
-{ config, pkgs, lib, username, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  username,
+  ...
+}:
 let
   bridgePort = 18813;
-  pythonEnv = pkgs.python3.withPackages (ps: with ps; [
-    fastapi
-    uvicorn
-  ]);
+  pythonEnv = pkgs.python3.withPackages (
+    ps: with ps; [
+      fastapi
+      uvicorn
+    ]
+  );
   appRoot = ../../apps/openclaw-cron-dashboard;
   frontendDist = pkgs.callPackage ../../packages/openclaw-cron-dashboard-frontend/package.nix { };
 in
@@ -26,7 +34,7 @@ in
         "https://openwebui.pylv.dev"
         "http://127.0.0.1:8787"
       ];
-      OPENCLAW_CRON_FRONTEND_DIST = "${frontendDist}";
+      OPENCLAW_CRON_DASHBOARD_FRONTEND_DIST = "${frontendDist}";
       PYTHONPATH = "${appRoot}/backend";
     };
     serviceConfig = {
