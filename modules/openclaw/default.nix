@@ -14,11 +14,33 @@ let
   gatewayTokenPath = "${stateDir}/gateway-auth-token";
   gatewayNginxAuthIncludePath = "/etc/openclaw/nginx-gateway-auth.conf";
   openclawBootstrapPath = "/etc/openclaw/bootstrap.sh";
+  openclawRuntimePath = lib.concatStringsSep ":" [
+    "/run/current-system/sw/bin"
+    "${homeDirectory}/.nix-profile/bin"
+    "/etc/profiles/per-user/${username}/bin"
+    "${homeDirectory}/.local/bin"
+    "${homeDirectory}/.npm-global/bin"
+    "${homeDirectory}/bin"
+    "${homeDirectory}/.volta/bin"
+    "${homeDirectory}/.asdf/shims"
+    "${homeDirectory}/.bun/bin"
+    "${homeDirectory}/.nvm/current/bin"
+    "${homeDirectory}/.fnm/current/bin"
+    "${homeDirectory}/.local/share/pnpm"
+    "/usr/local/bin"
+    "/usr/bin"
+    "/bin"
+  ];
+  openclawSystemdDropInPath = "${homeDirectory}/.config/systemd/user/openclaw-gateway.service.d/20-nix-path.conf";
+  openclawSystemdDropInFile = pkgs.writeText "openclaw-gateway-20-nix-path.conf" ''
+    [Service]
+    # NixOS-specific PATH shim for the hybrid OpenClaw setup.
+    Environment=PATH=${openclawRuntimePath}
+  '';
   openclawHybridCli = pkgs.writeShellScriptBin "openclaw" ''
     export OPENCLAW_NIX_MODE=
-    # Temporary NixOS-specific PATH shim for this hybrid setup.
-    # Upstream PATH bootstrap does not currently cover /run/current-system/sw/bin.
-    export PATH="/run/current-system/sw/bin:${homeDirectory}/.nix-profile/bin:/etc/profiles/per-user/${username}/bin:$PATH"
+    # NixOS-specific PATH shim for this hybrid setup.
+    export PATH="${openclawRuntimePath}:$PATH"
     export OPENCLAW_PATH_BOOTSTRAPPED=1
 
     if [ -r ${pkgs.lib.escapeShellArg openclawBootstrapPath} ]; then
@@ -88,6 +110,9 @@ in
     # Install static Nix-generated config files
     ${pkgs.coreutils}/bin/install -m 444 ${seedConfigFile} /etc/openclaw/openclaw.seed.json
     ${pkgs.coreutils}/bin/install -m 444 ${bootstrapScriptFile} /etc/openclaw/bootstrap.sh
+
+    ${pkgs.coreutils}/bin/install -d -m 755 -o ${username} -g users ${pkgs.lib.escapeShellArg "${homeDirectory}/.config/systemd/user/openclaw-gateway.service.d"}
+    ${pkgs.coreutils}/bin/install -m 644 -o ${username} -g users ${openclawSystemdDropInFile} ${pkgs.lib.escapeShellArg openclawSystemdDropInPath}
 
     CONFIG_FILE=${pkgs.lib.escapeShellArg "${stateDir}/openclaw.json"}
     TOKEN_FILE=${pkgs.lib.escapeShellArg gatewayTokenPath}
