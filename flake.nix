@@ -66,12 +66,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # nix-openclaw - AI assistant gateway
-    nix-openclaw = {
-      url = "github:openclaw/nix-openclaw";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     flake-stores = {
       url = "github:gytkk/flake-stores";
       inputs.nixpkgs.follows = "nixpkgs";

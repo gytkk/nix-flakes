@@ -1,11 +1,13 @@
 {
   config,
+  inputs,
   pkgs,
   lib,
   username,
   ...
 }:
 let
+  openclawPackage = inputs.flake-stores.packages.${pkgs.system}.openclaw;
   bridgePort = 18813;
   pythonEnv = pkgs.python3.withPackages (
     ps: with ps; [
@@ -29,7 +31,7 @@ in
       HOME = "/home/${username}";
       OPENCLAW_STATE_DIR = "/home/${username}/.openclaw";
       OPENCLAW_CONFIG_PATH = "/home/${username}/.openclaw/openclaw.json";
-      OPENCLAW_BIN = "${pkgs.openclaw}/bin/openclaw";
+      OPENCLAW_BIN = "${openclawPackage}/bin/openclaw";
       OPENCLAW_CRON_DASHBOARD_CORS = lib.concatStringsSep ";" [
         "https://openwebui.pylv.dev"
         "http://127.0.0.1:8787"

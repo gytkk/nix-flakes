@@ -1,5 +1,6 @@
 {
   config,
+  inputs,
   lib,
   pkgs,
   username,
@@ -10,7 +11,7 @@ let
   gatewayPort = 18789;
   lanProxyPort = 18790;
   lanInterface = "wlo1";
-  openclawPackage = pkgs.openclaw;
+  openclawPackage = inputs.flake-stores.packages.${pkgs.system}.openclaw;
   stateDir = "${homeDirectory}/.openclaw";
   gatewayTokenPath = "${stateDir}/gateway-auth-token";
   gatewayNginxAuthIncludePath = "/etc/openclaw/nginx-gateway-auth.conf";
