@@ -164,6 +164,18 @@
           if command -v micromamba > /dev/null; then
             eval "$(micromamba shell hook --shell zsh)"
           fi
+
+          # OpenClaw completion is managed declaratively here so the CLI's
+          # one-shot installer does not get reverted by Home Manager.
+          if command -v openclaw > /dev/null; then
+            local_openclaw_completion_cache="$HOME/.openclaw/completions/openclaw.zsh"
+            if [[ ! -r "$local_openclaw_completion_cache" ]]; then
+              openclaw completion --write-state >/dev/null 2>&1 || true
+            fi
+            # OpenClaw Completion
+            [[ -r "$local_openclaw_completion_cache" ]] && source "$local_openclaw_completion_cache"
+            unset local_openclaw_completion_cache
+          fi
         '';
       in
       lib.mkMerge [
