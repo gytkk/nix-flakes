@@ -48,6 +48,12 @@
         "source": "github",
         "repo": "openai/codex-plugin-cc"
       }
+    },
+    "thedotmack": {
+      "source": {
+        "source": "github",
+        "repo": "thedotmack/claude-mem"
+      }
     }
   },
   "language": "korean",
