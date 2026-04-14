@@ -170,8 +170,9 @@ in
           if command -v micromamba > /dev/null; then
             eval "$(micromamba shell hook --shell zsh)"
           fi
-        ''
-        + lib.optionalString isPylvOnyx ''
+        '';
+
+        openclawCompletion = lib.mkIf isPylvOnyx (lib.mkOrder 1100 ''
           # OpenClaw completion is managed declaratively here so the CLI's
           # one-shot installer does not get reverted by Home Manager.
           if command -v openclaw > /dev/null; then
@@ -183,11 +184,12 @@ in
             [[ -r "$local_openclaw_completion_cache" ]] && source "$local_openclaw_completion_cache"
             unset local_openclaw_completion_cache
           fi
-        '';
+        '');
       in
       lib.mkMerge [
         earlyInit
         zshConfig
+        openclawCompletion
       ];
   };
 
