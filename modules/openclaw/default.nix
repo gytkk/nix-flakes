@@ -10,12 +10,14 @@ let
   lanProxyPort = 18790;
   lanInterface = "wlo1";
   stateDir = "${homeDirectory}/.openclaw";
-  runtimeConfigPath = "${stateDir}/openclaw.json";
-  seedConfigPath = "/etc/openclaw/openclaw.seed.json";
   trustedProxyUser = "lan-admin";
   trustedProxyUserHeader = "x-openclaw-user";
   trustedProxyRequiredHeader = "x-openclaw-proxy";
   trustedProxyRequiredValue = "1";
+  openclawHybridCli = pkgs.writeShellScriptBin "openclaw" ''
+    export OPENCLAW_NIX_MODE=
+    exec ${pkgs."openclaw-gateway"}/bin/openclaw "$@"
+  '';
 
   seedConfig = {
     gateway = {
@@ -62,7 +64,7 @@ in
   '';
 
   environment.systemPackages = with pkgs; [
-    openclaw-gateway
+    openclawHybridCli
     bun
     nodejs
   ];

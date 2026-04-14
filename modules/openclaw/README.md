@@ -5,8 +5,9 @@
 현재 운영 모드:
 - **Nix는 OpenClaw 패키지 / seed config / nginx 프록시만 관리**
 - **실제 OpenClaw gateway 서비스는 OpenClaw CLI가 설치한 user service가 관리**
+- **시스템의 `openclaw` 명령은 하이브리드 wrapper라서 upstream의 `OPENCLAW_NIX_MODE=1` 기본값을 빈 값으로 덮어씀**
 
-마지막 검증: `2026-04-13`
+마지막 검증: `2026-04-14`
 
 ## 구성 요약
 
@@ -70,6 +71,7 @@ openclaw gateway restart
 
 주의:
 - 이 모드는 system-level `openclaw-gateway.service`가 아니라 OpenClaw CLI가 설치한 user service를 기준으로 한다.
+- Nix가 설치하는 `openclaw` 명령은 내부적으로 upstream 패키지 wrapper의 `OPENCLAW_NIX_MODE=1` 기본값을 빈 값으로 덮어써 CLI-managed service 경로를 사용한다.
 - Discord 토큰은 `/run/agenix/discord-bot-token`에서 읽어 login shell에 export되도록 `/etc/profile.d/openclaw-discord-token.sh`를 제공한다.
 - `OPENCLAW_CONFIG_PATH` / `OPENCLAW_STATE_DIR`는 host session variables로 고정되어 있다.
 

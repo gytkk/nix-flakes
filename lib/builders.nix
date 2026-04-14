@@ -121,7 +121,6 @@ rec {
           inputs.home-manager.nixosModules.home-manager
           inputs.agenix.nixosModules.default
           inputs.copyparty.nixosModules.default
-          inputs.nix-openclaw.nixosModules.openclaw-gateway
           inputs.hermes-agent.nixosModules.default
           inputs.niri.nixosModules.niri
           inputs.dms.nixosModules.dank-material-shell
