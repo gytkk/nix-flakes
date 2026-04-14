@@ -83,6 +83,36 @@ in
     nodejs
   ];
 
+  system.activationScripts.openclawSyncGatewayConfig = ''
+    CONFIG_FILE=${pkgs.lib.escapeShellArg "${stateDir}/openclaw.json"}
+
+    if [ -f "$CONFIG_FILE" ]; then
+      tmp="$(${pkgs.coreutils}/bin/mktemp)"
+      ${pkgs.jq}/bin/jq \
+        --arg userHeader ${pkgs.lib.escapeShellArg trustedProxyUserHeader} \
+        --arg requiredHeader ${pkgs.lib.escapeShellArg trustedProxyRequiredHeader} \
+        --arg allowUser ${pkgs.lib.escapeShellArg trustedProxyUser} \
+        --argjson port ${toString gatewayPort} \
+        '
+          .gateway.mode = "local"
+          | .gateway.port = $port
+          | .gateway.bind = "loopback"
+          | .gateway.auth.mode = "trusted-proxy"
+          | .gateway.auth.trustedProxy.userHeader = $userHeader
+          | .gateway.auth.trustedProxy.requiredHeaders = [$requiredHeader]
+          | .gateway.auth.trustedProxy.allowUsers = [$allowUser]
+          | .gateway.trustedProxies = ["127.0.0.1", "::1"]
+          | .gateway.http.endpoints.chatCompletions.enabled = true
+          | .gateway.tailscale.mode = "off"
+          | .gateway.controlUi.dangerouslyDisableDeviceAuth = true
+          | .gateway.controlUi.dangerouslyAllowHostHeaderOriginFallback = true
+        ' \
+        "$CONFIG_FILE" > "$tmp"
+      ${pkgs.coreutils}/bin/install -o ${username} -g users -m 600 "$tmp" "$CONFIG_FILE"
+      ${pkgs.coreutils}/bin/rm -f "$tmp"
+    fi
+  '';
+
   services.nginx = {
     enable = true;
     recommendedProxySettings = true;
