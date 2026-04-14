@@ -14,6 +14,9 @@ let
   gatewayTokenPath = "${stateDir}/gateway-auth-token";
   gatewayNginxAuthIncludePath = "/etc/openclaw/nginx-gateway-auth.conf";
   openclawBootstrapPath = "/etc/openclaw/bootstrap.sh";
+  openclawRuntimeLibraryPath = lib.makeLibraryPath [
+    pkgs.libcap
+  ];
   openclawServicePath = lib.concatStringsSep ":" [
     "/run/current-system/sw/bin"
     "${homeDirectory}/.nix-profile/bin"
@@ -39,11 +42,13 @@ let
     [Service]
     # NixOS-specific PATH shim for the hybrid OpenClaw setup.
     Environment=PATH=${openclawServicePath}
+    Environment=LD_LIBRARY_PATH=${openclawRuntimeLibraryPath}
   '';
   openclawHybridCli = pkgs.writeShellScriptBin "openclaw" ''
     export OPENCLAW_NIX_MODE=
     # NixOS-specific PATH shim for this hybrid setup.
     export PATH="${openclawCliPath}:$PATH"
+    export LD_LIBRARY_PATH="${openclawRuntimeLibraryPath}''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
     export OPENCLAW_PATH_BOOTSTRAPPED=1
 
     if [ -r ${pkgs.lib.escapeShellArg openclawBootstrapPath} ]; then
@@ -98,6 +103,7 @@ in
   environment.systemPackages = with pkgs; [
     openclawHybridCli
     bun
+    libcap
     nodejs
   ];
 
