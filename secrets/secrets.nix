@@ -41,6 +41,12 @@ in
   # Discord bot token for openclaw
   "discord-bot-token.age".publicKeys = allUsers ++ allHosts;
 
+  # Discord user token for discordo terminal client
+  "discordo-token.age".publicKeys = [
+    gytkk
+    gytkkCurrent
+  ] ++ allHosts;
+
   # Open WebUI initial admin environment file
   "open-webui-env.age".publicKeys = [
     gytkk
