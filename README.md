@@ -164,6 +164,8 @@ nix flake show
 nix flake update
 ```
 
+Generic tooling that probes `nix build .` now hits a small compatibility package instead of failing on a missing default output. For actual host builds, keep using explicit flake attributes such as `.#homeConfigurations...` or `.#nixosConfigurations...`.
+
 ## References
 
 - Nix Packages: <https://search.nixos.org/packages>

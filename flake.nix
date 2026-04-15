@@ -116,8 +116,50 @@
 
       # NixOS 설정 생성 함수
       mkNixOSConfig = lib.builders.mkNixOSConfig;
+
+      mkDefaultCompatPackage =
+        system: systemPkgs:
+        let
+          recommendedTargets =
+            if system == "aarch64-darwin" then
+              ''
+                nix build .#homeConfigurations.devsisters-macbook.activationPackage
+                nix build .#homeConfigurations.devsisters-macstudio.activationPackage
+              ''
+            else
+              ''
+                nix build .#nixosConfigurations.pylv-onyx.config.system.build.toplevel
+                nix build .#nixosConfigurations.pylv-sepia.config.system.build.toplevel
+              '';
+        in
+        systemPkgs.writeShellScriptBin "nix-flakes" ''
+          cat <<'EOF'
+          This flake does not expose a single real build target by default.
+          Use an explicit attribute instead.
+
+          Recommended targets:
+          ${recommendedTargets}
+
+          See also:
+            nix flake show
+          EOF
+        '';
+
+      defaultPackages = builtins.mapAttrs (system: systemPkgs: {
+        default = mkDefaultCompatPackage system systemPkgs;
+      }) pkgs;
+
+      defaultApps = builtins.mapAttrs (system: _: {
+        default = {
+          type = "app";
+          program = "${defaultPackages.${system}.default}/bin/nix-flakes";
+        };
+      }) pkgs;
     in
     {
+      packages = defaultPackages;
+      apps = defaultApps;
+
       homeConfigurations = builtins.mapAttrs mkHomeConfig environmentConfigs;
 
       nixosConfigurations = builtins.mapAttrs mkNixOSConfig hostConfigs;
