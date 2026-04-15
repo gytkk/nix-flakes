@@ -12,6 +12,7 @@
 {
   imports = [
     # 기본 모듈들 (항상 import됨)
+    ../modules/aerospace
     ../modules/claude
     ../modules/codex
     ../modules/ghostty

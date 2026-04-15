@@ -1,0 +1,6 @@
+# Omitted scalar values fall back to AeroSpace's built-in defaults.
+config-version = 2
+
+# Keyboard bindings don't inherit from the built-in config.
+# Add bindings here as you customize AeroSpace.
+[mode.main.binding]
