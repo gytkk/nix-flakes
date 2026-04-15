@@ -39,6 +39,8 @@ This module configures Neovim as the primary editor with a modern Lua-based setu
 - `<leader>gh`: blame current line
 - `<leader>gi`: open GitHub issues
 - `<leader>gp`: open GitHub pull requests
+- `gd`: go to definition
+- `gb`: jump back in the jumplist
 - `<leader>cR`: rename current file with LSP-aware updates
 - `<leader>ud`: toggle diagnostics
 - `<leader>uh`: toggle LSP inlay hints

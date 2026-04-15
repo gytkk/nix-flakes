@@ -151,6 +151,7 @@ local snacks = {
     { "<leader>gP", function() Snacks.picker.gh_pr({ state = "all" }) end,    desc = "GitHub Pull Requests (All)" },
     -- Picker: LSP
     { "gd",         function() Snacks.picker.lsp_definitions() end,           desc = "Goto Definition" },
+    { "gb",         "<C-o>",                                                 desc = "Jump Back" },
     { "gr",         function() Snacks.picker.lsp_references() end,            nowait = true,                       desc = "References" },
     { "gi",         function() Snacks.picker.lsp_implementations() end,       desc = "Goto Implementation" },
     -- Picker: misc
