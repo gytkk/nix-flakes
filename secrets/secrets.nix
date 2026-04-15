@@ -45,7 +45,7 @@ in
   "discordo-token.age".publicKeys = [
     gytkk
     gytkkCurrent
-  ] ++ allHosts ++ devsistersHosts;
+  ] ++ allHosts;
 
   # Open WebUI initial admin environment file
   "open-webui-env.age".publicKeys = [

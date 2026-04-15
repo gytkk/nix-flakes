@@ -9,9 +9,6 @@
   ...
 }:
 
-let
-  discordoTokenSecretFile = ../secrets/discordo-token.age;
-in
 {
   imports = [
     # 기본 모듈들 (항상 import됨)
@@ -119,9 +116,6 @@ in
       # AI / Browser automation
       agent-browser
 
-      # Terminal UI
-      discordo
-
       # etc
       direnv
 
@@ -141,10 +135,6 @@ in
     };
   };
 
-  age.secrets.discordo-token = lib.mkIf (builtins.pathExists discordoTokenSecretFile) {
-    file = discordoTokenSecretFile;
-  };
-
   programs = {
     # Enable Home Manager
     home-manager = {
@@ -157,14 +147,6 @@ in
       nix-direnv.enable = true;
     };
   };
-
-  programs.zsh.shellAliases.discord = "discordo";
-
-  programs.zsh.initContent = lib.mkAfter ''
-    if [ -z "''${DISCORDO_TOKEN-}" ] && [ -r /run/agenix/discordo-token ]; then
-      export DISCORDO_TOKEN="$(cat /run/agenix/discordo-token)"
-    fi
-  '';
 
   home.activation.installPackages = lib.mkForce (
     lib.hm.dag.entryAfter [ "writeBoundary" ] (
