@@ -64,8 +64,8 @@ The official [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc)
 
 - AeroSpace config is managed through `modules/aerospace/default.nix` on Darwin hosts.
 - `home-manager switch` installs `~/.config/aerospace/aerospace.toml` as an out-of-store symlink to `modules/aerospace/files/aerospace.toml`, so the repo file stays mutable.
-- The checked-in config is intentionally minimal: `config-version = 2` plus an empty `[mode.main.binding]`.
-- Omitted scalar options fall back to AeroSpace's built-in defaults, but keyboard bindings do not inherit from the built-in config and must be added explicitly.
+- The checked-in config keeps `config-version = 2` plus AeroSpace's default `main` and `service` keybindings.
+- Omitted scalar options still fall back to AeroSpace's built-in defaults, but keyboard bindings do not inherit from the built-in config and must be declared explicitly in the repo file.
 
 ## macOS (`nix-darwin`)
 
