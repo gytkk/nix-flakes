@@ -16,7 +16,8 @@ config.enable_scroll_bar = true
 config.scrollback_lines = 90000
 
 config.default_cursor_style = 'SteadyBar'
-config.use_fancy_tab_bar = false
+config.use_fancy_tab_bar = true
+config.hide_tab_bar_if_only_one_tab = true
 
 config.colors = {
   foreground = '#383a42',
