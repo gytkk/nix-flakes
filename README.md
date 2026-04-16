@@ -56,8 +56,10 @@ The official [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc)
 ## WezTerm config
 
 - WezTerm is managed through `modules/wezterm/default.nix`.
-- `home-manager switch` installs `~/.config/wezterm/wezterm.lua` as an out-of-store symlink to `modules/wezterm/files/wezterm.lua`, so editing either path produces the same repo diff.
+- `home-manager switch` installs `~/.config/wezterm/wezterm.lua` and `shared.lua` as out-of-store symlinks to `modules/wezterm/files/`, so editing either path produces the same repo diff.
+- On WSL hosts, activation also deploys `%USERPROFILE%/.config/wezterm/wezterm.lua` plus `shared.lua` for Windows WezTerm, and rewrites `%USERPROFILE%/.wezterm.lua` to a small bridge that loads the XDG config path.
 - The checked-in defaults keep the existing WezTerm basics such as the scroll bar and large scrollback, while mirroring the current Ghostty setup for One Half Light colors, JetBrains Mono with Sarasa Mono CL fallback, a bar cursor, `xterm-256color`, Kitty keyboard protocol support for modified keys such as `Shift+Enter`, 95% background opacity, and muted split and tab colors.
+- The Windows WSL bridge keeps `default_domain = 'WSL:Ubuntu'` in the Windows entrypoint so new windows still open into WSL by default.
 - The module only manages config. Install the WezTerm app or binary separately.
 
 ## AeroSpace config
