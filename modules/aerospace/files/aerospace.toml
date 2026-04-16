@@ -1,6 +1,9 @@
 # Omitted scalar values fall back to AeroSpace's built-in defaults.
 config-version = 2
 
+# Keep the mouse stationary when monitor/workspace focus changes.
+on-focused-monitor-changed = []
+
 # Keep the workspace list stable even when it becomes temporarily empty.
 persistent-workspaces = [
   "1",
