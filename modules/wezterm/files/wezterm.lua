@@ -40,6 +40,10 @@ wezterm.on('format-tab-title', function(tab, _, _, _, hover, max_width)
   }
 end)
 
+if wezterm.target_triple:find('apple%-darwin') ~= nil then
+  config.window_decorations = 'RESIZE'
+end
+
 config.term = 'xterm-256color'
 
 config.font = wezterm.font_with_fallback {
