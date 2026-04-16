@@ -114,6 +114,7 @@ modules/<name>/
 | `wezterm/`   | WezTerm terminal    | `files/wezterm.lua`                                 | YES     |
 | `vscode/`    | VSCode (DISABLED)   | `default.nix`, `one-half-light-theme/`              | NO      |
 | `zed/`       | Zed editor          | `files/settings.json`, `themes/one-half-light.json` | YES     |
+| `zellij/`    | Zellij multiplexer  | `files/config.darwin.kdl`, `files/config.linux.kdl` | YES     |
 | `zsh/`       | Zsh shell           | `default.nix`, `starship.toml`                      | 부분적  |
 
 > **Mutable**: `mkOutOfStoreSymlink`로 설정 파일이 repo로 직접 symlink됨. 앱 UI에서 수정 가능, 변경이 즉시 repo에 반영. `nfc` alias로 커밋.

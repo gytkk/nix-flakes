@@ -1,27 +1,17 @@
-{ pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  flakeDirectory,
+  ...
+}:
+
+let
+  mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/zellij/${path}";
+  configPath = if pkgs.stdenv.isDarwin then "files/config.darwin.kdl" else "files/config.linux.kdl";
+in
 
 {
-  programs.zellij = {
-    enable = true;
+  programs.zellij.enable = true;
 
-    settings = {
-      default_layout = "welcome";
-      theme = "one-half-light";
-      show_startup_tips = false;
-    }
-    // lib.optionalAttrs pkgs.stdenv.isDarwin {
-      copy_command = "pbcopy";
-    };
-
-    # XXX: theme inlined as workaround for theme_dir not being picked up on startup
-    # https://github.com/zellij-org/zellij/pull/4892
-    extraConfig = builtins.readFile ./files/one-half-light.kdl + ''
-
-      keybinds {
-          shared_except "tmux" "locked" {
-              unbind "Ctrl b"
-          }
-      }
-    '';
-  };
+  xdg.configFile."zellij/config.kdl".source = mkSymlink configPath;
 }

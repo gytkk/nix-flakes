@@ -1,3 +1,11 @@
+// Managed via Home Manager as an out-of-store symlink from ~/.config/zellij/config.kdl.
+// Edit this file directly to keep the repo and the live config in sync on macOS.
+
+copy_command "pbcopy"
+default_layout "welcome"
+show_startup_tips false
+theme "one-half-light"
+
 themes {
     one-half-light {
         text_unselected {
@@ -116,5 +124,11 @@ themes {
             player_9 0
             player_10 0
         }
+    }
+}
+
+keybinds {
+    shared_except "tmux" "locked" {
+        unbind "Ctrl b"
     }
 }
