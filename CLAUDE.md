@@ -106,6 +106,7 @@ modules/<name>/
 | `ghostty/`   | Ghostty terminal    | `files/config`                                      | YES     |
 | `git/`       | Git configuration   | `default.nix`                                       | NO      |
 | `k9s/`       | Kubernetes manager  | `default.nix`                                       | NO      |
+| `kitty/`     | Kitty terminal      | `files/kitty.conf`                                  | YES     |
 | `lsp/`       | LSP server packages | `default.nix`                                       | NO      |
 | `opencode/`  | OpenCode AI agent   | `files/opencode.json`, `files/AGENTS.md`            | YES     |
 | `terraform/` | Terraform versions  | `default.nix` (direnv lazy-load)                    | NO      |

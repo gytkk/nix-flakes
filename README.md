@@ -45,6 +45,13 @@ The official [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc)
 - Local interactive shells started from Ghostty automatically `exec zellij`.
 - SSH sessions and shells already inside `zellij` or `tmux` are excluded from that auto-start.
 
+## Kitty config
+
+- Kitty is managed through `modules/kitty/default.nix`.
+- `home-manager switch` installs `~/.config/kitty/kitty.conf` as an out-of-store symlink to `modules/kitty/files/kitty.conf`, so the repo file stays mutable.
+- The checked-in defaults mirror the current Ghostty look and feel: One Half Light colors, JetBrains Mono with Sarasa Mono CL as the Hangul fallback, a beam cursor, 95% background opacity, shell integration, and muted split borders.
+- The module only manages config. Install the `kitty` app or binary separately.
+
 ## AeroSpace config
 
 - AeroSpace config is managed through `modules/aerospace/default.nix` on Darwin hosts.
