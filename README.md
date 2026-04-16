@@ -42,6 +42,7 @@ The official [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc)
 - Zellij is managed through `modules/zellij/default.nix`.
 - The current theme is `ayu-light`.
 - Startup tips are disabled, and `Ctrl+b` is passed through to terminal apps like Neovim instead of entering Zellij's tmux mode.
+- On macOS, Zellij uses `pbcopy` as `copy_command` so copy-mode selections go to the system clipboard.
 - Local interactive shells started from Ghostty automatically `exec zellij`.
 - SSH sessions and shells already inside `zellij` or `tmux` are excluded from that auto-start.
 

@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 {
   programs.zellij = {
@@ -8,6 +8,9 @@
       default_layout = "welcome";
       theme = "one-half-light";
       show_startup_tips = false;
+    }
+    // lib.optionalAttrs pkgs.stdenv.isDarwin {
+      copy_command = "pbcopy";
     };
 
     # XXX: theme inlined as workaround for theme_dir not being picked up on startup
