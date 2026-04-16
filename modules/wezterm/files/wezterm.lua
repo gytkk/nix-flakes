@@ -7,6 +7,7 @@ local tab_bar_bg = '#eef1f4'
 local inactive_tab_bg = '#e4e9ef'
 local inactive_tab_hover_bg = '#dde3ea'
 local inactive_tab_fg = '#5c6370'
+local fixed_tab_width = 20
 
 local function tab_title(tab)
   local title = tab.tab_title
@@ -17,10 +18,15 @@ local function tab_title(tab)
 end
 
 wezterm.on('format-tab-title', function(tab, _, _, _, hover, max_width)
-  local title = tab_title(tab)
+  local title_width = math.max(fixed_tab_width - 2, 1)
   if max_width ~= nil then
-    title = wezterm.truncate_right(title, math.max(max_width - 2, 1))
+    title_width = math.max(math.min(title_width, max_width - 2), 1)
   end
+
+  local title = wezterm.pad_right(
+    wezterm.truncate_right(tab_title(tab), title_width),
+    title_width
+  )
 
   local bg = inactive_tab_bg
   local fg = inactive_tab_fg
