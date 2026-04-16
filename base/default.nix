@@ -18,7 +18,6 @@
     ../modules/ghostty
     ../modules/git
     ../modules/k9s
-    ../modules/kitty
     ../modules/opencode
     ../modules/lsp
     ../modules/vim
