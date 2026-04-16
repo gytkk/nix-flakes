@@ -42,6 +42,7 @@ end)
 
 if wezterm.target_triple:find('apple%-darwin') ~= nil then
   config.window_decorations = 'RESIZE'
+  config.macos_window_background_blur = 30
 end
 
 config.term = 'xterm-256color'
@@ -52,7 +53,7 @@ config.font = wezterm.font_with_fallback {
 }
 config.font_size = 12.0
 
-config.window_background_opacity = 0.95
+config.window_background_opacity = 0.98
 
 config.enable_scroll_bar = true
 config.scrollback_lines = 90000
