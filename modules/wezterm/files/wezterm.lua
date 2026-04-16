@@ -19,6 +19,15 @@ config.default_cursor_style = 'SteadyBar'
 config.use_fancy_tab_bar = true
 config.hide_tab_bar_if_only_one_tab = true
 
+config.window_frame = {
+  active_titlebar_bg = '#eef1f4',
+  inactive_titlebar_bg = '#eef1f4',
+  active_titlebar_fg = '#383a42',
+  inactive_titlebar_fg = '#5c6370',
+  active_titlebar_border_bottom = '#d0d7de',
+  inactive_titlebar_border_bottom = '#d0d7de',
+}
+
 config.colors = {
   foreground = '#383a42',
   background = '#fdfdfd',
@@ -50,26 +59,26 @@ config.colors = {
     '#ffffff',
   },
   tab_bar = {
-    background = '#fdfdfd',
-    inactive_tab_edge = '#e5e7eb',
+    background = '#eef1f4',
+    inactive_tab_edge = '#d0d7de',
     active_tab = {
       bg_color = '#fdfdfd',
       fg_color = '#383a42',
     },
     inactive_tab = {
-      bg_color = '#f5f5f5',
-      fg_color = '#4f525e',
+      bg_color = '#e4e9ef',
+      fg_color = '#5c6370',
     },
     inactive_tab_hover = {
-      bg_color = '#eceef2',
+      bg_color = '#dde3ea',
       fg_color = '#383a42',
     },
     new_tab = {
-      bg_color = '#fdfdfd',
-      fg_color = '#4f525e',
+      bg_color = '#eef1f4',
+      fg_color = '#5c6370',
     },
     new_tab_hover = {
-      bg_color = '#eceef2',
+      bg_color = '#dde3ea',
       fg_color = '#383a42',
     },
   },
