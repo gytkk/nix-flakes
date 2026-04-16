@@ -52,6 +52,7 @@ if wezterm.target_triple:find('apple%-darwin') ~= nil then
 end
 
 config.term = 'xterm-256color'
+config.enable_kitty_keyboard = true
 
 config.font = wezterm.font_with_fallback {
   'JetBrains Mono',

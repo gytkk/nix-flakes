@@ -4,6 +4,7 @@
 default_layout "welcome"
 show_startup_tips false
 theme "one-half-light"
+support_kitty_keyboard_protocol true
 
 themes {
     one-half-light {
