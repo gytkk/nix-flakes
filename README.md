@@ -52,6 +52,13 @@ The official [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc)
 - The checked-in defaults mirror the current Ghostty look and feel: One Half Light colors, JetBrains Mono with Sarasa Mono CL as the Hangul fallback, a beam cursor, 95% background opacity, shell integration, and muted split borders.
 - The module only manages config. Install the `kitty` app or binary separately.
 
+## WezTerm config
+
+- WezTerm is managed through `modules/wezterm/default.nix`.
+- `home-manager switch` installs `~/.wezterm.lua` as an out-of-store symlink to `modules/wezterm/files/wezterm.lua`, so editing either path produces the same repo diff.
+- The checked-in defaults keep the existing WezTerm basics such as the scroll bar and large scrollback, while mirroring the current Ghostty setup for One Half Light colors, JetBrains Mono with Sarasa Mono CL fallback, a bar cursor, `xterm-256color`, 95% background opacity, and muted split and tab colors.
+- The module only manages config. Install the WezTerm app or binary separately.
+
 ## AeroSpace config
 
 - AeroSpace config is managed through `modules/aerospace/default.nix` on Darwin hosts.
