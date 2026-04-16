@@ -7,11 +7,18 @@
 
 let
   mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/zellij/${path}";
-  configPath = if pkgs.stdenv.isDarwin then "files/config.darwin.kdl" else "files/config.linux.kdl";
+  configSource =
+    if pkgs.stdenv.isDarwin then
+      pkgs.writeText "zellij-config.kdl" ''
+        copy_command "pbcopy"
+        ${builtins.readFile ./files/config.kdl}
+      ''
+    else
+      mkSymlink "files/config.kdl";
 in
 
 {
-  programs.zellij.enable = true;
+  home.packages = [ pkgs.zellij ];
 
-  xdg.configFile."zellij/config.kdl".source = mkSymlink configPath;
+  xdg.configFile."zellij/config.kdl".source = configSource;
 }

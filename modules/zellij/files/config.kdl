@@ -1,7 +1,6 @@
-// Managed via Home Manager as an out-of-store symlink from ~/.config/zellij/config.kdl.
-// Edit this file directly to keep the repo and the live config in sync on macOS.
+// Managed via Home Manager as the shared Zellij config.
+// macOS injects copy_command "pbcopy" from modules/zellij/default.nix.
 
-copy_command "pbcopy"
 default_layout "welcome"
 show_startup_tips false
 theme "one-half-light"
