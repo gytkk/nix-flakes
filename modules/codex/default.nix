@@ -13,7 +13,11 @@ let
   legacySystemCodexConfigPath = "/etc/codex/config.toml";
   systemCodexConfigPath = "/etc/codex/managed_config.toml";
   systemCodexConfigDirectory = "/etc/codex";
-  managedConfigSource = ./files/config.toml;
+  managedConfigSource =
+    if hasSystemCodexConfig then
+      ./files/config.toml
+    else
+      "${flakeDirectory}/modules/codex/files/config.toml";
   coreutils = pkgs.coreutils;
   extractProjectsFunction = ''
     extract_projects() {

@@ -31,10 +31,11 @@ The official [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc)
 
 ### Codex CLI Config
 
-- On NixOS and nix-darwin hosts, the static Codex base config is installed to `/etc/codex/config.toml`.
-- On standalone Home Manager environments, `home-manager switch` ensures `/etc/codex/config.toml` is a symlink to this repo's `modules/codex/files/config.toml`.
-- Standalone activation may prompt for `sudo` on the first switch, when the repo path changes, or after the symlink is removed.
-- If `/etc/codex/config.toml` already exists as a regular file, activation stops instead of overwriting it.
+- On NixOS and nix-darwin hosts, the static Codex base config is installed to `/etc/codex/managed_config.toml`.
+- On standalone Home Manager environments, `home-manager switch` ensures `/etc/codex/managed_config.toml` is a symlink to this repo's `modules/codex/files/config.toml`.
+- Standalone activation may prompt for `sudo` on the first switch, after the symlink is removed, or when migrating from the legacy `/etc/codex/config.toml` path.
+- Using the repo path instead of the flake source store path avoids repeated sudo prompts after unrelated repo changes.
+- If `/etc/codex/managed_config.toml` or the legacy `/etc/codex/config.toml` already exists as a regular file, activation stops instead of overwriting it.
 - `~/.codex/config.toml` stays writable for user-local state such as `[projects."..."]` trust entries.
 
 ## Zellij config
