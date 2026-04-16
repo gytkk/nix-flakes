@@ -8,7 +8,7 @@
 
 let
   claude = "${pkgs.claude-code}/bin/claude";
-  timeout = "${pkgs.coreutils}/bin/timeout";
+  timeout = "${pkgs.coreutils}/bin/timeout --foreground";
   marketplaces = [
     "anthropics/skills"
     "anthropics/claude-code"
@@ -98,10 +98,14 @@ in
 
     INSTALLED_PLUGINS="$HOME/.claude/plugins/installed_plugins.json"
 
-    # Cache marketplace list once to avoid repeated calls
-    # All claude commands use < /dev/null to prevent SIGTTIN when timeout(1)
-    # creates a new process group (background group reading from tty = stopped)
-    MARKETPLACE_CACHE=$(${timeout} 15s ${claude} plugin marketplace list < /dev/null 2>/dev/null || echo "")
+    # Pre-flight: verify Claude Code authentication by listing marketplaces.
+    # --foreground prevents timeout(1) from creating a new process group,
+    # which avoids SIGTTIN when child processes (git) open /dev/tty.
+    if ! MARKETPLACE_CACHE=$(${timeout} 15s ${claude} plugin marketplace list < /dev/null 2>/dev/null); then
+      log "ERROR: Claude Code auth check failed (marketplace list timed out or errored)."
+      log "  Skipping all plugin/marketplace/MCP setup."
+      log "  Run 'claude auth login' to re-authenticate, then retry 'home-manager switch'."
+    else
 
     # Register marketplaces (failures are non-fatal)
     ${lib.concatMapStringsSep "\n    " (mp: ''
@@ -160,6 +164,8 @@ in
           log "MCP server already registered: ${name}"
         fi''
     ) mcpCommands}
+
+    fi # end auth check
 
     # Fix permissions on all shell scripts in plugins (Claude Code doesn't preserve +x)
     log "Fixing plugin script permissions..."
