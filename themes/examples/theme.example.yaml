@@ -1,0 +1,153 @@
+version: 1
+
+meta:
+  id: example-theme
+  name: Example Theme
+  variant: dark
+  family: example
+  author: your-name
+  description: >-
+    Example canonical theme definition using the nix-flakes theme schema.
+
+palette:
+  # Base24-compatible base slots.
+  # For dark themes, base00..base07 usually move from darker surfaces toward lighter text.
+  base00: "#101114"
+  base01: "#16181d"
+  base02: "#20242b"
+  base03: "#3a404c"
+  base04: "#6b7280"
+  base05: "#d7dae0"
+  base06: "#e7e9ee"
+  base07: "#f5f7fa"
+
+  base08: "#ef6b73"
+  base09: "#f39c6b"
+  base0A: "#e5c76b"
+  base0B: "#8ccf7e"
+  base0C: "#6fc7d8"
+  base0D: "#67b0e8"
+  base0E: "#c792ea"
+  base0F: "#ff8fab"
+
+  base10: "#f0d48a"
+  base11: "#a9dc76"
+  base12: "#78dce8"
+  base13: "#8aadf4"
+  base14: "#c6a0f6"
+  base15: "#3b4252"
+  base16: "#7f8490"
+  base17: "#4a5160"
+
+  # Friendly aliases used by roles.
+  bg: "{palette.base00}"
+  bgElevated: "{palette.base01}"
+  bgAlt: "{palette.base02}"
+  border: "{palette.base03}"
+  muted: "{palette.base04}"
+  comment: "{palette.base16}"
+  fgMuted: "{palette.base04}"
+  fg: "{palette.base05}"
+  fgBright: "{palette.base06}"
+  fgMax: "{palette.base07}"
+
+  red: "{palette.base08}"
+  orange: "{palette.base09}"
+  yellow: "{palette.base0A}"
+  green: "{palette.base0B}"
+  cyan: "{palette.base0C}"
+  blue: "{palette.base0D}"
+  magenta: "{palette.base0E}"
+  pink: "{palette.base0F}"
+
+  yellowBright: "{palette.base10}"
+  greenBright: "{palette.base11}"
+  cyanBright: "{palette.base12}"
+  blueBright: "{palette.base13}"
+  magentaBright: "{palette.base14}"
+
+  selection: "{palette.base15}"
+  lineNumber: "{palette.base16}"
+  whitespace: "{palette.base17}"
+  blackBright: "{palette.base03}"
+  white: "{palette.base07}"
+
+roles:
+  ui:
+    bg: "{palette.bg}"
+    bgAlt: "{palette.bgAlt}"
+    bgElevated: "{palette.bgElevated}"
+    fg: "{palette.fg}"
+    fgMuted: "{palette.fgMuted}"
+    border: "{palette.border}"
+    borderActive: "{palette.blue}"
+    selection: "{palette.selection}"
+    selectionInactive: "{palette.base02}"
+    currentLine: "{palette.base01}"
+    currentLineNumber: "{palette.fgBright}"
+    cursor: "{palette.fg}"
+    caretText: "{palette.bg}"
+    search: "{palette.yellowBright}"
+    searchText: "{palette.bg}"
+    match: "{palette.base03}"
+    panelBg: "{palette.bgElevated}"
+    sidebarBg: "{palette.bgElevated}"
+    statuslineBg: "{palette.bgElevated}"
+    statuslineFg: "{palette.fg}"
+
+  syntax:
+    text: "{palette.fg}"
+    comment: "{palette.comment}"
+    string: "{palette.green}"
+    stringEscape: "{palette.cyan}"
+    number: "{palette.orange}"
+    constant: "{palette.orange}"
+    keyword: "{palette.magenta}"
+    operator: "{palette.fg}"
+    variable: "{palette.fg}"
+    parameter: "{palette.fg}"
+    property: "{palette.red}"
+    field: "{palette.red}"
+    function: "{palette.blue}"
+    method: "{palette.blue}"
+    type: "{palette.yellow}"
+    class: "{palette.yellow}"
+    interface: "{palette.yellow}"
+    namespace: "{palette.blue}"
+    builtin: "{palette.cyan}"
+    tag: "{palette.red}"
+    attribute: "{palette.yellow}"
+    punctuation: "{palette.fg}"
+    link: "{palette.blue}"
+
+  diagnostics:
+    error: "{palette.red}"
+    warning: "{palette.yellow}"
+    info: "{palette.blue}"
+    hint: "{palette.cyan}"
+    ok: "{palette.green}"
+
+  vcs:
+    added: "{palette.green}"
+    modified: "{palette.yellow}"
+    removed: "{palette.red}"
+    renamed: "{palette.blue}"
+    conflict: "{palette.orange}"
+
+  ansi:
+    black: "{palette.bg}"
+    red: "{palette.red}"
+    green: "{palette.green}"
+    yellow: "{palette.yellow}"
+    blue: "{palette.blue}"
+    magenta: "{palette.magenta}"
+    cyan: "{palette.cyan}"
+    white: "{palette.fg}"
+    brightBlack: "{palette.blackBright}"
+    brightRed: "{palette.pink}"
+    brightGreen: "{palette.greenBright}"
+    brightYellow: "{palette.yellowBright}"
+    brightBlue: "{palette.blueBright}"
+    brightMagenta: "{palette.magentaBright}"
+    brightCyan: "{palette.cyanBright}"
+    brightWhite: "{palette.white}"
