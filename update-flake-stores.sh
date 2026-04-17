@@ -6,6 +6,53 @@ cd "$(dirname "$0")"
 FLAKE_LOCK="flake.lock"
 INPUT_NAME="flake-stores"
 GITHUB_REPO="gytkk/flake-stores"
+GITHUB_URL="https://github.com/${GITHUB_REPO}.git"
+REMOTE_REF="refs/heads/main"
+
+ensure_nix_ssl_cert_file() {
+  if [[ -n "${NIX_SSL_CERT_FILE:-}" && -r "${NIX_SSL_CERT_FILE}" ]]; then
+    return 0
+  fi
+
+  if [[ -n "${SSL_CERT_FILE:-}" && -r "${SSL_CERT_FILE}" ]]; then
+    export NIX_SSL_CERT_FILE="${SSL_CERT_FILE}"
+    return 0
+  fi
+
+  local candidate=""
+  for candidate in \
+    /nix/var/nix/profiles/default/etc/ssl/certs/ca-bundle.crt \
+    /etc/ssl/certs/ca-bundle.crt \
+    /etc/ssl/certs/ca-certificates.crt
+  do
+    if [[ -r "$candidate" ]]; then
+      export NIX_SSL_CERT_FILE="$candidate"
+      return 0
+    fi
+  done
+
+  local cacert_out=""
+  cacert_out="$(NIX_SSL_CERT_FILE= SSL_CERT_FILE= nix eval --raw nixpkgs#cacert.outPath 2>/dev/null || true)"
+  if [[ -n "$cacert_out" && -r "${cacert_out}/etc/ssl/certs/ca-bundle.crt" ]]; then
+    export NIX_SSL_CERT_FILE="${cacert_out}/etc/ssl/certs/ca-bundle.crt"
+    return 0
+  fi
+
+  echo "Failed to determine a usable CA bundle for Nix HTTPS fetches." >&2
+  exit 1
+}
+
+get_remote_head_rev() {
+  git ls-remote "$GITHUB_URL" "$REMOTE_REF" | awk '{ print $1 }'
+}
+
+ensure_nix_ssl_cert_file
+remote_head_rev="$(get_remote_head_rev)"
+
+if [[ -z "$remote_head_rev" ]]; then
+  echo "Failed to resolve ${GITHUB_REPO} ${REMOTE_REF}." >&2
+  exit 1
+fi
 
 old_rev=$(jq -r ".nodes.\"${INPUT_NAME}\".locked.rev" "$FLAKE_LOCK")
 old_modified=$(jq -r ".nodes.\"${INPUT_NAME}\".locked.lastModified" "$FLAKE_LOCK")
@@ -20,6 +67,12 @@ nix flake update "$INPUT_NAME"
 
 new_rev=$(jq -r ".nodes.\"${INPUT_NAME}\".locked.rev" "$FLAKE_LOCK")
 new_modified=$(jq -r ".nodes.\"${INPUT_NAME}\".locked.lastModified" "$FLAKE_LOCK")
+
+if [[ "$new_rev" != "$remote_head_rev" ]]; then
+  echo "Expected ${INPUT_NAME} to update to ${remote_head_rev}, but flake.lock now points to ${new_rev}." >&2
+  echo "This usually means Nix could not refresh the remote input state." >&2
+  exit 1
+fi
 
 if [[ "$old_rev" == "$new_rev" ]]; then
   echo "No updates available for ${INPUT_NAME}."
