@@ -291,6 +291,8 @@ function M.setup()
   hl("SnacksPickerFile", { fg = p.fg })
   hl("SnacksPickerMatch", { fg = p.blue, bold = true })
   hl("SnacksPickerPrompt", { fg = p.blue })
+  hl("SnacksPickerGitStatusAdded", { fg = p.green, bold = true })
+  hl("SnacksPickerGitStatusUntracked", { fg = p.orange, bold = true })
 
   -- Indent guides
   hl("IblIndent", { fg = p.bg_alt })
