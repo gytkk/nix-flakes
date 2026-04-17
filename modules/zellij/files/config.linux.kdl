@@ -1,5 +1,4 @@
-// Managed via Home Manager as the shared Zellij config.
-// macOS injects copy_command "pbcopy" from modules/zellij/default.nix.
+// Managed via Home Manager as the Linux Zellij config.
 
 default_layout "welcome"
 show_startup_tips false

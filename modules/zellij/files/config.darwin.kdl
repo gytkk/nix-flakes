@@ -1,0 +1,133 @@
+// Managed via Home Manager as the macOS Zellij config.
+
+copy_command "pbcopy"
+default_layout "welcome"
+show_startup_tips false
+theme "one-half-light"
+
+themes {
+    one-half-light {
+        text_unselected {
+            base 56 58 66
+            background 232 232 232
+            emphasis_0 232 134 47
+            emphasis_1 71 138 204
+            emphasis_2 59 172 110
+            emphasis_3 212 73 108
+        }
+        text_selected {
+            base 250 250 250
+            background 58 154 136
+            emphasis_0 232 134 47
+            emphasis_1 180 215 255
+            emphasis_2 170 235 195
+            emphasis_3 212 73 108
+        }
+        ribbon_selected {
+            base 232 232 232
+            background 59 172 110
+            emphasis_0 220 185 80
+            emphasis_1 232 134 47
+            emphasis_2 212 73 108
+            emphasis_3 71 138 204
+        }
+        ribbon_unselected {
+            base 245 245 245
+            background 92 97 102
+            emphasis_0 217 68 82
+            emphasis_1 250 250 250
+            emphasis_2 71 138 204
+            emphasis_3 212 73 108
+        }
+        table_title {
+            base 59 172 110
+            background 0
+            emphasis_0 232 134 47
+            emphasis_1 71 138 204
+            emphasis_2 59 172 110
+            emphasis_3 212 73 108
+        }
+        table_cell_selected {
+            base 250 250 250
+            background 58 154 136
+            emphasis_0 232 134 47
+            emphasis_1 180 215 255
+            emphasis_2 170 235 195
+            emphasis_3 212 73 108
+        }
+        table_cell_unselected {
+            base 56 58 66
+            background 232 232 232
+            emphasis_0 232 134 47
+            emphasis_1 71 138 204
+            emphasis_2 59 172 110
+            emphasis_3 212 73 108
+        }
+        list_selected {
+            base 250 250 250
+            background 58 154 136
+            emphasis_0 232 134 47
+            emphasis_1 180 215 255
+            emphasis_2 170 235 195
+            emphasis_3 212 73 108
+        }
+        list_unselected {
+            base 56 58 66
+            background 232 232 232
+            emphasis_0 232 134 47
+            emphasis_1 71 138 204
+            emphasis_2 59 172 110
+            emphasis_3 212 73 108
+        }
+        frame_selected {
+            base 59 172 110
+            background 0
+            emphasis_0 232 134 47
+            emphasis_1 71 138 204
+            emphasis_2 212 73 108
+            emphasis_3 0
+        }
+        frame_highlight {
+            base 232 134 47
+            background 0
+            emphasis_0 212 73 108
+            emphasis_1 232 134 47
+            emphasis_2 232 134 47
+            emphasis_3 232 134 47
+        }
+        exit_code_success {
+            base 59 172 110
+            background 0
+            emphasis_0 71 138 204
+            emphasis_1 232 232 232
+            emphasis_2 212 73 108
+            emphasis_3 58 154 136
+        }
+        exit_code_error {
+            base 217 68 82
+            background 0
+            emphasis_0 212 162 22
+            emphasis_1 0
+            emphasis_2 0
+            emphasis_3 0
+        }
+        multiplayer_user_colors {
+            player_1 212 73 108
+            player_2 71 138 204
+            player_3 0
+            player_4 212 162 22
+            player_5 58 154 136
+            player_6 0
+            player_7 217 68 82
+            player_8 0
+            player_9 0
+            player_10 0
+        }
+    }
+}
+
+keybinds {
+    shared_except "tmux" "locked" {
+        unbind "Ctrl b"
+    }
+}
