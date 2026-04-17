@@ -26,7 +26,7 @@ in
       gopls
 
       # TypeScript
-      nodePackages.typescript-language-server
+      typescript-language-server
 
       # Terraform
       terraform-ls
