@@ -104,7 +104,7 @@ new_packages=$(nix flake show "github:${GITHUB_REPO}/${new_rev}" --json 2>/dev/n
 package_changes=""
 while IFS='=' read -r pkg new_full_name; do
   [[ -z "$pkg" ]] && continue
-  old_full_name=$(echo "$old_packages" | rg "^${pkg}=" | head -1 | cut -d= -f2-)
+  old_full_name=$(echo "$old_packages" | rg "^${pkg}=" | head -1 | cut -d= -f2- || true)
   # Extract version: strip package name prefix (handle names with hyphens)
   new_ver="${new_full_name#"${pkg}-"}"
   old_ver="${old_full_name#"${pkg}-"}"
