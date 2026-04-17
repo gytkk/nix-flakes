@@ -55,7 +55,15 @@ elseif wezterm.target_triple:find('windows') ~= nil then
 end
 
 config.term = 'xterm-256color'
-config.enable_kitty_keyboard = true
+config.enable_kitty_keyboard = false
+config.keys = {
+  -- Keep Shift+Enter distinct for chat-style TUIs without enabling kitty keyboard globally.
+  {
+    key = 'Enter',
+    mods = 'SHIFT',
+    action = wezterm.action.SendString '\x1b[13;2u',
+  },
+}
 
 config.font = wezterm.font_with_fallback {
   'JetBrains Mono',
