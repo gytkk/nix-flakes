@@ -482,6 +482,13 @@ python themes/validate.py
 python themes/validate.py themes/core/one-half-light.yaml
 ```
 
+Override validation helper:
+
+```bash
+python themes/validate_overrides.py
+python themes/validate_overrides.py themes/overrides/nvim/rose-pine.yaml
+```
+
 Generation helper:
 
 ```bash
@@ -610,6 +617,25 @@ Instead use this progression:
 3. if still not good enough, add a small override file in `themes/overrides/<app>/`
 
 This keeps exceptions visible and isolated.
+
+Current override support:
+
+- `themes/overrides/SCHEMA.md` -> override-layer format notes
+- `themes/overrides/TEMPLATE.yaml` -> minimal authoring template
+- `themes/overrides/nvim/<theme-id>.yaml` -> Neovim per-theme override patches
+- `themes/validate_overrides.py` -> override validator for current Neovim override files
+
+Current Neovim override precedence:
+
+1. rendered template attrs
+2. `groups.<highlight-group>` patch merge
+3. `links.<highlight-group>` replacement
+
+Use overrides for app-specific exceptions like:
+
+- matching an official app theme more closely for one theme only
+- correcting interaction colors such as search, selection, or float emphasis
+- nudging exact highlight groups without changing canonical roles
 
 ## Export Targets to Support First
 

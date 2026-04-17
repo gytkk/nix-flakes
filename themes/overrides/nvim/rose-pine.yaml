@@ -1,0 +1,177 @@
+version: 1
+
+meta:
+  app: nvim
+  theme: rose-pine
+  variant: dark
+
+groups:
+  Search:
+    bg: "#403d52"
+  CurSearch:
+    fg: "{roles.ui.bg}"
+    bg: "{palette.magenta}"
+  IncSearch:
+    fg: "{roles.ui.bg}"
+    bg: "{palette.magenta}"
+  Visual:
+    bg: "#403d52"
+  MatchParen:
+    fg: "{roles.syntax.text}"
+    bg: "#403d52"
+    underline: false
+  PmenuSel:
+    fg: "{roles.syntax.text}"
+    bg: "{roles.ui.bgAlt}"
+  FloatTitle:
+    fg: "{roles.syntax.comment}"
+    bold: false
+  MoreMsg:
+    fg: "{palette.blue}"
+  Boolean:
+    fg: "{palette.magenta}"
+  Constant:
+    fg: "{palette.yellow}"
+  Number:
+    fg: "{palette.yellow}"
+  Float:
+    fg: "{palette.yellow}"
+  Function:
+    fg: "{palette.magenta}"
+  Identifier:
+    fg: "{palette.magenta}"
+  Keyword:
+    fg: "{palette.green}"
+  Conditional:
+    fg: "{palette.green}"
+  Repeat:
+    fg: "{palette.green}"
+  Exception:
+    fg: "{palette.green}"
+  Include:
+    fg: "{palette.blue}"
+  Define:
+    fg: "{palette.blue}"
+  Macro:
+    fg: "{palette.blue}"
+  PreCondit:
+    fg: "{palette.blue}"
+  PreProc:
+    fg: "{palette.blue}"
+  Label:
+    fg: "{palette.cyan}"
+  Special:
+    fg: "{palette.magenta}"
+  SpecialChar:
+    fg: "{palette.magenta}"
+  SpecialComment:
+    fg: "{palette.blue}"
+  Statement:
+    fg: "{palette.green}"
+  StorageClass:
+    fg: "{palette.cyan}"
+  Structure:
+    fg: "{palette.cyan}"
+  Tag:
+    fg: "{palette.magenta}"
+  Todo:
+    fg: "{palette.blue}"
+  Type:
+    fg: "{palette.cyan}"
+  Typedef:
+    fg: "{palette.cyan}"
+  @string.escape:
+    fg: "{palette.magenta}"
+  @boolean:
+    fg: "{palette.magenta}"
+  @number:
+    fg: "{palette.yellow}"
+  @number.float:
+    fg: "{palette.yellow}"
+  @constant:
+    fg: "{palette.yellow}"
+  @function:
+    fg: "{palette.magenta}"
+  @function.call:
+    fg: "{palette.magenta}"
+  @function.method:
+    fg: "{palette.magenta}"
+  @function.method.call:
+    fg: "{palette.magenta}"
+  @keyword:
+    fg: "{palette.green}"
+  @keyword.coroutine:
+    fg: "{palette.green}"
+  @keyword.function:
+    fg: "{palette.green}"
+  @keyword.operator:
+    fg: "{palette.green}"
+  @keyword.import:
+    fg: "{palette.green}"
+  @keyword.type:
+    fg: "{palette.green}"
+  @keyword.modifier:
+    fg: "{palette.green}"
+  @keyword.repeat:
+    fg: "{palette.green}"
+  @keyword.return:
+    fg: "{palette.green}"
+  @keyword.debug:
+    fg: "{palette.green}"
+  @keyword.exception:
+    fg: "{palette.green}"
+  @keyword.conditional:
+    fg: "{palette.green}"
+  @keyword.conditional.ternary:
+    fg: "{palette.green}"
+  @keyword.directive:
+    fg: "{palette.blue}"
+  @keyword.directive.define:
+    fg: "{palette.blue}"
+  @type:
+    fg: "{palette.cyan}"
+  @type.definition:
+    fg: "{palette.cyan}"
+  @attribute:
+    fg: "{palette.blue}"
+  @function.builtin:
+    fg: "{palette.blue}"
+  @function.macro:
+    fg: "{palette.blue}"
+  @type.builtin:
+    fg: "{palette.blue}"
+  @attribute.builtin:
+    fg: "{palette.blue}"
+  @module.builtin:
+    fg: "{palette.blue}"
+  @variable.builtin:
+    fg: "{palette.blue}"
+  @constant.builtin:
+    fg: "{palette.blue}"
+  @constant.macro:
+    fg: "{palette.blue}"
+  @tag:
+    fg: "{palette.magenta}"
+  @lsp.type.class:
+    fg: "{palette.cyan}"
+  @lsp.type.struct:
+    fg: "{palette.cyan}"
+  @lsp.type.enum:
+    fg: "{palette.cyan}"
+  @lsp.type.enumMember:
+    fg: "{palette.yellow}"
+  @lsp.type.interface:
+    fg: "{palette.cyan}"
+  @lsp.type.keyword:
+    fg: "{palette.green}"
+  @lsp.type.function:
+    fg: "{palette.magenta}"
+  @lsp.type.method:
+    fg: "{palette.magenta}"
+  @lsp.type.macro:
+    fg: "{palette.blue}"
+  @lsp.type.decorator:
+    fg: "{palette.blue}"
+
+links:
+  @constructor: "@type"

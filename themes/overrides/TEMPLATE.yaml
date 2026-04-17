@@ -1,0 +1,14 @@
+version: 1
+
+meta:
+  app: nvim
+  theme: theme-id
+  variant: dark
+
+groups:
+  CurSearch:
+    fg: "{roles.ui.bg}"
+    bg: "{palette.magenta}"
+
+links:
+  @constructor: "@type"

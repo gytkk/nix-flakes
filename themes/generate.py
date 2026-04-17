@@ -12,6 +12,7 @@ from validate import ParseError, Validator, load_yaml, validate_theme
 
 
 REF_RE = re.compile(r"^\{palette\.([A-Za-z][A-Za-z0-9]*)\}$")
+ROLE_REF_RE = re.compile(r"^\{roles\.([A-Za-z][A-Za-z0-9]*)\.([A-Za-z][A-Za-z0-9]*)\}$")
 
 
 def alpha(hex_color: str, suffix: str) -> str:
@@ -112,6 +113,32 @@ def theme_context(theme: dict[str, Any]) -> dict[str, Any]:
         "palette": palette,
         "roles": roles,
     }
+
+
+def resolve_context_value(value: Any, ctx: dict[str, Any]) -> Any:
+    if isinstance(value, str):
+        palette_match = REF_RE.match(value)
+        if palette_match:
+            return ctx["palette"][palette_match.group(1)]
+
+        role_match = ROLE_REF_RE.match(value)
+        if role_match:
+            group, key = role_match.groups()
+            return ctx["roles"][group][key]
+
+        if value == "true":
+            return True
+        if value == "false":
+            return False
+        if value == "null":
+            return None
+        return value
+
+    if isinstance(value, dict):
+        return {key: resolve_context_value(item, ctx) for key, item in value.items()}
+    if isinstance(value, list):
+        return [resolve_context_value(item, ctx) for item in value]
+    return value
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -463,6 +490,78 @@ def load_nvim_plugin_template(root: Path) -> dict[str, Any]:
     return load_json(template_path)
 
 
+def load_nvim_override(root: Path, theme_id: str) -> dict[str, Any] | None:
+    path = root / "overrides" / "nvim" / f"{theme_id}.yaml"
+    if not path.exists():
+        return None
+    return load_yaml(path)
+
+
+def apply_nvim_override_sections(
+    sections: list[dict[str, Any]],
+    override: dict[str, Any] | None,
+    ctx: dict[str, Any],
+    *,
+    append_extra: bool = True,
+) -> list[dict[str, Any]]:
+    if not override:
+        return sections
+
+    group_overrides = override.get("groups", {})
+    links = override.get("links", {})
+
+    if not isinstance(group_overrides, dict):
+        raise RuntimeError("nvim override groups must be a mapping")
+    if not isinstance(links, dict):
+        raise RuntimeError("nvim override links must be a mapping")
+
+    out: list[dict[str, Any]] = []
+    seen_groups: set[str] = set()
+
+    for section in sections:
+        new_section = {**section, "groups": []}
+        for spec in section["groups"]:
+            group = spec["group"]
+            attrs = dict(spec["attrs"])
+
+            if group in group_overrides:
+                patch = group_overrides[group]
+                if not isinstance(patch, dict):
+                    raise RuntimeError(f"nvim override for group {group!r} must be a mapping")
+                attrs.update(resolve_context_value(patch, ctx))
+
+            if group in links:
+                attrs = {"link": resolve_context_value(links[group], ctx)}
+
+            new_section["groups"].append({"group": group, "attrs": attrs})
+            seen_groups.add(group)
+        out.append(new_section)
+
+    extra_groups: list[dict[str, Any]] = []
+    for group, patch in group_overrides.items():
+        if group in seen_groups:
+            continue
+        if not isinstance(patch, dict):
+            raise RuntimeError(f"nvim override for group {group!r} must be a mapping")
+        extra_groups.append({"group": group, "attrs": resolve_context_value(patch, ctx)})
+
+    for group, target in links.items():
+        if group in seen_groups or group in group_overrides:
+            continue
+        extra_groups.append({"group": group, "attrs": {"link": resolve_context_value(target, ctx)}})
+
+    if append_extra and extra_groups:
+        out.append(
+            {
+                "name": "Override groups",
+                "source": "themes/overrides/nvim",
+                "groups": extra_groups,
+            }
+        )
+
+    return out
+
+
 def nvim_lua(ctx: dict[str, Any], root: Path) -> str:
     meta = ctx["meta"]
     p = ctx["palette"]
@@ -472,6 +571,7 @@ def nvim_lua(ctx: dict[str, Any], root: Path) -> str:
     is_light = background == "light"
     nvim_template = load_nvim_template(root)
     nvim_plugin_template = load_nvim_plugin_template(root)
+    nvim_override = load_nvim_override(root, meta["id"])
 
     palette_table = {
         "bg": r["ui"]["bg"],
@@ -486,15 +586,38 @@ def nvim_lua(ctx: dict[str, Any], root: Path) -> str:
         "fg_muted": r["ui"]["fgMuted"],
         "fg_bright": r["ui"]["currentLineNumber"],
         "comment": r["syntax"]["comment"],
-        "red": r["syntax"]["tag"],
-        "orange": r["syntax"]["keyword"],
-        "yellow": r["syntax"]["type"],
-        "green": r["syntax"]["string"],
-        "cyan": r["syntax"]["stringEscape"],
-        "blue": r["syntax"]["function"],
+        "red": p["red"],
+        "orange": p["orange"],
+        "yellow": p["yellow"],
+        "green": p["green"],
+        "cyan": p["cyan"],
+        "blue": p["blue"],
         "magenta": p["magenta"],
         "pink": p["pink"],
         "linenr": p["lineNumber"],
+        "syntax_text": r["syntax"]["text"],
+        "syntax_comment": r["syntax"]["comment"],
+        "syntax_string": r["syntax"]["string"],
+        "syntax_string_escape": r["syntax"]["stringEscape"],
+        "syntax_number": r["syntax"]["number"],
+        "syntax_constant": r["syntax"]["constant"],
+        "syntax_keyword": r["syntax"]["keyword"],
+        "syntax_operator": r["syntax"]["operator"],
+        "syntax_variable": r["syntax"]["variable"],
+        "syntax_parameter": r["syntax"]["parameter"],
+        "syntax_property": r["syntax"]["property"],
+        "syntax_field": r["syntax"]["field"],
+        "syntax_func": r["syntax"]["function"],
+        "syntax_method": r["syntax"]["method"],
+        "syntax_type": r["syntax"]["type"],
+        "syntax_class": r["syntax"]["class"],
+        "syntax_interface": r["syntax"]["interface"],
+        "syntax_namespace": r["syntax"]["namespace"],
+        "syntax_builtin": r["syntax"]["builtin"],
+        "syntax_tag": r["syntax"]["tag"],
+        "syntax_attribute": r["syntax"]["attribute"],
+        "syntax_punctuation": r["syntax"]["punctuation"],
+        "syntax_link": r["syntax"]["link"],
         "diff_add_bg": soft_background(r["vcs"]["added"], r["ui"]["bg"], light=is_light, strength=0.82),
         "diff_change_bg": soft_background(r["vcs"]["modified"], r["ui"]["bg"], light=is_light, strength=0.82),
         "diff_delete_bg": soft_background(r["vcs"]["removed"], r["ui"]["bg"], light=is_light, strength=0.82),
@@ -541,13 +664,18 @@ def nvim_lua(ctx: dict[str, Any], root: Path) -> str:
         ]
     )
 
-    for section in nvim_template["sections"]:
+    rendered_sections = apply_nvim_override_sections(nvim_template["sections"], nvim_override, ctx)
+    rendered_plugin_sections = apply_nvim_override_sections(
+        nvim_plugin_template["sections"], nvim_override, ctx, append_extra=False
+    )
+
+    for section in rendered_sections:
         lines.append("")
         lines.append(f"  -- {section['name']}")
         for spec in section["groups"]:
             lines.append(f"  hl({lua_string(spec['group'])}, {lua_opts(spec['attrs'])})")
 
-    for section in nvim_plugin_template["sections"]:
+    for section in rendered_plugin_sections:
         lines.append("")
         lines.append(f"  -- Plugin: {section['name']}")
         for spec in section["groups"]:

@@ -590,169 +590,169 @@
         {
           "group": "Constant",
           "attrs": {
-            "fg": "$yellow"
+            "fg": "$syntax_constant"
           }
         },
         {
           "group": "String",
           "attrs": {
-            "fg": "$green"
+            "fg": "$syntax_string"
           }
         },
         {
           "group": "Character",
           "attrs": {
-            "fg": "$green"
+            "fg": "$syntax_string"
           }
         },
         {
           "group": "Number",
           "attrs": {
-            "fg": "$yellow"
+            "fg": "$syntax_number"
           }
         },
         {
           "group": "Boolean",
           "attrs": {
-            "fg": "$yellow"
+            "fg": "$syntax_constant"
           }
         },
         {
           "group": "Float",
           "attrs": {
-            "fg": "$yellow"
+            "fg": "$syntax_number"
           }
         },
         {
           "group": "Identifier",
           "attrs": {
-            "fg": "$fg"
+            "fg": "$syntax_variable"
           }
         },
         {
           "group": "Function",
           "attrs": {
-            "fg": "$blue"
+            "fg": "$syntax_func"
           }
         },
         {
           "group": "Statement",
           "attrs": {
-            "fg": "$orange"
+            "fg": "$syntax_keyword"
           }
         },
         {
           "group": "Conditional",
           "attrs": {
-            "fg": "$orange"
+            "fg": "$syntax_keyword"
           }
         },
         {
           "group": "Repeat",
           "attrs": {
-            "fg": "$orange"
+            "fg": "$syntax_keyword"
           }
         },
         {
           "group": "Label",
           "attrs": {
-            "fg": "$red"
+            "fg": "$syntax_namespace"
           }
         },
         {
           "group": "Operator",
           "attrs": {
-            "fg": "$fg"
+            "fg": "$syntax_operator"
           }
         },
         {
           "group": "Keyword",
           "attrs": {
-            "fg": "$orange"
+            "fg": "$syntax_keyword"
           }
         },
         {
           "group": "Exception",
           "attrs": {
-            "fg": "$orange"
+            "fg": "$syntax_keyword"
           }
         },
         {
           "group": "PreProc",
           "attrs": {
-            "fg": "$orange"
+            "fg": "$syntax_keyword"
           }
         },
         {
           "group": "Include",
           "attrs": {
-            "fg": "$orange"
+            "fg": "$syntax_keyword"
           }
         },
         {
           "group": "Define",
           "attrs": {
-            "fg": "$orange"
+            "fg": "$syntax_keyword"
           }
         },
         {
           "group": "Macro",
           "attrs": {
-            "fg": "$blue"
+            "fg": "$syntax_builtin"
           }
         },
         {
           "group": "PreCondit",
           "attrs": {
-            "fg": "$orange"
+            "fg": "$syntax_keyword"
           }
         },
         {
           "group": "Type",
           "attrs": {
-            "fg": "$yellow"
+            "fg": "$syntax_type"
           }
         },
         {
           "group": "StorageClass",
           "attrs": {
-            "fg": "$orange"
+            "fg": "$syntax_keyword"
           }
         },
         {
           "group": "Structure",
           "attrs": {
-            "fg": "$yellow"
+            "fg": "$syntax_class"
           }
         },
         {
           "group": "Typedef",
           "attrs": {
-            "fg": "$yellow"
+            "fg": "$syntax_type"
           }
         },
         {
           "group": "Special",
           "attrs": {
-            "fg": "$blue"
+            "fg": "$syntax_builtin"
           }
         },
         {
           "group": "SpecialChar",
           "attrs": {
-            "fg": "$cyan"
+            "fg": "$syntax_string_escape"
           }
         },
         {
           "group": "Tag",
           "attrs": {
-            "fg": "$red"
+            "fg": "$syntax_tag"
           }
         },
         {
           "group": "Delimiter",
           "attrs": {
-            "fg": "$fg"
+            "fg": "$syntax_punctuation"
           }
         },
         {
@@ -771,7 +771,7 @@
         {
           "group": "Underlined",
           "attrs": {
-            "fg": "$blue",
+            "fg": "$syntax_link",
             "underline": true
           }
         },
@@ -822,339 +822,339 @@
         {
           "group": "@variable",
           "attrs": {
-            "fg": "$fg"
+            "fg": "$syntax_variable"
           }
         },
         {
           "group": "@variable.builtin",
           "attrs": {
-            "fg": "$red"
+            "fg": "$syntax_builtin"
           }
         },
         {
           "group": "@variable.parameter",
           "attrs": {
-            "fg": "$fg"
+            "fg": "$syntax_parameter"
           }
         },
         {
           "group": "@variable.parameter.builtin",
           "attrs": {
-            "fg": "$red"
+            "fg": "$syntax_builtin"
           }
         },
         {
           "group": "@variable.member",
           "attrs": {
-            "fg": "$red"
+            "fg": "$syntax_field"
           }
         },
         {
           "group": "@constant",
           "attrs": {
-            "fg": "$yellow"
+            "fg": "$syntax_constant"
           }
         },
         {
           "group": "@constant.builtin",
           "attrs": {
-            "fg": "$yellow"
+            "fg": "$syntax_builtin"
           }
         },
         {
           "group": "@constant.macro",
           "attrs": {
-            "fg": "$yellow"
+            "fg": "$syntax_builtin"
           }
         },
         {
           "group": "@module",
           "attrs": {
-            "fg": "$fg"
+            "fg": "$syntax_namespace"
           }
         },
         {
           "group": "@module.builtin",
           "attrs": {
-            "fg": "$red"
+            "fg": "$syntax_builtin"
           }
         },
         {
           "group": "@label",
           "attrs": {
-            "fg": "$blue"
+            "fg": "$syntax_namespace"
           }
         },
         {
           "group": "@string",
           "attrs": {
-            "fg": "$green"
+            "fg": "$syntax_string"
           }
         },
         {
           "group": "@string.documentation",
           "attrs": {
-            "fg": "$green",
+            "fg": "$syntax_string",
             "italic": true
           }
         },
         {
           "group": "@string.regexp",
           "attrs": {
-            "fg": "$cyan"
+            "fg": "$syntax_string_escape"
           }
         },
         {
           "group": "@string.escape",
           "attrs": {
-            "fg": "$cyan"
+            "fg": "$syntax_string_escape"
           }
         },
         {
           "group": "@string.special",
           "attrs": {
-            "fg": "$cyan"
+            "fg": "$syntax_string_escape"
           }
         },
         {
           "group": "@string.special.symbol",
           "attrs": {
-            "fg": "$yellow"
+            "fg": "$syntax_constant"
           }
         },
         {
           "group": "@string.special.path",
           "attrs": {
-            "fg": "$cyan"
+            "fg": "$syntax_string_escape"
           }
         },
         {
           "group": "@string.special.url",
           "attrs": {
-            "fg": "$orange",
+            "fg": "$syntax_link",
             "underline": true
           }
         },
         {
           "group": "@character",
           "attrs": {
-            "fg": "$green"
+            "fg": "$syntax_string"
           }
         },
         {
           "group": "@character.special",
           "attrs": {
-            "fg": "$cyan"
+            "fg": "$syntax_string_escape"
           }
         },
         {
           "group": "@boolean",
           "attrs": {
-            "fg": "$yellow"
+            "fg": "$syntax_constant"
           }
         },
         {
           "group": "@number",
           "attrs": {
-            "fg": "$yellow"
+            "fg": "$syntax_number"
           }
         },
         {
           "group": "@number.float",
           "attrs": {
-            "fg": "$yellow"
+            "fg": "$syntax_number"
           }
         },
         {
           "group": "@type",
           "attrs": {
-            "fg": "$yellow"
+            "fg": "$syntax_type"
           }
         },
         {
           "group": "@type.builtin",
           "attrs": {
-            "fg": "$yellow"
+            "fg": "$syntax_builtin"
           }
         },
         {
           "group": "@type.definition",
           "attrs": {
-            "fg": "$yellow"
+            "fg": "$syntax_class"
           }
         },
         {
           "group": "@attribute",
           "attrs": {
-            "fg": "$yellow"
+            "fg": "$syntax_attribute"
           }
         },
         {
           "group": "@attribute.builtin",
           "attrs": {
-            "fg": "$yellow"
+            "fg": "$syntax_builtin"
           }
         },
         {
           "group": "@property",
           "attrs": {
-            "fg": "$red"
+            "fg": "$syntax_property"
           }
         },
         {
           "group": "@function",
           "attrs": {
-            "fg": "$blue"
+            "fg": "$syntax_func"
           }
         },
         {
           "group": "@function.builtin",
           "attrs": {
-            "fg": "$blue"
+            "fg": "$syntax_builtin"
           }
         },
         {
           "group": "@function.call",
           "attrs": {
-            "fg": "$blue"
+            "fg": "$syntax_func"
           }
         },
         {
           "group": "@function.macro",
           "attrs": {
-            "fg": "$blue"
+            "fg": "$syntax_builtin"
           }
         },
         {
           "group": "@function.method",
           "attrs": {
-            "fg": "$blue"
+            "fg": "$syntax_method"
           }
         },
         {
           "group": "@function.method.call",
           "attrs": {
-            "fg": "$blue"
+            "fg": "$syntax_method"
           }
         },
         {
           "group": "@constructor",
           "attrs": {
-            "fg": "$blue"
+            "fg": "$syntax_class"
           }
         },
         {
           "group": "@operator",
           "attrs": {
-            "fg": "$fg"
+            "fg": "$syntax_operator"
           }
         },
         {
           "group": "@keyword",
           "attrs": {
-            "fg": "$orange"
+            "fg": "$syntax_keyword"
           }
         },
         {
           "group": "@keyword.coroutine",
           "attrs": {
-            "fg": "$orange"
+            "fg": "$syntax_keyword"
           }
         },
         {
           "group": "@keyword.function",
           "attrs": {
-            "fg": "$orange"
+            "fg": "$syntax_keyword"
           }
         },
         {
           "group": "@keyword.operator",
           "attrs": {
-            "fg": "$orange"
+            "fg": "$syntax_keyword"
           }
         },
         {
           "group": "@keyword.import",
           "attrs": {
-            "fg": "$orange"
+            "fg": "$syntax_keyword"
           }
         },
         {
           "group": "@keyword.type",
           "attrs": {
-            "fg": "$orange"
+            "fg": "$syntax_keyword"
           }
         },
         {
           "group": "@keyword.modifier",
           "attrs": {
-            "fg": "$orange"
+            "fg": "$syntax_keyword"
           }
         },
         {
           "group": "@keyword.repeat",
           "attrs": {
-            "fg": "$orange"
+            "fg": "$syntax_keyword"
           }
         },
         {
           "group": "@keyword.return",
           "attrs": {
-            "fg": "$orange"
+            "fg": "$syntax_keyword"
           }
         },
         {
           "group": "@keyword.debug",
           "attrs": {
-            "fg": "$orange"
+            "fg": "$syntax_keyword"
           }
         },
         {
           "group": "@keyword.exception",
           "attrs": {
-            "fg": "$orange"
+            "fg": "$syntax_keyword"
           }
         },
         {
           "group": "@keyword.conditional",
           "attrs": {
-            "fg": "$orange"
+            "fg": "$syntax_keyword"
           }
         },
         {
           "group": "@keyword.conditional.ternary",
           "attrs": {
-            "fg": "$orange"
+            "fg": "$syntax_keyword"
           }
         },
         {
           "group": "@keyword.directive",
           "attrs": {
-            "fg": "$orange"
+            "fg": "$syntax_keyword"
           }
         },
         {
           "group": "@keyword.directive.define",
           "attrs": {
-            "fg": "$orange"
+            "fg": "$syntax_keyword"
           }
         },
         {
           "group": "@punctuation.delimiter",
           "attrs": {
-            "fg": "$fg"
+            "fg": "$syntax_punctuation"
           }
         },
         {
           "group": "@punctuation.bracket",
           "attrs": {
-            "fg": "$fg"
+            "fg": "$syntax_punctuation"
           }
         },
         {
           "group": "@punctuation.special",
           "attrs": {
-            "fg": "$cyan"
+            "fg": "$syntax_punctuation"
           }
         },
         {
@@ -1618,92 +1618,92 @@
         {
           "group": "LspSignatureActiveParameter",
           "attrs": {
-            "fg": "$blue",
+            "fg": "$syntax_parameter",
             "underline": true
           }
         },
         {
           "group": "@lsp.type.class",
           "attrs": {
-            "fg": "$yellow"
+            "fg": "$syntax_class"
           }
         },
         {
           "group": "@lsp.type.struct",
           "attrs": {
-            "fg": "$yellow"
+            "fg": "$syntax_type"
           }
         },
         {
           "group": "@lsp.type.enum",
           "attrs": {
-            "fg": "$yellow"
+            "fg": "$syntax_type"
           }
         },
         {
           "group": "@lsp.type.enumMember",
           "attrs": {
-            "fg": "$yellow"
+            "fg": "$syntax_constant"
           }
         },
         {
           "group": "@lsp.type.interface",
           "attrs": {
-            "fg": "$yellow"
+            "fg": "$syntax_interface"
           }
         },
         {
           "group": "@lsp.type.parameter",
           "attrs": {
-            "fg": "$fg"
+            "fg": "$syntax_parameter"
           }
         },
         {
           "group": "@lsp.type.property",
           "attrs": {
-            "fg": "$red"
+            "fg": "$syntax_property"
           }
         },
         {
           "group": "@lsp.type.variable",
           "attrs": {
-            "fg": "$fg"
+            "fg": "$syntax_variable"
           }
         },
         {
           "group": "@lsp.type.keyword",
           "attrs": {
-            "fg": "$orange"
+            "fg": "$syntax_keyword"
           }
         },
         {
           "group": "@lsp.type.namespace",
           "attrs": {
-            "fg": "$red"
+            "fg": "$syntax_namespace"
           }
         },
         {
           "group": "@lsp.type.function",
           "attrs": {
-            "fg": "$blue"
+            "fg": "$syntax_func"
           }
         },
         {
           "group": "@lsp.type.method",
           "attrs": {
-            "fg": "$blue"
+            "fg": "$syntax_method"
           }
         },
         {
           "group": "@lsp.type.macro",
           "attrs": {
-            "fg": "$blue"
+            "fg": "$syntax_builtin"
           }
         },
         {
           "group": "@lsp.type.decorator",
           "attrs": {
-            "fg": "$yellow"
+            "fg": "$syntax_attribute"
           }
         },
         {
