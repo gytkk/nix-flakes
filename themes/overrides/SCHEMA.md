@@ -14,6 +14,7 @@ Do not use overrides to redefine the canonical theme core.
 
 - `themes/overrides/nvim/<theme-id>.yaml`
 - `python themes/validate_overrides.py`
+- `python themes/check_templates.py` now also checks override template/current override file structure
 
 ## Resolution order
 

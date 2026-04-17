@@ -502,6 +502,11 @@ Template consistency helper:
 python themes/check_templates.py
 ```
 
+This now checks both:
+
+- app template JSON files under `themes/templates/`
+- override template/current override YAML files under `themes/overrides/`
+
 Current generators:
 
 - `zed` -> `themes/exports/zed/*.json`

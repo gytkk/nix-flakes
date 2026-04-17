@@ -6,11 +6,17 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from validate import load_yaml
+
 ROOT = Path(__file__).resolve().parent
 
 
 def load(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text())
+
+
+def load_yaml_doc(path: Path) -> dict[str, Any]:
+    return load_yaml(path)
 
 
 def expect(condition: bool, message: str, errors: list[str]) -> None:
@@ -198,17 +204,80 @@ def check_nvim_plugin_template(path: Path, doc: dict[str, Any], errors: list[str
     check_nvim_sections(f"{path}.sections", doc.get("sections"), errors)
 
 
-CHECKS = {
+def check_override_template(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
+    path_str = str(path)
+    expected_top = ["version", "meta", "groups", "links"]
+    expect(list(doc.keys()) == expected_top, f"{path_str}: top-level keys must exactly match {expected_top}", errors)
+
+    meta = doc.get("meta")
+    expect(isinstance(meta, dict), f"{path_str}.meta must be an object", errors)
+    if isinstance(meta, dict):
+        expected_meta = ["app", "theme", "variant"]
+        expect(list(meta.keys()) == expected_meta, f"{path_str}.meta keys must exactly match {expected_meta}", errors)
+
+    groups = doc.get("groups")
+    expect(isinstance(groups, dict) and len(groups) > 0, f"{path_str}.groups must be a non-empty object", errors)
+
+    links = doc.get("links")
+    expect(isinstance(links, dict), f"{path_str}.links must be an object", errors)
+
+
+def check_nvim_override(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
+    path_str = str(path)
+    expected_top = ["version", "meta", "groups", "links"]
+    expect(list(doc.keys()) == expected_top, f"{path_str}: top-level keys must exactly match {expected_top}", errors)
+
+    expect(doc.get("version") == 1, f"{path_str}.version must be 1", errors)
+
+    meta = doc.get("meta")
+    expect(isinstance(meta, dict), f"{path_str}.meta must be an object", errors)
+    if isinstance(meta, dict):
+        expected_meta = ["app", "theme", "variant"]
+        expect(list(meta.keys()) == expected_meta, f"{path_str}.meta keys must exactly match {expected_meta}", errors)
+        expect(meta.get("app") == "nvim", f"{path_str}.meta.app must be 'nvim'", errors)
+        expect(isinstance(meta.get("theme"), str) and meta.get("theme"), f"{path_str}.meta.theme must be a non-empty string", errors)
+        expect(meta.get("variant") in {"light", "dark"}, f"{path_str}.meta.variant must be 'light' or 'dark'", errors)
+
+    groups = doc.get("groups")
+    expect(isinstance(groups, dict) and len(groups) > 0, f"{path_str}.groups must be a non-empty object", errors)
+    if isinstance(groups, dict):
+        seen_groups: set[str] = set()
+        for group, attrs in groups.items():
+            expect(isinstance(group, str) and group, f"{path_str}.groups contains an invalid group name", errors)
+            if isinstance(group, str):
+                expect(group not in seen_groups, f"{path_str}.groups duplicate group name {group!r}", errors)
+                seen_groups.add(group)
+            expect(isinstance(attrs, dict) and len(attrs) > 0, f"{path_str}.groups.{group} must be a non-empty object", errors)
+
+    links = doc.get("links")
+    expect(isinstance(links, dict), f"{path_str}.links must be an object", errors)
+    if isinstance(links, dict):
+        for group, target in links.items():
+            expect(isinstance(group, str) and group, f"{path_str}.links contains an invalid group name", errors)
+            expect(isinstance(target, str) and target, f"{path_str}.links.{group} must be a non-empty string", errors)
+
+
+JSON_CHECKS = {
     ROOT / "templates" / "nvim" / "official-template.json": check_nvim,
     ROOT / "templates" / "zed" / "official-template.json": check_zed,
     ROOT / "templates" / "nvim" / "plugins.json": check_nvim_plugin_template,
 }
 
+YAML_CHECKS = {
+    ROOT / "overrides" / "TEMPLATE.yaml": check_override_template,
+}
+
 
 def main() -> int:
     errors: list[str] = []
-    for path, checker in CHECKS.items():
+    for path, checker in JSON_CHECKS.items():
         checker(path.relative_to(ROOT), load(path), errors)
+
+    for path, checker in YAML_CHECKS.items():
+        checker(path.relative_to(ROOT), load_yaml_doc(path), errors)
+
+    for path in sorted((ROOT / "overrides" / "nvim").glob("*.yaml")):
+        check_nvim_override(path.relative_to(ROOT), load_yaml_doc(path), errors)
 
     if errors:
         print("Template consistency check failed:", file=sys.stderr)
@@ -216,7 +285,8 @@ def main() -> int:
             print(f"- {error}", file=sys.stderr)
         return 1
 
-    print(f"Validated {len(CHECKS)} template file(s) successfully.")
+    total = len(JSON_CHECKS) + len(YAML_CHECKS) + len(list((ROOT / "overrides" / "nvim").glob("*.yaml")))
+    print(f"Validated {total} template/override file(s) successfully.")
     return 0
 
 
