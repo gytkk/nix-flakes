@@ -6,12 +6,11 @@
 
 let
   mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/vim/${path}";
-  mkThemeSymlink =
-    path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/themes/exports/nvim/${path}";
+  nvimThemeExports = config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/themes/exports/nvim";
 in
 {
   xdg.configFile."nvim/lua/config".source = mkSymlink "files/config";
-  xdg.configFile."nvim/rose-pine.lua".source = mkThemeSymlink "rose-pine.lua";
+  xdg.configFile."nvim/themes".source = nvimThemeExports;
 
   programs.neovim = {
     enable = true;
