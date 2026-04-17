@@ -1,0 +1,1075 @@
+{
+  "name": "zed-official-theme-template",
+  "version": 1,
+  "description": "Official Zed theme template derived from the published theme JSON schema and Zed theme documentation.",
+  "sources": [
+    {
+      "kind": "schema",
+      "ref": "themes/v0.2.0.json",
+      "url": "https://zed.dev/schema/themes/v0.2.0.json"
+    },
+    {
+      "kind": "docs",
+      "ref": "Theme Extensions",
+      "url": "https://zed.dev/docs/extensions/themes"
+    },
+    {
+      "kind": "docs",
+      "ref": "Themes",
+      "url": "https://zed.dev/docs/themes"
+    }
+  ],
+  "theme_family_schema": {
+    "schema_url": "https://zed.dev/schema/themes/v0.2.0.json",
+    "token_prefix": "$",
+    "style_key_source": "official-json-schema",
+    "syntax_value_schema": "HighlightStyleContent"
+  },
+  "style_sections": [
+    {
+      "name": "Surfaces and borders",
+      "entries": [
+        {
+          "key": "border",
+          "value": "$border"
+        },
+        {
+          "key": "border.variant",
+          "value": "$border_variant"
+        },
+        {
+          "key": "border.focused",
+          "value": "$border_focused"
+        },
+        {
+          "key": "border.selected",
+          "value": "$border_selected"
+        },
+        {
+          "key": "border.transparent",
+          "value": "$border_transparent"
+        },
+        {
+          "key": "border.disabled",
+          "value": "$border_disabled"
+        },
+        {
+          "key": "elevated_surface.background",
+          "value": "$elevated_surface_background"
+        },
+        {
+          "key": "surface.background",
+          "value": "$surface_background"
+        },
+        {
+          "key": "background",
+          "value": "$background"
+        },
+        {
+          "key": "element.background",
+          "value": "$element_background"
+        },
+        {
+          "key": "element.hover",
+          "value": "$element_hover"
+        },
+        {
+          "key": "element.active",
+          "value": "$element_active"
+        },
+        {
+          "key": "element.selected",
+          "value": "$element_selected"
+        },
+        {
+          "key": "element.disabled",
+          "value": "$element_disabled"
+        },
+        {
+          "key": "drop_target.background",
+          "value": "$drop_target_background"
+        },
+        {
+          "key": "ghost_element.background",
+          "value": "$ghost_element_background"
+        },
+        {
+          "key": "ghost_element.hover",
+          "value": "$ghost_element_hover"
+        },
+        {
+          "key": "ghost_element.active",
+          "value": "$ghost_element_active"
+        },
+        {
+          "key": "ghost_element.selected",
+          "value": "$ghost_element_selected"
+        },
+        {
+          "key": "ghost_element.disabled",
+          "value": "$ghost_element_disabled"
+        }
+      ]
+    },
+    {
+      "name": "Text and icons",
+      "entries": [
+        {
+          "key": "text",
+          "value": "$text"
+        },
+        {
+          "key": "text.muted",
+          "value": "$text_muted"
+        },
+        {
+          "key": "text.placeholder",
+          "value": "$text_placeholder"
+        },
+        {
+          "key": "text.disabled",
+          "value": "$text_disabled"
+        },
+        {
+          "key": "text.accent",
+          "value": "$text_accent"
+        },
+        {
+          "key": "icon",
+          "value": "$icon"
+        },
+        {
+          "key": "icon.muted",
+          "value": "$icon_muted"
+        },
+        {
+          "key": "icon.disabled",
+          "value": "$icon_disabled"
+        },
+        {
+          "key": "icon.placeholder",
+          "value": "$icon_placeholder"
+        },
+        {
+          "key": "icon.accent",
+          "value": "$icon_accent"
+        },
+        {
+          "key": "link_text.hover",
+          "value": "$link_text_hover"
+        }
+      ]
+    },
+    {
+      "name": "Panels and chrome",
+      "entries": [
+        {
+          "key": "status_bar.background",
+          "value": "$status_bar_background"
+        },
+        {
+          "key": "title_bar.background",
+          "value": "$title_bar_background"
+        },
+        {
+          "key": "title_bar.inactive_background",
+          "value": "$title_bar_inactive_background"
+        },
+        {
+          "key": "toolbar.background",
+          "value": "$toolbar_background"
+        },
+        {
+          "key": "tab_bar.background",
+          "value": "$tab_bar_background"
+        },
+        {
+          "key": "tab.inactive_background",
+          "value": "$tab_inactive_background"
+        },
+        {
+          "key": "tab.active_background",
+          "value": "$tab_active_background"
+        },
+        {
+          "key": "search.match_background",
+          "value": "$search_match_background"
+        },
+        {
+          "key": "panel.background",
+          "value": "$panel_background"
+        },
+        {
+          "key": "panel.focused_border",
+          "value": "$panel_focused_border"
+        },
+        {
+          "key": "panel.indent_guide",
+          "value": "$panel_indent_guide"
+        },
+        {
+          "key": "panel.indent_guide_active",
+          "value": "$panel_indent_guide_active"
+        },
+        {
+          "key": "panel.indent_guide_hover",
+          "value": "$panel_indent_guide_hover"
+        },
+        {
+          "key": "pane.focused_border",
+          "value": "$pane_focused_border"
+        },
+        {
+          "key": "pane_group.border",
+          "value": "$pane_group_border"
+        },
+        {
+          "key": "scrollbar.thumb.background",
+          "value": "$scrollbar_thumb_background"
+        },
+        {
+          "key": "scrollbar.thumb.hover_background",
+          "value": "$scrollbar_thumb_hover_background"
+        },
+        {
+          "key": "scrollbar.thumb.border",
+          "value": "$scrollbar_thumb_border"
+        },
+        {
+          "key": "scrollbar.track.background",
+          "value": "$scrollbar_track_background"
+        },
+        {
+          "key": "scrollbar.track.border",
+          "value": "$scrollbar_track_border"
+        }
+      ]
+    },
+    {
+      "name": "Editor",
+      "entries": [
+        {
+          "key": "editor.foreground",
+          "value": "$editor_foreground"
+        },
+        {
+          "key": "editor.background",
+          "value": "$editor_background"
+        },
+        {
+          "key": "editor.gutter.background",
+          "value": "$editor_gutter_background"
+        },
+        {
+          "key": "editor.subheader.background",
+          "value": "$editor_subheader_background"
+        },
+        {
+          "key": "editor.active_line.background",
+          "value": "$editor_active_line_background"
+        },
+        {
+          "key": "editor.highlighted_line.background",
+          "value": "$editor_highlighted_line_background"
+        },
+        {
+          "key": "editor.line_number",
+          "value": "$editor_line_number"
+        },
+        {
+          "key": "editor.active_line_number",
+          "value": "$editor_active_line_number"
+        },
+        {
+          "key": "editor.invisible",
+          "value": "$editor_invisible"
+        },
+        {
+          "key": "editor.wrap_guide",
+          "value": "$editor_wrap_guide"
+        },
+        {
+          "key": "editor.active_wrap_guide",
+          "value": "$editor_active_wrap_guide"
+        },
+        {
+          "key": "editor.indent_guide",
+          "value": "$editor_indent_guide"
+        },
+        {
+          "key": "editor.indent_guide_active",
+          "value": "$editor_indent_guide_active"
+        },
+        {
+          "key": "editor.document_highlight.bracket_background",
+          "value": "$editor_document_highlight_bracket_background"
+        },
+        {
+          "key": "editor.document_highlight.read_background",
+          "value": "$editor_document_highlight_read_background"
+        },
+        {
+          "key": "editor.document_highlight.write_background",
+          "value": "$editor_document_highlight_write_background"
+        }
+      ]
+    },
+    {
+      "name": "Terminal",
+      "entries": [
+        {
+          "key": "terminal.background",
+          "value": "$terminal_background"
+        },
+        {
+          "key": "terminal.foreground",
+          "value": "$terminal_foreground"
+        },
+        {
+          "key": "terminal.bright_foreground",
+          "value": "$terminal_bright_foreground"
+        },
+        {
+          "key": "terminal.dim_foreground",
+          "value": "$terminal_dim_foreground"
+        },
+        {
+          "key": "terminal.ansi.background",
+          "value": "$terminal_ansi_background"
+        },
+        {
+          "key": "terminal.ansi.black",
+          "value": "$terminal_ansi_black"
+        },
+        {
+          "key": "terminal.ansi.bright_black",
+          "value": "$terminal_ansi_bright_black"
+        },
+        {
+          "key": "terminal.ansi.dim_black",
+          "value": "$terminal_ansi_dim_black"
+        },
+        {
+          "key": "terminal.ansi.red",
+          "value": "$terminal_ansi_red"
+        },
+        {
+          "key": "terminal.ansi.bright_red",
+          "value": "$terminal_ansi_bright_red"
+        },
+        {
+          "key": "terminal.ansi.dim_red",
+          "value": "$terminal_ansi_dim_red"
+        },
+        {
+          "key": "terminal.ansi.green",
+          "value": "$terminal_ansi_green"
+        },
+        {
+          "key": "terminal.ansi.bright_green",
+          "value": "$terminal_ansi_bright_green"
+        },
+        {
+          "key": "terminal.ansi.dim_green",
+          "value": "$terminal_ansi_dim_green"
+        },
+        {
+          "key": "terminal.ansi.yellow",
+          "value": "$terminal_ansi_yellow"
+        },
+        {
+          "key": "terminal.ansi.bright_yellow",
+          "value": "$terminal_ansi_bright_yellow"
+        },
+        {
+          "key": "terminal.ansi.dim_yellow",
+          "value": "$terminal_ansi_dim_yellow"
+        },
+        {
+          "key": "terminal.ansi.blue",
+          "value": "$terminal_ansi_blue"
+        },
+        {
+          "key": "terminal.ansi.bright_blue",
+          "value": "$terminal_ansi_bright_blue"
+        },
+        {
+          "key": "terminal.ansi.dim_blue",
+          "value": "$terminal_ansi_dim_blue"
+        },
+        {
+          "key": "terminal.ansi.magenta",
+          "value": "$terminal_ansi_magenta"
+        },
+        {
+          "key": "terminal.ansi.bright_magenta",
+          "value": "$terminal_ansi_bright_magenta"
+        },
+        {
+          "key": "terminal.ansi.dim_magenta",
+          "value": "$terminal_ansi_dim_magenta"
+        },
+        {
+          "key": "terminal.ansi.cyan",
+          "value": "$terminal_ansi_cyan"
+        },
+        {
+          "key": "terminal.ansi.bright_cyan",
+          "value": "$terminal_ansi_bright_cyan"
+        },
+        {
+          "key": "terminal.ansi.dim_cyan",
+          "value": "$terminal_ansi_dim_cyan"
+        },
+        {
+          "key": "terminal.ansi.white",
+          "value": "$terminal_ansi_white"
+        },
+        {
+          "key": "terminal.ansi.bright_white",
+          "value": "$terminal_ansi_bright_white"
+        },
+        {
+          "key": "terminal.ansi.dim_white",
+          "value": "$terminal_ansi_dim_white"
+        }
+      ]
+    },
+    {
+      "name": "Status colors",
+      "entries": [
+        {
+          "key": "conflict",
+          "value": "$conflict"
+        },
+        {
+          "key": "conflict.background",
+          "value": "$conflict_background"
+        },
+        {
+          "key": "conflict.border",
+          "value": "$conflict_border"
+        },
+        {
+          "key": "created",
+          "value": "$created"
+        },
+        {
+          "key": "created.background",
+          "value": "$created_background"
+        },
+        {
+          "key": "created.border",
+          "value": "$created_border"
+        },
+        {
+          "key": "deleted",
+          "value": "$deleted"
+        },
+        {
+          "key": "deleted.background",
+          "value": "$deleted_background"
+        },
+        {
+          "key": "deleted.border",
+          "value": "$deleted_border"
+        },
+        {
+          "key": "error",
+          "value": "$error"
+        },
+        {
+          "key": "error.background",
+          "value": "$error_background"
+        },
+        {
+          "key": "error.border",
+          "value": "$error_border"
+        },
+        {
+          "key": "hidden",
+          "value": "$hidden"
+        },
+        {
+          "key": "hidden.background",
+          "value": "$hidden_background"
+        },
+        {
+          "key": "hidden.border",
+          "value": "$hidden_border"
+        },
+        {
+          "key": "hint",
+          "value": "$hint"
+        },
+        {
+          "key": "hint.background",
+          "value": "$hint_background"
+        },
+        {
+          "key": "hint.border",
+          "value": "$hint_border"
+        },
+        {
+          "key": "ignored",
+          "value": "$ignored"
+        },
+        {
+          "key": "ignored.background",
+          "value": "$ignored_background"
+        },
+        {
+          "key": "ignored.border",
+          "value": "$ignored_border"
+        },
+        {
+          "key": "info",
+          "value": "$info"
+        },
+        {
+          "key": "info.background",
+          "value": "$info_background"
+        },
+        {
+          "key": "info.border",
+          "value": "$info_border"
+        },
+        {
+          "key": "modified",
+          "value": "$modified"
+        },
+        {
+          "key": "modified.background",
+          "value": "$modified_background"
+        },
+        {
+          "key": "modified.border",
+          "value": "$modified_border"
+        },
+        {
+          "key": "predictive",
+          "value": "$predictive"
+        },
+        {
+          "key": "predictive.background",
+          "value": "$predictive_background"
+        },
+        {
+          "key": "predictive.border",
+          "value": "$predictive_border"
+        },
+        {
+          "key": "renamed",
+          "value": "$renamed"
+        },
+        {
+          "key": "renamed.background",
+          "value": "$renamed_background"
+        },
+        {
+          "key": "renamed.border",
+          "value": "$renamed_border"
+        },
+        {
+          "key": "success",
+          "value": "$success"
+        },
+        {
+          "key": "success.background",
+          "value": "$success_background"
+        },
+        {
+          "key": "success.border",
+          "value": "$success_border"
+        },
+        {
+          "key": "unreachable",
+          "value": "$unreachable"
+        },
+        {
+          "key": "unreachable.background",
+          "value": "$unreachable_background"
+        },
+        {
+          "key": "unreachable.border",
+          "value": "$unreachable_border"
+        },
+        {
+          "key": "warning",
+          "value": "$warning"
+        },
+        {
+          "key": "warning.background",
+          "value": "$warning_background"
+        },
+        {
+          "key": "warning.border",
+          "value": "$warning_border"
+        }
+      ]
+    }
+  ],
+  "syntax_sections": [
+    {
+      "name": "Core syntax",
+      "entries": [
+        {
+          "key": "attribute",
+          "value": {
+            "color": "$syntax_attribute",
+            "font_style": null,
+            "font_weight": null
+          }
+        },
+        {
+          "key": "boolean",
+          "value": {
+            "color": "$syntax_boolean",
+            "font_style": null,
+            "font_weight": null
+          }
+        },
+        {
+          "key": "comment",
+          "value": {
+            "color": "$syntax_comment",
+            "font_style": "italic",
+            "font_weight": null
+          }
+        },
+        {
+          "key": "comment.doc",
+          "value": {
+            "color": "$syntax_comment",
+            "font_style": "italic",
+            "font_weight": null
+          }
+        },
+        {
+          "key": "constant",
+          "value": {
+            "color": "$syntax_constant",
+            "font_style": null,
+            "font_weight": null
+          }
+        },
+        {
+          "key": "constructor",
+          "value": {
+            "color": "$syntax_constructor",
+            "font_style": null,
+            "font_weight": null
+          }
+        },
+        {
+          "key": "embedded",
+          "value": {
+            "color": "$syntax_embedded",
+            "font_style": null,
+            "font_weight": null
+          }
+        },
+        {
+          "key": "enum",
+          "value": {
+            "color": "$syntax_enum",
+            "font_style": null,
+            "font_weight": null
+          }
+        },
+        {
+          "key": "function",
+          "value": {
+            "color": "$syntax_function",
+            "font_style": null,
+            "font_weight": null
+          }
+        },
+        {
+          "key": "hint",
+          "value": {
+            "color": "$syntax_hint",
+            "font_style": null,
+            "font_weight": null
+          }
+        },
+        {
+          "key": "keyword",
+          "value": {
+            "color": "$syntax_keyword",
+            "font_style": null,
+            "font_weight": null
+          }
+        },
+        {
+          "key": "label",
+          "value": {
+            "color": "$syntax_label",
+            "font_style": null,
+            "font_weight": null
+          }
+        },
+        {
+          "key": "link_text",
+          "value": {
+            "color": "$syntax_link_text",
+            "font_style": null,
+            "font_weight": null
+          }
+        },
+        {
+          "key": "link_uri",
+          "value": {
+            "color": "$syntax_link_uri",
+            "font_style": null,
+            "font_weight": null
+          }
+        },
+        {
+          "key": "namespace",
+          "value": {
+            "color": "$syntax_namespace",
+            "font_style": null,
+            "font_weight": null
+          }
+        },
+        {
+          "key": "number",
+          "value": {
+            "color": "$syntax_number",
+            "font_style": null,
+            "font_weight": null
+          }
+        },
+        {
+          "key": "operator",
+          "value": {
+            "color": "$syntax_operator",
+            "font_style": null,
+            "font_weight": null
+          }
+        },
+        {
+          "key": "property",
+          "value": {
+            "color": "$syntax_property",
+            "font_style": null,
+            "font_weight": null
+          }
+        },
+        {
+          "key": "punctuation",
+          "value": {
+            "color": "$syntax_punctuation",
+            "font_style": null,
+            "font_weight": null
+          }
+        },
+        {
+          "key": "punctuation.bracket",
+          "value": {
+            "color": "$syntax_punctuation_bracket",
+            "font_style": null,
+            "font_weight": null
+          }
+        },
+        {
+          "key": "punctuation.delimiter",
+          "value": {
+            "color": "$syntax_punctuation_delimiter",
+            "font_style": null,
+            "font_weight": null
+          }
+        },
+        {
+          "key": "punctuation.special",
+          "value": {
+            "color": "$syntax_punctuation_special",
+            "font_style": null,
+            "font_weight": null
+          }
+        },
+        {
+          "key": "string",
+          "value": {
+            "color": "$syntax_string",
+            "font_style": null,
+            "font_weight": null
+          }
+        },
+        {
+          "key": "string.escape",
+          "value": {
+            "color": "$syntax_string_escape",
+            "font_style": null,
+            "font_weight": null
+          }
+        },
+        {
+          "key": "string.regex",
+          "value": {
+            "color": "$syntax_string_regex",
+            "font_style": null,
+            "font_weight": null
+          }
+        },
+        {
+          "key": "string.special",
+          "value": {
+            "color": "$syntax_string_special",
+            "font_style": null,
+            "font_weight": null
+          }
+        },
+        {
+          "key": "string.special.symbol",
+          "value": {
+            "color": "$syntax_string_special_symbol",
+            "font_style": null,
+            "font_weight": null
+          }
+        },
+        {
+          "key": "tag",
+          "value": {
+            "color": "$syntax_tag",
+            "font_style": null,
+            "font_weight": null
+          }
+        },
+        {
+          "key": "text.literal",
+          "value": {
+            "color": "$syntax_text_literal",
+            "font_style": null,
+            "font_weight": null
+          }
+        },
+        {
+          "key": "title",
+          "value": {
+            "color": "$syntax_title",
+            "font_style": null,
+            "font_weight": 700
+          }
+        },
+        {
+          "key": "type",
+          "value": {
+            "color": "$syntax_type",
+            "font_style": null,
+            "font_weight": null
+          }
+        },
+        {
+          "key": "variable",
+          "value": {
+            "color": "$syntax_variable",
+            "font_style": null,
+            "font_weight": null
+          }
+        },
+        {
+          "key": "variable.special",
+          "value": {
+            "color": "$syntax_variable_special",
+            "font_style": null,
+            "font_weight": null
+          }
+        },
+        {
+          "key": "variant",
+          "value": {
+            "color": "$syntax_variant",
+            "font_style": null,
+            "font_weight": null
+          }
+        }
+      ]
+    }
+  ],
+  "players": [
+    {
+      "cursor": "$player_1",
+      "background": "$player_1",
+      "selection": "$player_1_selection"
+    },
+    {
+      "cursor": "$player_2",
+      "background": "$player_2",
+      "selection": "$player_2_selection"
+    },
+    {
+      "cursor": "$player_3",
+      "background": "$player_3",
+      "selection": "$player_3_selection"
+    },
+    {
+      "cursor": "$player_4",
+      "background": "$player_4",
+      "selection": "$player_4_selection"
+    },
+    {
+      "cursor": "$player_5",
+      "background": "$player_5",
+      "selection": "$player_5_selection"
+    },
+    {
+      "cursor": "$player_6",
+      "background": "$player_6",
+      "selection": "$player_6_selection"
+    },
+    {
+      "cursor": "$player_7",
+      "background": "$player_7",
+      "selection": "$player_7_selection"
+    },
+    {
+      "cursor": "$player_8",
+      "background": "$player_8",
+      "selection": "$player_8_selection"
+    }
+  ],
+  "style_keys": [
+    "border",
+    "border.variant",
+    "border.focused",
+    "border.selected",
+    "border.transparent",
+    "border.disabled",
+    "elevated_surface.background",
+    "surface.background",
+    "background",
+    "element.background",
+    "element.hover",
+    "element.active",
+    "element.selected",
+    "element.disabled",
+    "drop_target.background",
+    "ghost_element.background",
+    "ghost_element.hover",
+    "ghost_element.active",
+    "ghost_element.selected",
+    "ghost_element.disabled",
+    "text",
+    "text.muted",
+    "text.placeholder",
+    "text.disabled",
+    "text.accent",
+    "icon",
+    "icon.muted",
+    "icon.disabled",
+    "icon.placeholder",
+    "icon.accent",
+    "link_text.hover",
+    "status_bar.background",
+    "title_bar.background",
+    "title_bar.inactive_background",
+    "toolbar.background",
+    "tab_bar.background",
+    "tab.inactive_background",
+    "tab.active_background",
+    "search.match_background",
+    "panel.background",
+    "panel.focused_border",
+    "panel.indent_guide",
+    "panel.indent_guide_active",
+    "panel.indent_guide_hover",
+    "pane.focused_border",
+    "pane_group.border",
+    "scrollbar.thumb.background",
+    "scrollbar.thumb.hover_background",
+    "scrollbar.thumb.border",
+    "scrollbar.track.background",
+    "scrollbar.track.border",
+    "editor.foreground",
+    "editor.background",
+    "editor.gutter.background",
+    "editor.subheader.background",
+    "editor.active_line.background",
+    "editor.highlighted_line.background",
+    "editor.line_number",
+    "editor.active_line_number",
+    "editor.invisible",
+    "editor.wrap_guide",
+    "editor.active_wrap_guide",
+    "editor.indent_guide",
+    "editor.indent_guide_active",
+    "editor.document_highlight.bracket_background",
+    "editor.document_highlight.read_background",
+    "editor.document_highlight.write_background",
+    "terminal.background",
+    "terminal.foreground",
+    "terminal.bright_foreground",
+    "terminal.dim_foreground",
+    "terminal.ansi.background",
+    "terminal.ansi.black",
+    "terminal.ansi.bright_black",
+    "terminal.ansi.dim_black",
+    "terminal.ansi.red",
+    "terminal.ansi.bright_red",
+    "terminal.ansi.dim_red",
+    "terminal.ansi.green",
+    "terminal.ansi.bright_green",
+    "terminal.ansi.dim_green",
+    "terminal.ansi.yellow",
+    "terminal.ansi.bright_yellow",
+    "terminal.ansi.dim_yellow",
+    "terminal.ansi.blue",
+    "terminal.ansi.bright_blue",
+    "terminal.ansi.dim_blue",
+    "terminal.ansi.magenta",
+    "terminal.ansi.bright_magenta",
+    "terminal.ansi.dim_magenta",
+    "terminal.ansi.cyan",
+    "terminal.ansi.bright_cyan",
+    "terminal.ansi.dim_cyan",
+    "terminal.ansi.white",
+    "terminal.ansi.bright_white",
+    "terminal.ansi.dim_white",
+    "conflict",
+    "conflict.background",
+    "conflict.border",
+    "created",
+    "created.background",
+    "created.border",
+    "deleted",
+    "deleted.background",
+    "deleted.border",
+    "error",
+    "error.background",
+    "error.border",
+    "hidden",
+    "hidden.background",
+    "hidden.border",
+    "hint",
+    "hint.background",
+    "hint.border",
+    "ignored",
+    "ignored.background",
+    "ignored.border",
+    "info",
+    "info.background",
+    "info.border",
+    "modified",
+    "modified.background",
+    "modified.border",
+    "predictive",
+    "predictive.background",
+    "predictive.border",
+    "renamed",
+    "renamed.background",
+    "renamed.border",
+    "success",
+    "success.background",
+    "success.border",
+    "unreachable",
+    "unreachable.background",
+    "unreachable.border",
+    "warning",
+    "warning.background",
+    "warning.border",
+    "players",
+    "syntax"
+  ]
+}

@@ -1,0 +1,1718 @@
+{
+  "name": "neovim-official-highlight-template",
+  "version": 1,
+  "description": "Official Neovim highlight template derived from builtin help topics, for use as the canonical base when exporting themes.",
+  "sources": [
+    {
+      "kind": "help",
+      "ref": "api.txt:*nvim_set_hl()*",
+      "path": "runtime/doc/api.txt"
+    },
+    {
+      "kind": "help",
+      "ref": "syntax.txt:*highlight-groups*",
+      "path": "runtime/doc/syntax.txt"
+    },
+    {
+      "kind": "help",
+      "ref": "syntax.txt:*group-name*",
+      "path": "runtime/doc/syntax.txt"
+    },
+    {
+      "kind": "help",
+      "ref": "treesitter.txt:*treesitter-highlight-groups*",
+      "path": "runtime/doc/treesitter.txt"
+    },
+    {
+      "kind": "help",
+      "ref": "diagnostic.txt:hl-Diagnostic*",
+      "path": "runtime/doc/diagnostic.txt"
+    },
+    {
+      "kind": "help",
+      "ref": "lsp.txt:*lsp-semantic-highlight*",
+      "path": "runtime/doc/lsp.txt"
+    }
+  ],
+  "highlight_schema": {
+    "api": "nvim_set_hl",
+    "allowed_keys": [
+      "fg",
+      "bg",
+      "fg_indexed",
+      "bg_indexed",
+      "sp",
+      "blend",
+      "bold",
+      "standout",
+      "underline",
+      "undercurl",
+      "underdouble",
+      "underdotted",
+      "underdashed",
+      "strikethrough",
+      "italic",
+      "reverse",
+      "nocombine",
+      "link",
+      "default",
+      "ctermfg",
+      "ctermbg",
+      "cterm"
+    ],
+    "token_prefix": "$",
+    "token_note": "Strings starting with $ reference exporter palette slots. Plain strings are literal values or link targets."
+  },
+  "sections": [
+    {
+      "name": "UI",
+      "source": "syntax.txt:*highlight-groups*",
+      "groups": [
+        {
+          "group": "Normal",
+          "attrs": {
+            "fg": "$fg",
+            "bg": "$bg"
+          }
+        },
+        {
+          "group": "NormalNC",
+          "attrs": {
+            "fg": "$fg_muted",
+            "bg": "$bg"
+          }
+        },
+        {
+          "group": "NormalFloat",
+          "attrs": {
+            "fg": "$fg",
+            "bg": "$bg_float"
+          }
+        },
+        {
+          "group": "FloatBorder",
+          "attrs": {
+            "fg": "$border",
+            "bg": "$bg_float"
+          }
+        },
+        {
+          "group": "FloatTitle",
+          "attrs": {
+            "fg": "$blue",
+            "bg": "$bg_float",
+            "bold": true
+          }
+        },
+        {
+          "group": "FloatFooter",
+          "attrs": {
+            "fg": "$comment",
+            "bg": "$bg_float"
+          }
+        },
+        {
+          "group": "Cursor",
+          "attrs": {
+            "fg": "$cursor",
+            "reverse": true
+          }
+        },
+        {
+          "group": "lCursor",
+          "attrs": {
+            "fg": "$cursor",
+            "reverse": true
+          }
+        },
+        {
+          "group": "CursorIM",
+          "attrs": {
+            "fg": "$cursor",
+            "reverse": true
+          }
+        },
+        {
+          "group": "TermCursor",
+          "attrs": {
+            "fg": "$cursor",
+            "reverse": true
+          }
+        },
+        {
+          "group": "CursorLine",
+          "attrs": {
+            "bg": "$bg_alt"
+          }
+        },
+        {
+          "group": "CursorColumn",
+          "attrs": {
+            "bg": "$bg_alt"
+          }
+        },
+        {
+          "group": "ColorColumn",
+          "attrs": {
+            "bg": "$bg_alt"
+          }
+        },
+        {
+          "group": "LineNr",
+          "attrs": {
+            "fg": "$linenr"
+          }
+        },
+        {
+          "group": "LineNrAbove",
+          "attrs": {
+            "fg": "$linenr"
+          }
+        },
+        {
+          "group": "LineNrBelow",
+          "attrs": {
+            "fg": "$linenr"
+          }
+        },
+        {
+          "group": "CursorLineNr",
+          "attrs": {
+            "fg": "$fg_bright",
+            "bold": true
+          }
+        },
+        {
+          "group": "SignColumn",
+          "attrs": {
+            "bg": "$bg"
+          }
+        },
+        {
+          "group": "CursorLineSign",
+          "attrs": {
+            "fg": "$fg_bright",
+            "bg": "$bg_alt"
+          }
+        },
+        {
+          "group": "FoldColumn",
+          "attrs": {
+            "fg": "$linenr",
+            "bg": "$bg"
+          }
+        },
+        {
+          "group": "CursorLineFold",
+          "attrs": {
+            "fg": "$fg_bright",
+            "bg": "$bg_alt"
+          }
+        },
+        {
+          "group": "WinSeparator",
+          "attrs": {
+            "fg": "$border"
+          }
+        },
+        {
+          "group": "VertSplit",
+          "attrs": {
+            "fg": "$border"
+          }
+        },
+        {
+          "group": "StatusLine",
+          "attrs": {
+            "fg": "$fg",
+            "bg": "$bg_float"
+          }
+        },
+        {
+          "group": "StatusLineNC",
+          "attrs": {
+            "fg": "$fg_muted",
+            "bg": "$bg_alt"
+          }
+        },
+        {
+          "group": "StatusLineTerm",
+          "attrs": {
+            "fg": "$fg",
+            "bg": "$bg_float"
+          }
+        },
+        {
+          "group": "StatusLineTermNC",
+          "attrs": {
+            "fg": "$fg_muted",
+            "bg": "$bg_alt"
+          }
+        },
+        {
+          "group": "TabLine",
+          "attrs": {
+            "fg": "$fg_muted",
+            "bg": "$bg_alt"
+          }
+        },
+        {
+          "group": "TabLineFill",
+          "attrs": {
+            "bg": "$bg_alt"
+          }
+        },
+        {
+          "group": "TabLineSel",
+          "attrs": {
+            "fg": "$fg",
+            "bg": "$bg",
+            "bold": true
+          }
+        },
+        {
+          "group": "WinBar",
+          "attrs": {
+            "fg": "$fg",
+            "bg": "$bg_float"
+          }
+        },
+        {
+          "group": "WinBarNC",
+          "attrs": {
+            "fg": "$fg_muted",
+            "bg": "$bg_alt"
+          }
+        },
+        {
+          "group": "Pmenu",
+          "attrs": {
+            "fg": "$fg",
+            "bg": "$bg_float"
+          }
+        },
+        {
+          "group": "PmenuSel",
+          "attrs": {
+            "bg": "$selection"
+          }
+        },
+        {
+          "group": "PmenuKind",
+          "attrs": {
+            "fg": "$orange",
+            "bg": "$bg_float"
+          }
+        },
+        {
+          "group": "PmenuKindSel",
+          "attrs": {
+            "fg": "$orange",
+            "bg": "$selection"
+          }
+        },
+        {
+          "group": "PmenuExtra",
+          "attrs": {
+            "fg": "$comment",
+            "bg": "$bg_float"
+          }
+        },
+        {
+          "group": "PmenuExtraSel",
+          "attrs": {
+            "fg": "$comment",
+            "bg": "$selection"
+          }
+        },
+        {
+          "group": "PmenuSbar",
+          "attrs": {
+            "bg": "$bg_alt"
+          }
+        },
+        {
+          "group": "PmenuThumb",
+          "attrs": {
+            "bg": "$border"
+          }
+        },
+        {
+          "group": "PmenuMatch",
+          "attrs": {
+            "fg": "$blue",
+            "bg": "$bg_float",
+            "bold": true
+          }
+        },
+        {
+          "group": "PmenuMatchSel",
+          "attrs": {
+            "fg": "$blue",
+            "bg": "$selection",
+            "bold": true
+          }
+        },
+        {
+          "group": "ComplMatchIns",
+          "attrs": {
+            "fg": "$blue",
+            "bold": true
+          }
+        },
+        {
+          "group": "Visual",
+          "attrs": {
+            "bg": "$selection"
+          }
+        },
+        {
+          "group": "VisualNOS",
+          "attrs": {
+            "bg": "$selection"
+          }
+        },
+        {
+          "group": "Search",
+          "attrs": {
+            "bg": "$search"
+          }
+        },
+        {
+          "group": "CurSearch",
+          "attrs": {
+            "bg": "$search_active",
+            "bold": true
+          }
+        },
+        {
+          "group": "IncSearch",
+          "attrs": {
+            "bg": "$search_active"
+          }
+        },
+        {
+          "group": "Substitute",
+          "attrs": {
+            "fg": "$fg",
+            "bg": "$search_active",
+            "bold": true
+          }
+        },
+        {
+          "group": "MatchParen",
+          "attrs": {
+            "fg": "$blue",
+            "underline": true
+          }
+        },
+        {
+          "group": "QuickFixLine",
+          "attrs": {
+            "bg": "$hover"
+          }
+        },
+        {
+          "group": "Folded",
+          "attrs": {
+            "fg": "$comment",
+            "bg": "$bg_float"
+          }
+        },
+        {
+          "group": "Directory",
+          "attrs": {
+            "fg": "$blue"
+          }
+        },
+        {
+          "group": "Title",
+          "attrs": {
+            "fg": "$blue",
+            "bold": true
+          }
+        },
+        {
+          "group": "Question",
+          "attrs": {
+            "fg": "$green"
+          }
+        },
+        {
+          "group": "MoreMsg",
+          "attrs": {
+            "fg": "$green"
+          }
+        },
+        {
+          "group": "ModeMsg",
+          "attrs": {
+            "fg": "$fg",
+            "bold": true
+          }
+        },
+        {
+          "group": "MsgArea",
+          "attrs": {
+            "fg": "$fg",
+            "bg": "$bg"
+          }
+        },
+        {
+          "group": "MsgSeparator",
+          "attrs": {
+            "fg": "$border",
+            "bg": "$bg"
+          }
+        },
+        {
+          "group": "WarningMsg",
+          "attrs": {
+            "fg": "$yellow",
+            "bold": true
+          }
+        },
+        {
+          "group": "ErrorMsg",
+          "attrs": {
+            "fg": "$red",
+            "bold": true
+          }
+        },
+        {
+          "group": "NonText",
+          "attrs": {
+            "fg": "$border"
+          }
+        },
+        {
+          "group": "EndOfBuffer",
+          "attrs": {
+            "fg": "$bg_float"
+          }
+        },
+        {
+          "group": "SpecialKey",
+          "attrs": {
+            "fg": "$border"
+          }
+        },
+        {
+          "group": "Whitespace",
+          "attrs": {
+            "fg": "$border"
+          }
+        },
+        {
+          "group": "Conceal",
+          "attrs": {
+            "fg": "$comment"
+          }
+        },
+        {
+          "group": "WildMenu",
+          "attrs": {
+            "bg": "$selection"
+          }
+        },
+        {
+          "group": "SnippetTabstop",
+          "attrs": {
+            "bg": "$selection"
+          }
+        },
+        {
+          "group": "SpellBad",
+          "attrs": {
+            "undercurl": true,
+            "sp": "$red"
+          }
+        },
+        {
+          "group": "SpellCap",
+          "attrs": {
+            "undercurl": true,
+            "sp": "$yellow"
+          }
+        },
+        {
+          "group": "SpellRare",
+          "attrs": {
+            "undercurl": true,
+            "sp": "$orange"
+          }
+        },
+        {
+          "group": "SpellLocal",
+          "attrs": {
+            "undercurl": true,
+            "sp": "$cyan"
+          }
+        },
+        {
+          "group": "DiffAdd",
+          "attrs": {
+            "bg": "$diff_add_bg"
+          }
+        },
+        {
+          "group": "DiffChange",
+          "attrs": {
+            "bg": "$diff_change_bg"
+          }
+        },
+        {
+          "group": "DiffDelete",
+          "attrs": {
+            "bg": "$diff_delete_bg"
+          }
+        },
+        {
+          "group": "DiffText",
+          "attrs": {
+            "bg": "$diff_text_bg",
+            "bold": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "Legacy syntax groups",
+      "source": "syntax.txt:*group-name*",
+      "groups": [
+        {
+          "group": "Comment",
+          "attrs": {
+            "fg": "$comment",
+            "italic": true
+          }
+        },
+        {
+          "group": "Constant",
+          "attrs": {
+            "fg": "$yellow"
+          }
+        },
+        {
+          "group": "String",
+          "attrs": {
+            "fg": "$green"
+          }
+        },
+        {
+          "group": "Character",
+          "attrs": {
+            "fg": "$green"
+          }
+        },
+        {
+          "group": "Number",
+          "attrs": {
+            "fg": "$yellow"
+          }
+        },
+        {
+          "group": "Boolean",
+          "attrs": {
+            "fg": "$yellow"
+          }
+        },
+        {
+          "group": "Float",
+          "attrs": {
+            "fg": "$yellow"
+          }
+        },
+        {
+          "group": "Identifier",
+          "attrs": {
+            "fg": "$fg"
+          }
+        },
+        {
+          "group": "Function",
+          "attrs": {
+            "fg": "$blue"
+          }
+        },
+        {
+          "group": "Statement",
+          "attrs": {
+            "fg": "$orange"
+          }
+        },
+        {
+          "group": "Conditional",
+          "attrs": {
+            "fg": "$orange"
+          }
+        },
+        {
+          "group": "Repeat",
+          "attrs": {
+            "fg": "$orange"
+          }
+        },
+        {
+          "group": "Label",
+          "attrs": {
+            "fg": "$red"
+          }
+        },
+        {
+          "group": "Operator",
+          "attrs": {
+            "fg": "$fg"
+          }
+        },
+        {
+          "group": "Keyword",
+          "attrs": {
+            "fg": "$orange"
+          }
+        },
+        {
+          "group": "Exception",
+          "attrs": {
+            "fg": "$orange"
+          }
+        },
+        {
+          "group": "PreProc",
+          "attrs": {
+            "fg": "$orange"
+          }
+        },
+        {
+          "group": "Include",
+          "attrs": {
+            "fg": "$orange"
+          }
+        },
+        {
+          "group": "Define",
+          "attrs": {
+            "fg": "$orange"
+          }
+        },
+        {
+          "group": "Macro",
+          "attrs": {
+            "fg": "$blue"
+          }
+        },
+        {
+          "group": "PreCondit",
+          "attrs": {
+            "fg": "$orange"
+          }
+        },
+        {
+          "group": "Type",
+          "attrs": {
+            "fg": "$yellow"
+          }
+        },
+        {
+          "group": "StorageClass",
+          "attrs": {
+            "fg": "$orange"
+          }
+        },
+        {
+          "group": "Structure",
+          "attrs": {
+            "fg": "$yellow"
+          }
+        },
+        {
+          "group": "Typedef",
+          "attrs": {
+            "fg": "$yellow"
+          }
+        },
+        {
+          "group": "Special",
+          "attrs": {
+            "fg": "$blue"
+          }
+        },
+        {
+          "group": "SpecialChar",
+          "attrs": {
+            "fg": "$cyan"
+          }
+        },
+        {
+          "group": "Tag",
+          "attrs": {
+            "fg": "$red"
+          }
+        },
+        {
+          "group": "Delimiter",
+          "attrs": {
+            "fg": "$fg"
+          }
+        },
+        {
+          "group": "SpecialComment",
+          "attrs": {
+            "fg": "$comment",
+            "italic": true
+          }
+        },
+        {
+          "group": "Debug",
+          "attrs": {
+            "fg": "$red"
+          }
+        },
+        {
+          "group": "Underlined",
+          "attrs": {
+            "fg": "$blue",
+            "underline": true
+          }
+        },
+        {
+          "group": "Ignore",
+          "attrs": {
+            "fg": "$comment"
+          }
+        },
+        {
+          "group": "Error",
+          "attrs": {
+            "fg": "$red",
+            "bold": true
+          }
+        },
+        {
+          "group": "Todo",
+          "attrs": {
+            "fg": "$orange",
+            "bold": true
+          }
+        },
+        {
+          "group": "Added",
+          "attrs": {
+            "fg": "$green"
+          }
+        },
+        {
+          "group": "Changed",
+          "attrs": {
+            "fg": "$yellow"
+          }
+        },
+        {
+          "group": "Removed",
+          "attrs": {
+            "fg": "$red"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Treesitter standard captures",
+      "source": "treesitter.txt:*treesitter-highlight-groups*",
+      "groups": [
+        {
+          "group": "@variable",
+          "attrs": {
+            "fg": "$fg"
+          }
+        },
+        {
+          "group": "@variable.builtin",
+          "attrs": {
+            "fg": "$red"
+          }
+        },
+        {
+          "group": "@variable.parameter",
+          "attrs": {
+            "fg": "$fg"
+          }
+        },
+        {
+          "group": "@variable.parameter.builtin",
+          "attrs": {
+            "fg": "$red"
+          }
+        },
+        {
+          "group": "@variable.member",
+          "attrs": {
+            "fg": "$red"
+          }
+        },
+        {
+          "group": "@constant",
+          "attrs": {
+            "fg": "$yellow"
+          }
+        },
+        {
+          "group": "@constant.builtin",
+          "attrs": {
+            "fg": "$yellow"
+          }
+        },
+        {
+          "group": "@constant.macro",
+          "attrs": {
+            "fg": "$yellow"
+          }
+        },
+        {
+          "group": "@module",
+          "attrs": {
+            "fg": "$fg"
+          }
+        },
+        {
+          "group": "@module.builtin",
+          "attrs": {
+            "fg": "$red"
+          }
+        },
+        {
+          "group": "@label",
+          "attrs": {
+            "fg": "$blue"
+          }
+        },
+        {
+          "group": "@string",
+          "attrs": {
+            "fg": "$green"
+          }
+        },
+        {
+          "group": "@string.documentation",
+          "attrs": {
+            "fg": "$green",
+            "italic": true
+          }
+        },
+        {
+          "group": "@string.regexp",
+          "attrs": {
+            "fg": "$cyan"
+          }
+        },
+        {
+          "group": "@string.escape",
+          "attrs": {
+            "fg": "$cyan"
+          }
+        },
+        {
+          "group": "@string.special",
+          "attrs": {
+            "fg": "$cyan"
+          }
+        },
+        {
+          "group": "@string.special.symbol",
+          "attrs": {
+            "fg": "$yellow"
+          }
+        },
+        {
+          "group": "@string.special.path",
+          "attrs": {
+            "fg": "$cyan"
+          }
+        },
+        {
+          "group": "@string.special.url",
+          "attrs": {
+            "fg": "$orange",
+            "underline": true
+          }
+        },
+        {
+          "group": "@character",
+          "attrs": {
+            "fg": "$green"
+          }
+        },
+        {
+          "group": "@character.special",
+          "attrs": {
+            "fg": "$cyan"
+          }
+        },
+        {
+          "group": "@boolean",
+          "attrs": {
+            "fg": "$yellow"
+          }
+        },
+        {
+          "group": "@number",
+          "attrs": {
+            "fg": "$yellow"
+          }
+        },
+        {
+          "group": "@number.float",
+          "attrs": {
+            "fg": "$yellow"
+          }
+        },
+        {
+          "group": "@type",
+          "attrs": {
+            "fg": "$yellow"
+          }
+        },
+        {
+          "group": "@type.builtin",
+          "attrs": {
+            "fg": "$yellow"
+          }
+        },
+        {
+          "group": "@type.definition",
+          "attrs": {
+            "fg": "$yellow"
+          }
+        },
+        {
+          "group": "@attribute",
+          "attrs": {
+            "fg": "$yellow"
+          }
+        },
+        {
+          "group": "@attribute.builtin",
+          "attrs": {
+            "fg": "$yellow"
+          }
+        },
+        {
+          "group": "@property",
+          "attrs": {
+            "fg": "$red"
+          }
+        },
+        {
+          "group": "@function",
+          "attrs": {
+            "fg": "$blue"
+          }
+        },
+        {
+          "group": "@function.builtin",
+          "attrs": {
+            "fg": "$blue"
+          }
+        },
+        {
+          "group": "@function.call",
+          "attrs": {
+            "fg": "$blue"
+          }
+        },
+        {
+          "group": "@function.macro",
+          "attrs": {
+            "fg": "$blue"
+          }
+        },
+        {
+          "group": "@function.method",
+          "attrs": {
+            "fg": "$blue"
+          }
+        },
+        {
+          "group": "@function.method.call",
+          "attrs": {
+            "fg": "$blue"
+          }
+        },
+        {
+          "group": "@constructor",
+          "attrs": {
+            "fg": "$blue"
+          }
+        },
+        {
+          "group": "@operator",
+          "attrs": {
+            "fg": "$fg"
+          }
+        },
+        {
+          "group": "@keyword",
+          "attrs": {
+            "fg": "$orange"
+          }
+        },
+        {
+          "group": "@keyword.coroutine",
+          "attrs": {
+            "fg": "$orange"
+          }
+        },
+        {
+          "group": "@keyword.function",
+          "attrs": {
+            "fg": "$orange"
+          }
+        },
+        {
+          "group": "@keyword.operator",
+          "attrs": {
+            "fg": "$orange"
+          }
+        },
+        {
+          "group": "@keyword.import",
+          "attrs": {
+            "fg": "$orange"
+          }
+        },
+        {
+          "group": "@keyword.type",
+          "attrs": {
+            "fg": "$orange"
+          }
+        },
+        {
+          "group": "@keyword.modifier",
+          "attrs": {
+            "fg": "$orange"
+          }
+        },
+        {
+          "group": "@keyword.repeat",
+          "attrs": {
+            "fg": "$orange"
+          }
+        },
+        {
+          "group": "@keyword.return",
+          "attrs": {
+            "fg": "$orange"
+          }
+        },
+        {
+          "group": "@keyword.debug",
+          "attrs": {
+            "fg": "$orange"
+          }
+        },
+        {
+          "group": "@keyword.exception",
+          "attrs": {
+            "fg": "$orange"
+          }
+        },
+        {
+          "group": "@keyword.conditional",
+          "attrs": {
+            "fg": "$orange"
+          }
+        },
+        {
+          "group": "@keyword.conditional.ternary",
+          "attrs": {
+            "fg": "$orange"
+          }
+        },
+        {
+          "group": "@keyword.directive",
+          "attrs": {
+            "fg": "$orange"
+          }
+        },
+        {
+          "group": "@keyword.directive.define",
+          "attrs": {
+            "fg": "$orange"
+          }
+        },
+        {
+          "group": "@punctuation.delimiter",
+          "attrs": {
+            "fg": "$fg"
+          }
+        },
+        {
+          "group": "@punctuation.bracket",
+          "attrs": {
+            "fg": "$fg"
+          }
+        },
+        {
+          "group": "@punctuation.special",
+          "attrs": {
+            "fg": "$cyan"
+          }
+        },
+        {
+          "group": "@comment",
+          "attrs": {
+            "fg": "$comment",
+            "italic": true
+          }
+        },
+        {
+          "group": "@comment.documentation",
+          "attrs": {
+            "fg": "$comment",
+            "italic": true
+          }
+        },
+        {
+          "group": "@comment.error",
+          "attrs": {
+            "fg": "$red",
+            "bold": true
+          }
+        },
+        {
+          "group": "@comment.warning",
+          "attrs": {
+            "fg": "$yellow"
+          }
+        },
+        {
+          "group": "@comment.todo",
+          "attrs": {
+            "fg": "$orange",
+            "bold": true
+          }
+        },
+        {
+          "group": "@comment.note",
+          "attrs": {
+            "fg": "$blue"
+          }
+        },
+        {
+          "group": "@markup.strong",
+          "attrs": {
+            "fg": "$yellow",
+            "bold": true
+          }
+        },
+        {
+          "group": "@markup.italic",
+          "attrs": {
+            "fg": "$orange",
+            "italic": true
+          }
+        },
+        {
+          "group": "@markup.strikethrough",
+          "attrs": {
+            "strikethrough": true
+          }
+        },
+        {
+          "group": "@markup.underline",
+          "attrs": {
+            "underline": true
+          }
+        },
+        {
+          "group": "@markup.heading",
+          "attrs": {
+            "fg": "$red",
+            "bold": true
+          }
+        },
+        {
+          "group": "@markup.heading.1",
+          "attrs": {
+            "fg": "$red",
+            "bold": true
+          }
+        },
+        {
+          "group": "@markup.heading.2",
+          "attrs": {
+            "fg": "$orange",
+            "bold": true
+          }
+        },
+        {
+          "group": "@markup.heading.3",
+          "attrs": {
+            "fg": "$yellow",
+            "bold": true
+          }
+        },
+        {
+          "group": "@markup.heading.4",
+          "attrs": {
+            "fg": "$green",
+            "bold": true
+          }
+        },
+        {
+          "group": "@markup.heading.5",
+          "attrs": {
+            "fg": "$blue",
+            "bold": true
+          }
+        },
+        {
+          "group": "@markup.heading.6",
+          "attrs": {
+            "fg": "$magenta",
+            "bold": true
+          }
+        },
+        {
+          "group": "@markup.quote",
+          "attrs": {
+            "fg": "$green",
+            "italic": true
+          }
+        },
+        {
+          "group": "@markup.math",
+          "attrs": {
+            "fg": "$cyan"
+          }
+        },
+        {
+          "group": "@markup.link",
+          "attrs": {
+            "fg": "$blue"
+          }
+        },
+        {
+          "group": "@markup.link.label",
+          "attrs": {
+            "fg": "$blue"
+          }
+        },
+        {
+          "group": "@markup.link.url",
+          "attrs": {
+            "fg": "$orange",
+            "underline": true
+          }
+        },
+        {
+          "group": "@markup.raw",
+          "attrs": {
+            "fg": "$green"
+          }
+        },
+        {
+          "group": "@markup.raw.block",
+          "attrs": {
+            "fg": "$green"
+          }
+        },
+        {
+          "group": "@markup.list",
+          "attrs": {
+            "fg": "$red"
+          }
+        },
+        {
+          "group": "@markup.list.checked",
+          "attrs": {
+            "fg": "$green"
+          }
+        },
+        {
+          "group": "@markup.list.unchecked",
+          "attrs": {
+            "fg": "$comment"
+          }
+        },
+        {
+          "group": "@diff.plus",
+          "attrs": {
+            "fg": "$green"
+          }
+        },
+        {
+          "group": "@diff.minus",
+          "attrs": {
+            "fg": "$red"
+          }
+        },
+        {
+          "group": "@diff.delta",
+          "attrs": {
+            "fg": "$yellow"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Diagnostics",
+      "source": "diagnostic.txt:hl-Diagnostic*",
+      "groups": [
+        {
+          "group": "DiagnosticError",
+          "attrs": {
+            "fg": "$red"
+          }
+        },
+        {
+          "group": "DiagnosticWarn",
+          "attrs": {
+            "fg": "$yellow"
+          }
+        },
+        {
+          "group": "DiagnosticInfo",
+          "attrs": {
+            "fg": "$blue"
+          }
+        },
+        {
+          "group": "DiagnosticHint",
+          "attrs": {
+            "fg": "$cyan"
+          }
+        },
+        {
+          "group": "DiagnosticOk",
+          "attrs": {
+            "fg": "$green"
+          }
+        },
+        {
+          "group": "DiagnosticVirtualTextError",
+          "attrs": {
+            "fg": "$red",
+            "italic": true
+          }
+        },
+        {
+          "group": "DiagnosticVirtualTextWarn",
+          "attrs": {
+            "fg": "$yellow",
+            "italic": true
+          }
+        },
+        {
+          "group": "DiagnosticVirtualTextInfo",
+          "attrs": {
+            "fg": "$blue",
+            "italic": true
+          }
+        },
+        {
+          "group": "DiagnosticVirtualTextHint",
+          "attrs": {
+            "fg": "$cyan",
+            "italic": true
+          }
+        },
+        {
+          "group": "DiagnosticVirtualTextOk",
+          "attrs": {
+            "fg": "$green",
+            "italic": true
+          }
+        },
+        {
+          "group": "DiagnosticVirtualLinesError",
+          "attrs": {
+            "fg": "$red",
+            "italic": true
+          }
+        },
+        {
+          "group": "DiagnosticVirtualLinesWarn",
+          "attrs": {
+            "fg": "$yellow",
+            "italic": true
+          }
+        },
+        {
+          "group": "DiagnosticVirtualLinesInfo",
+          "attrs": {
+            "fg": "$blue",
+            "italic": true
+          }
+        },
+        {
+          "group": "DiagnosticVirtualLinesHint",
+          "attrs": {
+            "fg": "$cyan",
+            "italic": true
+          }
+        },
+        {
+          "group": "DiagnosticVirtualLinesOk",
+          "attrs": {
+            "fg": "$green",
+            "italic": true
+          }
+        },
+        {
+          "group": "DiagnosticUnderlineError",
+          "attrs": {
+            "undercurl": true,
+            "sp": "$red"
+          }
+        },
+        {
+          "group": "DiagnosticUnderlineWarn",
+          "attrs": {
+            "undercurl": true,
+            "sp": "$yellow"
+          }
+        },
+        {
+          "group": "DiagnosticUnderlineInfo",
+          "attrs": {
+            "undercurl": true,
+            "sp": "$blue"
+          }
+        },
+        {
+          "group": "DiagnosticUnderlineHint",
+          "attrs": {
+            "undercurl": true,
+            "sp": "$cyan"
+          }
+        },
+        {
+          "group": "DiagnosticUnderlineOk",
+          "attrs": {
+            "undercurl": true,
+            "sp": "$green"
+          }
+        },
+        {
+          "group": "DiagnosticFloatingError",
+          "attrs": {
+            "fg": "$red"
+          }
+        },
+        {
+          "group": "DiagnosticFloatingWarn",
+          "attrs": {
+            "fg": "$yellow"
+          }
+        },
+        {
+          "group": "DiagnosticFloatingInfo",
+          "attrs": {
+            "fg": "$blue"
+          }
+        },
+        {
+          "group": "DiagnosticFloatingHint",
+          "attrs": {
+            "fg": "$cyan"
+          }
+        },
+        {
+          "group": "DiagnosticFloatingOk",
+          "attrs": {
+            "fg": "$green"
+          }
+        },
+        {
+          "group": "DiagnosticSignError",
+          "attrs": {
+            "fg": "$red"
+          }
+        },
+        {
+          "group": "DiagnosticSignWarn",
+          "attrs": {
+            "fg": "$yellow"
+          }
+        },
+        {
+          "group": "DiagnosticSignInfo",
+          "attrs": {
+            "fg": "$blue"
+          }
+        },
+        {
+          "group": "DiagnosticSignHint",
+          "attrs": {
+            "fg": "$cyan"
+          }
+        },
+        {
+          "group": "DiagnosticSignOk",
+          "attrs": {
+            "fg": "$green"
+          }
+        },
+        {
+          "group": "DiagnosticDeprecated",
+          "attrs": {
+            "strikethrough": true
+          }
+        },
+        {
+          "group": "DiagnosticUnnecessary",
+          "attrs": {
+            "link": "Comment"
+          }
+        }
+      ]
+    },
+    {
+      "name": "LSP",
+      "source": "lsp.txt:*lsp-semantic-highlight*",
+      "groups": [
+        {
+          "group": "LspReferenceText",
+          "attrs": {
+            "bg": "$selection"
+          }
+        },
+        {
+          "group": "LspReferenceRead",
+          "attrs": {
+            "bg": "$selection"
+          }
+        },
+        {
+          "group": "LspReferenceWrite",
+          "attrs": {
+            "bg": "$selection"
+          }
+        },
+        {
+          "group": "LspReferenceTarget",
+          "attrs": {
+            "bg": "$hover"
+          }
+        },
+        {
+          "group": "LspInlayHint",
+          "attrs": {
+            "fg": "$comment",
+            "italic": true
+          }
+        },
+        {
+          "group": "LspCodeLens",
+          "attrs": {
+            "fg": "$comment",
+            "italic": true
+          }
+        },
+        {
+          "group": "LspCodeLensSeparator",
+          "attrs": {
+            "fg": "$border"
+          }
+        },
+        {
+          "group": "LspSignatureActiveParameter",
+          "attrs": {
+            "fg": "$blue",
+            "underline": true
+          }
+        },
+        {
+          "group": "@lsp.type.class",
+          "attrs": {
+            "fg": "$yellow"
+          }
+        },
+        {
+          "group": "@lsp.type.struct",
+          "attrs": {
+            "fg": "$yellow"
+          }
+        },
+        {
+          "group": "@lsp.type.enum",
+          "attrs": {
+            "fg": "$yellow"
+          }
+        },
+        {
+          "group": "@lsp.type.enumMember",
+          "attrs": {
+            "fg": "$yellow"
+          }
+        },
+        {
+          "group": "@lsp.type.interface",
+          "attrs": {
+            "fg": "$yellow"
+          }
+        },
+        {
+          "group": "@lsp.type.parameter",
+          "attrs": {
+            "fg": "$fg"
+          }
+        },
+        {
+          "group": "@lsp.type.property",
+          "attrs": {
+            "fg": "$red"
+          }
+        },
+        {
+          "group": "@lsp.type.variable",
+          "attrs": {
+            "fg": "$fg"
+          }
+        },
+        {
+          "group": "@lsp.type.keyword",
+          "attrs": {
+            "fg": "$orange"
+          }
+        },
+        {
+          "group": "@lsp.type.namespace",
+          "attrs": {
+            "fg": "$red"
+          }
+        },
+        {
+          "group": "@lsp.type.function",
+          "attrs": {
+            "fg": "$blue"
+          }
+        },
+        {
+          "group": "@lsp.type.method",
+          "attrs": {
+            "fg": "$blue"
+          }
+        },
+        {
+          "group": "@lsp.type.macro",
+          "attrs": {
+            "fg": "$blue"
+          }
+        },
+        {
+          "group": "@lsp.type.decorator",
+          "attrs": {
+            "fg": "$yellow"
+          }
+        },
+        {
+          "group": "@lsp.mod.deprecated",
+          "attrs": {
+            "strikethrough": true
+          }
+        }
+      ]
+    }
+  ]
+}

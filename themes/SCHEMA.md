@@ -482,6 +482,33 @@ python themes/validate.py
 python themes/validate.py themes/core/one-half-light.yaml
 ```
 
+Generation helper:
+
+```bash
+python themes/generate.py
+python themes/generate.py themes/core/one-half-light.yaml
+```
+
+Template consistency helper:
+
+```bash
+python themes/check_templates.py
+```
+
+Current generators:
+
+- `zed` -> `themes/exports/zed/*.json`
+- `nvim` -> `themes/exports/nvim/*.lua`
+
+Adapter templates and schema helpers:
+
+- `themes/templates/zed/schema-v0.2.0.json` -> vendored official Zed theme JSON Schema
+- `themes/templates/zed/official-template.json` -> Zed official template split into `style_sections`, `syntax_sections`, and `players`
+  - note: Zed's official schema strictly enumerates outer `style` keys, but `style.syntax` remains open-ended and is validated as `HighlightStyleContent` entries rather than a fixed syntax-key list
+- `themes/templates/nvim/official-template.json` -> Neovim builtin highlight template derived from official help
+- `themes/templates/nvim/plugins.json` -> Neovim plugin-specific highlight template
+- `themes/check_templates.py` -> consistency check for app template metadata, contract fields, section layout, duplicate entries, and declared key coverage
+
 ## Resolution Rules
 
 Exporters should resolve values in this order:
