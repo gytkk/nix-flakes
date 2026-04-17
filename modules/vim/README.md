@@ -8,7 +8,7 @@ This module configures Neovim as the primary editor with a modern Lua-based setu
 - Creates `vi` and `vim` aliases that point to `nvim`
 - Loads the Neovim configuration from `modules/vim/files/config/init.lua`
 - Exposes every generated colorscheme from `themes/exports/nvim/`
-- Loads `rose-pine` by default and falls back to it if a selected exported theme is missing
+- Loads `monokai-pro-classic` by default and falls back to it if a selected exported theme is missing
 
 ## Included Features
 

@@ -29,8 +29,8 @@ vim.opt.incsearch = true
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
-local exportedThemeName = vim.g.nix_flakes_theme or "rose-pine"
-local fallbackExportedThemeName = "rose-pine"
+local exportedThemeName = vim.g.nix_flakes_theme or "monokai-pro-classic"
+local fallbackExportedThemeName = "monokai-pro-classic"
 
 local function load_exported_theme(theme_name)
   local theme_path = vim.fn.stdpath("config") .. "/themes/" .. theme_name .. ".lua"
