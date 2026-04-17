@@ -11,7 +11,7 @@ let
 in
 {
   xdg.configFile."nvim/lua/config".source = mkSymlink "files/config";
-  xdg.configFile."nvim/ayu-mirage.lua".source = mkThemeSymlink "ayu-mirage.lua";
+  xdg.configFile."nvim/rose-pine.lua".source = mkThemeSymlink "rose-pine.lua";
 
   programs.neovim = {
     enable = true;

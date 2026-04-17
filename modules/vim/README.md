@@ -7,7 +7,7 @@ This module configures Neovim as the primary editor with a modern Lua-based setu
 - Installs and configures Neovim as the default editor
 - Creates `vi` and `vim` aliases that point to `nvim`
 - Loads the Neovim configuration from `modules/vim/files/config/init.lua`
-- Applies the generated `ayu-mirage` colorscheme
+- Applies the generated `rose-pine` colorscheme
 
 ## Included Features
 
@@ -61,4 +61,4 @@ vi filename.txt
 
 - `modules/vim/default.nix`: Home Manager wiring
 - `modules/vim/files/config/init.lua`: main Neovim configuration
-- `themes/exports/nvim/ayu-mirage.lua`: generated colorscheme definition
+- `themes/exports/nvim/rose-pine.lua`: generated colorscheme definition

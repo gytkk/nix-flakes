@@ -228,14 +228,14 @@ local whichkey = {
   },
 }
 
-local ayuMirage = {
-  "ayu-mirage",
+local rosePine = {
+  "rose-pine",
   virtual = true,
   priority = 1000,
   config = function()
     local cfg_dir = vim.fn.stdpath("config")
-    package.loaded["ayu-mirage"] = nil
-    dofile(cfg_dir .. "/ayu-mirage.lua").setup()
+    package.loaded["rose-pine"] = nil
+    dofile(cfg_dir .. "/rose-pine.lua").setup()
   end,
 }
 
@@ -444,7 +444,7 @@ require("lazy").setup({
     noice,
     flash,
     whichkey,
-    ayuMirage,
+    rosePine,
     treesitter,
     blink,
     lspconfig,
