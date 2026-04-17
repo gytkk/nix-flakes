@@ -11,7 +11,7 @@ let
 in
 {
   xdg.configFile."nvim/lua/config".source = mkSymlink "files/config";
-  xdg.configFile."nvim/monokai-pro-classic.lua".source = mkThemeSymlink "monokai-pro-classic.lua";
+  xdg.configFile."nvim/ayu-mirage.lua".source = mkThemeSymlink "ayu-mirage.lua";
 
   programs.neovim = {
     enable = true;

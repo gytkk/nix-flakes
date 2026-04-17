@@ -228,14 +228,14 @@ local whichkey = {
   },
 }
 
-local monokaiProClassic = {
-  "monokai-pro-classic",
+local ayuMirage = {
+  "ayu-mirage",
   virtual = true,
   priority = 1000,
   config = function()
     local cfg_dir = vim.fn.stdpath("config")
-    package.loaded["monokai-pro-classic"] = nil
-    dofile(cfg_dir .. "/monokai-pro-classic.lua").setup()
+    package.loaded["ayu-mirage"] = nil
+    dofile(cfg_dir .. "/ayu-mirage.lua").setup()
   end,
 }
 
@@ -444,7 +444,7 @@ require("lazy").setup({
     noice,
     flash,
     whichkey,
-    monokaiProClassic,
+    ayuMirage,
     treesitter,
     blink,
     lspconfig,
