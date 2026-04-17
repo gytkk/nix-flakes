@@ -59,8 +59,8 @@ let
   # JSON 파일 생성 (WSL activation script용)
   settingsFile = pkgs.writeText "zed-settings.json" (builtins.readFile ./files/settings.json);
   keymapFile = pkgs.writeText "zed-keymap.json" (builtins.readFile ./files/keymap.json);
-  themeFile = pkgs.writeText "one-half-light-custom.json" (
-    builtins.toJSON (lib.importJSON ./themes/one-half-light.json)
+  themeFile = pkgs.writeText "one-half-light.json" (
+    builtins.toJSON (lib.importJSON ../../themes/exports/zed/one-half-light.json)
   );
 
   # WSL: Windows Zed에 설정, 테마, 확장 배포 스크립트
@@ -85,8 +85,8 @@ let
     cp "${keymapFile}" "${windowsZedConfigPath}/keymap.json"
 
     # 테마 파일 복사
-    rm -f "${windowsZedConfigPath}/themes/one-half-light-custom.json"
-    cp "${themeFile}" "${windowsZedConfigPath}/themes/one-half-light-custom.json"
+    rm -f "${windowsZedConfigPath}/themes/one-half-light.json"
+    cp "${themeFile}" "${windowsZedConfigPath}/themes/one-half-light.json"
 
     # 확장 복사 (Nix store → Windows 경로)
     for ext in ${extensionsDir}/*; do
@@ -120,8 +120,8 @@ in
         home.file."${zedConfigPath}/keymap.json".source = mkSymlink "files/keymap.json";
 
         # 커스텀 테마 → repo 파일로 직접 symlink (mutable)
-        home.file."${zedConfigPath}/themes/one-half-light-custom.json".source =
-          mkSymlink "themes/one-half-light.json";
+        home.file."${zedConfigPath}/themes/one-half-light.json".source =
+          config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/themes/exports/zed/one-half-light.json";
 
         # Nix로 확장 관리 (읽기 전용 — Nix 패키지 기반)
         home.file."${zedDataPath}/extensions/installed" = {
