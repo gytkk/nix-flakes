@@ -6,10 +6,12 @@
 
 let
   mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/vim/${path}";
+  mkThemeSymlink =
+    path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/themes/exports/nvim/${path}";
 in
 {
   xdg.configFile."nvim/lua/config".source = mkSymlink "files/config";
-  xdg.configFile."nvim/onelight.lua".source = mkSymlink "files/onelight.lua";
+  xdg.configFile."nvim/monokai-pro-classic.lua".source = mkThemeSymlink "monokai-pro-classic.lua";
 
   programs.neovim = {
     enable = true;

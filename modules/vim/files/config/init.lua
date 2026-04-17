@@ -228,14 +228,14 @@ local whichkey = {
   },
 }
 
-local onelight = {
-  "onelight",
+local monokaiProClassic = {
+  "monokai-pro-classic",
   virtual = true,
   priority = 1000,
   config = function()
     local cfg_dir = vim.fn.stdpath("config")
-    package.loaded["onelight"] = nil
-    dofile(cfg_dir .. "/onelight.lua").setup()
+    package.loaded["monokai-pro-classic"] = nil
+    dofile(cfg_dir .. "/monokai-pro-classic.lua").setup()
   end,
 }
 
@@ -444,7 +444,7 @@ require("lazy").setup({
     noice,
     flash,
     whichkey,
-    onelight,
+    monokaiProClassic,
     treesitter,
     blink,
     lspconfig,
