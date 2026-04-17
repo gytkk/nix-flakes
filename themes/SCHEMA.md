@@ -511,6 +511,7 @@ Current generators:
 
 - `zed` -> `themes/exports/zed/*.json`
 - `nvim` -> `themes/exports/nvim/*.lua`
+- `rio` -> `themes/exports/rio/*.toml`
 
 Adapter templates and schema helpers:
 
@@ -519,6 +520,7 @@ Adapter templates and schema helpers:
   - note: Zed's official schema strictly enumerates outer `style` keys, but `style.syntax` remains open-ended and is validated as `HighlightStyleContent` entries rather than a fixed syntax-key list
 - `themes/templates/nvim/official-template.json` -> Neovim builtin highlight template derived from official help
 - `themes/templates/nvim/plugins.json` -> Neovim plugin-specific highlight template
+- `themes/templates/rio/official-template.json` -> Rio Terminal color template derived from the official Rio config color contract
 - `themes/check_templates.py` -> consistency check for app template metadata, contract fields, section layout, duplicate entries, and declared key coverage
 
 ## Resolution Rules

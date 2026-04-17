@@ -204,6 +204,46 @@ def check_nvim_plugin_template(path: Path, doc: dict[str, Any], errors: list[str
     check_nvim_sections(f"{path}.sections", doc.get("sections"), errors)
 
 
+def check_rio_sections(path: str, sections: Any, errors: list[str]) -> None:
+    expect(isinstance(sections, list) and len(sections) > 0, f"{path}: sections must be a non-empty list", errors)
+    if not isinstance(sections, list):
+        return
+    check_section_names(path, sections, errors)
+    seen_keys: set[str] = set()
+    for idx, section in enumerate(sections):
+        if not isinstance(section, dict):
+            continue
+        entries = section.get("entries")
+        item_path = f"{path}[{idx}]"
+        expect(isinstance(entries, list) and len(entries) > 0, f"{item_path}.entries must be a non-empty list", errors)
+        if not isinstance(entries, list):
+            continue
+        for eidx, entry in enumerate(entries):
+            entry_path = f"{item_path}.entries[{eidx}]"
+            expect(isinstance(entry, dict), f"{entry_path}: entry must be an object", errors)
+            if not isinstance(entry, dict):
+                continue
+            require_keys(entry, ["key", "value"], entry_path, errors)
+            expect(isinstance(entry.get("key"), str) and entry["key"], f"{entry_path}.key must be a non-empty string", errors)
+            key = entry.get("key")
+            if isinstance(key, str):
+                expect(key not in seen_keys, f"{path}: duplicate color key {key!r}", errors)
+                seen_keys.add(key)
+
+
+def check_rio(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
+    check_common(path, doc, errors)
+    path_str = str(path)
+    contract = doc.get("color_schema")
+    expect(isinstance(contract, dict), f"{path_str}.color_schema must be an object", errors)
+    if isinstance(contract, dict):
+        require_keys(contract, ["section", "token_prefix", "value_type"], f"{path_str}.color_schema", errors)
+        expect(contract.get("section") == "colors", f"{path_str}.color_schema.section must be 'colors'", errors)
+        expect(contract.get("token_prefix") == "$", f"{path_str}.color_schema.token_prefix must be '$'", errors)
+        expect(contract.get("value_type") == "hex", f"{path_str}.color_schema.value_type must be 'hex'", errors)
+    check_rio_sections(f"{path_str}.sections", doc.get("sections"), errors)
+
+
 def check_override_template(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
     path_str = str(path)
     expected_top = ["version", "meta", "groups", "links"]
@@ -261,6 +301,7 @@ JSON_CHECKS = {
     ROOT / "templates" / "nvim" / "official-template.json": check_nvim,
     ROOT / "templates" / "zed" / "official-template.json": check_zed,
     ROOT / "templates" / "nvim" / "plugins.json": check_nvim_plugin_template,
+    ROOT / "templates" / "rio" / "official-template.json": check_rio,
 }
 
 YAML_CHECKS = {

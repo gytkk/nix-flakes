@@ -490,6 +490,11 @@ def load_nvim_plugin_template(root: Path) -> dict[str, Any]:
     return load_json(template_path)
 
 
+def load_rio_template(root: Path) -> dict[str, Any]:
+    template_path = root / "templates" / "rio" / "official-template.json"
+    return load_json(template_path)
+
+
 def load_nvim_override(root: Path, theme_id: str) -> dict[str, Any] | None:
     path = root / "overrides" / "nvim" / f"{theme_id}.yaml"
     if not path.exists():
@@ -684,6 +689,77 @@ def nvim_lua(ctx: dict[str, Any], root: Path) -> str:
     lines.extend(["end", "", "return M"])
     return "\n".join(lines) + "\n"
 
+
+def build_rio_slots(ctx: dict[str, Any]) -> dict[str, str]:
+    meta = ctx["meta"]
+    p = ctx["palette"]
+    r = ctx["roles"]
+    is_light = meta["variant"] == "light"
+
+    return {
+        "background": r["ui"]["bg"],
+        "foreground": r["ui"]["fg"],
+        "selection_background": r["ui"]["selection"],
+        "selection_foreground": r["ui"]["fg"],
+        "tabs": p["blackBright"],
+        "tabs_active": r["ui"]["fg"],
+        "bar": r["ui"]["panelBg"],
+        "split": r["ui"]["border"],
+        "cursor": r["ui"]["cursor"],
+        "vi_cursor": r["syntax"]["link"],
+        "search_match_background": soft_background(r["ui"]["search"], r["ui"]["bg"], light=is_light, strength=0.74),
+        "search_match_foreground": r["ui"]["fg"],
+        "search_focused_match_background": r["diagnostics"]["warning"],
+        "search_focused_match_foreground": p["white"],
+        "hint_foreground": r["ui"]["fg"],
+        "hint_background": r["diagnostics"]["warning"],
+        "black": r["ansi"]["black"],
+        "red": r["ansi"]["red"],
+        "green": r["ansi"]["green"],
+        "yellow": r["ansi"]["yellow"],
+        "blue": r["ansi"]["blue"],
+        "magenta": r["ansi"]["magenta"],
+        "cyan": r["ansi"]["cyan"],
+        "white": r["ansi"]["white"],
+        "dim_black": dim_terminal(r["ansi"]["black"], r["ui"]["bg"], light=is_light),
+        "dim_red": dim_terminal(r["ansi"]["red"], r["ui"]["bg"], light=is_light),
+        "dim_green": dim_terminal(r["ansi"]["green"], r["ui"]["bg"], light=is_light),
+        "dim_yellow": dim_terminal(r["ansi"]["yellow"], r["ui"]["bg"], light=is_light),
+        "dim_blue": dim_terminal(r["ansi"]["blue"], r["ui"]["bg"], light=is_light),
+        "dim_magenta": dim_terminal(r["ansi"]["magenta"], r["ui"]["bg"], light=is_light),
+        "dim_cyan": dim_terminal(r["ansi"]["cyan"], r["ui"]["bg"], light=is_light),
+        "dim_white": dim_terminal(r["ansi"]["white"], r["ui"]["bg"], light=is_light),
+        "dim_foreground": p["fgMuted"],
+        "light_black": r["ansi"]["brightBlack"],
+        "light_red": r["ansi"]["brightRed"],
+        "light_green": r["ansi"]["brightGreen"],
+        "light_yellow": r["ansi"]["brightYellow"],
+        "light_blue": r["ansi"]["brightBlue"],
+        "light_magenta": r["ansi"]["brightMagenta"],
+        "light_cyan": r["ansi"]["brightCyan"],
+        "light_white": r["ansi"]["brightWhite"],
+        "light_foreground": p["fgBright"],
+    }
+
+
+def rio_theme_toml(ctx: dict[str, Any], root: Path) -> str:
+    template = load_rio_template(root)
+    slots = build_rio_slots(ctx)
+
+    lines = [
+        f"# Auto-generated from themes/core/{ctx['meta']['id']}.yaml",
+        f"# Template: {template['name']} v{template['version']}",
+        "[colors]",
+    ]
+    for section in template["sections"]:
+        if lines[-1] != "[colors]":
+            lines.append("")
+        for entry in section["entries"]:
+            value = render_template_value(entry["value"], slots)
+            lines.append(f'{entry["key"]} = {json.dumps(value, ensure_ascii=False)}')
+    return "\n".join(lines) + "\n"
+
+
 def write_json(path: Path, data: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
@@ -701,10 +777,12 @@ def generate_theme(theme_path: Path, template: dict[str, Any], root: Path) -> li
 
     zed_path = root / "exports" / "zed" / f"{theme_id}.json"
     nvim_path = root / "exports" / "nvim" / f"{theme_id}.lua"
+    rio_path = root / "exports" / "rio" / f"{theme_id}.toml"
 
     write_json(zed_path, zed_theme_doc(ctx, root))
     write_text(nvim_path, nvim_lua(ctx, root))
-    return [zed_path, nvim_path]
+    write_text(rio_path, rio_theme_toml(ctx, root))
+    return [zed_path, nvim_path, rio_path]
 
 
 def discover_default_targets(root: Path) -> list[Path]:

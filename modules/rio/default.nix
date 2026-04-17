@@ -5,9 +5,10 @@
 }:
 
 let
-  mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/rio/${path}";
+  mkModuleSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/rio/${path}";
+  generatedThemes = config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/themes/exports/rio";
 in
 {
-  xdg.configFile."rio/config.toml".source = mkSymlink "files/config.toml";
-  xdg.configFile."rio/themes".source = mkSymlink "themes";
+  xdg.configFile."rio/config.toml".source = mkModuleSymlink "files/config.toml";
+  xdg.configFile."rio/themes".source = generatedThemes;
 }
