@@ -6,6 +6,11 @@ show_startup_tips false
 theme "one-half-light"
 
 keybinds {
+    tab {
+        bind "Shift h" "Shift k" { MoveTab "Left"; }
+        bind "Shift j" "Shift l" { MoveTab "Right"; }
+    }
+
     shared_except "tmux" "locked" {
         unbind "Ctrl b"
     }
