@@ -55,9 +55,15 @@ elseif wezterm.target_triple:find('windows') ~= nil then
 end
 
 config.term = 'xterm-256color'
-config.enable_kitty_keyboard = false
+config.enable_kitty_keyboard = true
 config.keys = {
-  -- Keep Shift+Enter distinct for chat-style TUIs without enabling kitty keyboard globally.
+  -- Keep kitty keyboard enabled so macOS IME/CJK input works reliably.
+  -- Work around wezterm/wezterm#3621 where Delete is emitted as Ctrl+H.
+  {
+    key = 'Delete',
+    action = wezterm.action.SendKey { key = 'Delete' },
+  },
+  -- Keep Shift+Enter distinct for chat-style TUIs.
   {
     key = 'Enter',
     mods = 'SHIFT',
