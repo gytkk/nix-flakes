@@ -4,54 +4,54 @@ local M = {}
 
 local p = {
   bg = "#272822",
-  bg_float = "#1e1f1c",
-  bg_alt = "#34352f",
-  border = "#414339",
-  hover = "#363730",
-  selection = "#787b7f",
-  search = "#635935",
-  search_active = "#5f5d4d",
-  fg = "#f8f8f2",
-  fg_muted = "#90908a",
-  fg_bright = "#c2c2bf",
-  comment = "#75715e",
-  red = "#ff6188",
-  orange = "#fc9867",
-  yellow = "#ffd866",
-  green = "#a9dc76",
-  cyan = "#78dce8",
-  blue = "#6a7ec8",
-  magenta = "#ab9df2",
-  pink = "#f92672",
-  linenr = "#90908a",
-  syntax_text = "#f8f8f2",
-  syntax_comment = "#75715e",
-  syntax_string = "#a9dc76",
-  syntax_string_escape = "#78dce8",
-  syntax_number = "#fc9867",
-  syntax_constant = "#fc9867",
-  syntax_keyword = "#ff6188",
-  syntax_operator = "#f8f8f2",
-  syntax_variable = "#f8f8f2",
-  syntax_parameter = "#fc9867",
-  syntax_property = "#f8f8f2",
-  syntax_field = "#f8f8f2",
-  syntax_func = "#ffd866",
-  syntax_method = "#ffd866",
-  syntax_type = "#78dce8",
-  syntax_class = "#78dce8",
-  syntax_interface = "#78dce8",
-  syntax_namespace = "#f8f8f2",
-  syntax_builtin = "#78dce8",
-  syntax_tag = "#ff6188",
-  syntax_attribute = "#a9dc76",
-  syntax_punctuation = "#f8f8f2",
+  bg_float = "#1d1e19",
+  bg_alt = "#3b3c35",
+  border = "#57584f",
+  hover = "#3f4039",
+  selection = "#383932",
+  search = "#5c5a39",
+  search_active = "#5a5c53",
+  fg = "#fdfff1",
+  fg_muted = "#6e7066",
+  fg_bright = "#c0c1b5",
+  comment = "#6e7066",
+  red = "#f92672",
+  orange = "#fd971f",
+  yellow = "#e6db74",
+  green = "#a6e22e",
+  cyan = "#66d9ef",
+  blue = "#78dce8",
+  magenta = "#ae81ff",
+  pink = "#f82570",
+  linenr = "#6e7066",
+  syntax_text = "#fdfff1",
+  syntax_comment = "#6e7066",
+  syntax_string = "#e6db74",
+  syntax_string_escape = "#fd971f",
+  syntax_number = "#ae81ff",
+  syntax_constant = "#ae81ff",
+  syntax_keyword = "#f92672",
+  syntax_operator = "#fdfff1",
+  syntax_variable = "#fdfff1",
+  syntax_parameter = "#fd971f",
+  syntax_property = "#fdfff1",
+  syntax_field = "#fdfff1",
+  syntax_func = "#a6e22e",
+  syntax_method = "#a6e22e",
+  syntax_type = "#66d9ef",
+  syntax_class = "#66d9ef",
+  syntax_interface = "#66d9ef",
+  syntax_namespace = "#f92672",
+  syntax_builtin = "#66d9ef",
+  syntax_tag = "#f92672",
+  syntax_attribute = "#a6e22e",
+  syntax_punctuation = "#fdfff1",
   syntax_link = "#819aff",
-  diff_add_bg = "#39412e",
-  diff_change_bg = "#45412c",
-  diff_delete_bg = "#453030",
-  diff_text_bg = "#574f31",
-  cursor = "#f8f8f0",
+  diff_add_bg = "#394224",
+  diff_change_bg = "#453822",
+  diff_delete_bg = "#44282d",
+  diff_text_bg = "#514f34",
+  cursor = "#fdfff1",
   none = "NONE",
 }
 
@@ -71,10 +71,10 @@ function M.setup()
   -- UI
   hl("Normal", { fg = p.fg, bg = p.bg })
   hl("NormalNC", { fg = p.fg_muted, bg = p.bg })
-  hl("NormalFloat", { fg = p.fg, bg = p.bg_float })
-  hl("FloatBorder", { fg = p.border, bg = p.bg_float })
-  hl("FloatTitle", { fg = p.blue, bg = p.bg_float, bold = true })
-  hl("FloatFooter", { fg = p.comment, bg = p.bg_float })
+  hl("NormalFloat", { fg = p.fg, bg = "#3b3c35" })
+  hl("FloatBorder", { fg = "#6e7066", bg = "#3b3c35" })
+  hl("FloatTitle", { fg = "#f92672", bg = "#3b3c35", bold = true })
+  hl("FloatFooter", { fg = p.comment, bg = "#3b3c35" })
   hl("Cursor", { fg = p.cursor, reverse = true })
   hl("lCursor", { fg = p.cursor, reverse = true })
   hl("CursorIM", { fg = p.cursor, reverse = true })
@@ -92,43 +92,43 @@ function M.setup()
   hl("CursorLineFold", { fg = p.fg_bright, bg = p.bg_alt })
   hl("WinSeparator", { fg = p.border })
   hl("VertSplit", { fg = p.border })
-  hl("StatusLine", { fg = p.fg, bg = p.bg_float })
-  hl("StatusLineNC", { fg = p.fg_muted, bg = p.bg_alt })
-  hl("StatusLineTerm", { fg = p.fg, bg = p.bg_float })
+  hl("StatusLine", { fg = p.fg, bg = "#3b3c35" })
+  hl("StatusLineNC", { fg = p.fg_muted, bg = "#3b3c35" })
+  hl("StatusLineTerm", { fg = p.fg, bg = "#3b3c35" })
   hl("StatusLineTermNC", { fg = p.fg_muted, bg = p.bg_alt })
-  hl("TabLine", { fg = p.fg_muted, bg = p.bg_alt })
-  hl("TabLineFill", { bg = p.bg_alt })
+  hl("TabLine", { fg = p.fg_muted, bg = "#3b3c35" })
+  hl("TabLineFill", { bg = "#3b3c35" })
   hl("TabLineSel", { fg = p.fg, bg = p.bg, bold = true })
   hl("WinBar", { fg = p.fg, bg = p.bg_float })
   hl("WinBarNC", { fg = p.fg_muted, bg = p.bg_alt })
-  hl("Pmenu", { fg = p.fg, bg = p.bg_float })
-  hl("PmenuSel", { bg = p.selection })
+  hl("Pmenu", { fg = p.fg, bg = "#3b3c35" })
+  hl("PmenuSel", { bg = "#e6db74", fg = "#272822" })
   hl("PmenuKind", { fg = p.orange, bg = p.bg_float })
   hl("PmenuKindSel", { fg = p.orange, bg = p.selection })
   hl("PmenuExtra", { fg = p.comment, bg = p.bg_float })
   hl("PmenuExtraSel", { fg = p.comment, bg = p.selection })
-  hl("PmenuSbar", { bg = p.bg_alt })
-  hl("PmenuThumb", { bg = p.border })
+  hl("PmenuSbar", { bg = "#57584f" })
+  hl("PmenuThumb", { bg = "#6e7066" })
   hl("PmenuMatch", { fg = p.blue, bg = p.bg_float, bold = true })
   hl("PmenuMatchSel", { fg = p.blue, bg = p.selection, bold = true })
   hl("ComplMatchIns", { fg = p.blue, bold = true })
-  hl("Visual", { bg = p.selection })
-  hl("VisualNOS", { bg = p.selection })
-  hl("Search", { bg = p.search })
-  hl("CurSearch", { bg = p.search_active, bold = true })
-  hl("IncSearch", { bg = p.search_active })
+  hl("Visual", { bg = "#3b3c35" })
+  hl("VisualNOS", { bg = "#3b3c35" })
+  hl("Search", { bg = "#e6db74", fg = "#272822" })
+  hl("CurSearch", { bg = "#fd971f", bold = true, fg = "#272822" })
+  hl("IncSearch", { bg = "#fd971f", fg = "#272822" })
   hl("Substitute", { fg = p.fg, bg = p.search_active, bold = true })
-  hl("MatchParen", { fg = p.blue, underline = true })
-  hl("QuickFixLine", { bg = p.hover })
-  hl("Folded", { fg = p.comment, bg = p.bg_float })
+  hl("MatchParen", { fg = "#fdfff1", underline = false, bg = "#3b3c35", bold = true })
+  hl("QuickFixLine", { bg = "#3b3c35", bold = true })
+  hl("Folded", { fg = p.comment, bg = "#3b3c35" })
   hl("Directory", { fg = p.blue })
   hl("Title", { fg = p.blue, bold = true })
-  hl("Question", { fg = p.green })
+  hl("Question", { fg = "#66d9ef" })
   hl("MoreMsg", { fg = p.green })
   hl("ModeMsg", { fg = p.fg, bold = true })
   hl("MsgArea", { fg = p.fg, bg = p.bg })
   hl("MsgSeparator", { fg = p.border, bg = p.bg })
-  hl("WarningMsg", { fg = p.yellow, bold = true })
+  hl("WarningMsg", { fg = "#fd971f", bold = true })
   hl("ErrorMsg", { fg = p.red, bold = true })
   hl("NonText", { fg = p.border })
   hl("EndOfBuffer", { fg = p.bg_float })
@@ -138,13 +138,13 @@ function M.setup()
   hl("WildMenu", { bg = p.selection })
   hl("SnippetTabstop", { bg = p.selection })
   hl("SpellBad", { undercurl = true, sp = p.red })
-  hl("SpellCap", { undercurl = true, sp = p.yellow })
-  hl("SpellRare", { undercurl = true, sp = p.orange })
-  hl("SpellLocal", { undercurl = true, sp = p.cyan })
-  hl("DiffAdd", { bg = p.diff_add_bg })
-  hl("DiffChange", { bg = p.diff_change_bg })
-  hl("DiffDelete", { bg = p.diff_delete_bg })
-  hl("DiffText", { bg = p.diff_text_bg, bold = true })
+  hl("SpellCap", { undercurl = true, sp = "#66d9ef" })
+  hl("SpellRare", { undercurl = true, sp = "#ae81ff" })
+  hl("SpellLocal", { undercurl = true, sp = "#fd971f" })
+  hl("DiffAdd", { bg = "#1d1e19", fg = "#a6e22e" })
+  hl("DiffChange", { bg = "#1d1e19", fg = "#fd971f" })
+  hl("DiffDelete", { bg = "#1d1e19", fg = "#f92672" })
+  hl("DiffText", { bg = "#1d1e19", bold = true, fg = "#fdfff1" })
 
   -- Legacy syntax groups
   hl("Comment", { fg = p.comment, italic = true })
@@ -223,7 +223,7 @@ function M.setup()
   hl("@function.macro", { fg = p.syntax_builtin })
   hl("@function.method", { fg = p.syntax_method })
   hl("@function.method.call", { fg = p.syntax_method })
-  hl("@constructor", { fg = p.syntax_class })
+  hl("@constructor", { link = "@type" })
   hl("@operator", { fg = p.syntax_operator })
   hl("@keyword", { fg = p.syntax_keyword })
   hl("@keyword.coroutine", { fg = p.syntax_keyword })
@@ -276,42 +276,42 @@ function M.setup()
 
   -- Diagnostics
   hl("DiagnosticError", { fg = p.red })
-  hl("DiagnosticWarn", { fg = p.yellow })
-  hl("DiagnosticInfo", { fg = p.blue })
-  hl("DiagnosticHint", { fg = p.cyan })
+  hl("DiagnosticWarn", { fg = "#fd971f" })
+  hl("DiagnosticInfo", { fg = "#66d9ef" })
+  hl("DiagnosticHint", { fg = "#ae81ff" })
   hl("DiagnosticOk", { fg = p.green })
   hl("DiagnosticVirtualTextError", { fg = p.red, italic = true })
-  hl("DiagnosticVirtualTextWarn", { fg = p.yellow, italic = true })
-  hl("DiagnosticVirtualTextInfo", { fg = p.blue, italic = true })
-  hl("DiagnosticVirtualTextHint", { fg = p.cyan, italic = true })
+  hl("DiagnosticVirtualTextWarn", { fg = "#fd971f", italic = true })
+  hl("DiagnosticVirtualTextInfo", { fg = "#66d9ef", italic = true })
+  hl("DiagnosticVirtualTextHint", { fg = "#ae81ff", italic = true })
   hl("DiagnosticVirtualTextOk", { fg = p.green, italic = true })
   hl("DiagnosticVirtualLinesError", { fg = p.red, italic = true })
-  hl("DiagnosticVirtualLinesWarn", { fg = p.yellow, italic = true })
-  hl("DiagnosticVirtualLinesInfo", { fg = p.blue, italic = true })
-  hl("DiagnosticVirtualLinesHint", { fg = p.cyan, italic = true })
+  hl("DiagnosticVirtualLinesWarn", { fg = "#fd971f", italic = true })
+  hl("DiagnosticVirtualLinesInfo", { fg = "#66d9ef", italic = true })
+  hl("DiagnosticVirtualLinesHint", { fg = "#ae81ff", italic = true })
   hl("DiagnosticVirtualLinesOk", { fg = p.green, italic = true })
   hl("DiagnosticUnderlineError", { undercurl = true, sp = p.red })
-  hl("DiagnosticUnderlineWarn", { undercurl = true, sp = p.yellow })
-  hl("DiagnosticUnderlineInfo", { undercurl = true, sp = p.blue })
-  hl("DiagnosticUnderlineHint", { undercurl = true, sp = p.cyan })
+  hl("DiagnosticUnderlineWarn", { undercurl = true, sp = "#fd971f" })
+  hl("DiagnosticUnderlineInfo", { undercurl = true, sp = "#66d9ef" })
+  hl("DiagnosticUnderlineHint", { undercurl = true, sp = "#ae81ff" })
   hl("DiagnosticUnderlineOk", { undercurl = true, sp = p.green })
-  hl("DiagnosticFloatingError", { fg = p.red })
-  hl("DiagnosticFloatingWarn", { fg = p.yellow })
-  hl("DiagnosticFloatingInfo", { fg = p.blue })
-  hl("DiagnosticFloatingHint", { fg = p.cyan })
+  hl("DiagnosticFloatingError", { fg = "#f92672", bg = "#3b3c35" })
+  hl("DiagnosticFloatingWarn", { fg = "#fd971f", bg = "#3b3c35" })
+  hl("DiagnosticFloatingInfo", { fg = "#66d9ef", bg = "#3b3c35" })
+  hl("DiagnosticFloatingHint", { fg = "#ae81ff", bg = "#3b3c35" })
   hl("DiagnosticFloatingOk", { fg = p.green })
   hl("DiagnosticSignError", { fg = p.red })
-  hl("DiagnosticSignWarn", { fg = p.yellow })
-  hl("DiagnosticSignInfo", { fg = p.blue })
-  hl("DiagnosticSignHint", { fg = p.cyan })
+  hl("DiagnosticSignWarn", { fg = "#fd971f" })
+  hl("DiagnosticSignInfo", { fg = "#66d9ef" })
+  hl("DiagnosticSignHint", { fg = "#ae81ff" })
   hl("DiagnosticSignOk", { fg = p.green })
   hl("DiagnosticDeprecated", { strikethrough = true })
   hl("DiagnosticUnnecessary", { link = "Comment" })
 
   -- LSP
-  hl("LspReferenceText", { bg = p.selection })
-  hl("LspReferenceRead", { bg = p.selection })
-  hl("LspReferenceWrite", { bg = p.selection })
+  hl("LspReferenceText", { bg = "#3b3c35" })
+  hl("LspReferenceRead", { bg = "#3b3c35" })
+  hl("LspReferenceWrite", { bg = "#3b3c35" })
   hl("LspReferenceTarget", { bg = p.hover })
   hl("LspInlayHint", { fg = p.comment, italic = true })
   hl("LspCodeLens", { fg = p.comment, italic = true })
@@ -333,38 +333,62 @@ function M.setup()
   hl("@lsp.type.decorator", { fg = p.syntax_attribute })
   hl("@lsp.mod.deprecated", { strikethrough = true })
 
+  -- Override groups
+  hl("GitSignsAdd", { fg = "#a6e22e" })
+  hl("GitSignsChange", { fg = "#fd971f" })
+  hl("GitSignsDelete", { fg = "#f92672" })
+  hl("WhichKey", { fg = "#fd971f" })
+  hl("WhichKeyGroup", { fg = "#66d9ef" })
+  hl("WhichKeyDesc", { fg = "#fdfff1" })
+  hl("WhichKeySeparator", { fg = "#6e7066" })
+  hl("WhichKeyFloat", { bg = "#3b3c35" })
+  hl("BlinkCmpMenu", { bg = "#3b3c35" })
+  hl("BlinkCmpMenuBorder", { fg = "#6e7066", bg = "#3b3c35" })
+  hl("BlinkCmpMenuSelection", { fg = "#272822", bg = "#e6db74" })
+  hl("BlinkCmpLabelMatch", { fg = "#66d9ef", bold = true })
+  hl("BlinkCmpKind", { fg = "#fd971f" })
+  hl("BlinkCmpGhostText", { fg = "#6e7066", italic = true })
+  hl("SnacksPickerDir", { fg = "#6e7066" })
+  hl("SnacksPickerFile", { fg = "#fdfff1" })
+  hl("SnacksPickerMatch", { fg = "#66d9ef", bold = true })
+  hl("SnacksPickerPrompt", { fg = "#fd971f" })
+  hl("SnacksIndent", { fg = "#57584f" })
+  hl("SnacksIndentScope", { fg = "#ae81ff" })
+  hl("IblIndent", { fg = "#57584f" })
+  hl("IblScope", { fg = "#ae81ff" })
+
   -- Plugin: GitSigns
-  hl("GitSignsAdd", { fg = p.green })
-  hl("GitSignsChange", { fg = p.yellow })
-  hl("GitSignsDelete", { fg = p.red })
+  hl("GitSignsAdd", { fg = "#a6e22e" })
+  hl("GitSignsChange", { fg = "#fd971f" })
+  hl("GitSignsDelete", { fg = "#f92672" })
 
   -- Plugin: which-key
-  hl("WhichKey", { fg = p.orange })
-  hl("WhichKeyGroup", { fg = p.blue })
-  hl("WhichKeyDesc", { fg = p.fg })
-  hl("WhichKeySeparator", { fg = p.comment })
-  hl("WhichKeyFloat", { bg = p.bg_float })
+  hl("WhichKey", { fg = "#fd971f" })
+  hl("WhichKeyGroup", { fg = "#66d9ef" })
+  hl("WhichKeyDesc", { fg = "#fdfff1" })
+  hl("WhichKeySeparator", { fg = "#6e7066" })
+  hl("WhichKeyFloat", { bg = "#3b3c35" })
 
   -- Plugin: blink.cmp
-  hl("BlinkCmpMenu", { fg = p.fg, bg = p.bg_float })
-  hl("BlinkCmpMenuBorder", { fg = p.border, bg = p.bg_float })
-  hl("BlinkCmpMenuSelection", { bg = p.selection })
+  hl("BlinkCmpMenu", { fg = p.fg, bg = "#3b3c35" })
+  hl("BlinkCmpMenuBorder", { fg = "#6e7066", bg = "#3b3c35" })
+  hl("BlinkCmpMenuSelection", { bg = "#e6db74", fg = "#272822" })
   hl("BlinkCmpLabel", { fg = p.fg })
-  hl("BlinkCmpLabelMatch", { fg = p.blue, bold = true })
-  hl("BlinkCmpKind", { fg = p.orange })
-  hl("BlinkCmpGhostText", { fg = p.comment, italic = true })
+  hl("BlinkCmpLabelMatch", { fg = "#66d9ef", bold = true })
+  hl("BlinkCmpKind", { fg = "#fd971f" })
+  hl("BlinkCmpGhostText", { fg = "#6e7066", italic = true })
 
   -- Plugin: snacks.nvim
-  hl("SnacksPickerDir", { fg = p.comment })
-  hl("SnacksPickerFile", { fg = p.fg })
-  hl("SnacksPickerMatch", { fg = p.blue, bold = true })
-  hl("SnacksPickerPrompt", { fg = p.blue })
-  hl("SnacksIndent", { fg = p.bg_alt })
-  hl("SnacksIndentScope", { fg = p.selection })
+  hl("SnacksPickerDir", { fg = "#6e7066" })
+  hl("SnacksPickerFile", { fg = "#fdfff1" })
+  hl("SnacksPickerMatch", { fg = "#66d9ef", bold = true })
+  hl("SnacksPickerPrompt", { fg = "#fd971f" })
+  hl("SnacksIndent", { fg = "#57584f" })
+  hl("SnacksIndentScope", { fg = "#ae81ff" })
 
   -- Plugin: indent-blankline / ibl
-  hl("IblIndent", { fg = p.bg_alt })
-  hl("IblScope", { fg = p.selection })
+  hl("IblIndent", { fg = "#57584f" })
+  hl("IblScope", { fg = "#ae81ff" })
 end
 
 return M

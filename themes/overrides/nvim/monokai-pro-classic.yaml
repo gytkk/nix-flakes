@@ -1,0 +1,185 @@
+version: 1
+
+meta:
+  app: nvim
+  theme: monokai-pro-classic
+  variant: dark
+
+groups:
+  NormalFloat:
+    bg: "{roles.ui.bgAlt}"
+  FloatBorder:
+    fg: "{roles.syntax.comment}"
+    bg: "{roles.ui.bgAlt}"
+  FloatTitle:
+    fg: "{palette.red}"
+    bg: "{roles.ui.bgAlt}"
+    bold: true
+  FloatFooter:
+    bg: "{roles.ui.bgAlt}"
+  StatusLine:
+    bg: "{roles.ui.bgAlt}"
+  StatusLineNC:
+    bg: "{roles.ui.bgAlt}"
+  StatusLineTerm:
+    bg: "{roles.ui.bgAlt}"
+  TabLine:
+    bg: "{roles.ui.bgAlt}"
+  TabLineFill:
+    bg: "{roles.ui.bgAlt}"
+  Folded:
+    bg: "{roles.ui.bgAlt}"
+  Search:
+    fg: "{roles.ui.bg}"
+    bg: "{palette.yellow}"
+  CurSearch:
+    fg: "{roles.ui.bg}"
+    bg: "{palette.orange}"
+    bold: true
+  IncSearch:
+    fg: "{roles.ui.bg}"
+    bg: "{palette.orange}"
+  Visual:
+    bg: "{roles.ui.bgAlt}"
+  VisualNOS:
+    bg: "{roles.ui.bgAlt}"
+  MatchParen:
+    fg: "{roles.syntax.text}"
+    bg: "{roles.ui.bgAlt}"
+    bold: true
+    underline: false
+  QuickFixLine:
+    bg: "{roles.ui.bgAlt}"
+    bold: true
+  Pmenu:
+    bg: "{roles.ui.bgAlt}"
+  PmenuSel:
+    fg: "{roles.ui.bg}"
+    bg: "{palette.yellow}"
+  PmenuSbar:
+    bg: "{roles.ui.border}"
+  PmenuThumb:
+    bg: "{roles.syntax.comment}"
+  WarningMsg:
+    fg: "{palette.orange}"
+  Question:
+    fg: "{palette.cyan}"
+  DiagnosticWarn:
+    fg: "{palette.orange}"
+  DiagnosticInfo:
+    fg: "{palette.cyan}"
+  DiagnosticHint:
+    fg: "{palette.magenta}"
+  DiagnosticSignWarn:
+    fg: "{palette.orange}"
+  DiagnosticSignInfo:
+    fg: "{palette.cyan}"
+  DiagnosticSignHint:
+    fg: "{palette.magenta}"
+  DiagnosticFloatingError:
+    fg: "{palette.red}"
+    bg: "{roles.ui.bgAlt}"
+  DiagnosticFloatingWarn:
+    fg: "{palette.orange}"
+    bg: "{roles.ui.bgAlt}"
+  DiagnosticFloatingInfo:
+    fg: "{palette.cyan}"
+    bg: "{roles.ui.bgAlt}"
+  DiagnosticFloatingHint:
+    fg: "{palette.magenta}"
+    bg: "{roles.ui.bgAlt}"
+  DiagnosticUnderlineWarn:
+    sp: "{palette.orange}"
+  DiagnosticUnderlineInfo:
+    sp: "{palette.cyan}"
+  DiagnosticUnderlineHint:
+    sp: "{palette.magenta}"
+  DiagnosticVirtualTextWarn:
+    fg: "{palette.orange}"
+  DiagnosticVirtualTextInfo:
+    fg: "{palette.cyan}"
+  DiagnosticVirtualTextHint:
+    fg: "{palette.magenta}"
+  DiagnosticVirtualLinesWarn:
+    fg: "{palette.orange}"
+  DiagnosticVirtualLinesInfo:
+    fg: "{palette.cyan}"
+  DiagnosticVirtualLinesHint:
+    fg: "{palette.magenta}"
+  SpellCap:
+    sp: "{palette.cyan}"
+  SpellRare:
+    sp: "{palette.magenta}"
+  SpellLocal:
+    sp: "{palette.orange}"
+  DiffAdd:
+    fg: "{palette.green}"
+    bg: "{roles.ui.bgElevated}"
+  DiffChange:
+    fg: "{palette.orange}"
+    bg: "{roles.ui.bgElevated}"
+  DiffDelete:
+    fg: "{palette.red}"
+    bg: "{roles.ui.bgElevated}"
+  DiffText:
+    fg: "{roles.syntax.text}"
+    bg: "{roles.ui.bgElevated}"
+    bold: true
+  LspReferenceText:
+    bg: "{roles.ui.bgAlt}"
+  LspReferenceRead:
+    bg: "{roles.ui.bgAlt}"
+  LspReferenceWrite:
+    bg: "{roles.ui.bgAlt}"
+  GitSignsAdd:
+    fg: "{palette.green}"
+  GitSignsChange:
+    fg: "{palette.orange}"
+  GitSignsDelete:
+    fg: "{palette.red}"
+  WhichKey:
+    fg: "{palette.orange}"
+  WhichKeyGroup:
+    fg: "{palette.cyan}"
+  WhichKeyDesc:
+    fg: "{roles.syntax.text}"
+  WhichKeySeparator:
+    fg: "{roles.syntax.comment}"
+  WhichKeyFloat:
+    bg: "{roles.ui.bgAlt}"
+  BlinkCmpMenu:
+    bg: "{roles.ui.bgAlt}"
+  BlinkCmpMenuBorder:
+    fg: "{roles.syntax.comment}"
+    bg: "{roles.ui.bgAlt}"
+  BlinkCmpMenuSelection:
+    fg: "{roles.ui.bg}"
+    bg: "{palette.yellow}"
+  BlinkCmpLabelMatch:
+    fg: "{palette.cyan}"
+    bold: true
+  BlinkCmpKind:
+    fg: "{palette.orange}"
+  BlinkCmpGhostText:
+    fg: "{roles.syntax.comment}"
+    italic: true
+  SnacksPickerDir:
+    fg: "{roles.syntax.comment}"
+  SnacksPickerFile:
+    fg: "{roles.syntax.text}"
+  SnacksPickerMatch:
+    fg: "{palette.cyan}"
+    bold: true
+  SnacksPickerPrompt:
+    fg: "{palette.orange}"
+  SnacksIndent:
+    fg: "{roles.ui.border}"
+  SnacksIndentScope:
+    fg: "{palette.magenta}"
+  IblIndent:
+    fg: "{roles.ui.border}"
+  IblScope:
+    fg: "{palette.magenta}"
+
+links:
+  @constructor: "@type"
