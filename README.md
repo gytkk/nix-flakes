@@ -42,7 +42,8 @@ The official [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc)
 
 - Zellij is managed through `modules/zellij/default.nix`.
 - `home-manager switch` installs `~/.config/zellij/config.kdl` from `modules/zellij/default.nix`: macOS prepends `copy_command "pbcopy"` to the shared `modules/zellij/files/config.kdl`, and other platforms symlink the shared file directly.
-- The checked-in defaults keep the `one-half-light` theme, the builtin welcome layout, startup tips disabled, Zellij mouse mode disabled so terminal emulators like WezTerm handle text selection and clipboard shortcuts, Kitty keyboard protocol support enabled for modified keys like `Shift+Enter`, and `Ctrl+b` passed through to terminal apps like Neovim instead of entering Zellij's tmux mode.
+- The checked-in defaults keep the `one-half-light` theme, the builtin welcome layout, startup tips disabled, Zellij mouse mode enabled for pane scrolling in TUI apps, Kitty keyboard protocol support enabled for modified keys like `Shift+Enter`, and `Ctrl+b` passed through to terminal apps like Neovim instead of entering Zellij's tmux mode.
+- In WezTerm, hold `Shift` while dragging to bypass Zellij mouse reporting for terminal-side selection, then use `Cmd+C` to copy.
 - On macOS, the repo-managed config still prepends `copy_command "pbcopy"` so explicit Zellij copy actions continue to target the system clipboard.
 - Local interactive shells started from Ghostty automatically `exec zellij`.
 - SSH sessions and shells already inside `zellij` or `tmux` are excluded from that auto-start.

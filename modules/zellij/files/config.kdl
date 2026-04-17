@@ -5,7 +5,6 @@ default_layout "welcome"
 show_startup_tips false
 theme "one-half-light"
 support_kitty_keyboard_protocol true
-mouse_mode false
 
 themes {
     one-half-light {
