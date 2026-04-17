@@ -12,8 +12,9 @@ shape = "beam"
 
 [fonts]
 size = 12
-family = "JetBrains Mono"
+family = "JetBrainsMono Nerd Font Mono"
 extras = [{ family = "Sarasa Mono CL" }]
+use-drawable-chars = false
 
 [keyboard]
 disable-ctlseqs-alt = false
