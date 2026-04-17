@@ -88,11 +88,18 @@ Defined in `inventory.nix` (single source of truth). `kind` field determines bui
 
 Each module in `modules/` manages a specific tool. **When modifying settings for any tool, look in the corresponding module directory first.**
 
+For theme-backed apps, prefer the canonical theme pipeline under `themes/` over app-local theme copies:
+
+- `themes/core/` is the source of truth for reusable theme definitions
+- `themes/templates/` defines app adapter/template structure
+- `themes/exports/` contains generated app-ready artifacts
+- when changing a module to use a theme, prefer wiring the module to `themes/exports/<app>/...` rather than creating or editing duplicated app-local theme files inside `modules/<app>/themes/`
+
 ```text
 modules/<name>/
 ├── default.nix    # Main module configuration (ALWAYS exists)
 ├── files/         # Static config files (JSON, TOML, etc.)
-├── themes/        # Custom themes
+├── themes/        # Legacy or app-local themes (prefer `themes/exports/` for generated themes)
 └── agents/        # AI agent definitions (for AI tools)
 ```
 
@@ -123,7 +130,7 @@ modules/<name>/
 
 #### Neovim (`modules/vim/`)
 
-`programs.neovim.initLua`가 `require('config')`으로 부트스트랩. 실제 설정은 `files/config/`에 있으며 `~/.config/nvim/lua/config/`로 symlink. LSP 서버 추가 시 `files/config/init.lua`의 `servers` 테이블 + `modules/lsp/default.nix`에 바이너리 추가.
+`programs.neovim.initLua`가 `require('config')`으로 부트스트랩. 실제 설정은 `files/config/`에 있으며 `~/.config/nvim/lua/config/`로 symlink. Theme artifacts should prefer `themes/exports/nvim/` when generated from the canonical theme pipeline. LSP 서버 추가 시 `files/config/init.lua`의 `servers` 테이블 + `modules/lsp/default.nix`에 바이너리 추가.
 
 #### VSCode (`modules/vscode/`) — DISABLED
 
@@ -131,7 +138,7 @@ modules/<name>/
 
 #### Zed (`modules/zed/`)
 
-Settings, keymaps, themes는 `mkOutOfStoreSymlink`로 symlink. Zed UI에서 편집 가능. Extensions는 `default.nix`의 `nixExtensions` 리스트로 관리.
+Settings, keymaps는 `mkOutOfStoreSymlink`로 symlink. Generated themes should be consumed from `themes/exports/zed/`. Extensions는 `default.nix`의 `nixExtensions` 리스트로 관리.
 
 #### Terraform
 
