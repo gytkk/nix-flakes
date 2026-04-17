@@ -244,6 +244,39 @@ def check_rio(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
     check_rio_sections(f"{path_str}.sections", doc.get("sections"), errors)
 
 
+def check_zellij_sections(path: str, sections: Any, errors: list[str]) -> None:
+    expect(isinstance(sections, list) and len(sections) > 0, f"{path}: sections must be a non-empty list", errors)
+    if not isinstance(sections, list):
+        return
+    seen_components: set[str] = set()
+    for idx, section in enumerate(sections):
+        item_path = f"{path}[{idx}]"
+        expect(isinstance(section, dict), f"{item_path}: section must be an object", errors)
+        if not isinstance(section, dict):
+            continue
+        require_keys(section, ["component", "attrs"], item_path, errors)
+        component = section.get("component")
+        expect(isinstance(component, str) and component, f"{item_path}.component must be a non-empty string", errors)
+        if isinstance(component, str):
+            expect(component not in seen_components, f"{path}: duplicate component {component!r}", errors)
+            seen_components.add(component)
+        attrs = section.get("attrs")
+        expect(isinstance(attrs, dict) and len(attrs) > 0, f"{item_path}.attrs must be a non-empty object", errors)
+
+
+def check_zellij(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
+    check_common(path, doc, errors)
+    path_str = str(path)
+    contract = doc.get("theme_schema")
+    expect(isinstance(contract, dict), f"{path_str}.theme_schema must be an object", errors)
+    if isinstance(contract, dict):
+        require_keys(contract, ["root_node", "token_prefix", "value_type"], f"{path_str}.theme_schema", errors)
+        expect(contract.get("root_node") == "themes", f"{path_str}.theme_schema.root_node must be 'themes'", errors)
+        expect(contract.get("token_prefix") == "$", f"{path_str}.theme_schema.token_prefix must be '$'", errors)
+        expect(contract.get("value_type") == "rgb-triplet", f"{path_str}.theme_schema.value_type must be 'rgb-triplet'", errors)
+    check_zellij_sections(f"{path_str}.sections", doc.get("sections"), errors)
+
+
 def check_override_template(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
     path_str = str(path)
     expected_top = ["version", "meta", "groups", "links"]
@@ -302,6 +335,7 @@ JSON_CHECKS = {
     ROOT / "templates" / "zed" / "official-template.json": check_zed,
     ROOT / "templates" / "nvim" / "plugins.json": check_nvim_plugin_template,
     ROOT / "templates" / "rio" / "official-template.json": check_rio,
+    ROOT / "templates" / "zellij" / "official-template.json": check_zellij,
 }
 
 YAML_CHECKS = {

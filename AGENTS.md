@@ -13,6 +13,7 @@ This file provides guidance to Codex CLI when working with code in this reposito
 - Use `nixfmt` to format all Nix files before committing
 - Run `nix flake check` only for complex changes (multi-module, architecture changes); skip for simple edits unless explicitly requested
 - Do NOT push unless explicitly requested
+- When changing the canonical theme pipeline or generated theme exports, leave a local git commit in a sensible rollbackable unit before finishing the work
 
 ### Documentation Guidelines
 
@@ -94,6 +95,7 @@ For theme-backed apps, prefer the canonical theme pipeline under `themes/` over 
 - `themes/templates/` defines app adapter/template structure
 - `themes/exports/` contains generated app-ready artifacts
 - when changing a module to use a theme, prefer wiring the module to `themes/exports/<app>/...` rather than creating or editing duplicated app-local theme files inside `modules/<app>/themes/`
+- after changing theme templates, generators, overrides, or generated exports, leave the repo with a local commit that captures the change in a clear rollbackable unit
 
 ```text
 modules/<name>/

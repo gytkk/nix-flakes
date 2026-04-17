@@ -495,6 +495,11 @@ def load_rio_template(root: Path) -> dict[str, Any]:
     return load_json(template_path)
 
 
+def load_zellij_template(root: Path) -> dict[str, Any]:
+    template_path = root / "templates" / "zellij" / "official-template.json"
+    return load_json(template_path)
+
+
 def load_nvim_override(root: Path, theme_id: str) -> dict[str, Any] | None:
     path = root / "overrides" / "nvim" / f"{theme_id}.yaml"
     if not path.exists():
@@ -760,6 +765,138 @@ def rio_theme_toml(ctx: dict[str, Any], root: Path) -> str:
     return "\n".join(lines) + "\n"
 
 
+def zellij_rgb(hex_color: str) -> str:
+    r, g, b = hex_to_rgb(hex_color)
+    return f"{r} {g} {b}"
+
+
+def build_zellij_slots(ctx: dict[str, Any]) -> dict[str, str]:
+    p = ctx["palette"]
+    r = ctx["roles"]
+    players = [
+        r["syntax"]["tag"],
+        r["syntax"]["link"],
+        r["diagnostics"]["warning"],
+        r["syntax"]["type"],
+        r["ui"]["selection"],
+        r["diagnostics"]["hint"],
+        r["diagnostics"]["error"],
+        r["diagnostics"]["ok"],
+        r["vcs"]["modified"],
+        r["vcs"]["removed"],
+    ]
+    return {
+        "text_base": r["ui"]["fg"],
+        "text_background": r["ui"]["panelBg"],
+        "text_emphasis_0": r["diagnostics"]["warning"],
+        "text_emphasis_1": r["syntax"]["link"],
+        "text_emphasis_2": r["diagnostics"]["ok"],
+        "text_emphasis_3": r["diagnostics"]["error"],
+        "text_selected_base": p["white"],
+        "text_selected_background": r["ui"]["selection"],
+        "text_selected_emphasis_0": r["diagnostics"]["warning"],
+        "text_selected_emphasis_1": p["blueBright"],
+        "text_selected_emphasis_2": p["greenBright"],
+        "text_selected_emphasis_3": r["diagnostics"]["error"],
+        "ribbon_selected_base": r["ui"]["bg"],
+        "ribbon_selected_background": r["diagnostics"]["ok"],
+        "ribbon_selected_emphasis_0": p["yellowBright"],
+        "ribbon_selected_emphasis_1": r["diagnostics"]["warning"],
+        "ribbon_selected_emphasis_2": r["diagnostics"]["error"],
+        "ribbon_selected_emphasis_3": r["syntax"]["link"],
+        "ribbon_unselected_base": p["white"],
+        "ribbon_unselected_background": p["blackBright"],
+        "ribbon_unselected_emphasis_0": r["vcs"]["removed"],
+        "ribbon_unselected_emphasis_1": p["white"],
+        "ribbon_unselected_emphasis_2": r["syntax"]["link"],
+        "ribbon_unselected_emphasis_3": r["diagnostics"]["error"],
+        "table_title_base": r["diagnostics"]["ok"],
+        "table_title_background": "#000000",
+        "table_title_emphasis_0": r["diagnostics"]["warning"],
+        "table_title_emphasis_1": r["syntax"]["link"],
+        "table_title_emphasis_2": r["diagnostics"]["ok"],
+        "table_title_emphasis_3": r["diagnostics"]["error"],
+        "table_cell_selected_base": p["white"],
+        "table_cell_selected_background": r["ui"]["selection"],
+        "table_cell_selected_emphasis_0": r["diagnostics"]["warning"],
+        "table_cell_selected_emphasis_1": p["blueBright"],
+        "table_cell_selected_emphasis_2": p["greenBright"],
+        "table_cell_selected_emphasis_3": r["diagnostics"]["error"],
+        "table_cell_unselected_base": r["ui"]["fg"],
+        "table_cell_unselected_background": r["ui"]["panelBg"],
+        "table_cell_unselected_emphasis_0": r["diagnostics"]["warning"],
+        "table_cell_unselected_emphasis_1": r["syntax"]["link"],
+        "table_cell_unselected_emphasis_2": r["diagnostics"]["ok"],
+        "table_cell_unselected_emphasis_3": r["diagnostics"]["error"],
+        "list_selected_base": p["white"],
+        "list_selected_background": r["ui"]["selection"],
+        "list_selected_emphasis_0": r["diagnostics"]["warning"],
+        "list_selected_emphasis_1": p["blueBright"],
+        "list_selected_emphasis_2": p["greenBright"],
+        "list_selected_emphasis_3": r["diagnostics"]["error"],
+        "list_unselected_base": r["ui"]["fg"],
+        "list_unselected_background": r["ui"]["panelBg"],
+        "list_unselected_emphasis_0": r["diagnostics"]["warning"],
+        "list_unselected_emphasis_1": r["syntax"]["link"],
+        "list_unselected_emphasis_2": r["diagnostics"]["ok"],
+        "list_unselected_emphasis_3": r["diagnostics"]["error"],
+        "frame_selected_base": r["diagnostics"]["ok"],
+        "frame_selected_background": "#000000",
+        "frame_selected_emphasis_0": r["diagnostics"]["warning"],
+        "frame_selected_emphasis_1": r["syntax"]["link"],
+        "frame_selected_emphasis_2": r["diagnostics"]["error"],
+        "frame_selected_emphasis_3": "#000000",
+        "frame_unselected_base": r["ui"]["border"],
+        "frame_unselected_background": "#000000",
+        "frame_unselected_emphasis_0": r["ui"]["fgMuted"],
+        "frame_unselected_emphasis_1": r["ui"]["border"],
+        "frame_unselected_emphasis_2": "#000000",
+        "frame_unselected_emphasis_3": "#000000",
+        "frame_highlight_base": r["diagnostics"]["warning"],
+        "frame_highlight_background": "#000000",
+        "frame_highlight_emphasis_0": r["diagnostics"]["error"],
+        "frame_highlight_emphasis_1": r["diagnostics"]["warning"],
+        "frame_highlight_emphasis_2": r["diagnostics"]["warning"],
+        "frame_highlight_emphasis_3": r["diagnostics"]["warning"],
+        "exit_code_success_base": r["diagnostics"]["ok"],
+        "exit_code_success_background": "#000000",
+        "exit_code_success_emphasis_0": r["syntax"]["link"],
+        "exit_code_success_emphasis_1": r["ui"]["bgAlt"],
+        "exit_code_success_emphasis_2": r["diagnostics"]["error"],
+        "exit_code_success_emphasis_3": r["ui"]["selection"],
+        "exit_code_error_base": r["diagnostics"]["error"],
+        "exit_code_error_background": "#000000",
+        "exit_code_error_emphasis_0": r["diagnostics"]["warning"],
+        "exit_code_error_emphasis_1": "#000000",
+        "exit_code_error_emphasis_2": "#000000",
+        "exit_code_error_emphasis_3": "#000000",
+        **{f"player_{idx}": color for idx, color in enumerate(players, start=1)},
+    }
+
+
+def zellij_theme_kdl(ctx: dict[str, Any], root: Path) -> str:
+    template = load_zellij_template(root)
+    slots = build_zellij_slots(ctx)
+    theme_id = ctx["meta"]["id"]
+    lines = [
+        f"// Auto-generated from themes/core/{theme_id}.yaml",
+        f"// Template: {template['name']} v{template['version']}",
+        "themes {",
+        f"    {theme_id} {{",
+    ]
+    for section in template["sections"]:
+        lines.append(f"        {section['component']} {{")
+        for attr, token in section["attrs"].items():
+            value = render_template_value(token, slots)
+            if section["component"] == "multiplayer_user_colors":
+                lines.append(f"            {attr} {zellij_rgb(value)}")
+            else:
+                lines.append(f"            {attr} {zellij_rgb(value)}")
+        lines.append("        }")
+    lines.extend(["    }", "}"])
+    return "\n".join(lines) + "\n"
+
+
 def write_json(path: Path, data: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
@@ -778,11 +915,13 @@ def generate_theme(theme_path: Path, template: dict[str, Any], root: Path) -> li
     zed_path = root / "exports" / "zed" / f"{theme_id}.json"
     nvim_path = root / "exports" / "nvim" / f"{theme_id}.lua"
     rio_path = root / "exports" / "rio" / f"{theme_id}.toml"
+    zellij_path = root / "exports" / "zellij" / f"{theme_id}.kdl"
 
     write_json(zed_path, zed_theme_doc(ctx, root))
     write_text(nvim_path, nvim_lua(ctx, root))
     write_text(rio_path, rio_theme_toml(ctx, root))
-    return [zed_path, nvim_path, rio_path]
+    write_text(zellij_path, zellij_theme_kdl(ctx, root))
+    return [zed_path, nvim_path, rio_path, zellij_path]
 
 
 def discover_default_targets(root: Path) -> list[Path]:
