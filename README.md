@@ -38,6 +38,14 @@ The official [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc)
 - If `/etc/codex/managed_config.toml` or the legacy `/etc/codex/config.toml` already exists as a regular file, activation stops instead of overwriting it.
 - `~/.codex/config.toml` stays writable for user-local state such as `[projects."..."]` trust entries.
 
+## Zed config
+
+- Zed is managed through `modules/zed/default.nix`.
+- On macOS and Linux, `home-manager switch` installs `~/.config/zed/settings.json` and `keymap.json` as out-of-store symlinks to the repo, and exposes the entire `themes/exports/zed` directory at `~/.config/zed/themes`.
+- That means mutable settings can switch between generated theme names without requiring another switch just to materialize a newly referenced theme file.
+- On WSL hosts, activation still copies settings, keymaps, and the full set of generated `themes/exports/zed/*.json` files into the Windows Zed config directory on each switch.
+- The checked-in defaults keep `One Half Light` for light mode and Zed's built-in `One Dark` for dark mode.
+
 ## Zellij config
 
 - Zellij is managed through `modules/zellij/default.nix`.

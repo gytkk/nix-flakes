@@ -12,6 +12,8 @@ let
   cfg = config.modules.zed;
 
   mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/zed/${path}";
+  zedThemeExportsPath = "${flakeDirectory}/themes/exports/zed";
+  zedThemeExports = config.lib.file.mkOutOfStoreSymlink zedThemeExportsPath;
 
   # Nix로 관리할 확장 목록 (pkgs.zed-extensions에서 가져옴)
   nixExtensions = with pkgs.zed-extensions; [
@@ -59,9 +61,6 @@ let
   # JSON 파일 생성 (WSL activation script용)
   settingsFile = pkgs.writeText "zed-settings.json" (builtins.readFile ./files/settings.json);
   keymapFile = pkgs.writeText "zed-keymap.json" (builtins.readFile ./files/keymap.json);
-  themeFile = pkgs.writeText "one-half-light.json" (
-    builtins.toJSON (lib.importJSON ../../themes/exports/zed/one-half-light.json)
-  );
 
   # WSL: Windows Zed에 설정, 테마, 확장 배포 스크립트
   wslActivationScript = ''
@@ -84,9 +83,11 @@ let
     rm -f "${windowsZedConfigPath}/keymap.json"
     cp "${keymapFile}" "${windowsZedConfigPath}/keymap.json"
 
-    # 테마 파일 복사
-    rm -f "${windowsZedConfigPath}/themes/one-half-light.json"
-    cp "${themeFile}" "${windowsZedConfigPath}/themes/one-half-light.json"
+    # 생성된 테마 전체 복사
+    for theme in "${zedThemeExportsPath}"/*.json; do
+      [ -f "$theme" ] || continue
+      cp -f "$theme" "${windowsZedConfigPath}/themes/$(basename "$theme")"
+    done
 
     # 확장 복사 (Nix store → Windows 경로)
     for ext in ${extensionsDir}/*; do
@@ -119,9 +120,8 @@ in
         home.file."${zedConfigPath}/settings.json".source = mkSymlink "files/settings.json";
         home.file."${zedConfigPath}/keymap.json".source = mkSymlink "files/keymap.json";
 
-        # 커스텀 테마 → repo 파일로 직접 symlink (mutable)
-        home.file."${zedConfigPath}/themes/one-half-light.json".source =
-          config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/themes/exports/zed/one-half-light.json";
+        # 생성된 테마 전체 → repo export 디렉토리로 직접 symlink (mutable)
+        home.file."${zedConfigPath}/themes".source = zedThemeExports;
 
         # Nix로 확장 관리 (읽기 전용 — Nix 패키지 기반)
         home.file."${zedDataPath}/extensions/installed" = {
