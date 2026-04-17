@@ -523,6 +523,7 @@ Adapter templates and schema helpers:
 - `themes/templates/nvim/plugins.json` -> Neovim plugin-specific highlight template
 - `themes/templates/rio/official-template.json` -> Rio Terminal color template derived from the official Rio config color contract
 - `themes/templates/zellij/official-template.json` -> Zellij theme template derived from the official Zellij theme definition specification
+- `themes/overrides/zellij/*.yaml` -> optional Zellij-specific component/player overrides applied after generator defaults
 - `themes/check_templates.py` -> consistency check for app template metadata, contract fields, section layout, duplicate entries, and declared key coverage
 
 ## Resolution Rules

@@ -330,6 +330,55 @@ def check_nvim_override(path: Path, doc: dict[str, Any], errors: list[str]) -> N
             expect(isinstance(target, str) and target, f"{path_str}.links.{group} must be a non-empty string", errors)
 
 
+def check_zellij_override_template(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
+    path_str = str(path)
+    expected_top = ["version", "meta", "components", "players"]
+    expect(list(doc.keys()) == expected_top, f"{path_str}: top-level keys must exactly match {expected_top}", errors)
+
+    meta = doc.get("meta")
+    expect(isinstance(meta, dict), f"{path_str}.meta must be an object", errors)
+    if isinstance(meta, dict):
+        expected_meta = ["app", "theme", "variant"]
+        expect(list(meta.keys()) == expected_meta, f"{path_str}.meta keys must exactly match {expected_meta}", errors)
+
+    components = doc.get("components")
+    expect(isinstance(components, dict), f"{path_str}.components must be an object", errors)
+
+    players = doc.get("players")
+    expect(isinstance(players, dict), f"{path_str}.players must be an object", errors)
+
+
+def check_zellij_override(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
+    path_str = str(path)
+    expected_top = ["version", "meta", "components", "players"]
+    expect(list(doc.keys()) == expected_top, f"{path_str}: top-level keys must exactly match {expected_top}", errors)
+    expect(doc.get("version") == 1, f"{path_str}.version must be 1", errors)
+
+    meta = doc.get("meta")
+    expect(isinstance(meta, dict), f"{path_str}.meta must be an object", errors)
+    if isinstance(meta, dict):
+        expected_meta = ["app", "theme", "variant"]
+        expect(list(meta.keys()) == expected_meta, f"{path_str}.meta keys must exactly match {expected_meta}", errors)
+        expect(meta.get("app") == "zellij", f"{path_str}.meta.app must be 'zellij'", errors)
+        expect(isinstance(meta.get("theme"), str) and meta.get("theme"), f"{path_str}.meta.theme must be a non-empty string", errors)
+        expect(meta.get("variant") in {"light", "dark"}, f"{path_str}.meta.variant must be 'light' or 'dark'", errors)
+
+    components = doc.get("components")
+    players = doc.get("players")
+    expect(isinstance(components, dict), f"{path_str}.components must be an object", errors)
+    expect(isinstance(players, dict), f"{path_str}.players must be an object", errors)
+    if isinstance(components, dict):
+        for component, attrs in components.items():
+            expect(isinstance(component, str) and component, f"{path_str}.components contains an invalid component name", errors)
+            expect(isinstance(attrs, dict) and len(attrs) > 0, f"{path_str}.components.{component} must be a non-empty object", errors)
+    if isinstance(players, dict):
+        for player, value in players.items():
+            expect(isinstance(player, str) and player, f"{path_str}.players contains an invalid player name", errors)
+            expect(isinstance(value, str) and value, f"{path_str}.players.{player} must be a non-empty string", errors)
+    if isinstance(components, dict) and isinstance(players, dict):
+        expect(bool(components) or bool(players), f"{path_str} must contain at least one component or player override", errors)
+
+
 JSON_CHECKS = {
     ROOT / "templates" / "nvim" / "official-template.json": check_nvim,
     ROOT / "templates" / "zed" / "official-template.json": check_zed,
@@ -340,6 +389,7 @@ JSON_CHECKS = {
 
 YAML_CHECKS = {
     ROOT / "overrides" / "TEMPLATE.yaml": check_override_template,
+    ROOT / "overrides" / "zellij" / "TEMPLATE.yaml": check_zellij_override_template,
 }
 
 
@@ -353,6 +403,10 @@ def main() -> int:
 
     for path in sorted((ROOT / "overrides" / "nvim").glob("*.yaml")):
         check_nvim_override(path.relative_to(ROOT), load_yaml_doc(path), errors)
+    for path in sorted((ROOT / "overrides" / "zellij").glob("*.yaml")):
+        if path.name == "TEMPLATE.yaml":
+            continue
+        check_zellij_override(path.relative_to(ROOT), load_yaml_doc(path), errors)
 
     if errors:
         print("Template consistency check failed:", file=sys.stderr)
@@ -360,7 +414,12 @@ def main() -> int:
             print(f"- {error}", file=sys.stderr)
         return 1
 
-    total = len(JSON_CHECKS) + len(YAML_CHECKS) + len(list((ROOT / "overrides" / "nvim").glob("*.yaml")))
+    total = (
+        len(JSON_CHECKS)
+        + len(YAML_CHECKS)
+        + len(list((ROOT / "overrides" / "nvim").glob("*.yaml")))
+        + len([p for p in (ROOT / "overrides" / "zellij").glob("*.yaml") if p.name != "TEMPLATE.yaml"])
+    )
     print(f"Validated {total} template/override file(s) successfully.")
     return 0
 

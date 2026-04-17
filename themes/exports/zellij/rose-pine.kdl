@@ -36,7 +36,7 @@ themes {
         }
         table_title {
             base 49 116 143
-            background 0 0 0
+            background 25 23 36
             emphasis_0 246 193 119
             emphasis_1 196 167 231
             emphasis_2 49 116 143
@@ -76,23 +76,23 @@ themes {
         }
         frame_selected {
             base 49 116 143
-            background 0 0 0
+            background 25 23 36
             emphasis_0 246 193 119
             emphasis_1 196 167 231
             emphasis_2 235 111 146
-            emphasis_3 0 0 0
+            emphasis_3 25 23 36
         }
         frame_unselected {
             base 82 79 103
-            background 0 0 0
+            background 25 23 36
             emphasis_0 144 140 170
             emphasis_1 82 79 103
-            emphasis_2 0 0 0
-            emphasis_3 0 0 0
+            emphasis_2 25 23 36
+            emphasis_3 25 23 36
         }
         frame_highlight {
             base 246 193 119
-            background 0 0 0
+            background 25 23 36
             emphasis_0 235 111 146
             emphasis_1 246 193 119
             emphasis_2 246 193 119
@@ -100,7 +100,7 @@ themes {
         }
         exit_code_success {
             base 49 116 143
-            background 0 0 0
+            background 25 23 36
             emphasis_0 196 167 231
             emphasis_1 38 35 58
             emphasis_2 235 111 146
@@ -108,23 +108,23 @@ themes {
         }
         exit_code_error {
             base 235 111 146
-            background 0 0 0
+            background 25 23 36
             emphasis_0 246 193 119
-            emphasis_1 0 0 0
-            emphasis_2 0 0 0
-            emphasis_3 0 0 0
+            emphasis_1 25 23 36
+            emphasis_2 25 23 36
+            emphasis_3 25 23 36
         }
         multiplayer_user_colors {
             player_1 235 111 146
-            player_2 196 167 231
-            player_3 246 193 119
+            player_2 49 116 143
+            player_3 156 207 216
             player_4 246 193 119
-            player_5 64 61 82
-            player_6 196 167 231
-            player_7 235 111 146
-            player_8 49 116 143
-            player_9 235 188 186
-            player_10 235 111 146
+            player_5 196 167 231
+            player_6 168 210 221
+            player_7 233 131 164
+            player_8 242 198 142
+            player_9 201 177 233
+            player_10 80 135 161
         }
     }
 }

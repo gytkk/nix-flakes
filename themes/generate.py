@@ -53,6 +53,45 @@ def dim_terminal(color: str, bg: str, *, light: bool) -> str:
     return mix(color, bg, 0.34 if light else 0.42)
 
 
+def color_distance(hex_a: str, hex_b: str) -> int:
+    a = hex_to_rgb(hex_a)
+    b = hex_to_rgb(hex_b)
+    return sum(abs(a[i] - b[i]) for i in range(3))
+
+
+def relative_luminance(hex_color: str) -> float:
+    def channel(value: int) -> float:
+        c = value / 255.0
+        if c <= 0.03928:
+            return c / 12.92
+        return ((c + 0.055) / 1.055) ** 2.4
+
+    r, g, b = hex_to_rgb(hex_color)
+    rl, gl, bl = channel(r), channel(g), channel(b)
+    return 0.2126 * rl + 0.7152 * gl + 0.0722 * bl
+
+
+def contrast_ratio(hex_a: str, hex_b: str) -> float:
+    a = relative_luminance(hex_a)
+    b = relative_luminance(hex_b)
+    lighter = max(a, b)
+    darker = min(a, b)
+    return (lighter + 0.05) / (darker + 0.05)
+
+
+def best_contrast(bg: str, *candidates: str) -> str:
+    return max(candidates, key=lambda candidate: contrast_ratio(candidate, bg))
+
+
+def ensure_distinct_background(candidate: str, base: str, accent: str, *, light: bool) -> str:
+    if color_distance(candidate, base) >= 72:
+        return candidate
+    fallback = soft_background(accent, base, light=light, strength=0.58 if light else 0.52)
+    if color_distance(fallback, base) >= 72:
+        return fallback
+    return mix(accent, base, 0.46 if light else 0.34)
+
+
 def load_and_validate_theme(theme_path: Path, template: dict[str, Any]) -> dict[str, Any]:
     validator = Validator()
     validate_theme(validator, theme_path, template)
@@ -500,6 +539,13 @@ def load_zellij_template(root: Path) -> dict[str, Any]:
     return load_json(template_path)
 
 
+def load_zellij_override(root: Path, theme_id: str) -> dict[str, Any] | None:
+    path = root / "overrides" / "zellij" / f"{theme_id}.yaml"
+    if not path.exists():
+        return None
+    return load_yaml(path)
+
+
 def load_nvim_override(root: Path, theme_id: str) -> dict[str, Any] | None:
     path = root / "overrides" / "nvim" / f"{theme_id}.yaml"
     if not path.exists():
@@ -770,21 +816,63 @@ def zellij_rgb(hex_color: str) -> str:
     return f"{r} {g} {b}"
 
 
+def build_zellij_player_colors(ctx: dict[str, Any], *, light: bool) -> list[str]:
+    p = ctx["palette"]
+    r = ctx["roles"]
+    bg = r["ui"]["bg"]
+    fg = r["ui"]["fg"]
+    candidates = [
+        r["ansi"]["brightRed"],
+        r["ansi"]["brightBlue"],
+        r["ansi"]["brightGreen"],
+        r["ansi"]["brightYellow"],
+        r["ansi"]["brightMagenta"],
+        r["ansi"]["brightCyan"],
+        r["diagnostics"]["error"],
+        r["diagnostics"]["warning"],
+        r["diagnostics"]["hint"],
+        r["diagnostics"]["ok"],
+        r["syntax"]["tag"],
+        r["syntax"]["type"],
+        p["orange"],
+        p["pink"],
+    ]
+    colors: list[str] = []
+    for candidate in candidates:
+        color = candidate
+        if color_distance(color, bg) < 88:
+            color = sharpen(color, bg, light=light)
+        if any(color_distance(color, existing) < 52 for existing in colors):
+            color = mix(color, fg, 0.18 if light else 0.12)
+        if color_distance(color, bg) < 88:
+            color = mix(color, fg, 0.28 if light else 0.22)
+        if any(color_distance(color, existing) < 52 for existing in colors):
+            continue
+        colors.append(color)
+        if len(colors) == 10:
+            break
+    while len(colors) < 10:
+        seed = candidates[len(colors) % len(candidates)]
+        variant = mix(seed, fg, 0.32 if light else 0.18)
+        if color_distance(variant, bg) < 88:
+            variant = sharpen(variant, bg, light=light)
+        colors.append(variant)
+    return colors[:10]
+
+
 def build_zellij_slots(ctx: dict[str, Any]) -> dict[str, str]:
     p = ctx["palette"]
     r = ctx["roles"]
-    players = [
-        r["syntax"]["tag"],
-        r["syntax"]["link"],
-        r["diagnostics"]["warning"],
-        r["syntax"]["type"],
+    is_light = ctx["meta"]["variant"] == "light"
+    selected_bg = ensure_distinct_background(
         r["ui"]["selection"],
-        r["diagnostics"]["hint"],
-        r["diagnostics"]["error"],
-        r["diagnostics"]["ok"],
-        r["vcs"]["modified"],
-        r["vcs"]["removed"],
-    ]
+        r["ui"]["panelBg"],
+        r["syntax"]["link"],
+        light=is_light,
+    )
+    selected_base = best_contrast(selected_bg, p["white"], r["ui"]["fg"], r["ui"]["bg"])
+    flat_bg = r["ui"]["bg"]
+    players = build_zellij_player_colors(ctx, light=is_light)
     return {
         "text_base": r["ui"]["fg"],
         "text_background": r["ui"]["panelBg"],
@@ -792,8 +880,8 @@ def build_zellij_slots(ctx: dict[str, Any]) -> dict[str, str]:
         "text_emphasis_1": r["syntax"]["link"],
         "text_emphasis_2": r["diagnostics"]["ok"],
         "text_emphasis_3": r["diagnostics"]["error"],
-        "text_selected_base": p["white"],
-        "text_selected_background": r["ui"]["selection"],
+        "text_selected_base": selected_base,
+        "text_selected_background": selected_bg,
         "text_selected_emphasis_0": r["diagnostics"]["warning"],
         "text_selected_emphasis_1": p["blueBright"],
         "text_selected_emphasis_2": p["greenBright"],
@@ -811,13 +899,13 @@ def build_zellij_slots(ctx: dict[str, Any]) -> dict[str, str]:
         "ribbon_unselected_emphasis_2": r["syntax"]["link"],
         "ribbon_unselected_emphasis_3": r["diagnostics"]["error"],
         "table_title_base": r["diagnostics"]["ok"],
-        "table_title_background": "#000000",
+        "table_title_background": flat_bg,
         "table_title_emphasis_0": r["diagnostics"]["warning"],
         "table_title_emphasis_1": r["syntax"]["link"],
         "table_title_emphasis_2": r["diagnostics"]["ok"],
         "table_title_emphasis_3": r["diagnostics"]["error"],
-        "table_cell_selected_base": p["white"],
-        "table_cell_selected_background": r["ui"]["selection"],
+        "table_cell_selected_base": selected_base,
+        "table_cell_selected_background": selected_bg,
         "table_cell_selected_emphasis_0": r["diagnostics"]["warning"],
         "table_cell_selected_emphasis_1": p["blueBright"],
         "table_cell_selected_emphasis_2": p["greenBright"],
@@ -828,8 +916,8 @@ def build_zellij_slots(ctx: dict[str, Any]) -> dict[str, str]:
         "table_cell_unselected_emphasis_1": r["syntax"]["link"],
         "table_cell_unselected_emphasis_2": r["diagnostics"]["ok"],
         "table_cell_unselected_emphasis_3": r["diagnostics"]["error"],
-        "list_selected_base": p["white"],
-        "list_selected_background": r["ui"]["selection"],
+        "list_selected_base": selected_base,
+        "list_selected_background": selected_bg,
         "list_selected_emphasis_0": r["diagnostics"]["warning"],
         "list_selected_emphasis_1": p["blueBright"],
         "list_selected_emphasis_2": p["greenBright"],
@@ -841,57 +929,84 @@ def build_zellij_slots(ctx: dict[str, Any]) -> dict[str, str]:
         "list_unselected_emphasis_2": r["diagnostics"]["ok"],
         "list_unselected_emphasis_3": r["diagnostics"]["error"],
         "frame_selected_base": r["diagnostics"]["ok"],
-        "frame_selected_background": "#000000",
+        "frame_selected_background": flat_bg,
         "frame_selected_emphasis_0": r["diagnostics"]["warning"],
         "frame_selected_emphasis_1": r["syntax"]["link"],
         "frame_selected_emphasis_2": r["diagnostics"]["error"],
-        "frame_selected_emphasis_3": "#000000",
+        "frame_selected_emphasis_3": flat_bg,
         "frame_unselected_base": r["ui"]["border"],
-        "frame_unselected_background": "#000000",
+        "frame_unselected_background": flat_bg,
         "frame_unselected_emphasis_0": r["ui"]["fgMuted"],
         "frame_unselected_emphasis_1": r["ui"]["border"],
-        "frame_unselected_emphasis_2": "#000000",
-        "frame_unselected_emphasis_3": "#000000",
+        "frame_unselected_emphasis_2": flat_bg,
+        "frame_unselected_emphasis_3": flat_bg,
         "frame_highlight_base": r["diagnostics"]["warning"],
-        "frame_highlight_background": "#000000",
+        "frame_highlight_background": flat_bg,
         "frame_highlight_emphasis_0": r["diagnostics"]["error"],
         "frame_highlight_emphasis_1": r["diagnostics"]["warning"],
         "frame_highlight_emphasis_2": r["diagnostics"]["warning"],
         "frame_highlight_emphasis_3": r["diagnostics"]["warning"],
         "exit_code_success_base": r["diagnostics"]["ok"],
-        "exit_code_success_background": "#000000",
+        "exit_code_success_background": flat_bg,
         "exit_code_success_emphasis_0": r["syntax"]["link"],
         "exit_code_success_emphasis_1": r["ui"]["bgAlt"],
         "exit_code_success_emphasis_2": r["diagnostics"]["error"],
-        "exit_code_success_emphasis_3": r["ui"]["selection"],
+        "exit_code_success_emphasis_3": selected_bg,
         "exit_code_error_base": r["diagnostics"]["error"],
-        "exit_code_error_background": "#000000",
+        "exit_code_error_background": flat_bg,
         "exit_code_error_emphasis_0": r["diagnostics"]["warning"],
-        "exit_code_error_emphasis_1": "#000000",
-        "exit_code_error_emphasis_2": "#000000",
-        "exit_code_error_emphasis_3": "#000000",
+        "exit_code_error_emphasis_1": flat_bg,
+        "exit_code_error_emphasis_2": flat_bg,
+        "exit_code_error_emphasis_3": flat_bg,
         **{f"player_{idx}": color for idx, color in enumerate(players, start=1)},
     }
+
+
+def apply_zellij_override_sections(sections: list[dict[str, Any]], override: dict[str, Any] | None, ctx: dict[str, Any]) -> list[dict[str, Any]]:
+    if not override:
+        return sections
+
+    component_map = {section["component"]: section for section in sections}
+    for component, attrs in override.get("components", {}).items():
+        section = component_map.get(component)
+        if section is None:
+            continue
+        for attr, value in attrs.items():
+            section["attrs"][attr] = resolve_context_value(value, ctx)
+
+    players = override.get("players", {})
+    if players:
+        section = component_map.get("multiplayer_user_colors")
+        if section is not None:
+            for player, value in players.items():
+                section["attrs"][player] = resolve_context_value(value, ctx)
+
+    return sections
 
 
 def zellij_theme_kdl(ctx: dict[str, Any], root: Path) -> str:
     template = load_zellij_template(root)
     slots = build_zellij_slots(ctx)
     theme_id = ctx["meta"]["id"]
+    override = load_zellij_override(root, theme_id)
+    sections = [
+        {
+            "component": section["component"],
+            "attrs": {key: render_template_value(value, slots) for key, value in section["attrs"].items()},
+        }
+        for section in template["sections"]
+    ]
+    sections = apply_zellij_override_sections(sections, override, ctx)
     lines = [
         f"// Auto-generated from themes/core/{theme_id}.yaml",
         f"// Template: {template['name']} v{template['version']}",
         "themes {",
         f"    {theme_id} {{",
     ]
-    for section in template["sections"]:
+    for section in sections:
         lines.append(f"        {section['component']} {{")
-        for attr, token in section["attrs"].items():
-            value = render_template_value(token, slots)
-            if section["component"] == "multiplayer_user_colors":
-                lines.append(f"            {attr} {zellij_rgb(value)}")
-            else:
-                lines.append(f"            {attr} {zellij_rgb(value)}")
+        for attr, value in section["attrs"].items():
+            lines.append(f"            {attr} {zellij_rgb(value)}")
         lines.append("        }")
     lines.extend(["    }", "}"])
     return "\n".join(lines) + "\n"
