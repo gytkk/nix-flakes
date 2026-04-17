@@ -1,0 +1,44 @@
+theme = "one-half-light"
+confirm-before-quit = false
+hide-mouse-cursor-when-typing = true
+use-fork = false
+use-kitty-keyboard-protocol = true
+scrollback-history-limit = 90000
+enable-scroll-bar = true
+padding = [0]
+
+[cursor]
+shape = "beam"
+
+[fonts]
+size = 12
+family = "JetBrains Mono"
+extras = [{ family = "Sarasa Mono CL" }]
+
+[keyboard]
+disable-ctlseqs-alt = false
+ime-cursor-positioning = true
+
+[navigation]
+mode = "Tab"
+use-split = true
+hide-if-single = true
+current-working-directory = true
+unfocused-split-opacity = 0.85
+
+[panel]
+padding = [0]
+row-gap = 0
+column-gap = 0
+border-width = 1.0
+border-radius = 0.0
+
+[window]
+opacity = 0.95
+decorations = "Enabled"
+
+[platform]
+macos.window.opacity = 0.98
+macos.window.blur = true
+macos.window.macos-use-shadow = true
+macos.window.macos-use-unified-titlebar = true
