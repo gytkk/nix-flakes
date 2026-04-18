@@ -962,24 +962,74 @@ def build_zellij_slots(ctx: dict[str, Any]) -> dict[str, str]:
     }
 
 
+def dedupe_zellij_player_attrs(attrs: dict[str, str], ctx: dict[str, Any]) -> dict[str, str]:
+    r = ctx["roles"]
+    p = ctx["palette"]
+    light = ctx["meta"]["variant"] == "light"
+    bg = r["ui"]["bg"]
+    fg = r["ui"]["fg"]
+    alternates = [
+        r["ansi"]["brightRed"],
+        r["ansi"]["brightBlue"],
+        r["ansi"]["brightGreen"],
+        r["ansi"]["brightYellow"],
+        r["ansi"]["brightMagenta"],
+        r["ansi"]["brightCyan"],
+        r["diagnostics"]["error"],
+        r["diagnostics"]["warning"],
+        r["diagnostics"]["hint"],
+        r["diagnostics"]["ok"],
+        r["syntax"]["tag"],
+        r["syntax"]["type"],
+        p["orange"],
+        p["pink"],
+    ]
+    used: list[str] = []
+    out: dict[str, str] = {}
+    for player, color in attrs.items():
+        candidate_pool = [
+            color,
+            mix(color, fg, 0.12 if light else 0.08),
+            mix(color, fg, 0.24 if light else 0.16),
+            sharpen(color, bg, light=light),
+            mix(color, bg, 0.18 if light else 0.1),
+            *alternates,
+        ]
+        chosen = color
+        for candidate in candidate_pool:
+            adjusted = candidate
+            if color_distance(adjusted, bg) < 88:
+                adjusted = sharpen(adjusted, bg, light=light)
+            if any(color_distance(adjusted, existing) < 52 for existing in used):
+                continue
+            chosen = adjusted
+            break
+        out[player] = chosen
+        used.append(chosen)
+    return out
+
+
 def apply_zellij_override_sections(sections: list[dict[str, Any]], override: dict[str, Any] | None, ctx: dict[str, Any]) -> list[dict[str, Any]]:
-    if not override:
-        return sections
-
     component_map = {section["component"]: section for section in sections}
-    for component, attrs in override.get("components", {}).items():
-        section = component_map.get(component)
-        if section is None:
-            continue
-        for attr, value in attrs.items():
-            section["attrs"][attr] = resolve_context_value(value, ctx)
 
-    players = override.get("players", {})
-    if players:
-        section = component_map.get("multiplayer_user_colors")
-        if section is not None:
-            for player, value in players.items():
-                section["attrs"][player] = resolve_context_value(value, ctx)
+    if override:
+        for component, attrs in override.get("components", {}).items():
+            section = component_map.get(component)
+            if section is None:
+                continue
+            for attr, value in attrs.items():
+                section["attrs"][attr] = resolve_context_value(value, ctx)
+
+        players = override.get("players", {})
+        if players:
+            section = component_map.get("multiplayer_user_colors")
+            if section is not None:
+                for player, value in players.items():
+                    section["attrs"][player] = resolve_context_value(value, ctx)
+
+    player_section = component_map.get("multiplayer_user_colors")
+    if player_section is not None:
+        player_section["attrs"] = dedupe_zellij_player_attrs(player_section["attrs"], ctx)
 
     return sections
 

@@ -120,10 +120,10 @@ themes {
             player_3 156 207 216
             player_4 246 193 119
             player_5 196 167 231
-            player_6 168 210 221
-            player_7 233 131 164
-            player_8 242 198 142
-            player_9 201 177 233
+            player_6 128 158 169
+            player_7 232 138 170
+            player_8 239 202 158
+            player_9 152 134 178
             player_10 80 135 161
         }
     }
