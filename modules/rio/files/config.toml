@@ -13,7 +13,7 @@ shape = "beam"
 [fonts]
 size = 12
 family = "JetBrainsMono Nerd Font Mono"
-extras = [{ family = "Sarasa Mono K" }]
+extras = [{ family = "NanumGothicCoding" }]
 use-drawable-chars = false
 
 [keyboard]

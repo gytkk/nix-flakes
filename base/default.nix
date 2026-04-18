@@ -125,6 +125,7 @@
       # Fonts
       nerd-fonts.fira-code
       nerd-fonts.jetbrains-mono
+      nanum-gothic-coding
       sarasa-gothic
       noto-fonts-cjk-sans
       noto-fonts-cjk-serif
