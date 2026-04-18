@@ -509,6 +509,7 @@ This now checks both:
 
 Current generators:
 
+- `ghostty` -> `themes/exports/ghostty/*.conf`
 - `zed` -> `themes/exports/zed/*.json`
 - `nvim` -> `themes/exports/nvim/*.lua`
 - `starship` -> `themes/exports/starship/*.toml`
@@ -519,6 +520,7 @@ Adapter templates and schema helpers:
 - `themes/templates/zed/schema-v0.2.0.json` -> vendored official Zed theme JSON Schema
 - `themes/templates/zed/official-template.json` -> Zed official template split into `style_sections`, `syntax_sections`, and `players`
   - note: Zed's official schema strictly enumerates outer `style` keys, but `style.syntax` remains open-ended and is validated as `HighlightStyleContent` entries rather than a fixed syntax-key list
+- `themes/templates/ghostty/official-template.json` -> Ghostty theme template derived from the config reference and existing local terminal config
 - `themes/templates/nvim/official-template.json` -> Neovim builtin highlight template derived from official help
 - `themes/templates/nvim/plugins.json` -> Neovim plugin-specific highlight template
 - `themes/templates/starship/official-template.json` -> Starship prompt template derived from the Starship config contract plus the existing local prompt layout

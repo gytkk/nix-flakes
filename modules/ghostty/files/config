@@ -5,32 +5,11 @@ auto-update = check
 # https://github.com/ghostty-org/ghostty/discussions/4415
 term = xterm-256color
 
-# One Half Light theme
-background = #fdfdfd
-foreground = #383a42
-selection-background = #bfceff
-selection-foreground = #383a42
+# Theme comes from themes/exports/ghostty/<commonTheme>.conf
+theme = "one-half-light"
 adjust-cursor-thickness = 250%
 cursor-style = bar
-cursor-color = #3a9a88
-cursor-text = #ffffff
 cursor-click-to-move = true
-palette = 0=#383a42
-palette = 1=#e45649
-palette = 2=#50a14f
-palette = 3=#c18401
-palette = 4=#0184bc
-palette = 5=#d65d0e
-palette = 6=#427b58
-palette = 7=#fdfdfd
-palette = 8=#4f525e
-palette = 9=#e06c75
-palette = 10=#98c379
-palette = 11=#e5c07b
-palette = 12=#61afef
-palette = 13=#e78a4e
-palette = 14=#689d6a
-palette = 15=#ffffff
 
 background-opacity = 0.95
 minimum-contrast = 1.6

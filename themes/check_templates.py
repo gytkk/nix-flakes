@@ -204,7 +204,7 @@ def check_nvim_plugin_template(path: Path, doc: dict[str, Any], errors: list[str
     check_nvim_sections(f"{path}.sections", doc.get("sections"), errors)
 
 
-def check_rio_sections(path: str, sections: Any, errors: list[str]) -> None:
+def check_ghostty_sections(path: str, sections: Any, errors: list[str]) -> None:
     expect(isinstance(sections, list) and len(sections) > 0, f"{path}: sections must be a non-empty list", errors)
     if not isinstance(sections, list):
         return
@@ -219,7 +219,7 @@ def check_rio_sections(path: str, sections: Any, errors: list[str]) -> None:
         expect(isinstance(entries, list) and len(entries) > 0, f"{item_path}.entries must be a non-empty list", errors)
         if not isinstance(entries, list):
             continue
-        seen_keys: set[str] = set()
+        seen_keys: set[tuple[str, Any]] = set()
         for eidx, entry in enumerate(entries):
             entry_path = f"{item_path}.entries[{eidx}]"
             expect(isinstance(entry, dict), f"{entry_path}: entry must be an object", errors)
@@ -227,23 +227,25 @@ def check_rio_sections(path: str, sections: Any, errors: list[str]) -> None:
                 continue
             require_keys(entry, ["key", "value"], entry_path, errors)
             key = entry.get("key")
+            value = entry.get("value")
             expect(isinstance(key, str) and key, f"{entry_path}.key must be a non-empty string", errors)
-            if isinstance(key, str):
-                expect(key not in seen_keys, f"{item_path}: duplicate key {key!r}", errors)
-                seen_keys.add(key)
+            expect(isinstance(value, str) and value, f"{entry_path}.value must be a non-empty string", errors)
+            if isinstance(key, str) and isinstance(value, str):
+                fingerprint = (key, value)
+                expect(fingerprint not in seen_keys, f"{item_path}: duplicate entry {(key, value)!r}", errors)
+                seen_keys.add(fingerprint)
 
 
-def check_rio(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
+def check_ghostty(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
     check_common(path, doc, errors)
     path_str = str(path)
-    contract = doc.get("color_schema")
-    expect(isinstance(contract, dict), f"{path_str}.color_schema must be an object", errors)
+    contract = doc.get("config_schema")
+    expect(isinstance(contract, dict), f"{path_str}.config_schema must be an object", errors)
     if isinstance(contract, dict):
-        require_keys(contract, ["section", "token_prefix", "value_type"], f"{path_str}.color_schema", errors)
-        expect(contract.get("section") == "colors", f"{path_str}.color_schema.section must be 'colors'", errors)
-        expect(contract.get("token_prefix") == "$", f"{path_str}.color_schema.token_prefix must be '$'", errors)
-        expect(contract.get("value_type") == "hex", f"{path_str}.color_schema.value_type must be 'hex'", errors)
-    check_rio_sections(f"{path_str}.sections", doc.get("sections"), errors)
+        require_keys(contract, ["token_prefix", "value_type"], f"{path_str}.config_schema", errors)
+        expect(contract.get("token_prefix") == "$", f"{path_str}.config_schema.token_prefix must be '$'", errors)
+        expect(contract.get("value_type") == "hex-or-palette-entry", f"{path_str}.config_schema.value_type must be 'hex-or-palette-entry'", errors)
+    check_ghostty_sections(f"{path_str}.sections", doc.get("sections"), errors)
 
 
 def check_starship_sections(path: str, sections: Any, errors: list[str]) -> None:
@@ -430,8 +432,8 @@ def check_zellij_override(path: Path, doc: dict[str, Any], errors: list[str]) ->
 
 
 JSON_CHECKS = {
+    ROOT / "templates" / "ghostty" / "official-template.json": check_ghostty,
     ROOT / "templates" / "nvim" / "official-template.json": check_nvim,
-    ROOT / "templates" / "rio" / "official-template.json": check_rio,
     ROOT / "templates" / "zed" / "official-template.json": check_zed,
     ROOT / "templates" / "nvim" / "plugins.json": check_nvim_plugin_template,
     ROOT / "templates" / "starship" / "official-template.json": check_starship,

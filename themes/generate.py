@@ -529,8 +529,8 @@ def load_nvim_plugin_template(root: Path) -> dict[str, Any]:
     return load_json(template_path)
 
 
-def load_rio_template(root: Path) -> dict[str, Any]:
-    template_path = root / "templates" / "rio" / "official-template.json"
+def load_ghostty_template(root: Path) -> dict[str, Any]:
+    template_path = root / "templates" / "ghostty" / "official-template.json"
     return load_json(template_path)
 
 
@@ -746,73 +746,54 @@ def nvim_lua(ctx: dict[str, Any], root: Path) -> str:
     return "\n".join(lines) + "\n"
 
 
-def build_rio_slots(ctx: dict[str, Any]) -> dict[str, str]:
-    meta = ctx["meta"]
+def build_ghostty_slots(ctx: dict[str, Any]) -> dict[str, str]:
     p = ctx["palette"]
     r = ctx["roles"]
-    is_light = meta["variant"] == "light"
-
-    return {
+    cursor_text = best_contrast(r["ui"]["cursor"], p["white"], r["ui"]["bg"], r["ui"]["fg"])
+    palette = {
+        0: r["ansi"]["black"],
+        1: r["ansi"]["red"],
+        2: r["ansi"]["green"],
+        3: r["ansi"]["yellow"],
+        4: r["ansi"]["blue"],
+        5: r["ansi"]["magenta"],
+        6: r["ansi"]["cyan"],
+        7: r["ansi"]["white"],
+        8: r["ansi"]["brightBlack"],
+        9: r["ansi"]["brightRed"],
+        10: r["ansi"]["brightGreen"],
+        11: r["ansi"]["brightYellow"],
+        12: r["ansi"]["brightBlue"],
+        13: r["ansi"]["brightMagenta"],
+        14: r["ansi"]["brightCyan"],
+        15: r["ansi"]["brightWhite"],
+    }
+    slots = {
         "background": r["ui"]["bg"],
         "foreground": r["ui"]["fg"],
         "selection_background": r["ui"]["selection"],
-        "selection_foreground": r["ui"]["fg"],
-        "tabs": p["blackBright"],
-        "tabs_active": r["ui"]["fg"],
-        "bar": r["ui"]["panelBg"],
-        "split": r["ui"]["border"],
-        "cursor": r["ui"]["cursor"],
-        "vi_cursor": r["syntax"]["link"],
-        "search_match_background": soft_background(r["ui"]["search"], r["ui"]["bg"], light=is_light, strength=0.74),
-        "search_match_foreground": r["ui"]["fg"],
-        "search_focused_match_background": r["diagnostics"]["warning"],
-        "search_focused_match_foreground": p["white"],
-        "hint_foreground": r["ui"]["fg"],
-        "hint_background": r["diagnostics"]["warning"],
-        "black": r["ansi"]["black"],
-        "red": r["ansi"]["red"],
-        "green": r["ansi"]["green"],
-        "yellow": r["ansi"]["yellow"],
-        "blue": r["ansi"]["blue"],
-        "magenta": r["ansi"]["magenta"],
-        "cyan": r["ansi"]["cyan"],
-        "white": r["ansi"]["white"],
-        "dim_black": dim_terminal(r["ansi"]["black"], r["ui"]["bg"], light=is_light),
-        "dim_red": dim_terminal(r["ansi"]["red"], r["ui"]["bg"], light=is_light),
-        "dim_green": dim_terminal(r["ansi"]["green"], r["ui"]["bg"], light=is_light),
-        "dim_yellow": dim_terminal(r["ansi"]["yellow"], r["ui"]["bg"], light=is_light),
-        "dim_blue": dim_terminal(r["ansi"]["blue"], r["ui"]["bg"], light=is_light),
-        "dim_magenta": dim_terminal(r["ansi"]["magenta"], r["ui"]["bg"], light=is_light),
-        "dim_cyan": dim_terminal(r["ansi"]["cyan"], r["ui"]["bg"], light=is_light),
-        "dim_white": dim_terminal(r["ansi"]["white"], r["ui"]["bg"], light=is_light),
-        "dim_foreground": p["fgMuted"],
-        "light_black": r["ansi"]["brightBlack"],
-        "light_red": r["ansi"]["brightRed"],
-        "light_green": r["ansi"]["brightGreen"],
-        "light_yellow": r["ansi"]["brightYellow"],
-        "light_blue": r["ansi"]["brightBlue"],
-        "light_magenta": r["ansi"]["brightMagenta"],
-        "light_cyan": r["ansi"]["brightCyan"],
-        "light_white": r["ansi"]["brightWhite"],
-        "light_foreground": p["fgBright"],
+        "selection_foreground": best_contrast(r["ui"]["selection"], p["white"], r["ui"]["bg"], r["ui"]["fg"]),
+        "cursor_color": r["ui"]["cursor"],
+        "cursor_text": cursor_text,
     }
+    for idx, color in palette.items():
+        slots[f"palette_{idx}_entry"] = f"{idx}={color}"
+    return slots
 
 
-def rio_theme_toml(ctx: dict[str, Any], root: Path) -> str:
-    template = load_rio_template(root)
-    slots = build_rio_slots(ctx)
-
+def ghostty_theme_conf(ctx: dict[str, Any], root: Path) -> str:
+    template = load_ghostty_template(root)
+    slots = build_ghostty_slots(ctx)
     lines = [
         f"# Auto-generated from themes/core/{ctx['meta']['id']}.yaml",
         f"# Template: {template['name']} v{template['version']}",
-        "[colors]",
     ]
     for section in template["sections"]:
-        if lines[-1] != "[colors]":
+        if lines[-1].startswith("#") is False:
             lines.append("")
         for entry in section["entries"]:
             value = render_template_value(entry["value"], slots)
-            lines.append(f'{entry["key"]} = {json.dumps(value, ensure_ascii=False)}')
+            lines.append(f"{entry['key']} = {value}")
     return "\n".join(lines) + "\n"
 
 
@@ -1181,18 +1162,18 @@ def generate_theme(theme_path: Path, template: dict[str, Any], root: Path) -> li
     ctx = theme_context(theme)
     theme_id = ctx["meta"]["id"]
 
+    ghostty_path = root / "exports" / "ghostty" / f"{theme_id}.conf"
     zed_path = root / "exports" / "zed" / f"{theme_id}.json"
     nvim_path = root / "exports" / "nvim" / f"{theme_id}.lua"
-    rio_path = root / "exports" / "rio" / f"{theme_id}.toml"
     starship_path = root / "exports" / "starship" / f"{theme_id}.toml"
     zellij_path = root / "exports" / "zellij" / f"{theme_id}.kdl"
 
+    write_text(ghostty_path, ghostty_theme_conf(ctx, root))
     write_json(zed_path, zed_theme_doc(ctx, root))
     write_text(nvim_path, nvim_lua(ctx, root))
-    write_text(rio_path, rio_theme_toml(ctx, root))
     write_text(starship_path, starship_theme_toml(ctx, root))
     write_text(zellij_path, zellij_theme_kdl(ctx, root))
-    return [zed_path, nvim_path, rio_path, starship_path, zellij_path]
+    return [ghostty_path, zed_path, nvim_path, starship_path, zellij_path]
 
 
 def discover_default_targets(root: Path) -> list[Path]:
