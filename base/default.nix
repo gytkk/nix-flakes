@@ -28,167 +28,176 @@
     ../modules/zsh
   ];
 
-  # Disable news on update
-  news.display = "silent";
-
-  # macOS: App Management 권한 문제 방지
-  # stateVersion >= 25.11에서 copyApps가 기본 활성화되며,
-  # 매 switch마다 tccutil reset으로 TCC App Management 권한을 리셋함
-  # Nix로 .app 번들을 설치하지 않으므로 비활성화
-  targets.darwin.copyApps.enable = false;
-
-  # XDG Base Directory Specification
-  xdg = {
-    enable = true;
-    configHome = "${homeDirectory}/.config";
+  options.modules.commonTheme = lib.mkOption {
+    type = lib.types.str;
+    default = "rose-pine";
+    description = "Canonical theme id shared across theme-aware app modules.";
+    example = "rose-pine";
   };
 
-  home = {
-    inherit username homeDirectory;
+  config = {
+    # Disable news on update
+    news.display = "silent";
 
-    # Set language for shell sessions managed by home-manager
-    language = {
-      base = "ko_KR.UTF-8";
-    };
+    # macOS: App Management 권한 문제 방지
+    # stateVersion >= 25.11에서 copyApps가 기본 활성화되며,
+    # 매 switch마다 tccutil reset으로 TCC App Management 권한을 리셋함
+    # Nix로 .app 번들을 설치하지 않으므로 비활성화
+    targets.darwin.copyApps.enable = false;
 
-    # 기본 패키지 (모든 환경에서 공통)
-    packages = with pkgs; [
-      # Nix
-      nixfmt
-
-      # System utilities
-      coreutils
-      findutils
-      gnupg
-      libiconv
-
-      # Development (common)
-      docker
-      gcc
-
-      # Dev tools
-      awscli2
-      jq
-      yq-go # yq 패키지는 더 이상 관리되지 않음
-      fd
-      ripgrep
-      tmux
-      less
-      wget
-      curl
-
-      # Git
-      git
-      gh
-      lazygit
-      delta
-      bat
-
-      # Python
-      python3
-      uv
-      ruff
-
-      # Rust
-      rustup
-
-      # JavaScript + Node.js
-      bun
-      nodejs
-      typescript
-
-      # Go
-      go
-
-      # Kubernetes
-      kubectl
-      kubectx
-      kubernetes-helm
-
-      # Secrets
-      _1password-cli
-      keybase
-      inputs.agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
-
-      # Modeling
-      ffmpeg
-      imagemagick
-      pkgs.stable-25_05.micromamba
-      yt-dlp
-
-      # AI / Browser automation
-      agent-browser
-
-      # etc
-      direnv
-
-      # Fonts
-      nerd-fonts.fira-code
-      nerd-fonts.jetbrains-mono
-      nanum-gothic-coding
-      sarasa-gothic
-      noto-fonts-cjk-sans
-      noto-fonts-cjk-serif
-    ];
-
-    stateVersion = "26.05";
-
-    # Rust/C 빌드 시 라이브러리 경로 (특히 macOS에서 libiconv 링킹용)
-    sessionVariables = {
-      LIBRARY_PATH = lib.makeLibraryPath [ pkgs.libiconv ];
-    };
-  };
-
-  programs = {
-    # Enable Home Manager
-    home-manager = {
+    # XDG Base Directory Specification
+    xdg = {
       enable = true;
+      configHome = "${homeDirectory}/.config";
     };
 
-    direnv = {
-      enable = true;
-      enableZshIntegration = true;
-      nix-direnv.enable = true;
+    home = {
+      inherit username homeDirectory;
+
+      # Set language for shell sessions managed by home-manager
+      language = {
+        base = "ko_KR.UTF-8";
+      };
+
+      # 기본 패키지 (모든 환경에서 공통)
+      packages = with pkgs; [
+        # Nix
+        nixfmt
+
+        # System utilities
+        coreutils
+        findutils
+        gnupg
+        libiconv
+
+        # Development (common)
+        docker
+        gcc
+
+        # Dev tools
+        awscli2
+        jq
+        yq-go # yq 패키지는 더 이상 관리되지 않음
+        fd
+        ripgrep
+        tmux
+        less
+        wget
+        curl
+
+        # Git
+        git
+        gh
+        lazygit
+        delta
+        bat
+
+        # Python
+        python3
+        uv
+        ruff
+
+        # Rust
+        rustup
+
+        # JavaScript + Node.js
+        bun
+        nodejs
+        typescript
+
+        # Go
+        go
+
+        # Kubernetes
+        kubectl
+        kubectx
+        kubernetes-helm
+
+        # Secrets
+        _1password-cli
+        keybase
+        inputs.agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
+
+        # Modeling
+        ffmpeg
+        imagemagick
+        pkgs.stable-25_05.micromamba
+        yt-dlp
+
+        # AI / Browser automation
+        agent-browser
+
+        # etc
+        direnv
+
+        # Fonts
+        nerd-fonts.fira-code
+        nerd-fonts.jetbrains-mono
+        nanum-gothic-coding
+        sarasa-gothic
+        noto-fonts-cjk-sans
+        noto-fonts-cjk-serif
+      ];
+
+      stateVersion = "26.05";
+
+      # Rust/C 빌드 시 라이브러리 경로 (특히 macOS에서 libiconv 링킹용)
+      sessionVariables = {
+        LIBRARY_PATH = lib.makeLibraryPath [ pkgs.libiconv ];
+      };
     };
+
+    programs = {
+      # Enable Home Manager
+      home-manager = {
+        enable = true;
+      };
+
+      direnv = {
+        enable = true;
+        enableZshIntegration = true;
+        nix-direnv.enable = true;
+      };
+    };
+
+    home.activation.installPackages = lib.mkForce (
+      lib.hm.dag.entryAfter [ "writeBoundary" ] (
+        if config.submoduleSupport.externalPackageInstall then
+          ''
+            nixProfileRemove home-manager-path
+          ''
+        else
+          ''
+            nixReplaceProfile() {
+              local oldNix="$(command -v nix)"
+
+              nixProfileRemove 'home-manager-path'
+
+              run "$oldNix" profile install "$1"
+            }
+
+            if [[ -e ${config.home.profileDirectory}/manifest.json ]] ; then
+              INSTALL_CMD="nix profile install"
+              INSTALL_CMD_ACTUAL="nixReplaceProfile"
+              LIST_CMD="nix profile list"
+              REMOVE_CMD_SYNTAX='nix profile remove {number | store path}'
+            else
+              INSTALL_CMD="nix-env -i"
+              INSTALL_CMD_ACTUAL="run nix-env -i"
+              LIST_CMD="nix-env -q"
+              REMOVE_CMD_SYNTAX='nix-env -e {package name}'
+            fi
+
+            if ! $INSTALL_CMD_ACTUAL ${config.home.path} ; then
+              echo
+              _iError $'Oops, Nix failed to install your new Home Manager profile!\n\nPerhaps there is a conflict with a package that was installed using\n"%s"? Try running\n\n    %s\n\nand if there is a conflicting package you can remove it with\n\n    %s\n\nThen try activating your Home Manager configuration again.' "$INSTALL_CMD" "$LIST_CMD" "$REMOVE_CMD_SYNTAX"
+              exit 1
+            fi
+
+            unset -f nixReplaceProfile
+            unset INSTALL_CMD INSTALL_CMD_ACTUAL LIST_CMD REMOVE_CMD_SYNTAX
+          ''
+      )
+    );
   };
-
-  home.activation.installPackages = lib.mkForce (
-    lib.hm.dag.entryAfter [ "writeBoundary" ] (
-      if config.submoduleSupport.externalPackageInstall then
-        ''
-          nixProfileRemove home-manager-path
-        ''
-      else
-        ''
-          nixReplaceProfile() {
-            local oldNix="$(command -v nix)"
-
-            nixProfileRemove 'home-manager-path'
-
-            run "$oldNix" profile install "$1"
-          }
-
-          if [[ -e ${config.home.profileDirectory}/manifest.json ]] ; then
-            INSTALL_CMD="nix profile install"
-            INSTALL_CMD_ACTUAL="nixReplaceProfile"
-            LIST_CMD="nix profile list"
-            REMOVE_CMD_SYNTAX='nix profile remove {number | store path}'
-          else
-            INSTALL_CMD="nix-env -i"
-            INSTALL_CMD_ACTUAL="run nix-env -i"
-            LIST_CMD="nix-env -q"
-            REMOVE_CMD_SYNTAX='nix-env -e {package name}'
-          fi
-
-          if ! $INSTALL_CMD_ACTUAL ${config.home.path} ; then
-            echo
-            _iError $'Oops, Nix failed to install your new Home Manager profile!\n\nPerhaps there is a conflict with a package that was installed using\n"%s"? Try running\n\n    %s\n\nand if there is a conflicting package you can remove it with\n\n    %s\n\nThen try activating your Home Manager configuration again.' "$INSTALL_CMD" "$LIST_CMD" "$REMOVE_CMD_SYNTAX"
-            exit 1
-          fi
-
-          unset -f nixReplaceProfile
-          unset INSTALL_CMD INSTALL_CMD_ACTUAL LIST_CMD REMOVE_CMD_SYNTAX
-        ''
-    )
-  );
 }

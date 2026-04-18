@@ -14,6 +14,23 @@ let
   mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/zed/${path}";
   zedThemeExportsPath = "${flakeDirectory}/themes/exports/zed";
   zedThemeExports = config.lib.file.mkOutOfStoreSymlink zedThemeExportsPath;
+  zedThemeDoc = builtins.fromJSON (
+    builtins.readFile (../../themes/exports/zed + "/${config.modules.commonTheme}.json")
+  );
+  zedThemeName = if zedThemeDoc ? name then zedThemeDoc.name else config.modules.commonTheme;
+  baseSettings = builtins.fromJSON (builtins.readFile ./files/settings.json);
+  renderedSettings = pkgs.writeText "zed-settings.json" (
+    builtins.toJSON (
+      baseSettings
+      // {
+        theme = {
+          mode = "system";
+          light = zedThemeName;
+          dark = zedThemeName;
+        };
+      }
+    )
+  );
 
   # Nix로 관리할 확장 목록 (pkgs.zed-extensions에서 가져옴)
   nixExtensions = with pkgs.zed-extensions; [
@@ -59,7 +76,7 @@ let
   windowsZedDataPath = "/mnt/c/Users/${username}/AppData/Local/Zed";
 
   # JSON 파일 생성 (WSL activation script용)
-  settingsFile = pkgs.writeText "zed-settings.json" (builtins.readFile ./files/settings.json);
+  settingsFile = renderedSettings;
   keymapFile = pkgs.writeText "zed-keymap.json" (builtins.readFile ./files/keymap.json);
 
   # WSL: Windows Zed에 설정, 테마, 확장 배포 스크립트
@@ -116,8 +133,8 @@ in
     lib.mkMerge [
       # macOS/Linux (non-WSL): 설정 파일을 repo에 직접 symlink
       (lib.mkIf (!isWSL) {
-        # settings.json, keymap.json → repo 파일로 직접 symlink (mutable)
-        home.file."${zedConfigPath}/settings.json".source = mkSymlink "files/settings.json";
+        # settings.json은 commonTheme를 반영한 generated file 사용, keymap.json은 repo 파일로 직접 symlink
+        home.file."${zedConfigPath}/settings.json".source = settingsFile;
         home.file."${zedConfigPath}/keymap.json".source = mkSymlink "files/keymap.json";
 
         # 생성된 테마 전체 → repo export 디렉토리로 직접 symlink (mutable)

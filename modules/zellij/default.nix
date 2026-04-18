@@ -6,15 +6,18 @@
 }:
 
 let
-  mkModuleSymlink =
-    path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/zellij/${path}";
   generatedThemes = config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/themes/exports/zellij";
-  configPath = if pkgs.stdenv.isDarwin then "files/config.darwin.kdl" else "files/config.linux.kdl";
+  configPath = if pkgs.stdenv.isDarwin then ./files/config.darwin.kdl else ./files/config.linux.kdl;
+  configTemplate = builtins.readFile configPath;
+  renderedConfig = pkgs.writeText "zellij-config.kdl" (
+    builtins.replaceStrings [ ''theme "one-half-light"'' ] [ ''theme "${config.modules.commonTheme}"'' ]
+      configTemplate
+  );
 in
 
 {
   home.packages = [ pkgs.zellij ];
 
-  xdg.configFile."zellij/config.kdl".source = mkModuleSymlink configPath;
+  xdg.configFile."zellij/config.kdl".source = renderedConfig;
   xdg.configFile."zellij/themes".source = generatedThemes;
 }

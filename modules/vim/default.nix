@@ -18,6 +18,9 @@ in
     viAlias = true;
     vimAlias = true;
 
-    initLua = "require('config')";
+    initLua = ''
+      vim.g.nix_flakes_theme = ${builtins.toJSON config.modules.commonTheme}
+      require('config')
+    '';
   };
 }
