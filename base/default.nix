@@ -29,9 +29,9 @@
 
   options.modules.commonTheme = lib.mkOption {
     type = lib.types.str;
-    default = "rose-pine-moon";
+    default = "catppuccin-mocha";
     description = "Canonical theme id shared across theme-aware app modules.";
-    example = "rose-pine-moon";
+    example = "catppuccin-mocha";
   };
 
   config = {
