@@ -1,8 +1,8 @@
-# Auto-generated from themes/core/rose-pine.yaml
+# Auto-generated from themes/core/rose-pine-moon.yaml
 # Template: starship-theme-template v1
 "$schema" = "https://starship.rs/config-schema.json"
 
-palette = "rose_pine"
+palette = "rose_pine_moon"
 format = """
 [](iris)\
 [ 󰉋 ](bg:iris fg:base)\
@@ -163,23 +163,23 @@ $character"""
 "vimcmd_replace_symbol" = "[❮](bold fg:iris)"
 "vimcmd_visual_symbol" = "[❮](bold fg:gold)"
 
-[palettes.rose_pine]
-base = "#191724"
-surface = "#26233a"
-overlay = "#524f67"
+[palettes.rose_pine_moon]
+base = "#232136"
+surface = "#393552"
+overlay = "#56526e"
 muted = "#908caa"
 subtle = "#e0def4"
 text = "#e0def4"
 love = "#eb6f92"
-gold = "#f6c177"
+gold = "#ea9a97"
 rose = "#eb6f92"
-pine = "#f6c177"
+pine = "#ea9a97"
 foam = "#9ccfd8"
 iris = "#eb6f92"
-highlight_low = "#1f1d2e"
-highlight_med = "#35324a"
-highlight_high = "#524f67"
-green = "#31748f"
-layer1 = "#1f1d2e"
-layer2 = "#35324a"
-layer3 = "#524f67"
+highlight_low = "#2a273f"
+highlight_med = "#433f5c"
+highlight_high = "#56526e"
+green = "#3e8fb0"
+layer1 = "#2a273f"
+layer2 = "#433f5c"
+layer3 = "#56526e"

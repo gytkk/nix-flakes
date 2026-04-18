@@ -1,44 +1,44 @@
 version: 1
 
 meta:
-  id: rose-pine
-  name: Rose Pine
+  id: rose-pine-moon
+  name: Rosé Pine Moon
   variant: dark
   family: rose-pine
   author: rose-pine, pylv
   description: >-
-    Canonical Rose Pine theme definition for nix-flakes, based on the official
-    Rose Pine palette package and the main variant used as the default theme.
+    Canonical Rosé Pine Moon theme definition for nix-flakes, based on the
+    official Moon variant palette and used as the default shared theme.
 
 palette:
   # Base24-compatible base slots.
-  # Derived from the official Rose Pine main palette and mapped into the canonical schema.
-  base00: "#191724"
-  base01: "#1f1d2e"
-  base02: "#26233a"
-  base03: "#21202e"
+  # Derived from the official Rosé Pine Moon palette and mapped into the canonical schema.
+  base00: "#232136"
+  base01: "#2a273f"
+  base02: "#393552"
+  base03: "#2a283e"
   base04: "#6e6a86"
   base05: "#e0def4"
   base06: "#908caa"
-  base07: "#f6f3ff"
+  base07: "#e0def4"
 
   base08: "#eb6f92"
   base09: "#f6c177"
-  base0A: "#f6c177"
-  base0B: "#31748f"
+  base0A: "#ea9a97"
+  base0B: "#3e8fb0"
   base0C: "#9ccfd8"
   base0D: "#c4a7e7"
-  base0E: "#ebbcba"
-  base0F: "#524f67"
+  base0E: "#f6c177"
+  base0F: "#56526e"
 
-  base10: "#ebbcba"
+  base10: "#ea9a97"
   base11: "#9ccfd8"
-  base12: "#31748f"
+  base12: "#3e8fb0"
   base13: "#c4a7e7"
   base14: "#f6c177"
-  base15: "#403d52"
+  base15: "#44415a"
   base16: "#908caa"
-  base17: "#524f67"
+  base17: "#56526e"
 
   bg: "{palette.base00}"
   bgElevated: "{palette.base01}"
@@ -49,7 +49,7 @@ palette:
   fgMuted: "{palette.base06}"
   fg: "{palette.base05}"
   fgBright: "{palette.base07}"
-  fgMax: "#ffffff"
+  fgMax: "#ecebf6"
 
   red: "{palette.base08}"
   orange: "{palette.base09}"

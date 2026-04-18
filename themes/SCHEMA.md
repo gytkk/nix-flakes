@@ -486,7 +486,7 @@ Override validation helper:
 
 ```bash
 python themes/validate_overrides.py
-python themes/validate_overrides.py themes/overrides/nvim/rose-pine.yaml
+python themes/validate_overrides.py themes/overrides/nvim/rose-pine-moon.yaml
 ```
 
 Generation helper:

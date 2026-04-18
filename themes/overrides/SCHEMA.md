@@ -40,7 +40,7 @@ version: 1
 
 meta:
   app: nvim
-  theme: rose-pine
+  theme: rose-pine-moon
   variant: dark
 
 groups:

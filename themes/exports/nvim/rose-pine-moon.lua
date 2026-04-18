@@ -1,56 +1,56 @@
--- Auto-generated from themes/core/rose-pine.yaml
+-- Auto-generated from themes/core/rose-pine-moon.yaml
 -- Template: neovim-official-highlight-template v1
 local M = {}
 
 local p = {
-  bg = "#191724",
-  bg_float = "#1f1d2e",
-  bg_alt = "#26233a",
-  border = "#524f67",
-  hover = "#2c2940",
-  selection = "#3a374b",
-  search = "#57473b",
-  search_active = "#947fb0",
+  bg = "#232136",
+  bg_float = "#2a273f",
+  bg_alt = "#393552",
+  border = "#56526e",
+  hover = "#3d3956",
+  selection = "#3f3c54",
+  search = "#5b4351",
+  search_active = "#9781b5",
   fg = "#e0def4",
   fg_muted = "#908caa",
-  fg_bright = "#f6f3ff",
+  fg_bright = "#e0def4",
   comment = "#6e6a86",
   red = "#eb6f92",
   orange = "#f6c177",
-  yellow = "#f6c177",
-  green = "#31748f",
+  yellow = "#ea9a97",
+  green = "#3e8fb0",
   cyan = "#9ccfd8",
   blue = "#c4a7e7",
-  magenta = "#ebbcba",
+  magenta = "#f6c177",
   pink = "#eb6f92",
   linenr = "#908caa",
   syntax_text = "#e0def4",
   syntax_comment = "#6e6a86",
-  syntax_string = "#f6c177",
+  syntax_string = "#ea9a97",
   syntax_string_escape = "#9ccfd8",
-  syntax_number = "#ebbcba",
-  syntax_constant = "#ebbcba",
+  syntax_number = "#f6c177",
+  syntax_constant = "#f6c177",
   syntax_keyword = "#eb6f92",
   syntax_operator = "#908caa",
   syntax_variable = "#e0def4",
   syntax_parameter = "#c4a7e7",
   syntax_property = "#9ccfd8",
   syntax_field = "#9ccfd8",
-  syntax_func = "#31748f",
-  syntax_method = "#31748f",
+  syntax_func = "#3e8fb0",
+  syntax_method = "#3e8fb0",
   syntax_type = "#f6c177",
   syntax_class = "#f6c177",
   syntax_interface = "#f6c177",
   syntax_namespace = "#c4a7e7",
   syntax_builtin = "#eb6f92",
   syntax_tag = "#eb6f92",
-  syntax_attribute = "#ebbcba",
+  syntax_attribute = "#f6c177",
   syntax_punctuation = "#908caa",
   syntax_link = "#c4a7e7",
-  diff_add_bg = "#2b313d",
-  diff_change_bg = "#362e39",
-  diff_delete_bg = "#362333",
-  diff_text_bg = "#4a3c36",
+  diff_add_bg = "#34394d",
+  diff_change_bg = "#41373f",
+  diff_delete_bg = "#3f2c43",
+  diff_text_bg = "#4f3c4b",
   cursor = "#908caa",
   none = "NONE",
 }
@@ -62,7 +62,7 @@ function M.setup()
   end
   vim.o.termguicolors = true
   vim.o.background = "dark"
-  vim.g.colors_name = "rose_pine"
+  vim.g.colors_name = "rose_pine_moon"
 
   local hl = function(group, opts)
     vim.api.nvim_set_hl(0, group, opts)
@@ -102,7 +102,7 @@ function M.setup()
   hl("WinBar", { fg = p.fg, bg = p.bg_float })
   hl("WinBarNC", { fg = p.fg_muted, bg = p.bg_alt })
   hl("Pmenu", { fg = p.fg, bg = p.bg_float })
-  hl("PmenuSel", { bg = "#26233a", fg = "#e0def4" })
+  hl("PmenuSel", { bg = "#393552", fg = "#e0def4" })
   hl("PmenuKind", { fg = p.orange, bg = p.bg_float })
   hl("PmenuKindSel", { fg = p.orange, bg = p.selection })
   hl("PmenuExtra", { fg = p.comment, bg = p.bg_float })
@@ -115,8 +115,8 @@ function M.setup()
   hl("Visual", { bg = "#403d52" })
   hl("VisualNOS", { bg = p.selection })
   hl("Search", { bg = "#403d52" })
-  hl("CurSearch", { bg = "#ebbcba", bold = true, fg = "#191724" })
-  hl("IncSearch", { bg = "#ebbcba", fg = "#191724" })
+  hl("CurSearch", { bg = "#f6c177", bold = true, fg = "#232136" })
+  hl("IncSearch", { bg = "#f6c177", fg = "#232136" })
   hl("Substitute", { fg = p.fg, bg = p.search_active, bold = true })
   hl("MatchParen", { fg = "#e0def4", underline = false, bg = "#403d52" })
   hl("QuickFixLine", { bg = p.hover })
@@ -148,21 +148,21 @@ function M.setup()
 
   -- Legacy syntax groups
   hl("Comment", { fg = p.comment, italic = true })
-  hl("Constant", { fg = "#f6c177" })
+  hl("Constant", { fg = "#ea9a97" })
   hl("String", { fg = p.syntax_string })
   hl("Character", { fg = p.syntax_string })
-  hl("Number", { fg = "#f6c177" })
-  hl("Boolean", { fg = "#ebbcba" })
-  hl("Float", { fg = "#f6c177" })
-  hl("Identifier", { fg = "#ebbcba" })
-  hl("Function", { fg = "#ebbcba" })
-  hl("Statement", { fg = "#31748f" })
-  hl("Conditional", { fg = "#31748f" })
-  hl("Repeat", { fg = "#31748f" })
+  hl("Number", { fg = "#ea9a97" })
+  hl("Boolean", { fg = "#f6c177" })
+  hl("Float", { fg = "#ea9a97" })
+  hl("Identifier", { fg = "#f6c177" })
+  hl("Function", { fg = "#f6c177" })
+  hl("Statement", { fg = "#3e8fb0" })
+  hl("Conditional", { fg = "#3e8fb0" })
+  hl("Repeat", { fg = "#3e8fb0" })
   hl("Label", { fg = "#9ccfd8" })
   hl("Operator", { fg = p.syntax_operator })
-  hl("Keyword", { fg = "#31748f" })
-  hl("Exception", { fg = "#31748f" })
+  hl("Keyword", { fg = "#3e8fb0" })
+  hl("Exception", { fg = "#3e8fb0" })
   hl("PreProc", { fg = "#c4a7e7" })
   hl("Include", { fg = "#c4a7e7" })
   hl("Define", { fg = "#c4a7e7" })
@@ -172,9 +172,9 @@ function M.setup()
   hl("StorageClass", { fg = "#9ccfd8" })
   hl("Structure", { fg = "#9ccfd8" })
   hl("Typedef", { fg = "#9ccfd8" })
-  hl("Special", { fg = "#ebbcba" })
-  hl("SpecialChar", { fg = "#ebbcba" })
-  hl("Tag", { fg = "#ebbcba" })
+  hl("Special", { fg = "#f6c177" })
+  hl("SpecialChar", { fg = "#f6c177" })
+  hl("Tag", { fg = "#f6c177" })
   hl("Delimiter", { fg = p.syntax_punctuation })
   hl("SpecialComment", { fg = "#c4a7e7", italic = true })
   hl("Debug", { fg = p.red })
@@ -192,7 +192,7 @@ function M.setup()
   hl("@variable.parameter", { fg = p.syntax_parameter })
   hl("@variable.parameter.builtin", { fg = p.syntax_builtin })
   hl("@variable.member", { fg = p.syntax_field })
-  hl("@constant", { fg = "#f6c177" })
+  hl("@constant", { fg = "#ea9a97" })
   hl("@constant.builtin", { fg = "#c4a7e7" })
   hl("@constant.macro", { fg = "#c4a7e7" })
   hl("@module", { fg = p.syntax_namespace })
@@ -201,43 +201,43 @@ function M.setup()
   hl("@string", { fg = p.syntax_string })
   hl("@string.documentation", { fg = p.syntax_string, italic = true })
   hl("@string.regexp", { fg = p.syntax_string_escape })
-  hl("@string.escape", { fg = "#ebbcba" })
+  hl("@string.escape", { fg = "#f6c177" })
   hl("@string.special", { fg = p.syntax_string_escape })
   hl("@string.special.symbol", { fg = p.syntax_constant })
   hl("@string.special.path", { fg = p.syntax_string_escape })
   hl("@string.special.url", { fg = p.syntax_link, underline = true })
   hl("@character", { fg = p.syntax_string })
   hl("@character.special", { fg = p.syntax_string_escape })
-  hl("@boolean", { fg = "#ebbcba" })
-  hl("@number", { fg = "#f6c177" })
-  hl("@number.float", { fg = "#f6c177" })
+  hl("@boolean", { fg = "#f6c177" })
+  hl("@number", { fg = "#ea9a97" })
+  hl("@number.float", { fg = "#ea9a97" })
   hl("@type", { fg = "#9ccfd8" })
   hl("@type.builtin", { fg = "#c4a7e7" })
   hl("@type.definition", { fg = "#9ccfd8" })
   hl("@attribute", { fg = "#c4a7e7" })
   hl("@attribute.builtin", { fg = "#c4a7e7" })
   hl("@property", { fg = p.syntax_property })
-  hl("@function", { fg = "#ebbcba" })
+  hl("@function", { fg = "#f6c177" })
   hl("@function.builtin", { fg = "#c4a7e7" })
-  hl("@function.call", { fg = "#ebbcba" })
+  hl("@function.call", { fg = "#f6c177" })
   hl("@function.macro", { fg = "#c4a7e7" })
-  hl("@function.method", { fg = "#ebbcba" })
-  hl("@function.method.call", { fg = "#ebbcba" })
+  hl("@function.method", { fg = "#f6c177" })
+  hl("@function.method.call", { fg = "#f6c177" })
   hl("@constructor", { link = "@type" })
   hl("@operator", { fg = p.syntax_operator })
-  hl("@keyword", { fg = "#31748f" })
-  hl("@keyword.coroutine", { fg = "#31748f" })
-  hl("@keyword.function", { fg = "#31748f" })
-  hl("@keyword.operator", { fg = "#31748f" })
-  hl("@keyword.import", { fg = "#31748f" })
-  hl("@keyword.type", { fg = "#31748f" })
-  hl("@keyword.modifier", { fg = "#31748f" })
-  hl("@keyword.repeat", { fg = "#31748f" })
-  hl("@keyword.return", { fg = "#31748f" })
-  hl("@keyword.debug", { fg = "#31748f" })
-  hl("@keyword.exception", { fg = "#31748f" })
-  hl("@keyword.conditional", { fg = "#31748f" })
-  hl("@keyword.conditional.ternary", { fg = "#31748f" })
+  hl("@keyword", { fg = "#3e8fb0" })
+  hl("@keyword.coroutine", { fg = "#3e8fb0" })
+  hl("@keyword.function", { fg = "#3e8fb0" })
+  hl("@keyword.operator", { fg = "#3e8fb0" })
+  hl("@keyword.import", { fg = "#3e8fb0" })
+  hl("@keyword.type", { fg = "#3e8fb0" })
+  hl("@keyword.modifier", { fg = "#3e8fb0" })
+  hl("@keyword.repeat", { fg = "#3e8fb0" })
+  hl("@keyword.return", { fg = "#3e8fb0" })
+  hl("@keyword.debug", { fg = "#3e8fb0" })
+  hl("@keyword.exception", { fg = "#3e8fb0" })
+  hl("@keyword.conditional", { fg = "#3e8fb0" })
+  hl("@keyword.conditional.ternary", { fg = "#3e8fb0" })
   hl("@keyword.directive", { fg = "#c4a7e7" })
   hl("@keyword.directive.define", { fg = "#c4a7e7" })
   hl("@punctuation.delimiter", { fg = p.syntax_punctuation })
@@ -320,21 +320,21 @@ function M.setup()
   hl("@lsp.type.class", { fg = "#9ccfd8" })
   hl("@lsp.type.struct", { fg = "#9ccfd8" })
   hl("@lsp.type.enum", { fg = "#9ccfd8" })
-  hl("@lsp.type.enumMember", { fg = "#f6c177" })
+  hl("@lsp.type.enumMember", { fg = "#ea9a97" })
   hl("@lsp.type.interface", { fg = "#9ccfd8" })
   hl("@lsp.type.parameter", { fg = p.syntax_parameter })
   hl("@lsp.type.property", { fg = p.syntax_property })
   hl("@lsp.type.variable", { fg = p.syntax_variable })
-  hl("@lsp.type.keyword", { fg = "#31748f" })
+  hl("@lsp.type.keyword", { fg = "#3e8fb0" })
   hl("@lsp.type.namespace", { fg = p.syntax_namespace })
-  hl("@lsp.type.function", { fg = "#ebbcba" })
-  hl("@lsp.type.method", { fg = "#ebbcba" })
+  hl("@lsp.type.function", { fg = "#f6c177" })
+  hl("@lsp.type.method", { fg = "#f6c177" })
   hl("@lsp.type.macro", { fg = "#c4a7e7" })
   hl("@lsp.type.decorator", { fg = "#c4a7e7" })
   hl("@lsp.mod.deprecated", { strikethrough = true })
 
   -- Override groups
-  hl("@tag", { fg = "#ebbcba" })
+  hl("@tag", { fg = "#f6c177" })
 
   -- Plugin: GitSigns
   hl("GitSignsAdd", { fg = p.green })

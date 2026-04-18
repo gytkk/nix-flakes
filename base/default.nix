@@ -30,9 +30,9 @@
 
   options.modules.commonTheme = lib.mkOption {
     type = lib.types.str;
-    default = "rose-pine";
+    default = "rose-pine-moon";
     description = "Canonical theme id shared across theme-aware app modules.";
-    example = "rose-pine";
+    example = "rose-pine-moon";
   };
 
   config = {
