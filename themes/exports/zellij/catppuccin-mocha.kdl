@@ -11,8 +11,8 @@ themes {
             emphasis_3 243 139 168
         }
         text_selected {
-            base 245 224 220
-            background 88 91 112
+            base 30 30 46
+            background 147 153 178
             emphasis_0 249 226 175
             emphasis_1 180 190 254
             emphasis_2 166 227 161
@@ -21,16 +21,16 @@ themes {
         ribbon_selected {
             base 30 30 46
             background 166 227 161
-            emphasis_0 249 226 175
+            emphasis_0 250 179 135
             emphasis_1 249 226 175
             emphasis_2 243 139 168
             emphasis_3 137 180 250
         }
         ribbon_unselected {
-            base 245 224 220
-            background 108 112 134
+            base 205 214 244
+            background 88 91 112
             emphasis_0 243 139 168
-            emphasis_1 245 224 220
+            emphasis_1 205 214 244
             emphasis_2 137 180 250
             emphasis_3 243 139 168
         }
@@ -43,8 +43,8 @@ themes {
             emphasis_3 243 139 168
         }
         table_cell_selected {
-            base 245 224 220
-            background 88 91 112
+            base 30 30 46
+            background 147 153 178
             emphasis_0 249 226 175
             emphasis_1 180 190 254
             emphasis_2 166 227 161
@@ -59,8 +59,8 @@ themes {
             emphasis_3 243 139 168
         }
         list_selected {
-            base 245 224 220
-            background 88 91 112
+            base 30 30 46
+            background 147 153 178
             emphasis_0 249 226 175
             emphasis_1 180 190 254
             emphasis_2 166 227 161
@@ -83,10 +83,10 @@ themes {
             emphasis_3 30 30 46
         }
         frame_unselected {
-            base 69 71 90
+            base 108 112 134
             background 30 30 46
-            emphasis_0 127 132 156
-            emphasis_1 69 71 90
+            emphasis_0 166 173 200
+            emphasis_1 108 112 134
             emphasis_2 30 30 46
             emphasis_3 30 30 46
         }
@@ -104,7 +104,7 @@ themes {
             emphasis_0 137 180 250
             emphasis_1 49 50 68
             emphasis_2 243 139 168
-            emphasis_3 88 91 112
+            emphasis_3 147 153 178
         }
         exit_code_error {
             base 243 139 168
@@ -115,15 +115,15 @@ themes {
             emphasis_3 30 30 46
         }
         multiplayer_user_colors {
-            player_1 245 194 231
+            player_1 243 139 168
             player_2 180 190 254
             player_3 166 227 161
-            player_4 249 226 175
+            player_4 250 179 135
             player_5 203 166 247
-            player_6 116 199 236
-            player_7 243 139 168
-            player_8 148 226 213
-            player_9 250 179 135
+            player_6 137 220 235
+            player_7 249 226 175
+            player_8 245 194 231
+            player_9 103 154 184
             player_10 133 170 140
         }
     }

@@ -20,7 +20,6 @@
     ../modules/k9s
     ../modules/opencode
     ../modules/lsp
-    ../modules/rio
     ../modules/vim
     ../modules/wezterm
     ../modules/zed

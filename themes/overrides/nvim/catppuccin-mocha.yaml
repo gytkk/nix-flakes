@@ -6,74 +6,47 @@ meta:
   variant: dark
 
 groups:
-  NormalFloat:
-    bg: "{roles.ui.bgElevated}"
-  FloatBorder:
-    fg: "{roles.ui.border}"
-    bg: "{roles.ui.bgElevated}"
-  FloatTitle:
-    fg: "{palette.blue}"
-    bg: "{roles.ui.bgElevated}"
-    bold: true
-  FloatFooter:
-    bg: "{roles.ui.bgElevated}"
-  Pmenu:
-    bg: "{roles.ui.bgElevated}"
-  PmenuSel:
-    fg: "{roles.ui.bg}"
-    bg: "{palette.blue}"
-    bold: true
-  PmenuSbar:
-    bg: "{roles.ui.border}"
-  PmenuThumb:
-    bg: "{roles.ui.fgMuted}"
   Search:
-    fg: "{roles.ui.bg}"
-    bg: "{palette.yellow}"
+    fg: "{roles.ui.fg}"
+    bg: "{roles.ui.search}"
   CurSearch:
-    fg: "{roles.ui.bg}"
-    bg: "{palette.orange}"
-    bold: true
+    fg: "{roles.ui.fg}"
+    bg: "{roles.diagnostics.error}"
   IncSearch:
-    fg: "{roles.ui.bg}"
-    bg: "{palette.orange}"
-  Visual:
-    bg: "{palette.base15}"
-  VisualNOS:
-    bg: "{palette.base15}"
-  MatchParen:
-    fg: "{palette.blue}"
-    bg: "{palette.base15}"
-    bold: true
-    underline: false
-  DiagnosticFloatingError:
-    fg: "{palette.red}"
-    bg: "{roles.ui.bgElevated}"
-  DiagnosticFloatingWarn:
-    fg: "{palette.yellow}"
-    bg: "{roles.ui.bgElevated}"
+    fg: "{roles.ui.fg}"
+    bg: "{roles.diagnostics.error}"
+  Substitute:
+    fg: "{roles.ui.fg}"
+    bg: "{roles.diagnostics.error}"
+  Macro:
+    fg: "{roles.ui.cursor}"
+  @constant.macro:
+    fg: "{roles.ui.cursor}"
+  @function.macro:
+    fg: "{roles.ui.cursor}"
+  DiagnosticInfo:
+    fg: "{roles.diagnostics.info}"
+  DiagnosticHint:
+    fg: "{roles.diagnostics.hint}"
+  DiagnosticVirtualTextInfo:
+    fg: "{roles.diagnostics.info}"
+  DiagnosticVirtualTextHint:
+    fg: "{roles.diagnostics.hint}"
+  DiagnosticVirtualLinesInfo:
+    fg: "{roles.diagnostics.info}"
+  DiagnosticVirtualLinesHint:
+    fg: "{roles.diagnostics.hint}"
+  DiagnosticUnderlineInfo:
+    sp: "{roles.diagnostics.info}"
+  DiagnosticUnderlineHint:
+    sp: "{roles.diagnostics.hint}"
   DiagnosticFloatingInfo:
-    fg: "{palette.blue}"
-    bg: "{roles.ui.bgElevated}"
+    fg: "{roles.diagnostics.info}"
   DiagnosticFloatingHint:
-    fg: "{palette.cyan}"
-    bg: "{roles.ui.bgElevated}"
-  BlinkCmpMenu:
-    bg: "{roles.ui.bgElevated}"
-  BlinkCmpMenuBorder:
-    fg: "{roles.ui.border}"
-    bg: "{roles.ui.bgElevated}"
-  BlinkCmpMenuSelection:
-    fg: "{roles.ui.bg}"
-    bg: "{palette.blue}"
-  BlinkCmpLabelMatch:
-    fg: "{palette.blueBright}"
-    bold: true
-  BlinkCmpKind:
-    fg: "{palette.magenta}"
-  BlinkCmpGhostText:
-    fg: "{roles.syntax.comment}"
-    italic: true
+    fg: "{roles.diagnostics.hint}"
+  DiagnosticSignInfo:
+    fg: "{roles.diagnostics.info}"
+  DiagnosticSignHint:
+    fg: "{roles.diagnostics.hint}"
 
 links:
-  @constructor: "@function"

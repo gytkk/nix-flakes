@@ -6,15 +6,15 @@ local p = {
   bg = "#1e1e2e",
   bg_float = "#181825",
   bg_alt = "#313244",
-  border = "#45475a",
-  hover = "#343547",
-  selection = "#4f5165",
-  search = "#5b5552",
-  search_active = "#6b8ac1",
+  border = "#6c7086",
+  hover = "#393b4d",
+  selection = "#80859d",
+  search = "#3f555d",
+  search_active = "#8a91c4",
   fg = "#cdd6f4",
-  fg_muted = "#7f849c",
-  fg_bright = "#bac2de",
-  comment = "#7f849c",
+  fg_muted = "#a6adc8",
+  fg_bright = "#b4befe",
+  comment = "#9399b2",
   red = "#f38ba8",
   orange = "#fab387",
   yellow = "#f9e2af",
@@ -25,32 +25,32 @@ local p = {
   pink = "#f5c2e7",
   linenr = "#7f849c",
   syntax_text = "#cdd6f4",
-  syntax_comment = "#7f849c",
+  syntax_comment = "#9399b2",
   syntax_string = "#a6e3a1",
-  syntax_string_escape = "#74c7ec",
+  syntax_string_escape = "#f5c2e7",
   syntax_number = "#fab387",
   syntax_constant = "#fab387",
   syntax_keyword = "#cba6f7",
-  syntax_operator = "#89b4fa",
+  syntax_operator = "#89dceb",
   syntax_variable = "#cdd6f4",
-  syntax_parameter = "#cdd6f4",
-  syntax_property = "#b4befe",
-  syntax_field = "#b4befe",
+  syntax_parameter = "#eba0ac",
+  syntax_property = "#89b4fa",
+  syntax_field = "#89b4fa",
   syntax_func = "#89b4fa",
   syntax_method = "#89b4fa",
   syntax_type = "#f9e2af",
   syntax_class = "#f9e2af",
   syntax_interface = "#f9e2af",
-  syntax_namespace = "#b4befe",
+  syntax_namespace = "#89b4fa",
   syntax_builtin = "#f38ba8",
   syntax_tag = "#f38ba8",
-  syntax_attribute = "#a6e3a1",
-  syntax_punctuation = "#7f849c",
+  syntax_attribute = "#f9e2af",
+  syntax_punctuation = "#9399b2",
   syntax_link = "#89b4fa",
   diff_add_bg = "#313a3e",
-  diff_change_bg = "#3d3940",
+  diff_change_bg = "#2d334b",
   diff_delete_bg = "#3c2d3f",
-  diff_text_bg = "#4e494a",
+  diff_text_bg = "#384953",
   cursor = "#f5e0dc",
   none = "NONE",
 }
@@ -71,10 +71,10 @@ function M.setup()
   -- UI
   hl("Normal", { fg = p.fg, bg = p.bg })
   hl("NormalNC", { fg = p.fg_muted, bg = p.bg })
-  hl("NormalFloat", { fg = p.fg, bg = "#181825" })
-  hl("FloatBorder", { fg = "#45475a", bg = "#181825" })
-  hl("FloatTitle", { fg = "#89b4fa", bg = "#181825", bold = true })
-  hl("FloatFooter", { fg = p.comment, bg = "#181825" })
+  hl("NormalFloat", { fg = p.fg, bg = p.bg_float })
+  hl("FloatBorder", { fg = p.border, bg = p.bg_float })
+  hl("FloatTitle", { fg = p.blue, bg = p.bg_float, bold = true })
+  hl("FloatFooter", { fg = p.comment, bg = p.bg_float })
   hl("Cursor", { fg = p.cursor, reverse = true })
   hl("lCursor", { fg = p.cursor, reverse = true })
   hl("CursorIM", { fg = p.cursor, reverse = true })
@@ -101,24 +101,24 @@ function M.setup()
   hl("TabLineSel", { fg = p.fg, bg = p.bg, bold = true })
   hl("WinBar", { fg = p.fg, bg = p.bg_float })
   hl("WinBarNC", { fg = p.fg_muted, bg = p.bg_alt })
-  hl("Pmenu", { fg = p.fg, bg = "#181825" })
-  hl("PmenuSel", { bg = "#89b4fa", fg = "#1e1e2e", bold = true })
+  hl("Pmenu", { fg = p.fg, bg = p.bg_float })
+  hl("PmenuSel", { bg = p.selection })
   hl("PmenuKind", { fg = p.orange, bg = p.bg_float })
   hl("PmenuKindSel", { fg = p.orange, bg = p.selection })
   hl("PmenuExtra", { fg = p.comment, bg = p.bg_float })
   hl("PmenuExtraSel", { fg = p.comment, bg = p.selection })
-  hl("PmenuSbar", { bg = "#45475a" })
-  hl("PmenuThumb", { bg = "#7f849c" })
+  hl("PmenuSbar", { bg = p.bg_alt })
+  hl("PmenuThumb", { bg = p.border })
   hl("PmenuMatch", { fg = p.blue, bg = p.bg_float, bold = true })
   hl("PmenuMatchSel", { fg = p.blue, bg = p.selection, bold = true })
   hl("ComplMatchIns", { fg = p.blue, bold = true })
-  hl("Visual", { bg = "#585b70" })
-  hl("VisualNOS", { bg = "#585b70" })
-  hl("Search", { bg = "#f9e2af", fg = "#1e1e2e" })
-  hl("CurSearch", { bg = "#fab387", bold = true, fg = "#1e1e2e" })
-  hl("IncSearch", { bg = "#fab387", fg = "#1e1e2e" })
-  hl("Substitute", { fg = p.fg, bg = p.search_active, bold = true })
-  hl("MatchParen", { fg = "#89b4fa", underline = false, bg = "#585b70", bold = true })
+  hl("Visual", { bg = p.selection })
+  hl("VisualNOS", { bg = p.selection })
+  hl("Search", { bg = "#94e2d5", fg = "#cdd6f4" })
+  hl("CurSearch", { bg = "#f38ba8", bold = true, fg = "#cdd6f4" })
+  hl("IncSearch", { bg = "#f38ba8", fg = "#cdd6f4" })
+  hl("Substitute", { fg = "#cdd6f4", bg = "#f38ba8", bold = true })
+  hl("MatchParen", { fg = p.blue, underline = true })
   hl("QuickFixLine", { bg = p.hover })
   hl("Folded", { fg = p.comment, bg = p.bg_float })
   hl("Directory", { fg = p.blue })
@@ -166,7 +166,7 @@ function M.setup()
   hl("PreProc", { fg = p.syntax_keyword })
   hl("Include", { fg = p.syntax_keyword })
   hl("Define", { fg = p.syntax_keyword })
-  hl("Macro", { fg = p.syntax_builtin })
+  hl("Macro", { fg = "#f5e0dc" })
   hl("PreCondit", { fg = p.syntax_keyword })
   hl("Type", { fg = p.syntax_type })
   hl("StorageClass", { fg = p.syntax_keyword })
@@ -194,7 +194,7 @@ function M.setup()
   hl("@variable.member", { fg = p.syntax_field })
   hl("@constant", { fg = p.syntax_constant })
   hl("@constant.builtin", { fg = p.syntax_builtin })
-  hl("@constant.macro", { fg = p.syntax_builtin })
+  hl("@constant.macro", { fg = "#f5e0dc" })
   hl("@module", { fg = p.syntax_namespace })
   hl("@module.builtin", { fg = p.syntax_builtin })
   hl("@label", { fg = p.syntax_namespace })
@@ -220,10 +220,10 @@ function M.setup()
   hl("@function", { fg = p.syntax_func })
   hl("@function.builtin", { fg = p.syntax_builtin })
   hl("@function.call", { fg = p.syntax_func })
-  hl("@function.macro", { fg = p.syntax_builtin })
+  hl("@function.macro", { fg = "#f5e0dc" })
   hl("@function.method", { fg = p.syntax_method })
   hl("@function.method.call", { fg = p.syntax_method })
-  hl("@constructor", { link = "@function" })
+  hl("@constructor", { fg = p.syntax_class })
   hl("@operator", { fg = p.syntax_operator })
   hl("@keyword", { fg = p.syntax_keyword })
   hl("@keyword.coroutine", { fg = p.syntax_keyword })
@@ -277,33 +277,33 @@ function M.setup()
   -- Diagnostics
   hl("DiagnosticError", { fg = p.red })
   hl("DiagnosticWarn", { fg = p.yellow })
-  hl("DiagnosticInfo", { fg = p.blue })
-  hl("DiagnosticHint", { fg = p.cyan })
+  hl("DiagnosticInfo", { fg = "#94e2d5" })
+  hl("DiagnosticHint", { fg = "#74c7ec" })
   hl("DiagnosticOk", { fg = p.green })
   hl("DiagnosticVirtualTextError", { fg = p.red, italic = true })
   hl("DiagnosticVirtualTextWarn", { fg = p.yellow, italic = true })
-  hl("DiagnosticVirtualTextInfo", { fg = p.blue, italic = true })
-  hl("DiagnosticVirtualTextHint", { fg = p.cyan, italic = true })
+  hl("DiagnosticVirtualTextInfo", { fg = "#94e2d5", italic = true })
+  hl("DiagnosticVirtualTextHint", { fg = "#74c7ec", italic = true })
   hl("DiagnosticVirtualTextOk", { fg = p.green, italic = true })
   hl("DiagnosticVirtualLinesError", { fg = p.red, italic = true })
   hl("DiagnosticVirtualLinesWarn", { fg = p.yellow, italic = true })
-  hl("DiagnosticVirtualLinesInfo", { fg = p.blue, italic = true })
-  hl("DiagnosticVirtualLinesHint", { fg = p.cyan, italic = true })
+  hl("DiagnosticVirtualLinesInfo", { fg = "#94e2d5", italic = true })
+  hl("DiagnosticVirtualLinesHint", { fg = "#74c7ec", italic = true })
   hl("DiagnosticVirtualLinesOk", { fg = p.green, italic = true })
   hl("DiagnosticUnderlineError", { undercurl = true, sp = p.red })
   hl("DiagnosticUnderlineWarn", { undercurl = true, sp = p.yellow })
-  hl("DiagnosticUnderlineInfo", { undercurl = true, sp = p.blue })
-  hl("DiagnosticUnderlineHint", { undercurl = true, sp = p.cyan })
+  hl("DiagnosticUnderlineInfo", { undercurl = true, sp = "#94e2d5" })
+  hl("DiagnosticUnderlineHint", { undercurl = true, sp = "#74c7ec" })
   hl("DiagnosticUnderlineOk", { undercurl = true, sp = p.green })
-  hl("DiagnosticFloatingError", { fg = "#f38ba8", bg = "#181825" })
-  hl("DiagnosticFloatingWarn", { fg = "#f9e2af", bg = "#181825" })
-  hl("DiagnosticFloatingInfo", { fg = "#89b4fa", bg = "#181825" })
-  hl("DiagnosticFloatingHint", { fg = "#94e2d5", bg = "#181825" })
+  hl("DiagnosticFloatingError", { fg = p.red })
+  hl("DiagnosticFloatingWarn", { fg = p.yellow })
+  hl("DiagnosticFloatingInfo", { fg = "#94e2d5" })
+  hl("DiagnosticFloatingHint", { fg = "#74c7ec" })
   hl("DiagnosticFloatingOk", { fg = p.green })
   hl("DiagnosticSignError", { fg = p.red })
   hl("DiagnosticSignWarn", { fg = p.yellow })
-  hl("DiagnosticSignInfo", { fg = p.blue })
-  hl("DiagnosticSignHint", { fg = p.cyan })
+  hl("DiagnosticSignInfo", { fg = "#94e2d5" })
+  hl("DiagnosticSignHint", { fg = "#74c7ec" })
   hl("DiagnosticSignOk", { fg = p.green })
   hl("DiagnosticDeprecated", { strikethrough = true })
   hl("DiagnosticUnnecessary", { link = "Comment" })
@@ -333,14 +333,6 @@ function M.setup()
   hl("@lsp.type.decorator", { fg = p.syntax_attribute })
   hl("@lsp.mod.deprecated", { strikethrough = true })
 
-  -- Override groups
-  hl("BlinkCmpMenu", { bg = "#181825" })
-  hl("BlinkCmpMenuBorder", { fg = "#45475a", bg = "#181825" })
-  hl("BlinkCmpMenuSelection", { fg = "#1e1e2e", bg = "#89b4fa" })
-  hl("BlinkCmpLabelMatch", { fg = "#b4befe", bold = true })
-  hl("BlinkCmpKind", { fg = "#cba6f7" })
-  hl("BlinkCmpGhostText", { fg = "#7f849c", italic = true })
-
   -- Plugin: GitSigns
   hl("GitSignsAdd", { fg = p.green })
   hl("GitSignsChange", { fg = p.yellow })
@@ -354,13 +346,13 @@ function M.setup()
   hl("WhichKeyFloat", { bg = p.bg_float })
 
   -- Plugin: blink.cmp
-  hl("BlinkCmpMenu", { fg = p.fg, bg = "#181825" })
-  hl("BlinkCmpMenuBorder", { fg = "#45475a", bg = "#181825" })
-  hl("BlinkCmpMenuSelection", { bg = "#89b4fa", fg = "#1e1e2e" })
+  hl("BlinkCmpMenu", { fg = p.fg, bg = p.bg_float })
+  hl("BlinkCmpMenuBorder", { fg = p.border, bg = p.bg_float })
+  hl("BlinkCmpMenuSelection", { bg = p.selection })
   hl("BlinkCmpLabel", { fg = p.fg })
-  hl("BlinkCmpLabelMatch", { fg = "#b4befe", bold = true })
-  hl("BlinkCmpKind", { fg = "#cba6f7" })
-  hl("BlinkCmpGhostText", { fg = "#7f849c", italic = true })
+  hl("BlinkCmpLabelMatch", { fg = p.blue, bold = true })
+  hl("BlinkCmpKind", { fg = p.orange })
+  hl("BlinkCmpGhostText", { fg = p.comment, italic = true })
 
   -- Plugin: snacks.nvim
   hl("SnacksPickerDir", { fg = p.comment })
