@@ -11,6 +11,7 @@ let
   lanProxyPort = 18790;
   lanInterface = "wlo1";
   openclawPackage = inputs.flake-stores.packages.${pkgs.system}.openclaw;
+  qmdPackage = pkgs.callPackage ../../packages/qmd/package.nix { };
   stateDir = "${homeDirectory}/.openclaw";
   gatewayTokenPath = "${stateDir}/gateway-auth-token";
   gatewayNginxAuthIncludePath = "/etc/openclaw/nginx-gateway-auth.conf";
@@ -125,6 +126,7 @@ lib.mkMerge [
       bun
       libcap
       nodejs
+      qmdPackage
     ];
   }
   (import ./state-sync.nix (args // { inherit common; }))
