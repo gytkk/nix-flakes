@@ -33,9 +33,12 @@ nix eval .#homeConfigurations.pylv-denim.config.home.packages --apply 'x: map (p
 
 **User-run commands** (ask the user to run these):
 
+Standalone Home Manager commands require `--impure` because several modules
+use out-of-store symlinks to the checkout path.
+
 ```bash
-home-manager switch --flake .#<environment>   # pylv-denim, pylv-sepia, devsisters-macbook, devsisters-macstudio
-nixos-rebuild switch --flake .#<host>         # pylv-sepia, pylv-onyx (NixOS only)
+home-manager switch --impure --flake .#<environment>
+nixos-rebuild switch --flake .#<host>
 ```
 
 ---

@@ -14,6 +14,9 @@ echo "experimental-features = nix-command flakes" | sudo tee -a /etc/nix/nix.con
 
 - This repo assumes the checkout lives at `~/development/nix-flakes`.
   Several modules create out-of-store symlinks from that path.
+- Standalone Home Manager commands must be run with `--impure` for those
+  out-of-store symlinks. Pure evaluation fails with `access to absolute path
+  ... is forbidden`.
 
 ## Codex Plugin for Claude Code
 
@@ -127,23 +130,25 @@ nix build .#darwinConfigurations.devsisters-macstudio.system
 ## Standalone Home Manager
 
 Standalone Home Manager outputs are still available for profile-only testing:
+run them with `--impure` because several modules symlink directly to the
+checkout path.
 
 ```bash
-home-manager switch --flake .#devsisters-macbook
+home-manager switch --impure --flake .#devsisters-macbook
 
-home-manager switch --flake .#devsisters-macstudio
+home-manager switch --impure --flake .#devsisters-macstudio
 
-home-manager switch --flake .#pylv-denim
+home-manager switch --impure --flake .#pylv-denim
 
-home-manager switch --flake .#pylv-onyx
+home-manager switch --impure --flake .#pylv-onyx
 
-home-manager switch --flake .#pylv-sepia
+home-manager switch --impure --flake .#pylv-sepia
 ```
 
 ### Build without switching
 
 ```bash
-home-manager build --flake .#devsisters-macbook
+home-manager build --impure --flake .#devsisters-macbook
 ```
 
 ## NixOS
