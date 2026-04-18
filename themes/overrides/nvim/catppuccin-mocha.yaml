@@ -1,0 +1,79 @@
+version: 1
+
+meta:
+  app: nvim
+  theme: catppuccin-mocha
+  variant: dark
+
+groups:
+  NormalFloat:
+    bg: "{roles.ui.bgElevated}"
+  FloatBorder:
+    fg: "{roles.ui.border}"
+    bg: "{roles.ui.bgElevated}"
+  FloatTitle:
+    fg: "{palette.blue}"
+    bg: "{roles.ui.bgElevated}"
+    bold: true
+  FloatFooter:
+    bg: "{roles.ui.bgElevated}"
+  Pmenu:
+    bg: "{roles.ui.bgElevated}"
+  PmenuSel:
+    fg: "{roles.ui.bg}"
+    bg: "{palette.blue}"
+    bold: true
+  PmenuSbar:
+    bg: "{roles.ui.border}"
+  PmenuThumb:
+    bg: "{roles.ui.fgMuted}"
+  Search:
+    fg: "{roles.ui.bg}"
+    bg: "{palette.yellow}"
+  CurSearch:
+    fg: "{roles.ui.bg}"
+    bg: "{palette.orange}"
+    bold: true
+  IncSearch:
+    fg: "{roles.ui.bg}"
+    bg: "{palette.orange}"
+  Visual:
+    bg: "{palette.base15}"
+  VisualNOS:
+    bg: "{palette.base15}"
+  MatchParen:
+    fg: "{palette.blue}"
+    bg: "{palette.base15}"
+    bold: true
+    underline: false
+  DiagnosticFloatingError:
+    fg: "{palette.red}"
+    bg: "{roles.ui.bgElevated}"
+  DiagnosticFloatingWarn:
+    fg: "{palette.yellow}"
+    bg: "{roles.ui.bgElevated}"
+  DiagnosticFloatingInfo:
+    fg: "{palette.blue}"
+    bg: "{roles.ui.bgElevated}"
+  DiagnosticFloatingHint:
+    fg: "{palette.cyan}"
+    bg: "{roles.ui.bgElevated}"
+  BlinkCmpMenu:
+    bg: "{roles.ui.bgElevated}"
+  BlinkCmpMenuBorder:
+    fg: "{roles.ui.border}"
+    bg: "{roles.ui.bgElevated}"
+  BlinkCmpMenuSelection:
+    fg: "{roles.ui.bg}"
+    bg: "{palette.blue}"
+  BlinkCmpLabelMatch:
+    fg: "{palette.blueBright}"
+    bold: true
+  BlinkCmpKind:
+    fg: "{palette.magenta}"
+  BlinkCmpGhostText:
+    fg: "{roles.syntax.comment}"
+    italic: true
+
+links:
+  @constructor: "@function"

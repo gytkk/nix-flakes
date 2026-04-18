@@ -1,0 +1,153 @@
+version: 1
+
+meta:
+  id: catppuccin-mocha
+  name: Catppuccin Mocha
+  variant: dark
+  family: catppuccin
+  author: catppuccin, pylv
+  description: >-
+    Canonical Catppuccin Mocha theme definition for nix-flakes, based on the
+    official Mocha palette and Catppuccin style semantics.
+
+palette:
+  # Base24-compatible base slots.
+  # Derived from the official Catppuccin Mocha palette.
+  base00: "#1e1e2e"
+  base01: "#181825"
+  base02: "#313244"
+  base03: "#45475a"
+  base04: "#6c7086"
+  base05: "#cdd6f4"
+  base06: "#bac2de"
+  base07: "#f5e0dc"
+
+  base08: "#f38ba8"
+  base09: "#fab387"
+  base0A: "#f9e2af"
+  base0B: "#a6e3a1"
+  base0C: "#94e2d5"
+  base0D: "#89b4fa"
+  base0E: "#cba6f7"
+  base0F: "#f5c2e7"
+
+  base10: "#f9e2af"
+  base11: "#a6e3a1"
+  base12: "#74c7ec"
+  base13: "#b4befe"
+  base14: "#cba6f7"
+  base15: "#585b70"
+  base16: "#7f849c"
+  base17: "#313244"
+
+  bg: "{palette.base00}"
+  bgElevated: "{palette.base01}"
+  bgAlt: "{palette.base02}"
+  border: "{palette.base03}"
+  muted: "{palette.base04}"
+  comment: "{palette.base16}"
+  fgMuted: "{palette.base16}"
+  fg: "{palette.base05}"
+  fgBright: "{palette.base06}"
+  fgMax: "{palette.base07}"
+
+  red: "{palette.base08}"
+  orange: "{palette.base09}"
+  yellow: "{palette.base0A}"
+  green: "{palette.base0B}"
+  cyan: "{palette.base0C}"
+  blue: "{palette.base0D}"
+  magenta: "{palette.base0E}"
+  pink: "{palette.base0F}"
+
+  yellowBright: "{palette.base10}"
+  greenBright: "{palette.base11}"
+  cyanBright: "{palette.base12}"
+  blueBright: "{palette.base13}"
+  magentaBright: "{palette.base14}"
+
+  selection: "{palette.base15}"
+  lineNumber: "{palette.base16}"
+  whitespace: "{palette.base17}"
+  blackBright: "{palette.base04}"
+  white: "{palette.base07}"
+
+roles:
+  ui:
+    bg: "{palette.bg}"
+    bgAlt: "{palette.bgAlt}"
+    bgElevated: "{palette.bgElevated}"
+    fg: "{palette.fg}"
+    fgMuted: "{palette.fgMuted}"
+    border: "{palette.border}"
+    borderActive: "{palette.blue}"
+    selection: "{palette.selection}"
+    selectionInactive: "{palette.base03}"
+    currentLine: "{palette.base17}"
+    currentLineNumber: "{palette.fgBright}"
+    cursor: "{palette.base07}"
+    caretText: "{palette.bg}"
+    search: "{palette.yellow}"
+    searchText: "{palette.bg}"
+    match: "{palette.base15}"
+    panelBg: "{palette.bgElevated}"
+    sidebarBg: "{palette.bgElevated}"
+    statuslineBg: "{palette.bgElevated}"
+    statuslineFg: "{palette.fg}"
+
+  syntax:
+    text: "{palette.fg}"
+    comment: "{palette.comment}"
+    string: "{palette.green}"
+    stringEscape: "{palette.cyanBright}"
+    number: "{palette.orange}"
+    constant: "{palette.orange}"
+    keyword: "{palette.magenta}"
+    operator: "{palette.blue}"
+    variable: "{palette.fg}"
+    parameter: "{palette.fg}"
+    property: "{palette.blueBright}"
+    field: "{palette.blueBright}"
+    function: "{palette.blue}"
+    method: "{palette.blue}"
+    type: "{palette.yellow}"
+    class: "{palette.yellow}"
+    interface: "{palette.yellow}"
+    namespace: "{palette.blueBright}"
+    builtin: "{palette.red}"
+    tag: "{palette.red}"
+    attribute: "{palette.green}"
+    punctuation: "{palette.fgMuted}"
+    link: "{palette.blue}"
+
+  diagnostics:
+    error: "{palette.red}"
+    warning: "{palette.yellow}"
+    info: "{palette.blue}"
+    hint: "{palette.cyan}"
+    ok: "{palette.green}"
+
+  vcs:
+    added: "{palette.green}"
+    modified: "{palette.yellow}"
+    removed: "{palette.red}"
+    renamed: "{palette.blue}"
+    conflict: "{palette.orange}"
+
+  ansi:
+    black: "{palette.bgElevated}"
+    red: "{palette.red}"
+    green: "{palette.green}"
+    yellow: "{palette.yellow}"
+    blue: "{palette.blue}"
+    magenta: "{palette.magenta}"
+    cyan: "{palette.cyan}"
+    white: "{palette.fg}"
+    brightBlack: "{palette.blackBright}"
+    brightRed: "{palette.pink}"
+    brightGreen: "{palette.greenBright}"
+    brightYellow: "{palette.yellowBright}"
+    brightBlue: "{palette.blueBright}"
+    brightMagenta: "{palette.magentaBright}"
+    brightCyan: "{palette.cyanBright}"
+    brightWhite: "{palette.white}"
