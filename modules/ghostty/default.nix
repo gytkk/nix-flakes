@@ -1,11 +1,9 @@
 {
   config,
-  flakeDirectory,
   ...
 }:
 
 let
-  generatedThemes = config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/themes/exports/ghostty";
   ghosttyConfig =
     builtins.replaceStrings
       [ ''theme = "one-half-light"'' ]
@@ -13,6 +11,6 @@ let
       (builtins.readFile ./files/config);
 in
 {
-  xdg.configFile."ghostty/themes".source = generatedThemes;
+  xdg.configFile."ghostty/themes".source = ../../themes/exports/ghostty;
   xdg.configFile."ghostty/config".text = ghosttyConfig;
 }

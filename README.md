@@ -14,9 +14,9 @@ echo "experimental-features = nix-command flakes" | sudo tee -a /etc/nix/nix.con
 
 - This repo assumes the checkout lives at `~/development/nix-flakes`.
   Several modules create out-of-store symlinks from that path.
-- Standalone Home Manager commands must be run with `--impure` for those
-  out-of-store symlinks. Pure evaluation fails with `access to absolute path
-  ... is forbidden`.
+- Standalone Home Manager commands evaluate without `--impure`.
+  The checkout path still matters for modules that intentionally install
+  out-of-store symlinks back to the repo.
 
 ## Codex Plugin for Claude Code
 
@@ -63,6 +63,19 @@ The official [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc)
 - On macOS, the repo-managed Darwin config includes `copy_command "pbcopy"` so explicit Zellij copy actions continue to target the system clipboard.
 - Local interactive shells started from Ghostty automatically `exec zellij`.
 - SSH sessions and shells already inside `zellij` or `tmux` are excluded from that auto-start.
+
+## Ghostty config
+
+- Ghostty is managed through `modules/ghostty/default.nix`.
+- `home-manager switch` renders `~/.config/ghostty/config` with the selected
+  `modules.commonTheme` and links `~/.config/ghostty/themes` to the generated
+  `themes/exports/ghostty` flake source directory.
+- Because Ghostty now reads the flake-managed copy rather than an out-of-store
+  repo symlink, repo edits take effect on the next switch instead of
+  immediately.
+- The checked-in defaults keep `xterm-256color`, the generated shared theme,
+  JetBrains Mono with Sarasa Mono CL fallback, a beam cursor, 95% background
+  opacity, shell integration, and the IME-safe `Ctrl+key_*` bindings.
 
 ## Kitty config
 
@@ -129,26 +142,24 @@ nix build .#darwinConfigurations.devsisters-macstudio.system
 
 ## Standalone Home Manager
 
-Standalone Home Manager outputs are still available for profile-only testing:
-run them with `--impure` because several modules symlink directly to the
-checkout path.
+Standalone Home Manager outputs are still available for profile-only testing.
 
 ```bash
-home-manager switch --impure --flake .#devsisters-macbook
+home-manager switch --flake .#devsisters-macbook
 
-home-manager switch --impure --flake .#devsisters-macstudio
+home-manager switch --flake .#devsisters-macstudio
 
-home-manager switch --impure --flake .#pylv-denim
+home-manager switch --flake .#pylv-denim
 
-home-manager switch --impure --flake .#pylv-onyx
+home-manager switch --flake .#pylv-onyx
 
-home-manager switch --impure --flake .#pylv-sepia
+home-manager switch --flake .#pylv-sepia
 ```
 
 ### Build without switching
 
 ```bash
-home-manager build --impure --flake .#devsisters-macbook
+home-manager build --flake .#devsisters-macbook
 ```
 
 ## NixOS

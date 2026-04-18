@@ -34,11 +34,11 @@ nix eval .#homeConfigurations.pylv-denim.config.home.packages --apply 'x: map (p
 
 **User-run commands** (ask the user to run these):
 
-Standalone Home Manager commands require `--impure` because several modules
-use out-of-store symlinks to the checkout path.
+Standalone Home Manager commands do not require `--impure`, but several
+modules still install out-of-store symlinks to the checkout path.
 
 ```bash
-home-manager switch --impure --flake .#<environment>
+home-manager switch --flake .#<environment>
 nixos-rebuild switch --flake .#<host>
 ```
 
@@ -115,7 +115,7 @@ modules/<name>/
 | `nixos/`     | NixOS common config | `baseline.nix`, `remote-access.nix`, `user.nix`     | NO      |
 | `claude/`    | Claude Code         | `files/settings.json`, `files/CLAUDE.md`            | 부분적  |
 | `codex/`     | OpenAI Codex CLI    | `files/config.toml`, `files/AGENTS.md`              | YES     |
-| `ghostty/`   | Ghostty terminal    | `files/config`                                      | YES     |
+| `ghostty/`   | Ghostty terminal    | `files/config`, `themes/exports/ghostty`            | NO      |
 | `git/`       | Git configuration   | `default.nix`                                       | NO      |
 | `k9s/`       | Kubernetes manager  | `default.nix`                                       | NO      |
 | `kitty/`     | Kitty terminal      | `files/kitty.conf`                                  | YES     |
