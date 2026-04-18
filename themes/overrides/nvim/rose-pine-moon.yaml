@@ -7,39 +7,39 @@ meta:
 
 groups:
   Search:
-    bg: "#403d52"
+    fg: "{palette.fg}"
+    bg: "{palette.orange}"
   CurSearch:
     fg: "{roles.ui.bg}"
-    bg: "{palette.magenta}"
+    bg: "{palette.orange}"
   IncSearch:
-    fg: "{roles.ui.bg}"
-    bg: "{palette.magenta}"
+    link: "CurSearch"
   Visual:
-    bg: "#403d52"
+    bg: "{palette.blue}"
   MatchParen:
-    fg: "{roles.syntax.text}"
-    bg: "#403d52"
+    fg: "{palette.green}"
+    bg: "{palette.green}"
     underline: false
   PmenuSel:
-    fg: "{roles.syntax.text}"
+    fg: "{palette.fg}"
     bg: "{roles.ui.bgAlt}"
   FloatTitle:
-    fg: "{roles.syntax.comment}"
-    bold: false
+    fg: "{palette.cyan}"
+    bold: true
   MoreMsg:
     fg: "{palette.blue}"
   Boolean:
-    fg: "{palette.magenta}"
+    fg: "{palette.yellow}"
   Constant:
-    fg: "{palette.yellow}"
+    fg: "{palette.orange}"
   Number:
-    fg: "{palette.yellow}"
+    fg: "{palette.orange}"
   Float:
-    fg: "{palette.yellow}"
+    fg: "{palette.orange}"
   Function:
-    fg: "{palette.magenta}"
+    fg: "{palette.yellow}"
   Identifier:
-    fg: "{palette.magenta}"
+    fg: "{palette.fg}"
   Keyword:
     fg: "{palette.green}"
   Conditional:
@@ -61,43 +61,45 @@ groups:
   Label:
     fg: "{palette.cyan}"
   Special:
-    fg: "{palette.magenta}"
+    fg: "{palette.cyan}"
   SpecialChar:
-    fg: "{palette.magenta}"
+    link: "Special"
   SpecialComment:
     fg: "{palette.blue}"
   Statement:
     fg: "{palette.green}"
+    bold: true
   StorageClass:
     fg: "{palette.cyan}"
   Structure:
     fg: "{palette.cyan}"
   Tag:
-    fg: "{palette.magenta}"
+    fg: "{palette.cyan}"
   Todo:
-    fg: "{palette.blue}"
+    fg: "{palette.yellow}"
+    bg: "{palette.yellow}"
   Type:
     fg: "{palette.cyan}"
   Typedef:
-    fg: "{palette.cyan}"
+    link: "Type"
   @string.escape:
-    fg: "{palette.magenta}"
+    fg: "{palette.yellow}"
   @boolean:
-    fg: "{palette.magenta}"
+    fg: "{palette.yellow}"
   @number:
-    fg: "{palette.yellow}"
+    fg: "{palette.orange}"
   @number.float:
-    fg: "{palette.yellow}"
+    fg: "{palette.orange}"
   @constant:
-    fg: "{palette.yellow}"
+    fg: "{palette.orange}"
   @function:
-    fg: "{palette.magenta}"
+    fg: "{palette.yellow}"
   @function.call:
-    fg: "{palette.magenta}"
+    fg: "{palette.yellow}"
   @function.method:
-    fg: "{palette.magenta}"
+    fg: "{palette.yellow}"
   @function.method.call:
-    fg: "{palette.magenta}"
+    fg: "{palette.yellow}"
   @keyword:
     fg: "{palette.green}"
   @keyword.coroutine:
@@ -151,7 +153,7 @@ groups:
   @constant.macro:
     fg: "{palette.blue}"
   @tag:
-    fg: "{palette.magenta}"
+    fg: "{palette.cyan}"
   @lsp.type.class:
     fg: "{palette.cyan}"
   @lsp.type.struct:
@@ -159,15 +161,15 @@ groups:
   @lsp.type.enum:
     fg: "{palette.cyan}"
   @lsp.type.enumMember:
-    fg: "{palette.yellow}"
+    fg: "{palette.orange}"
   @lsp.type.interface:
     fg: "{palette.cyan}"
   @lsp.type.keyword:
     fg: "{palette.green}"
   @lsp.type.function:
-    fg: "{palette.magenta}"
+    fg: "{palette.yellow}"
   @lsp.type.method:
-    fg: "{palette.magenta}"
+    fg: "{palette.yellow}"
   @lsp.type.macro:
     fg: "{palette.blue}"
   @lsp.type.decorator:
