@@ -525,6 +525,7 @@ Adapter templates and schema helpers:
 - `themes/templates/nvim/plugins.json` -> Neovim plugin-specific highlight template
 - `themes/templates/starship/official-template.json` -> Starship prompt template derived from the Starship config contract plus the existing local prompt layout
 - `themes/templates/zellij/official-template.json` -> Zellij theme template derived from the official Zellij theme definition specification
+- `themes/overrides/ghostty/*.yaml` -> optional Ghostty slot overrides applied after generator defaults
 - `themes/overrides/zellij/*.yaml` -> optional Zellij-specific component/player overrides applied after generator defaults
 - `themes/check_templates.py` -> consistency check for app template metadata, contract fields, section layout, duplicate entries, and declared key coverage
 
@@ -635,7 +636,7 @@ Current override support:
 - `themes/overrides/SCHEMA.md` -> override-layer format notes
 - `themes/overrides/TEMPLATE.yaml` -> minimal authoring template
 - `themes/overrides/nvim/<theme-id>.yaml` -> Neovim per-theme override patches
-- `themes/validate_overrides.py` -> override validator for current Neovim override files
+- `themes/validate_overrides.py` -> override validator for current Ghostty, Neovim, and Zellij override files
 
 Current Neovim override precedence:
 

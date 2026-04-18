@@ -1,0 +1,16 @@
+version: 1
+
+meta:
+  app: ghostty
+  theme: catppuccin-mocha
+  variant: dark
+
+slots:
+  selection_background: "#353749"
+  selection_foreground: "#cdd6f4"
+  palette_9_entry: "9=#f38ba8"
+  palette_10_entry: "10=#a6e3a1"
+  palette_11_entry: "11=#f9e2af"
+  palette_12_entry: "12=#89b4fa"
+  palette_13_entry: "13=#f5c2e7"
+  palette_14_entry: "14=#94e2d5"

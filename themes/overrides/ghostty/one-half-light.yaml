@@ -1,0 +1,14 @@
+version: 1
+
+meta:
+  app: ghostty
+  theme: one-half-light
+  variant: light
+
+slots:
+  background: "#fafafa"
+  cursor_color: "#a5b4e5"
+  cursor_text: "#383a42"
+  palette_6_entry: "6=#0997b3"
+  palette_7_entry: "7=#bababa"
+  palette_11_entry: "11=#d8b36e"

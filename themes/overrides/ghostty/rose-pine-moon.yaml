@@ -1,0 +1,17 @@
+version: 1
+
+meta:
+  app: ghostty
+  theme: rose-pine-moon
+  variant: dark
+
+slots:
+  cursor_color: "#e0def4"
+  palette_0_entry: "0=#393552"
+  palette_3_entry: "3=#f6c177"
+  palette_4_entry: "4=#9ccfd8"
+  palette_5_entry: "5=#c4a7e7"
+  palette_6_entry: "6=#ea9a97"
+  palette_10_entry: "10=#3e8fb0"
+  palette_12_entry: "12=#9ccfd8"
+  palette_14_entry: "14=#ea9a97"

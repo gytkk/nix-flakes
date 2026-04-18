@@ -558,6 +558,13 @@ def load_nvim_override(root: Path, theme_id: str) -> dict[str, Any] | None:
     return load_yaml(path)
 
 
+def load_ghostty_override(root: Path, theme_id: str) -> dict[str, Any] | None:
+    path = root / "overrides" / "ghostty" / f"{theme_id}.yaml"
+    if not path.exists():
+        return None
+    return load_yaml(path)
+
+
 def apply_nvim_override_sections(
     sections: list[dict[str, Any]],
     override: dict[str, Any] | None,
@@ -781,9 +788,29 @@ def build_ghostty_slots(ctx: dict[str, Any]) -> dict[str, str]:
     return slots
 
 
+def apply_ghostty_override_slots(
+    slots: dict[str, str], override: dict[str, Any] | None, ctx: dict[str, Any]
+) -> dict[str, str]:
+    if not override:
+        return slots
+
+    slot_overrides = override.get("slots", {})
+    if not isinstance(slot_overrides, dict):
+        raise RuntimeError("ghostty override slots must be a mapping")
+
+    out = dict(slots)
+    for key, value in slot_overrides.items():
+        rendered = resolve_context_value(value, ctx)
+        if not isinstance(rendered, str):
+            raise RuntimeError(f"ghostty override slot {key!r} must resolve to a string")
+        out[key] = rendered
+    return out
+
+
 def ghostty_theme_conf(ctx: dict[str, Any], root: Path) -> str:
     template = load_ghostty_template(root)
-    slots = build_ghostty_slots(ctx)
+    override = load_ghostty_override(root, ctx["meta"]["id"])
+    slots = apply_ghostty_override_slots(build_ghostty_slots(ctx), override, ctx)
     lines = [
         f"# Auto-generated from themes/core/{ctx['meta']['id']}.yaml",
         f"# Template: {template['name']} v{template['version']}",

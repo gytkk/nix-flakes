@@ -1,0 +1,30 @@
+version: 1
+
+meta:
+  app: ghostty
+  theme: ayu-mirage
+  variant: dark
+
+slots:
+  background: "#1f2430"
+  foreground: "#cccac2"
+  selection_background: "#409fff"
+  selection_foreground: "#1f2430"
+  cursor_color: "#ffcc66"
+  cursor_text: "#1f2430"
+  palette_0_entry: "0=#171b24"
+  palette_1_entry: "1=#ed8274"
+  palette_2_entry: "2=#87d96c"
+  palette_3_entry: "3=#facc6e"
+  palette_4_entry: "4=#6dcbfa"
+  palette_5_entry: "5=#dabafa"
+  palette_6_entry: "6=#90e1c6"
+  palette_7_entry: "7=#c7c7c7"
+  palette_8_entry: "8=#686868"
+  palette_9_entry: "9=#f28779"
+  palette_10_entry: "10=#d5ff80"
+  palette_11_entry: "11=#ffd173"
+  palette_12_entry: "12=#73d0ff"
+  palette_13_entry: "13=#dfbfff"
+  palette_14_entry: "14=#95e6cb"
+  palette_15_entry: "15=#ffffff"

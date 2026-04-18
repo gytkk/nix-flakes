@@ -16,6 +16,18 @@ PALETTE_REF_RE = re.compile(r"^\{palette\.[A-Za-z][A-Za-z0-9]*\}$")
 ROLE_REF_RE = re.compile(r"^\{roles\.[A-Za-z][A-Za-z0-9]*\.[A-Za-z][A-Za-z0-9]*\}$")
 ID_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 PLAYER_RE = re.compile(r"^player_(10|[1-9])$")
+GHOSTTY_PALETTE_ENTRY_RE = re.compile(
+    r"^(?:0|[1-9]|1[0-5])=(?:#[0-9a-fA-F]{6}|\{palette\.[A-Za-z][A-Za-z0-9]*\}|\{roles\.[A-Za-z][A-Za-z0-9]*\.[A-Za-z][A-Za-z0-9]*\})$"
+)
+GHOSTTY_SLOT_KEYS = {
+    "background",
+    "foreground",
+    "selection_background",
+    "selection_foreground",
+    "cursor_color",
+    "cursor_text",
+    *{f"palette_{idx}_entry" for idx in range(16)},
+}
 
 
 ROOT = Path(__file__).resolve().parent
@@ -165,6 +177,51 @@ def validate_nvim_override(v: Validator, path: Path, allowed_attrs: set[str]) ->
         validate_links(v, path, links)
 
 
+def valid_ghostty_slot_value(key: str, value: Any) -> bool:
+    if not isinstance(value, str) or not value:
+        return False
+    if key.startswith("palette_"):
+        return bool(GHOSTTY_PALETTE_ENTRY_RE.match(value))
+    return valid_color_value(value)
+
+
+def validate_ghostty_override(v: Validator, path: Path) -> None:
+    try:
+        data = load_yaml(path)
+    except ParseError as e:
+        v.error(path, str(e))
+        return
+
+    expected_top = ["version", "meta", "slots"]
+    if key_order(data) != expected_top:
+        v.error(path, "top-level key order does not match template")
+
+    for key in expected_top:
+        if key not in data:
+            v.error(path, f"missing top-level key: {key}")
+    for key in key_order(data):
+        if key not in expected_top:
+            v.error(path, f"unexpected top-level key: {key}")
+
+    if data.get("version") != 1:
+        v.error(path, "version must be 1")
+
+    meta = ensure_mapping(v, path, data.get("meta"), "meta")
+    slots = ensure_mapping(v, path, data.get("slots"), "slots")
+
+    if meta is not None:
+        validate_meta(v, path, meta, app="ghostty")
+    if slots is not None:
+        if not slots:
+            v.error(path, "slots must not be empty")
+        for key, value in slots.items():
+            if key not in GHOSTTY_SLOT_KEYS:
+                v.error(path, f"slots.{key} is not a supported ghostty slot")
+                continue
+            if not valid_ghostty_slot_value(key, value):
+                v.error(path, f"slots.{key} must be a ghostty color or indexed palette entry")
+
+
 def validate_zellij_override(v: Validator, path: Path, allowed_components: set[str], allowed_attrs: set[str]) -> None:
     try:
         data = load_yaml(path)
@@ -210,7 +267,7 @@ def main() -> int:
     parser.add_argument(
         "paths",
         nargs="*",
-        help="Override YAML files to validate. Defaults to themes/overrides/nvim/*.yaml and themes/overrides/zellij/*.yaml",
+        help="Override YAML files to validate. Defaults to themes/overrides/{ghostty,nvim,zellij}/*.yaml",
     )
     args = parser.parse_args()
 
@@ -225,6 +282,7 @@ def main() -> int:
         targets = [Path(p).resolve() for p in args.paths]
     else:
         targets = [
+            *[p.resolve() for p in sorted((ROOT / "overrides" / "ghostty").glob("*.yaml")) if p.name != "TEMPLATE.yaml"],
             *[p.resolve() for p in sorted((ROOT / "overrides" / "nvim").glob("*.yaml"))],
             *[p.resolve() for p in sorted((ROOT / "overrides" / "zellij").glob("*.yaml")) if p.name != "TEMPLATE.yaml"],
         ]
@@ -234,7 +292,9 @@ def main() -> int:
 
     v = Validator()
     for target in targets:
-        if target.parent.name == "nvim":
+        if target.parent.name == "ghostty":
+            validate_ghostty_override(v, target)
+        elif target.parent.name == "nvim":
             validate_nvim_override(v, target, nvim_allowed_attrs)
         elif target.parent.name == "zellij":
             validate_zellij_override(v, target, zellij_allowed_components, zellij_allowed_attrs)
