@@ -44,6 +44,10 @@ persistent-workspaces = [
 if.app-id = 'com.kakao.KakaoTalkMac'
 run = 'layout floating'
 
+[[on-window-detected]]
+if.app-id = 'com.mitchellh.ghostty'
+run = 'layout floating'
+
 [workspace-to-monitor-force-assignment]
 1 = 2
 2 = 2
