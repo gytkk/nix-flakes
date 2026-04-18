@@ -512,6 +512,7 @@ Current generators:
 - `zed` -> `themes/exports/zed/*.json`
 - `nvim` -> `themes/exports/nvim/*.lua`
 - `rio` -> `themes/exports/rio/*.toml`
+- `starship` -> `themes/exports/starship/*.toml`
 - `zellij` -> `themes/exports/zellij/*.kdl`
 
 Adapter templates and schema helpers:
@@ -522,6 +523,7 @@ Adapter templates and schema helpers:
 - `themes/templates/nvim/official-template.json` -> Neovim builtin highlight template derived from official help
 - `themes/templates/nvim/plugins.json` -> Neovim plugin-specific highlight template
 - `themes/templates/rio/official-template.json` -> Rio Terminal color template derived from the official Rio config color contract
+- `themes/templates/starship/official-template.json` -> Starship prompt template derived from the Starship config contract plus the existing local prompt layout
 - `themes/templates/zellij/official-template.json` -> Zellij theme template derived from the official Zellij theme definition specification
 - `themes/overrides/zellij/*.yaml` -> optional Zellij-specific component/player overrides applied after generator defaults
 - `themes/check_templates.py` -> consistency check for app template metadata, contract fields, section layout, duplicate entries, and declared key coverage

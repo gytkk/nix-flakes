@@ -13,6 +13,9 @@ let
     osConfig != null
     && (osConfig.networking.hostName or null) == "pylv-onyx";
 in
+let
+  starshipThemeConfig = config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/themes/exports/starship/${config.modules.commonTheme}.toml";
+in
 {
   home.packages = with pkgs; [
     zsh
@@ -199,10 +202,8 @@ in
     enableZshIntegration = true;
   };
 
-  # Starship configuration from TOML file
-  # Style: Jetpack (minimalist) + Catppuccin Latte colors
-  xdg.configFile."starship.toml".source =
-    config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/zsh/starship.toml";
+  # Starship configuration from generated canonical theme export
+  xdg.configFile."starship.toml".source = starshipThemeConfig;
 
   # dircolors for LS_COLORS
   programs.dircolors = {

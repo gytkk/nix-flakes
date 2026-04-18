@@ -534,6 +534,11 @@ def load_rio_template(root: Path) -> dict[str, Any]:
     return load_json(template_path)
 
 
+def load_starship_template(root: Path) -> dict[str, Any]:
+    template_path = root / "templates" / "starship" / "official-template.json"
+    return load_json(template_path)
+
+
 def load_zellij_template(root: Path) -> dict[str, Any]:
     template_path = root / "templates" / "zellij" / "official-template.json"
     return load_json(template_path)
@@ -811,6 +816,105 @@ def rio_theme_toml(ctx: dict[str, Any], root: Path) -> str:
     return "\n".join(lines) + "\n"
 
 
+def build_starship_slots(ctx: dict[str, Any]) -> dict[str, Any]:
+    p = ctx["palette"]
+    r = ctx["roles"]
+    light = ctx["meta"]["variant"] == "light"
+    layer1 = r["ui"]["bgElevated"]
+    layer2 = mix(r["ui"]["bgAlt"], r["ui"]["border"], 0.5 if light else 0.35)
+    layer3 = p["whitespace"]
+    return {
+        "format": """[](iris)\\
+[ 󰉋 ](bg:iris fg:base)\\
+[](bg:foam fg:iris)\\
+$directory\\
+[](fg:foam bg:layer3)\\
+$git_branch\\
+$git_status\\
+[](fg:layer3 bg:layer2)\\
+$c\\
+$cpp\\
+$rust\\
+$golang\\
+$nodejs\\
+$php\\
+$java\\
+$kotlin\\
+$haskell\\
+$python\\
+[](fg:layer2 bg:layer1)\\
+$docker_context\\
+$conda\\
+$pixi\\
+[](fg:layer1)\\
+$fill\\
+[](fg:layer1)\\
+$kubernetes\\
+[](fg:layer2 bg:layer1)\\
+$hostname\\
+[](fg:layer3 bg:layer2)\\
+$time\\
+[](fg:layer3)
+$character""",
+        "palette_name": ctx["meta"]["id"].replace("-", "_"),
+        "base": r["ui"]["bg"],
+        "surface": r["ui"]["bgAlt"],
+        "overlay": layer3,
+        "muted": r["ui"]["fgMuted"],
+        "subtle": r["ui"]["fg"],
+        "text": r["ui"]["fg"],
+        "love": r["diagnostics"]["error"],
+        "gold": r["diagnostics"]["warning"],
+        "rose": p["pink"],
+        "pine": r["syntax"]["string"],
+        "foam": r["syntax"]["stringEscape"],
+        "iris": r["syntax"]["keyword"],
+        "highlight_low": layer1,
+        "highlight_med": layer2,
+        "highlight_high": layer3,
+        "green": p["green"],
+        "layer1": layer1,
+        "layer2": layer2,
+        "layer3": layer3,
+    }
+
+
+def toml_literal(value: Any) -> str:
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, int) or isinstance(value, float):
+        return str(value)
+    if isinstance(value, str) and "\n" in value:
+        return '"""\n' + value + '"""'
+    return json.dumps(str(value), ensure_ascii=False)
+
+
+def starship_theme_toml(ctx: dict[str, Any], root: Path) -> str:
+    template = load_starship_template(root)
+    slots = build_starship_slots(ctx)
+    palette = template["palette"]
+    palette_name = render_template_value(palette["name"], slots)
+
+    lines = [
+        f"# Auto-generated from themes/core/{ctx['meta']['id']}.yaml",
+        f"# Template: {template['name']} v{template['version']}",
+        '"$schema" = "https://starship.rs/config-schema.json"',
+        "",
+        f"palette = {json.dumps(palette_name, ensure_ascii=False)}",
+        f"format = {toml_literal(render_template_value(template['format'], slots))}",
+    ]
+    for section in template["sections"]:
+        lines.extend(["", f"[{section['table']}]"])
+        for entry in section["entries"]:
+            value = render_template_value(entry["value"], slots)
+            lines.append(f"{json.dumps(entry['key'], ensure_ascii=False)} = {toml_literal(value)}")
+    lines.extend(["", f"[palettes.{palette_name}]"])
+    for entry in palette["entries"]:
+        value = render_template_value(entry["value"], slots)
+        lines.append(f"{entry['key']} = {json.dumps(value, ensure_ascii=False)}")
+    return "\n".join(lines) + "\n"
+
+
 def zellij_rgb(hex_color: str) -> str:
     r, g, b = hex_to_rgb(hex_color)
     return f"{r} {g} {b}"
@@ -1080,13 +1184,15 @@ def generate_theme(theme_path: Path, template: dict[str, Any], root: Path) -> li
     zed_path = root / "exports" / "zed" / f"{theme_id}.json"
     nvim_path = root / "exports" / "nvim" / f"{theme_id}.lua"
     rio_path = root / "exports" / "rio" / f"{theme_id}.toml"
+    starship_path = root / "exports" / "starship" / f"{theme_id}.toml"
     zellij_path = root / "exports" / "zellij" / f"{theme_id}.kdl"
 
     write_json(zed_path, zed_theme_doc(ctx, root))
     write_text(nvim_path, nvim_lua(ctx, root))
     write_text(rio_path, rio_theme_toml(ctx, root))
+    write_text(starship_path, starship_theme_toml(ctx, root))
     write_text(zellij_path, zellij_theme_kdl(ctx, root))
-    return [zed_path, nvim_path, rio_path, zellij_path]
+    return [zed_path, nvim_path, rio_path, starship_path, zellij_path]
 
 
 def discover_default_targets(root: Path) -> list[Path]:

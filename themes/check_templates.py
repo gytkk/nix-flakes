@@ -244,6 +244,54 @@ def check_rio(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
     check_rio_sections(f"{path_str}.sections", doc.get("sections"), errors)
 
 
+def check_starship_sections(path: str, sections: Any, errors: list[str]) -> None:
+    expect(isinstance(sections, list) and len(sections) > 0, f"{path}: sections must be a non-empty list", errors)
+    if not isinstance(sections, list):
+        return
+    check_section_names(path, sections, errors)
+    seen_tables: set[str] = set()
+    for idx, section in enumerate(sections):
+        item_path = f"{path}[{idx}]"
+        expect(isinstance(section, dict), f"{item_path}: section must be an object", errors)
+        if not isinstance(section, dict):
+            continue
+        require_keys(section, ["name", "table", "entries"], item_path, errors)
+        table = section.get("table")
+        expect(isinstance(table, str) and table, f"{item_path}.table must be a non-empty string", errors)
+        if isinstance(table, str):
+            expect(table not in seen_tables, f"{path}: duplicate table {table!r}", errors)
+            seen_tables.add(table)
+        entries = section.get("entries")
+        expect(isinstance(entries, list) and len(entries) > 0, f"{item_path}.entries must be a non-empty list", errors)
+        if not isinstance(entries, list):
+            continue
+        seen_keys: set[str] = set()
+        for eidx, entry in enumerate(entries):
+            entry_path = f"{item_path}.entries[{eidx}]"
+            expect(isinstance(entry, dict), f"{entry_path}: entry must be an object", errors)
+            if not isinstance(entry, dict):
+                continue
+            require_keys(entry, ["key", "value"], entry_path, errors)
+            key = entry.get("key")
+            expect(isinstance(key, str) and key, f"{entry_path}.key must be a non-empty string", errors)
+            if isinstance(key, str):
+                expect(key not in seen_keys, f"{item_path}: duplicate key {key!r}", errors)
+                seen_keys.add(key)
+
+
+def check_starship(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
+    check_common(path, doc, errors)
+    path_str = str(path)
+    contract = doc.get("toml_schema")
+    expect(isinstance(contract, dict), f"{path_str}.toml_schema must be an object", errors)
+    if isinstance(contract, dict):
+        require_keys(contract, ["format_key", "palette_table_prefix", "value_types"], f"{path_str}.toml_schema", errors)
+        expect(contract.get("format_key") == "format", f"{path_str}.toml_schema.format_key must be 'format'", errors)
+        expect(contract.get("palette_table_prefix") == "palettes", f"{path_str}.toml_schema.palette_table_prefix must be 'palettes'", errors)
+        expect(isinstance(contract.get("value_types"), list) and len(contract["value_types"]) > 0, f"{path_str}.toml_schema.value_types must be a non-empty list", errors)
+    check_starship_sections(f"{path_str}.sections", doc.get("sections"), errors)
+
+
 def check_zellij_sections(path: str, sections: Any, errors: list[str]) -> None:
     expect(isinstance(sections, list) and len(sections) > 0, f"{path}: sections must be a non-empty list", errors)
     if not isinstance(sections, list):
@@ -384,6 +432,7 @@ JSON_CHECKS = {
     ROOT / "templates" / "zed" / "official-template.json": check_zed,
     ROOT / "templates" / "nvim" / "plugins.json": check_nvim_plugin_template,
     ROOT / "templates" / "rio" / "official-template.json": check_rio,
+    ROOT / "templates" / "starship" / "official-template.json": check_starship,
     ROOT / "templates" / "zellij" / "official-template.json": check_zellij,
 }
 
