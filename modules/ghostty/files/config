@@ -6,7 +6,7 @@ auto-update = check
 term = xterm-256color
 
 # Theme comes from themes/exports/ghostty/<commonTheme>.conf
-theme = "one-half-light"
+theme = "one-half-light.conf"
 adjust-cursor-thickness = 250%
 cursor-style = bar
 cursor-click-to-move = true

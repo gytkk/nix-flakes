@@ -68,8 +68,9 @@ The official [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc)
 
 - Ghostty is managed through `modules/ghostty/default.nix`.
 - `home-manager switch` renders `~/.config/ghostty/config` with the selected
-  `modules.commonTheme` and links `~/.config/ghostty/themes` to the generated
-  `themes/exports/ghostty` flake source directory.
+  `modules.commonTheme` as `theme = "<commonTheme>.conf"` and links
+  `~/.config/ghostty/themes` to the generated `themes/exports/ghostty` flake
+  source directory.
 - Because Ghostty now reads the flake-managed copy rather than an out-of-store
   repo symlink, repo edits take effect on the next switch instead of
   immediately.

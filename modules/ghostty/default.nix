@@ -6,8 +6,8 @@
 let
   ghosttyConfig =
     builtins.replaceStrings
-      [ ''theme = "one-half-light"'' ]
-      [ ''theme = "${config.modules.commonTheme}"'' ]
+      [ ''theme = "one-half-light.conf"'' ]
+      [ ''theme = "${config.modules.commonTheme}.conf"'' ]
       (builtins.readFile ./files/config);
 in
 {
