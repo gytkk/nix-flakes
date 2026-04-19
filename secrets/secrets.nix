@@ -30,6 +30,10 @@ let
     devsisters-macbook
     devsisters-macstudio
   ];
+  openWebUiUsers = [
+    gytkk
+    gytkkCurrent
+  ];
 in
 {
   # Cloudflare Tunnel token for pylv-sepia
@@ -41,12 +45,8 @@ in
   # Discord bot token for openclaw
   "discord-bot-token.age".publicKeys = allUsers ++ allHosts;
 
-  # Open WebUI initial admin environment file
-  "open-webui-env.age".publicKeys = [
-    gytkk
-    gytkkCurrent
-  ]
-  ++ allHosts;
+  # Open WebUI keeps an explicit recipient exception and still includes both user keys.
+  "open-webui-env.age".publicKeys = openWebUiUsers ++ allHosts;
 
   # Google Workspace CLI credentials for obsidian-maintenance calendar sync
   "gws-credentials.age".publicKeys = allUsers ++ allHosts;
