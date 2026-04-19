@@ -33,8 +33,6 @@ status_line = [
   "project-root",
   "git-branch",
   "context-used",
-  "total-input-tokens",
-  "total-output-tokens",
   "fast-mode",
 ]
 
