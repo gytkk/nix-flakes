@@ -29,7 +29,7 @@
 
   options.modules.commonTheme = lib.mkOption {
     type = lib.types.str;
-    default = "catppuccin-mocha";
+    default = "ayu-mirage";
     description = "Canonical theme id shared across theme-aware app modules.";
     example = "catppuccin-mocha";
   };
