@@ -23,10 +23,10 @@ Updated: 2026-04-19 UTC+09:00
 
 ## Current Key Layout
 
-- `gytkk` is still the default user recipient through `allUsers`.
-- `gytkkCurrent` is still defined, but it is only used for `open-webui-env.age`.
-- The current repo state does not look like a broad key migration in progress.
-- Instead, it has one explicit exception recipient set for Open WebUI.
+- `gytkk` is the default user recipient through `allUsers`.
+- `gytkkCurrent` has been removed from `secrets/secrets.nix`.
+- `open-webui-env.age` no longer carries a recipient exception.
+- All live secrets now use the normal key groups defined in `secrets/secrets.nix`.
 
 ## Local Verification
 
@@ -46,15 +46,12 @@ Updated: 2026-04-19 UTC+09:00
 
 - Keep `secrets/` file inventory as-is for now.
 - There are no obviously unused `.age` files left in the directory.
-- Make the `open-webui-env.age` exception explicit in `secrets/secrets.nix`.
-- Decide whether `gytkkCurrent` is still needed:
-  - If it is still needed, keep it scoped to the explicit Open WebUI exception and
-    document why.
-  - If it is no longer needed, rekey `open-webui-env.age` without it and remove the
-    key definition.
+- There is no remaining recipient-level cleanup tied to `gytkkCurrent`.
+- Future cleanup, if needed, should focus on whether user keys should stay per-user
+  or move to a clearer per-device naming scheme.
 
 ## Conclusion
 
-- The main cleanup need is documentation and recipient intent clarity.
-- The immediate target is not deleting secret files.
-- `gytkkCurrent` is currently a narrow exception, not the active default user key.
+- The user-key cleanup is complete for the current repository state.
+- `gytkk` is the active default user key.
+- `gytkkCurrent` is no longer part of the live secret recipient set.

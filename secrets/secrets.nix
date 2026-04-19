@@ -10,7 +10,6 @@
 let
   # User SSH public keys (for encrypting secrets)
   gytkk = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJhE4Uakcz7usa0aetMqb99LYybOQ0I+sWKOiAidmBio";
-  gytkkCurrent = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH4fQ+YuQEWjtoSxCYydHbmerei0EQ2QC/z7GQZWjZmU";
 
   # Host SSH public keys (for host-specific secrets)
   pylv-sepia = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIC6EAZczgXONlXiwh946SidpRKSMw7fehg0u2L5SkHmd";
@@ -30,10 +29,6 @@ let
     devsisters-macbook
     devsisters-macstudio
   ];
-  openWebUiUsers = [
-    gytkk
-    gytkkCurrent
-  ];
 in
 {
   # Cloudflare Tunnel token for pylv-sepia
@@ -45,8 +40,8 @@ in
   # Discord bot token for openclaw
   "discord-bot-token.age".publicKeys = allUsers ++ allHosts;
 
-  # Open WebUI keeps an explicit recipient exception and still includes both user keys.
-  "open-webui-env.age".publicKeys = openWebUiUsers ++ allHosts;
+  # Open WebUI initial admin environment file
+  "open-webui-env.age".publicKeys = allUsers ++ allHosts;
 
   # Google Workspace CLI credentials for obsidian-maintenance calendar sync
   "gws-credentials.age".publicKeys = allUsers ++ allHosts;
