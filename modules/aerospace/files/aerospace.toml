@@ -39,13 +39,22 @@ persistent-workspaces = [
   "Z",
 ]
 
-# Treat KakaoTalk conversation windows like the main app window.
+# Force these apps to float even when AeroSpace observes only a localized or
+# helper-style app name during window creation.
 [[on-window-detected]]
 if.app-id = 'com.kakao.KakaoTalkMac'
 run = 'layout floating'
 
 [[on-window-detected]]
+if.app-name-regex-substring = 'KakaoTalk|카카오톡'
+run = 'layout floating'
+
+[[on-window-detected]]
 if.app-id = 'com.mitchellh.ghostty'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-name-regex-substring = 'ghostty'
 run = 'layout floating'
 
 [workspace-to-monitor-force-assignment]
