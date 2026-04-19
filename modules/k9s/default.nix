@@ -8,7 +8,8 @@
 }:
 
 let
-  generatedSkins = config.lib.file.mkOutOfStoreSymlink (themeExports.mutableDir "k9s");
+  commonTheme = config.modules.commonTheme;
+  generatedSkins = themeExports.mutableDirLink config.lib.file "k9s";
 in
 {
   programs.k9s = {
@@ -24,7 +25,7 @@ in
         noExitOnCtrlC = false;
         portForwardAddress = "localhost";
         ui = {
-          skin = config.modules.commonTheme;
+          skin = commonTheme;
           enableMouse = false;
           headless = false;
           logoless = false;

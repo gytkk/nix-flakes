@@ -10,12 +10,13 @@
 }:
 
 let
+  commonTheme = config.modules.commonTheme;
   windowsWeztermConfigPath = "/mnt/c/Users/${username}/.config/wezterm";
   windowsWeztermBridgePath = "/mnt/c/Users/${username}/.wezterm.lua";
   weztermThemeExportsPath = themeExports.mutableDir "wezterm";
-  weztermThemeExports = config.lib.file.mkOutOfStoreSymlink weztermThemeExportsPath;
+  weztermThemeExports = themeExports.mutableDirLink config.lib.file "wezterm";
   renderedConfig = pkgs.writeText "wezterm.lua" (
-    builtins.replaceStrings [ "__COMMON_THEME__" ] [ config.modules.commonTheme ] (
+    builtins.replaceStrings [ "__COMMON_THEME__" ] [ commonTheme ] (
       builtins.readFile ./files/wezterm.lua
     )
   );
