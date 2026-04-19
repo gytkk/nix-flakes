@@ -41,6 +41,137 @@ The official [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc)
 - If `/etc/codex/managed_config.toml` or the legacy `/etc/codex/config.toml` already exists as a regular file, activation stops instead of overwriting it.
 - `~/.codex/config.toml` stays writable for user-local state such as `[projects."..."]` trust entries.
 
+### Codex LSP MCP Implementation Plan
+
+This section is a design plan only. The bridge and skills below are not
+implemented yet.
+
+#### Goals
+
+- Give Codex symbol-aware navigation and diagnostics through MCP instead of
+  relying on plain text search alone.
+- Reuse LSP binaries already installed by this flake when possible, while also
+  supporting language servers that Claude Code or OpenCode treat as built-in.
+- Auto-detect roughly ten languages from the current workspace without
+  requiring per-repo manual MCP edits.
+- Keep the first rollout read-only and deterministic so it is safe to enable by
+  default in Codex.
+
+#### Design Target
+
+- Follow `lspi` for runtime design: explicit workspace roots, `doctor`,
+  warmup, structured diagnostics, and server lifecycle management.
+- Follow `symbols` for agent UX: a compact MCP tool surface plus bundled skills
+  that teach Codex when to prefer semantic navigation over `rg`.
+- Expose LSP functionality through a local `stdio` MCP server because Codex
+  currently treats MCP as the primary extension path.
+
+#### Planned Components
+
+1. `codex-lsp-mcp` local server
+   - Starts as a local `stdio` process from Codex config.
+   - Owns language detection, LSP process supervision, tool dispatch, and
+     diagnostic caching.
+2. Profile registry
+   - Data-driven definitions for each supported language instead of hardcoded
+     branching.
+   - Each profile includes file extensions, project markers, root markers,
+     command candidates, default args, timeouts, and capability flags.
+3. Workspace detector
+   - Chooses the best profile from file extension plus nearby project files.
+   - Resolves the workspace root before any LSP request so definitions and
+     references stay scoped correctly.
+4. LSP supervisor
+   - Maintains one live session per `<workspace root, profile>`.
+   - Supports lazy startup, optional warmup, restart-on-crash, and per-server
+     logs for debugging.
+5. Repo-local skills
+   - Add a small skill set that nudges Codex toward semantic tools first for
+     navigation, diagnostics, and safe refactors.
+
+#### Initial Language Matrix
+
+- `nix` via `nixd`, rooted by `flake.nix` or nearby `.nix` files
+- `go` via `gopls`, rooted by `go.mod`
+- `rust` via `rust-analyzer`, rooted by `Cargo.toml`
+- `typescript` and `javascript` via `typescript-language-server`, rooted by
+  `package.json`, `tsconfig.json`, or `jsconfig.json`
+- `python` via `ty server` first, with room for a fallback profile later
+- `terraform` via `terraform-ls serve`
+- `scala` via `metals`, rooted by `build.sbt` or `project/build.properties`
+- `yaml` via `yaml-language-server --stdio`
+- `markdown` via `marksman server`
+- one extra slot reserved for a future default such as `clangd` or
+  `bash-language-server`
+
+#### MCP Tool Shape
+
+The first version should stay intentionally small:
+
+- `hover_at`
+- `find_definition_at`
+- `find_references_at`
+- `get_document_symbols`
+- `search_workspace_symbols`
+- `get_diagnostics`
+- `doctor`
+
+Resources should supplement the tools instead of expanding the tool count:
+
+- `lsp://profiles`
+- `lsp://profiles/<id>`
+- `lsp://logs/<workspace>/<profile>`
+- `lsp://diagnostics/<workspace>/<path>`
+
+#### Detection and Routing Rules
+
+- Prefer explicit project markers over extension-only guesses.
+- Resolve the workspace root first, then select or start the matching server.
+- Treat missing binaries as a diagnosable state, not a hard crash.
+- Keep auto-detection separate from auto-installation. The first version only
+  uses binaries already on `PATH`.
+- Allow profile-specific adapters where raw LSP behavior is known to need extra
+  shaping, especially for TypeScript-family servers.
+
+#### Rollout Phases
+
+1. Prototype the bridge
+   - Build the MCP server with profile registry, detector, supervisor, and the
+     seven read-only tools.
+   - Add `doctor` output that explains which binaries, roots, and profiles were
+     selected.
+2. Integrate with `modules/codex`
+   - Add the bridge as a default local MCP entry in
+     `modules/codex/files/config.toml`.
+   - Keep the bridge opt-in or read-only until the manual smoke tests are
+     stable.
+3. Add Codex skills
+   - Ship a navigation skill and a diagnostics-first editing skill so Codex
+     reaches for LSP tools before wide text scans.
+4. Expand carefully
+   - Add preview-first rename and other write-capable workflows only after the
+     read-only path is stable.
+
+#### Verification Plan
+
+- Unit-test profile detection from extensions, markers, and missing-binary
+  cases.
+- Add fixture workspaces for at least `nix`, `go`, `rust`, `typescript`, and
+  `python`.
+- Verify `doctor` output for both healthy and degraded setups.
+- Smoke-test MCP registration with `codex mcp list` and direct tool calls.
+- Confirm that multiple files in the same workspace reuse one LSP session.
+- Confirm that failures degrade to actionable diagnostics rather than hanging
+  Codex.
+
+#### Non-Goals for the First Iteration
+
+- No raw 1:1 exposure of every LSP method.
+- No automatic package downloads or language server installation.
+- No write-capable refactors by default.
+- No attempt to replace broad semantic search or indexing tools across the
+  whole repository.
+
 ## Zed config
 
 - Zed is managed through `modules/zed/default.nix`.
