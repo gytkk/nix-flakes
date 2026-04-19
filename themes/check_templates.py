@@ -329,7 +329,7 @@ def check_zellij(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
     check_zellij_sections(f"{path_str}.sections", doc.get("sections"), errors)
 
 
-def check_override_template(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
+def check_nvim_override_template(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
     path_str = str(path)
     expected_top = ["version", "meta", "groups", "links"]
     expect(list(doc.keys()) == expected_top, f"{path_str}: top-level keys must exactly match {expected_top}", errors)
@@ -345,6 +345,44 @@ def check_override_template(path: Path, doc: dict[str, Any], errors: list[str]) 
 
     links = doc.get("links")
     expect(isinstance(links, dict), f"{path_str}.links must be an object", errors)
+
+
+def check_ghostty_override_template(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
+    path_str = str(path)
+    expected_top = ["version", "meta", "slots"]
+    expect(list(doc.keys()) == expected_top, f"{path_str}: top-level keys must exactly match {expected_top}", errors)
+
+    meta = doc.get("meta")
+    expect(isinstance(meta, dict), f"{path_str}.meta must be an object", errors)
+    if isinstance(meta, dict):
+        expected_meta = ["app", "theme", "variant"]
+        expect(list(meta.keys()) == expected_meta, f"{path_str}.meta keys must exactly match {expected_meta}", errors)
+
+    slots = doc.get("slots")
+    expect(isinstance(slots, dict) and len(slots) > 0, f"{path_str}.slots must be a non-empty object", errors)
+
+
+def check_ghostty_override(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
+    path_str = str(path)
+    expected_top = ["version", "meta", "slots"]
+    expect(list(doc.keys()) == expected_top, f"{path_str}: top-level keys must exactly match {expected_top}", errors)
+    expect(doc.get("version") == 1, f"{path_str}.version must be 1", errors)
+
+    meta = doc.get("meta")
+    expect(isinstance(meta, dict), f"{path_str}.meta must be an object", errors)
+    if isinstance(meta, dict):
+        expected_meta = ["app", "theme", "variant"]
+        expect(list(meta.keys()) == expected_meta, f"{path_str}.meta keys must exactly match {expected_meta}", errors)
+        expect(meta.get("app") == "ghostty", f"{path_str}.meta.app must be 'ghostty'", errors)
+        expect(isinstance(meta.get("theme"), str) and meta.get("theme"), f"{path_str}.meta.theme must be a non-empty string", errors)
+        expect(meta.get("variant") in {"light", "dark"}, f"{path_str}.meta.variant must be 'light' or 'dark'", errors)
+
+    slots = doc.get("slots")
+    expect(isinstance(slots, dict) and len(slots) > 0, f"{path_str}.slots must be a non-empty object", errors)
+    if isinstance(slots, dict):
+        for slot, value in slots.items():
+            expect(isinstance(slot, str) and slot, f"{path_str}.slots contains an invalid slot name", errors)
+            expect(isinstance(value, str) and value, f"{path_str}.slots.{slot} must be a non-empty string", errors)
 
 
 def check_nvim_override(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
@@ -441,7 +479,8 @@ JSON_CHECKS = {
 }
 
 YAML_CHECKS = {
-    ROOT / "overrides" / "TEMPLATE.yaml": check_override_template,
+    ROOT / "overrides" / "TEMPLATE.yaml": check_nvim_override_template,
+    ROOT / "overrides" / "ghostty" / "TEMPLATE.yaml": check_ghostty_override_template,
     ROOT / "overrides" / "zellij" / "TEMPLATE.yaml": check_zellij_override_template,
 }
 
@@ -454,6 +493,10 @@ def main() -> int:
     for path, checker in YAML_CHECKS.items():
         checker(path.relative_to(ROOT), load_yaml_doc(path), errors)
 
+    for path in sorted((ROOT / "overrides" / "ghostty").glob("*.yaml")):
+        if path.name == "TEMPLATE.yaml":
+            continue
+        check_ghostty_override(path.relative_to(ROOT), load_yaml_doc(path), errors)
     for path in sorted((ROOT / "overrides" / "nvim").glob("*.yaml")):
         check_nvim_override(path.relative_to(ROOT), load_yaml_doc(path), errors)
     for path in sorted((ROOT / "overrides" / "zellij").glob("*.yaml")):
@@ -470,6 +513,7 @@ def main() -> int:
     total = (
         len(JSON_CHECKS)
         + len(YAML_CHECKS)
+        + len([p for p in (ROOT / "overrides" / "ghostty").glob("*.yaml") if p.name != "TEMPLATE.yaml"])
         + len(list((ROOT / "overrides" / "nvim").glob("*.yaml")))
         + len([p for p in (ROOT / "overrides" / "zellij").glob("*.yaml") if p.name != "TEMPLATE.yaml"])
     )

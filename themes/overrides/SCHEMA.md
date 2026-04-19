@@ -12,6 +12,9 @@ Do not use overrides to redefine the canonical theme core.
 
 ## Current support
 
+- `themes/overrides/ghostty/TEMPLATE.yaml`
+- `themes/overrides/TEMPLATE.yaml` for Neovim
+- `themes/overrides/zellij/TEMPLATE.yaml`
 - `themes/overrides/ghostty/<theme-id>.yaml`
 - `themes/overrides/nvim/<theme-id>.yaml`
 - `themes/overrides/zellij/<theme-id>.yaml`
@@ -41,6 +44,8 @@ For Zellij exports, values resolve in this order:
 
 ## Ghostty override format
 
+Author from `themes/overrides/ghostty/TEMPLATE.yaml`:
+
 ```yaml
 version: 1
 
@@ -55,6 +60,8 @@ slots:
 ```
 
 ## Neovim override format
+
+Author from `themes/overrides/TEMPLATE.yaml`:
 
 ```yaml
 version: 1
@@ -77,6 +84,8 @@ links:
 ```
 
 ## Zellij override format
+
+Author from `themes/overrides/zellij/TEMPLATE.yaml`:
 
 ```yaml
 version: 1

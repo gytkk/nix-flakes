@@ -634,8 +634,12 @@ This keeps exceptions visible and isolated.
 Current override support:
 
 - `themes/overrides/SCHEMA.md` -> override-layer format notes
-- `themes/overrides/TEMPLATE.yaml` -> minimal authoring template
+- `themes/overrides/ghostty/TEMPLATE.yaml` -> Ghostty minimal authoring template
+- `themes/overrides/TEMPLATE.yaml` -> Neovim minimal authoring template
+- `themes/overrides/zellij/TEMPLATE.yaml` -> Zellij minimal authoring template
+- `themes/overrides/ghostty/<theme-id>.yaml` -> Ghostty slot overrides
 - `themes/overrides/nvim/<theme-id>.yaml` -> Neovim per-theme override patches
+- `themes/overrides/zellij/<theme-id>.yaml` -> Zellij per-theme override patches
 - `themes/validate_overrides.py` -> override validator for current Ghostty, Neovim, and Zellij override files
 
 Current Neovim override precedence:
