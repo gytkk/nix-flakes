@@ -1,0 +1,155 @@
+version: 1
+
+meta:
+  id: vira-graphene
+  name: Vira Graphene
+  variant: dark
+  family: vira
+  author: vira, pylv
+  description: >-
+    Canonical Vira Graphene theme definition for nix-flakes, aligned to the
+    provided Ghostty palette so terminal output matches the observed official
+    Graphene look as closely as possible.
+
+palette:
+  # Base24-compatible base slots.
+  # Derived primarily from the provided Ghostty theme file, with semantic
+  # companion slots filled in conservatively to keep other exporters coherent.
+  base00: "#212121"
+  base01: "#212121"
+  base02: "#2b2b2b"
+  base03: "#474747"
+  base04: "#545454"
+  base05: "#D9D9D9"
+  base06: "#D9D9D9"
+  base07: "#ffffff"
+
+  base08: "#f07178"
+  base09: "#f78c6c"
+  base0A: "#FFCB6B"
+  base0B: "#C3E88D"
+  base0C: "#89DDFF"
+  base0D: "#82AAFF"
+  base0E: "#C792EA"
+  base0F: "#FFCC00"
+
+  base10: "#FFCB6B"
+  base11: "#C3E88D"
+  base12: "#89DDFF"
+  base13: "#82AAFF"
+  base14: "#C792EA"
+  base15: "#474747"
+  base16: "#545454"
+  base17: "#3a3a3a"
+
+  bg: "{palette.base00}"
+  bgElevated: "{palette.base01}"
+  bgAlt: "{palette.base02}"
+  border: "{palette.base17}"
+  muted: "{palette.base04}"
+  comment: "{palette.base16}"
+  fgMuted: "{palette.base04}"
+  fg: "{palette.base05}"
+  fgBright: "{palette.base06}"
+  fgMax: "{palette.base07}"
+
+  red: "{palette.base08}"
+  orange: "{palette.base09}"
+  yellow: "{palette.base0A}"
+  green: "{palette.base0B}"
+  cyan: "{palette.base0C}"
+  blue: "{palette.base0D}"
+  magenta: "{palette.base0E}"
+  pink: "{palette.base0F}"
+
+  yellowBright: "{palette.base10}"
+  greenBright: "{palette.base11}"
+  cyanBright: "{palette.base12}"
+  blueBright: "{palette.base13}"
+  magentaBright: "{palette.base14}"
+
+  selection: "{palette.base15}"
+  lineNumber: "{palette.base16}"
+  whitespace: "{palette.base17}"
+  blackBright: "{palette.base04}"
+  white: "{palette.base07}"
+
+roles:
+  ui:
+    bg: "{palette.bg}"
+    bgAlt: "{palette.bgAlt}"
+    bgElevated: "{palette.bgElevated}"
+    fg: "{palette.fg}"
+    fgMuted: "{palette.fgMuted}"
+    border: "{palette.border}"
+    borderActive: "{palette.blue}"
+    selection: "{palette.selection}"
+    selectionInactive: "{palette.base02}"
+    currentLine: "{palette.base02}"
+    currentLineNumber: "{palette.fgBright}"
+    cursor: "{palette.pink}"
+    caretText: "{palette.base00}"
+    search: "{palette.yellow}"
+    searchText: "{palette.base00}"
+    match: "{palette.base03}"
+    panelBg: "{palette.bgElevated}"
+    sidebarBg: "{palette.bgElevated}"
+    statuslineBg: "{palette.bgElevated}"
+    statuslineFg: "{palette.fg}"
+
+  syntax:
+    text: "{palette.fg}"
+    comment: "{palette.comment}"
+    string: "{palette.green}"
+    stringEscape: "{palette.cyan}"
+    number: "{palette.orange}"
+    constant: "{palette.orange}"
+    keyword: "{palette.magenta}"
+    operator: "{palette.cyan}"
+    variable: "{palette.fg}"
+    parameter: "{palette.fg}"
+    property: "{palette.blue}"
+    field: "{palette.blue}"
+    function: "{palette.blue}"
+    method: "{palette.blue}"
+    type: "{palette.yellow}"
+    class: "{palette.yellow}"
+    interface: "{palette.yellow}"
+    namespace: "{palette.blue}"
+    builtin: "{palette.cyan}"
+    tag: "{palette.red}"
+    attribute: "{palette.yellow}"
+    punctuation: "{palette.fgMuted}"
+    link: "{palette.blue}"
+
+  diagnostics:
+    error: "{palette.red}"
+    warning: "{palette.yellow}"
+    info: "{palette.blue}"
+    hint: "{palette.cyan}"
+    ok: "{palette.green}"
+
+  vcs:
+    added: "{palette.green}"
+    modified: "{palette.blue}"
+    removed: "{palette.red}"
+    renamed: "{palette.magenta}"
+    conflict: "{palette.orange}"
+
+  ansi:
+    black: "{palette.base04}"
+    red: "{palette.red}"
+    green: "{palette.green}"
+    yellow: "{palette.yellow}"
+    blue: "{palette.blue}"
+    magenta: "{palette.magenta}"
+    cyan: "{palette.cyan}"
+    white: "{palette.fg}"
+    brightBlack: "{palette.base04}"
+    brightRed: "{palette.red}"
+    brightGreen: "{palette.greenBright}"
+    brightYellow: "{palette.yellowBright}"
+    brightBlue: "{palette.blueBright}"
+    brightMagenta: "{palette.magentaBright}"
+    brightCyan: "{palette.cyanBright}"
+    brightWhite: "{palette.white}"

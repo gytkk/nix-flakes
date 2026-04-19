@@ -1,0 +1,9 @@
+version: 1
+
+meta:
+  app: ghostty
+  theme: vira-graphene
+  variant: dark
+
+slots:
+  selection_foreground: "#D9D9D9"
