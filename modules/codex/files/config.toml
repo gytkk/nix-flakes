@@ -29,6 +29,16 @@ args = ["-y", "@playwright/mcp@latest"]
 alternate_screen = "never"
 notification_method = "auto"
 notifications = true
+status_line = [
+  "model-with-reasoning",
+  "current-dir",
+  "project-root",
+  "git-branch",
+  "context-used",
+  "total-input-tokens",
+  "total-output-tokens",
+  "fast-mode",
+]
 
 [history]
 persistence = "save-all"
