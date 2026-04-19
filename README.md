@@ -67,13 +67,12 @@ The official [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc)
 ## Ghostty config
 
 - Ghostty is managed through `modules/ghostty/default.nix`.
-- `home-manager switch` installs `~/.config/ghostty/config` as an out-of-store
-  symlink to `modules/ghostty/files/config`, so repo edits update the live
-  config immediately.
-- Home Manager also exposes each generated `themes/exports/ghostty/*.conf`
-  file under `~/.config/ghostty/themes/` as an out-of-store symlink, and keeps
-  `~/.config/ghostty/themes/nix-flakes-current.conf` pointed at the selected
-  `modules.commonTheme`.
+- `home-manager switch` renders `~/.config/ghostty/config` with the selected
+  `modules.commonTheme` as `theme = "<commonTheme>.conf"`.
+- Home Manager links `~/.config/ghostty/themes` to the generated
+  `themes/exports/ghostty` directory managed by the flake.
+- Repo edits to Ghostty config and generated themes take effect on the next
+  switch instead of updating live files immediately.
 - The checked-in defaults keep `xterm-256color`, the generated shared theme,
   JetBrains Mono with Sarasa Mono CL fallback, a beam cursor, 95% background
   opacity, shell integration, and the IME-safe `Ctrl+key_*` bindings.

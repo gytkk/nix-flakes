@@ -1,32 +1,17 @@
 {
   config,
-  flakeDirectory,
   themeExports,
   ...
 }:
 
 let
-  mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/ghostty/${path}";
-  ghosttyThemeEntries = builtins.readDir (themeExports.dir "ghostty");
-  ghosttyThemeFiles = builtins.filter (
-    fileName:
-    let
-      fileType = ghosttyThemeEntries.${fileName};
-    in
-    fileType == "regular" || fileType == "symlink"
-  ) (builtins.attrNames ghosttyThemeEntries);
-  ghosttyThemeLinks = builtins.listToAttrs (
-    map (fileName: {
-      name = "ghostty/themes/${fileName}";
-      value.source = config.lib.file.mkOutOfStoreSymlink (themeExports.mutableFile "ghostty" fileName);
-    }) ghosttyThemeFiles
-  );
+  ghosttyConfig =
+    builtins.replaceStrings
+      [ ''theme = "__COMMON_THEME__.conf"'' ]
+      [ ''theme = "${config.modules.commonTheme}.conf"'' ]
+      (builtins.readFile ./files/config);
 in
 {
-  xdg.configFile = ghosttyThemeLinks // {
-    "ghostty/config".source = mkSymlink "files/config";
-    "ghostty/themes/nix-flakes-current.conf".source = config.lib.file.mkOutOfStoreSymlink (
-      themeExports.mutableFile "ghostty" "${config.modules.commonTheme}.conf"
-    );
-  };
+  xdg.configFile."ghostty/themes".source = themeExports.dir "ghostty";
+  xdg.configFile."ghostty/config".text = ghosttyConfig;
 }

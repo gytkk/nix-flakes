@@ -5,9 +5,9 @@ auto-update = check
 # https://github.com/ghostty-org/ghostty/discussions/4415
 term = xterm-256color
 
-# Theme comes from ~/.config/ghostty/themes/nix-flakes-current.conf,
-# which Home Manager repoints to themes/exports/ghostty/<commonTheme>.conf.
-theme = "nix-flakes-current.conf"
+# Theme comes from ~/.config/ghostty/themes/<commonTheme>.conf.
+# Home Manager rewrites the theme entry below to match modules.commonTheme.
+theme = "__COMMON_THEME__.conf"
 adjust-cursor-thickness = 250%
 cursor-style = bar
 cursor-click-to-move = true
