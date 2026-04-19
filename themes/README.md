@@ -510,9 +510,11 @@ This now checks both:
 Current generators:
 
 - `ghostty` -> `themes/exports/ghostty/*.conf`
+- `k9s` -> `themes/exports/k9s/*.yaml`
 - `zed` -> `themes/exports/zed/*.json`
 - `nvim` -> `themes/exports/nvim/*.lua`
 - `starship` -> `themes/exports/starship/*.toml`
+- `wezterm` -> `themes/exports/wezterm/*.lua`
 - `zellij` -> `themes/exports/zellij/*.kdl`
 
 Adapter templates and schema helpers:
@@ -521,9 +523,11 @@ Adapter templates and schema helpers:
 - `themes/templates/zed/official-template.json` -> Zed official template split into `style_sections`, `syntax_sections`, and `players`
   - note: Zed's official schema strictly enumerates outer `style` keys, but `style.syntax` remains open-ended and is validated as `HighlightStyleContent` entries rather than a fixed syntax-key list
 - `themes/templates/ghostty/official-template.json` -> Ghostty theme template derived from the config reference and existing local terminal config
+- `themes/templates/k9s/official-template.json` -> K9s skin template derived from the official skins format and the existing local module skin definitions
 - `themes/templates/nvim/official-template.json` -> Neovim builtin highlight template derived from official help
 - `themes/templates/nvim/plugins.json` -> Neovim plugin-specific highlight template
 - `themes/templates/starship/official-template.json` -> Starship prompt template derived from the Starship config contract plus the existing local prompt layout
+- `themes/templates/wezterm/official-template.json` -> WezTerm Lua theme template derived from the colors/window-frame config contracts plus the existing local module config
 - `themes/templates/zellij/official-template.json` -> Zellij theme template derived from the official Zellij theme definition specification
 - `themes/overrides/ghostty/*.yaml` -> optional Ghostty slot overrides applied after generator defaults
 - `themes/overrides/zellij/*.yaml` -> optional Zellij-specific component/player overrides applied after generator defaults

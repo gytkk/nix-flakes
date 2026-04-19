@@ -1,0 +1,81 @@
+-- Auto-generated from themes/core/monokai-pro-classic.yaml
+-- Template: wezterm-theme-template v1
+return {
+  tab_bar = {
+    background = "#40413a",
+    active_bg = "#272822",
+    active_fg = "#fdfff1",
+    inactive_bg = "#3e3f38",
+    inactive_fg = "#6e7066",
+    inactive_hover_bg = "#3f4039",
+    inactive_hover_fg = "#fdfff1",
+    edge = "#4d5154",
+    new_tab_bg = "#40413a",
+    new_tab_fg = "#6e7066",
+    new_tab_hover_bg = "#3f4039",
+    new_tab_hover_fg = "#fdfff1",
+  },
+  window_frame = {
+    active_titlebar_bg = "#40413a",
+    inactive_titlebar_bg = "#40413a",
+    active_titlebar_fg = "#fdfff1",
+    inactive_titlebar_fg = "#6e7066",
+    active_titlebar_border_bottom = "#4d5154",
+    inactive_titlebar_border_bottom = "#4d5154",
+  },
+  colors = {
+    foreground = "#fdfff1",
+    background = "#272822",
+    cursor_bg = "#fdfff1",
+    cursor_fg = "#272822",
+    cursor_border = "#fdfff1",
+    selection_fg = "#fdfff1",
+    selection_bg = "#3b3c35",
+    scrollbar_thumb = "#4d5154",
+    split = "#57584f",
+    ansi = {
+      "#333333",
+      "#c4265e",
+      "#86b42b",
+      "#b3b42b",
+      "#78dce8",
+      "#8c6bc8",
+      "#56adbc",
+      "#e3e3dd",
+    },
+    brights = {
+      "#6e7066",
+      "#f82570",
+      "#a1efe4",
+      "#ffd866",
+      "#819aff",
+      "#ae81ff",
+      "#a1efe4",
+      "#fdfff1",
+    },
+    tab_bar = {
+      background = "#40413a",
+      inactive_tab_edge = "#4d5154",
+      active_tab = {
+        bg_color = "#272822",
+        fg_color = "#fdfff1",
+      },
+      inactive_tab = {
+        bg_color = "#3e3f38",
+        fg_color = "#6e7066",
+      },
+      inactive_tab_hover = {
+        bg_color = "#3f4039",
+        fg_color = "#fdfff1",
+      },
+      new_tab = {
+        bg_color = "#40413a",
+        fg_color = "#6e7066",
+      },
+      new_tab_hover = {
+        bg_color = "#3f4039",
+        fg_color = "#fdfff1",
+      },
+    },
+  },
+}

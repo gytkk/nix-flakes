@@ -1,0 +1,81 @@
+-- Auto-generated from themes/core/rose-pine-moon.yaml
+-- Template: wezterm-theme-template v1
+return {
+  tab_bar = {
+    background = "#3e3a57",
+    active_bg = "#232136",
+    active_fg = "#e0def4",
+    inactive_bg = "#3c3855",
+    inactive_fg = "#908caa",
+    inactive_hover_bg = "#3d3956",
+    inactive_hover_fg = "#e0def4",
+    edge = "#56526e",
+    new_tab_bg = "#3e3a57",
+    new_tab_fg = "#908caa",
+    new_tab_hover_bg = "#3d3956",
+    new_tab_hover_fg = "#e0def4",
+  },
+  window_frame = {
+    active_titlebar_bg = "#3e3a57",
+    inactive_titlebar_bg = "#3e3a57",
+    active_titlebar_fg = "#e0def4",
+    inactive_titlebar_fg = "#908caa",
+    active_titlebar_border_bottom = "#56526e",
+    inactive_titlebar_border_bottom = "#56526e",
+  },
+  colors = {
+    foreground = "#e0def4",
+    background = "#232136",
+    cursor_bg = "#908caa",
+    cursor_fg = "#232136",
+    cursor_border = "#908caa",
+    selection_fg = "#e0def4",
+    selection_bg = "#44415a",
+    scrollbar_thumb = "#56526e",
+    split = "#56526e",
+    ansi = {
+      "#2a273f",
+      "#eb6f92",
+      "#3e8fb0",
+      "#ea9a97",
+      "#c4a7e7",
+      "#f6c177",
+      "#9ccfd8",
+      "#e0def4",
+    },
+    brights = {
+      "#6e6a86",
+      "#eb6f92",
+      "#9ccfd8",
+      "#f6c177",
+      "#3e8fb0",
+      "#c4a7e7",
+      "#9ccfd8",
+      "#e0def4",
+    },
+    tab_bar = {
+      background = "#3e3a57",
+      inactive_tab_edge = "#56526e",
+      active_tab = {
+        bg_color = "#232136",
+        fg_color = "#e0def4",
+      },
+      inactive_tab = {
+        bg_color = "#3c3855",
+        fg_color = "#908caa",
+      },
+      inactive_tab_hover = {
+        bg_color = "#3d3956",
+        fg_color = "#e0def4",
+      },
+      new_tab = {
+        bg_color = "#3e3a57",
+        fg_color = "#908caa",
+      },
+      new_tab_hover = {
+        bg_color = "#3d3956",
+        fg_color = "#e0def4",
+      },
+    },
+  },
+}

@@ -1,0 +1,100 @@
+k9s:
+  body:
+    fgColor: "#e0def4"
+    bgColor: "#232136"
+    logoColor: "#3e8fb0"
+  prompt:
+    fgColor: "#e0def4"
+    bgColor: "#232136"
+    suggestColor: "#3e8fb0"
+  help:
+    fgColor: "#e0def4"
+    bgColor: "#232136"
+    sectionColor: "#3e8fb0"
+    keyColor: "#c4a7e7"
+    numKeyColor: "#eb6f92"
+  info:
+    fgColor: "#9ccfd8"
+    sectionColor: "#e0def4"
+  dialog:
+    fgColor: "#e0def4"
+    bgColor: "#3d3956"
+    buttonFgColor: "#232136"
+    buttonBgColor: "#3e8fb0"
+    buttonFocusFgColor: "#232136"
+    buttonFocusBgColor: "#ea9a97"
+    labelFgColor: "#ea9a97"
+    fieldFgColor: "#e0def4"
+  frame:
+    border:
+      fgColor: "#56526e"
+      focusColor: "#c4a7e7"
+    menu:
+      fgColor: "#e0def4"
+      keyColor: "#c4a7e7"
+      numKeyColor: "#ea9a97"
+    crumbs:
+      fgColor: "#e0def4"
+      bgColor: "#393552"
+      activeColor: "#44415a"
+    status:
+      newColor: "#9ccfd8"
+      modifyColor: "#f6c177"
+      addColor: "#9ccfd8"
+      pendingColor: "#ea9a97"
+      errorColor: "#eb6f92"
+      highlightcolor: "#c4a7e7"
+      killColor: "#ea9a97"
+      completedColor: "#908caa"
+    title:
+      fgColor: "#e0def4"
+      bgColor: "#393552"
+      highlightColor: "#f6c177"
+      counterColor: "#9ccfd8"
+      filterColor: "#ea9a97"
+  views:
+    table:
+      fgColor: "#e0def4"
+      bgColor: "#232136"
+      cursorFgColor: "#e0def4"
+      cursorBgColor: "#44415a"
+      markColor: "#ea9a97"
+      header:
+        fgColor: "#e0def4"
+        bgColor: "#232136"
+        sorterColor: "#c4a7e7"
+    xray:
+      fgColor: "#e0def4"
+      bgColor: "#232136"
+      cursorColor: "#44415a"
+      cursorTextColor: "#e0def4"
+      graphicColor: "#c4a7e7"
+    charts:
+      bgColor: "#232136"
+      chartBgColor: "#232136"
+      dialBgColor: "#232136"
+      defaultDialColors:
+        - "#9ccfd8"
+        - "#eb6f92"
+      defaultChartColors:
+        - "#9ccfd8"
+        - "#eb6f92"
+      resourceColors:
+        cpu:
+          - "#eb6f92"
+          - "#9ccfd8"
+        mem:
+          - "#ea9a97"
+          - "#ea9a97"
+    yaml:
+      keyColor: "#c4a7e7"
+      colonColor: "#908caa"
+      valueColor: "#e0def4"
+    logs:
+      fgColor: "#e0def4"
+      bgColor: "#232136"
+      indicator:
+        fgColor: "#232136"
+        bgColor: "#3e8fb0"
+        toggleOnColor: "#9ccfd8"
+        toggleOffColor: "#908caa"

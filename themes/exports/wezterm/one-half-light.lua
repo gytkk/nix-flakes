@@ -1,0 +1,81 @@
+-- Auto-generated from themes/core/one-half-light.yaml
+-- Template: wezterm-theme-template v1
+return {
+  tab_bar = {
+    background = "#ededed",
+    active_bg = "#fdfdfd",
+    active_fg = "#383a42",
+    inactive_bg = "#eeeeee",
+    inactive_fg = "#9d9d9f",
+    inactive_hover_bg = "#eeeeee",
+    inactive_hover_fg = "#383a42",
+    edge = "#d0d0d0",
+    new_tab_bg = "#ededed",
+    new_tab_fg = "#9d9d9f",
+    new_tab_hover_bg = "#eeeeee",
+    new_tab_hover_fg = "#383a42",
+  },
+  window_frame = {
+    active_titlebar_bg = "#ededed",
+    inactive_titlebar_bg = "#ededed",
+    active_titlebar_fg = "#383a42",
+    inactive_titlebar_fg = "#9d9d9f",
+    active_titlebar_border_bottom = "#d0d0d0",
+    inactive_titlebar_border_bottom = "#d0d0d0",
+  },
+  colors = {
+    foreground = "#383a42",
+    background = "#fdfdfd",
+    cursor_bg = "#0184bc",
+    cursor_fg = "#ffffff",
+    cursor_border = "#0184bc",
+    selection_fg = "#383a42",
+    selection_bg = "#bfceff",
+    scrollbar_thumb = "#d0d0d0",
+    split = "#e5e5e5",
+    ansi = {
+      "#383a42",
+      "#e45649",
+      "#50a14f",
+      "#c18401",
+      "#0184bc",
+      "#a626a4",
+      "#427b58",
+      "#fdfdfd",
+    },
+    brights = {
+      "#4f525e",
+      "#e06c75",
+      "#98c379",
+      "#e5c07b",
+      "#61afef",
+      "#c678dd",
+      "#56b6c2",
+      "#ffffff",
+    },
+    tab_bar = {
+      background = "#ededed",
+      inactive_tab_edge = "#d0d0d0",
+      active_tab = {
+        bg_color = "#fdfdfd",
+        fg_color = "#383a42",
+      },
+      inactive_tab = {
+        bg_color = "#eeeeee",
+        fg_color = "#9d9d9f",
+      },
+      inactive_tab_hover = {
+        bg_color = "#eeeeee",
+        fg_color = "#383a42",
+      },
+      new_tab = {
+        bg_color = "#ededed",
+        fg_color = "#9d9d9f",
+      },
+      new_tab_hover = {
+        bg_color = "#eeeeee",
+        fg_color = "#383a42",
+      },
+    },
+  },
+}

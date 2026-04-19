@@ -1,0 +1,81 @@
+-- Auto-generated from themes/core/ayu-mirage.yaml
+-- Template: wezterm-theme-template v1
+return {
+  tab_bar = {
+    background = "#252b37",
+    active_bg = "#242936",
+    active_fg = "#CCCAC2",
+    inactive_bg = "#262c39",
+    inactive_fg = "#8A9199",
+    inactive_hover_bg = "#262b38",
+    inactive_hover_fg = "#CCCAC2",
+    edge = "#637599",
+    new_tab_bg = "#252b37",
+    new_tab_fg = "#8A9199",
+    new_tab_hover_bg = "#262b38",
+    new_tab_hover_fg = "#CCCAC2",
+  },
+  window_frame = {
+    active_titlebar_bg = "#252b37",
+    inactive_titlebar_bg = "#252b37",
+    active_titlebar_fg = "#CCCAC2",
+    inactive_titlebar_fg = "#8A9199",
+    active_titlebar_border_bottom = "#637599",
+    inactive_titlebar_border_bottom = "#637599",
+  },
+  colors = {
+    foreground = "#CCCAC2",
+    background = "#242936",
+    cursor_bg = "#FFCC66",
+    cursor_fg = "#242936",
+    cursor_border = "#FFCC66",
+    selection_fg = "#242936",
+    selection_bg = "#409FFF",
+    scrollbar_thumb = "#637599",
+    split = "#171B24",
+    ansi = {
+      "#1F2430",
+      "#F28779",
+      "#87D96C",
+      "#FFCC66",
+      "#73D0FF",
+      "#DFBFFF",
+      "#5CCFE6",
+      "#CCCAC2",
+    },
+    brights = {
+      "#707A8C",
+      "#FFAD66",
+      "#D5FF80",
+      "#FFD173",
+      "#80BFFF",
+      "#B8CFE6",
+      "#95E6CB",
+      "#D9D7CE",
+    },
+    tab_bar = {
+      background = "#252b37",
+      inactive_tab_edge = "#637599",
+      active_tab = {
+        bg_color = "#242936",
+        fg_color = "#CCCAC2",
+      },
+      inactive_tab = {
+        bg_color = "#262c39",
+        fg_color = "#8A9199",
+      },
+      inactive_tab_hover = {
+        bg_color = "#262b38",
+        fg_color = "#CCCAC2",
+      },
+      new_tab = {
+        bg_color = "#252b37",
+        fg_color = "#8A9199",
+      },
+      new_tab_hover = {
+        bg_color = "#262b38",
+        fg_color = "#CCCAC2",
+      },
+    },
+  },
+}

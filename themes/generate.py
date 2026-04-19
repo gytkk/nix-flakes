@@ -539,6 +539,16 @@ def load_starship_template(root: Path) -> dict[str, Any]:
     return load_json(template_path)
 
 
+def load_wezterm_template(root: Path) -> dict[str, Any]:
+    template_path = root / "templates" / "wezterm" / "official-template.json"
+    return load_json(template_path)
+
+
+def load_k9s_template(root: Path) -> dict[str, Any]:
+    template_path = root / "templates" / "k9s" / "official-template.json"
+    return load_json(template_path)
+
+
 def load_zellij_template(root: Path) -> dict[str, Any]:
     template_path = root / "templates" / "zellij" / "official-template.json"
     return load_json(template_path)
@@ -897,6 +907,68 @@ def toml_literal(value: Any) -> str:
     return json.dumps(str(value), ensure_ascii=False)
 
 
+def lua_literal(value: Any, indent: int = 0) -> str:
+    if isinstance(value, str):
+        return lua_string(value)
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if value is None:
+        return "nil"
+    if isinstance(value, int) or isinstance(value, float):
+        return str(value)
+    if isinstance(value, list):
+        if not value:
+            return "{}"
+        inner_indent = " " * (indent + 2)
+        closing_indent = " " * indent
+        lines = [f"{inner_indent}{lua_literal(item, indent + 2)}," for item in value]
+        return "{\n" + "\n".join(lines) + f"\n{closing_indent}" + "}"
+    if isinstance(value, dict):
+        if not value:
+            return "{}"
+        inner_indent = " " * (indent + 2)
+        closing_indent = " " * indent
+        lines = [f"{inner_indent}{key} = {lua_literal(item, indent + 2)}," for key, item in value.items()]
+        return "{\n" + "\n".join(lines) + f"\n{closing_indent}" + "}"
+    raise TypeError(f"unsupported Lua literal value: {value!r}")
+
+
+def write_yaml(path: Path, data: dict[str, Any]) -> None:
+    def yaml_scalar(value: Any) -> str:
+        if isinstance(value, bool):
+            return "true" if value else "false"
+        if value is None:
+            return "null"
+        if isinstance(value, int) or isinstance(value, float):
+            return str(value)
+        return json.dumps(str(value), ensure_ascii=False)
+
+    def yaml_lines(value: Any, indent: int = 0) -> list[str]:
+        prefix = " " * indent
+        if isinstance(value, dict):
+            lines: list[str] = []
+            for key, item in value.items():
+                if isinstance(item, dict) or isinstance(item, list):
+                    lines.append(f"{prefix}{key}:")
+                    lines.extend(yaml_lines(item, indent + 2))
+                else:
+                    lines.append(f"{prefix}{key}: {yaml_scalar(item)}")
+            return lines
+        if isinstance(value, list):
+            lines = []
+            for item in value:
+                if isinstance(item, dict) or isinstance(item, list):
+                    lines.append(f"{prefix}-")
+                    lines.extend(yaml_lines(item, indent + 2))
+                else:
+                    lines.append(f"{prefix}- {yaml_scalar(item)}")
+            return lines
+        return [f"{prefix}{yaml_scalar(value)}"]
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(yaml_lines(data)) + "\n")
+
+
 def starship_theme_toml(ctx: dict[str, Any], root: Path) -> str:
     template = load_starship_template(root)
     slots = build_starship_slots(ctx)
@@ -921,6 +993,170 @@ def starship_theme_toml(ctx: dict[str, Any], root: Path) -> str:
         value = render_template_value(entry["value"], slots)
         lines.append(f"{entry['key']} = {json.dumps(value, ensure_ascii=False)}")
     return "\n".join(lines) + "\n"
+
+
+def build_wezterm_slots(ctx: dict[str, Any]) -> dict[str, Any]:
+    p = ctx["palette"]
+    r = ctx["roles"]
+    is_light = ctx["meta"]["variant"] == "light"
+    tab_bar_background = mix(r["ui"]["bgAlt"], r["ui"]["border"], 0.28 if is_light else 0.18)
+    inactive_tab_bg = mix(r["ui"]["bgAlt"], r["ui"]["border"], 0.16 if is_light else 0.1)
+    inactive_tab_hover_bg = raised_surface(r["ui"]["bgAlt"], r["ui"]["border"], light=is_light)
+    cursor_fg = best_contrast(r["ui"]["cursor"], r["ui"]["caretText"], p["white"], r["ui"]["bg"], r["ui"]["fg"])
+    selection_fg = best_contrast(r["ui"]["selection"], p["white"], r["ui"]["bg"], r["ui"]["fg"])
+    return {
+        "foreground": r["ui"]["fg"],
+        "background": r["ui"]["bg"],
+        "cursor_bg": r["ui"]["cursor"],
+        "cursor_fg": cursor_fg,
+        "cursor_border": r["ui"]["cursor"],
+        "selection_fg": selection_fg,
+        "selection_bg": r["ui"]["selection"],
+        "scrollbar_thumb": p["whitespace"],
+        "split": r["ui"]["border"],
+        "tab_bar_background": tab_bar_background,
+        "inactive_tab_edge": p["whitespace"],
+        "active_tab_bg": r["ui"]["bg"],
+        "active_tab_fg": r["ui"]["fg"],
+        "inactive_tab_bg": inactive_tab_bg,
+        "inactive_tab_fg": r["ui"]["fgMuted"],
+        "inactive_tab_hover_bg": inactive_tab_hover_bg,
+        "inactive_tab_hover_fg": r["ui"]["fg"],
+        "new_tab_bg": tab_bar_background,
+        "new_tab_fg": r["ui"]["fgMuted"],
+        "new_tab_hover_bg": inactive_tab_hover_bg,
+        "new_tab_hover_fg": r["ui"]["fg"],
+        "window_frame_active_titlebar_bg": tab_bar_background,
+        "window_frame_inactive_titlebar_bg": tab_bar_background,
+        "window_frame_active_titlebar_fg": r["ui"]["fg"],
+        "window_frame_inactive_titlebar_fg": r["ui"]["fgMuted"],
+        "window_frame_active_titlebar_border_bottom": p["whitespace"],
+        "window_frame_inactive_titlebar_border_bottom": p["whitespace"],
+        "ansi_0": r["ansi"]["black"],
+        "ansi_1": r["ansi"]["red"],
+        "ansi_2": r["ansi"]["green"],
+        "ansi_3": r["ansi"]["yellow"],
+        "ansi_4": r["ansi"]["blue"],
+        "ansi_5": r["ansi"]["magenta"],
+        "ansi_6": r["ansi"]["cyan"],
+        "ansi_7": r["ansi"]["white"],
+        "bright_0": r["ansi"]["brightBlack"],
+        "bright_1": r["ansi"]["brightRed"],
+        "bright_2": r["ansi"]["brightGreen"],
+        "bright_3": r["ansi"]["brightYellow"],
+        "bright_4": r["ansi"]["brightBlue"],
+        "bright_5": r["ansi"]["brightMagenta"],
+        "bright_6": r["ansi"]["brightCyan"],
+        "bright_7": r["ansi"]["brightWhite"],
+    }
+
+
+def wezterm_theme_lua(ctx: dict[str, Any], root: Path) -> str:
+    template = load_wezterm_template(root)
+    doc = render_template_value(template["document"], build_wezterm_slots(ctx))
+    return "\n".join(
+        [
+            f"-- Auto-generated from themes/core/{ctx['meta']['id']}.yaml",
+            f"-- Template: {template['name']} v{template['version']}",
+            f"return {lua_literal(doc)}",
+            "",
+        ]
+    )
+
+
+def build_k9s_slots(ctx: dict[str, Any]) -> dict[str, Any]:
+    p = ctx["palette"]
+    r = ctx["roles"]
+    is_light = ctx["meta"]["variant"] == "light"
+    selected_bg = ensure_distinct_background(r["ui"]["selection"], r["ui"]["bg"], r["ui"]["borderActive"], light=is_light)
+    selected_fg = best_contrast(selected_bg, p["white"], r["ui"]["bg"], r["ui"]["fg"])
+    dialog_bg = raised_surface(r["ui"]["bgAlt"], r["ui"]["border"], light=is_light)
+    dialog_button_bg = r["syntax"]["function"]
+    dialog_button_focus_bg = r["vcs"]["conflict"]
+    dialog_button_fg = best_contrast(dialog_button_bg, p["white"], r["ui"]["bg"], r["ui"]["fg"])
+    dialog_button_focus_fg = best_contrast(dialog_button_focus_bg, p["white"], r["ui"]["bg"], r["ui"]["fg"])
+    return {
+        "body_fg": r["ui"]["fg"],
+        "body_bg": r["ui"]["bg"],
+        "body_logo": r["syntax"]["function"],
+        "prompt_fg": r["ui"]["fg"],
+        "prompt_bg": r["ui"]["bg"],
+        "prompt_suggest": r["syntax"]["function"],
+        "help_fg": r["ui"]["fg"],
+        "help_bg": r["ui"]["bg"],
+        "help_section": r["diagnostics"]["ok"],
+        "help_key": r["syntax"]["link"],
+        "help_num_key": r["diagnostics"]["error"],
+        "info_fg": r["diagnostics"]["info"],
+        "info_section": r["ui"]["fg"],
+        "dialog_fg": r["ui"]["fg"],
+        "dialog_bg": dialog_bg,
+        "dialog_button_fg": dialog_button_fg,
+        "dialog_button_bg": dialog_button_bg,
+        "dialog_button_focus_fg": dialog_button_focus_fg,
+        "dialog_button_focus_bg": dialog_button_focus_bg,
+        "dialog_label": r["diagnostics"]["warning"],
+        "dialog_field": r["ui"]["fg"],
+        "frame_border_fg": r["ui"]["border"],
+        "frame_border_focus": r["ui"]["borderActive"],
+        "frame_menu_fg": r["ui"]["fg"],
+        "frame_menu_key": r["syntax"]["link"],
+        "frame_menu_num_key": r["vcs"]["conflict"],
+        "frame_crumbs_fg": r["ui"]["fg"],
+        "frame_crumbs_bg": r["ui"]["bgAlt"],
+        "frame_crumbs_active": selected_bg,
+        "frame_status_new": r["diagnostics"]["info"],
+        "frame_status_modify": r["vcs"]["modified"],
+        "frame_status_add": r["vcs"]["added"],
+        "frame_status_pending": r["diagnostics"]["warning"],
+        "frame_status_error": r["diagnostics"]["error"],
+        "frame_status_highlight": r["syntax"]["link"],
+        "frame_status_kill": r["vcs"]["conflict"],
+        "frame_status_completed": r["ui"]["fgMuted"],
+        "frame_title_fg": r["ui"]["fg"],
+        "frame_title_bg": r["ui"]["bgAlt"],
+        "frame_title_highlight": r["vcs"]["modified"],
+        "frame_title_counter": r["diagnostics"]["info"],
+        "frame_title_filter": r["vcs"]["conflict"],
+        "table_fg": r["ui"]["fg"],
+        "table_bg": r["ui"]["bg"],
+        "table_cursor_fg": selected_fg,
+        "table_cursor_bg": selected_bg,
+        "table_mark": r["diagnostics"]["warning"],
+        "table_header_fg": r["ui"]["fg"],
+        "table_header_bg": r["ui"]["bg"],
+        "table_header_sorter": r["syntax"]["link"],
+        "xray_fg": r["ui"]["fg"],
+        "xray_bg": r["ui"]["bg"],
+        "xray_cursor": selected_bg,
+        "xray_cursor_text": selected_fg,
+        "xray_graphic": r["syntax"]["link"],
+        "charts_bg": r["ui"]["bg"],
+        "charts_chart_bg": r["ui"]["bg"],
+        "charts_dial_bg": r["ui"]["bg"],
+        "charts_dial_primary": r["vcs"]["added"],
+        "charts_dial_secondary": r["diagnostics"]["error"],
+        "charts_chart_primary": r["vcs"]["added"],
+        "charts_chart_secondary": r["diagnostics"]["error"],
+        "charts_cpu_primary": r["syntax"]["keyword"],
+        "charts_cpu_secondary": r["diagnostics"]["info"],
+        "charts_mem_primary": r["diagnostics"]["warning"],
+        "charts_mem_secondary": r["vcs"]["conflict"],
+        "yaml_key": r["syntax"]["link"],
+        "yaml_colon": r["ui"]["fgMuted"],
+        "yaml_value": r["ui"]["fg"],
+        "logs_fg": r["ui"]["fg"],
+        "logs_bg": r["ui"]["bg"],
+        "logs_indicator_fg": dialog_button_fg,
+        "logs_indicator_bg": dialog_button_bg,
+        "logs_indicator_on": r["vcs"]["added"],
+        "logs_indicator_off": r["ui"]["fgMuted"],
+    }
+
+
+def k9s_theme_doc(ctx: dict[str, Any], root: Path) -> dict[str, Any]:
+    template = load_k9s_template(root)
+    return render_template_value(template["document"], build_k9s_slots(ctx))
 
 
 def zellij_rgb(hex_color: str) -> str:
@@ -1190,17 +1426,21 @@ def generate_theme(theme_path: Path, template: dict[str, Any], root: Path) -> li
     theme_id = ctx["meta"]["id"]
 
     ghostty_path = root / "exports" / "ghostty" / f"{theme_id}.conf"
+    k9s_path = root / "exports" / "k9s" / f"{theme_id}.yaml"
     zed_path = root / "exports" / "zed" / f"{theme_id}.json"
     nvim_path = root / "exports" / "nvim" / f"{theme_id}.lua"
     starship_path = root / "exports" / "starship" / f"{theme_id}.toml"
+    wezterm_path = root / "exports" / "wezterm" / f"{theme_id}.lua"
     zellij_path = root / "exports" / "zellij" / f"{theme_id}.kdl"
 
     write_text(ghostty_path, ghostty_theme_conf(ctx, root))
+    write_yaml(k9s_path, k9s_theme_doc(ctx, root))
     write_json(zed_path, zed_theme_doc(ctx, root))
     write_text(nvim_path, nvim_lua(ctx, root))
     write_text(starship_path, starship_theme_toml(ctx, root))
+    write_text(wezterm_path, wezterm_theme_lua(ctx, root))
     write_text(zellij_path, zellij_theme_kdl(ctx, root))
-    return [ghostty_path, zed_path, nvim_path, starship_path, zellij_path]
+    return [ghostty_path, k9s_path, zed_path, nvim_path, starship_path, wezterm_path, zellij_path]
 
 
 def discover_default_targets(root: Path) -> list[Path]:

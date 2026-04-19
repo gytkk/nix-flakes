@@ -157,6 +157,10 @@ def check_common(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
     check_source_list(path_str, doc.get("sources"), errors)
 
 
+def check_document_template(path: str, document: Any, errors: list[str]) -> None:
+    expect(isinstance(document, dict) and len(document) > 0, f"{path}.document must be a non-empty object", errors)
+
+
 def check_nvim(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
     check_common(path, doc, errors)
     path_str = str(path)
@@ -329,6 +333,33 @@ def check_zellij(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
     check_zellij_sections(f"{path_str}.sections", doc.get("sections"), errors)
 
 
+def check_wezterm(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
+    check_common(path, doc, errors)
+    path_str = str(path)
+    contract = doc.get("lua_schema")
+    expect(isinstance(contract, dict), f"{path_str}.lua_schema must be an object", errors)
+    if isinstance(contract, dict):
+        require_keys(contract, ["root_type", "token_prefix", "value_types"], f"{path_str}.lua_schema", errors)
+        expect(contract.get("root_type") == "table", f"{path_str}.lua_schema.root_type must be 'table'", errors)
+        expect(contract.get("token_prefix") == "$", f"{path_str}.lua_schema.token_prefix must be '$'", errors)
+        expect(isinstance(contract.get("value_types"), list) and len(contract["value_types"]) > 0, f"{path_str}.lua_schema.value_types must be a non-empty list", errors)
+    check_document_template(path_str, doc.get("document"), errors)
+
+
+def check_k9s(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
+    check_common(path, doc, errors)
+    path_str = str(path)
+    contract = doc.get("skin_schema")
+    expect(isinstance(contract, dict), f"{path_str}.skin_schema must be an object", errors)
+    if isinstance(contract, dict):
+        require_keys(contract, ["format", "root_key", "token_prefix", "value_types"], f"{path_str}.skin_schema", errors)
+        expect(contract.get("format") == "yaml", f"{path_str}.skin_schema.format must be 'yaml'", errors)
+        expect(contract.get("root_key") == "k9s", f"{path_str}.skin_schema.root_key must be 'k9s'", errors)
+        expect(contract.get("token_prefix") == "$", f"{path_str}.skin_schema.token_prefix must be '$'", errors)
+        expect(isinstance(contract.get("value_types"), list) and len(contract["value_types"]) > 0, f"{path_str}.skin_schema.value_types must be a non-empty list", errors)
+    check_document_template(path_str, doc.get("document"), errors)
+
+
 def check_nvim_override_template(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
     path_str = str(path)
     expected_top = ["version", "meta", "groups", "links"]
@@ -470,11 +501,13 @@ def check_zellij_override(path: Path, doc: dict[str, Any], errors: list[str]) ->
 
 
 JSON_CHECKS = {
+    ROOT / "templates" / "k9s" / "official-template.json": check_k9s,
     ROOT / "templates" / "ghostty" / "official-template.json": check_ghostty,
     ROOT / "templates" / "nvim" / "official-template.json": check_nvim,
     ROOT / "templates" / "zed" / "official-template.json": check_zed,
     ROOT / "templates" / "nvim" / "plugins.json": check_nvim_plugin_template,
     ROOT / "templates" / "starship" / "official-template.json": check_starship,
+    ROOT / "templates" / "wezterm" / "official-template.json": check_wezterm,
     ROOT / "templates" / "zellij" / "official-template.json": check_zellij,
 }
 
