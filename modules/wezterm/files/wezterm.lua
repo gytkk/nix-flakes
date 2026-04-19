@@ -1,13 +1,45 @@
 local wezterm = require 'wezterm'
 
 local config = wezterm.config_builder()
-local active_tab_bg = '#fdfdfd'
-local active_tab_fg = '#383a42'
-local tab_bar_bg = '#eef1f4'
-local inactive_tab_bg = '#e4e9ef'
-local inactive_tab_hover_bg = '#dde3ea'
-local inactive_tab_fg = '#5c6370'
+local theme_path = wezterm.config_dir .. '/themes/__COMMON_THEME__.lua'
+local ok, loaded_theme = pcall(dofile, theme_path)
+if not ok then
+  wezterm.log_error('Failed to load generated WezTerm theme from ' .. theme_path .. ': ' .. tostring(loaded_theme))
+  loaded_theme = {}
+end
+if type(loaded_theme) ~= 'table' then
+  wezterm.log_error('Generated WezTerm theme did not return a table: ' .. theme_path)
+  loaded_theme = {}
+end
+
+local colors = loaded_theme.colors or {}
+local tab_bar = loaded_theme.tab_bar or {}
+local tab_bar_colors = colors.tab_bar or {}
+local active_tab = tab_bar_colors.active_tab or {}
+local inactive_tab = tab_bar_colors.inactive_tab or {}
+local inactive_tab_hover = tab_bar_colors.inactive_tab_hover or {}
+local new_tab = tab_bar_colors.new_tab or {}
+local new_tab_hover = tab_bar_colors.new_tab_hover or {}
 local fixed_tab_width = 20
+
+local function pick(...)
+  for index = 1, select('#', ...) do
+    local value = select(index, ...)
+    if value ~= nil then
+      return value
+    end
+  end
+  return nil
+end
+
+local active_tab_bg = pick(tab_bar.active_bg, active_tab.bg_color, colors.background, '#2b2042')
+local active_tab_fg = pick(tab_bar.active_fg, active_tab.fg_color, colors.foreground, '#c0c0c0')
+local tab_bar_bg = pick(tab_bar.background, tab_bar_colors.background, colors.background, '#1b1032')
+local inactive_tab_bg = pick(tab_bar.inactive_bg, inactive_tab.bg_color, new_tab.bg_color, tab_bar_bg)
+local inactive_tab_hover_bg = pick(tab_bar.inactive_hover_bg, inactive_tab_hover.bg_color, inactive_tab_bg)
+local inactive_tab_fg = pick(tab_bar.inactive_fg, inactive_tab.fg_color, new_tab.fg_color, colors.foreground, '#808080')
+local inactive_tab_hover_fg = pick(tab_bar.inactive_hover_fg, inactive_tab_hover.fg_color, active_tab_fg)
+local window_frame = loaded_theme.window_frame or {}
 
 local function tab_title(tab)
   local title = tab.tab_title
@@ -36,7 +68,7 @@ wezterm.on('format-tab-title', function(tab, _, _, _, hover, max_width)
     fg = active_tab_fg
   elseif hover then
     bg = inactive_tab_hover_bg
-    fg = active_tab_fg
+    fg = inactive_tab_hover_fg
   end
 
   return {
@@ -87,68 +119,16 @@ config.use_fancy_tab_bar = true
 config.hide_tab_bar_if_only_one_tab = true
 
 config.window_frame = {
-  active_titlebar_bg = tab_bar_bg,
-  inactive_titlebar_bg = tab_bar_bg,
-  active_titlebar_fg = active_tab_fg,
-  inactive_titlebar_fg = inactive_tab_fg,
-  active_titlebar_border_bottom = '#d0d7de',
-  inactive_titlebar_border_bottom = '#d0d7de',
+  active_titlebar_bg = pick(window_frame.active_titlebar_bg, tab_bar_bg),
+  inactive_titlebar_bg = pick(window_frame.inactive_titlebar_bg, tab_bar_bg),
+  active_titlebar_fg = pick(window_frame.active_titlebar_fg, active_tab_fg),
+  inactive_titlebar_fg = pick(window_frame.inactive_titlebar_fg, inactive_tab_fg),
+  active_titlebar_border_bottom = pick(window_frame.active_titlebar_border_bottom, tab_bar.edge, tab_bar_colors.inactive_tab_edge, '#575757'),
+  inactive_titlebar_border_bottom = pick(window_frame.inactive_titlebar_border_bottom, tab_bar.edge, tab_bar_colors.inactive_tab_edge, '#575757'),
 }
 
-config.colors = {
-  foreground = '#383a42',
-  background = '#fdfdfd',
-  cursor_bg = '#3a9a88',
-  cursor_fg = '#ffffff',
-  cursor_border = '#3a9a88',
-  selection_fg = '#383a42',
-  selection_bg = '#bfceff',
-  scrollbar_thumb = '#d0d7de',
-  split = '#e5e7eb',
-  ansi = {
-    '#383a42',
-    '#e45649',
-    '#50a14f',
-    '#c18401',
-    '#0184bc',
-    '#d65d0e',
-    '#427b58',
-    '#fdfdfd',
-  },
-  brights = {
-    '#4f525e',
-    '#e06c75',
-    '#98c379',
-    '#e5c07b',
-    '#61afef',
-    '#e78a4e',
-    '#689d6a',
-    '#ffffff',
-  },
-  tab_bar = {
-    background = tab_bar_bg,
-    inactive_tab_edge = '#d0d7de',
-    active_tab = {
-      bg_color = active_tab_bg,
-      fg_color = active_tab_fg,
-    },
-    inactive_tab = {
-      bg_color = inactive_tab_bg,
-      fg_color = inactive_tab_fg,
-    },
-    inactive_tab_hover = {
-      bg_color = inactive_tab_hover_bg,
-      fg_color = active_tab_fg,
-    },
-    new_tab = {
-      bg_color = tab_bar_bg,
-      fg_color = inactive_tab_fg,
-    },
-    new_tab_hover = {
-      bg_color = inactive_tab_hover_bg,
-      fg_color = active_tab_fg,
-    },
-  },
-}
+if next(colors) ~= nil then
+  config.colors = colors
+end
 
 return config
