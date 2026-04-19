@@ -19,7 +19,7 @@ Goal: keep one reusable source of truth under `themes/` that can later be export
 
 ```text
 themes/
-├── SCHEMA.md                  # this document
+├── README.md                  # this document
 ├── TEMPLATE.yaml              # strict authoring template
 ├── core/
 │   ├── <theme-name>.yaml      # canonical theme definitions
@@ -471,9 +471,9 @@ When creating a new theme file:
 5. only use raw hex in `roles` when a theme truly needs a value that should not become a shared alias
 6. keep the same leaf ordering in each role group as the template
 7. if a value is theme-specific but the role name is shared, change only the value, not the structure
-8. if you think a new alias or role is needed, update `SCHEMA.md` and `TEMPLATE.yaml` first
+8. if you think a new alias or role is needed, update `README.md` and `TEMPLATE.yaml` first
 
-In short, `SCHEMA.md` defines the rules and `TEMPLATE.yaml` defines the exact authoring shape.
+In short, `README.md` defines the rules and `TEMPLATE.yaml` defines the exact authoring shape.
 
 Validation helper:
 
