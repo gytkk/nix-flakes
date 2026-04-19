@@ -2,19 +2,19 @@
   config,
   lib,
   pkgs,
-  flakeDirectory,
+  themeExports,
   isWSL ? false,
   osConfig ? null,
   ...
 }:
 
 let
-  isPylvOnyx =
-    osConfig != null
-    && (osConfig.networking.hostName or null) == "pylv-onyx";
+  isPylvOnyx = osConfig != null && (osConfig.networking.hostName or null) == "pylv-onyx";
 in
 let
-  starshipThemeConfig = config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/themes/exports/starship/${config.modules.commonTheme}.toml";
+  starshipThemeConfig = config.lib.file.mkOutOfStoreSymlink (
+    themeExports.mutableFile "starship" "${config.modules.commonTheme}.toml"
+  );
 in
 {
   home.packages = with pkgs; [
@@ -175,19 +175,21 @@ in
           fi
         '';
 
-        openclawCompletion = lib.mkIf isPylvOnyx (lib.mkOrder 1100 ''
-          # OpenClaw completion is managed declaratively here so the CLI's
-          # one-shot installer does not get reverted by Home Manager.
-          if command -v openclaw > /dev/null; then
-            local_openclaw_completion_cache="$HOME/.openclaw/completions/openclaw.zsh"
-            if [[ ! -r "$local_openclaw_completion_cache" ]]; then
-              openclaw completion --write-state >/dev/null 2>&1 || true
+        openclawCompletion = lib.mkIf isPylvOnyx (
+          lib.mkOrder 1100 ''
+            # OpenClaw completion is managed declaratively here so the CLI's
+            # one-shot installer does not get reverted by Home Manager.
+            if command -v openclaw > /dev/null; then
+              local_openclaw_completion_cache="$HOME/.openclaw/completions/openclaw.zsh"
+              if [[ ! -r "$local_openclaw_completion_cache" ]]; then
+                openclaw completion --write-state >/dev/null 2>&1 || true
+              fi
+              # OpenClaw Completion
+              [[ -r "$local_openclaw_completion_cache" ]] && source "$local_openclaw_completion_cache"
+              unset local_openclaw_completion_cache
             fi
-            # OpenClaw Completion
-            [[ -r "$local_openclaw_completion_cache" ]] && source "$local_openclaw_completion_cache"
-            unset local_openclaw_completion_cache
-          fi
-        '');
+          ''
+        );
       in
       lib.mkMerge [
         earlyInit

@@ -1,12 +1,12 @@
 {
   config,
   pkgs,
-  flakeDirectory,
+  themeExports,
   ...
 }:
 
 let
-  generatedThemes = config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/themes/exports/zellij";
+  generatedThemes = config.lib.file.mkOutOfStoreSymlink (themeExports.mutableDir "zellij");
   configPath = if pkgs.stdenv.isDarwin then ./files/config.darwin.kdl else ./files/config.linux.kdl;
   configTemplate = builtins.readFile configPath;
   renderedConfig = pkgs.writeText "zellij-config.kdl" (

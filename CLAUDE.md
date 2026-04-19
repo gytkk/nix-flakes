@@ -106,7 +106,7 @@ modules/<name>/
 | `nixos/`     | NixOS common config | `baseline.nix`, `remote-access.nix`, `user.nix`     | NO      |
 | `claude/`    | Claude Code         | `files/settings.json`, `files/CLAUDE.md`            | 부분적  |
 | `codex/`     | OpenAI Codex CLI    | `files/config.toml`, `files/AGENTS.md`              | YES     |
-| `ghostty/`   | Ghostty terminal    | `files/config`, `themes/exports/ghostty`            | NO      |
+| `ghostty/`   | Ghostty terminal    | `files/config`, `themes/exports/ghostty`            | YES     |
 | `git/`       | Git configuration   | `default.nix`                                       | NO      |
 | `k9s/`       | Kubernetes manager  | `default.nix`                                       | NO      |
 | `kitty/`     | Kitty terminal      | `files/kitty.conf`                                  | YES     |

@@ -1,12 +1,13 @@
 {
   config,
   flakeDirectory,
+  themeExports,
   ...
 }:
 
 let
   mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/vim/${path}";
-  nvimThemeExports = config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/themes/exports/nvim";
+  nvimThemeExports = config.lib.file.mkOutOfStoreSymlink (themeExports.mutableDir "nvim");
 in
 {
   xdg.configFile."nvim/lua/config".source = mkSymlink "files/config";

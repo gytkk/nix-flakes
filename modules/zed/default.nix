@@ -4,6 +4,7 @@
   pkgs,
   username,
   flakeDirectory,
+  themeExports,
   isWSL ? false,
   ...
 }:
@@ -12,10 +13,10 @@ let
   cfg = config.modules.zed;
 
   mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/zed/${path}";
-  zedThemeExportsPath = "${flakeDirectory}/themes/exports/zed";
+  zedThemeExportsPath = themeExports.mutableDir "zed";
   zedThemeExports = config.lib.file.mkOutOfStoreSymlink zedThemeExportsPath;
   zedThemeDoc = builtins.fromJSON (
-    builtins.readFile (../../themes/exports/zed + "/${config.modules.commonTheme}.json")
+    builtins.readFile (themeExports.file "zed" "${config.modules.commonTheme}.json")
   );
   zedThemeName = if zedThemeDoc ? name then zedThemeDoc.name else config.modules.commonTheme;
   baseSettings = builtins.fromJSON (builtins.readFile ./files/settings.json);

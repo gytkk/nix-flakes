@@ -73,6 +73,7 @@ rec {
         extraSpecialArgs = {
           inherit (config) username homeDirectory;
           inherit inputs flakeDirectory;
+          themeExports = import ./themes.nix { inherit flakeDirectory; };
           isWSL = config.isWSL or false;
           hasSystemCodexConfig = false;
         };
@@ -100,6 +101,7 @@ rec {
       specialArgs = {
         inherit inputs flakeDirectory;
         inherit (config) username homeDirectory;
+        themeExports = import ./themes.nix { inherit flakeDirectory; };
         isWSL = config.isWSL or false;
         hasSystemCodexConfig = true;
       };
