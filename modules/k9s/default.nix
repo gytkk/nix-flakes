@@ -86,5 +86,8 @@ in
     };
   };
 
-  xdg.configFile."k9s/skins".source = generatedSkins;
+  xdg.configFile."k9s/skins" = {
+    source = generatedSkins;
+    force = true;
+  };
 }
