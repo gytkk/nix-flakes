@@ -6,7 +6,7 @@ auto-update = check
 term = xterm-256color
 
 # Theme comes from ~/.config/ghostty/themes/<commonTheme>.conf.
-# Home Manager rewrites the theme entry below to match modules.commonTheme.
+# Home Manager rewrites only the placeholder token below to match modules.commonTheme.
 theme = "__COMMON_THEME__.conf"
 adjust-cursor-thickness = 250%
 cursor-style = bar
