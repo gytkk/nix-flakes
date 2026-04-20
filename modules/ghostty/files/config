@@ -12,7 +12,7 @@ adjust-cursor-thickness = 250%
 cursor-style = bar
 cursor-click-to-move = true
 
-background-opacity = 0.95
+background-opacity = 1
 minimum-contrast = 1.6
 
 font-size = 12
@@ -28,7 +28,7 @@ window-inherit-working-directory = true
 macos-window-buttons = hidden
 macos-titlebar-style = tabs
 
-unfocused-split-opacity = 0.85
+unfocused-split-opacity = 0.9
 
 link-url = true
 clipboard-trim-trailing-spaces = true
