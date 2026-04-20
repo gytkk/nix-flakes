@@ -1,6 +1,7 @@
 // Managed via Home Manager as the Zellij config.
 __PLATFORM_SETTINGS__default_layout "default"
 scroll_buffer_size 99000
+session_serialization false
 show_startup_tips false
 theme "__COMMON_THEME__"
 
