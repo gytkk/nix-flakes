@@ -184,12 +184,8 @@ Resources should supplement the tools instead of expanding the tool count:
 ## Zellij config
 
 - Zellij is managed through `modules/zellij/default.nix`.
-- `home-manager switch` installs `~/.config/zellij/config.kdl` as an out-of-store symlink to `modules/zellij/files/config.darwin.kdl` on macOS and `modules/zellij/files/config.linux.kdl` on other platforms, so repo edits update the live config immediately.
-- The checked-in defaults keep the `catppuccin-mocha` theme, the builtin
-  welcome layout, startup tips disabled, Zellij mouse mode enabled for pane
-  scrolling in TUI apps, Kitty keyboard protocol support disabled in Zellij,
-  and `Ctrl+b` passed through to terminal apps like Neovim instead of entering
-  Zellij's tmux mode.
+- `home-manager switch` renders `~/.config/zellij/config.kdl` from the platform-specific template in `modules/zellij/files/`, exposes the generated `themes/exports/zellij` directory at `~/.config/zellij/themes`, and installs the pinned `zellaude` layout plus its WASM and hook script under `~/.config/zellij/{layouts,plugins}`.
+- The checked-in defaults keep the selected shared theme, set `zellaude` as the default startup layout, disable startup tips, and leave `Ctrl+b` unbound so terminal apps like Neovim still receive it instead of entering Zellij's tmux mode.
 - In WezTerm, hold `Shift` while dragging to bypass Zellij mouse reporting for terminal-side selection, then use `Cmd+C` to copy.
 - On macOS, the repo-managed Darwin config includes `copy_command "pbcopy"` so explicit Zellij copy actions continue to target the system clipboard.
 - Local interactive shells started from Ghostty automatically `exec zellij`.
