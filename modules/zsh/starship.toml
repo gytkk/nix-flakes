@@ -154,7 +154,7 @@ format = '[[ $symbol$context ](fg:foam bg:layer1)]($style)'
 disabled = false
 time_format = "%R"
 style = "bg:layer3"
-format = '[[ 󰥔 $time ](fg:muted bg:layer3)]($style)'
+format = '[[ 󰥔 $time ](fg:text bg:layer3)]($style)'
 
 [hostname]
 ssh_only = true

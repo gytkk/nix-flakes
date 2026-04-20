@@ -215,7 +215,7 @@
         { "key": "disabled", "value": false },
         { "key": "time_format", "value": "%R" },
         { "key": "style", "value": "bg:layer3" },
-        { "key": "format", "value": "[[ 󰥔 $time ](fg:muted bg:layer3)]($style)" }
+        { "key": "format", "value": "[[ 󰥔 $time ](fg:text bg:layer3)]($style)" }
       ]
     },
     {
