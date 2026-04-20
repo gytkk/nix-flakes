@@ -35,6 +35,8 @@ status_line = [
   "context-used",
   "fast-mode",
 ]
+theme = "catppuccin-mocha"
+
 
 [history]
 persistence = "save-all"
