@@ -150,6 +150,6 @@ AI 코딩 에이전트 설정 변경 시 **로컬 프로젝트 파일이 아닌 
 
 ### Package Management
 
-- **Base packages** (`base/default.nix`): nixfmt, coreutils, findutils, docker, gcc, jq, fd, ripgrep, git, gh, lazygit, nodejs, bun, go, uv, ruff, rustup, kubectl, helm, etc.
-- **LSP servers** (`modules/lsp/`): nixd, gopls, typescript-language-server, terraform-ls, metals, ty, yaml-language-server, marksman (rust-analyzer는 rustup이 제공)
+- **Base packages** (`base/default.nix`): nixfmt, coreutils, findutils, docker, gcc, jq, fd, ripgrep, git, gh, lazygit, nodejs, bun, go, uv, ruff, `pkgs.rustToolchain`, kubectl, helm, etc.
+- **LSP servers** (`modules/lsp/`): nixd, gopls, typescript-language-server, terraform-ls, metals, ty, yaml-language-server, marksman (Rust tooling including `rust-analyzer` comes from `pkgs.rustToolchain`)
 - **Devsisters-specific** (`base/devsisters/`): saml2aws, vault, scala, ruby, databricks-cli
