@@ -1,6 +1,6 @@
 // Managed via Home Manager as the Linux Zellij config.
 
-default_layout "zellaude"
+default_layout "default"
 show_startup_tips false
 theme "one-half-light"
 

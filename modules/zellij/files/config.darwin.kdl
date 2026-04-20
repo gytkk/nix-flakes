@@ -1,7 +1,7 @@
 // Managed via Home Manager as the macOS Zellij config.
 
 copy_command "pbcopy"
-default_layout "zellaude"
+default_layout "default"
 show_startup_tips false
 theme "one-half-light"
 
