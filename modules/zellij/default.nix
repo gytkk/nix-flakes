@@ -1,5 +1,6 @@
 {
   config,
+  lib,
   pkgs,
   themeExports,
   ...
@@ -7,10 +8,20 @@
 
 let
   generatedThemes = config.lib.file.mkOutOfStoreSymlink (themeExports.mutableDir "zellij");
-  configPath = if pkgs.stdenv.isDarwin then ./files/config.darwin.kdl else ./files/config.linux.kdl;
-  configTemplate = builtins.readFile configPath;
+  configTemplate = builtins.readFile ./files/config.kdl;
+  platformSettings = lib.optionalString pkgs.stdenv.isDarwin ''
+    copy_command "pbcopy"
+  '';
   renderedConfig = pkgs.writeText "zellij-config.kdl" (
-    builtins.replaceStrings [ ''theme "one-half-light"'' ] [ ''theme "${config.modules.commonTheme}"'' ]
+    builtins.replaceStrings
+      [
+        "__PLATFORM_SETTINGS__"
+        "__COMMON_THEME__"
+      ]
+      [
+        platformSettings
+        config.modules.commonTheme
+      ]
       configTemplate
   );
   zellijWrapper = pkgs.writeShellScriptBin "zellij" ''

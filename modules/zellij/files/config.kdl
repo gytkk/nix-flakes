@@ -1,9 +1,8 @@
-// Managed via Home Manager as the Linux Zellij config.
-
-default_layout "default"
+// Managed via Home Manager as the Zellij config.
+__PLATFORM_SETTINGS__default_layout "default"
 scroll_buffer_size 99000
 show_startup_tips false
-theme "one-half-light"
+theme "__COMMON_THEME__"
 
 keybinds {
     tab {
