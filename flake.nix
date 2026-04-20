@@ -40,6 +40,13 @@
     nix-zed-extensions = {
       url = "github:DuskSystems/nix-zed-extensions";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.rust-overlay.follows = "rust-overlay";
+    };
+
+    # rust-overlay - reproducible Rust toolchains without rustup
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # agenix - secrets management for NixOS

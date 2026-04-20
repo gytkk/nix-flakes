@@ -1,13 +1,17 @@
 { inputs, nixpkgs }:
 let
+  repoOverlays = import ../overlays { inherit inputs; };
+
   # Common overlays for both Home Manager and NixOS
   commonOverlays = [
     inputs.copyparty.overlays.default
     inputs.nix-zed-extensions.overlays.default
     inputs.flake-stores.overlays.default
     inputs.niri.overlays.niri
-    (import ../overlays { inherit inputs; }).nixpkgs-versions
-    (import ../overlays { inherit inputs; }).package-fixes
+    inputs.rust-overlay.overlays.default
+    repoOverlays.nixpkgs-versions
+    repoOverlays.toolchains
+    repoOverlays.package-fixes
   ];
 
   # Pre-evaluated pkgs per system (evaluated once, reused everywhere)

@@ -34,4 +34,14 @@
     # databricks-cli 0.290.1: cmd/apps 테스트 실패 (upstream nixpkgs 문제)
     databricks-cli = prev.databricks-cli.overrideAttrs { doCheck = false; };
   };
+
+  # Shared toolchains used across modules and hosts
+  toolchains = final: _prev: {
+    rustToolchain = final.rust-bin.stable.latest.default.override {
+      extensions = [
+        "rust-analyzer"
+        "rust-src"
+      ];
+    };
+  };
 }

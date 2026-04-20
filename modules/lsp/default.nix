@@ -43,7 +43,7 @@ in
       # Markdown
       marksman
 
-      # Rust: rust-analyzer is provided by rustup
+      # Rust: rust-analyzer is bundled with pkgs.rustToolchain in base/default.nix
     ];
   };
 }

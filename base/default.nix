@@ -97,7 +97,7 @@
         ruff
 
         # Rust
-        rustup
+        rustToolchain
 
         # JavaScript + Node.js
         bun
