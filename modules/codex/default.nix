@@ -9,6 +9,7 @@
 
 let
   cfg = config.modules.codex;
+  mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/codex/${path}";
   codexConfigPath = "${config.home.homeDirectory}/.codex/config.toml";
   legacySystemCodexConfigPath = "/etc/codex/config.toml";
   systemCodexConfigPath = "/etc/codex/managed_config.toml";
@@ -145,8 +146,8 @@ in
   config = lib.mkIf cfg.enable {
     home.packages = [ pkgs.codex ];
 
-    home.file.".codex/AGENTS.md".source =
-      config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/codex/files/AGENTS.md";
+    home.file.".codex/AGENTS.md".source = mkSymlink "files/AGENTS.md";
+    home.file.".codex/hooks.json".source = mkSymlink "files/hooks.json";
 
     home.activation.codexUserConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       ${extractProjectsFunction}

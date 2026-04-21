@@ -41,6 +41,16 @@ The official [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc)
 - If `/etc/codex/managed_config.toml` or the legacy `/etc/codex/config.toml` already exists as a regular file, activation stops instead of overwriting it.
 - `~/.codex/config.toml` stays writable for user-local state such as `[projects."..."]` trust entries.
 
+### Agent Session Record Hooks
+
+- Claude `SessionEnd` and Codex `Stop` / `SessionStart` hooks are installed by
+  default through `modules/agent-session-record`.
+- Session transcripts are uploaded best-effort to `pylv-onyx` over `rsync` +
+  SSH and stored under `/home/gytkk/agent-sessions/{claude,codex}/...`.
+- Hook failures only append warning logs under
+  `~/.local/state/agent-session-record/warnings.log`; they do not block Claude
+  exit or Codex continuation.
+
 ### Codex LSP MCP Implementation Plan
 
 This section is a design plan only. The bridge and skills below are not

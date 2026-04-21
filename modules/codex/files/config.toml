@@ -9,6 +9,7 @@ web_search = "live"
 personality = "pragmatic"
 
 [features]
+codex_hooks = true
 fast_mode = true
 shell_tool = true
 multi_agent = true

@@ -12,6 +12,7 @@
 {
   imports = [
     # 기본 모듈들 (항상 import됨)
+    ../modules/agent-session-record
     ../modules/aerospace
     ../modules/claude
     ../modules/codex
@@ -35,6 +36,8 @@
   };
 
   config = {
+    modules.agentSessionRecord.enable = lib.mkDefault true;
+
     # Disable news on update
     news.display = "silent";
 
