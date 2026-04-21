@@ -52,10 +52,10 @@ let
 
     message="$(${pkgs.coreutils}/bin/cat "$MESSAGE_FILE")"
     jobs_json="$($OPENCLAW_BIN cron list --json 2>/dev/null || true)"
-    exists="$(${pkgs.jq}/bin/jq -r --arg id "$JOB_ID" '.jobs[]? | select(.id == $id) | .id' <<<"$jobs_json" | head -n 1)"
+    exists="$(${pkgs.jq}/bin/jq -r --arg id "$JOB_ID" --arg name "$JOB_NAME" '.jobs[]? | select(.id == $id or .name == $name) | .id' <<<"$jobs_json" | head -n 1)"
 
     if [ -n "$exists" ]; then
-      "$OPENCLAW_BIN" cron edit "$JOB_ID" \
+      "$OPENCLAW_BIN" cron edit "$exists" \
         --name "$JOB_NAME" \
         --description "$JOB_DESCRIPTION" \
         --cron "$JOB_EXPR" \
@@ -86,11 +86,6 @@ let
         --json \
         >/dev/null
 
-      fresh_jobs_json="$($OPENCLAW_BIN cron list --json 2>/dev/null || true)"
-      created_id="$(${pkgs.jq}/bin/jq -r --arg name "$JOB_NAME" '.jobs[]? | select(.name == $name) | .id' <<<"$fresh_jobs_json" | head -n 1)"
-      if [ -n "$created_id" ] && [ "$created_id" != "$JOB_ID" ]; then
-        "$OPENCLAW_BIN" cron edit "$created_id" --name "$JOB_NAME" >/dev/null || true
-      fi
     fi
   '';
 in
