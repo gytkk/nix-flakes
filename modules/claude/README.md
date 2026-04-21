@@ -18,6 +18,7 @@ This module installs and configures Claude Code, Anthropic's AI coding assistant
 - **Agent Teams**: Enabled (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`)
 - **MCP**: Enables all project MCP servers, Context7, Notion
 - **Permissions**: Pre-approved tools (Bash, Read, Edit, WebFetch, Context7)
+- **Permission Mode**: `acceptEdits` for the working directory and Claude default repo-local worktrees
 - **Language**: Korean
 
 ### CLAUDE.md
@@ -26,7 +27,7 @@ Global development guidelines deployed to `~/.claude/CLAUDE.md`. Includes:
 
 - Verification & Inquiry Protocol
 - Git conventions (conventional commits, atomic changes)
-- Worktree workflow
+- Worktree workflow using Claude default repo-local worktrees
 - Planning & Approval (plannotator integration)
 - Code style rules (TDD, type safety, error handling)
 - Python conventions (`uv run`)
