@@ -38,7 +38,7 @@ The official [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc)
 - Codex admin skills live under `modules/codex/skills` in this repo and are exposed at `/etc/codex/skills`.
 - On standalone Home Manager environments, `home-manager switch` ensures `/etc/codex/managed_config.toml` is a symlink to this repo's `modules/codex/files/config.toml`.
 - On standalone Home Manager environments, `home-manager switch` also ensures `/etc/codex/skills` is a symlink to this repo's `modules/codex/skills`.
-- Standalone activation may prompt for `sudo` on the first switch, after the symlink is removed, or when migrating from the legacy `/etc/codex/config.toml` path.
+- Standalone activation only prompts for `sudo` when `/etc/codex` needs to be created or repaired, or when migrating from the legacy `/etc/codex/config.toml` path.
 - Using the repo path instead of the flake source store path avoids repeated sudo prompts after unrelated repo changes.
 - If `/etc/codex/managed_config.toml` or the legacy `/etc/codex/config.toml` already exists as a regular file, activation stops instead of overwriting it.
 - `~/.codex/config.toml` stays writable for user-local state such as `[projects."..."]` trust entries.

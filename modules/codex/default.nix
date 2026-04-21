@@ -107,7 +107,47 @@ let
           local config_target=${lib.escapeShellArg managedConfigSource}
           local skills_target=${lib.escapeShellArg managedSkillsSource}
           local sudo_bin=""
+          local needs_update=0
+          local current_target=""
           local legacy_target=""
+
+          if [ -L ${lib.escapeShellArg systemCodexConfigPath} ]; then
+            current_target="$(${coreutils}/bin/readlink ${lib.escapeShellArg systemCodexConfigPath} || true)"
+            if [ "$current_target" != "$config_target" ]; then
+              needs_update=1
+            fi
+          elif [ -e ${lib.escapeShellArg systemCodexConfigPath} ]; then
+            errorEcho "${systemCodexConfigPath} exists and is not a symlink. Move it aside and rerun home-manager switch."
+            exit 1
+          else
+            needs_update=1
+          fi
+
+          if [ -L ${lib.escapeShellArg systemCodexSkillsPath} ]; then
+            current_target="$(${coreutils}/bin/readlink ${lib.escapeShellArg systemCodexSkillsPath} || true)"
+            if [ "$current_target" != "$skills_target" ]; then
+              needs_update=1
+            fi
+          elif [ -e ${lib.escapeShellArg systemCodexSkillsPath} ]; then
+            errorEcho "${systemCodexSkillsPath} exists and is not a symlink. Move it aside and rerun home-manager switch."
+            exit 1
+          else
+            needs_update=1
+          fi
+
+          if [ -L ${lib.escapeShellArg legacySystemCodexConfigPath} ]; then
+            legacy_target="$(${coreutils}/bin/readlink ${lib.escapeShellArg legacySystemCodexConfigPath} || true)"
+            if [ -n "$legacy_target" ]; then
+              needs_update=1
+            fi
+          elif [ -e ${lib.escapeShellArg legacySystemCodexConfigPath} ]; then
+            errorEcho "${legacySystemCodexConfigPath} exists and is not a symlink. Move it aside and rerun home-manager switch."
+            exit 1
+          fi
+
+          if [ "$needs_update" != "1" ]; then
+            return 0
+          fi
 
           for candidate in /run/wrappers/bin/sudo /usr/bin/sudo /bin/sudo; do
             if [ -x "$candidate" ]; then
@@ -117,25 +157,19 @@ let
           done
 
           if [ -z "$sudo_bin" ]; then
-            errorEcho "Could not find sudo while managing ${systemCodexConfigPath}."
+            errorEcho "Could not find sudo while managing /etc/codex."
             exit 1
           fi
 
           if ! "$sudo_bin" -n true 2>/dev/null && ! [ -t 0 ] && ! [ -t 1 ] && ! [ -t 2 ]; then
-            errorEcho "Managing ${systemCodexConfigPath} requires sudo, but no interactive terminal is available."
+            errorEcho "Managing /etc/codex requires sudo, but no interactive terminal is available."
             errorEcho "Rerun home-manager switch from an interactive shell or refresh sudo credentials first."
             exit 1
           fi
 
           run "$sudo_bin" ${coreutils}/bin/mkdir -p ${lib.escapeShellArg systemCodexConfigDirectory}
-          if [ -L ${lib.escapeShellArg legacySystemCodexConfigPath} ]; then
-            legacy_target="$(${coreutils}/bin/readlink ${lib.escapeShellArg legacySystemCodexConfigPath} || true)"
-            if [ -n "$legacy_target" ]; then
-              run "$sudo_bin" ${coreutils}/bin/rm -f ${lib.escapeShellArg legacySystemCodexConfigPath}
-            fi
-          elif [ -e ${lib.escapeShellArg legacySystemCodexConfigPath} ]; then
-            errorEcho "${legacySystemCodexConfigPath} exists and is not a symlink. Move it aside and rerun home-manager switch."
-            exit 1
+          if [ -n "$legacy_target" ]; then
+            run "$sudo_bin" ${coreutils}/bin/rm -f ${lib.escapeShellArg legacySystemCodexConfigPath}
           fi
 
           ensure_system_symlink ${lib.escapeShellArg systemCodexConfigPath} "$config_target"
