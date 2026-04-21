@@ -56,23 +56,6 @@ The official [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc)
   `~/.local/state/agent-session-record/debug.log`.
 - These logs do not block Claude exit or Codex continuation.
 
-### Agent Session Feedback Automation
-
-- `modules/openclaw-agent-session-feedback` installs the daily feedback-loop
-  runbook and helper script into
-  `~/.openclaw/workspace/automation/agent-session-feedback/` on `pylv-onyx`.
-- The helper builds a deterministic context bundle from the current day of
-  `~/agent-sessions` plus previously written daily summaries under
-  `~/agent-sessions/review/`.
-- The OpenClaw cron job is reconciled declaratively by
-  `openclaw-sync-agent-session-feedback-cron`, which keeps the real scheduler
-  entry aligned with the repo-managed prompt, schedule, and target channel.
-- The workflow is designed to update summaries, analysis, proposals, and daily
-  reports first, then apply only evidence-backed low-risk changes to Codex /
-  Claude operating rules.
-- Repo changes made by the automation are committed locally only. Push remains
-  manual.
-
 ### Codex LSP MCP Implementation Plan
 
 This section is a design plan only. The bridge and skills below are not
