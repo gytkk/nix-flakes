@@ -10,6 +10,19 @@
 let
   cfg = config.modules.codex;
   mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/codex/${path}";
+  codexStopUploadCommand = "${config.home.homeDirectory}/.local/bin/codex-stop-upload";
+  codexSessionStartSweepCommand = "${config.home.homeDirectory}/.local/bin/codex-session-start-sweep";
+  codexHooksJson =
+    builtins.replaceStrings
+      [
+        "~/.local/bin/codex-session-start-sweep"
+        "~/.local/bin/codex-stop-upload"
+      ]
+      [
+        codexSessionStartSweepCommand
+        codexStopUploadCommand
+      ]
+      (builtins.readFile ./files/hooks.json);
   codexConfigPath = "${config.home.homeDirectory}/.codex/config.toml";
   legacySystemCodexConfigPath = "/etc/codex/config.toml";
   systemCodexConfigPath = "/etc/codex/managed_config.toml";
@@ -147,7 +160,7 @@ in
     home.packages = [ pkgs.codex ];
 
     home.file.".codex/AGENTS.md".source = mkSymlink "files/AGENTS.md";
-    home.file.".codex/hooks.json".source = mkSymlink "files/hooks.json";
+    home.file.".codex/hooks.json".text = codexHooksJson;
 
     home.activation.codexUserConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       ${extractProjectsFunction}

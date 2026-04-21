@@ -9,6 +9,10 @@
 let
   claude = "${pkgs.claude-code}/bin/claude";
   timeout = "${pkgs.coreutils}/bin/timeout --foreground";
+  claudeSessionUploadCommand = "${config.home.homeDirectory}/.local/bin/claude-session-upload";
+  claudeSettingsJson =
+    builtins.replaceStrings [ "~/.local/bin/claude-session-upload" ] [ claudeSessionUploadCommand ]
+      (builtins.readFile ./files/settings.json);
   marketplaces = [
     "anthropics/skills"
     "anthropics/claude-code"
@@ -68,8 +72,7 @@ in
     "${config.xdg.dataHome}/bin"
   ];
 
-  home.file.".claude/settings.json".source =
-    config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/claude/files/settings.json";
+  home.file.".claude/settings.json".text = claudeSettingsJson;
   home.file.".claude/CLAUDE.md".source = ./files/CLAUDE.md;
   home.file.".claude/statusline-command.sh" = {
     source = ./files/statusline-command.sh;
