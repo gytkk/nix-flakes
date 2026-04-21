@@ -77,7 +77,7 @@ fi
 uploaded_count=0
 failed_count=0
 
-while IFS= read -r transcript_path; do
+while IFS= read -r transcript_path <&3; do
   [ -n "$transcript_path" ] || continue
 
   session_id="$("$HEAD" -n 1 "$transcript_path" | "$JQ" -r '
@@ -121,7 +121,7 @@ while IFS= read -r transcript_path; do
       last_assistant_message: $last_assistant_message
     }' >"$payload_file"
 
-  if "${BASH:-bash}" "$WORKER_CMD" --mode payload --agent codex --payload-file "$payload_file"; then
+  if "${BASH:-bash}" "$WORKER_CMD" --mode payload --agent codex --payload-file "$payload_file" </dev/null; then
     if [ -f "${SESSION_STATE_DIR}/codex-${session_id}.json" ]; then
       "$PRINTF" 'uploaded: %s\n' "$session_id"
       uploaded_count=$((uploaded_count + 1))
@@ -136,10 +136,10 @@ while IFS= read -r transcript_path; do
 
   "$RM" -f "$payload_file"
   payload_file=""
-done <"$rollouts_file"
+done 3<"$rollouts_file"
 
 remote_count="$("$SSH" -o BatchMode=yes -o ConnectTimeout=10 "$remote_prefix" \
-  "find '$remote_codex_dir' -type f -name '*.jsonl' 2>/dev/null | wc -l" || true)"
+  "find '$remote_codex_dir' -type f -name '*.jsonl' 2>/dev/null | wc -l" </dev/null || true)"
 
 "$PRINTF" '\nprocessed: %s\nuploaded: %s\nfailed: %s\n' \
   "$total_rollouts" "$uploaded_count" "$failed_count"
