@@ -19,7 +19,6 @@ JQ_BIN="$AGENT_SESSION_RECORD_JQ_BIN"
 SSH_BIN="$AGENT_SESSION_RECORD_SSH_BIN"
 
 DATE="${COREUTILS_BIN}/date"
-HEAD="${COREUTILS_BIN}/head"
 MKDIR="${COREUTILS_BIN}/mkdir"
 MKTEMP="${COREUTILS_BIN}/mktemp"
 PRINTF="${COREUTILS_BIN}/printf"
@@ -83,11 +82,22 @@ while IFS= read -r transcript_path <&3; do
   session_id="${transcript_path##*/}"
   session_id="${session_id%.jsonl}"
 
-  cwd="$("$JQ" -r '.cwd // empty' "$transcript_path" 2>/dev/null | "$HEAD" -n 1)"
-  end_reason="$("$JQ" -r '
-    select(.type == "summary")
-    | .summary.stop_reason // .summary.reason // empty
-  ' "$transcript_path" 2>/dev/null | "$HEAD" -n 1)"
+  cwd="$("$JQ" -sr '
+    map(.cwd // empty)
+    | map(select(. != ""))
+    | .[0] // empty
+  ' "$transcript_path" 2>/dev/null)"
+  end_reason="$("$JQ" -sr '
+    map(
+      if .type == "summary" then
+        .summary.stop_reason // .summary.reason // empty
+      else
+        empty
+      end
+    )
+    | map(select(. != ""))
+    | .[0] // empty
+  ' "$transcript_path" 2>/dev/null)"
 
   "$RM" -f "${SESSION_STATE_DIR}/claude-${session_id}.json"
 
