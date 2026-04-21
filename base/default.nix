@@ -83,6 +83,7 @@
         less
         wget
         curl
+        rsync
 
         # Git
         git
