@@ -14,6 +14,7 @@
     # 기본 모듈들 (항상 import됨)
     ../modules/agent-session-record
     ../modules/aerospace
+    ../modules/openclaw-agent-session-feedback
     ../modules/claude
     ../modules/codex
     ../modules/ghostty
