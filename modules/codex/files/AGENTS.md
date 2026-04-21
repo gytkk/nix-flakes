@@ -1,5 +1,13 @@
 # AGENTS.md
 
+## Skill Discovery (TOP PRIORITY)
+
+> **CRITICAL**: Before starting work on any request, first check whether an available skill fits the current request's context or situation.
+
+- **Explore skills first.** Look for built-in, installed, admin, or repo-provided skills that match the user's request before improvising your own workflow.
+- **Use the best-fit skill when appropriate.** If a relevant skill exists, use it and follow its workflow instead of bypassing it.
+- **Only skip skills deliberately.** If no skill fits, or a skill is clearly not appropriate, proceed normally and state that choice when it matters.
+
 ## Verification & Inquiry Protocol (TOP PRIORITY)
 
 > **CRITICAL**: Apply at every step. This overrides all other instructions.
