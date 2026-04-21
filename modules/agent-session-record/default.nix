@@ -65,24 +65,19 @@ in
   config = lib.mkIf cfg.enable {
     xdg.configFile."agent-session-record/config.sh".text = configFile;
 
-    home.file.".local/bin/agent-session-upload-worker" = {
-      source = mkSymlink "files/agent-session-upload-worker.sh";
-      executable = true;
-    };
+    home.file.".local/bin/agent-session-upload-worker".source =
+      mkSymlink "files/agent-session-upload-worker.sh";
 
-    home.file.".local/bin/claude-session-upload" = lib.mkIf cfg.agents.claude.enable {
-      source = mkSymlink "files/claude-session-upload.sh";
-      executable = true;
-    };
+    home.file.".local/bin/claude-session-upload".source = lib.mkIf cfg.agents.claude.enable (
+      mkSymlink "files/claude-session-upload.sh"
+    );
 
-    home.file.".local/bin/codex-stop-upload" = lib.mkIf cfg.agents.codex.enable {
-      source = mkSymlink "files/codex-stop-upload.sh";
-      executable = true;
-    };
+    home.file.".local/bin/codex-stop-upload".source = lib.mkIf cfg.agents.codex.enable (
+      mkSymlink "files/codex-stop-upload.sh"
+    );
 
-    home.file.".local/bin/codex-session-start-sweep" = lib.mkIf cfg.agents.codex.enable {
-      source = mkSymlink "files/codex-session-start-sweep.sh";
-      executable = true;
-    };
+    home.file.".local/bin/codex-session-start-sweep".source = lib.mkIf cfg.agents.codex.enable (
+      mkSymlink "files/codex-session-start-sweep.sh"
+    );
   };
 }
