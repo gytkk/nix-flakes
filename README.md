@@ -46,7 +46,7 @@ The official [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc)
 - Claude `SessionEnd` and Codex `Stop` / `SessionStart` hooks are installed by
   default through `modules/agent-session-record`.
 - Session transcripts are uploaded best-effort to `pylv-onyx` over `rsync` +
-  SSH and stored under `/home/gytkk/agent-sessions/{claude,codex}/...`.
+  SSH and stored under `/home/gytkk/agent-sessions/<agent>/<YYYY>/<MM>/<DD>/`.
 - `pylv-denim` overrides the agent session upload target to `192.168.0.10`
   because that machine reaches `pylv-onyx` over the local network instead of
   the tailnet.

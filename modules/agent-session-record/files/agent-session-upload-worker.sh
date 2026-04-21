@@ -133,7 +133,7 @@ file_mtime_ns() {
   "$PRINTF" '%s%s' "$seconds" "$fraction"
 }
 
-file_year_month() {
+file_date_path() {
   local mtime_ns="$1"
   local seconds="${mtime_ns%?????????}"
 
@@ -141,7 +141,7 @@ file_year_month() {
     seconds=0
   fi
 
-  "$DATE" -u -d "@${seconds}" '+%Y-%m'
+  "$DATE" -u -d "@${seconds}" '+%Y/%m/%d'
 }
 
 file_fingerprint() {
@@ -466,16 +466,15 @@ upload_snapshot() {
   local transcript_path="$2"
   local agent="$3"
   local session_id="$4"
-  local hostname="$5"
-  local mtime_ns="$6"
-  local fingerprint="$7"
-  local year_month
+  local mtime_ns="$5"
+  local fingerprint="$6"
+  local date_path
   local target_dir
   local uploaded_at
   local meta_file
 
-  year_month="$(file_year_month "$mtime_ns")"
-  target_dir="${AGENT_SESSION_RECORD_REMOTE_BASE_PATH}/${agent}/${hostname}/${year_month}"
+  date_path="$(file_date_path "$mtime_ns")"
+  target_dir="${AGENT_SESSION_RECORD_REMOTE_BASE_PATH}/${agent}/${date_path}"
   uploaded_at="$("$DATE" -u -Is)"
   meta_file="$("$MKTEMP" "${TMP_DIR}/meta.XXXXXX")" || return 1
 
@@ -540,7 +539,6 @@ process_manifest_with_lock() {
       "$transcript_path" \
       "$agent" \
       "$session_id" \
-      "$(read_json_field "$manifest_file" '.hostname // "unknown"')" \
       "$mtime_ns" \
       "$fingerprint"; then
       if [ -n "$cleanup_queue_dir" ]; then
