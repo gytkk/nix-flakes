@@ -54,9 +54,13 @@ AGENT=""
 PAYLOAD_FILE=""
 
 warn() {
+  local timestamp
+  timestamp="$("$DATE" -Is 2>/dev/null || date)"
   "$MKDIR" -p "${WARN_LOG%/*}" 2>/dev/null || true
   "$PRINTF" '%s agent-session-upload-worker: %s\n' \
-    "$("$DATE" -Is 2>/dev/null || date)" "$*" >>"$WARN_LOG" 2>/dev/null || true
+    "$timestamp" "$*" >>"$WARN_LOG" 2>/dev/null || true
+  "$PRINTF" '%s agent-session-upload-worker: %s\n' \
+    "$timestamp" "$*" >&2 2>/dev/null || true
 }
 
 ensure_dirs() {

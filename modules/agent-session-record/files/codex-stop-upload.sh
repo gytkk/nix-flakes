@@ -12,6 +12,7 @@ fi
 
 COREUTILS_BIN="$AGENT_SESSION_RECORD_COREUTILS_BIN"
 WARN_LOG="${AGENT_SESSION_RECORD_STATE_DIR}/warnings.log"
+DEBUG_LOG="${AGENT_SESSION_RECORD_STATE_DIR}/debug.log"
 MKTEMP="${COREUTILS_BIN}/mktemp"
 MKDIR="${COREUTILS_BIN}/mkdir"
 RM="${COREUTILS_BIN}/rm"
@@ -49,11 +50,16 @@ if ! cat >"$payload_file"; then
   exit 0
 fi
 
+stderr_sink="/dev/null"
+if "$MKDIR" -p "${DEBUG_LOG%/*}" 2>/dev/null && : >>"$DEBUG_LOG" 2>/dev/null; then
+  stderr_sink="$DEBUG_LOG"
+fi
+
 "$NOHUP" "${BASH:-bash}" "$worker_cmd" \
   --mode payload \
   --agent codex \
   --payload-file "$payload_file" \
-  >/dev/null 2>&1 &
+  >/dev/null 2>>"$stderr_sink" &
 
 disown || true
 continue_json
