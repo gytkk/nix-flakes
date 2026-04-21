@@ -24,6 +24,7 @@
     homeDirectory = "/home/gytkk";
     profile = "pylv";
     isWSL = true;
+    homeModules = [ ./base/pylv/denim.nix ];
   };
 
   "devsisters-macbook" = {

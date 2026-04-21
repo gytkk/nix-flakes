@@ -47,6 +47,9 @@ The official [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc)
   default through `modules/agent-session-record`.
 - Session transcripts are uploaded best-effort to `pylv-onyx` over `rsync` +
   SSH and stored under `/home/gytkk/agent-sessions/{claude,codex}/...`.
+- `pylv-denim` overrides the agent session upload target to `192.168.0.10`
+  because that machine reaches `pylv-onyx` over the local network instead of
+  the tailnet.
 - Hook failures append one-line summaries under
   `~/.local/state/agent-session-record/warnings.log`.
 - Detailed worker stderr from SSH / `rsync` failures is appended to
