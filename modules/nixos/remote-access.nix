@@ -17,4 +17,5 @@
   };
 
   networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ 22 ];
+  networking.firewall.interfaces.wlo1.allowedTCPPorts = [ 22 ];
 }
