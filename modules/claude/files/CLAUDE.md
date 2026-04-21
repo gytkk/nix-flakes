@@ -52,13 +52,6 @@
 By default, work on the current branch. Only use git worktree when the user explicitly requests it.
 Individual projects may override this policy (e.g., banning worktree entirely). Project-level CLAUDE.md rules take precedence.
 
-**When worktree is requested:**
-
-1. Prefer Claude Code's default repo-local worktree flow (`claude --worktree`) or create the worktree under `<repo>/.claude/worktrees/`
-2. Change to the worktree directory and work there
-3. When done, create a PR from the worktree branch
-4. After merge, clean up the repo-local worktree you created
-
 **Worktree agent permissions:** Prefer the normal permission flow or `acceptEdits` in repo-local worktrees. Only use `bypassPermissions` in genuinely isolated environments such as containers or VMs.
 
 ## Critical Rules
