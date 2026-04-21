@@ -73,6 +73,12 @@
 - Keep documentation in sync with code changes.
 - Do NOT create one-off or temporary documentation files.
 
+## Codex Skills
+
+- When creating or updating Codex skills for this setup, use Codex's built-in `$skill-creator` first.
+- Store repo-managed admin skills under `modules/codex/skills/` so they are exposed at `/etc/codex/skills`.
+- Treat `$skill-creator` output as a scaffold: trim unused files, keep the skill focused, and align it with this repository's conventions before committing.
+
 ## Error Handling
 
 - Always handle errors gracefully; avoid silent failures.
