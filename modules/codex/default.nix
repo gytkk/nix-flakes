@@ -26,12 +26,15 @@ let
   codexConfigPath = "${config.home.homeDirectory}/.codex/config.toml";
   legacySystemCodexConfigPath = "/etc/codex/config.toml";
   systemCodexConfigPath = "/etc/codex/managed_config.toml";
+  systemCodexSkillsPath = "/etc/codex/skills";
   systemCodexConfigDirectory = "/etc/codex";
   managedConfigSource =
     if hasSystemCodexConfig then
       ./files/config.toml
     else
       "${flakeDirectory}/modules/codex/files/config.toml";
+  managedSkillsSource =
+    if hasSystemCodexConfig then ./skills else "${flakeDirectory}/modules/codex/skills";
   coreutils = pkgs.coreutils;
   extractProjectsFunction = ''
     extract_projects() {
@@ -70,22 +73,41 @@ let
       ""
     else
       ''
-        ensure_system_codex_config() {
-          local desired_target=${lib.escapeShellArg managedConfigSource}
+        ensure_system_symlink() {
+          local destination="$1"
+          local desired_target="$2"
           local current_target=""
-          local legacy_target=""
-          local sudo_bin=""
 
-          if [ -L ${lib.escapeShellArg systemCodexConfigPath} ]; then
-            current_target="$(${coreutils}/bin/readlink ${lib.escapeShellArg systemCodexConfigPath} || true)"
-          elif [ -e ${lib.escapeShellArg systemCodexConfigPath} ]; then
-            errorEcho "${systemCodexConfigPath} exists and is not a symlink. Move it aside and rerun home-manager switch."
+          if [ -L "$destination" ]; then
+            current_target="$(${coreutils}/bin/readlink "$destination" || true)"
+          elif [ -e "$destination" ]; then
+            errorEcho "$destination exists and is not a symlink. Move it aside and rerun home-manager switch."
             exit 1
           fi
 
           if [ "$current_target" = "$desired_target" ]; then
             return 0
           fi
+
+          run "$sudo_bin" ${coreutils}/bin/rm -f "$destination"
+          run "$sudo_bin" ${coreutils}/bin/ln -s "$desired_target" "$destination"
+
+          if [ -n "''${DRY_RUN:-}" ]; then
+            return 0
+          fi
+
+          current_target="$(${coreutils}/bin/readlink "$destination" || true)"
+          if [ "$current_target" != "$desired_target" ]; then
+            errorEcho "Expected $destination to point to $desired_target, got '$current_target'."
+            exit 1
+          fi
+        }
+
+        ensure_system_codex_config() {
+          local config_target=${lib.escapeShellArg managedConfigSource}
+          local skills_target=${lib.escapeShellArg managedSkillsSource}
+          local sudo_bin=""
+          local legacy_target=""
 
           for candidate in /run/wrappers/bin/sudo /usr/bin/sudo /bin/sudo; do
             if [ -x "$candidate" ]; then
@@ -116,17 +138,8 @@ let
             exit 1
           fi
 
-          run "$sudo_bin" ${coreutils}/bin/ln -sfn "$desired_target" ${lib.escapeShellArg systemCodexConfigPath}
-
-          if [ -n "''${DRY_RUN:-}" ]; then
-            return 0
-          fi
-
-          current_target="$(${coreutils}/bin/readlink ${lib.escapeShellArg systemCodexConfigPath} || true)"
-          if [ "$current_target" != "$desired_target" ]; then
-            errorEcho "Expected ${systemCodexConfigPath} to point to $desired_target, got '$current_target'."
-            exit 1
-          fi
+          ensure_system_symlink ${lib.escapeShellArg systemCodexConfigPath} "$config_target"
+          ensure_system_symlink ${lib.escapeShellArg systemCodexSkillsPath} "$skills_target"
         }
       '';
   codexUserConfigActivation = ''
