@@ -309,10 +309,27 @@ local treesitter = {
   end,
 }
 
+local copilot = {
+  "zbirenbaum/copilot.lua",
+  cmd = "Copilot",
+  event = "InsertEnter",
+  opts = {
+    suggestion = { enabled = false },
+    panel = { enabled = false },
+    filetypes = {
+      markdown = true,
+      help = true,
+    },
+  },
+}
+
 local blink = {
   "saghen/blink.cmp",
   version = "1.*",
-  dependencies = { "rafamadriz/friendly-snippets" },
+  dependencies = {
+    "rafamadriz/friendly-snippets",
+    "fang2hou/blink-copilot",
+  },
   event = "InsertEnter",
   opts = {
     keymap = { preset = "super-tab" },
@@ -322,7 +339,15 @@ local blink = {
       ghost_text = { enabled = true },
     },
     sources = {
-      default = { "lsp", "path", "snippets", "buffer" },
+      default = { "lsp", "path", "snippets", "buffer", "copilot" },
+      providers = {
+        copilot = {
+          name = "copilot",
+          module = "blink-copilot",
+          async = true,
+          score_offset = 100,
+        },
+      },
     },
     signature = { enabled = true },
   },
@@ -503,6 +528,7 @@ require("lazy").setup({
     whichkey,
     exportedTheme,
     treesitter,
+    copilot,
     blink,
     lspconfig,
     lualine,

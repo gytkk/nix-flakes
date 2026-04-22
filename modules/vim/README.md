@@ -16,12 +16,17 @@ This module configures Neovim as the primary editor with a modern Lua-based setu
 - `snacks.nvim` for file picking, explorer, notifications, status column, inlay hint toggles, and lazygit integration
 - `snacks.nvim` extras for git browse, file rename, smooth scrolling, and inline image rendering
 - `snacks.nvim` GitHub integration for issues and pull requests via the `gh` CLI
-- `blink.cmp` completion with LSP, snippets, path, and buffer sources
+- `blink.cmp` completion with LSP, snippets, path, buffer, and GitHub Copilot sources
 - Built-in Neovim LSP configuration for Nix, Go, Rust, TypeScript, Terraform, YAML, Markdown, and Python via `ty`
 - `nvim-treesitter` syntax parsing for the main languages used in this repository
 - `conform.nvim` formatting on save, including `nixfmt`, `prettier`, `rustfmt`, `gofmt`, and `ruff_format`
 - `gitsigns.nvim`, `lualine.nvim`, `flash.nvim`, `which-key.nvim`, `trouble.nvim`, and `render-markdown.nvim`
 - Markdown rendering uses inline icons only, with gutter sign markers disabled to avoid duplicates
+
+## GitHub Copilot
+
+- Copilot suggestions are surfaced through the `blink.cmp` completion menu rather than Copilot's inline suggestion UI.
+- First-time setup requires authentication with `:Copilot auth`.
 
 ## Notable Keymaps
 
