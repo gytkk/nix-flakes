@@ -7,8 +7,10 @@ theme "__COMMON_THEME__"
 
 keybinds {
     tab {
-        bind "Shift h" "Shift k" { MoveTab "Left"; }
-        bind "Shift j" "Shift l" { MoveTab "Right"; }
+        bind "h" "j" { GoToPreviousTab; }
+        bind "k" "l" { GoToNextTab; }
+        bind "Shift h" "Shift j" { MoveTab "Left"; }
+        bind "Shift k" "Shift l" { MoveTab "Right"; }
     }
 
     shared_except "tmux" "locked" {
