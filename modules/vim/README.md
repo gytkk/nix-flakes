@@ -26,7 +26,8 @@ This module configures Neovim as the primary editor with a modern Lua-based setu
 
 ## Minuet
 
-- Set `OPENAI_API_KEY` before launching Neovim.
+- Sign in to the 1Password CLI before launching Neovim.
+- The default setup reads the OpenAI key from the `pylv` vault item `OPENAI_API_KEY` via `op`.
 - Inline suggestions use Minuet's virtual text frontend to avoid duplicate OpenAI API requests from the completion menu.
 - Press `<A-y>` to open Minuet suggestions in the `blink.cmp` menu on demand.
 
