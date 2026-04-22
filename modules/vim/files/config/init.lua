@@ -311,15 +311,23 @@ local treesitter = {
 
 local openaiApiKey
 
-local function readOnePasswordSecret(reference)
-  local result = vim.system({ "op", "read", reference }, { text = true }):wait()
-  if result.code ~= 0 then
-    return nil, vim.trim(result.stderr or "")
+local function readOpenAIKeyFile(path)
+  if type(path) ~= "string" or path == "" then
+    return nil, "Agenix secret path is not configured."
   end
 
-  local value = vim.trim(result.stdout or "")
+  if not vim.uv.fs_stat(path) then
+    return nil, ("Agenix secret file does not exist at %s."):format(path)
+  end
+
+  local ok, lines = pcall(vim.fn.readfile, path)
+  if not ok then
+    return nil, ("Failed to read agenix secret at %s."):format(path)
+  end
+
+  local value = vim.trim(table.concat(lines, "\n"))
   if value == "" then
-    return nil, "1Password returned an empty secret"
+    return nil, ("Agenix secret at %s is empty."):format(path)
   end
 
   return value
@@ -330,30 +338,17 @@ local function getOpenAIKey()
     return openaiApiKey
   end
 
-  local references = {
-    "op://pylv/OPENAI_API_KEY/credential",
-    "op://pylv/OPENAI_API_KEY/password",
-    "op://pylv/OPENAI_API_KEY/OPENAI_API_KEY",
-    "op://pylv/OPENAI_API_KEY/api_key",
-  }
-
-  local lastError = "No matching 1Password secret reference succeeded."
-  for _, reference in ipairs(references) do
-    local value, err = readOnePasswordSecret(reference)
-    if value then
-      openaiApiKey = value
-      return openaiApiKey
-    end
-    if err and err ~= "" then
-      lastError = err
-    end
+  local value, err = readOpenAIKeyFile(vim.g.openai_api_key_path)
+  if value then
+    openaiApiKey = value
+    return openaiApiKey
   end
 
   error(
-    "Failed to read OPENAI_API_KEY from 1Password CLI. "
-      .. "Sign in to op and ensure vault 'pylv' item 'OPENAI_API_KEY' exposes one of: "
-      .. "credential, password, OPENAI_API_KEY, api_key. Last error: "
-      .. lastError
+    "Failed to read OPENAI_API_KEY from agenix. "
+      .. "Create secrets/openai-api-key.age, run home-manager switch, and ensure Neovim receives "
+      .. "vim.g.openai_api_key_path. Last error: "
+      .. err
   )
 end
 
