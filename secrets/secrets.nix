@@ -50,5 +50,5 @@ in
   "databricks-token.age".publicKeys = allUsers ++ devsistersHosts;
 
   # OpenAI API key for Neovim Minuet
-  "openai-api-key.age".publicKeys = allUsers;
+  "openai-api-key.age".publicKeys = allUsers ++ allHosts ++ devsistersHosts;
 }
