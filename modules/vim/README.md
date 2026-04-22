@@ -16,17 +16,19 @@ This module configures Neovim as the primary editor with a modern Lua-based setu
 - `snacks.nvim` for file picking, explorer, notifications, status column, inlay hint toggles, and lazygit integration
 - `snacks.nvim` extras for git browse, file rename, smooth scrolling, and inline image rendering
 - `snacks.nvim` GitHub integration for issues and pull requests via the `gh` CLI
-- `blink.cmp` completion with LSP, snippets, path, buffer, and GitHub Copilot sources
+- `blink.cmp` completion with LSP, snippets, path, buffer, and on-demand Minuet AI suggestions
+- `minuet-ai.nvim` inline suggestions backed by the OpenAI API
 - Built-in Neovim LSP configuration for Nix, Go, Rust, TypeScript, Terraform, YAML, Markdown, and Python via `ty`
 - `nvim-treesitter` syntax parsing for the main languages used in this repository
 - `conform.nvim` formatting on save, including `nixfmt`, `prettier`, `rustfmt`, `gofmt`, and `ruff_format`
 - `gitsigns.nvim`, `lualine.nvim`, `flash.nvim`, `which-key.nvim`, `trouble.nvim`, and `render-markdown.nvim`
 - Markdown rendering uses inline icons only, with gutter sign markers disabled to avoid duplicates
 
-## GitHub Copilot
+## Minuet
 
-- Copilot suggestions are surfaced through the `blink.cmp` completion menu rather than Copilot's inline suggestion UI.
-- First-time setup requires authentication with `:Copilot auth`.
+- Set `OPENAI_API_KEY` before launching Neovim.
+- Inline suggestions use Minuet's virtual text frontend to avoid duplicate OpenAI API requests from the completion menu.
+- Press `<A-y>` to open Minuet suggestions in the `blink.cmp` menu on demand.
 
 ## Notable Keymaps
 
@@ -54,6 +56,10 @@ This module configures Neovim as the primary editor with a modern Lua-based setu
 - `<leader>uS`: toggle smooth scrolling
 - `<leader>uw`: toggle wrap
 - `<leader>cf`: format current buffer
+- `<A-a>`: accept current Minuet inline suggestion
+- `<A-l>`: accept current Minuet suggestion line
+- `<A-e>`: dismiss current Minuet suggestion
+- `<A-y>`: request Minuet completion in the blink menu
 
 ## Usage
 

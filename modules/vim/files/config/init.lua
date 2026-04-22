@@ -309,18 +309,63 @@ local treesitter = {
   end,
 }
 
-local copilot = {
-  "zbirenbaum/copilot.lua",
-  cmd = "Copilot",
+local minuet = {
+  "milanglacier/minuet-ai.nvim",
   event = "InsertEnter",
-  opts = {
-    suggestion = { enabled = false },
-    panel = { enabled = false },
-    filetypes = {
-      markdown = true,
-      help = true,
-    },
-  },
+  config = function()
+    require("minuet").setup({
+      provider = "openai",
+      n_completions = 1,
+      throttle = 1000,
+      debounce = 400,
+      request_timeout = 2.5,
+      notify = "warn",
+      blink = {
+        enable_auto_complete = false,
+      },
+      virtualtext = {
+        auto_trigger_ft = {
+          "bash",
+          "go",
+          "gomod",
+          "gosum",
+          "hcl",
+          "javascript",
+          "javascriptreact",
+          "json",
+          "lua",
+          "nix",
+          "python",
+          "rust",
+          "sh",
+          "terraform",
+          "toml",
+          "tsx",
+          "typescript",
+          "typescriptreact",
+          "yaml",
+          "zsh",
+        },
+        keymap = {
+          accept = "<A-a>",
+          accept_line = "<A-l>",
+          next = "<A-]>",
+          prev = "<A-[>",
+          dismiss = "<A-e>",
+        },
+      },
+      provider_options = {
+        openai = {
+          model = "gpt-5.4-nano",
+          api_key = "OPENAI_API_KEY",
+          optional = {
+            max_completion_tokens = 128,
+            reasoning_effort = "none",
+          },
+        },
+      },
+    })
+  end,
 }
 
 local blink = {
@@ -328,29 +373,36 @@ local blink = {
   version = "1.*",
   dependencies = {
     "rafamadriz/friendly-snippets",
-    "fang2hou/blink-copilot",
+    "milanglacier/minuet-ai.nvim",
   },
   event = "InsertEnter",
-  opts = {
-    keymap = { preset = "super-tab" },
-    appearance = { nerd_font_variant = "mono" },
-    completion = {
-      documentation = { auto_show = true, auto_show_delay_ms = 300 },
-      ghost_text = { enabled = true },
-    },
-    sources = {
-      default = { "lsp", "path", "snippets", "buffer", "copilot" },
-      providers = {
-        copilot = {
-          name = "copilot",
-          module = "blink-copilot",
-          async = true,
-          score_offset = 100,
+  opts = function()
+    return {
+      keymap = {
+        preset = "super-tab",
+        ["<A-y>"] = require("minuet").make_blink_map(),
+      },
+      appearance = { nerd_font_variant = "mono" },
+      completion = {
+        documentation = { auto_show = true, auto_show_delay_ms = 300 },
+        ghost_text = { enabled = true },
+        trigger = { prefetch_on_insert = false },
+      },
+      sources = {
+        default = { "lsp", "path", "snippets", "buffer" },
+        providers = {
+          minuet = {
+            name = "minuet",
+            module = "minuet.blink",
+            async = true,
+            timeout_ms = 2500,
+            score_offset = 50,
+          },
         },
       },
-    },
-    signature = { enabled = true },
-  },
+      signature = { enabled = true },
+    }
+  end,
   opts_extend = { "sources.default" },
 }
 
