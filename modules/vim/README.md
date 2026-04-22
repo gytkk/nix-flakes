@@ -29,7 +29,8 @@ This module configures Neovim as the primary editor with a modern Lua-based setu
 - Store the OpenAI API key in `secrets/openai-api-key.age` and apply your Home Manager configuration before launching Neovim.
 - The vim module wires the decrypted agenix path into Neovim as `vim.g.openai_api_key_path` on every environment.
 - Inline suggestions use Minuet's virtual text frontend to avoid duplicate OpenAI API requests from the completion menu.
-- Press `<A-y>` to open Minuet suggestions in the `blink.cmp` menu on demand.
+- Press `<Tab>` to accept the current Minuet inline suggestion when one is visible.
+- Press `<C-y>` to open Minuet suggestions in the `blink.cmp` menu on demand.
 
 Create or update the secret with:
 
@@ -63,10 +64,12 @@ EDITOR=vim agenix -e secrets/openai-api-key.age
 - `<leader>uS`: toggle smooth scrolling
 - `<leader>uw`: toggle wrap
 - `<leader>cf`: format current buffer
-- `<A-a>`: accept current Minuet inline suggestion
-- `<A-l>`: accept current Minuet suggestion line
-- `<A-e>`: dismiss current Minuet suggestion
-- `<A-y>`: request Minuet completion in the blink menu
+- `<Tab>`: accept current Minuet inline suggestion, otherwise fall back to the usual blink/snippet behavior
+- `<C-g>l`: accept current Minuet suggestion line
+- `<C-g>e`: dismiss current Minuet suggestion
+- `<C-g>n`: show next Minuet inline suggestion
+- `<C-g>p`: show previous Minuet inline suggestion
+- `<C-y>`: request Minuet completion in the blink menu
 
 ## Usage
 

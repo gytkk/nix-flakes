@@ -417,11 +417,11 @@ local minuet = {
           "zsh",
         },
         keymap = {
-          accept = "<A-a>",
-          accept_line = "<A-l>",
-          next = "<A-]>",
-          prev = "<A-[>",
-          dismiss = "<A-e>",
+          accept = nil,
+          accept_line = "<C-g>l",
+          next = "<C-g>n",
+          prev = "<C-g>p",
+          dismiss = "<C-g>e",
         },
       },
       provider_options = {
@@ -450,7 +450,24 @@ local blink = {
     return {
       keymap = {
         preset = "super-tab",
-        ["<A-y>"] = require("minuet").make_blink_map(),
+        ["<Tab>"] = {
+          function(cmp)
+            local minuetVirtualText = require("minuet.virtualtext").action
+            if minuetVirtualText.is_visible() then
+              minuetVirtualText.accept()
+              return true
+            end
+
+            if cmp.snippet_active() then
+              return cmp.accept()
+            end
+
+            return cmp.select_and_accept()
+          end,
+          "snippet_forward",
+          "fallback",
+        },
+        ["<C-y>"] = require("minuet").make_blink_map(),
       },
       appearance = { nerd_font_variant = "mono" },
       completion = {
