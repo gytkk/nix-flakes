@@ -417,11 +417,11 @@ local minuet = {
           "zsh",
         },
         keymap = {
-          accept = "<C-g>a",
-          accept_line = "<C-g>l",
-          next = "<C-g>n",
-          prev = "<C-g>p",
-          dismiss = "<C-g>e",
+          accept = "<A-a>",
+          accept_line = "<A-l>",
+          next = "<A-]>",
+          prev = "<A-[>",
+          dismiss = "<A-e>",
         },
       },
       provider_options = {
@@ -450,7 +450,7 @@ local blink = {
     return {
       keymap = {
         preset = "super-tab",
-        ["<C-y>"] = require("minuet").make_blink_map(),
+        ["<A-y>"] = require("minuet").make_blink_map(),
       },
       appearance = { nerd_font_variant = "mono" },
       completion = {
@@ -650,7 +650,7 @@ require("lazy").setup({
     whichkey,
     exportedTheme,
     treesitter,
-    minuet,
+    copilot,
     blink,
     lspconfig,
     lualine,
