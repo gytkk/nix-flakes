@@ -24,6 +24,7 @@ vim.opt.ignorecase = true
 vim.opt.smartcase = true
 vim.opt.hlsearch = true
 vim.opt.incsearch = true
+vim.opt.autoread = true
 
 -- Leader key (must be set before lazy.nvim loads plugins)
 vim.g.mapleader = " "
@@ -719,5 +720,17 @@ vim.api.nvim_create_autocmd("VimEnter", {
     if vim.fn.argc() == 0 then
       Snacks.picker.files()
     end
+  end,
+})
+
+-- Refresh normal buffers when files change on disk outside Neovim.
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "CursorHoldI", "TermClose", "TermLeave" }, {
+  callback = function()
+    if vim.fn.mode() == "c" then return end
+
+    local buf = vim.api.nvim_get_current_buf()
+    if vim.bo[buf].buftype ~= "" or vim.bo[buf].modified then return end
+
+    vim.cmd("checktime")
   end,
 })
