@@ -386,10 +386,13 @@ local minuet = {
     require("minuet").setup({
       provider = "openai",
       n_completions = 1,
-      throttle = 1000,
-      debounce = 400,
+      context_window = 8000,
+      throttle = 500,
+      debounce = 200,
       request_timeout = 2.5,
       notify = "warn",
+      after_cursor_filter_length = 24,
+      before_cursor_filter_length = 4,
       blink = {
         enable_auto_complete = false,
       },
@@ -419,6 +422,7 @@ local minuet = {
         keymap = {
           accept = nil,
           accept_line = "<C-g>l",
+          accept_n_lines = "<C-g>a",
           next = "<C-g>n",
           prev = "<C-g>p",
           dismiss = "<C-g>e",
@@ -539,37 +543,43 @@ local lspconfig = {
 
 local lualine = {
   "nvim-lualine/lualine.nvim",
-  dependencies = { "nvim-tree/nvim-web-devicons" },
-  event = "VeryLazy",
-  opts = {
-    options = {
-      theme = "auto",
-      component_separators = { left = "|", right = "|" },
-      section_separators = { left = "", right = "" },
-    },
-    sections = {
-      lualine_a = { "mode" },
-      lualine_b = { "branch", "diff", "diagnostics" },
-      lualine_c = { "filename" },
-      lualine_x = {
-        {
-          function()
-            local clients = vim.lsp.get_clients({ bufnr = 0 })
-            if #clients == 0 then return "-" end
-            local names = {}
-            for _, c in ipairs(clients) do
-              table.insert(names, c.name)
-            end
-            return table.concat(names, ", ")
-          end,
-          icon = " ",
-        },
-        "filetype",
-      },
-      lualine_y = { "progress" },
-      lualine_z = { "location" },
-    },
+  dependencies = {
+    "nvim-tree/nvim-web-devicons",
+    "milanglacier/minuet-ai.nvim",
   },
+  event = "VeryLazy",
+  opts = function()
+    return {
+      options = {
+        theme = "auto",
+        component_separators = { left = "|", right = "|" },
+        section_separators = { left = "", right = "" },
+      },
+      sections = {
+        lualine_a = { "mode" },
+        lualine_b = { "branch", "diff", "diagnostics" },
+        lualine_c = { "filename" },
+        lualine_x = {
+          require("minuet.lualine"),
+          {
+            function()
+              local clients = vim.lsp.get_clients({ bufnr = 0 })
+              if #clients == 0 then return "-" end
+              local names = {}
+              for _, c in ipairs(clients) do
+                table.insert(names, c.name)
+              end
+              return table.concat(names, ", ")
+            end,
+            icon = " ",
+          },
+          "filetype",
+        },
+        lualine_y = { "progress" },
+        lualine_z = { "location" },
+      },
+    }
+  end,
 }
 
 local gitsigns = {
