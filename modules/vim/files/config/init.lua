@@ -419,14 +419,6 @@ local minuet = {
           "yaml",
           "zsh",
         },
-        keymap = {
-          accept = nil,
-          accept_line = "<C-g>l",
-          accept_n_lines = "<C-g>a",
-          next = "<C-g>n",
-          prev = "<C-g>p",
-          dismiss = "<C-g>e",
-        },
       },
       provider_options = {
         openai = {
