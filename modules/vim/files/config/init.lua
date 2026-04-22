@@ -10,6 +10,7 @@ vim.opt.number = true
 vim.opt.termguicolors = true
 vim.opt.mousescroll = "ver:1,hor:1"
 vim.opt.clipboard:append("unnamedplus")
+vim.opt.updatetime = 1000
 
 -- Indentation
 vim.opt.expandtab = true
