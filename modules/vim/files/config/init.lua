@@ -667,7 +667,7 @@ require("lazy").setup({
     whichkey,
     exportedTheme,
     treesitter,
-    copilot,
+    minuet,
     blink,
     lspconfig,
     lualine,
