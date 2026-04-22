@@ -27,7 +27,7 @@ This module configures Neovim as the primary editor with a modern Lua-based setu
 ## Minuet
 
 - Store the OpenAI API key in `secrets/openai-api-key.age` and apply your Home Manager configuration before launching Neovim.
-- The default setup reads the decrypted key from the agenix runtime path exposed to Neovim as `vim.g.openai_api_key_path`.
+- The vim module wires the decrypted agenix path into Neovim as `vim.g.openai_api_key_path` on every environment.
 - Inline suggestions use Minuet's virtual text frontend to avoid duplicate OpenAI API requests from the completion menu.
 - Press `<A-y>` to open Minuet suggestions in the `blink.cmp` menu on demand.
 

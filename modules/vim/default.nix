@@ -1,5 +1,4 @@
 {
-  lib,
   config,
   flakeDirectory,
   themeExports,
@@ -10,11 +9,10 @@ let
   mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/vim/${path}";
   nvimThemeExports = config.lib.file.mkOutOfStoreSymlink (themeExports.mutableDir "nvim");
   openAIKeySecretName = "openai-api-key";
-  openAIKeySecretFile = "${flakeDirectory}/secrets/${openAIKeySecretName}.age";
-  hasOpenAIKeySecret = builtins.pathExists openAIKeySecretFile;
+  openAIKeySecretFile = ../../secrets/openai-api-key.age;
 in
 {
-  age.secrets = lib.optionalAttrs hasOpenAIKeySecret {
+  age.secrets = {
     "${openAIKeySecretName}".file = builtins.toPath openAIKeySecretFile;
   };
 
@@ -29,9 +27,7 @@ in
 
     initLua = ''
       vim.g.nix_flakes_theme = ${builtins.toJSON config.modules.commonTheme}
-      ${lib.optionalString hasOpenAIKeySecret ''
-        vim.g.openai_api_key_path = ${builtins.toJSON config.age.secrets.${openAIKeySecretName}.path}
-      ''}
+      vim.g.openai_api_key_path = ${builtins.toJSON config.age.secrets.${openAIKeySecretName}.path}
       require('config')
     '';
   };
