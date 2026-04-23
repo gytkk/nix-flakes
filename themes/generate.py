@@ -664,6 +664,7 @@ def nvim_lua(ctx: dict[str, Any], root: Path) -> str:
         "fg_muted": r["ui"]["fgMuted"],
         "fg_bright": r["ui"]["currentLineNumber"],
         "comment": r["syntax"]["comment"],
+        "ghost_text": mix(r["syntax"]["comment"], p["blue"], 0.42 if is_light else 0.42),
         "red": p["red"],
         "orange": p["orange"],
         "yellow": p["yellow"],

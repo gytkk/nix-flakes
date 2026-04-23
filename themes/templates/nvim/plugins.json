@@ -113,7 +113,7 @@
         {
           "group": "BlinkCmpGhostText",
           "attrs": {
-            "fg": "$blue",
+            "fg": "$ghost_text",
             "italic": true
           }
         },

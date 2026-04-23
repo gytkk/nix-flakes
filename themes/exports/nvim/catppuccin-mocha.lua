@@ -15,6 +15,7 @@ local p = {
   fg_muted = "#a6adc8",
   fg_bright = "#b4befe",
   comment = "#9399b2",
+  ghost_text = "#8fa4d0",
   red = "#f38ba8",
   orange = "#fab387",
   yellow = "#f9e2af",
@@ -352,7 +353,7 @@ function M.setup()
   hl("BlinkCmpLabel", { fg = p.fg })
   hl("BlinkCmpLabelMatch", { fg = p.blue, bold = true })
   hl("BlinkCmpKind", { fg = p.orange })
-  hl("BlinkCmpGhostText", { fg = p.blue, italic = true })
+  hl("BlinkCmpGhostText", { fg = p.ghost_text, italic = true })
   hl("MinuetVirtualText", { link = "BlinkCmpGhostText" })
 
   -- Plugin: snacks.nvim
