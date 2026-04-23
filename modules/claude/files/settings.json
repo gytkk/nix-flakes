@@ -18,7 +18,8 @@
       "Write(~/.config)",
       "Write(~/.local)",
       "Write(~/workspace)",
-      "Write(~/development)"
+      "Write(~/development)",
+      "Write(/tmp)"
     ],
     "defaultMode": "acceptEdits"
   },
