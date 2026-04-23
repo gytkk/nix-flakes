@@ -355,7 +355,8 @@ function M.setup()
   hl("BlinkCmpLabel", { fg = p.fg })
   hl("BlinkCmpLabelMatch", { fg = p.blue, bold = true })
   hl("BlinkCmpKind", { fg = p.orange })
-  hl("BlinkCmpGhostText", { fg = p.comment, italic = true })
+  hl("BlinkCmpGhostText", { fg = p.blue, italic = true })
+  hl("MinuetVirtualText", { link = "BlinkCmpGhostText" })
 
   -- Plugin: snacks.nvim
   hl("SnacksPickerDir", { fg = p.comment })

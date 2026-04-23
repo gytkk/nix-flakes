@@ -160,9 +160,6 @@ groups:
     bold: true
   BlinkCmpKind:
     fg: "{palette.orange}"
-  BlinkCmpGhostText:
-    fg: "{roles.syntax.comment}"
-    italic: true
   SnacksPickerDir:
     fg: "{roles.syntax.comment}"
   SnacksPickerFile:

@@ -113,8 +113,14 @@
         {
           "group": "BlinkCmpGhostText",
           "attrs": {
-            "fg": "$comment",
+            "fg": "$blue",
             "italic": true
+          }
+        },
+        {
+          "group": "MinuetVirtualText",
+          "attrs": {
+            "link": "BlinkCmpGhostText"
           }
         }
       ]
