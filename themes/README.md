@@ -26,7 +26,6 @@ themes/
 │   └── <theme-name>.yaml
 ├── exports/
 │   ├── vscode/
-│   ├── wezterm/
 │   ├── ghostty/
 │   ├── zed/
 │   └── vim/
@@ -35,16 +34,13 @@ themes/
 │   ├── roles.nix              # shared role defaults and fallback rules
 │   └── exporters/
 │       ├── vscode.nix
-│       ├── wezterm.nix
 │       ├── ghostty.nix
 │       ├── zed.nix
 │       └── vim.nix
 ├── overrides/
 │   ├── vscode/
 │   │   └── <theme-name>.nix
-│   ├── zed/
-│   │   └── <theme-name>.nix
-│   └── wezterm/
+│   └── zed/
 │       └── <theme-name>.nix
 └── examples/
     └── theme.example.yaml
@@ -514,7 +510,6 @@ Current generators:
 - `zed` -> `themes/exports/zed/*.json`
 - `nvim` -> `themes/exports/nvim/*.lua`
 - `starship` -> `themes/exports/starship/*.toml`
-- `wezterm` -> `themes/exports/wezterm/*.lua`
 - `zellij` -> `themes/exports/zellij/*.kdl`
 
 Adapter templates and schema helpers:
@@ -527,7 +522,6 @@ Adapter templates and schema helpers:
 - `themes/templates/nvim/official-template.json` -> Neovim builtin highlight template derived from official help
 - `themes/templates/nvim/plugins.json` -> Neovim plugin-specific highlight template
 - `themes/templates/starship/official-template.json` -> Starship prompt template derived from the Starship config contract plus the existing local prompt layout
-- `themes/templates/wezterm/official-template.json` -> WezTerm Lua theme template derived from the colors/window-frame config contracts plus the existing local module config
 - `themes/templates/zellij/official-template.json` -> Zellij theme template derived from the official Zellij theme definition specification
 - `themes/overrides/ghostty/*.yaml` -> optional Ghostty slot overrides applied after generator defaults
 - `themes/overrides/zellij/*.yaml` -> optional Zellij-specific component/player overrides applied after generator defaults
@@ -574,7 +568,6 @@ Examples:
 
 - VS Code `activityBarBadge.background`
 - VS Code `editorGutter.modifiedBackground`
-- WezTerm tab bar edge colors
 - Zed title bar or player-specific UI fragments
 - any exact output key that only one target understands
 
@@ -662,11 +655,10 @@ Use overrides for app-specific exceptions like:
 
 Suggested first exporters:
 
-1. `wezterm`
-2. `ghostty`
-3. `zed`
-4. `vscode`
-5. `vim`
+1. `ghostty`
+2. `zed`
+3. `vscode`
+4. `vim`
 
 Rationale:
 
@@ -705,7 +697,7 @@ Or better, expose generated outputs:
 ```nix
 {
   themeExports.vscode.tokyo-night-ish = ...;
-  themeExports.wezterm.tokyo-night-ish = ...;
+  themeExports.ghostty.tokyo-night-ish = ...;
 }
 ```
 

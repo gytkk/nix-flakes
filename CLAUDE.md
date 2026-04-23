@@ -114,7 +114,6 @@ modules/<name>/
 | `opencode/`  | OpenCode AI agent   | `files/opencode.json`, `files/AGENTS.md`            | YES     |
 | `terraform/` | Terraform versions  | `default.nix` (direnv lazy-load)                    | NO      |
 | `vim/`       | Neovim              | `files/config/init.lua`, `files/onelight.lua`       | YES     |
-| `wezterm/`   | WezTerm terminal    | `files/wezterm.lua`                                 | YES     |
 | `vscode/`    | VSCode (DISABLED)   | `default.nix`, `one-half-light-theme/`              | NO      |
 | `zed/`       | Zed editor          | `files/settings.json`, `themes/one-half-light.json` | YES     |
 | `zellij/`    | Zellij multiplexer  | `files/config.darwin.kdl`, `files/config.linux.kdl` | YES     |

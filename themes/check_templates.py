@@ -332,20 +332,6 @@ def check_zellij(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
         expect(contract.get("value_type") == "rgb-triplet", f"{path_str}.theme_schema.value_type must be 'rgb-triplet'", errors)
     check_zellij_sections(f"{path_str}.sections", doc.get("sections"), errors)
 
-
-def check_wezterm(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
-    check_common(path, doc, errors)
-    path_str = str(path)
-    contract = doc.get("lua_schema")
-    expect(isinstance(contract, dict), f"{path_str}.lua_schema must be an object", errors)
-    if isinstance(contract, dict):
-        require_keys(contract, ["root_type", "token_prefix", "value_types"], f"{path_str}.lua_schema", errors)
-        expect(contract.get("root_type") == "table", f"{path_str}.lua_schema.root_type must be 'table'", errors)
-        expect(contract.get("token_prefix") == "$", f"{path_str}.lua_schema.token_prefix must be '$'", errors)
-        expect(isinstance(contract.get("value_types"), list) and len(contract["value_types"]) > 0, f"{path_str}.lua_schema.value_types must be a non-empty list", errors)
-    check_document_template(path_str, doc.get("document"), errors)
-
-
 def check_k9s(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
     check_common(path, doc, errors)
     path_str = str(path)
@@ -507,7 +493,6 @@ JSON_CHECKS = {
     ROOT / "templates" / "zed" / "official-template.json": check_zed,
     ROOT / "templates" / "nvim" / "plugins.json": check_nvim_plugin_template,
     ROOT / "templates" / "starship" / "official-template.json": check_starship,
-    ROOT / "templates" / "wezterm" / "official-template.json": check_wezterm,
     ROOT / "templates" / "zellij" / "official-template.json": check_zellij,
 }
 

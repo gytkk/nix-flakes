@@ -22,7 +22,6 @@
     ../modules/opencode
     ../modules/lsp
     ../modules/vim
-    ../modules/wezterm
     ../modules/zed
     ../modules/zellij
     ../modules/zsh

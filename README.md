@@ -203,7 +203,6 @@ Resources should supplement the tools instead of expanding the tool count:
 - Zellij is managed through `modules/zellij/default.nix`.
 - `home-manager switch` renders `~/.config/zellij/config.kdl` from the platform-specific template in `modules/zellij/files/` and exposes the generated `themes/exports/zellij` directory at `~/.config/zellij/themes`.
 - The checked-in defaults keep the selected shared theme, use Zellij's builtin `default` layout, disable startup tips, and leave `Ctrl+b` unbound so terminal apps like Neovim still receive it instead of entering Zellij's tmux mode.
-- In WezTerm, hold `Shift` while dragging to bypass Zellij mouse reporting for terminal-side selection, then use `Cmd+C` to copy.
 - On macOS, the repo-managed Darwin config includes `copy_command "pbcopy"` so explicit Zellij copy actions continue to target the system clipboard.
 - Local interactive shells started from Ghostty automatically `exec zellij`.
 - SSH sessions and shells already inside `zellij` or `tmux` are excluded from that auto-start.
@@ -227,15 +226,6 @@ Resources should supplement the tools instead of expanding the tool count:
 - `home-manager switch` installs `~/.config/kitty/kitty.conf` as an out-of-store symlink to `modules/kitty/files/kitty.conf`, so the repo file stays mutable.
 - The checked-in defaults mirror the current Ghostty look and feel: One Half Light colors, JetBrains Mono with Sarasa Mono CL as the Hangul fallback, a beam cursor, 95% background opacity, shell integration, and muted split borders.
 - The module only manages config. Install the `kitty` app or binary separately.
-
-## WezTerm config
-
-- WezTerm is managed through `modules/wezterm/default.nix`.
-- `home-manager switch` installs `~/.config/wezterm/wezterm.lua` as an out-of-store symlink to `modules/wezterm/files/wezterm.lua`, so editing either path produces the same repo diff.
-- The checked-in `wezterm.lua` handles platform-specific differences inline, including macOS blur and Windows defaults such as `default_domain = 'WSL:Ubuntu'` and titlebar-less `RESIZE` decorations.
-- On WSL hosts, activation also deploys `%USERPROFILE%/.config/wezterm/wezterm.lua` for Windows WezTerm, and rewrites `%USERPROFILE%/.wezterm.lua` to a small bridge that loads the XDG config path.
-- The checked-in defaults keep the existing WezTerm basics such as the scroll bar and large scrollback, while mirroring the current Ghostty setup for One Half Light colors, JetBrains Mono with Sarasa Mono CL fallback, a bar cursor, `xterm-256color`, Kitty keyboard protocol support disabled for Zellij compatibility on macOS, an explicit `Shift+Enter -> CSI 13;2u` remap for AI TUI newline prompts, 95% background opacity, and muted split and tab colors.
-- The module only manages config. Install the WezTerm app or binary separately.
 
 ## AeroSpace config
 
