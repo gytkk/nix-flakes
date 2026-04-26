@@ -1,6 +1,8 @@
 {
   config,
   flakeDirectory,
+  lib,
+  osConfig ? null,
   themeExports,
   ...
 }:
@@ -10,9 +12,15 @@ let
   nvimThemeExports = config.lib.file.mkOutOfStoreSymlink (themeExports.mutableDir "nvim");
   openAIKeySecretName = "openai-api-key";
   openAIKeySecretFile = ../../secrets/openai-api-key.age;
+  usesSystemAgenix = osConfig != null;
+  openAIKeySecretPath =
+    if usesSystemAgenix then
+      osConfig.age.secrets.${openAIKeySecretName}.path
+    else
+      config.age.secrets.${openAIKeySecretName}.path;
 in
 {
-  age.secrets = {
+  age.secrets = lib.mkIf (!usesSystemAgenix) {
     "${openAIKeySecretName}".file = builtins.toPath openAIKeySecretFile;
   };
 
@@ -27,7 +35,7 @@ in
 
     initLua = ''
       vim.g.nix_flakes_theme = ${builtins.toJSON config.modules.commonTheme}
-      vim.g.openai_api_key_path = ${builtins.toJSON config.age.secrets.${openAIKeySecretName}.path}
+      vim.g.openai_api_key_path = ${builtins.toJSON openAIKeySecretPath}
       require('config')
     '';
   };

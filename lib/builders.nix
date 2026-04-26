@@ -135,6 +135,13 @@ rec {
             nixpkgs.overlays = commonOverlays;
             nixpkgs.config.allowUnfree = true;
 
+            age.secrets."openai-api-key" = {
+              file = ../secrets/openai-api-key.age;
+              owner = config.username;
+              group = "users";
+              mode = "0400";
+            };
+
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.backupFileExtension = "backup";
