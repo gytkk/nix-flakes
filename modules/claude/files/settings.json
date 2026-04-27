@@ -21,7 +21,7 @@
       "Write(~/development)",
       "Write(/tmp)"
     ],
-    "defaultMode": "auto"
+    "defaultMode": "acceptEdits"
   },
   "enableAllProjectMcpServers": true,
   "hooks": {
