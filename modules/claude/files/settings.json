@@ -21,7 +21,7 @@
       "Write(~/development)",
       "Write(/tmp)"
     ],
-    "defaultMode": "acceptEdits"
+    "defaultMode": "auto"
   },
   "enableAllProjectMcpServers": true,
   "hooks": {
@@ -75,6 +75,6 @@
   "spinnerTipsEnabled": false,
   "alwaysThinkingEnabled": true,
   "effortLevel": "high",
-  "theme": "light",
+  "theme": "auto",
   "teammateMode": "auto"
 }
