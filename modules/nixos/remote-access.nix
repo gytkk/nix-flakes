@@ -14,6 +14,7 @@
 
   services.tailscale = {
     enable = true;
+    extraSetFlags = [ "--ssh=false" ];
   };
 
   networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ 22 ];
