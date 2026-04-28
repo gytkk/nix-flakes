@@ -1,21 +1,23 @@
 { pkgs, username, ... }@args:
+let
+  sharedAuthorizedKeys = [
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJhE4Uakcz7usa0aetMqb99LYybOQ0I+sWKOiAidmBio gytk.kim@gmail.com"
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDdeZoty0uKpSDJ8sUGFwsMEEBYcuajo30lHlUHh8RMi devsisters-macbook"
+  ];
+in
 {
   security.sudo = {
     enable = true;
     wheelNeedsPassword = false;
   };
 
-  users.users.root.openssh.authorizedKeys.keys = [
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJhE4Uakcz7usa0aetMqb99LYybOQ0I+sWKOiAidmBio gytk.kim@gmail.com"
-  ]
+  users.users.root.openssh.authorizedKeys.keys = sharedAuthorizedKeys
   ++ (args.extraPublicKeys or [ ]);
 
   users.users.${username} = {
     isNormalUser = true;
     extraGroups = [ "wheel" ];
     shell = pkgs.zsh;
-    openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJhE4Uakcz7usa0aetMqb99LYybOQ0I+sWKOiAidmBio gytk.kim@gmail.com"
-    ];
+    openssh.authorizedKeys.keys = sharedAuthorizedKeys;
   };
 }
