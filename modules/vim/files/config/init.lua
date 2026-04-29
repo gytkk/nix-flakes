@@ -526,6 +526,14 @@ local lspconfig = {
       capabilities = require("blink.cmp").get_lsp_capabilities(),
     })
 
+    vim.lsp.config("rust_analyzer", {
+      settings = {
+        ["rust-analyzer"] = {
+          files = { watcher = "server" },
+        },
+      },
+    })
+
     vim.lsp.enable(lspServers)
     setupLspDiagnostics()
 
