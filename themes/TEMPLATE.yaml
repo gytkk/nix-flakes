@@ -48,6 +48,11 @@ palette:
   muted: "{palette.base04}"
   comment: "{palette.base16}"
   fgMuted: "{palette.base04}"
+  # Secondary/inactive UI text (sidebar items, inactive tabs). Pick a value
+  # between fg and fgMuted; aim for >=3:1 contrast on panelBg. base06 works
+  # for most palettes that position it as secondary text; otherwise use a
+  # literal hex tuned to the theme's design intent.
+  fgInactive: "{palette.base06}"
   fg: "{palette.base05}"
   fgBright: "{palette.base06}"
   fgMax: "{palette.base07}"
@@ -79,6 +84,7 @@ roles:
     bgAlt: "{palette.bgAlt}"
     bgElevated: "{palette.bgElevated}"
     fg: "{palette.fg}"
+    fgInactive: "{palette.fgInactive}"
     fgMuted: "{palette.fgMuted}"
     border: "{palette.border}"
     borderActive: "{palette.blue}"
