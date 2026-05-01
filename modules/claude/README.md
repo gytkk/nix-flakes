@@ -14,7 +14,7 @@ This module installs and configures Claude Code, Anthropic's AI coding assistant
 
 ### settings.json
 
-- **Model**: `opus` (default)
+- **Model**: `claude-opus-4-6` (default)
 - **Agent Teams**: Enabled (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`)
 - **MCP**: Enables all project MCP servers, Context7, Notion
 - **Permissions**: Pre-approved tools (Bash, Read, Edit, WebFetch, Context7)
