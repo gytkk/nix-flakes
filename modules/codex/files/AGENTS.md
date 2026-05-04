@@ -162,6 +162,12 @@
 - Treat `$skill-creator` output as a scaffold: trim unused files, keep the
   skill focused, and align it with this repository's conventions before
   committing.
+- Use the repo-managed `parallel-research-merge` skill when a task needs
+  bounded parallel investigation before one main agent produces the final
+  implementation.
+- Do not rely on always-on AGENTS guidance alone for multi-worker orchestration.
+  When delegation matters, use a skill with an explicit worker contract and
+  merge checklist.
 
 ## Error Handling
 

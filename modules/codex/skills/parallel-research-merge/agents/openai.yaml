@@ -1,0 +1,4 @@
+interface:
+  display_name: "Parallel Research Merge"
+  short_description: "Split investigation, then merge one verified implementation"
+  default_prompt: "Use $parallel-research-merge to delegate bounded parallel research and then implement one verified result."
