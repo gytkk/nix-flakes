@@ -62,6 +62,11 @@ Individual projects may override this policy (e.g., banning worktree entirely). 
 
 **Worktree agent permissions:** Prefer the normal permission flow or `acceptEdits` in repo-local worktrees. Only use `bypassPermissions` in genuinely isolated environments such as containers or VMs.
 
+## Looping Plugins
+
+- When using Ralph Loop or any self-repeating plugin, always set a bounded stop condition such as `--max-iterations`, an explicit `--completion-promise`, or both.
+- Do not start an unbounded loop with no exit condition. If a loop becomes stuck, stop and clear the loop state instead of asking the user to keep fighting the hook.
+
 ## Critical Rules
 
 - First, deeply understand and think about what you want to achieve with your code.
