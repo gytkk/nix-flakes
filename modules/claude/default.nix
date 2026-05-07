@@ -44,7 +44,8 @@ let
     # thedotmack/claude-mem — persistent memory compression for Claude Code
     "claude-mem@claude-mem"
 
-    # gytkk/claude-marketplace — Scala LSP, Python LSP, Terraform LSP, and Nix LSP
+    # gytkk/claude-marketplace — skills and LSP plugins
+    "devils-advocate@gytkk"
     "metals-lsp@gytkk"
     "ty-lsp@gytkk"
     "terraform-ls@gytkk"
