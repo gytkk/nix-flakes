@@ -51,6 +51,7 @@ Global development guidelines deployed to `~/.claude/CLAUDE.md`. Includes:
 - `plannotator` (visual plan annotation and review)
 - `codex` (official OpenAI Codex plugin — provides `/codex:review`, `/codex:rescue`, etc.)
 - `claude-mem` (persistent memory compression across Claude Code sessions)
+- `devils-advocate` (skeptical multi-pass review skill)
 
 ## MCP Servers
 

@@ -52,6 +52,7 @@
     "plannotator@plannotator": true,
     "codex@openai-codex": true,
     "claude-mem@claude-mem": true,
+    "devils-advocate@gytkk": true,
     "metals-lsp@gytkk": true,
     "ty-lsp@gytkk": true,
     "terraform-ls@gytkk": true,
