@@ -128,6 +128,17 @@ in
     log "Updating marketplace index..."
     ${timeout} 30s ${claude} plugin marketplace update < /dev/null >> "$SETUP_LOG" 2>&1 || log "Marketplace update failed"
 
+    # Temporarily make settings.json writable for plugin install/update.
+    # Home Manager symlinks it to a read-only Nix store path, which causes
+    # EACCES when `claude plugin install` tries to write back to it.
+    SETTINGS_FILE="$HOME/.claude/settings.json"
+    SETTINGS_LINK_TARGET=""
+    if [ -L "$SETTINGS_FILE" ]; then
+      SETTINGS_LINK_TARGET=$(${pkgs.coreutils}/bin/readlink -f "$SETTINGS_FILE")
+      ${pkgs.coreutils}/bin/cp --remove-destination "$SETTINGS_LINK_TARGET" "$SETTINGS_FILE"
+      log "Temporarily made settings.json writable for plugin operations"
+    fi
+
     # Install or update plugins
     ${lib.concatMapStringsSep "\n    " (plugin: ''
       if ! grep -qF "${plugin}" "$INSTALLED_PLUGINS" 2>/dev/null; then
@@ -145,6 +156,12 @@ in
           log "  -> FAILED (exit $?)"
         fi
       fi'') plugins}
+
+    # Restore settings.json symlink
+    if [ -n "$SETTINGS_LINK_TARGET" ]; then
+      ${pkgs.coreutils}/bin/ln -sf "$SETTINGS_LINK_TARGET" "$SETTINGS_FILE"
+      log "Restored settings.json symlink"
+    fi
 
     # Cache MCP server list once to avoid repeated calls
     MCP_CACHE=$(${timeout} 15s ${claude} mcp list < /dev/null 2>/dev/null || echo "")
