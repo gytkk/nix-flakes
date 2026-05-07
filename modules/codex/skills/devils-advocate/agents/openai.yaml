@@ -1,0 +1,4 @@
+interface:
+  display_name: "Devil's Advocate Review"
+  short_description: "Anti-sycophantic multi-pass code review"
+  default_prompt: "Use $devils-advocate to run a skeptical multi-pass review of the current changes."
