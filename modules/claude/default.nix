@@ -73,7 +73,11 @@ in
     "${config.xdg.dataHome}/bin"
   ];
 
-  home.file.".claude/settings.json".text = claudeSettingsJson;
+  # Claude plugin operations may temporarily leave this as a regular file.
+  home.file.".claude/settings.json" = {
+    text = claudeSettingsJson;
+    force = true;
+  };
   home.file.".claude/CLAUDE.md".source = ./files/CLAUDE.md;
   home.file.".claude/statusline-command.sh" = {
     source = ./files/statusline-command.sh;
