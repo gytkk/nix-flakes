@@ -57,15 +57,18 @@ Check:
 - Resource leaks: files, connections, locks, transactions.
 - Boundary conditions: off-by-one, empty collections, maximum limits.
 
-Minimum findings: 1 critical issue. Re-examine once if no critical issue is
-found, then report the shortfall rather than inventing one.
+Completion target: identify at least 1 edge-case finding when defensible.
+Re-examine once if none is found. If no edge-case finding is defensible, report
+that the pass did not produce material findings and list the concrete
+edge-case areas that remain unverified rather than inventing one.
 
 ## Verdict Criteria
 
 Use:
 
 - `approve`: findings are all minor or info, average confidence is at least 8,
-  and all pass targets were met.
+  and all passes were completed. A completed pass may have no findings only when
+  the report states the re-check and remaining unverified areas.
 - `needs_work`: default; use for any major finding, confidence below 8,
   incomplete context, or missed pass target.
 - `reject`: any high-confidence critical finding or fundamental design flaw.

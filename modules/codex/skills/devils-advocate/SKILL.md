@@ -42,7 +42,8 @@ or dominant conventions.
 5. Aggregate findings into a verdict.
 6. Report a concise review with unverified areas.
 
-Read `references/rubrics.md` for detailed criteria. Use
+Read `references/rubrics.md` before reviewing; it is canonical for standards
+discovery, pass checks, pass completion, and verdict criteria. Use
 `references/review-schema.json` when the user requests JSON output or when a
 machine-readable result is useful.
 
@@ -52,21 +53,24 @@ If the user names files, directories, commits, or a feature, use that as the
 target. If the user provides `--base <ref>` or asks for a branch review, inspect
 `git diff <ref>...HEAD`.
 
-If no explicit target is provided, use the first non-empty target:
+If no explicit target is provided, prefer the complete current working tree
+state before falling back to the last commit:
 
 ```bash
-git diff --staged --stat
-git diff --stat
+git diff HEAD --stat
 git diff HEAD~1 HEAD --stat
 ```
 
 Use the matching full diff command only after selecting the target:
 
 ```bash
-git diff --staged
-git diff
+git diff HEAD
 git diff HEAD~1 HEAD
 ```
+
+Use staged-only or unstaged-only diffs only when the user explicitly scopes the
+review that way. When both staged and unstaged changes exist, review them
+together unless doing so makes the target too broad.
 
 If the target is too broad to review meaningfully, stop with
 `CONTEXT INSUFFICIENT` and ask for a narrower scope.
@@ -115,42 +119,15 @@ Run the passes sequentially so later passes can avoid duplicating earlier
 findings. If the user asks for quick mode, run only Pass 1 with a target minimum
 of 1 finding.
 
-### Pass 1: Architecture
+Run the passes defined in `references/rubrics.md`:
 
-Focus on design fit:
+1. Architecture and design fitness.
+2. Future maintainability and tech debt.
+3. Hidden assumptions and edge cases.
 
-- Dependency direction and circular dependencies.
-- Abstraction level: over-engineering, copy-paste, speculative generality.
-- Module boundaries and public API contracts.
-- Consistency with discovered project standards.
-- Separation of concerns.
-
-Target minimum: 2 findings in full mode, 1 finding in quick mode.
-
-### Pass 2: Maintainability
-
-Focus on future cost:
-
-- Coupling, cohesion, and shotgun surgery.
-- Whether a new maintainer can reason about the code in six months.
-- Implicit assumptions and temporal coupling.
-- Magic values, weak domain types, or primitive obsession.
-- Error messages and operational debuggability.
-
-Target minimum: 2 findings.
-
-### Pass 3: Edge Cases
-
-Focus on hidden failure modes:
-
-- Unenforced caller/callee contracts.
-- Partial failures and cleanup.
-- Concurrency, ordering, retries, and idempotency.
-- Empty, null, malformed, maximum-size, and boundary inputs.
-- Resource leaks and external dependency failures.
-
-Target minimum: 1 critical finding. If no critical finding is defensible after a
-second pass, report the shortfall instead of fabricating one.
+If a required pass produces no material findings after the required
+re-examination, say so explicitly and list the concrete areas that remain
+unverified. Do not fabricate findings to satisfy a target.
 
 ## Finding Rules
 
@@ -174,14 +151,10 @@ Severity guide:
 
 ## Verdict
 
-Use:
-
-- `reject` when any high-confidence critical issue exists or the design is
-  fundamentally unsafe.
-- `needs_work` when any major issue exists, confidence is below 8, context is
-  incomplete, or a pass missed its target minimum.
-- `approve` only when all findings are minor or info, average confidence is at
-  least 8, and all required passes were satisfied.
+Use the verdict criteria in `references/rubrics.md`. Approval is allowed only
+when all findings are minor or info, confidence is at least 8, and every
+required pass was completed with either findings or an explicit no material
+findings note after re-check.
 
 ## Report Format
 

@@ -16,7 +16,7 @@
     },
     "summary": {
       "type": "string",
-      "maxLength": 100
+      "maxLength": 160
     },
     "passes": {
       "type": "array",
@@ -45,21 +45,36 @@
                   "type": "string",
                   "description": "file:line format"
                 },
-                "description": {
+                "what_can_go_wrong": {
                   "type": "string",
-                  "maxLength": 80
+                  "maxLength": 240
                 },
-                "suggestion": {
+                "why_vulnerable": {
                   "type": "string",
-                  "maxLength": 80
+                  "maxLength": 240
+                },
+                "impact": {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                "recommendation": {
+                  "type": "string",
+                  "maxLength": 240
                 }
               },
-              "required": ["severity", "file", "description", "suggestion"]
+              "required": [
+                "severity",
+                "file",
+                "what_can_go_wrong",
+                "why_vulnerable",
+                "impact",
+                "recommendation"
+              ]
             }
           },
           "what_could_go_wrong": {
             "type": "string",
-            "maxLength": 200
+            "maxLength": 240
           },
           "unverified": {
             "type": "array",
@@ -67,7 +82,7 @@
             "maxItems": 3,
             "items": {
               "type": "string",
-              "maxLength": 80
+              "maxLength": 160
             }
           },
           "confidence": {
@@ -94,7 +109,7 @@
       "maxItems": 5,
       "items": {
         "type": "string",
-        "maxLength": 120
+        "maxLength": 200
       }
     },
     "improvements": {
@@ -111,7 +126,7 @@
           },
           "description": {
             "type": "string",
-            "maxLength": 80
+            "maxLength": 200
           },
           "impact": {
             "type": "string",
@@ -127,7 +142,7 @@
       "maxItems": 9,
       "items": {
         "type": "string",
-        "maxLength": 80
+        "maxLength": 160
       }
     },
     "mode": {
