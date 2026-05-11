@@ -1,31 +1,23 @@
 # CLAUDE.md
 
-## Skill Discovery (TOP PRIORITY)
+## Skill Discovery
 
-> **CRITICAL**: Before starting work on any request, first check whether an available skill fits the current request's context or situation.
+- Explore available skills first — look for built-in, installed, or repo-provided skills that match the user's request before improvising.
+- Use the best-fit skill when one exists, and follow its workflow.
+- If no skill fits, proceed normally and state that choice when it matters.
 
-- **Explore skills first.** Look for built-in, installed, or repo-provided skills that match the user's request before improvising your own workflow.
-- **Use the best-fit skill when appropriate.** If a relevant skill exists, use it and follow its workflow instead of bypassing it.
-- **Only skip skills deliberately.** If no skill fits, or a skill is clearly not appropriate, proceed normally and state that choice when it matters.
+## Inquiry Protocol
 
-## Verification & Inquiry Protocol (TOP PRIORITY)
-
-> **CRITICAL**: Apply at EVERY step. This overrides all other instructions.
-
-- **Verify before moving on.** Confirm each step succeeded with evidence (tests, diagnostics, diffs) — never assume.
-- **Ask, don't guess.** If requirements are ambiguous or context is missing, ask the user immediately.
-- **Surface blockers early.** Flag missing info, risky assumptions, or dependencies NOW — not after building on them.
+- If requirements are ambiguous or context is missing, ask the user immediately instead of guessing.
 
 ## Git & Commit Workflow
-
-> **CRITICAL**: Follow the single flow from change completion through commit.
 
 1. Complete one logical change
 2. If subject to review → Use `@review` agent
    - No issues → Proceed to commit
    - Issues found → Fix and re-verify
 3. Otherwise → Commit immediately
-4. Do not bundle unrelated changes into a single commit
+4. One logical change per commit
 
 **Review targets** (review when one or more apply):
 
@@ -41,7 +33,7 @@
 - [Conventional Commits](https://www.conventionalcommits.org/) format (e.g., `feat:`, `fix:`, `docs:`)
 - Reference git commit history to maintain consistent message style
 - Imperative mood (e.g., "Add feature" not "Added feature")
-- Do NOT push unless explicitly requested
+- Push only when explicitly requested
 
 ## Planning & Approval
 
@@ -74,6 +66,7 @@ Individual projects may override this policy (e.g., banning worktree entirely). 
 - Be concise. Commit small, frequent changes for readable diffs.
 - Proactively use web search if there is any uncertainty or lack of knowledge.
 - Always use `rg` (ripgrep) instead of `grep`. This applies to all contexts: shell commands, scripts, and Nix expressions.
+- Never commit secrets, credentials, or API keys.
 
 ## Writing Code
 
@@ -88,37 +81,3 @@ Individual projects may override this policy (e.g., banning worktree entirely). 
   - Use `uv run script.py` instead of `python script.py`
   - Use `uv run -m pytest` instead of `python -m pytest`
   - Use `uv run -m pip install` instead of `pip install`
-
-## Security
-
-- Never commit secrets, credentials, or API keys.
-- Use environment variables or secret management tools for sensitive data.
-- Review dependency changes for known vulnerabilities before committing.
-
-## Testing
-
-- Write tests for new features before or alongside implementation.
-- Run existing tests before committing when the project has a test suite (e.g., `uv run -m pytest`, `npm test`).
-- For Nix-only projects, defer to project-specific build/test rules.
-- Cover edge cases and error scenarios in tests.
-
-## Code Review
-
-- Focus on: readability, maintainability, security, and performance.
-- Suggest improvements constructively with clear explanations.
-- Check for edge cases and proper error handling.
-- Verify that changes align with existing code patterns.
-
-## Documentation
-
-- Update README.md when adding new features or changing behavior.
-- Add docstrings/comments for complex logic only when necessary.
-- Keep documentation in sync with code changes.
-- Do NOT create one-off or temporary documentation files.
-
-## Error Handling
-
-- Always handle errors gracefully; avoid silent failures.
-- Use specific error types when possible.
-- Log errors with enough context for debugging.
-- Provide meaningful error messages to users.
