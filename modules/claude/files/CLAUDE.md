@@ -81,3 +81,43 @@ Individual projects may override this policy (e.g., banning worktree entirely). 
   - Use `uv run script.py` instead of `python script.py`
   - Use `uv run -m pytest` instead of `python -m pytest`
   - Use `uv run -m pip install` instead of `pip install`
+
+## Security
+
+- Never commit secrets, credentials, or API keys.
+- Use environment variables or secret management tools for sensitive data.
+- Review dependency changes for known vulnerabilities before committing.
+
+## Testing
+
+- Write tests for new features before or alongside implementation.
+- Run existing tests before committing when the project has a test suite (e.g., `uv run -m pytest`, `npm test`).
+- For Nix-only projects, defer to project-specific build/test rules.
+- Cover edge cases and error scenarios in tests.
+
+## Code Review
+
+- Focus on: readability, maintainability, security, and performance.
+- Suggest improvements constructively with clear explanations.
+- Check for edge cases and proper error handling.
+- Verify that changes align with existing code patterns.
+
+## Documentation
+
+- Update README.md when adding new features or changing behavior.
+- Add docstrings/comments for complex logic only when necessary.
+- Keep documentation in sync with code changes.
+- Do NOT create one-off or temporary documentation files.
+
+## Error Handling
+
+- Always handle errors gracefully; avoid silent failures.
+- Use specific error types when possible.
+- Log errors with enough context for debugging.
+- Provide meaningful error messages to users.
+
+## Discovery and Reporting
+
+- During discovery, diagnosis, or question-driven planning, do not claim the work is complete or that all needed information has been gathered until you have actually finished collecting it.
+- Avoid premature final-report phrasing after partial reads, intermediate tool output, or user answers that still leave open decisions.
+- If the task is still exploratory, keep the response explicitly in-progress and continue the questioning or investigation flow instead of switching into a wrapped-up summary voice.
