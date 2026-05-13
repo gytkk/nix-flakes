@@ -21,6 +21,15 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.local/share/bin/plannotator",
+            "timeout": 345600
+          }
+        ]
       }
     ]
   }

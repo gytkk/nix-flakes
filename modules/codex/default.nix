@@ -12,15 +12,18 @@ let
   mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/codex/${path}";
   codexStopUploadCommand = "${config.home.homeDirectory}/.local/bin/codex-stop-upload";
   codexSessionStartSweepCommand = "${config.home.homeDirectory}/.local/bin/codex-session-start-sweep";
+  plannotatorCommand = "${config.xdg.dataHome}/bin/plannotator";
   codexHooksJson =
     builtins.replaceStrings
       [
         "~/.local/bin/codex-session-start-sweep"
         "~/.local/bin/codex-stop-upload"
+        "~/.local/share/bin/plannotator"
       ]
       [
         codexSessionStartSweepCommand
         codexStopUploadCommand
+        plannotatorCommand
       ]
       (builtins.readFile ./files/hooks.json);
   codexConfigPath = "${config.home.homeDirectory}/.codex/config.toml";
