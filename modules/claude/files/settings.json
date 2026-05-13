@@ -11,8 +11,6 @@
       "Edit",
       "WebFetch",
       "WebSearch",
-      "Skill(plannotator-review)",
-      "Skill(plannotator:plannotator-review)",
       "mcp__context7__*",
       "Write(~/.ai)",
       "Write(~/.config)",
