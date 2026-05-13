@@ -8,12 +8,6 @@ sandbox_mode = "danger-full-access"
 web_search = "live"
 personality = "pragmatic"
 
-[features]
-hooks = true
-fast_mode = true
-shell_tool = true
-multi_agent = true
-
 [mcp_servers.openaiDeveloperDocs]
 url = "https://developers.openai.com/mcp"
 
