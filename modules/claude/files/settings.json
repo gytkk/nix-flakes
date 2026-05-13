@@ -51,7 +51,6 @@
     "typescript-lsp@claude-plugins-official": true,
     "plannotator@plannotator": true,
     "codex@openai-codex": true,
-    "claude-mem@claude-mem": true,
     "devils-advocate@gytkk": true,
     "metals-lsp@gytkk": true,
     "ty-lsp@gytkk": true,
@@ -63,12 +62,6 @@
       "source": {
         "source": "github",
         "repo": "openai/codex-plugin-cc"
-      }
-    },
-    "thedotmack": {
-      "source": {
-        "source": "github",
-        "repo": "thedotmack/claude-mem"
       }
     }
   },
