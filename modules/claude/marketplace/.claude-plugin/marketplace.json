@@ -1,0 +1,61 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "gytkk",
+  "description": "gytkk's personal marketplace for Claude Code",
+  "owner": {
+    "name": "gytkk",
+    "email": "gytkk@users.noreply.github.com"
+  },
+  "plugins": [
+    {
+      "name": "devils-advocate",
+      "description": "Anti-sycophantic multi-pass code review: architecture fitness, maintainability, and hidden assumptions",
+      "version": "2.0.0",
+      "author": {
+        "name": "gytkk"
+      },
+      "source": "./skills/devils-advocate",
+      "category": "productivity"
+    },
+    {
+      "name": "metals-lsp",
+      "description": "Scala language server (Metals) for code intelligence, refactoring, and analysis",
+      "version": "1.0.0",
+      "author": {
+        "name": "gytkk"
+      },
+      "source": "./lsp/metals-lsp",
+      "category": "development"
+    },
+    {
+      "name": "ty-lsp",
+      "description": "Python type checker and language server (ty by Astral) for code intelligence",
+      "version": "1.0.0",
+      "author": {
+        "name": "gytkk"
+      },
+      "source": "./lsp/ty-lsp",
+      "category": "development"
+    },
+    {
+      "name": "terraform-ls",
+      "description": "Terraform language server for code intelligence and refactoring",
+      "version": "1.0.0",
+      "author": {
+        "name": "gytkk"
+      },
+      "source": "./lsp/terraform-ls",
+      "category": "development"
+    },
+    {
+      "name": "nixd-lsp",
+      "description": "Nix language server (nixd) for code intelligence and diagnostics",
+      "version": "1.0.0",
+      "author": {
+        "name": "gytkk"
+      },
+      "source": "./lsp/nixd-lsp",
+      "category": "development"
+    }
+  ]
+}

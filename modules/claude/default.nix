@@ -17,9 +17,17 @@ let
     "anthropics/skills"
     "anthropics/claude-code"
     "anthropics/claude-plugins-official"
-    "gytkk/claude-marketplace"
     "backnotprop/plannotator"
     "openai/codex-plugin-cc"
+  ];
+
+  # Local marketplaces sourced from the flake working tree.
+  # Each entry is registered via `claude plugin marketplace add <path>`.
+  localMarketplaces = [
+    {
+      name = "gytkk";
+      path = "${flakeDirectory}/modules/claude/marketplace";
+    }
   ];
 
   # plugin-name@marketplace-name
@@ -40,7 +48,7 @@ let
     # openai/codex-plugin-cc — Official Codex plugin for Claude Code
     "codex@openai-codex"
 
-    # gytkk/claude-marketplace — skills and LSP plugins
+    # local gytkk marketplace (modules/claude/marketplace) — skills and LSP plugins
     "devils-advocate@gytkk"
     "metals-lsp@gytkk"
     "ty-lsp@gytkk"
@@ -123,6 +131,36 @@ in
       else
         log "Marketplace already registered: ${mp}"
       fi'') marketplaces}
+
+    # Register local marketplaces (filesystem-sourced).
+    # If a same-named marketplace was previously registered from GitHub,
+    # remove it first so the local path takes over without name collision.
+    KNOWN_MARKETPLACES="$HOME/.claude/plugins/known_marketplaces.json"
+    ${lib.concatMapStringsSep "\n    " (mp: ''
+      LOCAL_MP_NAME=${lib.escapeShellArg mp.name}
+      LOCAL_MP_PATH=${lib.escapeShellArg mp.path}
+      EXISTING_SOURCE=""
+      EXISTING_PATH=""
+      if [ -f "$KNOWN_MARKETPLACES" ]; then
+        EXISTING_SOURCE=$(${pkgs.jq}/bin/jq -r --arg n "$LOCAL_MP_NAME" '.[$n].source.source // ""' "$KNOWN_MARKETPLACES" 2>/dev/null || echo "")
+        EXISTING_PATH=$(${pkgs.jq}/bin/jq -r --arg n "$LOCAL_MP_NAME" '.[$n].source.path // ""' "$KNOWN_MARKETPLACES" 2>/dev/null || echo "")
+      fi
+      if [ "$EXISTING_SOURCE" = "github" ]; then
+        log "Removing stale github marketplace: $LOCAL_MP_NAME"
+        ${timeout} 30s ${claude} plugin marketplace remove "$LOCAL_MP_NAME" < /dev/null >> "$SETUP_LOG" 2>&1 || log "  -> remove FAILED (exit $?)"
+        EXISTING_SOURCE=""
+        EXISTING_PATH=""
+      fi
+      if [ "$EXISTING_PATH" != "$LOCAL_MP_PATH" ]; then
+        log "Adding local marketplace: $LOCAL_MP_NAME -> $LOCAL_MP_PATH"
+        if ${timeout} 60s ${claude} plugin marketplace add "$LOCAL_MP_PATH" < /dev/null >> "$SETUP_LOG" 2>&1; then
+          log "  -> OK"
+        else
+          log "  -> FAILED (exit $?)"
+        fi
+      else
+        log "Local marketplace already registered: $LOCAL_MP_NAME"
+      fi'') localMarketplaces}
 
     # Refresh marketplace index after adding new ones
     log "Updating marketplace index..."
