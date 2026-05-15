@@ -68,5 +68,6 @@
   "alwaysThinkingEnabled": true,
   "effortLevel": "high",
   "theme": "auto",
-  "teammateMode": "auto"
+  "teammateMode": "auto",
+  "skipAutoPermissionPrompt": true
 }
