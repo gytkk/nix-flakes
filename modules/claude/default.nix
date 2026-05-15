@@ -9,10 +9,7 @@
 let
   claude = "${pkgs.claude-code}/bin/claude";
   timeout = "${pkgs.coreutils}/bin/timeout --foreground";
-  claudeSessionUploadCommand = "${config.home.homeDirectory}/.local/bin/claude-session-upload";
-  claudeSettingsJson =
-    builtins.replaceStrings [ "~/.local/bin/claude-session-upload" ] [ claudeSessionUploadCommand ]
-      (builtins.readFile ./files/settings.json);
+  mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/claude/${path}";
   marketplaces = [
     "anthropics/skills"
     "anthropics/claude-code"
@@ -79,7 +76,7 @@ in
 
   # Claude plugin operations may temporarily leave this as a regular file.
   home.file.".claude/settings.json" = {
-    text = claudeSettingsJson;
+    source = mkSymlink "files/settings.json";
     force = true;
   };
   home.file.".claude/CLAUDE.md".source = ./files/CLAUDE.md;
@@ -166,9 +163,8 @@ in
     log "Updating marketplace index..."
     ${timeout} 30s ${claude} plugin marketplace update < /dev/null >> "$SETUP_LOG" 2>&1 || log "Marketplace update failed"
 
-    # Temporarily make settings.json writable for plugin install/update.
-    # Home Manager symlinks it to a read-only Nix store path, which causes
-    # EACCES when `claude plugin install` tries to write back to it.
+    # Temporarily run plugin install/update against a copy so activation
+    # does not mutate the repository-backed settings symlink.
     SETTINGS_FILE="$HOME/.claude/settings.json"
     SETTINGS_LINK_TARGET=""
     if [ -L "$SETTINGS_FILE" ]; then
