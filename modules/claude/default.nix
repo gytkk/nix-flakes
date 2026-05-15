@@ -69,9 +69,9 @@ in
     pkgs.claude-code
   ];
 
-  # Add XDG data bin to PATH (for plannotator CLI installed via install.sh)
+  # Add ~/.local/bin to PATH (plannotator install.sh installs here)
   home.sessionPath = [
-    "${config.xdg.dataHome}/bin"
+    "${config.home.homeDirectory}/.local/bin"
   ];
 
   # Claude plugin operations may temporarily leave this as a regular file.
@@ -233,11 +233,12 @@ in
     log "=== Claude Code setup finished ==="
   '';
 
-  # Install plannotator CLI binary (from GitHub releases, not in nixpkgs)
-  # Binary installs to ${XDG_DATA_HOME}/bin/plannotator via install.sh
+  # Install plannotator CLI binary (from GitHub releases, not in nixpkgs).
+  # install.sh hardcodes INSTALL_DIR="$HOME/.local/bin" and does not honor
+  # an env override, so we just consume that location directly.
   home.activation.installPlannotator = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    PLANNOTATOR_BIN="${config.xdg.dataHome}/bin/plannotator"
-    PLANNOTATOR_VERSION_FILE="${config.xdg.dataHome}/bin/.plannotator-version"
+    PLANNOTATOR_BIN="$HOME/.local/bin/plannotator"
+    PLANNOTATOR_VERSION_FILE="$HOME/.local/bin/.plannotator-version"
     SETUP_LOG="$HOME/.claude/nix-setup.log"
     export PATH="${
       lib.makeBinPath (
@@ -251,8 +252,6 @@ in
         ]
       )
     }:$PATH"
-
-    ${pkgs.coreutils}/bin/mkdir -p "$(${pkgs.coreutils}/bin/dirname "$PLANNOTATOR_BIN")"
 
     LATEST_TAG=""
     NEEDS_INSTALL=0
@@ -273,14 +272,7 @@ in
 
     if [ "$NEEDS_INSTALL" = "1" ]; then
       echo "[$(date '+%H:%M:%S')] Installing plannotator CLI..." >> "$SETUP_LOG"
-      # install.sh installs to $HOME/.local/bin; copy to XDG_DATA_HOME/bin afterwards
       if ${pkgs.curl}/bin/curl -fsSL https://plannotator.ai/install.sh | ${pkgs.bash}/bin/bash >> "$SETUP_LOG" 2>&1; then
-        # Copy to XDG data bin if install.sh installed to a different location
-        INSTALL_SH_BIN="$HOME/.local/bin/plannotator"
-        if [ -x "$INSTALL_SH_BIN" ] && [ "$INSTALL_SH_BIN" != "$PLANNOTATOR_BIN" ]; then
-          ${pkgs.coreutils}/bin/mkdir -p "$(${pkgs.coreutils}/bin/dirname "$PLANNOTATOR_BIN")"
-          ${pkgs.coreutils}/bin/cp -f "$INSTALL_SH_BIN" "$PLANNOTATOR_BIN"
-        fi
         # Record installed version
         if [ -n "$LATEST_TAG" ]; then
           echo "$LATEST_TAG" > "$PLANNOTATOR_VERSION_FILE"
@@ -295,6 +287,14 @@ in
       else
         echo "[$(date '+%H:%M:%S')] plannotator installation FAILED (exit $?)" >> "$SETUP_LOG"
       fi
+    fi
+
+    # One-shot migration: remove legacy XDG-bin copy from the pre-cleanup
+    # layout. No-op once cleaned up.
+    LEGACY_BIN="${config.xdg.dataHome}/bin/plannotator"
+    if [ -e "$LEGACY_BIN" ]; then
+      ${pkgs.coreutils}/bin/rm -f "$LEGACY_BIN" "${config.xdg.dataHome}/bin/.plannotator-version"
+      echo "[$(date '+%H:%M:%S')] Removed legacy $LEGACY_BIN" >> "$SETUP_LOG"
     fi
   '';
 

@@ -26,7 +26,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.local/share/bin/plannotator",
+            "command": "~/.local/bin/plannotator",
             "timeout": 345600
           }
         ]
