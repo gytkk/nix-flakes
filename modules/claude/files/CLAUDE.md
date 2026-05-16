@@ -33,7 +33,8 @@
 - [Conventional Commits](https://www.conventionalcommits.org/) format (e.g., `feat:`, `fix:`, `docs:`)
 - Reference git commit history to maintain consistent message style
 - Imperative mood (e.g., "Add feature" not "Added feature")
-- Push only when explicitly requested
+- Do NOT push unless explicitly requested
+- Treat `finish it`, `wrap this up`, `handle the rest`, PR preparation, test success, or local commits as insufficient for push permission. Push only when the current conversation explicitly asks for remote push.
 
 ## Planning & Approval
 
