@@ -6,6 +6,9 @@
     "flakes"
   ];
 
+  # Keep the current D-Bus daemon until we do an explicit broker migration.
+  services.dbus.implementation = "dbus";
+
   # Enable zsh system-wide (configuration via Home Manager)
   programs.zsh.enable = true;
 
