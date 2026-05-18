@@ -252,6 +252,14 @@ in
         ]
       )
     }:$PATH"
+    ${pkgs.coreutils}/bin/mkdir -p "$HOME/.claude" "$HOME/.local/bin"
+
+    fetchLatestPlannotatorTag() {
+      ${pkgs.curl}/bin/curl -fsSL "https://api.github.com/repos/backnotprop/plannotator/releases/latest" 2>/dev/null \
+        | ${pkgs.gnugrep}/bin/grep '"tag_name"' \
+        | ${pkgs.coreutils}/bin/cut -d'"' -f4 \
+        || true
+    }
 
     LATEST_TAG=""
     NEEDS_INSTALL=0
@@ -259,10 +267,10 @@ in
       NEEDS_INSTALL=1
     else
       # Check latest version from GitHub
-      LATEST_TAG=$(${pkgs.curl}/bin/curl -fsSL "https://api.github.com/repos/backnotprop/plannotator/releases/latest" 2>/dev/null | ${pkgs.gnugrep}/bin/grep '"tag_name"' | ${pkgs.coreutils}/bin/cut -d'"' -f4)
+      LATEST_TAG="$(fetchLatestPlannotatorTag)"
       LOCAL_VERSION=""
       if [ -f "$PLANNOTATOR_VERSION_FILE" ]; then
-        LOCAL_VERSION=$(${pkgs.coreutils}/bin/cat "$PLANNOTATOR_VERSION_FILE")
+        LOCAL_VERSION="$(${pkgs.coreutils}/bin/cat "$PLANNOTATOR_VERSION_FILE" 2>/dev/null || true)"
       fi
       if [ -n "$LATEST_TAG" ] && [ "$LATEST_TAG" != "$LOCAL_VERSION" ]; then
         NEEDS_INSTALL=1
@@ -278,7 +286,7 @@ in
           echo "$LATEST_TAG" > "$PLANNOTATOR_VERSION_FILE"
           echo "[$(date '+%H:%M:%S')] plannotator installed ($LATEST_TAG) to $PLANNOTATOR_BIN" >> "$SETUP_LOG"
         else
-          INSTALLED_TAG=$(${pkgs.curl}/bin/curl -fsSL "https://api.github.com/repos/backnotprop/plannotator/releases/latest" 2>/dev/null | ${pkgs.gnugrep}/bin/grep '"tag_name"' | ${pkgs.coreutils}/bin/cut -d'"' -f4)
+          INSTALLED_TAG="$(fetchLatestPlannotatorTag)"
           if [ -n "$INSTALLED_TAG" ]; then
             echo "$INSTALLED_TAG" > "$PLANNOTATOR_VERSION_FILE"
           fi
