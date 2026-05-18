@@ -86,6 +86,7 @@
         wget
         curl
         rsync
+        glow
 
         # Git
         git
