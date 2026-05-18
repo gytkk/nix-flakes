@@ -11,26 +11,6 @@ Generated from `openclaw doctor` on May 18, 2026.
 
 ## Remaining Warnings
 
-### Missing External Plugins
-
-The config enables these plugins, but they are not installed:
-
-- `discord`: install with `openclaw plugins install @openclaw/discord`
-- `brave`: install with `openclaw plugins install @openclaw/brave-plugin`
-- `codex`: install with `openclaw plugins install @openclaw/codex`
-- `acpx`: install with `openclaw plugins install @openclaw/acpx`
-
-### Stale Plugin References
-
-Doctor reports stale references for:
-
-- `plugins.entries.brave`
-- `plugins.entries.codex`
-- `plugins.entries.acpx`
-
-`openclaw doctor --fix` can remove stale plugin IDs and dangling channel
-references.
-
 ### Personal Codex Assets
 
 OpenClaw found personal Codex assets under:
@@ -91,10 +71,13 @@ or require missing environment variables/configuration.
 - Gateway service is healthy.
 - Browser warnings are gone.
 - Security warnings are clear.
+- External plugin warnings are gone.
+- Stale plugin reference warnings are gone.
 - Plugin load errors are `0`.
+- Loaded plugins: `68`.
 
 ## Notes
 
-The remaining warnings mostly require explicit decisions: installing external
-plugins, choosing Discord sender allowlists, setting a command owner, and
-allowing `openclaw doctor --fix` to rewrite state files.
+The remaining warnings mostly require explicit decisions: choosing Discord
+sender allowlists, setting a command owner, and allowing
+`openclaw doctor --fix` to rewrite state files.
