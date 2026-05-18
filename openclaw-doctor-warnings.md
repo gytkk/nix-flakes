@@ -36,35 +36,15 @@ are configured or the policy is changed to `open`.
 Effect: owner-only commands such as `/diagnostics`, `/export-trajectory`,
 `/config`, and exec approvals do not have an explicit owner identity.
 
-### State Integrity
-
-Doctor found state that does not match the current config:
-
-- One agent directory exists without a matching `agents.list` entry: `gpt-pro`.
-- Nineteen orphan transcript files exist under
-  `~/.openclaw/agents/main/sessions`.
-
-Doctor says it can archive orphan transcripts by renaming them to
-`*.deleted.<timestamp>`.
-
-### Legacy Session Route State
-
-Doctor found legacy `openai-codex/*` session route state.
-
-- Affected sessions: `168`.
-- `openclaw doctor --fix` can rewrite stale session model/provider pins across
-  agent session stores.
-
 ### Skill Requirements
 
 Doctor reports:
 
 - Eligible skills: `23`
-- Missing requirements: `38`
+- Missing requirements: `0`
 - Blocked by allowlist: `0`
 
-Most listed skills are unusable because they are macOS-only, missing binaries,
-or require missing environment variables/configuration.
+Previously unusable skills were disabled by `openclaw doctor --fix`.
 
 ## Clean Sections
 
@@ -73,11 +53,13 @@ or require missing environment variables/configuration.
 - Security warnings are clear.
 - External plugin warnings are gone.
 - Stale plugin reference warnings are gone.
+- State integrity warnings are gone.
+- Legacy session route warnings are gone.
 - Plugin load errors are `0`.
 - Loaded plugins: `68`.
 
 ## Notes
 
-The remaining warnings mostly require explicit decisions: choosing Discord
-sender allowlists, setting a command owner, and allowing
-`openclaw doctor --fix` to rewrite state files.
+The remaining warnings require explicit decisions: choosing Discord sender
+allowlists, setting a command owner, and deciding whether to migrate personal
+Codex assets into OpenClaw.
