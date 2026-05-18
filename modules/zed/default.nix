@@ -32,9 +32,15 @@ let
       }
     )
   );
+  zedExtensions = pkgs.zed-extensions // {
+    # proto pulls in a large Rust workspace; unrestricted Cargo jobs can OOM on pylv-onyx.
+    proto = pkgs.zed-extensions.proto.overrideAttrs (_: {
+      CARGO_BUILD_JOBS = "1";
+    });
+  };
 
   # Nix로 관리할 확장 목록 (pkgs.zed-extensions에서 가져옴)
-  nixExtensions = with pkgs.zed-extensions; [
+  nixExtensions = with zedExtensions; [
     docker-compose
     dockerfile
     git-firefly
