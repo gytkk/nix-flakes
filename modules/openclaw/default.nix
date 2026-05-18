@@ -82,13 +82,6 @@ let
     browser = {
       enabled = true;
       defaultProfile = "openclaw";
-      actionTimeoutMs = 60000;
-      tabCleanup = {
-        enabled = true;
-        idleMinutes = 30;
-        maxTabsPerSession = 8;
-        sweepMinutes = 10;
-      };
     };
     session.threadBindings = {
       enabled = true;
@@ -135,7 +128,8 @@ let
       openclawSystemdDropInFile
       openclawSystemdDropInPath
       seedConfigFile
-      stateDir;
+      stateDir
+      ;
   };
 in
 lib.mkMerge [
