@@ -8,7 +8,8 @@
 
 ## Inquiry Protocol
 
-- If requirements are ambiguous or context is missing, ask the user immediately instead of guessing.
+- If missing context cannot be recovered locally and guessing would be risky, ask the user immediately.
+- If the answer is likely available from the repo, local files, logs, or adjacent workspace context, inspect those first and come back with a narrower question only if a real blocker remains.
 
 ## Git & Commit Workflow
 
