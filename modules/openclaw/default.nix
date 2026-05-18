@@ -84,6 +84,24 @@ let
       defaultProfile = "openclaw";
       executablePath = "/run/current-system/sw/bin/chromium";
       headless = true;
+      actionTimeoutMs = 60000;
+      tabCleanup = {
+        enabled = true;
+        idleMinutes = 120;
+        maxTabsPerSession = 8;
+        sweepMinutes = 5;
+      };
+      profiles = {
+        openclaw = {
+          cdpPort = 18800;
+          color = "#FF4500";
+        };
+        user = {
+          driver = "existing-session";
+          attachOnly = true;
+          color = "#00AA00";
+        };
+      };
     };
     plugins.entries.browser.enabled = true;
     messages.groupChat.visibleReplies = "message_tool";
