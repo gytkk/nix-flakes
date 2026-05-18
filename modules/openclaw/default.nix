@@ -111,11 +111,19 @@ let
       idleHours = 168;
       maxAgeHours = 0;
       spawnSessions = true;
+      spawnSubagentSessions = true;
+      # Keep Discord Codex/ACP workflows on explicit existing-thread binds.
+      # This avoids the current ACP tool-path parity gap where thread spawns can
+      # resolve as child placement instead of true "--bind here" semantics.
+      spawnAcpSessions = false;
+      defaultSpawnContext = "fork";
     };
     session.threadBindings = {
       enabled = true;
       idleHours = 168;
       maxAgeHours = 0;
+      spawnSessions = true;
+      defaultSpawnContext = "fork";
     };
   };
 

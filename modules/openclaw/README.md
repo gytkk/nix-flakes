@@ -8,7 +8,7 @@
 - **시스템의 `openclaw` 명령은 하이브리드 wrapper이며, 실제 실행 파일은 `flake-stores`의 upstream npm 기반 `pkgs.openclaw`를 사용합니다**
 - **Nix activation은 `~/.openclaw/openclaw.json`이 없을 때만 초기 config를 seed에서 생성하고, 기존 mutable user config는 덮어쓰지 않습니다.**
 
-마지막 검증: `2026-04-14`
+마지막 검증: `2026-05-18`
 
 ## 구성 요약
 
@@ -21,6 +21,17 @@
 - OpenClaw Control UI 및 OpenAI 호환 API는 gateway bearer token을 주입하는 `nginx` 프록시를 통해 `0.0.0.0:18790`으로 노출됩니다.
 - 이 `18790` 포트는 NixOS 방화벽에서 `wlo1` 인터페이스에만 열려 있습니다.
 - OpenClaw는 `gateway.tailscale.mode = "off"`라서 Tailscale Serve로 직접 노출되지 않습니다.
+- Discord thread binding은 유지하되, **ACP의 Discord child-thread 자동 spawn은 비활성화**합니다.
+
+## Discord + Codex/ACP 운영 규칙
+
+- 기본 원칙은 **"target thread를 먼저 정하고, 거기에 bind"** 입니다.
+- Discord에서 persistent Codex/ACP 작업이 필요하면, 먼저 작업할 thread를 열거나 선택한 뒤 `'/acp spawn codex --bind here'`를 사용합니다.
+- 기존 Discord thread 안에서는 ACP를 새 child thread로 spawn하지 않습니다.
+- 이 구성은 `channels.discord.threadBindings.spawnAcpSessions = false`로 seed에 박아 둡니다.
+- 대신 일반 thread binding 자체와 native subagent thread session은 유지합니다.
+- top-level channel에서 새 Codex 작업 공간이 필요하면, OpenClaw가 child thread를 자동 생성하게 두는 대신 **직접 thread를 만들고 그곳에서 bind here** 하는 운영을 기본값으로 삼습니다.
+- `thread: true` 기반 ACP child-thread 생성은 upstream parity가 맞아진 뒤 다시 검토합니다.
 
 ## 접근 방법
 
@@ -82,6 +93,7 @@ openclaw gateway restart
 - 따라서 login shell 전체에 secret을 export하지 않는다.
 - `OPENCLAW_CONFIG_PATH` / `OPENCLAW_STATE_DIR`는 host session variables로 고정되어 있다.
 - Gateway token의 source of truth는 기존 `~/.openclaw/openclaw.json`이 있으면 그 파일이고, config가 없을 때는 token file/랜덤 토큰을 기반으로 초기 config를 만든다.
+- 그래서 seed를 바꾼 뒤에도 기존 `~/.openclaw/openclaw.json`은 자동으로 덮어쓰지 않는다. 이미 생성된 mutable config는 별도 patch/restart가 필요하다.
 
 ## 관련 설정 파일
 
