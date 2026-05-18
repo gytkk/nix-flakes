@@ -40,6 +40,9 @@
   networking.networkmanager.enable = true;
   networking.hostName = "pylv-onyx";
 
+  # Keep direct `nixos-rebuild switch` from attempting the dbus -> broker live migration.
+  services.dbus.implementation = "dbus";
+
   # niri compositor
   programs.niri.enable = true;
 
