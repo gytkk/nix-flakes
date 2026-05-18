@@ -74,7 +74,33 @@ let
       http = {
         endpoints.chatCompletions.enabled = true;
       };
+      controlUi = {
+        enabled = true;
+      };
       tailscale.mode = "off";
+    };
+    browser = {
+      enabled = true;
+      defaultProfile = "openclaw";
+      actionTimeoutMs = 60000;
+      tabCleanup = {
+        enabled = true;
+        idleMinutes = 30;
+        maxTabsPerSession = 8;
+        sweepMinutes = 10;
+      };
+    };
+    session.threadBindings = {
+      enabled = true;
+      idleHours = 168;
+      maxAgeHours = 0;
+    };
+    channels.discord.threadBindings = {
+      enabled = true;
+      idleHours = 168;
+      maxAgeHours = 0;
+      spawnSubagentSessions = true;
+      spawnAcpSessions = true;
     };
   };
 
@@ -124,6 +150,7 @@ lib.mkMerge [
     environment.systemPackages = with pkgs; [
       openclawHybridCli
       bun
+      chromium
       libcap
       nodejs
       qmdPackage
