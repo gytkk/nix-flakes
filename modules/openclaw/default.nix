@@ -82,18 +82,22 @@ let
     browser = {
       enabled = true;
       defaultProfile = "openclaw";
+      executablePath = "/run/current-system/sw/bin/chromium";
+      headless = true;
+    };
+    plugins.entries.browser.enabled = true;
+    messages.groupChat.visibleReplies = "message_tool";
+    agents.defaults.bootstrapMaxChars = 20000;
+    channels.discord.threadBindings = {
+      enabled = true;
+      idleHours = 168;
+      maxAgeHours = 0;
+      spawnSessions = true;
     };
     session.threadBindings = {
       enabled = true;
       idleHours = 168;
       maxAgeHours = 0;
-    };
-    channels.discord.threadBindings = {
-      enabled = true;
-      idleHours = 168;
-      maxAgeHours = 0;
-      spawnSubagentSessions = true;
-      spawnAcpSessions = true;
     };
   };
 
