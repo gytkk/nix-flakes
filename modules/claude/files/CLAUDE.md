@@ -56,6 +56,8 @@ Individual projects may override this policy (e.g., banning worktree entirely). 
 
 **Worktree agent permissions:** Prefer the normal permission flow or `acceptEdits` in repo-local worktrees. Only use `bypassPermissions` in genuinely isolated environments such as containers or VMs.
 
+- Before editing in parallel agent or worktree flows, verify the current worktree path and branch first. If you are not in the intended isolated checkout, stop before making changes, restore any accidental edits, and report the contamination clearly.
+
 ## Looping Plugins
 
 - When using Ralph Loop or any self-repeating plugin, always set a bounded stop condition such as `--max-iterations`, an explicit `--completion-promise`, or both.
