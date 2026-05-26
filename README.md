@@ -222,6 +222,16 @@ Resources should supplement the tools instead of expanding the tool count:
   JetBrains Mono with Sarasa Mono CL fallback, a beam cursor, 95% background
   opacity, shell integration, and the IME-safe `Ctrl+key_*` bindings.
 
+## cmux config
+
+- cmux app-owned settings are managed through `modules/cmux/default.nix` on
+  Darwin hosts.
+- `home-manager switch` renders `~/.config/cmux/cmux.json` with the official
+  schema URL, keeps cmux app/browser appearance aligned to the selected shared
+  theme variant, and lets terminal rendering continue to come from the Ghostty
+  config and generated Ghostty themes.
+- The module only manages config. Install the `cmux` app separately.
+
 ## Kitty config
 
 - Kitty is managed through `modules/kitty/default.nix`.

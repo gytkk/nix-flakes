@@ -15,6 +15,7 @@
     ../modules/agent-session-record
     ../modules/aerospace
     ../modules/claude
+    ../modules/cmux
     ../modules/codex
     ../modules/ghostty
     ../modules/git
