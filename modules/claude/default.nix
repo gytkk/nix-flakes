@@ -79,7 +79,7 @@ in
     source = mkSymlink "files/settings.json";
     force = true;
   };
-  home.file.".claude/CLAUDE.md".source = ./files/CLAUDE.md;
+  home.file.".claude/CLAUDE.md".source = mkSymlink "files/CLAUDE.md";
   home.file.".claude/statusline-command.sh" = {
     source = ./files/statusline-command.sh;
     executable = true;
