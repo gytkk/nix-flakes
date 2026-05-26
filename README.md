@@ -41,7 +41,9 @@ The official [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc)
 - Standalone activation only prompts for `sudo` when `/etc/codex` needs to be created or repaired, or when migrating from the legacy `/etc/codex/config.toml` path.
 - Using the repo path instead of the flake source store path avoids repeated sudo prompts after unrelated repo changes.
 - If `/etc/codex/managed_config.toml` or the legacy `/etc/codex/config.toml` already exists as a regular file, activation stops instead of overwriting it.
-- `~/.codex/config.toml` stays writable for user-local state such as `[projects."..."]` trust entries.
+- `~/.codex/config.toml` stays writable and is not rewritten by activation,
+  preserving user-local state such as project trust, hook trust, notices, and
+  TUI state.
 - Repo-managed admin skills currently include `karpathy-guidelines`,
   `parallel-research-merge`, and `devils-advocate`.
 

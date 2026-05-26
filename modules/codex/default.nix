@@ -39,38 +39,6 @@ let
   managedSkillsSource =
     if hasSystemCodexConfig then ./skills else "${flakeDirectory}/modules/codex/skills";
   coreutils = pkgs.coreutils;
-  extractProjectsFunction = ''
-    extract_projects() {
-      local src="$1"
-
-      if [ ! -r "$src" ]; then
-        return 0
-      fi
-
-      ${pkgs.gawk}/bin/awk '
-        BEGIN {
-          in_projects = 0
-          printed = 0
-        }
-        /^\[projects\.".*"\][[:space:]]*$/ {
-          if (printed == 1) {
-            print ""
-          }
-
-          print
-          in_projects = 1
-          printed = 1
-          next
-        }
-        /^\[/ {
-          in_projects = 0
-        }
-        in_projects {
-          print
-        }
-      ' "$src"
-    }
-  '';
   ensureSystemCodexConfigFunction =
     if hasSystemCodexConfig then
       ""
@@ -182,19 +150,10 @@ let
   codexUserConfigActivation = ''
     ${coreutils}/bin/mkdir -p "$HOME/.codex"
 
-    projects_tmp="$(${coreutils}/bin/mktemp)"
-    extract_projects ${lib.escapeShellArg codexConfigPath} > "$projects_tmp"
-
-    ${coreutils}/bin/rm -f ${lib.escapeShellArg codexConfigPath}
-
-    if [ -s "$projects_tmp" ]; then
-      ${coreutils}/bin/install -m 600 "$projects_tmp" ${lib.escapeShellArg codexConfigPath}
-    else
+    if [ ! -e ${lib.escapeShellArg codexConfigPath} ]; then
       : > ${lib.escapeShellArg codexConfigPath}
       ${coreutils}/bin/chmod 600 ${lib.escapeShellArg codexConfigPath}
     fi
-
-    ${coreutils}/bin/rm -f "$projects_tmp"
   '';
 in
 {
@@ -213,7 +172,6 @@ in
     home.file.".codex/hooks.json".text = codexHooksJson;
 
     home.activation.codexUserConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      ${extractProjectsFunction}
       ${ensureSystemCodexConfigFunction}
       ${lib.optionalString (!hasSystemCodexConfig) "ensure_system_codex_config"}
       ${codexUserConfigActivation}
