@@ -49,7 +49,7 @@ palette:
   muted: "{palette.base04}"
   comment: "{palette.base16}"
   fgMuted: "{palette.base04}"
-  fgInactive: "#676767"
+  fgInactive: "#9A9A9A"
   fg: "{palette.base05}"
   fgBright: "{palette.base06}"
   fgMax: "{palette.base07}"
@@ -70,7 +70,7 @@ palette:
   magentaBright: "{palette.base14}"
 
   selection: "{palette.base15}"
-  lineNumber: "{palette.base16}"
+  lineNumber: "#8A8A8A"
   whitespace: "{palette.base17}"
   blackBright: "{palette.base04}"
   white: "{palette.base07}"
