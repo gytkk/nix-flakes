@@ -31,6 +31,7 @@ let
       inherit appearance;
       appIcon = "automatic";
       workspaceInheritWorkingDirectory = true;
+      minimalMode = true;
       confirmQuit = "always";
     };
 

@@ -228,8 +228,8 @@ Resources should supplement the tools instead of expanding the tool count:
   Darwin hosts.
 - `home-manager switch` renders `~/.config/cmux/cmux.json` with the official
   schema URL, keeps cmux app/browser appearance aligned to the selected shared
-  theme variant, and lets terminal rendering continue to come from the Ghostty
-  config and generated Ghostty themes.
+  theme variant, always enables minimal UI mode, and lets terminal rendering
+  continue to come from the Ghostty config and generated Ghostty themes.
 - The module only manages config. Install the `cmux` app separately.
 
 ## Kitty config
