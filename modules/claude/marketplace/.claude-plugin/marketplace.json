@@ -25,7 +25,20 @@
         "name": "gytkk"
       },
       "source": "./lsp/metals-lsp",
-      "category": "development"
+      "category": "development",
+      "strict": false,
+      "lspServers": {
+        "metals": {
+          "command": "metals",
+          "extensionToLanguage": {
+            ".scala": "scala",
+            ".sc": "scala",
+            ".sbt": "sbt",
+            ".worksheet.sc": "scala"
+          },
+          "startupTimeout": 120000
+        }
+      }
     },
     {
       "name": "ty-lsp",
@@ -35,7 +48,18 @@
         "name": "gytkk"
       },
       "source": "./lsp/ty-lsp",
-      "category": "development"
+      "category": "development",
+      "strict": false,
+      "lspServers": {
+        "ty": {
+          "command": "ty",
+          "args": ["server"],
+          "extensionToLanguage": {
+            ".py": "python",
+            ".pyi": "python"
+          }
+        }
+      }
     },
     {
       "name": "terraform-ls",
@@ -45,7 +69,18 @@
         "name": "gytkk"
       },
       "source": "./lsp/terraform-ls",
-      "category": "development"
+      "category": "development",
+      "strict": false,
+      "lspServers": {
+        "terraform-ls": {
+          "command": "terraform-ls",
+          "args": ["serve"],
+          "extensionToLanguage": {
+            ".tf": "terraform",
+            ".tfvars": "terraform-vars"
+          }
+        }
+      }
     },
     {
       "name": "nixd-lsp",
@@ -55,7 +90,16 @@
         "name": "gytkk"
       },
       "source": "./lsp/nixd-lsp",
-      "category": "development"
+      "category": "development",
+      "strict": false,
+      "lspServers": {
+        "nixd": {
+          "command": "nixd",
+          "extensionToLanguage": {
+            ".nix": "nix"
+          }
+        }
+      }
     }
   ]
 }
