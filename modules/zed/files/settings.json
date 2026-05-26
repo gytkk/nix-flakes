@@ -9,8 +9,8 @@
   "buffer_font_size": 13,
   "theme": {
     "mode": "system",
-    "light": "One Half Light",
-    "dark": "One Dark"
+    "light": "Vira Graphene",
+    "dark": "Vira Graphene"
   },
   "tab_size": 2,
   "format_on_save": "on",
@@ -34,6 +34,9 @@
     },
     "font_family": "JetBrainsMono Nerd Font",
     "font_size": 13
+  },
+  "project_panel": {
+    "dock": "left"
   },
   "file_types": {
     "JSON": ["flake.lock"]

@@ -15,23 +15,6 @@ let
   mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/zed/${path}";
   zedThemeExportsPath = themeExports.mutableDir "zed";
   zedThemeExports = config.lib.file.mkOutOfStoreSymlink zedThemeExportsPath;
-  zedThemeDoc = builtins.fromJSON (
-    builtins.readFile (themeExports.file "zed" "${config.modules.commonTheme}.json")
-  );
-  zedThemeName = if zedThemeDoc ? name then zedThemeDoc.name else config.modules.commonTheme;
-  baseSettings = builtins.fromJSON (builtins.readFile ./files/settings.json);
-  renderedSettings = pkgs.writeText "zed-settings.json" (
-    builtins.toJSON (
-      baseSettings
-      // {
-        theme = {
-          mode = "system";
-          light = zedThemeName;
-          dark = zedThemeName;
-        };
-      }
-    )
-  );
   zedExtensions = pkgs.zed-extensions // {
     # proto pulls in a large Rust workspace; unrestricted Cargo jobs can OOM on pylv-onyx.
     proto = pkgs.zed-extensions.proto.overrideAttrs (_: {
@@ -82,8 +65,8 @@ let
   windowsZedConfigPath = "/mnt/c/Users/${username}/AppData/Roaming/Zed";
   windowsZedDataPath = "/mnt/c/Users/${username}/AppData/Local/Zed";
 
-  # JSON 파일 생성 (WSL activation script용)
-  settingsFile = renderedSettings;
+  # WSL activation script input files
+  settingsFile = "${flakeDirectory}/modules/zed/files/settings.json";
   keymapFile = pkgs.writeText "zed-keymap.json" (builtins.readFile ./files/keymap.json);
 
   # WSL: Windows Zed에 설정, 테마, 확장 배포 스크립트
@@ -140,8 +123,8 @@ in
     lib.mkMerge [
       # macOS/Linux (non-WSL): 설정 파일을 repo에 직접 symlink
       (lib.mkIf (!isWSL) {
-        # settings.json은 commonTheme를 반영한 generated file 사용, keymap.json은 repo 파일로 직접 symlink
-        home.file."${zedConfigPath}/settings.json".source = settingsFile;
+        # 설정 파일은 앱에서 수정하면 repo에 바로 반영되도록 직접 symlink한다.
+        home.file."${zedConfigPath}/settings.json".source = mkSymlink "files/settings.json";
         home.file."${zedConfigPath}/keymap.json".source = mkSymlink "files/keymap.json";
 
         # 생성된 테마 전체 → repo export 디렉토리로 직접 symlink (mutable)
