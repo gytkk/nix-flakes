@@ -173,18 +173,29 @@ in
       log "Temporarily made settings.json writable for plugin operations"
     fi
 
-    # Install or update plugins
+    # Install or update plugins. Always pin to user scope: a project-scope-only
+    # install causes Claude Code to re-prompt the install in every other project,
+    # and the previous substring check on installed_plugins.json could not tell
+    # project-scope entries apart from user-scope ones.
     ${lib.concatMapStringsSep "\n    " (plugin: ''
-      if ! grep -qF "${plugin}" "$INSTALLED_PLUGINS" 2>/dev/null; then
-        log "Installing plugin: ${plugin}"
-        if ${timeout} 60s ${claude} plugin install ${plugin} < /dev/null >> "$SETUP_LOG" 2>&1; then
+      HAS_USER_SCOPE=0
+      if [ -f "$INSTALLED_PLUGINS" ]; then
+        if [ "$(${pkgs.jq}/bin/jq -r --arg p "${plugin}" '
+              (.plugins[$p] // []) | map(select(.scope == "user")) | length
+            ' "$INSTALLED_PLUGINS" 2>/dev/null)" != "0" ]; then
+          HAS_USER_SCOPE=1
+        fi
+      fi
+      if [ "$HAS_USER_SCOPE" = "0" ]; then
+        log "Installing plugin (user scope): ${plugin}"
+        if ${timeout} 60s ${claude} plugin install -s user ${plugin} < /dev/null >> "$SETUP_LOG" 2>&1; then
           log "  -> OK"
         else
           log "  -> FAILED (exit $?)"
         fi
       else
-        log "Updating plugin: ${plugin}"
-        if ${timeout} 60s ${claude} plugin update ${plugin} < /dev/null >> "$SETUP_LOG" 2>&1; then
+        log "Updating plugin (user scope): ${plugin}"
+        if ${timeout} 60s ${claude} plugin update -s user ${plugin} < /dev/null >> "$SETUP_LOG" 2>&1; then
           log "  -> OK"
         else
           log "  -> FAILED (exit $?)"
