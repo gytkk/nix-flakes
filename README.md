@@ -228,10 +228,12 @@ Resources should supplement the tools instead of expanding the tool count:
 
 - cmux app-owned settings are managed through `modules/cmux/default.nix` on
   Darwin hosts.
-- `home-manager switch` renders `~/.config/cmux/cmux.json` with the official
-  schema URL, keeps cmux app/browser appearance aligned to the selected shared
-  theme variant, always enables minimal UI mode, and lets terminal rendering
-  continue to come from the Ghostty config and generated Ghostty themes.
+- `home-manager switch` installs `~/.config/cmux/cmux.json` as an out-of-store
+  symlink to `modules/cmux/files/cmux.json`, so edits made through the cmux
+  settings UI are written back to the repo-managed file.
+- The checked-in defaults use the official schema URL, dark app/browser
+  appearance, minimal UI mode, and let terminal rendering continue to come from
+  the Ghostty config and generated Ghostty themes.
 - The module only manages config. Install the `cmux` app separately.
 
 ## Kitty config

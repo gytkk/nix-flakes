@@ -2,62 +2,13 @@
   config,
   lib,
   pkgs,
-  themeExports,
+  flakeDirectory,
   ...
 }:
 
 let
   cfg = config.modules.cmux;
-  cmuxSchema = "https://raw.githubusercontent.com/manaflow-ai/cmux/main/web/data/cmux.schema.json";
-  zedThemeDoc = builtins.fromJSON (
-    builtins.readFile (themeExports.file "zed" "${config.modules.commonTheme}.json")
-  );
-  zedTheme = builtins.head zedThemeDoc.themes;
-  appearance =
-    if
-      builtins.elem zedTheme.appearance [
-        "dark"
-        "light"
-      ]
-    then
-      zedTheme.appearance
-    else
-      "system";
-  cmuxSettings = {
-    "$schema" = cmuxSchema;
-    schemaVersion = 1;
-
-    app = {
-      inherit appearance;
-      appIcon = "automatic";
-      workspaceInheritWorkingDirectory = true;
-      minimalMode = true;
-      confirmQuit = "always";
-    };
-
-    terminal = {
-      showScrollBar = true;
-      copyOnSelect = false;
-      autoResumeAgentSessions = true;
-      textBoxMaxLines = 10;
-    };
-
-    browser = {
-      theme = appearance;
-      openTerminalLinksInCmuxBrowser = true;
-      interceptTerminalOpenCommandInCmuxBrowser = true;
-    };
-
-    sidebarAppearance = {
-      matchTerminalBackground = true;
-      tintColor = "#000000";
-      tintOpacity = 0;
-    };
-
-    automation = {
-      suppressSubagentNotifications = true;
-    };
-  };
+  mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/cmux/${path}";
 in
 {
   options.modules.cmux = {
@@ -69,6 +20,6 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    xdg.configFile."cmux/cmux.json".text = builtins.toJSON cmuxSettings;
+    xdg.configFile."cmux/cmux.json".source = mkSymlink "files/cmux.json";
   };
 }
