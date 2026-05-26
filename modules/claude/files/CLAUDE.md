@@ -37,6 +37,14 @@
 - Do NOT push unless explicitly requested
 - Treat `finish it`, `wrap this up`, `handle the rest`, PR preparation, test success, or local commits as insufficient for push permission. Push only when the current conversation explicitly asks for remote push.
 
+**PR sync after push** (mandatory whenever a push is performed):
+
+- Immediately after a successful push, check the branch for an open PR with `gh pr view --json number,title,body,state` (omit the number — it resolves from the current branch).
+- If a PR exists, judge whether the pushed change made the current title or body stale or inaccurate: scope changes (renamed files, dropped/added features, switched approach, new follow-ups), invalidated test plan items, broken file/link references, or a now-misleading summary all count as stale.
+- When stale, update via `gh pr edit --title "..." --body "$(cat <<'EOF' ... EOF)"` in the same turn as the push. Preserve any prior sections that are still accurate; rewrite only the parts that diverged.
+- When the push is purely additive and the existing title/body still describes the branch correctly (e.g., follow-up fix matching the existing scope, typo-only commit), leave the PR alone and say so in one line.
+- This sync is part of the authorized push action — no separate confirmation needed. If no PR exists, skip silently.
+
 ## Planning & Approval
 
 **Simple changes** (1–2 file simple edits, low risk):
