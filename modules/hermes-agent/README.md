@@ -7,6 +7,7 @@ Minimal notes for reproducing the user-managed Hermes Agent install on NixOS.
 - `git`, `curl`, `uv`, `nodejs`, `ripgrep`, and `ffmpeg` on `PATH`.
 - `programs.nix-ld.enable = true` for upstream Linux binaries.
 - A GitHub SSH key registered for the user.
+- `SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt` in `~/.hermes/.env`.
 
 ## Install
 
@@ -41,6 +42,22 @@ For one-off Hermes runs:
 ```bash
 export DISCORD_BOT_TOKEN="$(cat /run/agenix/discord-bot-token)"
 ```
+
+## Discord Message Policy
+
+Use this policy when Hermes should answer without mentions while keeping normal
+channels thread-based:
+
+```yaml
+discord:
+  require_mention: false
+  free_response_channels: ''
+  auto_thread: true
+  thread_require_mention: false
+```
+
+Keep `free_response_channels` empty. Hermes treats those channels as inline
+chat surfaces and skips auto-threading there.
 
 ## Update
 
