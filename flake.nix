@@ -78,12 +78,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Hermes Agent
-    hermes-agent = {
-      url = "github:NousResearch/hermes-agent";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # gws - Google Workspace CLI
     gws = {
       url = "github:googleworkspace/cli";
