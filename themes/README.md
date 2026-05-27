@@ -3,7 +3,8 @@
 This document proposes a canonical theme schema for this repository.
 
 Status: draft
-Goal: keep one reusable source of truth under `themes/` that can later be exported to terminal, editor, and UI-specific theme formats.
+Goal: keep one reusable source of truth under `themes/` that can later be
+exported to terminal, editor, and UI-specific theme formats.
 
 ## Design Goals
 
@@ -110,6 +111,7 @@ palette:
   muted: "{palette.base04}"
   comment: "{palette.base16}"
   fgMuted: "{palette.base04}"
+  fgInactive: "{palette.base06}"
   fg: "{palette.base05}"
   fgBright: "{palette.base06}"
   fgMax: "{palette.base07}"
@@ -141,6 +143,7 @@ roles:
     bgAlt: "{palette.bgAlt}"
     bgElevated: "{palette.bgElevated}"
     fg: "{palette.fg}"
+    fgInactive: "{palette.fgInactive}"
     fgMuted: "{palette.fgMuted}"
     border: "{palette.border}"
     borderActive: "{palette.blue}"
@@ -246,7 +249,8 @@ At minimum, require Base24-compatible slots:
 - `base00` through `base17`
 
 Use the strict alias set from `themes/TEMPLATE.yaml`.
-Do not add extra alias names casually, and prefer keeping alias names and ordering identical across all theme files.
+Do not add extra alias names casually, and prefer keeping alias names and
+ordering identical across all theme files.
 
 ### 4. Required `roles` Groups
 
@@ -256,7 +260,8 @@ Do not add extra alias names casually, and prefer keeping alias names and orderi
 - `vcs`
 - `ansi`
 
-Not every leaf must be required on day 1, but exporters should have shared fallback logic.
+Not every leaf must be required on day 1, but exporters should have shared
+fallback logic.
 
 ## Role Naming Conventions
 
@@ -297,6 +302,7 @@ Recommended leaves:
 - `bgAlt`
 - `bgElevated`
 - `fg`
+- `fgInactive`
 - `fgMuted`
 - `border`
 - `borderActive`
@@ -399,7 +405,8 @@ When choosing a role, prefer semantic meaning over source palette ancestry.
 For example:
 
 - comments should map to `syntax.comment` even if they come from `base16`
-- current-line highlight should map to `ui.currentLine` even if one app calls it `lineHighlight`
+- current-line highlight should map to `ui.currentLine` even if one app calls
+  it `lineHighlight`
 
 ### 2. Promote only shared meaning
 
@@ -412,7 +419,8 @@ If it only helps one app, keep it in exporter logic or an override file.
 
 ### 3. Prefer derivation over duplication
 
-If a role can be cleanly derived from another role or from the palette, do not add a new core role yet.
+If a role can be cleanly derived from another role or from the palette, do not
+add a new core role yet.
 Examples:
 
 - `panelBg` can often derive from `bgElevated`
@@ -425,7 +433,8 @@ Across both light and dark themes, the intended meaning should remain stable:
 - `bg` is the primary surface
 - `bgElevated` is the raised or floating surface
 - `fg` is the primary readable foreground
-- `fgMuted` is secondary readable foreground
+- `fgInactive` is secondary readable foreground for inactive UI
+- `fgMuted` is quiet foreground for low-emphasis UI
 - `comment` is quieter than `text`
 - `selection` must remain visibly distinct from `bg`
 
@@ -438,7 +447,8 @@ Do not create names like:
 - `errorUnderline`
 - `strongBold`
 
-Style details such as italic, bold, underline, or opacity should be handled by exporters or a future separate styling layer.
+Style details such as italic, bold, underline, or opacity should be handled by
+exporters or a future separate styling layer.
 
 ### 6. Light and dark themes use the same role contract
 
@@ -453,7 +463,8 @@ For example, both light and dark themes should expose the same role names such a
 
 ### 7. Alias palette names are helpers, not the contract
 
-Names like `red`, `blue`, `fg`, `bg`, or `comment` in `palette` are convenience aliases.
+Names like `red`, `blue`, `fg`, `bg`, or `comment` in `palette` are convenience
+aliases.
 The stable public contract for exporters is the `roles` section.
 
 ## Authoring Rules
@@ -464,12 +475,16 @@ When creating a new theme file:
 2. keep top-level key order exactly as shown in the template
 3. keep alias names and role names exactly as shown in the template
 4. prefer palette or alias references over raw hex in `roles`
-5. only use raw hex in `roles` when a theme truly needs a value that should not become a shared alias
+5. only use raw hex in `roles` when a theme truly needs a value that should not
+   become a shared alias
 6. keep the same leaf ordering in each role group as the template
-7. if a value is theme-specific but the role name is shared, change only the value, not the structure
-8. if you think a new alias or role is needed, update `README.md` and `TEMPLATE.yaml` first
+7. if a value is theme-specific but the role name is shared, change only the
+   value, not the structure
+8. if you think a new alias or role is needed, update `README.md` and
+   `TEMPLATE.yaml` first
 
-In short, `README.md` defines the rules and `TEMPLATE.yaml` defines the exact authoring shape.
+In short, `README.md` defines the rules and `TEMPLATE.yaml` defines the exact
+authoring shape.
 
 Validation helper:
 
@@ -514,18 +529,31 @@ Current generators:
 
 Adapter templates and schema helpers:
 
-- `themes/templates/zed/schema-v0.2.0.json` -> vendored official Zed theme JSON Schema
-- `themes/templates/zed/official-template.json` -> Zed official template split into `style_sections`, `syntax_sections`, and `players`
-  - note: Zed's official schema strictly enumerates outer `style` keys, but `style.syntax` remains open-ended and is validated as `HighlightStyleContent` entries rather than a fixed syntax-key list
-- `themes/templates/ghostty/official-template.json` -> Ghostty theme template derived from the config reference and existing local terminal config
-- `themes/templates/k9s/official-template.json` -> K9s skin template derived from the official skins format and the existing local module skin definitions
-- `themes/templates/nvim/official-template.json` -> Neovim builtin highlight template derived from official help
+- `themes/templates/zed/schema-v0.2.0.json` -> vendored official Zed theme JSON
+  Schema
+- `themes/templates/zed/official-template.json` -> Zed official template split
+  into `style_sections`, `syntax_sections`, and `players`
+  - note: Zed's official schema strictly enumerates outer `style` keys, but
+    `style.syntax` remains open-ended and is validated as
+    `HighlightStyleContent` entries rather than a fixed syntax-key list
+- `themes/templates/ghostty/official-template.json` -> Ghostty theme template
+  derived from the config reference and existing local terminal config
+- `themes/templates/k9s/official-template.json` -> K9s skin template derived
+  from the official skins format and the existing local module skin definitions
+- `themes/templates/nvim/official-template.json` -> Neovim builtin highlight
+  template derived from official help
 - `themes/templates/nvim/plugins.json` -> Neovim plugin-specific highlight template
-- `themes/templates/starship/official-template.json` -> Starship prompt template derived from the Starship config contract plus the existing local prompt layout
-- `themes/templates/zellij/official-template.json` -> Zellij theme template derived from the official Zellij theme definition specification
-- `themes/overrides/ghostty/*.yaml` -> optional Ghostty slot overrides applied after generator defaults
-- `themes/overrides/zellij/*.yaml` -> optional Zellij-specific component/player overrides applied after generator defaults
-- `themes/check_templates.py` -> consistency check for app template metadata, contract fields, section layout, duplicate entries, and declared key coverage
+- `themes/templates/starship/official-template.json` -> Starship prompt template
+  derived from the Starship config contract plus the existing local prompt
+  layout
+- `themes/templates/zellij/official-template.json` -> Zellij theme template
+  derived from the official Zellij theme definition specification
+- `themes/overrides/ghostty/*.yaml` -> optional Ghostty slot overrides applied
+  after generator defaults
+- `themes/overrides/zellij/*.yaml` -> optional Zellij-specific
+  component/player overrides applied after generator defaults
+- `themes/check_templates.py` -> consistency check for app template metadata,
+  contract fields, section layout, duplicate entries, and declared key coverage
 
 ## Resolution Rules
 
@@ -637,7 +665,8 @@ Current override support:
 - `themes/overrides/ghostty/<theme-id>.yaml` -> Ghostty slot overrides
 - `themes/overrides/nvim/<theme-id>.yaml` -> Neovim per-theme override patches
 - `themes/overrides/zellij/<theme-id>.yaml` -> Zellij per-theme override patches
-- `themes/validate_overrides.py` -> override validator for current Ghostty, Neovim, and Zellij override files
+- `themes/validate_overrides.py` -> override validator for current Ghostty,
+  Neovim, and Zellij override files
 
 Current Neovim override precedence:
 
@@ -704,9 +733,11 @@ Or better, expose generated outputs:
 ## Open Questions
 
 - whether aliases like `bg`, `fg`, `red`, `blue` should be required or derived
-- whether references like `{palette.base00}` should be supported literally or resolved by Nix-only logic
+- whether references like `{palette.base00}` should be supported literally or
+  resolved by Nix-only logic
 - whether override files should be plain attrsets or functions over the loaded theme
-- whether font, opacity, and spacing hints belong in this schema or a separate appearance schema
+- whether font, opacity, and spacing hints belong in this schema or a separate
+  appearance schema
 - whether light themes need additional constraints for contrast validation
 - how strict the validator should be about required role leaves in v1
 
