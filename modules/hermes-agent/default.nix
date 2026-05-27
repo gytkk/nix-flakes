@@ -14,6 +14,9 @@ let
   bootstrapPath = "/etc/hermes-agent/bootstrap.sh";
 
   hermesRuntimeLibraryPath = lib.makeLibraryPath [ pkgs.libcap ];
+  hermesPythonPath = pkgs.python312Packages.makePythonPath [
+    pkgs.python312Packages.discordpy
+  ];
 
   hermesServicePath = lib.concatStringsSep ":" [
     "/run/current-system/sw/bin"
@@ -38,6 +41,19 @@ let
     "${homeDirectory}/.local/share/pnpm"
   ];
 
+  hermesSystemdDropInPath = "${homeDirectory}/.config/systemd/user/hermes-gateway.service.d/20-nix-wrapper.conf";
+  hermesSystemdDropInFile = pkgs.writeText "hermes-gateway-20-nix-wrapper.conf" ''
+    [Service]
+    # Route the CLI-installed gateway service through the Nix wrapper so bundled
+    # plugins and agenix-backed runtime secrets are available under systemd.
+    ExecStart=
+    ExecStart=/run/current-system/sw/bin/hermes gateway run --replace
+    Environment=HOME=${homeDirectory}
+    Environment=HERMES_HOME=${stateDir}
+    Environment=PATH=${hermesServicePath}
+    Environment=LD_LIBRARY_PATH=${hermesRuntimeLibraryPath}
+  '';
+
   hermesWrapper = pkgs.runCommand "hermes-agent-wrapped" { } ''
     mkdir -p "$out/bin"
 
@@ -48,6 +64,7 @@ let
     export HERMES_PATH_BOOTSTRAPPED=1
     export PATH=${lib.escapeShellArg hermesCliPath}:\$PATH
     export LD_LIBRARY_PATH=${lib.escapeShellArg hermesRuntimeLibraryPath}\''${LD_LIBRARY_PATH:+:\$LD_LIBRARY_PATH}
+    export PYTHONPATH=${lib.escapeShellArg hermesPythonPath}\''${PYTHONPATH:+:\$PYTHONPATH}
 
     if [ -r ${lib.escapeShellArg bootstrapPath} ]; then
       . ${lib.escapeShellArg bootstrapPath}
@@ -111,5 +128,8 @@ in
     for subdir in logs sessions memories skills plugins lsp; do
       ${pkgs.coreutils}/bin/install -d -m 700 -o ${username} -g users ${lib.escapeShellArg stateDir}/"$subdir"
     done
+
+    ${pkgs.coreutils}/bin/install -d -m 755 -o ${username} -g users ${lib.escapeShellArg "${homeDirectory}/.config/systemd/user/hermes-gateway.service.d"}
+    ${pkgs.coreutils}/bin/install -m 644 -o ${username} -g users ${hermesSystemdDropInFile} ${lib.escapeShellArg hermesSystemdDropInPath}
   '';
 }
