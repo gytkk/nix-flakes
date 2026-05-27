@@ -9,6 +9,7 @@
 let
   gatewayPort = 18789;
   lanProxyPort = 18790;
+  publicProxyPort = 18791;
   lanInterface = "wlo1";
   openclawPackage = inputs.flake-stores.packages.${pkgs.system}.openclaw;
   qmdPackage = pkgs.callPackage ../../packages/qmd/package.nix { };
@@ -150,6 +151,7 @@ let
       gatewayTokenPath
       lanInterface
       lanProxyPort
+      publicProxyPort
       openclawBootstrapPath
       openclawHybridCli
       openclawPackage

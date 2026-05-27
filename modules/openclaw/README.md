@@ -18,8 +18,9 @@
 - Nix는 `~/.config/systemd/user/openclaw-gateway.service.d/20-nix-path.conf` drop-in을 설치해 NixOS용 PATH를 보정합니다.
 - Mutable runtime config는 `~/.openclaw/openclaw.json`을 사용합니다.
 - Nix는 기존 `~/.openclaw/openclaw.json` 내용을 재작성하지 않고, 파일이 없을 때만 seed + gateway token으로 초기 config를 생성합니다.
-- OpenClaw Control UI 및 OpenAI 호환 API는 gateway bearer token을 주입하는 `nginx` 프록시를 통해 `0.0.0.0:18790`으로 노출됩니다.
-- 이 `18790` 포트는 NixOS 방화벽에서 `wlo1` 인터페이스에만 열려 있습니다.
+- OpenClaw Control UI 및 OpenAI 호환 API는 gateway bearer token을 주입하는 `nginx` 프록시를 통해 LAN용 `0.0.0.0:18790`과 Cloudflare Tunnel origin용 `127.0.0.1:18791`으로 노출됩니다.
+- LAN용 `18790` 포트는 NixOS 방화벽에서 `wlo1` 인터페이스에만 열려 있습니다.
+- 공개 오리진 `18791`은 loopback only라서 host 밖에서 직접 접근되지 않습니다.
 - OpenClaw는 `gateway.tailscale.mode = "off"`라서 Tailscale Serve로 직접 노출되지 않습니다.
 - Discord thread binding은 유지하되, **ACP의 Discord child-thread 자동 spawn은 비활성화**합니다.
 
@@ -40,11 +41,13 @@
 - LAN에서 접속: `http://pylv-onyx:18790`
 - LAN 이름 해석이 안 되면: `http://192.168.0.10:18790`
 - Tailscale에서는 현재 직접 접속 불가
+- Cloudflare Tunnel origin: `http://127.0.0.1:18791`
 
 직접 접속이 안 되는 이유:
 
 - OpenClaw 원본 게이트웨이는 loopback 전용입니다.
-- 외부용 프록시 `18790`은 방화벽 규칙상 `wlo1`에만 열려 있어서 Tailscale 인터페이스에서는 허용되지 않습니다.
+- LAN용 프록시 `18790`은 방화벽 규칙상 `wlo1`에만 열려 있어서 Tailscale 인터페이스에서는 허용되지 않습니다.
+- Cloudflare 공개 경로는 별도 loopback 오리진 `18791`을 쓰므로, LAN 노출 규칙과 분리됩니다.
 - 설정 파일 [`default.nix`](./default.nix) 에서 `gateway.tailscale.mode = "off"`를 명시하고 있습니다.
 
 ## Tailscale에서 OpenClaw를 써야 할 때
