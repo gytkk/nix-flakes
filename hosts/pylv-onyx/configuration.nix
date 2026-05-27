@@ -9,6 +9,7 @@
     ./hardware-configuration.nix
     ./open-webui.nix
     ./openclaw-cron-dashboard.nix
+    ../../modules/hermes-agent
     ../../modules/openclaw
     ../../modules/nixos
   ];
