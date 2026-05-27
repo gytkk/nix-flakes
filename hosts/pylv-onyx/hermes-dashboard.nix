@@ -1,5 +1,4 @@
 {
-  lib,
   username,
   homeDirectory,
   ...
@@ -17,16 +16,16 @@ in
     after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
     wantedBy = [ "multi-user.target" ];
+    path = [
+      "${homeDirectory}/.local"
+      "${homeDirectory}/.nix-profile"
+      "/etc/profiles/per-user/${username}"
+      "/run/current-system/sw"
+    ];
     environment = {
       HOME = homeDirectory;
       HERMES_HOME = hermesHome;
       SSL_CERT_FILE = "/etc/ssl/certs/ca-certificates.crt";
-      PATH = lib.concatStringsSep ":" [
-        "${homeDirectory}/.local/bin"
-        "${homeDirectory}/.nix-profile/bin"
-        "/etc/profiles/per-user/${username}/bin"
-        "/run/current-system/sw/bin"
-      ];
     };
     serviceConfig = {
       Type = "simple";
