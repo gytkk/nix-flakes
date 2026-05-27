@@ -19,7 +19,7 @@ This module installs and configures Claude Code, Anthropic's AI coding assistant
 - **MCP**: Enables all project MCP servers, Context7, Notion
 - **Permissions**: Pre-approved tools (Bash, Read, Edit, WebFetch, Context7)
 - **Permission Mode**: `acceptEdits` for the working directory and Claude default repo-local worktrees
-- **Language**: Korean
+- **Language**: English
 
 ### CLAUDE.md
 
