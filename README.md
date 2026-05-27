@@ -357,6 +357,13 @@ nix build .#nixosConfigurations.pylv-sepia.config.system.build.toplevel
 - Mutable Open WebUI data lives under `/var/lib/open-webui`
 - Suggested Cloudflare origin target: `http://127.0.0.1:8787`
 
+### `pylv-onyx` Hermes Dashboard access
+
+- Suggested public hostname: `https://hermes.pylv.dev`
+- Access control: protect the public hostname with a Cloudflare Access self-hosted app. The dashboard can expose Hermes config/API-key management, so do not publish it without Access.
+- The `hermes dashboard` process stays loopback-only on `127.0.0.1:9119`; nginx exposes a separate Cloudflare Tunnel origin on `127.0.0.1:19119`.
+- Suggested Cloudflare origin target: `http://127.0.0.1:19119`
+
 ## Helpers
 
 ```bash
