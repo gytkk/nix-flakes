@@ -7,7 +7,6 @@ approval_policy = "never"
 sandbox_mode = "danger-full-access"
 web_search = "live"
 personality = "pragmatic"
-developer_instructions = "Use English as the default response language unless the user explicitly asks for another language."
 
 [mcp_servers.openaiDeveloperDocs]
 url = "https://developers.openai.com/mcp"
