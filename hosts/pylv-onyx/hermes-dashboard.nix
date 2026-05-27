@@ -62,7 +62,7 @@ in
       proxyWebsockets = true;
       extraConfig = ''
         proxy_read_timeout 10m;
-        proxy_set_header Host $host;
+        proxy_set_header Host 127.0.0.1:${toString dashboardPort};
         proxy_set_header X-Forwarded-Host $host;
         proxy_set_header X-Forwarded-Proto https;
       '';
