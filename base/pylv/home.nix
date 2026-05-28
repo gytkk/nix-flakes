@@ -11,11 +11,6 @@
   # Import base configuration
   imports = [ ../default.nix ];
 
-  # Pylv 특화 패키지들 (추후 필요시 추가)
-  home.packages = with pkgs; [
-    ntn
-  ];
-
   # Pylv 특화 shell aliases (추후 필요시 추가)
   home.shellAliases = {
     # 추후 필요한 별칭들 추가 예정

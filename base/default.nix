@@ -88,6 +88,7 @@
         curl
         rsync
         glow
+        ntn
 
         # Git
         git
