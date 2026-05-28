@@ -154,6 +154,8 @@
 
       defaultPackages = builtins.mapAttrs (system: systemPkgs: {
         default = mkDefaultCompatPackage system systemPkgs;
+        notion-cli = systemPkgs.notion-cli;
+        ntn = systemPkgs.ntn;
       }) pkgs;
 
       defaultApps = builtins.mapAttrs (system: _: {

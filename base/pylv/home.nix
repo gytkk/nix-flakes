@@ -13,7 +13,7 @@
 
   # Pylv 특화 패키지들 (추후 필요시 추가)
   home.packages = with pkgs; [
-    # 추후 필요한 Pylv 특화 도구들 추가 예정
+    ntn
   ];
 
   # Pylv 특화 shell aliases (추후 필요시 추가)
