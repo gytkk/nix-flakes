@@ -18,6 +18,9 @@ url = "https://mcp.context7.com/mcp"
 command = "npx"
 args = ["-y", "@playwright/mcp@latest"]
 
+[features]
+multi_agent = true
+
 [tui]
 alternate_screen = "never"
 notification_method = "auto"

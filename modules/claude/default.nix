@@ -34,6 +34,7 @@ let
     "security-guidance@claude-code-plugins"
 
     "ralph-loop@claude-plugins-official"
+    "superpowers@claude-plugins-official"
 
     "gopls-lsp@claude-plugins-official"
     "rust-analyzer-lsp@claude-plugins-official"

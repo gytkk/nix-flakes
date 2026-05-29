@@ -46,7 +46,7 @@ Global development guidelines deployed to `~/.claude/CLAUDE.md`. Includes:
 ### Installed Plugins
 
 - `document-skills`, `commit-commands`, `security-guidance`
-- `ralph-loop`
+- `ralph-loop`, `superpowers`
 - LSP plugins: `gopls-lsp`, `rust-analyzer-lsp`, `typescript-lsp`, `metals-lsp`, `ty-lsp`, `terraform-ls`, `nixd-lsp`
 - `plannotator` (visual plan annotation and review)
 - `codex` (official OpenAI Codex plugin — provides `/codex:review`, `/codex:rescue`, etc.)

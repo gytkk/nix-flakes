@@ -21,6 +21,8 @@ echo "experimental-features = nix-command flakes" | sudo tee -a /etc/nix/nix.con
 ## Codex Plugin for Claude Code
 
 The official [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc) plugin is installed, enabling Codex integration from within Claude Code.
+Superpowers is also installed for both Codex CLI and Claude Code from their
+official plugin marketplaces.
 
 ### Available Commands
 
@@ -46,6 +48,12 @@ The official [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc)
   TUI state.
 - Repo-managed admin skills currently include `karpathy-guidelines`,
   `parallel-research-merge`, and `devils-advocate`.
+- `home-manager switch` ensures `superpowers@openai-curated` is installed and
+  enabled for Codex CLI; restart Codex after switching so plugin skills are
+  rediscovered.
+- If the bundled Codex marketplace has not synced yet, activation falls back to
+  the upstream Codex install path by cloning `obra/superpowers` under
+  `~/.codex/superpowers` and linking its skills into `~/.agents/skills`.
 
 ### Agent Session Record Hooks
 
