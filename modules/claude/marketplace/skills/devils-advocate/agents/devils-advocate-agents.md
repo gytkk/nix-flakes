@@ -3,6 +3,9 @@ name: devils-advocate-reviewer
 description: Skeptical code review subagent for devil's advocate review passes.
 tools: Read, Grep, Glob, Bash
 model: opus
+color: red
+memory: project
+omitClaudeMd: true
 ---
 
 # Devil's Advocate Code Reviewer

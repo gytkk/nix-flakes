@@ -4,6 +4,7 @@ description: >-
   architecture fitness, future maintainability, and hidden assumptions. Enforces
   skeptical re-checks without fabricating findings.
 argument-hint: "[files or description] [--base <branch>] [--quick]"
+disable-model-invocation: true
 allowed-tools:
   - Bash
   - Read
