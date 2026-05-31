@@ -14,11 +14,12 @@ This module installs and configures Claude Code, Anthropic's AI coding assistant
 
 ### settings.json
 
-- **Model**: `claude-opus-4-6` (default)
+- **Model**: Inherits the Claude Code default (no `model` pin)
 - **Agent Teams**: Enabled (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`)
 - **MCP**: Enables all project MCP servers, Context7, Notion
 - **Permissions**: Pre-approved tools (Bash, Read, Edit, WebFetch, Context7)
 - **Permission Mode**: `acceptEdits` for the working directory and Claude default repo-local worktrees
+- **Memory** (experimental): `autoMemoryEnabled` + `autoDreamEnabled` — native background insight extraction and 24h consolidation
 - **Language**: English
 
 ### CLAUDE.md
@@ -38,10 +39,9 @@ Global development guidelines deployed to `~/.claude/CLAUDE.md`. Includes:
 ### Marketplaces
 
 - `anthropics/skills`, `anthropics/claude-code`, `anthropics/claude-plugins-official`
-- `gytkk/claude-marketplace`
+- `gytkk` (local marketplace — `modules/claude/marketplace`)
 - `backnotprop/plannotator`
 - `openai/codex-plugin-cc`
-- `thedotmack/claude-mem`
 
 ### Installed Plugins
 
@@ -50,7 +50,6 @@ Global development guidelines deployed to `~/.claude/CLAUDE.md`. Includes:
 - LSP plugins: `gopls-lsp`, `rust-analyzer-lsp`, `typescript-lsp`, `metals-lsp`, `ty-lsp`, `terraform-ls`, `nixd-lsp`
 - `plannotator` (visual plan annotation and review)
 - `codex` (official OpenAI Codex plugin — provides `/codex:review`, `/codex:rescue`, etc.)
-- `claude-mem` (persistent memory compression across Claude Code sessions)
 - `devils-advocate` (skeptical multi-pass review skill)
 
 ## MCP Servers
