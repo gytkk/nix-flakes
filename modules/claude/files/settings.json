@@ -30,7 +30,8 @@
           {
             "type": "command",
             "command": "~/.local/bin/claude-session-upload",
-            "timeout": 10
+            "timeout": 10,
+            "async": true
           }
         ]
       }
@@ -67,6 +68,8 @@
   "language": "english",
   "spinnerTipsEnabled": false,
   "alwaysThinkingEnabled": true,
+  "autoMemoryEnabled": true,
+  "autoDreamEnabled": true,
   "effortLevel": "high",
   "theme": "auto",
   "teammateMode": "auto",
