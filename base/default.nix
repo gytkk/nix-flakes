@@ -22,6 +22,7 @@
     ../modules/k9s
     ../modules/opencode
     ../modules/lsp
+    ../modules/tmux
     ../modules/vim
     ../modules/zed
     ../modules/zellij
@@ -82,7 +83,6 @@
         yq-go # yq 패키지는 더 이상 관리되지 않음
         fd
         ripgrep
-        tmux
         less
         wget
         curl
