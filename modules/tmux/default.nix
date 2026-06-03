@@ -1,7 +1,7 @@
-{ ... }:
+{ pkgs, ... }:
 
 let
-  keyListCommand = "{ tmux list-keys -N; printf '\\n-- all bindings --\\n'; tmux list-keys; } | less -R";
+  keyListCommand = "{ ${pkgs.tmux}/bin/tmux list-keys -N; printf '\\n-- all bindings --\\n'; ${pkgs.tmux}/bin/tmux list-keys; } | ${pkgs.less}/bin/less -R";
 in
 {
   programs.tmux = {
@@ -17,7 +17,7 @@ in
     extraConfig = ''
       set -g status on
       set -g status-interval 5
-      set -g status-position bottom
+      set -g status-position top
       set -g status-left-length 60
       set -g status-right-length 140
       set -g status-style "bg=colour236,fg=colour248"
