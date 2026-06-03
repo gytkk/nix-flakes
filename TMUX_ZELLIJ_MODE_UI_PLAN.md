@@ -1,227 +1,434 @@
-# tmux Zellij식 모드 UI 구현 계획
+# tmux Zellij-Style Mode UI Implementation Plan
 
-> **목표:** tmux에서 Zellij처럼 모드 진입 상태와 해당 모드의 단축키 힌트를 항상 명확히 보여준다.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:executing-plans`
+> or `superpowers:subagent-driven-development` to implement this plan
+> task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-## 범위
+**Goal:** Show tmux's current interaction mode and the most relevant keys in a
+second status line, using only native tmux configuration.
 
-- 수정 대상: `modules/tmux/default.nix`
-- 문서 보강: `README.md`의 tmux config 섹션
-- 구현 방식: tmux native 기능만 사용
-- 플러그인 추가 없음
-- TPM 추가 없음
-- 복잡한 동적 스크립트 추가 없음
+**Architecture:** Keep `modules/tmux/default.nix` as the only implementation
+file and add a small `extraConfig` block on top of the Home Manager tmux module
+defaults. Use tmux format variables for live mode detection and a custom
+`window-mode` key table for the Zellij-style window action layer.
 
-## 핵심 요구사항
+**Tech Stack:** Nix Home Manager tmux module, tmux 3.6a native key tables,
+tmux status formats.
 
-1. `Ctrl-w`를 누르면 window 모드에 진입한다.
-2. window 모드에 진입하면 status 하단에 `WINDOW` 모드임을 표시한다.
-3. window 모드에서 사용 가능한 단축키를 status 하단에 표시한다.
-4. prefix 입력 상태도 별도 모드처럼 표시한다.
-5. copy-mode 진입 상태도 별도 모드처럼 표시한다.
-6. 일반 상태에서는 최소한의 도움말만 표시한다.
-7. 기존 `C-b h`, `C-b ?`, `C-b w` 동작은 유지한다.
+---
 
-## UI 구조
+## Current Baseline
 
-### status 위치
+The current `modules/tmux/default.nix` has no custom `extraConfig`.
 
-- `status-position top`은 유지한다.
-- `status 2`를 사용해 status를 2줄로 만든다.
-- 1번째 줄: session/window 목록
-- 2번째 줄: 현재 모드와 단축키 힌트
+```nix
+{ ... }:
 
-### 2번째 줄 표시 규칙
+{
+  programs.tmux = {
+    enable = true;
+    prefix = "C-b";
+    terminal = "tmux-256color";
+    keyMode = "vi";
+    mouse = true;
+    focusEvents = true;
+    historyLimit = 100000;
+    clock24 = true;
+  };
+}
+```
 
-우선순위는 아래 순서로 둔다.
+Verified baseline from the generated tmux config:
 
-1. copy-mode: `COPY  v:select  y:yank  /:search  n:next  Esc:exit`
-2. window 모드: `WINDOW  c:new  r:rename  h/l:prev/next  w:tree  x:kill  Esc:exit`
-3. prefix 입력 상태: `PREFIX  c:new  h:help  ?:keys  w:tree  v/s:split  r:reload`
-4. 일반 상태: `C-w window  C-b h help  C-b ? keys  C-b w tree`
+- `extraConfig` is empty.
+- tmux defaults keep `status-position bottom`; this plan changes it to `top`.
+- `C-b ?` already runs `list-keys -N`.
+- `C-b w` already runs `choose-tree -Zw`.
+- `C-b c` already creates a window.
+- `C-b ,` already renames the current window.
+- `C-b r` is tmux's default `refresh-client`, not a reload binding.
+- There is no current custom `C-b h` help menu to preserve.
+- In `copy-mode-vi`, `/` and `n` already search, `Space` starts selection,
+  `q` cancels, and `v` is rectangle toggle by default.
 
-## 구현 상세
+## Scope
 
-### Task 1: status 2줄 활성화
+- Modify: `modules/tmux/default.nix`
+- Modify: `README.md`
+- Use tmux native features only.
+- Do not add tmux plugins, TPM, byobu, fzf palettes, or dynamic scripts.
+- Do not add pane/session/resize modes in this pass.
+- Do not bind global `C-w` by default because it steals `Ctrl-w` from shells,
+  Vim/Neovim, and other terminal applications running inside tmux.
 
-**파일:** `modules/tmux/default.nix`
+## UX Requirements
 
-`extraConfig`의 status 설정 근처에 추가한다.
+1. `C-b W` enters a custom `window-mode` key table.
+2. While `window-mode` is active, the second status line shows `WINDOW` and the
+   available window-mode keys.
+3. While tmux prefix is active, the second status line shows `PREFIX` and the
+   most useful existing prefix keys.
+4. While the active pane is in copy mode, the second status line shows `COPY`
+   and copy-mode keys that match tmux's vi-mode defaults.
+5. In normal state, the second status line shows a compact hint set.
+6. Existing tmux defaults such as `C-b ?`, `C-b w`, `C-b c`, `C-b ,`, and
+   copy-mode search must continue to work.
+
+## Status-Line Design
+
+Keep the status line at the top and make it two rows:
+
+- Row 1: session/window context and clock.
+- Row 2: active mode and key hints.
+
+Mode priority:
+
+1. copy mode, detected with `#{==:#{pane_mode},copy-mode}`.
+2. custom window mode, detected with `#{==:#{client_key_table},window-mode}`.
+3. prefix state, detected with `#{client_prefix}`.
+4. normal state.
+
+Do not use `pane_in_mode` alone for copy-mode detection. `choose-tree` also sets
+`pane_in_mode=1` while `pane_mode=tree-mode`, so it would be mislabeled as
+`COPY`.
+
+## File Structure
+
+- `modules/tmux/default.nix`: add `modeHintStatus` and `extraConfig`.
+- `README.md`: update the tmux config section to describe the two-line status
+  UI and `C-b W` window mode.
+
+## Task 1: Add the Mode Hint Status String
+
+**Files:**
+
+- Modify: `modules/tmux/default.nix`
+
+- [ ] **Step 1: Add `modeHintStatus` to the `let` block**
+
+Replace the top-level module shape with a `let` binding:
+
+```nix
+{ ... }:
+
+let
+  modeHintStatus =
+    "#[align=left]"
+    + "#{?#{==:#{pane_mode},copy-mode},#[fg=colour16#,bg=colour42#,bold] COPY #[default] Space:select y:yank /:search n:next q:exit,"
+    + "#{?#{==:#{client_key_table},window-mode},#[fg=colour16#,bg=colour39#,bold] WINDOW #[default] c:new ,:rename h/l:prev/next w:tree x:kill Esc:exit,"
+    + "#{?client_prefix,#[fg=colour16#,bg=colour214#,bold] PREFIX #[default] ?:keys w:tree c:new ,:rename %/\":split [:copy,"
+    + "#[fg=colour245] C-b W window | C-b ? keys | C-b w tree}}}";
+in
+{
+  programs.tmux = {
+```
+
+Expected:
+
+- `modeHintStatus` is a plain Nix string, not an indented multiline string.
+- The generated tmux status format has no trailing newline.
+- The `COPY` hint follows tmux's current vi copy-mode defaults.
+
+- [ ] **Step 2: Run Nix evaluation**
+
+Run:
+
+```bash
+nix eval --raw '.#homeConfigurations.pylv-sepia.config.programs.tmux.extraConfig'
+```
+
+Expected:
+
+- Command succeeds.
+- Output may still be empty until Task 2 adds `extraConfig`.
+
+## Task 2: Configure the Two-Line Status
+
+**Files:**
+
+- Modify: `modules/tmux/default.nix`
+
+- [ ] **Step 1: Add `extraConfig` status settings**
+
+Inside `programs.tmux`, add:
+
+```nix
+    extraConfig = ''
+      set -g status on
+      set -g status 2
+      set -g status-position top
+      set -g status-interval 5
+      set -g status-left-length 60
+      set -g status-right-length 80
+      set -g status-style "bg=colour236,fg=colour248"
+      set -g status-left "#[fg=colour16,bg=colour39,bold] #S #[fg=colour39,bg=colour236,nobold] "
+      set -g status-right "#[fg=colour39]%Y-%m-%d %H:%M "
+      setw -g window-status-format " #I:#W#{?window_flags,#{window_flags},} "
+      setw -g window-status-current-format "#[fg=colour16,bg=colour248,bold] #I:#W#{?window_flags,#{window_flags},} #[default]"
+      set -g status-format[1] "${modeHintStatus}"
+    '';
+```
+
+Expected:
+
+- Row 1 keeps session/window/clock context.
+- Row 2 is reserved for mode hints.
+- The old custom discovery text is not duplicated in `status-right`.
+
+- [ ] **Step 2: Verify generated config text**
+
+Run:
+
+```bash
+nix eval --raw '.#homeConfigurations.pylv-sepia.config.programs.tmux.extraConfig'
+```
+
+Expected output contains:
 
 ```tmux
 set -g status 2
+set -g status-position top
+set -g status-format[1]
+COPY
+WINDOW
+PREFIX
 ```
 
-검증:
+## Task 3: Add Prefix-Based Window Mode
 
-```bash
-nix eval --raw '.#homeConfigurations.pylv-sepia.config.programs.tmux.extraConfig'
-```
+**Files:**
 
-예상:
+- Modify: `modules/tmux/default.nix`
 
-- 출력에 `set -g status 2`가 포함된다.
+- [ ] **Step 1: Add `window-mode` bindings**
 
-### Task 2: mode hint 문자열을 Nix 변수로 분리
-
-**파일:** `modules/tmux/default.nix`
-
-`let` 블록에 아래 변수를 추가한다.
-
-```nix
-modeHintStatus = ''
-  #[align=left]#{?pane_in_mode,#[fg=colour16,bg=colour42,bold] COPY #[default] v:select y:yank /:search n:next Esc:exit,#{?#{==:#{client_key_table},window-mode},#[fg=colour16,bg=colour39,bold] WINDOW #[default] c:new r:rename h/l:prev/next w:tree x:kill Esc:exit,#{?client_prefix,#[fg=colour16,bg=colour214,bold] PREFIX #[default] c:new h:help ?:keys w:tree v/s:split r:reload,#[fg=colour245] C-w window | C-b h help | C-b ? keys | C-b w tree}}}
-'';
-```
-
-원칙:
-
-- 한 줄 status string으로 유지한다.
-- 외부 command를 호출하지 않는다.
-- `pane_in_mode`, `client_key_table`, `client_prefix`만 사용한다.
-
-### Task 3: status-format[1]에 mode hint 적용
-
-**파일:** `modules/tmux/default.nix`
-
-`extraConfig`에 아래 설정을 추가한다.
+Append these bindings inside the existing `extraConfig` string:
 
 ```tmux
-set -g status-format[1] "${modeHintStatus}"
+      bind-key W switch-client -T window-mode
+      bind-key -T window-mode c new-window -c "#{pane_current_path}"
+      bind-key -T window-mode , command-prompt -I "#W" "rename-window -- %%"
+      bind-key -T window-mode h previous-window
+      bind-key -T window-mode l next-window
+      bind-key -T window-mode w choose-tree -Zw
+      bind-key -T window-mode x confirm-before -p "kill-window #W? (y/n)" kill-window
+      bind-key -T window-mode Escape display-message "normal mode"
 ```
 
-배치:
+Expected:
 
-- `status-left`, `status-right`, `window-status-format` 설정 다음에 둔다.
-- 1번째 줄의 window list 설정과 분리해 읽기 쉽게 둔다.
+- `C-b W` enters `window-mode`.
+- `Ctrl-w` remains available to shells, Vim/Neovim, and terminal applications.
+- Existing `C-b w` still opens tmux's default window tree.
 
-검증:
+- [ ] **Step 2: Verify generated key bindings**
 
-```bash
-nix eval --raw '.#homeConfigurations.pylv-sepia.config.programs.tmux.extraConfig'
-```
-
-예상:
-
-- 출력에 `status-format[1]`가 포함된다.
-- 출력에 `COPY`, `WINDOW`, `PREFIX`가 포함된다.
-
-### Task 4: Ctrl-w window 모드 추가
-
-**파일:** `modules/tmux/default.nix`
-
-`extraConfig`의 bind-key 섹션에 추가한다.
-
-```tmux
-bind-key -n C-w switch-client -T window-mode
-bind-key -T window-mode c new-window -c "#{pane_current_path}"
-bind-key -T window-mode r command-prompt -I "#W" "rename-window -- %%"
-bind-key -T window-mode h previous-window
-bind-key -T window-mode l next-window
-bind-key -T window-mode w choose-tree -Zw
-bind-key -T window-mode x confirm-before -p "kill-window #W? (y/n)" kill-window
-bind-key -T window-mode Escape display-message "normal mode"
-```
-
-주의:
-
-- `C-w`는 shell의 word-delete를 대체한다.
-- 이 단축키가 불편하면 이후 `C-b W` 또는 `C-Space`로 변경한다.
-
-검증:
-
-```bash
-tmux list-keys -T window-mode
-```
-
-예상:
-
-- `window-mode` key table에 `c`, `r`, `h`, `l`, `w`, `x`, `Escape`가 보인다.
-
-### Task 5: copy-mode 힌트와 실제 copy-mode 키 정렬
-
-**파일:** `modules/tmux/default.nix`
-
-기존 copy-mode binding은 유지하고 검색 키만 필요하면 추가한다.
-
-```tmux
-bind-key -T copy-mode-vi / command-prompt -p "search forward" "send-keys -X search-forward '%%'"
-bind-key -T copy-mode-vi n send-keys -X search-again
-```
-
-검증:
-
-```bash
-tmux list-keys -T copy-mode-vi
-```
-
-예상:
-
-- `v`, `y`, `Escape`, `/`, `n`이 힌트와 일치한다.
-
-### Task 6: tmux 설정 parse 검증
-
-**명령:**
+Run:
 
 ```bash
 conf=$(nix eval --raw '.#homeConfigurations.pylv-sepia.config.xdg.configFile."tmux/tmux.conf".source')
-tmux -f "$conf" start-server
+socket="tmux-zellij-mode-plan-keys"
+tmux -L "$socket" -f "$conf" new-session -d -s plan-test
+tmux -L "$socket" list-keys -T prefix | rg 'bind-key +(-r +)?-T prefix (W|w|\?|c|,) '
+tmux -L "$socket" list-keys -T window-mode
+tmux -L "$socket" kill-server
 ```
 
-예상:
+Expected:
 
-- stderr가 비어 있다.
-- exit code가 0이다.
+- Prefix table contains `W`, `w`, `?`, `c`, and `,`.
+- `window-mode` contains `c`, `,`, `h`, `l`, `w`, `x`, and `Escape`.
 
-### Task 7: README 업데이트
+## Task 4: Leave Copy-Mode Defaults Intact
 
-**파일:** `README.md`
+**Files:**
 
-`## tmux config` 섹션에 아래 내용을 반영한다.
+- Modify: `modules/tmux/default.nix`
+
+- [ ] **Step 1: Do not add custom copy-mode bindings**
+
+No implementation change is needed for copy-mode in this pass.
+
+Expected:
+
+- `/` and `n` continue to use tmux's default vi copy-mode search bindings.
+- `Space` remains begin-selection.
+- `v` remains rectangle toggle unless a later task explicitly changes copy-mode
+  semantics.
+
+- [ ] **Step 2: Verify copy-mode defaults from generated config**
+
+Run:
+
+```bash
+conf=$(nix eval --raw '.#homeConfigurations.pylv-sepia.config.xdg.configFile."tmux/tmux.conf".source')
+socket="tmux-zellij-mode-plan-copy"
+tmux -L "$socket" -f "$conf" new-session -d -s plan-test
+tmux -L "$socket" list-keys -T copy-mode-vi | rg 'search-forward|search-again|begin-selection|rectangle-toggle|cancel'
+tmux -L "$socket" kill-server
+```
+
+Expected:
+
+- Output includes `/` search-forward.
+- Output includes `n` search-again.
+- Output includes `Space` begin-selection.
+- Output includes `v` rectangle-toggle.
+
+## Task 5: Parse and Behavior Smoke Tests
+
+**Files:**
+
+- Modify: `modules/tmux/default.nix`
+
+- [ ] **Step 1: Format Nix**
+
+Run:
+
+```bash
+nixfmt modules/tmux/default.nix
+```
+
+Expected:
+
+- Command exits 0.
+- Formatting changes, if any, are limited to `modules/tmux/default.nix`.
+
+- [ ] **Step 2: Parse generated tmux config in an isolated server**
+
+Run:
+
+```bash
+conf=$(nix eval --raw '.#homeConfigurations.pylv-sepia.config.xdg.configFile."tmux/tmux.conf".source')
+socket="tmux-zellij-mode-plan-parse"
+tmux -L "$socket" -f "$conf" new-session -d -s plan-test
+tmux -L "$socket" show -g status
+tmux -L "$socket" show -g status-position
+tmux -L "$socket" show -g 'status-format[1]'
+tmux -L "$socket" kill-server
+```
+
+Expected:
+
+- `status` is `2`.
+- `status-position` is `top`.
+- `status-format[1]` contains `COPY`, `WINDOW`, and `PREFIX`.
+
+- [ ] **Step 3: Verify tree-mode is not labeled as copy-mode**
+
+Run:
+
+```bash
+socket="tmux-zellij-mode-plan-tree"
+tmux -L "$socket" -f /dev/null new-session -d -s plan-test
+tmux -L "$socket" set -g 'status-format[1]' '#{?#{==:#{pane_mode},copy-mode},COPY,not-copy}'
+tmux -L "$socket" choose-tree -Zw
+tmux -L "$socket" display-message -p '#{pane_mode}:#{?#{==:#{pane_mode},copy-mode},COPY,not-copy}'
+tmux -L "$socket" kill-server
+```
+
+Expected:
+
+```text
+tree-mode:not-copy
+```
+
+## Task 6: Update Documentation
+
+**Files:**
+
+- Modify: `README.md`
+
+- [ ] **Step 1: Update the `tmux config` section**
+
+Replace the existing tmux bullets with text that matches the new baseline and
+feature:
 
 ```markdown
-- The status area uses two lines: the first line shows session/window context,
-  and the second line shows the active tmux mode plus available keys.
-- Press `Ctrl-w` to enter window mode. The hint line shows actions such as
-  `c` for new window, `r` for rename, `h/l` for previous/next, and `w` for tree.
+- tmux is managed through `modules/tmux/default.nix`.
+- Home Manager installs tmux for every shared environment and writes
+  `~/.config/tmux/tmux.conf`.
+- The checked-in defaults keep `Ctrl+b` as the tmux prefix, enable mouse
+  support and vi copy mode, and use a two-line top status area.
+- The first status line shows session/window context and the clock; the second
+  line shows the active tmux mode plus available keys.
+- Press `Ctrl+b W` to enter window mode. The hint line shows actions such as
+  `c` for new window, `,` for rename, `h/l` for previous/next, and `w` for tree.
+- Existing tmux defaults such as `Ctrl+b ?`, `Ctrl+b w`, `Ctrl+b c`, and
+  `Ctrl+b ,` remain available.
 ```
 
-검증:
+- [ ] **Step 2: Check markdown diff**
+
+Run:
 
 ```bash
-git diff -- README.md modules/tmux/default.nix
+git diff -- README.md TMUX_ZELLIJ_MODE_UI_PLAN.md modules/tmux/default.nix
 ```
 
-예상:
+Expected:
 
-- 변경 범위가 tmux UI 관련 내용만 포함한다.
+- README changes only describe the tmux mode UI.
+- `C-b h` appears only as an explicitly excluded custom help menu.
+- The plan no longer uses global `Ctrl-w`.
 
-## 수동 확인 체크리스트
+## Task 7: Commit the Implementation
 
-- [ ] 새 tmux session에서 status가 2줄로 보인다.
-- [ ] 일반 상태에서 기본 힌트가 보인다.
-- [ ] `C-b`를 누르면 `PREFIX` 힌트가 보인다.
-- [ ] `Ctrl-w`를 누르면 `WINDOW` 힌트가 보인다.
-- [ ] window 모드에서 `c`가 새 window를 만든다.
-- [ ] window 모드에서 `r`이 window 이름 변경 prompt를 연다.
-- [ ] window 모드에서 `h/l`이 window를 이동한다.
-- [ ] window 모드에서 `w`가 tree를 연다.
-- [ ] copy-mode에서 `COPY` 힌트가 보인다.
-- [ ] `C-b h`, `C-b ?`, `C-b w`는 기존처럼 동작한다.
+**Files:**
 
-## 커밋 단위
+- Modify: `modules/tmux/default.nix`
+- Modify: `README.md`
+
+- [ ] **Step 1: Check final status**
+
+Run:
 
 ```bash
-git add modules/tmux/default.nix README.md TMUX_ZELLIJ_MODE_UI_PLAN.md
+git status --short
+```
+
+Expected:
+
+- Only intentional files for this work are modified.
+
+- [ ] **Step 2: Commit**
+
+Run:
+
+```bash
+git add modules/tmux/default.nix README.md
 git commit -m "feat(tmux): add zellij-style mode hints"
 ```
 
-## 제외할 것
+Expected:
 
-- tmux plugin 도입
-- TPM 도입
-- byobu 도입
-- fzf 기반 command palette
-- pane 모드 추가
-- session 모드 추가
-- 색상 테마 대규모 리팩터링
-- Home Manager module option 추가
+- Commit succeeds.
+- The plan file is committed separately only if it changed as part of planning.
+
+## Manual Verification Checklist
+
+- [ ] New tmux session shows a two-line status area at the top.
+- [ ] Normal state shows compact hints.
+- [ ] Pressing `C-b` shows the `PREFIX` hint.
+- [ ] Pressing `C-b W` shows the `WINDOW` hint.
+- [ ] In window mode, `c` creates a new window.
+- [ ] In window mode, `,` opens the rename prompt.
+- [ ] In window mode, `h/l` moves between windows.
+- [ ] In window mode, `w` opens the window tree.
+- [ ] `C-b w` still opens the default window tree.
+- [ ] `C-b ?` still shows tmux key help.
+- [ ] Copy mode shows the `COPY` hint.
+- [ ] Tree mode is not mislabeled as `COPY`.
+
+## Explicitly Excluded
+
+- Global `Ctrl-w` binding.
+- Custom `C-b h` help menu.
+- Custom reload binding on `C-b r`.
+- Copy-mode key remapping.
+- tmux plugin manager.
+- byobu.
+- fzf command palette.
+- Pane, session, and resize modes.
+- Large theme refactor.
+- New Home Manager module options.
