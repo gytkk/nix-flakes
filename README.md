@@ -230,8 +230,8 @@ Resources should supplement the tools instead of expanding the tool count:
 - The checked-in tmux config uses `Ctrl+a` as the prefix, starts window and
   pane indexes at `1`, enables mouse support, and keeps the statusline at the
   top with `PREFIX` and `SYNC` indicators.
-- Press `Ctrl+a ?` for the key list, `Ctrl+a w` for the tree, `Ctrl+a s` for
-  the session tree, and `Ctrl+a S` to toggle synchronized panes.
+- Press `Ctrl+a ?` for the key list, `Ctrl+a w` for the tree, and `Ctrl+a s`
+  for the session tree.
 
 ## Ghostty config
 
