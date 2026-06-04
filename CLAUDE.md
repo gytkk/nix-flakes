@@ -17,7 +17,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Documentation Guidelines
 
 - All documentation belongs in: CLAUDE.md, README.md, code comments (sparingly), commit messages
-- When you work on markdown files, ensure they are following markdownlint rules
 
 ### Build/Test/Lint Commands
 
