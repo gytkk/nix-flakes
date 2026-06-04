@@ -222,13 +222,10 @@ Resources should supplement the tools instead of expanding the tool count:
 ## tmux config
 
 - tmux is managed through `modules/tmux/default.nix`.
-- Home Manager installs tmux for every shared environment and writes
-  `~/.config/tmux/tmux.conf`.
-- The checked-in defaults keep `Ctrl+b` as the tmux prefix, enable mouse
-  support and vi copy mode, and show a status line with session/window
-  context plus the main discovery keys.
-- Press `Ctrl+b h` for the tmux help menu, `Ctrl+b ?` for the full key list,
-  and `Ctrl+b w` for the session/window tree.
+- Home Manager installs tmux for every shared environment and links
+  `~/.config/tmux/tmux.conf` to `modules/tmux/files/tmux.conf` through an
+  out-of-store symlink.
+- The checked-in tmux config starts window indexes at `1`.
 
 ## Ghostty config
 
