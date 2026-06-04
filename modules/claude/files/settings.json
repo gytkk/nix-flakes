@@ -68,10 +68,11 @@
   "language": "english",
   "spinnerTipsEnabled": false,
   "alwaysThinkingEnabled": true,
+  "effortLevel": "high",
   "autoMemoryEnabled": true,
   "autoDreamEnabled": true,
-  "effortLevel": "high",
   "theme": "auto",
   "teammateMode": "auto",
-  "skipAutoPermissionPrompt": true
+  "skipAutoPermissionPrompt": true,
+  "skipWorkflowUsageWarning": true
 }
