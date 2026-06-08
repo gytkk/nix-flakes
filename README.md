@@ -222,10 +222,16 @@ Resources should supplement the tools instead of expanding the tool count:
 ## tmux config
 
 - tmux is managed through `modules/tmux/default.nix`.
-- Home Manager installs tmux for every shared environment and links
-  `~/.config/tmux/tmux.conf` to `modules/tmux/files/tmux.conf` through an
-  out-of-store symlink.
-- The checked-in tmux config starts window indexes at `1`.
+- Home Manager installs a tmux wrapper for every shared environment and links
+  `~/.config/tmux/tmux.conf`, `keybindings.conf`, and `statusline.conf` to
+  `modules/tmux/files/` through out-of-store symlinks.
+- Running bare interactive `tmux` outside tmux opens the session manager; tmux
+  subcommands and calls from inside tmux pass through to the real binary.
+- The checked-in tmux config uses `Ctrl+a` as the prefix, starts window and
+  pane indexes at `1`, enables mouse support, and keeps the statusline at the
+  top with `PREFIX` and `SYNC` indicators.
+- Press `Ctrl+a ?` for the key list, `Ctrl+a w` for the tree, and `Ctrl+a s`
+  for the session tree.
 
 ## Ghostty config
 
