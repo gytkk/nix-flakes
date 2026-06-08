@@ -8,6 +8,7 @@ TEST_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/tmux-session-manager-test.XXXXXX")"
 FAKE_TMUX="${TEST_ROOT}/tmux"
 FAKE_FZF="${TEST_ROOT}/fzf"
 TMUX_LOG="${TEST_ROOT}/tmux.log"
+FZF_LOG="${TEST_ROOT}/fzf.log"
 FZF_INPUT="${TEST_ROOT}/fzf-input"
 FZF_USED="${TEST_ROOT}/fzf-used"
 SESSIONS_FILE="${TEST_ROOT}/sessions"
@@ -63,6 +64,7 @@ cat >"${FAKE_FZF}" <<'FAKE_FZF'
 set -euo pipefail
 
 : "${TMUX_TEST_FZF_INPUT:?}"
+: "${TMUX_TEST_FZF_LOG:?}"
 : "${TMUX_TEST_FZF_OUTPUT:?}"
 : "${TMUX_TEST_FZF_USED:?}"
 
@@ -115,6 +117,7 @@ if ! has_arg '--with-nth=2,3' "$@"; then
   exit 2
 fi
 
+printf 'fzf\n' >>"${TMUX_TEST_FZF_LOG}"
 cat >"${TMUX_TEST_FZF_INPUT}"
 
 if [ -e "${TMUX_TEST_FZF_USED}" ]; then
@@ -129,6 +132,7 @@ chmod +x "${FAKE_TMUX}" "${FAKE_FZF}"
 
 reset_files() {
   : >"${TMUX_LOG}"
+  : >"${FZF_LOG}"
   : >"${FZF_INPUT}"
   : >"${SESSIONS_FILE}"
   rm -f "${FZF_USED}"
@@ -141,6 +145,7 @@ run_manager() {
   TMUX_TEST_LOG="${TMUX_LOG}" \
     TMUX_TEST_SESSIONS="${SESSIONS_FILE}" \
     TMUX_TEST_FZF_INPUT="${FZF_INPUT}" \
+    TMUX_TEST_FZF_LOG="${FZF_LOG}" \
     TMUX_TEST_FZF_USED="${FZF_USED}" \
     TMUX_TEST_FZF_OUTPUT="${fzf_output}" \
     bash "${SUBJECT}" "${FAKE_TMUX}" "${FAKE_FZF}" <<<"${stdin}"
@@ -183,6 +188,7 @@ test_attach_selected_session() {
   run_manager '' $'enter\n@2\tops\t1 windows\n'
 
   assert_log_equals $'args:list-sessions -F #{session_id}\t#{session_name}\t#{session_windows} windows\nargs:attach-session -t @2\nattached:@2'
+  assert_file_equals "${FZF_LOG}" 'fzf'
   assert_file_equals "${FZF_INPUT}" $'@1\twork\t2 windows\n@2\tops\t1 windows'
 }
 
@@ -193,6 +199,7 @@ test_rename_selected_session() {
   run_manager $'renamed\n' $'ctrl-r\n@1\twork\t2 windows\n'
 
   assert_log_equals $'args:list-sessions -F #{session_id}\t#{session_name}\t#{session_windows} windows\nargs:rename-session -t @1 renamed\nrenamed:@1:renamed\nargs:list-sessions -F #{session_id}\t#{session_name}\t#{session_windows} windows'
+  assert_file_equals "${FZF_LOG}" $'fzf\nfzf'
 }
 
 test_delete_selected_session() {
@@ -202,6 +209,7 @@ test_delete_selected_session() {
   run_manager $'y\n' $'ctrl-d\n@1\twork\t2 windows\n'
 
   assert_log_equals $'args:list-sessions -F #{session_id}\t#{session_name}\t#{session_windows} windows\nargs:kill-session -t @1\nkilled:@1\nargs:list-sessions -F #{session_id}\t#{session_name}\t#{session_windows} windows'
+  assert_file_equals "${FZF_LOG}" $'fzf\nfzf'
 }
 
 test_ctrl_n_creates_session() {
@@ -211,6 +219,7 @@ test_ctrl_n_creates_session() {
   run_manager $'fresh\n' $'ctrl-n\n'
 
   assert_log_equals $'args:list-sessions -F #{session_id}\t#{session_name}\t#{session_windows} windows\nargs:new-session -s fresh\nnew:fresh'
+  assert_file_equals "${FZF_LOG}" 'fzf'
 }
 
 test_no_sessions_prompts_for_new_session() {
@@ -219,6 +228,7 @@ test_no_sessions_prompts_for_new_session() {
   run_manager $'fresh\n' ''
 
   assert_log_equals $'args:list-sessions -F #{session_id}\t#{session_name}\t#{session_windows} windows\nargs:new-session -s fresh\nnew:fresh'
+  assert_file_equals "${FZF_LOG}" ''
   assert_file_equals "${FZF_INPUT}" ''
 }
 
