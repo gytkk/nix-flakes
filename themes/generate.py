@@ -1091,12 +1091,12 @@ def k9s_theme_doc(ctx: dict[str, Any], root: Path) -> dict[str, Any]:
 
 
 def tmux_style(*, fg: str, bg: str | None = None, bold: bool = False) -> str:
-    parts = [f"fg={fg}"]
+    parts = [f"#[fg={fg}]"]
     if bg is not None:
-        parts.append(f"bg={bg}")
+        parts.append(f"#[bg={bg}]")
     if bold:
-        parts.append("bold")
-    return "#[" + ",".join(parts) + "]"
+        parts.append("#[bold]")
+    return "".join(parts)
 
 
 def tmux_quote(value: str) -> str:
