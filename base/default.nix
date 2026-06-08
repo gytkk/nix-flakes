@@ -48,6 +48,13 @@
     # Nix로 .app 번들을 설치하지 않으므로 비활성화
     targets.darwin.copyApps.enable = false;
 
+    # agenix's Home Manager LaunchAgent is a one-shot secret activation step.
+    # Its upstream KeepAlive.Crashed=false makes launchd rerun it continuously
+    # after normal exits, which can race with Home Manager's agent reload.
+    launchd.agents.activate-agenix.config = lib.mkIf pkgs.stdenv.isDarwin {
+      KeepAlive = lib.mkForce null;
+    };
+
     # XDG Base Directory Specification
     xdg = {
       enable = true;
