@@ -164,9 +164,19 @@ while true; do
     exit 0
   fi
 
-  if ! choice="$(choose_action "${rows}")"; then
-    exit 0
-  fi
+  choice="$(choose_action "${rows}")"
+  choice_status=$?
+
+  case "${choice_status}" in
+    0)
+      ;;
+    1)
+      [ -n "${choice}" ] || exit 0
+      ;;
+    *)
+      exit 0
+      ;;
+  esac
 
   parse_choice "${choice}"
 
