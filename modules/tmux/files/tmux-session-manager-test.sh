@@ -192,7 +192,7 @@ test_rename_selected_session() {
 
   run_manager $'renamed\n' $'ctrl-r\n@1\twork\t2 windows\n'
 
-  assert_log_equals $'args:list-sessions -F #{session_id}\t#{session_name}\t#{session_windows} windows\nargs:rename-session -t @1 renamed\nrenamed:@1:renamed'
+  assert_log_equals $'args:list-sessions -F #{session_id}\t#{session_name}\t#{session_windows} windows\nargs:rename-session -t @1 renamed\nrenamed:@1:renamed\nargs:list-sessions -F #{session_id}\t#{session_name}\t#{session_windows} windows'
 }
 
 test_delete_selected_session() {
@@ -201,7 +201,7 @@ test_delete_selected_session() {
 
   run_manager $'y\n' $'ctrl-d\n@1\twork\t2 windows\n'
 
-  assert_log_equals $'args:list-sessions -F #{session_id}\t#{session_name}\t#{session_windows} windows\nargs:kill-session -t @1\nkilled:@1'
+  assert_log_equals $'args:list-sessions -F #{session_id}\t#{session_name}\t#{session_windows} windows\nargs:kill-session -t @1\nkilled:@1\nargs:list-sessions -F #{session_id}\t#{session_name}\t#{session_windows} windows'
 }
 
 test_ctrl_n_creates_session() {
@@ -222,10 +222,17 @@ test_no_sessions_prompts_for_new_session() {
   assert_file_equals "${FZF_INPUT}" ''
 }
 
-test_attach_selected_session
-test_rename_selected_session
-test_delete_selected_session
-test_ctrl_n_creates_session
-test_no_sessions_prompts_for_new_session
+run_test() {
+  local name="${1}"
+
+  printf 'running %s\n' "${name}"
+  "${name}"
+}
+
+run_test test_attach_selected_session
+run_test test_rename_selected_session
+run_test test_delete_selected_session
+run_test test_ctrl_n_creates_session
+run_test test_no_sessions_prompts_for_new_session
 
 printf 'tmux-session-manager tests passed\n'
