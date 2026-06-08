@@ -231,8 +231,9 @@ Resources should supplement the tools instead of expanding the tool count:
   remains the original tmux binary.
 - The checked-in tmux config uses `Ctrl+a` as the prefix, starts window and
   pane indexes at `1`, enables mouse support, and keeps the statusline at the
-  top with generated canonical theme colors plus `PREFIX` and `SYNC`
-  indicators.
+  top with generated canonical theme colors. Pressing the prefix accent-colors
+  the session segment and shows key hints on the right; synchronized panes still
+  show a `SYNC` indicator.
 - tmux enables CSI-u extended keys so modified keys such as `Shift+Enter`
   survive through tmux into TUI apps like Codex. Restart tmux fully after
   changing this setting, because existing clients keep the old key mode.

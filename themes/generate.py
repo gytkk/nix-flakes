@@ -1117,16 +1117,13 @@ def build_tmux_slots(ctx: dict[str, Any]) -> dict[str, str]:
     prefix_fg = best_contrast(prefix_bg, p["white"], r["ui"]["bg"], r["ui"]["fg"])
     sync_fg = best_contrast(sync_bg, p["white"], r["ui"]["bg"], r["ui"]["fg"])
     current_fg = best_contrast(current_bg, p["white"], r["ui"]["bg"], r["ui"]["fg"])
+    normal_session = f"{tmux_style(fg=session_fg, bg=session_bg, bold=True)} #S #[default]"
+    prefix_session = f"{tmux_style(fg=prefix_fg, bg=prefix_bg, bold=True)} #S #[default]"
     status_left = (
-        f"{tmux_style(fg=session_fg, bg=session_bg, bold=True)} #S #[default]"
+        f"#{{?client_prefix,{prefix_session},{normal_session}}}"
         f"#{{?pane_synchronized,{tmux_style(fg=sync_fg, bg=sync_bg, bold=True)} SYNC #[default],}}"
     )
-    status_right = (
-        f"{tmux_style(fg=r['ui']['fgMuted'])} C-a ? help/keys | C-a w tree | C-a s sessions #[default]"
-        f"#{{?client_prefix,{tmux_style(fg=prefix_fg, bg=prefix_bg, bold=True)} PREFIX #[default],}}"
-        f"{tmux_style(fg=r['ui']['border'])}| "
-        f"{tmux_style(fg=status_fg)}%Y-%m-%d %H:%M "
-    )
+    status_right = f"#{{?client_prefix,{tmux_style(fg=status_fg)} ? help | w tree | s sessions #[default],}}"
     window_status = f"{tmux_style(fg=r['ui']['fgMuted'], bg=status_bg)} #I:#W#F #[default]"
     current_window = f"{tmux_style(fg=current_fg, bg=current_bg, bold=True)} #I:#W#F #[default]"
     return {
