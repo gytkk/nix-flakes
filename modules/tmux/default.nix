@@ -14,7 +14,7 @@ let
       "${config.modules.commonTheme}.conf";
   tmuxSessionManager = pkgs.writeShellScriptBin "tm" ''
     if [ "$#" -eq 0 ] && [ -t 0 ] && [ -t 1 ] && [ -z "''${TMUX:-}" ]; then
-      exec ${pkgs.bash}/bin/bash ${flakeDirectory}/modules/tmux/files/tmux-session-manager.sh ${pkgs.tmux}/bin/tmux
+      exec ${pkgs.bash}/bin/bash ${flakeDirectory}/modules/tmux/files/tmux-session-manager.sh ${pkgs.tmux}/bin/tmux ${pkgs.fzf}/bin/fzf
     fi
 
     exec ${pkgs.tmux}/bin/tmux "$@"
