@@ -5,6 +5,7 @@ set -u
 tmux_bin="${1:-}"
 fzf_bin="${2:-}"
 selected_session_id=''
+selected_session_name=''
 selected_query=''
 selected_key=''
 selected_row=''
@@ -79,12 +80,15 @@ prompt_session_name() {
 
 parse_selected_row() {
   local row="${1:-}"
+  local rest
 
   if [ -z "${row}" ]; then
     return 1
   fi
 
   selected_session_id="${row%%$'\t'*}"
+  rest="${row#*$'\t'}"
+  selected_session_name="${rest%%$'\t'*}"
   [ -n "${selected_session_id}" ]
 }
 
@@ -125,6 +129,50 @@ choose_action() {
     --expect=ctrl-n,ctrl-r,ctrl-d
 }
 
+choose_rename_name() {
+  local session_name="${1}"
+  local choice
+  local name
+
+  if ! choice="$(printf '' | "${fzf_bin}" \
+    --height=40% \
+    --layout=reverse \
+    --border \
+    --prompt="rename ${session_name}> " \
+    --print-query \
+    '--bind=enter:print()+accept-or-print-query' \
+    --header='enter: rename | esc: cancel')"; then
+    return 1
+  fi
+
+  name="${choice%%$'\n'*}"
+  if ! validate_session_name "${name}"; then
+    return 1
+  fi
+
+  printf '%s\n' "${name}"
+}
+
+confirm_delete_session() {
+  local session_name="${1}"
+  local choice
+  local action
+
+  if ! choice="$(printf 'yes\tDelete\ncancel\tCancel\n' | "${fzf_bin}" \
+    --height=40% \
+    --layout=reverse \
+    --border \
+    --prompt="delete ${session_name}> " \
+    $'--delimiter=\t' \
+    --with-nth=2 \
+    --header='enter: confirm | esc: cancel')"; then
+    return 1
+  fi
+
+  action="${choice%%$'\t'*}"
+  [ "${action}" = 'yes' ]
+}
+
 create_session_with_name() {
   local name="${1}"
 
@@ -147,9 +195,10 @@ create_session() {
 
 rename_session() {
   local session_id="${1}"
+  local session_name="${2}"
   local name
 
-  if ! name="$(prompt_session_name 'New session name: ')"; then
+  if ! name="$(choose_rename_name "${session_name}")"; then
     return 0
   fi
 
@@ -158,17 +207,13 @@ rename_session() {
 
 delete_session() {
   local session_id="${1}"
-  local confirm
+  local session_name="${2}"
 
-  if ! read -r -p "Delete \"${session_id}\"? [y/N] " confirm; then
+  if ! confirm_delete_session "${session_name}"; then
     return 0
   fi
 
-  case "${confirm}" in
-    y | Y | yes | YES)
-      "${tmux_bin}" kill-session -t "${session_id}" >/dev/null
-      ;;
-  esac
+  "${tmux_bin}" kill-session -t "${session_id}" >/dev/null
 }
 
 attach_session() {
@@ -204,12 +249,12 @@ while true; do
       ;;
     ctrl-r)
       if parse_selected_row "${selected_row}"; then
-        rename_session "${selected_session_id}"
+        rename_session "${selected_session_id}" "${selected_session_name}"
       fi
       ;;
     ctrl-d)
       if parse_selected_row "${selected_row}"; then
-        delete_session "${selected_session_id}"
+        delete_session "${selected_session_id}" "${selected_session_name}"
       fi
       ;;
   esac
