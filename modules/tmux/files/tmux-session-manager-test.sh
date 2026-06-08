@@ -143,8 +143,8 @@ if has_arg '--prompt=tmux> ' "$@"; then
     exit 2
   fi
 
-  if ! has_arg '--bind=enter:print()+accept-or-print-query' "$@"; then
-    printf 'missing required fzf arg: --bind=enter:print()+accept-or-print-query\n' >&2
+  if ! has_arg '--bind=enter:print(enter)+accept-or-print-query' "$@"; then
+    printf 'missing required fzf arg: --bind=enter:print(enter)+accept-or-print-query\n' >&2
     exit 2
   fi
 
@@ -299,7 +299,7 @@ test_attach_selected_session() {
   reset_files
   printf '@1\twork\t2 windows\n@2\tops\t1 windows\n' >"${SESSIONS_FILE}"
 
-  run_manager '' $'\n\n@2\tops\t1 windows\n'
+  run_manager '' $'\n\nenter\n@2\tops\t1 windows\n'
 
   assert_log_equals $'args:list-sessions -F #{session_id}\t#{session_name}\t#{session_windows} windows\nargs:attach-session -t @2\nattached:@2'
   assert_file_equals "${FZF_LOG}" 'fzf'
@@ -350,7 +350,7 @@ test_missing_tmux_tmpdir_uses_xdg_runtime_dir_for_existing_sessions() {
   reset_files
   printf '@1\twork\t2 windows\n@2\tops\t1 windows\n' >"${SESSIONS_FILE}"
 
-  run_manager_without_tmux_tmpdir '' $'\n\n@2\tops\t1 windows\n'
+  run_manager_without_tmux_tmpdir '' $'\n\nenter\n@2\tops\t1 windows\n'
 
   assert_log_equals $'args:list-sessions -F #{session_id}\t#{session_name}\t#{session_windows} windows\nargs:attach-session -t @2\nattached:@2'
   assert_file_equals "${FZF_LOG}" 'fzf'

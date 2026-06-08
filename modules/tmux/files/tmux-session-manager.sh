@@ -111,6 +111,23 @@ parse_choice() {
   fi
 
   selected_row="${rest#*$'\n'}"
+
+  if [ -z "${selected_key}" ]; then
+    case "${selected_row}" in
+      enter$'\n'*)
+        selected_key='enter'
+        selected_row="${selected_row#*$'\n'}"
+        ;;
+      ctrl-r$'\n'*)
+        selected_key='ctrl-r'
+        selected_row="${selected_row#*$'\n'}"
+        ;;
+      ctrl-d$'\n'*)
+        selected_key='ctrl-d'
+        selected_row="${selected_row#*$'\n'}"
+        ;;
+    esac
+  fi
 }
 
 choose_action() {
@@ -124,7 +141,7 @@ choose_action() {
     $'--delimiter=\t' \
     --with-nth=2,3 \
     --print-query \
-    '--bind=enter:print()+accept-or-print-query' \
+    '--bind=enter:print(enter)+accept-or-print-query' \
     --header='enter: attach | type new name + enter: create | ctrl-r: rename | ctrl-d: delete' \
     --expect=ctrl-r,ctrl-d
 }
