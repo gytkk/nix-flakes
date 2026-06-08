@@ -3,54 +3,21 @@
 set -u
 
 tmux_bin="${1:-}"
+fzf_bin="${2:-}"
+selected_session_id=''
 
 if [ -z "${tmux_bin}" ] || [ ! -x "${tmux_bin}" ]; then
-  printf 'tmux session manager: real tmux binary is missing or not executable\n' >&2
+  printf 'tmux session manager: tmux binary is missing or not executable\n' >&2
   exit 1
 fi
 
-sessions=()
-selected_session=''
-session_name=''
+if [ -z "${fzf_bin}" ] || [ ! -x "${fzf_bin}" ]; then
+  printf 'tmux session manager: fzf binary is missing or not executable\n' >&2
+  exit 1
+fi
 
-load_sessions() {
-  local output session
-
-  sessions=()
-  if ! output="$("${tmux_bin}" list-sessions -F '#{session_name}' 2>/dev/null)"; then
-    return 0
-  fi
-
-  while IFS= read -r session; do
-    if [ -n "${session}" ]; then
-      sessions+=("${session}")
-    fi
-  done <<<"${output}"
-}
-
-is_number() {
-  local value="${1:-}"
-  [[ "${value}" =~ ^[0-9]+$ ]]
-}
-
-print_menu() {
-  local index
-
-  printf '\nTmux sessions\n'
-  if [ "${#sessions[@]}" -eq 0 ]; then
-    printf '  (none)\n'
-  else
-    for index in "${!sessions[@]}"; do
-      printf '  %d) %s\n' "$((index + 1))" "${sessions[${index}]}"
-    done
-  fi
-
-  printf '\n'
-  if [ "${#sessions[@]}" -gt 0 ]; then
-    printf 'Enter a number to attach, c to create, r to rename, d to delete, q to quit.\n'
-  else
-    printf 'Enter c to create a named session or q to quit.\n'
-  fi
+list_session_rows() {
+  "${tmux_bin}" list-sessions -F $'#{session_id}\t#{session_name}\t#{session_windows} windows' 2>/dev/null
 }
 
 prompt_session_name() {
@@ -72,137 +39,115 @@ prompt_session_name() {
       continue
     fi
 
-    session_name="${name}"
+    printf '%s\n' "${name}"
     return 0
   done
 }
 
-session_by_number() {
-  local choice="${1:-}"
-  local index
+parse_selected_row() {
+  local row="${1:-}"
 
-  if ! is_number "${choice}"; then
-    printf 'Enter a session number.\n' >&2
+  if [ -z "${row}" ]; then
     return 1
   fi
 
-  index=$((choice - 1))
-  if [ "${index}" -lt 0 ] || [ "${index}" -ge "${#sessions[@]}" ]; then
-    printf 'No session for number %s.\n' "${choice}" >&2
-    return 1
-  fi
+  selected_session_id="${row%%$'\t'*}"
+  [ -n "${selected_session_id}" ]
+}
 
-  selected_session="${sessions[${index}]}"
+choose_action() {
+  local rows="${1}"
+
+  printf '%s\n' "${rows}" | "${fzf_bin}" \
+    --height=80% \
+    --layout=reverse \
+    --border \
+    --prompt='tmux> ' \
+    $'--delimiter=\t' \
+    --with-nth=2,3 \
+    --header='enter: attach | ctrl-n: new | ctrl-r: rename | ctrl-d: delete' \
+    --expect=enter,ctrl-n,ctrl-r,ctrl-d
 }
 
 create_session() {
-  if ! prompt_session_name 'New session name: '; then
+  local name
+
+  if ! name="$(prompt_session_name 'New session name: ')"; then
     return 0
   fi
 
-  exec "${tmux_bin}" new-session -s "${session_name}"
+  exec "${tmux_bin}" new-session -s "${name}"
 }
 
 rename_session() {
-  local choice old_name new_name
+  local session_id="${1}"
+  local name
 
-  if [ "${#sessions[@]}" -eq 0 ]; then
-    printf 'No sessions to rename.\n'
+  if ! name="$(prompt_session_name 'New session name: ')"; then
     return 0
   fi
 
-  if ! read -r -p 'Session number to rename: ' choice; then
-    return 0
-  fi
-
-  if ! session_by_number "${choice}"; then
-    return 0
-  fi
-  old_name="${selected_session}"
-
-  if ! prompt_session_name 'New session name: '; then
-    return 0
-  fi
-  new_name="${session_name}"
-
-  if "${tmux_bin}" rename-session -t "${old_name}" "${new_name}"; then
-    printf 'Renamed "%s" to "%s".\n' "${old_name}" "${new_name}"
-  else
-    printf 'Could not rename "%s".\n' "${old_name}" >&2
-  fi
+  "${tmux_bin}" rename-session -t "${session_id}" "${name}" >/dev/null
 }
 
 delete_session() {
-  local choice name confirm
+  local session_id="${1}"
+  local confirm
 
-  if [ "${#sessions[@]}" -eq 0 ]; then
-    printf 'No sessions to delete.\n'
-    return 0
-  fi
-
-  if ! read -r -p 'Session number to delete: ' choice; then
-    return 0
-  fi
-
-  if ! session_by_number "${choice}"; then
-    return 0
-  fi
-  name="${selected_session}"
-
-  if ! read -r -p "Delete \"${name}\"? [y/N] " confirm; then
+  if ! read -r -p "Delete \"${session_id}\"? [y/N] " confirm; then
     return 0
   fi
 
   case "${confirm}" in
     y | Y | yes | YES)
-      if "${tmux_bin}" kill-session -t "${name}"; then
-        printf 'Deleted "%s".\n' "${name}"
-      else
-        printf 'Could not delete "%s".\n' "${name}" >&2
-      fi
-      ;;
-    *)
-      printf 'Delete cancelled.\n'
+      "${tmux_bin}" kill-session -t "${session_id}" >/dev/null
       ;;
   esac
 }
 
 attach_session() {
-  local choice="${1:-}"
-  local name
+  local session_id="${1}"
 
-  if ! session_by_number "${choice}"; then
-    return 0
-  fi
-  name="${selected_session}"
-
-  exec "${tmux_bin}" attach-session -t "${name}"
+  exec "${tmux_bin}" attach-session -t "${session_id}"
 }
 
 while true; do
-  load_sessions
-  print_menu
+  rows="$(list_session_rows || true)"
 
-  if ! read -r -p 'Choice: ' choice; then
-    printf '\n'
+  if [ -z "${rows}" ]; then
+    create_session
     exit 0
   fi
 
-  case "${choice}" in
-    q | Q)
-      exit 0
-      ;;
-    c | C)
+  if ! choice="$(choose_action "${rows}")"; then
+    exit 0
+  fi
+
+  key="${choice%%$'\n'*}"
+  if [ "${choice}" = "${key}" ]; then
+    row=''
+  else
+    row="${choice#*$'\n'}"
+  fi
+
+  case "${key}" in
+    ctrl-n)
       create_session
       ;;
-    r | R)
-      rename_session
+    enter | '')
+      if parse_selected_row "${row}"; then
+        attach_session "${selected_session_id}"
+      fi
       ;;
-    d | D)
-      delete_session
+    ctrl-r)
+      if parse_selected_row "${row}"; then
+        rename_session "${selected_session_id}"
+      fi
       ;;
-    *)
-      attach_session "${choice}"
+    ctrl-d)
+      if parse_selected_row "${row}"; then
+        delete_session "${selected_session_id}"
+      fi
       ;;
   esac
 done
