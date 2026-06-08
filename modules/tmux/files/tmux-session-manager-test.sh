@@ -26,6 +26,12 @@ printf 'args:%s\n' "$*" >>"${TMUX_TEST_LOG}"
 
 case "${1:-} ${2:-}" in
   'list-sessions -F')
+    expected_format=$'#{session_id}\t#{session_name}\t#{session_windows} windows'
+    if [ "${3:-}" != "${expected_format}" ]; then
+      printf 'unexpected tmux list format: %s\n' "${3:-}" >&2
+      exit 2
+    fi
+
     if [ -s "${TMUX_TEST_SESSIONS}" ]; then
       cat "${TMUX_TEST_SESSIONS}"
     else
@@ -60,6 +66,55 @@ set -euo pipefail
 : "${TMUX_TEST_FZF_OUTPUT:?}"
 : "${TMUX_TEST_FZF_USED:?}"
 
+has_arg() {
+  local expected="${1}"
+  local arg
+
+  shift
+  for arg in "$@"; do
+    if [ "${arg}" = "${expected}" ]; then
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+has_delimiter_arg() {
+  local args=("$@")
+  local index
+
+  for index in "${!args[@]}"; do
+    case "${args[${index}]}" in
+      $'--delimiter=\t')
+        return 0
+        ;;
+      '--delimiter')
+        if [ "${args[$((index + 1))]:-}" = $'\t' ]; then
+          return 0
+        fi
+        ;;
+    esac
+  done
+
+  return 1
+}
+
+if ! has_arg '--expect=enter,ctrl-n,ctrl-r,ctrl-d' "$@"; then
+  printf 'missing required fzf arg: --expect=enter,ctrl-n,ctrl-r,ctrl-d\n' >&2
+  exit 2
+fi
+
+if ! has_delimiter_arg "$@"; then
+  printf 'missing required fzf tab delimiter\n' >&2
+  exit 2
+fi
+
+if ! has_arg '--with-nth=2,3' "$@"; then
+  printf 'missing required fzf arg: --with-nth=2,3\n' >&2
+  exit 2
+fi
+
 cat >"${TMUX_TEST_FZF_INPUT}"
 
 if [ -e "${TMUX_TEST_FZF_USED}" ]; then
@@ -67,7 +122,7 @@ if [ -e "${TMUX_TEST_FZF_USED}" ]; then
 fi
 
 : >"${TMUX_TEST_FZF_USED}"
-printf '%b' "${TMUX_TEST_FZF_OUTPUT}"
+printf '%s' "${TMUX_TEST_FZF_OUTPUT}"
 FAKE_FZF
 
 chmod +x "${FAKE_TMUX}" "${FAKE_FZF}"
@@ -91,17 +146,17 @@ run_manager() {
     bash "${SUBJECT}" "${FAKE_TMUX}" "${FAKE_FZF}" <<<"${stdin}"
 }
 
-assert_log_has() {
+assert_log_equals() {
   local expected="${1}"
-  local line
+  local actual
 
-  while IFS= read -r line; do
-    if [ "${line}" = "${expected}" ]; then
-      return 0
-    fi
-  done <"${TMUX_LOG}"
+  actual="$(cat "${TMUX_LOG}")"
+  if [ "${actual}" = "${expected}" ]; then
+    return 0
+  fi
 
-  printf 'Expected log line not found: %s\n' "${expected}" >&2
+  printf 'Unexpected tmux log\n' >&2
+  printf 'Expected log:\n%s\n' "${expected}" >&2
   printf 'Actual log:\n' >&2
   cat "${TMUX_LOG}" >&2
   return 1
@@ -127,7 +182,7 @@ test_attach_selected_session() {
 
   run_manager '' $'enter\n@2\tops\t1 windows\n'
 
-  assert_log_has 'attached:@2'
+  assert_log_equals $'args:list-sessions -F #{session_id}\t#{session_name}\t#{session_windows} windows\nargs:attach-session -t @2\nattached:@2'
   assert_file_equals "${FZF_INPUT}" $'@1\twork\t2 windows\n@2\tops\t1 windows'
 }
 
@@ -137,7 +192,7 @@ test_rename_selected_session() {
 
   run_manager $'renamed\n' $'ctrl-r\n@1\twork\t2 windows\n'
 
-  assert_log_has 'renamed:@1:renamed'
+  assert_log_equals $'args:list-sessions -F #{session_id}\t#{session_name}\t#{session_windows} windows\nargs:rename-session -t @1 renamed\nrenamed:@1:renamed'
 }
 
 test_delete_selected_session() {
@@ -146,7 +201,7 @@ test_delete_selected_session() {
 
   run_manager $'y\n' $'ctrl-d\n@1\twork\t2 windows\n'
 
-  assert_log_has 'killed:@1'
+  assert_log_equals $'args:list-sessions -F #{session_id}\t#{session_name}\t#{session_windows} windows\nargs:kill-session -t @1\nkilled:@1'
 }
 
 test_ctrl_n_creates_session() {
@@ -155,7 +210,7 @@ test_ctrl_n_creates_session() {
 
   run_manager $'fresh\n' $'ctrl-n\n'
 
-  assert_log_has 'new:fresh'
+  assert_log_equals $'args:list-sessions -F #{session_id}\t#{session_name}\t#{session_windows} windows\nargs:new-session -s fresh\nnew:fresh'
 }
 
 test_no_sessions_prompts_for_new_session() {
@@ -163,7 +218,7 @@ test_no_sessions_prompts_for_new_session() {
 
   run_manager $'fresh\n' ''
 
-  assert_log_has 'new:fresh'
+  assert_log_equals $'args:list-sessions -F #{session_id}\t#{session_name}\t#{session_windows} windows\nargs:new-session -s fresh\nnew:fresh'
   assert_file_equals "${FZF_INPUT}" ''
 }
 
