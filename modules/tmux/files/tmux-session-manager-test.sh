@@ -128,8 +128,8 @@ if has_arg '--prompt=tmux> ' "$@"; then
     exit 2
   fi
 
-  if ! has_arg '--expect=ctrl-n,ctrl-r,ctrl-d' "$@"; then
-    printf 'missing required fzf arg: --expect=ctrl-n,ctrl-r,ctrl-d\n' >&2
+  if ! has_arg '--expect=ctrl-r,ctrl-d' "$@"; then
+    printf 'missing required fzf arg: --expect=ctrl-r,ctrl-d\n' >&2
     exit 2
   fi
 
@@ -148,7 +148,7 @@ if has_arg '--prompt=tmux> ' "$@"; then
     exit 2
   fi
 
-  if ! has_arg '--header=enter: attach | type new name + enter: create | ctrl-n: prompt new | ctrl-r: rename | ctrl-d: delete' "$@"; then
+  if ! has_arg '--header=enter: attach | type new name + enter: create | ctrl-r: rename | ctrl-d: delete' "$@"; then
     printf 'missing required fzf header explaining query creation\n' >&2
     exit 2
   fi
@@ -336,16 +336,6 @@ test_delete_cancel_keeps_selected_session() {
   assert_file_equals "${FZF_LOG}" $'fzf\nfzf\nfzf'
 }
 
-test_ctrl_n_creates_session() {
-  reset_files
-  printf '@1\twork\t2 windows\n' >"${SESSIONS_FILE}"
-
-  run_manager $'fresh\n' $'\nctrl-n\n'
-
-  assert_log_equals $'args:list-sessions -F #{session_id}\t#{session_name}\t#{session_windows} windows\nargs:new-session -s fresh\nnew:fresh'
-  assert_file_equals "${FZF_LOG}" 'fzf'
-}
-
 test_enter_query_creates_session_when_no_row_matches() {
   reset_files
   printf '@1\twork\t2 windows\n' >"${SESSIONS_FILE}"
@@ -388,7 +378,6 @@ run_test test_attach_selected_session
 run_test test_rename_selected_session
 run_test test_delete_selected_session
 run_test test_delete_cancel_keeps_selected_session
-run_test test_ctrl_n_creates_session
 run_test test_enter_query_creates_session_when_no_row_matches
 run_test test_missing_tmux_tmpdir_uses_xdg_runtime_dir_for_existing_sessions
 run_test test_no_sessions_prompts_for_new_session

@@ -125,8 +125,8 @@ choose_action() {
     --with-nth=2,3 \
     --print-query \
     '--bind=enter:print()+accept-or-print-query' \
-    --header='enter: attach | type new name + enter: create | ctrl-n: prompt new | ctrl-r: rename | ctrl-d: delete' \
-    --expect=ctrl-n,ctrl-r,ctrl-d
+    --header='enter: attach | type new name + enter: create | ctrl-r: rename | ctrl-d: delete' \
+    --expect=ctrl-r,ctrl-d
 }
 
 choose_rename_name() {
@@ -237,9 +237,6 @@ while true; do
   parse_choice "${choice}"
 
   case "${selected_key}" in
-    ctrl-n)
-      create_session
-      ;;
     enter | '')
       if parse_selected_row "${selected_row}"; then
         attach_session "${selected_session_id}"

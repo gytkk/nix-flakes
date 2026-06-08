@@ -230,8 +230,7 @@ Resources should supplement the tools instead of expanding the tool count:
 - Running bare interactive `tm` outside tmux opens the fzf-backed session
   manager; `tmux` remains the original tmux binary. Use arrow keys to select a
   session, `Enter` to attach, type a new session name and press `Enter` to
-  create it, `Ctrl+n` to create through a prompt, `Ctrl+r` to rename, and
-  `Ctrl+d` to delete.
+  create it, `Ctrl+r` to rename, and `Ctrl+d` to delete.
 - The checked-in tmux config uses `Ctrl+a` as the prefix, starts window and
   pane indexes at `1`, enables mouse support, and keeps the statusline at the
   top with generated canonical theme colors. Pressing the prefix accent-colors
