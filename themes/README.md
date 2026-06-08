@@ -526,6 +526,7 @@ Current generators:
 - `nvim` -> `themes/exports/nvim/*.lua`
 - `starship` -> `themes/exports/starship/*.toml`
 - `zellij` -> `themes/exports/zellij/*.kdl`
+- `tmux` -> `themes/exports/tmux/*.conf`
 
 Adapter templates and schema helpers:
 
@@ -548,6 +549,8 @@ Adapter templates and schema helpers:
   layout
 - `themes/templates/zellij/official-template.json` -> Zellij theme template
   derived from the official Zellij theme definition specification
+- `themes/templates/tmux/official-template.json` -> tmux statusline template
+  derived from tmux style syntax and the existing local statusline layout
 - `themes/overrides/ghostty/*.yaml` -> optional Ghostty slot overrides applied
   after generator defaults
 - `themes/overrides/zellij/*.yaml` -> optional Zellij-specific

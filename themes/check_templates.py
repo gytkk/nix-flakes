@@ -332,6 +332,53 @@ def check_zellij(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
         expect(contract.get("value_type") == "rgb-triplet", f"{path_str}.theme_schema.value_type must be 'rgb-triplet'", errors)
     check_zellij_sections(f"{path_str}.sections", doc.get("sections"), errors)
 
+
+def check_tmux_sections(path: str, sections: object, errors: list[str]) -> None:
+    expect(isinstance(sections, list) and len(sections) > 0, f"{path}: sections must be a non-empty list", errors)
+    if not isinstance(sections, list):
+        return
+    check_section_names(path, sections, errors)
+    seen_options: set[str] = set()
+    for idx, section in enumerate(sections):
+        item_path = f"{path}[{idx}]"
+        expect(isinstance(section, dict), f"{item_path}: section must be an object", errors)
+        if not isinstance(section, dict):
+            continue
+        require_keys(section, ["name", "entries"], item_path, errors)
+        entries = section.get("entries")
+        expect(isinstance(entries, list) and len(entries) > 0, f"{item_path}.entries must be a non-empty list", errors)
+        if not isinstance(entries, list):
+            continue
+        for eidx, entry in enumerate(entries):
+            entry_path = f"{item_path}.entries[{eidx}]"
+            expect(isinstance(entry, dict), f"{entry_path}: entry must be an object", errors)
+            if not isinstance(entry, dict):
+                continue
+            require_keys(entry, ["scope", "option", "value"], entry_path, errors)
+            scope = entry.get("scope")
+            option = entry.get("option")
+            value = entry.get("value")
+            expect(scope in {"set", "setw"}, f"{entry_path}.scope must be 'set' or 'setw'", errors)
+            expect(isinstance(option, str) and option, f"{entry_path}.option must be a non-empty string", errors)
+            expect(isinstance(value, str) and value, f"{entry_path}.value must be a non-empty string", errors)
+            if isinstance(scope, str) and isinstance(option, str):
+                fingerprint = f"{scope}:{option}"
+                expect(fingerprint not in seen_options, f"{path}: duplicate tmux option {fingerprint!r}", errors)
+                seen_options.add(fingerprint)
+
+
+def check_tmux(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
+    check_common(path, doc, errors)
+    path_str = str(path)
+    contract = doc.get("config_schema")
+    expect(isinstance(contract, dict), f"{path_str}.config_schema must be an object", errors)
+    if isinstance(contract, dict):
+        require_keys(contract, ["token_prefix", "value_type"], f"{path_str}.config_schema", errors)
+        expect(contract.get("token_prefix") == "$", f"{path_str}.config_schema.token_prefix must be '$'", errors)
+        expect(contract.get("value_type") == "tmux-style-or-format", f"{path_str}.config_schema.value_type must be 'tmux-style-or-format'", errors)
+    check_tmux_sections(f"{path_str}.sections", doc.get("sections"), errors)
+
+
 def check_k9s(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
     check_common(path, doc, errors)
     path_str = str(path)
@@ -494,6 +541,7 @@ JSON_CHECKS = {
     ROOT / "templates" / "nvim" / "plugins.json": check_nvim_plugin_template,
     ROOT / "templates" / "starship" / "official-template.json": check_starship,
     ROOT / "templates" / "zellij" / "official-template.json": check_zellij,
+    ROOT / "templates" / "tmux" / "official-template.json": check_tmux,
 }
 
 YAML_CHECKS = {

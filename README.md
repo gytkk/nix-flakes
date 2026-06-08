@@ -222,14 +222,17 @@ Resources should supplement the tools instead of expanding the tool count:
 ## tmux config
 
 - tmux is managed through `modules/tmux/default.nix`.
-- Home Manager installs a tmux wrapper for every shared environment and links
+- Home Manager installs tmux plus a `tm` session-manager wrapper and links
   `~/.config/tmux/tmux.conf`, `keybindings.conf`, and `statusline.conf` to
   `modules/tmux/files/` through out-of-store symlinks.
-- Running bare interactive `tmux` outside tmux opens the session manager; tmux
-  subcommands and calls from inside tmux pass through to the real binary.
+- Home Manager also links `~/.config/tmux/themes` to `themes/exports/tmux` and
+  exposes the selected `modules.commonTheme` as `~/.config/tmux/theme.conf`.
+- Running bare interactive `tm` outside tmux opens the session manager; `tmux`
+  remains the original tmux binary.
 - The checked-in tmux config uses `Ctrl+a` as the prefix, starts window and
   pane indexes at `1`, enables mouse support, and keeps the statusline at the
-  top with `PREFIX` and `SYNC` indicators.
+  top with generated canonical theme colors plus `PREFIX` and `SYNC`
+  indicators.
 - Press `Ctrl+a ?` for the key list, `Ctrl+a w` for the tree, and `Ctrl+a s`
   for the session tree.
 

@@ -538,6 +538,12 @@ def load_starship_template(root: Path) -> dict[str, Any]:
     template_path = root / "templates" / "starship" / "official-template.json"
     return load_json(template_path)
 
+
+def load_tmux_template(root: Path) -> dict[str, Any]:
+    template_path = root / "templates" / "tmux" / "official-template.json"
+    return load_json(template_path)
+
+
 def load_k9s_template(root: Path) -> dict[str, Any]:
     template_path = root / "templates" / "k9s" / "official-template.json"
     return load_json(template_path)
@@ -1084,6 +1090,70 @@ def k9s_theme_doc(ctx: dict[str, Any], root: Path) -> dict[str, Any]:
     return render_template_value(template["document"], build_k9s_slots(ctx))
 
 
+def tmux_style(*, fg: str, bg: str | None = None, bold: bool = False) -> str:
+    parts = [f"fg={fg}"]
+    if bg is not None:
+        parts.append(f"bg={bg}")
+    if bold:
+        parts.append("bold")
+    return "#[" + ",".join(parts) + "]"
+
+
+def tmux_quote(value: str) -> str:
+    return "'" + value.replace("'", "'\\''") + "'"
+
+
+def build_tmux_slots(ctx: dict[str, Any]) -> dict[str, str]:
+    p = ctx["palette"]
+    r = ctx["roles"]
+    is_light = ctx["meta"]["variant"] == "light"
+    status_bg = r["ui"]["statuslineBg"]
+    status_fg = r["ui"]["statuslineFg"]
+    session_bg = r["ui"]["borderActive"]
+    prefix_bg = r["diagnostics"]["error"]
+    sync_bg = r["diagnostics"]["warning"]
+    current_bg = ensure_distinct_background(r["ui"]["selection"], status_bg, r["ui"]["borderActive"], light=is_light)
+    session_fg = best_contrast(session_bg, p["white"], r["ui"]["bg"], r["ui"]["fg"])
+    prefix_fg = best_contrast(prefix_bg, p["white"], r["ui"]["bg"], r["ui"]["fg"])
+    sync_fg = best_contrast(sync_bg, p["white"], r["ui"]["bg"], r["ui"]["fg"])
+    current_fg = best_contrast(current_bg, p["white"], r["ui"]["bg"], r["ui"]["fg"])
+    status_left = (
+        f"{tmux_style(fg=session_fg, bg=session_bg, bold=True)} #S #[default]"
+        f"#{{?client_prefix,{tmux_style(fg=prefix_fg, bg=prefix_bg, bold=True)} PREFIX #[default],}}"
+        f"#{{?pane_synchronized,{tmux_style(fg=sync_fg, bg=sync_bg, bold=True)} SYNC #[default],}}"
+    )
+    status_right = (
+        f"{tmux_style(fg=r['ui']['fgMuted'])} C-a ? help/keys | C-a w tree | C-a s sessions #[default]"
+        f"{tmux_style(fg=r['ui']['border'])}| "
+        f"{tmux_style(fg=status_fg)}%Y-%m-%d %H:%M "
+    )
+    window_status = f"{tmux_style(fg=r['ui']['fgMuted'], bg=status_bg)} #I:#W#F #[default]"
+    current_window = f"{tmux_style(fg=current_fg, bg=current_bg, bold=True)} #I:#W#F #[default]"
+    return {
+        "status_style": f"fg={status_fg},bg={status_bg}",
+        "status_left": status_left,
+        "status_right": status_right,
+        "window_status_format": window_status,
+        "window_status_current_format": current_window,
+    }
+
+
+def tmux_theme_conf(ctx: dict[str, Any], root: Path) -> str:
+    template = load_tmux_template(root)
+    slots = build_tmux_slots(ctx)
+    lines = [
+        f"# Auto-generated from themes/core/{ctx['meta']['id']}.yaml",
+        f"# Template: {template['name']} v{template['version']}",
+    ]
+    for section in template["sections"]:
+        lines.append("")
+        for entry in section["entries"]:
+            value = render_template_value(entry["value"], slots)
+            command = "set -g" if entry["scope"] == "set" else "setw -g"
+            lines.append(f"{command} {entry['option']} {tmux_quote(value)}")
+    return "\n".join(lines) + "\n"
+
+
 def zellij_rgb(hex_color: str) -> str:
     r, g, b = hex_to_rgb(hex_color)
     return f"{r} {g} {b}"
@@ -1356,6 +1426,7 @@ def generate_theme(theme_path: Path, template: dict[str, Any], root: Path) -> li
     nvim_path = root / "exports" / "nvim" / f"{theme_id}.lua"
     starship_path = root / "exports" / "starship" / f"{theme_id}.toml"
     zellij_path = root / "exports" / "zellij" / f"{theme_id}.kdl"
+    tmux_path = root / "exports" / "tmux" / f"{theme_id}.conf"
 
     write_text(ghostty_path, ghostty_theme_conf(ctx, root))
     write_yaml(k9s_path, k9s_theme_doc(ctx, root))
@@ -1363,7 +1434,8 @@ def generate_theme(theme_path: Path, template: dict[str, Any], root: Path) -> li
     write_text(nvim_path, nvim_lua(ctx, root))
     write_text(starship_path, starship_theme_toml(ctx, root))
     write_text(zellij_path, zellij_theme_kdl(ctx, root))
-    return [ghostty_path, k9s_path, zed_path, nvim_path, starship_path, zellij_path]
+    write_text(tmux_path, tmux_theme_conf(ctx, root))
+    return [ghostty_path, k9s_path, zed_path, nvim_path, starship_path, zellij_path, tmux_path]
 
 
 def discover_default_targets(root: Path) -> list[Path]:
