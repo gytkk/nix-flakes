@@ -19,6 +19,26 @@ if [ -z "${fzf_bin}" ] || [ ! -x "${fzf_bin}" ]; then
   exit 1
 fi
 
+set_default_tmux_tmpdir() {
+  local runtime_dir
+
+  if [ -n "${TMUX_TMPDIR:-}" ]; then
+    return 0
+  fi
+
+  if [ -n "${XDG_RUNTIME_DIR:-}" ] && [ -d "${XDG_RUNTIME_DIR}" ]; then
+    export TMUX_TMPDIR="${XDG_RUNTIME_DIR%/}"
+    return 0
+  fi
+
+  runtime_dir="/run/user/$(id -u)"
+  if [ -d "${runtime_dir}" ]; then
+    export TMUX_TMPDIR="${runtime_dir}"
+  fi
+}
+
+set_default_tmux_tmpdir
+
 list_session_rows() {
   "${tmux_bin}" list-sessions -F $'#{session_id}\t#{session_name}\t#{session_windows} windows' 2>/dev/null
 }

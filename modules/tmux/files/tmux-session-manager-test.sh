@@ -23,6 +23,11 @@ set -euo pipefail
 : "${TMUX_TEST_LOG:?}"
 : "${TMUX_TEST_SESSIONS:?}"
 
+if [ -n "${TMUX_TEST_EXPECT_TMUX_TMPDIR:-}" ] && [ "${TMUX_TMPDIR:-}" != "${TMUX_TEST_EXPECT_TMUX_TMPDIR}" ]; then
+  printf 'unexpected TMUX_TMPDIR: %s\n' "${TMUX_TMPDIR:-}" >&2
+  exit 1
+fi
+
 printf 'args:%s\n' "$*" >>"${TMUX_TEST_LOG}"
 
 case "${1:-} ${2:-}" in
@@ -166,6 +171,25 @@ run_manager() {
     bash "${SUBJECT}" "${FAKE_TMUX}" "${FAKE_FZF}" <<<"${stdin}"
 }
 
+run_manager_without_tmux_tmpdir() {
+  local stdin="${1:-}"
+  local fzf_output="${2:-}"
+  local runtime_dir="${TEST_ROOT}/runtime"
+
+  mkdir -p "${runtime_dir}"
+
+  env -u TMUX_TMPDIR \
+    XDG_RUNTIME_DIR="${runtime_dir}" \
+    TMUX_TEST_EXPECT_TMUX_TMPDIR="${runtime_dir}" \
+    TMUX_TEST_LOG="${TMUX_LOG}" \
+    TMUX_TEST_SESSIONS="${SESSIONS_FILE}" \
+    TMUX_TEST_FZF_INPUT="${FZF_INPUT}" \
+    TMUX_TEST_FZF_LOG="${FZF_LOG}" \
+    TMUX_TEST_FZF_USED="${FZF_USED}" \
+    TMUX_TEST_FZF_OUTPUT="${fzf_output}" \
+    bash "${SUBJECT}" "${FAKE_TMUX}" "${FAKE_FZF}" <<<"${stdin}"
+}
+
 assert_log_equals() {
   local expected="${1}"
   local actual
@@ -247,6 +271,17 @@ test_enter_query_creates_session_when_no_row_matches() {
   assert_file_equals "${FZF_LOG}" 'fzf'
 }
 
+test_missing_tmux_tmpdir_uses_xdg_runtime_dir_for_existing_sessions() {
+  reset_files
+  printf '@1\twork\t2 windows\n@2\tops\t1 windows\n' >"${SESSIONS_FILE}"
+
+  run_manager_without_tmux_tmpdir '' $'\n\n@2\tops\t1 windows\n'
+
+  assert_log_equals $'args:list-sessions -F #{session_id}\t#{session_name}\t#{session_windows} windows\nargs:attach-session -t @2\nattached:@2'
+  assert_file_equals "${FZF_LOG}" 'fzf'
+  assert_file_equals "${FZF_INPUT}" $'@1\twork\t2 windows\n@2\tops\t1 windows'
+}
+
 test_no_sessions_prompts_for_new_session() {
   reset_files
 
@@ -269,6 +304,7 @@ run_test test_rename_selected_session
 run_test test_delete_selected_session
 run_test test_ctrl_n_creates_session
 run_test test_enter_query_creates_session_when_no_row_matches
+run_test test_missing_tmux_tmpdir_uses_xdg_runtime_dir_for_existing_sessions
 run_test test_no_sessions_prompts_for_new_session
 
 printf 'tmux-session-manager tests passed\n'
