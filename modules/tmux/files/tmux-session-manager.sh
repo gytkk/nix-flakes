@@ -100,6 +100,7 @@ choose_action() {
     $'--delimiter=\t' \
     --with-nth=2,3 \
     --print-query \
+    '--bind=enter:print()+accept-or-print-query' \
     --header='enter: attach | type new name + enter: create | ctrl-n: prompt new | ctrl-r: rename | ctrl-d: delete' \
     --expect=ctrl-n,ctrl-r,ctrl-d
 }
@@ -164,19 +165,9 @@ while true; do
     exit 0
   fi
 
-  choice="$(choose_action "${rows}")"
-  choice_status=$?
-
-  case "${choice_status}" in
-    0)
-      ;;
-    1)
-      [ -n "${choice}" ] || exit 0
-      ;;
-    *)
-      exit 0
-      ;;
-  esac
+  if ! choice="$(choose_action "${rows}")"; then
+    exit 0
+  fi
 
   parse_choice "${choice}"
 

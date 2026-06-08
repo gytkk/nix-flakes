@@ -66,7 +66,6 @@ set -euo pipefail
 : "${TMUX_TEST_FZF_INPUT:?}"
 : "${TMUX_TEST_FZF_LOG:?}"
 : "${TMUX_TEST_FZF_OUTPUT:?}"
-: "${TMUX_TEST_FZF_STATUS:?}"
 : "${TMUX_TEST_FZF_USED:?}"
 
 has_arg() {
@@ -123,6 +122,11 @@ if ! has_arg '--with-nth=2,3' "$@"; then
   exit 2
 fi
 
+if ! has_arg '--bind=enter:print()+accept-or-print-query' "$@"; then
+  printf 'missing required fzf arg: --bind=enter:print()+accept-or-print-query\n' >&2
+  exit 2
+fi
+
 if ! has_arg '--header=enter: attach | type new name + enter: create | ctrl-n: prompt new | ctrl-r: rename | ctrl-d: delete' "$@"; then
   printf 'missing required fzf header explaining query creation\n' >&2
   exit 2
@@ -137,7 +141,6 @@ fi
 
 : >"${TMUX_TEST_FZF_USED}"
 printf '%s' "${TMUX_TEST_FZF_OUTPUT}"
-exit "${TMUX_TEST_FZF_STATUS}"
 FAKE_FZF
 
 chmod +x "${FAKE_TMUX}" "${FAKE_FZF}"
@@ -153,7 +156,6 @@ reset_files() {
 run_manager() {
   local stdin="${1:-}"
   local fzf_output="${2:-}"
-  local fzf_status="${3:-0}"
 
   TMUX_TEST_LOG="${TMUX_LOG}" \
     TMUX_TEST_SESSIONS="${SESSIONS_FILE}" \
@@ -161,7 +163,6 @@ run_manager() {
     TMUX_TEST_FZF_LOG="${FZF_LOG}" \
     TMUX_TEST_FZF_USED="${FZF_USED}" \
     TMUX_TEST_FZF_OUTPUT="${fzf_output}" \
-    TMUX_TEST_FZF_STATUS="${fzf_status}" \
     bash "${SUBJECT}" "${FAKE_TMUX}" "${FAKE_FZF}" <<<"${stdin}"
 }
 
@@ -240,7 +241,7 @@ test_enter_query_creates_session_when_no_row_matches() {
   reset_files
   printf '@1\twork\t2 windows\n' >"${SESSIONS_FILE}"
 
-  run_manager '' $'fresh\n\n' 1
+  run_manager '' $'fresh\n\n'
 
   assert_log_equals $'args:list-sessions -F #{session_id}\t#{session_name}\t#{session_windows} windows\nargs:new-session -s fresh\nnew:fresh'
   assert_file_equals "${FZF_LOG}" 'fzf'
