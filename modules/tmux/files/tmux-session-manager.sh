@@ -5,6 +5,9 @@ set -u
 tmux_bin="${1:-}"
 fzf_bin="${2:-}"
 selected_session_id=''
+selected_query=''
+selected_key=''
+selected_row=''
 
 if [ -z "${tmux_bin}" ] || [ ! -x "${tmux_bin}" ]; then
   printf 'tmux session manager: tmux binary is missing or not executable\n' >&2
@@ -20,6 +23,22 @@ list_session_rows() {
   "${tmux_bin}" list-sessions -F $'#{session_id}\t#{session_name}\t#{session_windows} windows' 2>/dev/null
 }
 
+validate_session_name() {
+  local name="${1}"
+
+  if [ -z "${name}" ]; then
+    printf 'Name cannot be empty.\n' >&2
+    return 1
+  fi
+
+  if [[ "${name}" == *:* ]]; then
+    printf 'Name cannot contain ":".\n' >&2
+    return 1
+  fi
+
+  return 0
+}
+
 prompt_session_name() {
   local prompt="${1}"
   local name
@@ -29,13 +48,7 @@ prompt_session_name() {
       return 1
     fi
 
-    if [ -z "${name}" ]; then
-      printf 'Name cannot be empty.\n' >&2
-      continue
-    fi
-
-    if [[ "${name}" == *:* ]]; then
-      printf 'Name cannot contain ":".\n' >&2
+    if ! validate_session_name "${name}"; then
       continue
     fi
 
@@ -55,6 +68,27 @@ parse_selected_row() {
   [ -n "${selected_session_id}" ]
 }
 
+parse_choice() {
+  local choice="${1:-}"
+  local rest
+
+  selected_query="${choice%%$'\n'*}"
+  if [ "${choice}" = "${selected_query}" ]; then
+    selected_key=''
+    selected_row=''
+    return 0
+  fi
+
+  rest="${choice#*$'\n'}"
+  selected_key="${rest%%$'\n'*}"
+  if [ "${rest}" = "${selected_key}" ]; then
+    selected_row=''
+    return 0
+  fi
+
+  selected_row="${rest#*$'\n'}"
+}
+
 choose_action() {
   local rows="${1}"
 
@@ -65,8 +99,19 @@ choose_action() {
     --prompt='tmux> ' \
     $'--delimiter=\t' \
     --with-nth=2,3 \
-    --header='enter: attach | ctrl-n: new | ctrl-r: rename | ctrl-d: delete' \
-    --expect=enter,ctrl-n,ctrl-r,ctrl-d
+    --print-query \
+    --header='enter: attach | type new name + enter: create | ctrl-n: prompt new | ctrl-r: rename | ctrl-d: delete' \
+    --expect=ctrl-n,ctrl-r,ctrl-d
+}
+
+create_session_with_name() {
+  local name="${1}"
+
+  if ! validate_session_name "${name}"; then
+    return 0
+  fi
+
+  exec "${tmux_bin}" new-session -s "${name}"
 }
 
 create_session() {
@@ -76,7 +121,7 @@ create_session() {
     return 0
   fi
 
-  exec "${tmux_bin}" new-session -s "${name}"
+  create_session_with_name "${name}"
 }
 
 rename_session() {
@@ -123,29 +168,26 @@ while true; do
     exit 0
   fi
 
-  key="${choice%%$'\n'*}"
-  if [ "${choice}" = "${key}" ]; then
-    row=''
-  else
-    row="${choice#*$'\n'}"
-  fi
+  parse_choice "${choice}"
 
-  case "${key}" in
+  case "${selected_key}" in
     ctrl-n)
       create_session
       ;;
     enter | '')
-      if parse_selected_row "${row}"; then
+      if parse_selected_row "${selected_row}"; then
         attach_session "${selected_session_id}"
+      elif [ -n "${selected_query}" ]; then
+        create_session_with_name "${selected_query}"
       fi
       ;;
     ctrl-r)
-      if parse_selected_row "${row}"; then
+      if parse_selected_row "${selected_row}"; then
         rename_session "${selected_session_id}"
       fi
       ;;
     ctrl-d)
-      if parse_selected_row "${row}"; then
+      if parse_selected_row "${selected_row}"; then
         delete_session "${selected_session_id}"
       fi
       ;;

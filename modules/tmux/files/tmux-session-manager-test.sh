@@ -102,8 +102,13 @@ has_delimiter_arg() {
   return 1
 }
 
-if ! has_arg '--expect=enter,ctrl-n,ctrl-r,ctrl-d' "$@"; then
-  printf 'missing required fzf arg: --expect=enter,ctrl-n,ctrl-r,ctrl-d\n' >&2
+if ! has_arg '--print-query' "$@"; then
+  printf 'missing required fzf arg: --print-query\n' >&2
+  exit 2
+fi
+
+if ! has_arg '--expect=ctrl-n,ctrl-r,ctrl-d' "$@"; then
+  printf 'missing required fzf arg: --expect=ctrl-n,ctrl-r,ctrl-d\n' >&2
   exit 2
 fi
 
@@ -114,6 +119,11 @@ fi
 
 if ! has_arg '--with-nth=2,3' "$@"; then
   printf 'missing required fzf arg: --with-nth=2,3\n' >&2
+  exit 2
+fi
+
+if ! has_arg '--header=enter: attach | type new name + enter: create | ctrl-n: prompt new | ctrl-r: rename | ctrl-d: delete' "$@"; then
+  printf 'missing required fzf header explaining query creation\n' >&2
   exit 2
 fi
 
@@ -185,7 +195,7 @@ test_attach_selected_session() {
   reset_files
   printf '@1\twork\t2 windows\n@2\tops\t1 windows\n' >"${SESSIONS_FILE}"
 
-  run_manager '' $'enter\n@2\tops\t1 windows\n'
+  run_manager '' $'\n\n@2\tops\t1 windows\n'
 
   assert_log_equals $'args:list-sessions -F #{session_id}\t#{session_name}\t#{session_windows} windows\nargs:attach-session -t @2\nattached:@2'
   assert_file_equals "${FZF_LOG}" 'fzf'
@@ -196,7 +206,7 @@ test_rename_selected_session() {
   reset_files
   printf '@1\twork\t2 windows\n' >"${SESSIONS_FILE}"
 
-  run_manager $'renamed\n' $'ctrl-r\n@1\twork\t2 windows\n'
+  run_manager $'renamed\n' $'\nctrl-r\n@1\twork\t2 windows\n'
 
   assert_log_equals $'args:list-sessions -F #{session_id}\t#{session_name}\t#{session_windows} windows\nargs:rename-session -t @1 renamed\nrenamed:@1:renamed\nargs:list-sessions -F #{session_id}\t#{session_name}\t#{session_windows} windows'
   assert_file_equals "${FZF_LOG}" $'fzf\nfzf'
@@ -206,7 +216,7 @@ test_delete_selected_session() {
   reset_files
   printf '@1\twork\t2 windows\n' >"${SESSIONS_FILE}"
 
-  run_manager $'y\n' $'ctrl-d\n@1\twork\t2 windows\n'
+  run_manager $'y\n' $'\nctrl-d\n@1\twork\t2 windows\n'
 
   assert_log_equals $'args:list-sessions -F #{session_id}\t#{session_name}\t#{session_windows} windows\nargs:kill-session -t @1\nkilled:@1\nargs:list-sessions -F #{session_id}\t#{session_name}\t#{session_windows} windows'
   assert_file_equals "${FZF_LOG}" $'fzf\nfzf'
@@ -216,7 +226,17 @@ test_ctrl_n_creates_session() {
   reset_files
   printf '@1\twork\t2 windows\n' >"${SESSIONS_FILE}"
 
-  run_manager $'fresh\n' $'ctrl-n\n'
+  run_manager $'fresh\n' $'\nctrl-n\n'
+
+  assert_log_equals $'args:list-sessions -F #{session_id}\t#{session_name}\t#{session_windows} windows\nargs:new-session -s fresh\nnew:fresh'
+  assert_file_equals "${FZF_LOG}" 'fzf'
+}
+
+test_enter_query_creates_session_when_no_row_matches() {
+  reset_files
+  printf '@1\twork\t2 windows\n' >"${SESSIONS_FILE}"
+
+  run_manager '' $'fresh\n\n'
 
   assert_log_equals $'args:list-sessions -F #{session_id}\t#{session_name}\t#{session_windows} windows\nargs:new-session -s fresh\nnew:fresh'
   assert_file_equals "${FZF_LOG}" 'fzf'
@@ -243,6 +263,7 @@ run_test test_attach_selected_session
 run_test test_rename_selected_session
 run_test test_delete_selected_session
 run_test test_ctrl_n_creates_session
+run_test test_enter_query_creates_session_when_no_row_matches
 run_test test_no_sessions_prompts_for_new_session
 
 printf 'tmux-session-manager tests passed\n'

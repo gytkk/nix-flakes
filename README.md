@@ -229,7 +229,8 @@ Resources should supplement the tools instead of expanding the tool count:
   exposes the selected `modules.commonTheme` as `~/.config/tmux/theme.conf`.
 - Running bare interactive `tm` outside tmux opens the fzf-backed session
   manager; `tmux` remains the original tmux binary. Use arrow keys to select a
-  session, `Enter` to attach, `Ctrl+n` to create, `Ctrl+r` to rename, and
+  session, `Enter` to attach, type a new session name and press `Enter` to
+  create it, `Ctrl+n` to create through a prompt, `Ctrl+r` to rename, and
   `Ctrl+d` to delete.
 - The checked-in tmux config uses `Ctrl+a` as the prefix, starts window and
   pane indexes at `1`, enables mouse support, and keeps the statusline at the
