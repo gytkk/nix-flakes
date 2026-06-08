@@ -18,7 +18,6 @@ This file provides guidance to Codex CLI when working with code in this reposito
 ### Documentation Guidelines
 
 - All documentation belongs in: `AGENTS.md`, `CLAUDE.md`, `README.md`, code comments (sparingly), commit messages
-- When you work on markdown files, ensure they are following markdownlint rules
 
 ### Build/Test/Lint Commands
 
