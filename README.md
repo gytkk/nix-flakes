@@ -233,6 +233,9 @@ Resources should supplement the tools instead of expanding the tool count:
   pane indexes at `1`, enables mouse support, and keeps the statusline at the
   top with generated canonical theme colors plus `PREFIX` and `SYNC`
   indicators.
+- tmux enables CSI-u extended keys so modified keys such as `Shift+Enter`
+  survive through tmux into TUI apps like Codex. Restart tmux fully after
+  changing this setting, because existing clients keep the old key mode.
 - Press `Ctrl+a ?` for the key list, `Ctrl+a w` for the tree, and `Ctrl+a s`
   for the session tree.
 

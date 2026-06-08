@@ -35,5 +35,8 @@ status_line = [
 ]
 theme = "one-half-dark"
 
+[tui.keymap.editor]
+insert_newline = ["ctrl-j", "shift-enter"]
+
 [history]
 persistence = "save-all"
