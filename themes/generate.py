@@ -1119,11 +1119,11 @@ def build_tmux_slots(ctx: dict[str, Any]) -> dict[str, str]:
     current_fg = best_contrast(current_bg, p["white"], r["ui"]["bg"], r["ui"]["fg"])
     status_left = (
         f"{tmux_style(fg=session_fg, bg=session_bg, bold=True)} #S #[default]"
-        f"#{{?client_prefix,{tmux_style(fg=prefix_fg, bg=prefix_bg, bold=True)} PREFIX #[default],}}"
         f"#{{?pane_synchronized,{tmux_style(fg=sync_fg, bg=sync_bg, bold=True)} SYNC #[default],}}"
     )
     status_right = (
         f"{tmux_style(fg=r['ui']['fgMuted'])} C-a ? help/keys | C-a w tree | C-a s sessions #[default]"
+        f"#{{?client_prefix,{tmux_style(fg=prefix_fg, bg=prefix_bg, bold=True)} PREFIX #[default],}}"
         f"{tmux_style(fg=r['ui']['border'])}| "
         f"{tmux_style(fg=status_fg)}%Y-%m-%d %H:%M "
     )
