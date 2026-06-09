@@ -1106,17 +1106,15 @@ def tmux_quote(value: str) -> str:
 def build_tmux_slots(ctx: dict[str, Any]) -> dict[str, str]:
     p = ctx["palette"]
     r = ctx["roles"]
-    is_light = ctx["meta"]["variant"] == "light"
     status_bg = r["ui"]["statuslineBg"]
     status_fg = r["ui"]["statuslineFg"]
     session_bg = r["ui"]["borderActive"]
     prefix_bg = r["diagnostics"]["error"]
     sync_bg = r["diagnostics"]["warning"]
-    current_bg = ensure_distinct_background(r["ui"]["selection"], status_bg, r["ui"]["borderActive"], light=is_light)
+    current_index_fg = session_bg
     session_fg = best_contrast(session_bg, p["white"], r["ui"]["bg"], r["ui"]["fg"])
     prefix_fg = best_contrast(prefix_bg, p["white"], r["ui"]["bg"], r["ui"]["fg"])
     sync_fg = best_contrast(sync_bg, p["white"], r["ui"]["bg"], r["ui"]["fg"])
-    current_fg = best_contrast(current_bg, p["white"], r["ui"]["bg"], r["ui"]["fg"])
     normal_session = f"{tmux_style(fg=session_fg, bg=session_bg, bold=True)} #S #[default]"
     prefix_session = f"{tmux_style(fg=prefix_fg, bg=prefix_bg, bold=True)} #S #[default]"
     status_left = (
@@ -1124,8 +1122,11 @@ def build_tmux_slots(ctx: dict[str, Any]) -> dict[str, str]:
         f"#{{?pane_synchronized,{tmux_style(fg=sync_fg, bg=sync_bg, bold=True)} SYNC #[default],}}"
     )
     status_right = f"#{{?client_prefix,{tmux_style(fg=status_fg)} ? help | w tree | s sessions #[default],}}"
-    window_status = f"{tmux_style(fg=r['ui']['fgMuted'], bg=status_bg)} #I:#W#F #[default]"
-    current_window = f"{tmux_style(fg=current_fg, bg=current_bg, bold=True)} #I:#W#F #[default]"
+    window_status = f"{tmux_style(fg=r['ui']['fgMuted'], bg=status_bg)} #I #W#F #[default]"
+    current_window = (
+        f"{tmux_style(fg=current_index_fg, bg=status_bg, bold=True)} #I "
+        f"{tmux_style(fg=status_fg, bg=status_bg, bold=True)}#W#F #[default]"
+    )
     return {
         "status_style": f"fg={status_fg},bg={status_bg}",
         "status_left": status_left,
