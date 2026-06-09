@@ -71,8 +71,9 @@
   "effortLevel": "high",
   "autoMemoryEnabled": true,
   "autoDreamEnabled": true,
+  "skipWorkflowUsageWarning": true,
   "theme": "auto",
   "teammateMode": "auto",
   "skipAutoPermissionPrompt": true,
-  "skipWorkflowUsageWarning": true
+  "model": "claude-fable-5[1m]"
 }
