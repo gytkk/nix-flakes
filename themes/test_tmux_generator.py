@@ -23,7 +23,7 @@ class TmuxGeneratorTest(unittest.TestCase):
         self.assertIn("#{?pane_synchronized,", slots["status_left"])
 
         self.assertEqual(
-            '#{?client_prefix,#[fg=#D9D9D9] ? help | w tree | s sessions | , rename | %/" split | z zoom | [ copy #[default],}',
+            '#{?client_prefix,#[fg=#D9D9D9] ? help | w tree | s sessions | #, rename | %%%%/" split | z zoom | [ copy #[default],}',
             slots["status_right"],
         )
         self.assertEqual(
