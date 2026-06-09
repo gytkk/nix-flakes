@@ -31,7 +31,7 @@
 
     # Custom scripts
     (pkgs.writeShellScriptBin "sign" (builtins.readFile ./scripts/sign))
-    (pkgs.writeShellScriptBin "login" (builtins.readFile ./scripts/login))
+    (pkgs.writeShellScriptBin "dlg" (builtins.readFile ./scripts/login))
   ];
 
   # Terraform 모듈 설정
