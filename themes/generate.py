@@ -1121,7 +1121,10 @@ def build_tmux_slots(ctx: dict[str, Any]) -> dict[str, str]:
         f"#{{?client_prefix,{prefix_session},{normal_session}}}"
         f"#{{?pane_synchronized,{tmux_style(fg=sync_fg, bg=sync_bg, bold=True)} SYNC #[default],}}"
     )
-    status_right = f"#{{?client_prefix,{tmux_style(fg=status_fg)} ? help | w tree | s sessions #[default],}}"
+    status_right = (
+        f'#{{?client_prefix,{tmux_style(fg=status_fg)} '
+        '? help | w tree | s sessions | , rename | %/" split | z zoom | [ copy #[default],}'
+    )
     window_status = f"{tmux_style(fg=r['ui']['fgMuted'], bg=status_bg)} #I #W#F #[default]"
     current_window = (
         f"{tmux_style(fg=current_index_fg, bg=status_bg, bold=True)} #I "
