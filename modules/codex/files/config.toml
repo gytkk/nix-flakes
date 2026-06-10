@@ -2,7 +2,6 @@
 
 model = "gpt-5.5"
 model_reasoning_effort = "xhigh"
-service_tier = "fast"
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
 web_search = "live"
