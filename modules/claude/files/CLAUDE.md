@@ -85,6 +85,19 @@ Individual projects may override this policy (e.g., banning worktree entirely). 
 - Prefer to write docstring and unit tests first (TDD approach).
 - No 'any' type hints, use specific types.
 
+## Scope Discipline
+
+- Don't add features, refactor, or introduce abstractions beyond what the task requires. A bug fix doesn't need surrounding cleanup, and a one-shot operation usually doesn't need a helper.
+- Don't design for hypothetical future requirements — do the simplest thing that works well. Avoid premature abstraction, but avoid half-finished implementations too.
+- Don't add error handling, fallbacks, or validation for scenarios that cannot happen. Trust internal code and framework guarantees; validate only at system boundaries (user input, external APIs).
+- Don't use feature flags or backwards-compatibility shims when you can just change the code.
+
+## Subagent Delegation
+
+- Delegate independent subtasks to sub-agents and keep working while they run; prefer asynchronous/background sub-agents over spawn-and-block.
+- Intervene if a sub-agent goes off track or is missing relevant context.
+- For long-running builds, verify with fresh-context sub-agents on a cadence rather than relying on self-critique.
+
 ## Python
 
 - Always use `uv run` instead of `python` or `python3` when executing Python scripts or commands.
@@ -121,6 +134,12 @@ Individual projects may override this policy (e.g., banning worktree entirely). 
 - Keep documentation in sync with code changes.
 - Do NOT create one-off or temporary documentation files.
 
+## Prompts & Skills Authoring
+
+- When writing or updating prompts, skills, or agent instructions, state the goal and constraints rather than enumerating step-by-step procedures — over-prescriptive scaffolding reduces output quality on current models.
+- When migrating an existing prompt or skill to a newer model, prefer removing old step-by-step scaffolding and comparing results before adding new instructions.
+- Give the reason behind a request, not just the request, when dispatching sub-agents or writing reusable prompts (what the larger task is, who it is for, what the output enables).
+
 ## Error Handling
 
 - Always handle errors gracefully; avoid silent failures.
@@ -130,6 +149,8 @@ Individual projects may override this policy (e.g., banning worktree entirely). 
 
 ## Discovery and Reporting
 
+- Before reporting progress, audit each claim against a tool result from this session. Only report work you can point to evidence for; if something is not yet verified, say so explicitly.
+- Report outcomes faithfully: if tests fail, say so with the output; if a step was skipped, say that; when something is done and verified, state it plainly without hedging.
 - During discovery, diagnosis, or question-driven planning, do not claim the work is complete or that all needed information has been gathered until you have actually finished collecting it.
 - Avoid premature final-report phrasing after partial reads, intermediate tool output, or user answers that still leave open decisions.
 - If the task is still exploratory, keep the response explicitly in-progress and continue the questioning or investigation flow instead of switching into a wrapped-up summary voice.
