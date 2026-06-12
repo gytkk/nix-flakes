@@ -55,6 +55,26 @@
       KeepAlive = lib.mkForce null;
     };
 
+    # macOS `launchctl bootout` rejects the `--wait` flag that Home Manager
+    # passes since nix-community/home-manager@9cb587a (2026-05-01), so its
+    # agent reload aborts with "Unrecognized target specifier" and the
+    # follow-up `bootstrap` fails with I/O error 5. This only bites when the
+    # activate-agenix plist changes between generations. Pre-unload (plain
+    # `bootout`, no `--wait`) and drop the stale plist so Home Manager's broken
+    # reload path is skipped and it re-bootstraps cleanly. Remove once upstream
+    # stops passing `--wait` to bootout.
+    home.activation.bootoutAgenixBeforeLaunchAgents = lib.mkIf pkgs.stdenv.isDarwin (
+      lib.hm.dag.entryBefore [ "setupLaunchAgents" ] ''
+        agentPlist="org.nix-community.home.activate-agenix.plist"
+        newPlist="$(readlink -m "$newGenPath/LaunchAgents/$agentPlist")"
+        oldPlist="${homeDirectory}/Library/LaunchAgents/$agentPlist"
+        if [[ -e "$newPlist" && -e "$oldPlist" ]] && ! cmp -s "$newPlist" "$oldPlist"; then
+          run /bin/launchctl bootout "gui/$UID/org.nix-community.home.activate-agenix" 2>/dev/null || true
+          run rm -f "$oldPlist"
+        fi
+      ''
+    );
+
     # XDG Base Directory Specification
     xdg = {
       enable = true;
