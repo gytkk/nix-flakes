@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  inputs,
   username,
   homeDirectory,
   ...
@@ -22,6 +23,7 @@
     # Authentication
     saml2aws
     vault
+    inputs.keycloak2aws.packages.${pkgs.stdenv.hostPlatform.system}.kc2aws
 
     # Databricks
     databricks-cli

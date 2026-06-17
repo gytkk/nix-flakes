@@ -140,6 +140,27 @@
         "type": "github"
       }
     },
+    "flake-parts": {
+      "inputs": {
+        "nixpkgs-lib": [
+          "keycloak2aws",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1778716662,
+        "narHash": "sha256-m1Yf0wZ8j1OHjTc2UwHwyQRSnNeSgLJOd7q5Y45hzi4=",
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "rev": "f7c1a2d347e4c52d5fb8d10cb4d94b5884e546fb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "type": "github"
+      }
+    },
     "flake-stores": {
       "inputs": {
         "nixpkgs": [
@@ -275,6 +296,27 @@
         "owner": "nix-community",
         "repo": "home-manager",
         "type": "github"
+      }
+    },
+    "keycloak2aws": {
+      "inputs": {
+        "flake-parts": "flake-parts",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1780555595,
+        "narHash": "sha256-m+0JEeMH9po7Q9+z98OgnjNrHUT6yJJMP+uk7McB2sE=",
+        "ref": "refs/heads/main",
+        "rev": "eaaa7b0a0a04520264fe63b3db65b0df268a4515",
+        "revCount": 7,
+        "type": "git",
+        "url": "ssh://git@github.com/devsisters/keycloak2aws"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/devsisters/keycloak2aws"
       }
     },
     "niri": {
@@ -548,6 +590,7 @@
         "flake-stores": "flake-stores",
         "gws": "gws",
         "home-manager": "home-manager_2",
+        "keycloak2aws": "keycloak2aws",
         "niri": "niri",
         "nix-darwin": "nix-darwin",
         "nix-vscode-extensions": "nix-vscode-extensions",

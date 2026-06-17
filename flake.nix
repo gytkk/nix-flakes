@@ -78,6 +78,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # kc2aws - Keycloak OIDC→SAML CLI authenticator (Devsisters 전용, private repo → SSH)
+    keycloak2aws = {
+      url = "git+ssh://git@github.com/devsisters/keycloak2aws";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # gws - Google Workspace CLI
     gws = {
       url = "github:googleworkspace/cli";
