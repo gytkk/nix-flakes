@@ -16,7 +16,7 @@ This module installs and configures Claude Code, Anthropic's AI coding assistant
 
 - **Model**: Inherits the Claude Code default (no `model` pin)
 - **Agent Teams**: Enabled (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`)
-- **MCP**: Enables all project MCP servers, Context7, Notion
+- **MCP**: Enables all project MCP servers and Context7; Notion uses the `ntn` CLI
 - **Permissions**: Pre-approved tools (Bash, Read, Edit, WebFetch, Context7)
 - **Permission Mode**: `acceptEdits` for the working directory and Claude default repo-local worktrees
 - **Memory** (experimental): `autoMemoryEnabled` + `autoDreamEnabled` — native background insight extraction and 24h consolidation
@@ -55,7 +55,11 @@ Global development guidelines deployed to `~/.claude/CLAUDE.md`. Includes:
 ## MCP Servers
 
 - **context7**: Library documentation lookup
-- **notion**: Notion integration
+
+## Notion
+
+Use the `ntn` CLI for Notion pages, data sources, and API actions. The Notion MCP
+server is intentionally removed during activation.
 
 ## Usage
 

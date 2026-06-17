@@ -59,10 +59,9 @@ let
       name = "context7";
       cmd = "mcp add -s user --transport http context7 https://mcp.context7.com/mcp";
     }
-    {
-      name = "notion";
-      cmd = "mcp add -s user --transport http notion https://mcp.notion.com/mcp";
-    }
+  ];
+  removedMcpServers = [
+    "notion"
   ];
 in
 {
@@ -119,7 +118,7 @@ in
 
     # Register marketplaces (failures are non-fatal)
     ${lib.concatMapStringsSep "\n    " (mp: ''
-      if ! echo "$MARKETPLACE_CACHE" | grep -qF "${mp}"; then
+      if ! printf '%s\n' "$MARKETPLACE_CACHE" | ${pkgs.ripgrep}/bin/rg -q --fixed-strings -- "${mp}"; then
         log "Adding marketplace: ${mp}"
         if ${timeout} 60s ${claude} plugin marketplace add ${mp} < /dev/null >> "$SETUP_LOG" 2>&1; then
           log "  -> OK"
@@ -212,6 +211,18 @@ in
     # Cache MCP server list once to avoid repeated calls
     MCP_CACHE=$(${timeout} 15s ${claude} mcp list < /dev/null 2>/dev/null || echo "")
 
+    # Remove MCP servers that are no longer managed here.
+    ${lib.concatMapStringsSep "\n    " (name: ''
+      if printf '%s\n' "$MCP_CACHE" | ${pkgs.ripgrep}/bin/rg -q --fixed-strings -- "${name}"; then
+        log "Removing MCP server: ${name}"
+        if ${timeout} 30s ${claude} mcp remove -s user ${name} < /dev/null >> "$SETUP_LOG" 2>&1; then
+          log "  -> OK"
+          MCP_CACHE=$(${timeout} 15s ${claude} mcp list < /dev/null 2>/dev/null || echo "")
+        else
+          log "  -> FAILED (exit $?)"
+        fi
+      fi'') removedMcpServers}
+
     # Register MCP servers (skip if already registered)
     ${lib.concatMapStringsSep "\n    " (
       mp:
@@ -220,7 +231,7 @@ in
         cmd = mp.cmd;
       in
       ''
-        if ! echo "$MCP_CACHE" | grep -qF "${name}"; then
+        if ! printf '%s\n' "$MCP_CACHE" | ${pkgs.ripgrep}/bin/rg -q --fixed-strings -- "${name}"; then
           log "Adding MCP server: ${name}"
           if ${timeout} 30s ${claude} ${cmd} < /dev/null >> "$SETUP_LOG" 2>&1; then
             log "  -> OK"

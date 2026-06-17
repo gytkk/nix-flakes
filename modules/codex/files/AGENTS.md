@@ -85,6 +85,12 @@
 - Always use `rg` (ripgrep) instead of `grep`. This applies to all contexts:
   shell commands, scripts, and Nix expressions.
 
+## Notion
+
+- Use the `ntn` CLI for Notion-related actions (`ntn pages`, `ntn datasources`,
+  `ntn api`, etc.).
+- Do not use, add, or depend on a Notion MCP server.
+
 ## Exploration & Tool Use
 
 - Decide which files, searches, and resources are needed before calling tools.

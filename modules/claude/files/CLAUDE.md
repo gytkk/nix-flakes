@@ -80,6 +80,11 @@ Individual projects may override this policy (e.g., banning worktree entirely). 
 - Always use `rg` (ripgrep) instead of `grep`. This applies to all contexts: shell commands, scripts, and Nix expressions.
 - Never commit secrets, credentials, or API keys.
 
+## Notion
+
+- Use the `ntn` CLI for Notion-related actions (`ntn pages`, `ntn datasources`, `ntn api`, etc.).
+- Do not use, add, or depend on a Notion MCP server.
+
 ## Writing Code
 
 - Prefer to write docstring and unit tests first (TDD approach).
