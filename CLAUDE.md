@@ -82,7 +82,7 @@ Defined in `inventory.nix` (single source of truth). `kind` field determines bui
 #### Base System
 
 1. **`base/default.nix`**: Common config — core modules, standard dev packages, programs
-2. **`base/devsisters/home.nix`**: saml2aws, vault, scala, ruby, databricks-cli, custom scripts
+2. **`base/devsisters/home.nix`**: saml2aws, vault, kc2aws, scala, ruby, databricks-cli, custom scripts
 3. **`base/pylv/home.nix`**: Minimal (inherits base)
 4. **`base/pylv/sepia.nix`**: pylv-sepia NixOS server specific config
 
@@ -152,4 +152,5 @@ AI 코딩 에이전트 설정 변경 시 **로컬 프로젝트 파일이 아닌 
 
 - **Base packages** (`base/default.nix`): nixfmt, coreutils, findutils, docker, gcc, jq, fd, ripgrep, git, gh, lazygit, nodejs, bun, go, uv, ruff, `pkgs.rustToolchain`, kubectl, helm, etc.
 - **LSP servers** (`modules/lsp/`): nixd, gopls, typescript-language-server, terraform-ls, metals, ty, yaml-language-server, marksman (Rust tooling including `rust-analyzer` comes from `pkgs.rustToolchain`)
-- **Devsisters-specific** (`base/devsisters/`): saml2aws, vault, scala, ruby, databricks-cli
+- **Devsisters-specific** (`base/devsisters/`): saml2aws, vault, scala, ruby, databricks-cli, kc2aws
+  - `kc2aws` comes from the private `keycloak2aws` flake input (`git+ssh://...`), pinned in `flake.lock`. To pull the latest `main`: `nix flake update keycloak2aws`, then `home-manager switch`. Commit the resulting `flake.lock` change.

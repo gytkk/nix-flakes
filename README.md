@@ -401,6 +401,11 @@ nix build .#nixosConfigurations.pylv-sepia.config.system.build.toplevel
 nix flake show
 
 nix flake update
+
+# Update a single input to its latest tracked ref (rewrites flake.lock only).
+# Example: bump kc2aws (keycloak2aws input) to the latest commit on main,
+# then apply it with a home-manager switch and commit the flake.lock change.
+nix flake update keycloak2aws
 ```
 
 Generic tooling that probes `nix build .` now hits a small compatibility package instead of failing on a missing default output. For actual host builds, keep using explicit flake attributes such as `.#homeConfigurations...` or `.#nixosConfigurations...`.
