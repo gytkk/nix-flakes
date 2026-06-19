@@ -27,16 +27,16 @@ class TmuxGeneratorTest(unittest.TestCase):
             slots["status_right"],
         )
         self.assertEqual(
-            "#[fg=#545454]#[bg=#212121] #I #W#F #(tmux-agent-window-status \"#{window_id}\") #[default]",
+            "#[fg=#545454]#[bg=#212121] #I #W#F #(tmux-agent-window-status #{window_id}) #[default]",
             slots["window_status_format"],
         )
         self.assertEqual(
-            "#[fg=#82AAFF]#[bg=#212121]#[bold] #I #[fg=#D9D9D9]#[bg=#212121]#[bold]#W#F #(tmux-agent-window-status \"#{window_id}\") #[default]",
+            "#[fg=#82AAFF]#[bg=#212121]#[bold] #I #[fg=#D9D9D9]#[bg=#212121]#[bold]#W#F #(tmux-agent-window-status #{window_id}) #[default]",
             slots["window_status_current_format"],
         )
         self.assertIn(" #I #W#F #(tmux-agent-window-status", theme_conf)
         self.assertIn(" #I #[fg=#D9D9D9]", theme_conf)
-        self.assertIn("#{window_id}", theme_conf)
+        self.assertIn("#(tmux-agent-window-status #{window_id})", theme_conf)
         self.assertNotIn("#I:#W#F", theme_conf)
 
         self.assertNotIn("PREFIX", theme_conf)
