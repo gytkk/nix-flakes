@@ -10,7 +10,18 @@ usage() {
   printf 'usage: tmux-agent-status <agent> <running|waiting|done|failed|clear> [window_id]\n' >&2
 }
 
-cache_dir="${XDG_CACHE_HOME:-${HOME}/.cache}/tmux-agent-status"
+valid_window_id() {
+  [[ "$1" =~ ^@[0-9]+$ ]]
+}
+
+cache_base="${XDG_CACHE_HOME:-}"
+if [ -z "${cache_base}" ]; then
+  if [ -z "${HOME:-}" ]; then
+    exit 1
+  fi
+  cache_base="${HOME}/.cache"
+fi
+cache_dir="${cache_base}/tmux-agent-status"
 
 if [ -z "${agent}" ] || [ -z "${state}" ]; then
   usage
@@ -36,6 +47,11 @@ fi
 if [ -z "${target_window}" ]; then
   # Hooks can run outside tmux during tests or non-interactive agent runs.
   exit 0
+fi
+
+if ! valid_window_id "${target_window}"; then
+  usage
+  exit 2
 fi
 
 mkdir -p "${cache_dir}" || exit 1
