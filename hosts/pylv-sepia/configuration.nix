@@ -152,6 +152,7 @@
 
   # Firewall - open ports for services
   networking.firewall.allowedTCPPorts = [
+    22 # OpenSSH
     8080 # Code Server
     3923 # Copyparty
     2283 # Immich
