@@ -168,11 +168,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1781036521,
-        "narHash": "sha256-SvkVmMi/hBj/0nFmw9ufSSAkx+bDAPvL+VTK+c2oZT0=",
+        "lastModified": 1782081469,
+        "narHash": "sha256-wPYoRA9uQCQkpgRFMczlORKxXsubAPxOJWSA64map6g=",
         "owner": "gytkk",
         "repo": "flake-stores",
-        "rev": "3a43600515dc2be85a7de724430cff6389108891",
+        "rev": "813e54a100996dbe75ef8dedde41757a20cfe6ac",
         "type": "github"
       },
       "original": {
