@@ -182,6 +182,7 @@
         notion-cli = systemPkgs.notion-cli;
         ntn = systemPkgs.ntn;
         omnigent = systemPkgs.omnigent;
+        pup = systemPkgs.pup;
       }) pkgs;
 
       defaultApps = builtins.mapAttrs (system: _: {

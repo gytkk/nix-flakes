@@ -118,6 +118,7 @@
         rsync
         glow
         ntn
+        pup
 
         # Git
         git

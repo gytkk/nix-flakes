@@ -42,6 +42,9 @@
     omnigent = final.callPackage ../packages/omnigent/package.nix {
       inherit (inputs) uv2nix pyproject-nix pyproject-build-systems;
     };
+
+    # pup - Datadog CLI, packaged from upstream release binaries
+    pup = final.callPackage ../packages/pup/package.nix { };
   };
 
   # Shared toolchains used across modules and hosts
