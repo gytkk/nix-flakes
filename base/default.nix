@@ -22,6 +22,7 @@
     ../modules/k9s
     ../modules/opencode
     ../modules/lsp
+    ../modules/omnigent
     ../modules/tmux
     ../modules/vim
     ../modules/zed
