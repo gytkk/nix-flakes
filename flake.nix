@@ -78,6 +78,25 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # uv2nix - build the omnigent Python app from its committed uv.lock
+    # (packages/omnigent). omnigent ships no prebuilt binary, so unlike the
+    # flake-stores apps it is built from source via uv2nix.
+    pyproject-nix = {
+      url = "github:pyproject-nix/pyproject.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    uv2nix = {
+      url = "github:pyproject-nix/uv2nix";
+      inputs.pyproject-nix.follows = "pyproject-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    pyproject-build-systems = {
+      url = "github:pyproject-nix/build-system-pkgs";
+      inputs.pyproject-nix.follows = "pyproject-nix";
+      inputs.uv2nix.follows = "uv2nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # kc2aws - Keycloak OIDC→SAML CLI authenticator (Devsisters 전용, private repo → SSH)
     keycloak2aws = {
       url = "git+ssh://git@github.com/devsisters/keycloak2aws";
@@ -162,6 +181,7 @@
         default = mkDefaultCompatPackage system systemPkgs;
         notion-cli = systemPkgs.notion-cli;
         ntn = systemPkgs.ntn;
+        omnigent = systemPkgs.omnigent;
       }) pkgs;
 
       defaultApps = builtins.mapAttrs (system: _: {

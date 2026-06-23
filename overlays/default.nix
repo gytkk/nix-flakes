@@ -36,6 +36,12 @@
 
     notion-cli = final.callPackage ../packages/notion-cli/package.nix { };
     ntn = final.notion-cli;
+
+    # omnigent - built from source via uv2nix (see packages/omnigent). The
+    # uv2nix builders come from flake inputs, threaded in here.
+    omnigent = final.callPackage ../packages/omnigent/package.nix {
+      inherit (inputs) uv2nix pyproject-nix pyproject-build-systems;
+    };
   };
 
   # Shared toolchains used across modules and hosts
