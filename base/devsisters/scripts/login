@@ -2,7 +2,7 @@
 
 main () {
   vault login -method=oidc
-  saml2aws login --disable-keychain --force --session-duration=43200
+  kc2aws login
 }
 
 main "$@"
