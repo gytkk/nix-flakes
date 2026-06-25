@@ -236,6 +236,9 @@ Resources should supplement the tools instead of expanding the tool count:
   top with generated canonical theme colors. Pressing the prefix accent-colors
   the session segment and shows key hints on the right; synchronized panes still
   show a `SYNC` indicator.
+- tmux sets the outer terminal title to the current session name, so terminal
+  tabs that use pane titles, including WezTerm, show the tmux session instead
+  of the `tmux` process name.
 - tmux enables CSI-u extended keys so modified keys such as `Shift+Enter`
   survive through tmux into TUI apps like Codex. Restart tmux fully after
   changing this setting, because existing clients keep the old key mode.
