@@ -39,6 +39,26 @@ config.tab_bar_at_bottom = false
 config.tab_max_width = 32
 config.use_fancy_tab_bar = false
 
+local tab_min_width = 18
+
+local function tab_title(tab)
+  local title = tab.tab_title
+  if title and #title > 0 then
+    return title
+  end
+
+  return tab.active_pane.title
+end
+
+wezterm.on('format-tab-title', function(tab, tabs, panes, config, hover, max_width)
+  local content_width = math.max(1, max_width - 2)
+  local title = wezterm.truncate_right(tab_title(tab), content_width)
+
+  return {
+    { Text = ' ' .. wezterm.pad_right(title, math.min(tab_min_width, content_width)) .. ' ' },
+  }
+end)
+
 config.inactive_pane_hsb = {
   saturation = 0.9,
   brightness = 0.9,
