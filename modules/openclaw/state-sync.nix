@@ -21,7 +21,7 @@
     ${pkgs.coreutils}/bin/install -m 444 ${common.seedConfigFile} /etc/openclaw/openclaw.seed.json
     ${pkgs.coreutils}/bin/install -m 444 ${common.bootstrapScriptFile} /etc/openclaw/bootstrap.sh
 
-    ${pkgs.coreutils}/bin/install -d -m 755 -o ${username} -g users ${pkgs.lib.escapeShellArg "${homeDirectory}/.config/systemd/user/openclaw-gateway.service.d"}
+    ${pkgs.coreutils}/bin/install -d -m 755 -o ${username} -g users ${pkgs.lib.escapeShellArg common.openclawSystemdDropInDir}
     ${pkgs.coreutils}/bin/install -m 644 -o ${username} -g users ${common.openclawSystemdDropInFile} ${pkgs.lib.escapeShellArg common.openclawSystemdDropInPath}
 
     CONFIG_FILE=${pkgs.lib.escapeShellArg "${common.stateDir}/openclaw.json"}

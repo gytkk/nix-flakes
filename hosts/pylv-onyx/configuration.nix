@@ -2,9 +2,14 @@
   config,
   inputs,
   pkgs,
+  homeDirectory,
   username,
   ...
 }:
+let
+  openclawStateDir = "${homeDirectory}/.openclaw";
+  openclawConfigPath = "${openclawStateDir}/openclaw.json";
+in
 {
   imports = [
     inputs.disko.nixosModules.disko
@@ -45,6 +50,15 @@
 
   networking.networkmanager.enable = true;
   networking.hostName = "pylv-onyx";
+
+  modules.openclaw = {
+    enable = true;
+    gatewayPort = 18789;
+    lanProxyPort = 18790;
+    publicProxyPort = 18791;
+    lanInterface = "wlo1";
+    stateDir = openclawStateDir;
+  };
 
   # Keep direct `nixos-rebuild switch` from attempting the dbus -> broker live migration.
   services.dbus.implementation = "dbus";
@@ -99,10 +113,10 @@
   # Wayland Electron support and headless user-systemd defaults for login shells.
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
-    OPENCLAW_CONFIG_PATH = "/home/gytkk/.openclaw/openclaw.json";
-    CLAWDBOT_CONFIG_PATH = "/home/gytkk/.openclaw/openclaw.json";
-    OPENCLAW_STATE_DIR = "/home/gytkk/.openclaw";
-    CLAWDBOT_STATE_DIR = "/home/gytkk/.openclaw";
+    OPENCLAW_CONFIG_PATH = openclawConfigPath;
+    CLAWDBOT_CONFIG_PATH = openclawConfigPath;
+    OPENCLAW_STATE_DIR = openclawStateDir;
+    CLAWDBOT_STATE_DIR = openclawStateDir;
     # Temporary workaround for headless Hermes CLI sessions so `systemctl --user`
     # can reach the user's bus and correctly detect the running gateway service.
     XDG_RUNTIME_DIR = "/run/user/1000";

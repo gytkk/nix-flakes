@@ -24,6 +24,23 @@
 - OpenClaw는 `gateway.tailscale.mode = "off"`라서 Tailscale Serve로 직접 노출되지 않습니다.
 - Discord thread binding은 유지하되, **ACP의 Discord child-thread 자동 spawn은 비활성화**합니다.
 
+## NixOS Module Boundary
+
+`modules/openclaw` owns reusable OpenClaw gateway wiring: wrapper creation,
+seed config rendering, state sync, secret bootstrap, nginx proxy config, and
+firewall wiring.
+
+Host-specific values are set by the importing host through `modules.openclaw`:
+
+- `lanInterface`
+- `gatewayPort`
+- `lanProxyPort`
+- `publicProxyPort`
+- `stateDir`
+
+`pylv-onyx` is the current consumer. OpenClaw and `qmd` package selections
+remain module-owned defaults.
+
 ## Discord + Codex/ACP 운영 규칙
 
 - 기본 원칙은 **"target thread를 먼저 정하고, 거기에 bind"** 입니다.

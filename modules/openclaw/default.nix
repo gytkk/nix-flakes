@@ -1,4 +1,5 @@
 {
+  config,
   inputs,
   lib,
   pkgs,
@@ -7,13 +8,14 @@
   ...
 }@args:
 let
-  gatewayPort = 18789;
-  lanProxyPort = 18790;
-  publicProxyPort = 18791;
-  lanInterface = "wlo1";
+  cfg = config.modules.openclaw;
+  gatewayPort = cfg.gatewayPort;
+  lanProxyPort = cfg.lanProxyPort;
+  publicProxyPort = cfg.publicProxyPort;
+  lanInterface = cfg.lanInterface;
   openclawPackage = inputs.flake-stores.packages.${pkgs.system}.openclaw;
   qmdPackage = pkgs.callPackage ../../packages/qmd/package.nix { };
-  stateDir = "${homeDirectory}/.openclaw";
+  stateDir = toString cfg.stateDir;
   gatewayTokenPath = "${stateDir}/gateway-auth-token";
   gatewayNginxAuthIncludePath = "/etc/openclaw/nginx-gateway-auth.conf";
   openclawBootstrapPath = "/etc/openclaw/bootstrap.sh";
@@ -42,7 +44,8 @@ let
     "${homeDirectory}/.local/share/pnpm"
   ];
 
-  openclawSystemdDropInPath = "${homeDirectory}/.config/systemd/user/openclaw-gateway.service.d/20-nix-path.conf";
+  openclawSystemdDropInDir = "${homeDirectory}/.config/systemd/user/openclaw-gateway.service.d";
+  openclawSystemdDropInPath = "${openclawSystemdDropInDir}/20-nix-path.conf";
   openclawSystemdDropInFile = pkgs.writeText "openclaw-gateway-20-nix-path.conf" ''
     [Service]
     # NixOS-specific PATH shim for the hybrid OpenClaw setup.
@@ -157,6 +160,7 @@ let
       openclawPackage
       openclawRuntimeLibraryPath
       openclawServicePath
+      openclawSystemdDropInDir
       openclawSystemdDropInFile
       openclawSystemdDropInPath
       seedConfigFile
@@ -164,24 +168,80 @@ let
       ;
   };
 in
-lib.mkMerge [
-  {
-    age.secrets.discord-bot-token = {
-      file = ../../secrets/discord-bot-token.age;
-      owner = username;
-      group = "users";
-      mode = "0400";
-    };
+{
+  imports = [
+    inputs.agenix.nixosModules.default
+  ];
 
-    environment.systemPackages = with pkgs; [
-      openclawHybridCli
-      bun
-      chromium
-      libcap
-      nodejs
-      qmdPackage
-    ];
-  }
-  (import ./state-sync.nix (args // { inherit common; }))
-  (import ./nginx-proxy.nix (args // { inherit common; }))
-]
+  options.modules.openclaw = {
+    enable = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Enable the OpenClaw hybrid gateway module";
+    };
+    gatewayPort = lib.mkOption {
+      type = lib.types.port;
+      default = 18789;
+      description = "Loopback OpenClaw gateway port";
+    };
+    lanProxyPort = lib.mkOption {
+      type = lib.types.port;
+      default = 18790;
+      description = "LAN nginx proxy port for OpenClaw";
+    };
+    publicProxyPort = lib.mkOption {
+      type = lib.types.port;
+      default = 18791;
+      description = "Loopback public-origin nginx proxy port for OpenClaw";
+    };
+    lanInterface = lib.mkOption {
+      type = lib.types.str;
+      default = "";
+      description = "Network interface that receives LAN OpenClaw traffic";
+    };
+    stateDir = lib.mkOption {
+      type = lib.types.str;
+      default = "${homeDirectory}/.openclaw";
+      description = "OpenClaw state directory";
+    };
+  };
+
+  config = lib.mkIf cfg.enable (
+    lib.mkMerge [
+      {
+        assertions = [
+          {
+            assertion = cfg.lanInterface != "";
+            message = "modules.openclaw.lanInterface must be set when modules.openclaw.enable is true.";
+          }
+          {
+            assertion = lib.hasPrefix "/" stateDir;
+            message = "modules.openclaw.stateDir must be an absolute path.";
+          }
+          {
+            assertion = !(lib.hasPrefix "/nix/store/" stateDir);
+            message = "modules.openclaw.stateDir must point to mutable host storage, not the Nix store.";
+          }
+        ];
+
+        age.secrets.discord-bot-token = {
+          file = ../../secrets/discord-bot-token.age;
+          owner = username;
+          group = "users";
+          mode = "0400";
+        };
+
+        environment.systemPackages = with pkgs; [
+          openclawHybridCli
+          bun
+          chromium
+          libcap
+          nodejs
+          qmdPackage
+        ];
+      }
+      (import ./state-sync.nix (args // { inherit common; }))
+      (import ./nginx-proxy.nix (args // { inherit common; }))
+    ]
+  );
+}
