@@ -1,13 +1,13 @@
 -- Auto-generated from themes/core/one-half-light.yaml
--- WezTerm color scheme export.
+-- Template: wezterm-color-template v1
 return {
   name = "One Half Light",
   colors = {
     foreground = "#383a42",
-    background = "#fdfdfd",
-    cursor_bg = "#0184bc",
-    cursor_fg = "#fdfdfd",
-    cursor_border = "#0184bc",
+    background = "#fafafa",
+    cursor_bg = "#a5b4e5",
+    cursor_fg = "#383a42",
+    cursor_border = "#a5b4e5",
     selection_bg = "#bfceff",
     selection_fg = "#383a42",
     scrollbar_thumb = "#9d9d9f",
@@ -19,14 +19,14 @@ return {
       "#c18401",
       "#0184bc",
       "#a626a4",
-      "#427b58",
-      "#fdfdfd",
+      "#0997b3",
+      "#bababa",
     },
     brights = {
       "#4f525e",
       "#e06c75",
       "#98c379",
-      "#e5c07b",
+      "#d8b36e",
       "#61afef",
       "#c678dd",
       "#56b6c2",

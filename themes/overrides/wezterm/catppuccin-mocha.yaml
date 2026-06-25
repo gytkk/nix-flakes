@@ -1,0 +1,16 @@
+version: 1
+
+meta:
+  app: wezterm
+  theme: catppuccin-mocha
+  variant: dark
+
+slots:
+  selection_bg: "#353749"
+  selection_fg: "#cdd6f4"
+  bright_1: "#f38ba8"
+  bright_2: "#a6e3a1"
+  bright_3: "#f9e2af"
+  bright_4: "#89b4fa"
+  bright_5: "#f5c2e7"
+  bright_6: "#94e2d5"

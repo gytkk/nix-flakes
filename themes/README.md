@@ -541,6 +541,9 @@ Adapter templates and schema helpers:
     `HighlightStyleContent` entries rather than a fixed syntax-key list
 - `themes/templates/ghostty/official-template.json` -> Ghostty theme template
   derived from the config reference and existing local terminal config
+- `themes/templates/wezterm/official-template.json` -> WezTerm color scheme
+  template derived from the official appearance reference and repo-managed
+  WezTerm config
 - `themes/templates/k9s/official-template.json` -> K9s skin template derived
   from the official skins format and the existing local module skin definitions
 - `themes/templates/nvim/official-template.json` -> Neovim builtin highlight
@@ -555,6 +558,8 @@ Adapter templates and schema helpers:
   derived from tmux style syntax and the existing local statusline layout
 - `themes/overrides/ghostty/*.yaml` -> optional Ghostty slot overrides applied
   after generator defaults
+- `themes/overrides/wezterm/*.yaml` -> optional WezTerm color slot overrides
+  applied after generator defaults
 - `themes/overrides/zellij/*.yaml` -> optional Zellij-specific
   component/player overrides applied after generator defaults
 - `themes/check_templates.py` -> consistency check for app template metadata,
@@ -665,13 +670,15 @@ Current override support:
 
 - `themes/overrides/SCHEMA.md` -> override-layer format notes
 - `themes/overrides/ghostty/TEMPLATE.yaml` -> Ghostty minimal authoring template
+- `themes/overrides/wezterm/TEMPLATE.yaml` -> WezTerm minimal authoring template
 - `themes/overrides/TEMPLATE.yaml` -> Neovim minimal authoring template
 - `themes/overrides/zellij/TEMPLATE.yaml` -> Zellij minimal authoring template
 - `themes/overrides/ghostty/<theme-id>.yaml` -> Ghostty slot overrides
+- `themes/overrides/wezterm/<theme-id>.yaml` -> WezTerm color slot overrides
 - `themes/overrides/nvim/<theme-id>.yaml` -> Neovim per-theme override patches
 - `themes/overrides/zellij/<theme-id>.yaml` -> Zellij per-theme override patches
 - `themes/validate_overrides.py` -> override validator for current Ghostty,
-  Neovim, and Zellij override files
+  WezTerm, Neovim, and Zellij override files
 
 Current Neovim override precedence:
 

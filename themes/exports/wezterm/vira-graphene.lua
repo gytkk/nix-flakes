@@ -1,5 +1,5 @@
 -- Auto-generated from themes/core/vira-graphene.yaml
--- WezTerm color scheme export.
+-- Template: wezterm-color-template v1
 return {
   name = "Vira Graphene",
   colors = {
@@ -9,7 +9,7 @@ return {
     cursor_fg = "#212121",
     cursor_border = "#FFCC00",
     selection_bg = "#474747",
-    selection_fg = "#ffffff",
+    selection_fg = "#D9D9D9",
     scrollbar_thumb = "#545454",
     split = "#3a3a3a",
     ansi = {

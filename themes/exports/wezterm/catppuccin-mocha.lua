@@ -1,5 +1,5 @@
 -- Auto-generated from themes/core/catppuccin-mocha.yaml
--- WezTerm color scheme export.
+-- Template: wezterm-color-template v1
 return {
   name = "Catppuccin Mocha",
   colors = {
@@ -8,8 +8,8 @@ return {
     cursor_bg = "#f5e0dc",
     cursor_fg = "#11111b",
     cursor_border = "#f5e0dc",
-    selection_bg = "#9399b2",
-    selection_fg = "#1e1e2e",
+    selection_bg = "#353749",
+    selection_fg = "#cdd6f4",
     scrollbar_thumb = "#a6adc8",
     split = "#6c7086",
     ansi = {
@@ -26,10 +26,10 @@ return {
       "#585b70",
       "#f38ba8",
       "#a6e3a1",
-      "#fab387",
-      "#b4befe",
-      "#cba6f7",
-      "#89dceb",
+      "#f9e2af",
+      "#89b4fa",
+      "#f5c2e7",
+      "#94e2d5",
       "#bac2de",
     },
     tab_bar = {

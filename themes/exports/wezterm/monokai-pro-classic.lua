@@ -1,5 +1,5 @@
 -- Auto-generated from themes/core/monokai-pro-classic.yaml
--- WezTerm color scheme export.
+-- Template: wezterm-color-template v1
 return {
   name = "Monokai Pro Classic",
   colors = {

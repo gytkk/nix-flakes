@@ -1,0 +1,74 @@
+{
+  "name": "wezterm-color-template",
+  "version": 1,
+  "description": "WezTerm color scheme template derived from the official WezTerm appearance reference and the repo-managed WezTerm config.",
+  "sources": [
+    {
+      "kind": "official-docs",
+      "ref": "WezTerm colors and appearance reference",
+      "url": "https://wezterm.org/config/appearance.html"
+    },
+    {
+      "kind": "local-example",
+      "ref": "repo-managed WezTerm config",
+      "path": "modules/wezterm/files/wezterm.lua"
+    }
+  ],
+  "config_schema": {
+    "token_prefix": "$",
+    "value_type": "hex-color"
+  },
+  "sections": [
+    {
+      "name": "ui",
+      "entries": [
+        { "key": "foreground", "value": "$foreground" },
+        { "key": "background", "value": "$background" },
+        { "key": "cursor_bg", "value": "$cursor_bg" },
+        { "key": "cursor_fg", "value": "$cursor_fg" },
+        { "key": "cursor_border", "value": "$cursor_border" },
+        { "key": "selection_bg", "value": "$selection_bg" },
+        { "key": "selection_fg", "value": "$selection_fg" },
+        { "key": "scrollbar_thumb", "value": "$scrollbar_thumb" },
+        { "key": "split", "value": "$split" }
+      ]
+    },
+    {
+      "name": "ansi",
+      "entries": [
+        { "key": "ansi_0", "value": "$ansi_0" },
+        { "key": "ansi_1", "value": "$ansi_1" },
+        { "key": "ansi_2", "value": "$ansi_2" },
+        { "key": "ansi_3", "value": "$ansi_3" },
+        { "key": "ansi_4", "value": "$ansi_4" },
+        { "key": "ansi_5", "value": "$ansi_5" },
+        { "key": "ansi_6", "value": "$ansi_6" },
+        { "key": "ansi_7", "value": "$ansi_7" },
+        { "key": "bright_0", "value": "$bright_0" },
+        { "key": "bright_1", "value": "$bright_1" },
+        { "key": "bright_2", "value": "$bright_2" },
+        { "key": "bright_3", "value": "$bright_3" },
+        { "key": "bright_4", "value": "$bright_4" },
+        { "key": "bright_5", "value": "$bright_5" },
+        { "key": "bright_6", "value": "$bright_6" },
+        { "key": "bright_7", "value": "$bright_7" }
+      ]
+    },
+    {
+      "name": "tab_bar",
+      "entries": [
+        { "key": "tab_bar.background", "value": "$tab_bar.background" },
+        { "key": "tab_bar.active_tab.bg_color", "value": "$tab_bar.active_tab.bg_color" },
+        { "key": "tab_bar.active_tab.fg_color", "value": "$tab_bar.active_tab.fg_color" },
+        { "key": "tab_bar.inactive_tab.bg_color", "value": "$tab_bar.inactive_tab.bg_color" },
+        { "key": "tab_bar.inactive_tab.fg_color", "value": "$tab_bar.inactive_tab.fg_color" },
+        { "key": "tab_bar.inactive_tab_hover.bg_color", "value": "$tab_bar.inactive_tab_hover.bg_color" },
+        { "key": "tab_bar.inactive_tab_hover.fg_color", "value": "$tab_bar.inactive_tab_hover.fg_color" },
+        { "key": "tab_bar.new_tab.bg_color", "value": "$tab_bar.new_tab.bg_color" },
+        { "key": "tab_bar.new_tab.fg_color", "value": "$tab_bar.new_tab.fg_color" },
+        { "key": "tab_bar.new_tab_hover.bg_color", "value": "$tab_bar.new_tab_hover.bg_color" },
+        { "key": "tab_bar.new_tab_hover.fg_color", "value": "$tab_bar.new_tab_hover.fg_color" }
+      ]
+    }
+  ]
+}

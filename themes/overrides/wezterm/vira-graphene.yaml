@@ -1,0 +1,9 @@
+version: 1
+
+meta:
+  app: wezterm
+  theme: vira-graphene
+  variant: dark
+
+slots:
+  selection_fg: "#D9D9D9"

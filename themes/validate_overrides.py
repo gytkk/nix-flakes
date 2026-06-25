@@ -28,6 +28,30 @@ GHOSTTY_SLOT_KEYS = {
     "cursor_text",
     *{f"palette_{idx}_entry" for idx in range(16)},
 }
+WEZTERM_SLOT_KEYS = {
+    "foreground",
+    "background",
+    "cursor_bg",
+    "cursor_fg",
+    "cursor_border",
+    "selection_bg",
+    "selection_fg",
+    "scrollbar_thumb",
+    "split",
+    "tab_bar.background",
+    "tab_bar.active_tab.bg_color",
+    "tab_bar.active_tab.fg_color",
+    "tab_bar.inactive_tab.bg_color",
+    "tab_bar.inactive_tab.fg_color",
+    "tab_bar.inactive_tab_hover.bg_color",
+    "tab_bar.inactive_tab_hover.fg_color",
+    "tab_bar.new_tab.bg_color",
+    "tab_bar.new_tab.fg_color",
+    "tab_bar.new_tab_hover.bg_color",
+    "tab_bar.new_tab_hover.fg_color",
+    *{f"ansi_{idx}" for idx in range(8)},
+    *{f"bright_{idx}" for idx in range(8)},
+}
 
 
 ROOT = Path(__file__).resolve().parent
@@ -222,6 +246,43 @@ def validate_ghostty_override(v: Validator, path: Path) -> None:
                 v.error(path, f"slots.{key} must be a ghostty color or indexed palette entry")
 
 
+def validate_wezterm_override(v: Validator, path: Path) -> None:
+    try:
+        data = load_yaml(path)
+    except ParseError as e:
+        v.error(path, str(e))
+        return
+
+    expected_top = ["version", "meta", "slots"]
+    if key_order(data) != expected_top:
+        v.error(path, "top-level key order does not match template")
+
+    for key in expected_top:
+        if key not in data:
+            v.error(path, f"missing top-level key: {key}")
+    for key in key_order(data):
+        if key not in expected_top:
+            v.error(path, f"unexpected top-level key: {key}")
+
+    if data.get("version") != 1:
+        v.error(path, "version must be 1")
+
+    meta = ensure_mapping(v, path, data.get("meta"), "meta")
+    slots = ensure_mapping(v, path, data.get("slots"), "slots")
+
+    if meta is not None:
+        validate_meta(v, path, meta, app="wezterm")
+    if slots is not None:
+        if not slots:
+            v.error(path, "slots must not be empty")
+        for key, value in slots.items():
+            if key not in WEZTERM_SLOT_KEYS:
+                v.error(path, f"slots.{key} is not a supported wezterm slot")
+                continue
+            if not valid_color_value(value):
+                v.error(path, f"slots.{key} must be a wezterm color")
+
+
 def validate_zellij_override(v: Validator, path: Path, allowed_components: set[str], allowed_attrs: set[str]) -> None:
     try:
         data = load_yaml(path)
@@ -267,7 +328,7 @@ def main() -> int:
     parser.add_argument(
         "paths",
         nargs="*",
-        help="Override YAML files to validate. Defaults to themes/overrides/{ghostty,nvim,zellij}/*.yaml",
+        help="Override YAML files to validate. Defaults to themes/overrides/{ghostty,wezterm,nvim,zellij}/*.yaml",
     )
     args = parser.parse_args()
 
@@ -283,6 +344,7 @@ def main() -> int:
     else:
         targets = [
             *[p.resolve() for p in sorted((ROOT / "overrides" / "ghostty").glob("*.yaml")) if p.name != "TEMPLATE.yaml"],
+            *[p.resolve() for p in sorted((ROOT / "overrides" / "wezterm").glob("*.yaml")) if p.name != "TEMPLATE.yaml"],
             *[p.resolve() for p in sorted((ROOT / "overrides" / "nvim").glob("*.yaml"))],
             *[p.resolve() for p in sorted((ROOT / "overrides" / "zellij").glob("*.yaml")) if p.name != "TEMPLATE.yaml"],
         ]
@@ -294,6 +356,8 @@ def main() -> int:
     for target in targets:
         if target.parent.name == "ghostty":
             validate_ghostty_override(v, target)
+        elif target.parent.name == "wezterm":
+            validate_wezterm_override(v, target)
         elif target.parent.name == "nvim":
             validate_nvim_override(v, target, nvim_allowed_attrs)
         elif target.parent.name == "zellij":

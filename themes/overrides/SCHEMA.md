@@ -13,9 +13,11 @@ Do not use overrides to redefine the canonical theme core.
 ## Current support
 
 - `themes/overrides/ghostty/TEMPLATE.yaml`
+- `themes/overrides/wezterm/TEMPLATE.yaml`
 - `themes/overrides/TEMPLATE.yaml` for Neovim
 - `themes/overrides/zellij/TEMPLATE.yaml`
 - `themes/overrides/ghostty/<theme-id>.yaml`
+- `themes/overrides/wezterm/<theme-id>.yaml`
 - `themes/overrides/nvim/<theme-id>.yaml`
 - `themes/overrides/zellij/<theme-id>.yaml`
 - `python themes/validate_overrides.py`
@@ -27,6 +29,12 @@ For Ghostty exports, values resolve in this order:
 
 1. generator-computed default slots
 2. override `slots.<slot>` replacement
+
+For WezTerm exports, values resolve in this order:
+
+1. generator-computed default color slots
+2. template `sections[].entries[]` slot rendering
+3. override `slots.<slot>` replacement
 
 For Neovim exports, values resolve in this order:
 
@@ -57,6 +65,24 @@ meta:
 slots:
   cursor_color: "#e0def4"
   palette_0_entry: "0=#393552"
+```
+
+## WezTerm override format
+
+Author from `themes/overrides/wezterm/TEMPLATE.yaml`:
+
+```yaml
+version: 1
+
+meta:
+  app: wezterm
+  theme: rose-pine-moon
+  variant: dark
+
+slots:
+  cursor_bg: "#e0def4"
+  cursor_border: "#e0def4"
+  ansi_0: "#393552"
 ```
 
 ## Neovim override format
@@ -111,6 +137,12 @@ Ghostty override values may be:
 
 - literal hex strings like `"#232136"` for UI color slots
 - indexed palette entries like `"0=#393552"`
+- palette refs like `"{palette.selection}"`
+- role refs like `"{roles.ui.cursor}"`
+
+WezTerm override values may be:
+
+- literal hex strings like `"#232136"` for color slots
 - palette refs like `"{palette.selection}"`
 - role refs like `"{roles.ui.cursor}"`
 

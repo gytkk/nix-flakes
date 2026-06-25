@@ -1,0 +1,11 @@
+version: 1
+
+meta:
+  app: wezterm
+  theme: theme-id
+  variant: dark
+
+slots:
+  cursor_bg: "{roles.ui.cursor}"
+  cursor_border: "{roles.ui.cursor}"
+  ansi_0: "{roles.ansi.black}"

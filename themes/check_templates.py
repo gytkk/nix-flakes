@@ -252,6 +252,18 @@ def check_ghostty(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
     check_ghostty_sections(f"{path_str}.sections", doc.get("sections"), errors)
 
 
+def check_wezterm(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
+    check_common(path, doc, errors)
+    path_str = str(path)
+    contract = doc.get("config_schema")
+    expect(isinstance(contract, dict), f"{path_str}.config_schema must be an object", errors)
+    if isinstance(contract, dict):
+        require_keys(contract, ["token_prefix", "value_type"], f"{path_str}.config_schema", errors)
+        expect(contract.get("token_prefix") == "$", f"{path_str}.config_schema.token_prefix must be '$'", errors)
+        expect(contract.get("value_type") == "hex-color", f"{path_str}.config_schema.value_type must be 'hex-color'", errors)
+    check_ghostty_sections(f"{path_str}.sections", doc.get("sections"), errors)
+
+
 def check_starship_sections(path: str, sections: Any, errors: list[str]) -> None:
     expect(isinstance(sections, list) and len(sections) > 0, f"{path}: sections must be a non-empty list", errors)
     if not isinstance(sections, list):
@@ -449,6 +461,44 @@ def check_ghostty_override(path: Path, doc: dict[str, Any], errors: list[str]) -
             expect(isinstance(value, str) and value, f"{path_str}.slots.{slot} must be a non-empty string", errors)
 
 
+def check_wezterm_override_template(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
+    path_str = str(path)
+    expected_top = ["version", "meta", "slots"]
+    expect(list(doc.keys()) == expected_top, f"{path_str}: top-level keys must exactly match {expected_top}", errors)
+
+    meta = doc.get("meta")
+    expect(isinstance(meta, dict), f"{path_str}.meta must be an object", errors)
+    if isinstance(meta, dict):
+        expected_meta = ["app", "theme", "variant"]
+        expect(list(meta.keys()) == expected_meta, f"{path_str}.meta keys must exactly match {expected_meta}", errors)
+
+    slots = doc.get("slots")
+    expect(isinstance(slots, dict) and len(slots) > 0, f"{path_str}.slots must be a non-empty object", errors)
+
+
+def check_wezterm_override(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
+    path_str = str(path)
+    expected_top = ["version", "meta", "slots"]
+    expect(list(doc.keys()) == expected_top, f"{path_str}: top-level keys must exactly match {expected_top}", errors)
+    expect(doc.get("version") == 1, f"{path_str}.version must be 1", errors)
+
+    meta = doc.get("meta")
+    expect(isinstance(meta, dict), f"{path_str}.meta must be an object", errors)
+    if isinstance(meta, dict):
+        expected_meta = ["app", "theme", "variant"]
+        expect(list(meta.keys()) == expected_meta, f"{path_str}.meta keys must exactly match {expected_meta}", errors)
+        expect(meta.get("app") == "wezterm", f"{path_str}.meta.app must be 'wezterm'", errors)
+        expect(isinstance(meta.get("theme"), str) and meta.get("theme"), f"{path_str}.meta.theme must be a non-empty string", errors)
+        expect(meta.get("variant") in {"light", "dark"}, f"{path_str}.meta.variant must be 'light' or 'dark'", errors)
+
+    slots = doc.get("slots")
+    expect(isinstance(slots, dict) and len(slots) > 0, f"{path_str}.slots must be a non-empty object", errors)
+    if isinstance(slots, dict):
+        for slot, value in slots.items():
+            expect(isinstance(slot, str) and slot, f"{path_str}.slots contains an invalid slot name", errors)
+            expect(isinstance(value, str) and value, f"{path_str}.slots.{slot} must be a non-empty string", errors)
+
+
 def check_nvim_override(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
     path_str = str(path)
     expected_top = ["version", "meta", "groups", "links"]
@@ -536,6 +586,7 @@ def check_zellij_override(path: Path, doc: dict[str, Any], errors: list[str]) ->
 JSON_CHECKS = {
     ROOT / "templates" / "k9s" / "official-template.json": check_k9s,
     ROOT / "templates" / "ghostty" / "official-template.json": check_ghostty,
+    ROOT / "templates" / "wezterm" / "official-template.json": check_wezterm,
     ROOT / "templates" / "nvim" / "official-template.json": check_nvim,
     ROOT / "templates" / "zed" / "official-template.json": check_zed,
     ROOT / "templates" / "nvim" / "plugins.json": check_nvim_plugin_template,
@@ -547,6 +598,7 @@ JSON_CHECKS = {
 YAML_CHECKS = {
     ROOT / "overrides" / "TEMPLATE.yaml": check_nvim_override_template,
     ROOT / "overrides" / "ghostty" / "TEMPLATE.yaml": check_ghostty_override_template,
+    ROOT / "overrides" / "wezterm" / "TEMPLATE.yaml": check_wezterm_override_template,
     ROOT / "overrides" / "zellij" / "TEMPLATE.yaml": check_zellij_override_template,
 }
 
@@ -563,6 +615,10 @@ def main() -> int:
         if path.name == "TEMPLATE.yaml":
             continue
         check_ghostty_override(path.relative_to(ROOT), load_yaml_doc(path), errors)
+    for path in sorted((ROOT / "overrides" / "wezterm").glob("*.yaml")):
+        if path.name == "TEMPLATE.yaml":
+            continue
+        check_wezterm_override(path.relative_to(ROOT), load_yaml_doc(path), errors)
     for path in sorted((ROOT / "overrides" / "nvim").glob("*.yaml")):
         check_nvim_override(path.relative_to(ROOT), load_yaml_doc(path), errors)
     for path in sorted((ROOT / "overrides" / "zellij").glob("*.yaml")):
@@ -580,6 +636,7 @@ def main() -> int:
         len(JSON_CHECKS)
         + len(YAML_CHECKS)
         + len([p for p in (ROOT / "overrides" / "ghostty").glob("*.yaml") if p.name != "TEMPLATE.yaml"])
+        + len([p for p in (ROOT / "overrides" / "wezterm").glob("*.yaml") if p.name != "TEMPLATE.yaml"])
         + len(list((ROOT / "overrides" / "nvim").glob("*.yaml")))
         + len([p for p in (ROOT / "overrides" / "zellij").glob("*.yaml") if p.name != "TEMPLATE.yaml"])
     )

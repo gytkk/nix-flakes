@@ -1,0 +1,31 @@
+version: 1
+
+meta:
+  app: wezterm
+  theme: ayu-mirage
+  variant: dark
+
+slots:
+  background: "#1f2430"
+  foreground: "#cccac2"
+  selection_bg: "#409fff"
+  selection_fg: "#1f2430"
+  cursor_bg: "#ffcc66"
+  cursor_fg: "#1f2430"
+  cursor_border: "#ffcc66"
+  ansi_0: "#171b24"
+  ansi_1: "#ed8274"
+  ansi_2: "#87d96c"
+  ansi_3: "#facc6e"
+  ansi_4: "#6dcbfa"
+  ansi_5: "#dabafa"
+  ansi_6: "#90e1c6"
+  ansi_7: "#c7c7c7"
+  bright_0: "#686868"
+  bright_1: "#f28779"
+  bright_2: "#d5ff80"
+  bright_3: "#ffd173"
+  bright_4: "#73d0ff"
+  bright_5: "#dfbfff"
+  bright_6: "#95e6cb"
+  bright_7: "#ffffff"

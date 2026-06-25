@@ -1,35 +1,35 @@
 -- Auto-generated from themes/core/rose-pine-moon.yaml
--- WezTerm color scheme export.
+-- Template: wezterm-color-template v1
 return {
   name = "Rosé Pine Moon",
   colors = {
     foreground = "#e0def4",
     background = "#232136",
-    cursor_bg = "#908caa",
+    cursor_bg = "#e0def4",
     cursor_fg = "#232136",
-    cursor_border = "#908caa",
+    cursor_border = "#e0def4",
     selection_bg = "#44415a",
     selection_fg = "#e0def4",
     scrollbar_thumb = "#908caa",
     split = "#56526e",
     ansi = {
-      "#2a273f",
+      "#393552",
       "#eb6f92",
       "#3e8fb0",
-      "#ea9a97",
-      "#c4a7e7",
       "#f6c177",
       "#9ccfd8",
+      "#c4a7e7",
+      "#ea9a97",
       "#e0def4",
     },
     brights = {
       "#6e6a86",
       "#eb6f92",
-      "#9ccfd8",
-      "#f6c177",
       "#3e8fb0",
-      "#c4a7e7",
+      "#f6c177",
       "#9ccfd8",
+      "#c4a7e7",
+      "#ea9a97",
       "#e0def4",
     },
     tab_bar = {

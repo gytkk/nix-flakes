@@ -1,0 +1,15 @@
+version: 1
+
+meta:
+  app: wezterm
+  theme: one-half-light
+  variant: light
+
+slots:
+  background: "#fafafa"
+  cursor_bg: "#a5b4e5"
+  cursor_fg: "#383a42"
+  cursor_border: "#a5b4e5"
+  ansi_6: "#0997b3"
+  ansi_7: "#bababa"
+  bright_3: "#d8b36e"

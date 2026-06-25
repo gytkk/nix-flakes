@@ -1,0 +1,18 @@
+version: 1
+
+meta:
+  app: wezterm
+  theme: rose-pine-moon
+  variant: dark
+
+slots:
+  cursor_bg: "#e0def4"
+  cursor_border: "#e0def4"
+  ansi_0: "#393552"
+  ansi_3: "#f6c177"
+  ansi_4: "#9ccfd8"
+  ansi_5: "#c4a7e7"
+  ansi_6: "#ea9a97"
+  bright_2: "#3e8fb0"
+  bright_4: "#9ccfd8"
+  bright_6: "#ea9a97"
