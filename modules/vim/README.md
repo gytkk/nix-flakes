@@ -6,7 +6,7 @@ This module configures Neovim as the primary editor with a modern Lua-based setu
 
 - Installs and configures Neovim as the default editor
 - Creates `vi` and `vim` aliases that point to `nvim`
-- Loads the Neovim configuration from `modules/vim/files/config/init.lua`
+- Loads the Neovim configuration from modular Lua files under `modules/vim/files/config/`
 - Exposes every generated colorscheme from `themes/exports/nvim/`
 - Loads `monokai-pro-classic` by default and falls back to it if a selected exported theme is missing
 
@@ -96,5 +96,7 @@ vi filename.txt
 ## Files
 
 - `modules/vim/default.nix`: Home Manager wiring
-- `modules/vim/files/config/init.lua`: main Neovim configuration
+- `modules/vim/files/config/init.lua`: small bootstrap for options, lazy.nvim, plugin specs, and startup hooks
+- `modules/vim/files/config/*.lua`: focused modules for options, lazy.nvim bootstrap, theme loading, LSP, session restore, AI helpers, and autocmds
+- `modules/vim/files/config/plugins/*.lua`: plugin specs grouped by feature area
 - `themes/exports/nvim/*.lua`: generated colorscheme definitions
