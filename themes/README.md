@@ -28,6 +28,7 @@ themes/
 ├── exports/
 │   ├── vscode/
 │   ├── ghostty/
+│   ├── wezterm/
 │   ├── zed/
 │   └── vim/
 ├── lib/
@@ -521,6 +522,7 @@ This now checks both:
 Current generators:
 
 - `ghostty` -> `themes/exports/ghostty/*.conf`
+- `wezterm` -> `themes/exports/wezterm/*.lua`
 - `k9s` -> `themes/exports/k9s/*.yaml`
 - `zed` -> `themes/exports/zed/*.json`
 - `nvim` -> `themes/exports/nvim/*.lua`
@@ -688,9 +690,10 @@ Use overrides for app-specific exceptions like:
 Suggested first exporters:
 
 1. `ghostty`
-2. `zed`
-3. `vscode`
-4. `vim`
+2. `wezterm`
+3. `zed`
+4. `vscode`
+5. `vim`
 
 Rationale:
 
@@ -730,6 +733,7 @@ Or better, expose generated outputs:
 {
   themeExports.vscode.tokyo-night-ish = ...;
   themeExports.ghostty.tokyo-night-ish = ...;
+  themeExports.wezterm.tokyo-night-ish = ...;
 }
 ```
 

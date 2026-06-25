@@ -835,6 +835,88 @@ def ghostty_theme_conf(ctx: dict[str, Any], root: Path) -> str:
     return "\n".join(lines) + "\n"
 
 
+def wezterm_color_scheme(ctx) -> dict[str, object]:
+    p = ctx["palette"]
+    r = ctx["roles"]
+    light = ctx["meta"]["variant"] == "light"
+
+    ansi = [
+        r["ansi"]["black"],
+        r["ansi"]["red"],
+        r["ansi"]["green"],
+        r["ansi"]["yellow"],
+        r["ansi"]["blue"],
+        r["ansi"]["magenta"],
+        r["ansi"]["cyan"],
+        r["ansi"]["white"],
+    ]
+    brights = [
+        r["ansi"]["brightBlack"],
+        r["ansi"]["brightRed"],
+        r["ansi"]["brightGreen"],
+        r["ansi"]["brightYellow"],
+        r["ansi"]["brightBlue"],
+        r["ansi"]["brightMagenta"],
+        r["ansi"]["brightCyan"],
+        r["ansi"]["brightWhite"],
+    ]
+    inactive_hover = raised_surface(r["ui"]["bgAlt"], r["ui"]["border"], light=light)
+
+    return {
+        "foreground": r["ui"]["fg"],
+        "background": r["ui"]["bg"],
+        "cursor_bg": r["ui"]["cursor"],
+        "cursor_fg": r["ui"]["caretText"],
+        "cursor_border": r["ui"]["cursor"],
+        "selection_bg": r["ui"]["selection"],
+        "selection_fg": best_contrast(r["ui"]["selection"], p["white"], r["ui"]["bg"], r["ui"]["fg"]),
+        "scrollbar_thumb": r["ui"]["fgMuted"],
+        "split": r["ui"]["border"],
+        "ansi": ansi,
+        "brights": brights,
+        "tab_bar": {
+            "background": r["ui"]["bgAlt"],
+            "active_tab": {
+                "bg_color": r["ui"]["currentLine"],
+                "fg_color": r["ui"]["fg"],
+                "intensity": "Bold",
+            },
+            "inactive_tab": {
+                "bg_color": r["ui"]["bgAlt"],
+                "fg_color": r["ui"]["fgInactive"],
+            },
+            "inactive_tab_hover": {
+                "bg_color": inactive_hover,
+                "fg_color": r["ui"]["fg"],
+            },
+            "new_tab": {
+                "bg_color": r["ui"]["bgAlt"],
+                "fg_color": r["ui"]["fgMuted"],
+            },
+            "new_tab_hover": {
+                "bg_color": r["ui"]["currentLine"],
+                "fg_color": r["ui"]["fg"],
+            },
+        },
+    }
+
+
+def wezterm_theme_lua(ctx) -> str:
+    meta = ctx["meta"]
+    doc = {
+        "name": meta["name"],
+        "colors": wezterm_color_scheme(ctx),
+    }
+    return "\n".join(
+        [
+            f"-- Auto-generated from themes/core/{meta['id']}.yaml",
+            "-- WezTerm color scheme export.",
+            f"return {lua_literal(doc)}",
+            "",
+        ]
+    )
+
+
 def build_starship_slots(ctx: dict[str, Any]) -> dict[str, Any]:
     p = ctx["palette"]
     r = ctx["roles"]
@@ -1423,6 +1505,7 @@ def generate_theme(theme_path: Path, template: dict[str, Any], root: Path) -> li
     theme_id = ctx["meta"]["id"]
 
     ghostty_path = root / "exports" / "ghostty" / f"{theme_id}.conf"
+    wezterm_path = root / "exports" / "wezterm" / f"{theme_id}.lua"
     k9s_path = root / "exports" / "k9s" / f"{theme_id}.yaml"
     zed_path = root / "exports" / "zed" / f"{theme_id}.json"
     nvim_path = root / "exports" / "nvim" / f"{theme_id}.lua"
@@ -1431,13 +1514,14 @@ def generate_theme(theme_path: Path, template: dict[str, Any], root: Path) -> li
     tmux_path = root / "exports" / "tmux" / f"{theme_id}.conf"
 
     write_text(ghostty_path, ghostty_theme_conf(ctx, root))
+    write_text(wezterm_path, wezterm_theme_lua(ctx))
     write_yaml(k9s_path, k9s_theme_doc(ctx, root))
     write_json(zed_path, zed_theme_doc(ctx, root))
     write_text(nvim_path, nvim_lua(ctx, root))
     write_text(starship_path, starship_theme_toml(ctx, root))
     write_text(zellij_path, zellij_theme_kdl(ctx, root))
     write_text(tmux_path, tmux_theme_conf(ctx, root))
-    return [ghostty_path, k9s_path, zed_path, nvim_path, starship_path, zellij_path, tmux_path]
+    return [ghostty_path, wezterm_path, k9s_path, zed_path, nvim_path, starship_path, zellij_path, tmux_path]
 
 
 def discover_default_targets(root: Path) -> list[Path]:

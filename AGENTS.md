@@ -114,7 +114,7 @@ modules/<name>/
 | `nixos/`     | NixOS common config | `baseline.nix`, `remote-access.nix`, `user.nix`     | NO      |
 | `claude/`    | Claude Code         | `files/settings.json`, `files/CLAUDE.md`            | 부분적  |
 | `codex/`     | OpenAI Codex CLI    | `files/config.toml`, `files/AGENTS.md`              | YES     |
-| `ghostty/`   | Ghostty terminal    | `files/config`, `themes/exports/ghostty`            | YES     |
+| `ghostty/`   | Legacy Ghostty terminal | `files/config`, `themes/exports/ghostty`        | YES     |
 | `git/`       | Git configuration   | `default.nix`                                       | NO      |
 | `k9s/`       | Kubernetes manager  | `default.nix`                                       | NO      |
 | `kitty/`     | Kitty terminal      | `files/kitty.conf`                                  | YES     |
@@ -123,6 +123,7 @@ modules/<name>/
 | `terraform/` | Terraform versions  | `default.nix` (direnv lazy-load)                    | NO      |
 | `vim/`       | Neovim              | `files/config/init.lua`, `files/onelight.lua`       | YES     |
 | `vscode/`    | VSCode (DISABLED)   | `default.nix`, `one-half-light-theme/`              | NO      |
+| `wezterm/`   | WezTerm terminal    | `files/wezterm.lua`, `themes/exports/wezterm`       | YES     |
 | `zed/`       | Zed editor          | `files/settings.json`, `themes/one-half-light.json` | YES     |
 | `zellij/`    | Zellij multiplexer  | `files/config.darwin.kdl`, `files/config.linux.kdl` | YES     |
 | `zsh/`       | Zsh shell           | `default.nix`, `starship.toml`                      | 부분적  |

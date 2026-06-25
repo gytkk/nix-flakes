@@ -24,7 +24,7 @@
     pkgs.alacritty
     pkgs.btop
     pkgs.walker
-    pkgs.ghostty
+    pkgs.wezterm
     pkgs.obsidian
     pkgs.wl-clipboard
     pkgs.yazi

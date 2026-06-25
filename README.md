@@ -216,7 +216,7 @@ Resources should supplement the tools instead of expanding the tool count:
 - `home-manager switch` renders `~/.config/zellij/config.kdl` from the platform-specific template in `modules/zellij/files/` and exposes the generated `themes/exports/zellij` directory at `~/.config/zellij/themes`.
 - The checked-in defaults keep the selected shared theme, use Zellij's builtin `default` layout, disable startup tips, and leave `Ctrl+b` unbound so terminal apps like Neovim still receive it instead of entering Zellij's tmux mode.
 - On macOS, the repo-managed Darwin config includes `copy_command "pbcopy"` so explicit Zellij copy actions continue to target the system clipboard.
-- Local interactive shells started from Ghostty automatically `exec zellij`.
+- Local interactive shells started from the terminal automatically `exec zellij`.
 - SSH sessions and shells already inside `zellij` or `tmux` are excluded from that auto-start.
 
 ## tmux config
@@ -242,18 +242,19 @@ Resources should supplement the tools instead of expanding the tool count:
 - Press `Ctrl+a ?` for the key list, `Ctrl+a w` for the tree, and `Ctrl+a s`
   for the session tree.
 
-## Ghostty config
+## WezTerm config
 
-- Ghostty is managed through `modules/ghostty/default.nix`.
-- `home-manager switch` renders `~/.config/ghostty/config` with the selected
-  `modules.commonTheme` as `theme = "<commonTheme>.conf"`.
-- Home Manager links `~/.config/ghostty/themes` to the generated
-  `themes/exports/ghostty` directory managed by the flake.
-- Repo edits to Ghostty config and generated themes take effect on the next
-  switch instead of updating live files immediately.
+- WezTerm is managed through `modules/wezterm/default.nix`.
+- `home-manager switch` installs `~/.config/wezterm/wezterm.lua` as an
+  out-of-store symlink to `modules/wezterm/files/wezterm.lua`, so repo edits
+  are reflected in the live config file.
+- Home Manager renders `~/.config/wezterm/theme.lua` with the selected
+  `modules.commonTheme` and links `~/.config/wezterm/themes` to the generated
+  `themes/exports/wezterm` directory.
 - The checked-in defaults keep `xterm-256color`, the generated shared theme,
-  JetBrains Mono with Sarasa Mono CL fallback, a beam cursor, 95% background
-  opacity, shell integration, and the IME-safe `Ctrl+key_*` bindings.
+  JetBrains Mono with Sarasa Mono CL fallback, a beam cursor, opaque
+  background, hidden titlebar via resize-only decorations, a compact tab bar,
+  and IME-safe physical `Ctrl+letter` bindings.
 
 ## cmux config
 
@@ -264,14 +265,14 @@ Resources should supplement the tools instead of expanding the tool count:
   settings UI are written back to the repo-managed file.
 - The checked-in defaults use the official schema URL, dark app/browser
   appearance, minimal UI mode, and let terminal rendering continue to come from
-  the Ghostty config and generated Ghostty themes.
+  the WezTerm config and generated WezTerm themes.
 - The module only manages config. Install the `cmux` app separately.
 
 ## Kitty config
 
 - Kitty is managed through `modules/kitty/default.nix`.
 - `home-manager switch` installs `~/.config/kitty/kitty.conf` as an out-of-store symlink to `modules/kitty/files/kitty.conf`, so the repo file stays mutable.
-- The checked-in defaults mirror the current Ghostty look and feel: One Half Light colors, JetBrains Mono with Sarasa Mono CL as the Hangul fallback, a beam cursor, 95% background opacity, shell integration, and muted split borders.
+- The checked-in defaults mirror the current WezTerm look and feel: One Half Light colors, JetBrains Mono with Sarasa Mono CL as the Hangul fallback, a beam cursor, opaque background, and muted split borders.
 - The module only manages config. Install the `kitty` app or binary separately.
 
 ## AeroSpace config

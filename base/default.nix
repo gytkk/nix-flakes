@@ -17,7 +17,6 @@
     ../modules/claude
     ../modules/cmux
     ../modules/codex
-    ../modules/ghostty
     ../modules/git
     ../modules/k9s
     ../modules/opencode
@@ -25,6 +24,7 @@
     ../modules/omnigent
     ../modules/tmux
     ../modules/vim
+    ../modules/wezterm
     ../modules/zed
     ../modules/zellij
     ../modules/zsh
