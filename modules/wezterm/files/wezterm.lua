@@ -31,13 +31,19 @@ config.window_padding = {
   bottom = 8,
 }
 config.window_decorations = 'RESIZE'
+config.window_frame = {
+  font = wezterm.font { family = 'JetBrains Mono', weight = 'Bold' },
+  font_size = 14.0,
+  active_titlebar_bg = selected_theme.colors.tab_bar.background,
+  inactive_titlebar_bg = selected_theme.colors.tab_bar.background,
+}
 
 config.enable_tab_bar = true
 config.hide_tab_bar_if_only_one_tab = false
 config.show_new_tab_button_in_tab_bar = false
 config.tab_bar_at_bottom = false
 config.tab_max_width = 32
-config.use_fancy_tab_bar = false
+config.use_fancy_tab_bar = true
 
 local tab_min_width = 18
 
