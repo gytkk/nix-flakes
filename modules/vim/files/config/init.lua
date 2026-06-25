@@ -806,6 +806,25 @@ local function closeSessionBlankWindows()
   end
 end
 
+local function detectSessionFiletypes()
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.api.nvim_buf_is_loaded(buf)
+        and vim.bo[buf].buftype == ""
+        and vim.api.nvim_buf_get_name(buf) ~= ""
+    then
+      vim.api.nvim_buf_call(buf, function()
+        if vim.bo[buf].filetype == "" then
+          vim.cmd("filetype detect")
+        end
+
+        if vim.bo[buf].syntax == "" then
+          vim.cmd("silent! syntax sync fromstart")
+        end
+      end)
+    end
+  end
+end
+
 vim.api.nvim_create_autocmd("User", {
   pattern = "PersistenceLoadPost",
   callback = closeSessionBlankWindows,
@@ -847,6 +866,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
     if ok and hasCurrentSession(persistence_module) then
       persistence_module.load()
       openStartupExplorer()
+      vim.defer_fn(detectSessionFiletypes, 50)
       return
     end
 
