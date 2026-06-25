@@ -1,6 +1,6 @@
 # nix-flakes
 
-Nix flake configuration for Home Manager, nix-darwin, and NixOS.
+Nix flake configuration for standalone Home Manager and NixOS.
 
 ## Prerequisites
 
@@ -36,7 +36,7 @@ official plugin marketplaces.
 
 ### Codex CLI Config
 
-- On NixOS and nix-darwin hosts, the static Codex base config is installed to `/etc/codex/managed_config.toml`.
+- On NixOS hosts, the static Codex base config is installed to `/etc/codex/managed_config.toml`.
 - Codex admin skills live under `modules/codex/skills` in this repo and are exposed at `/etc/codex/skills`.
 - On standalone Home Manager environments, `home-manager switch` ensures `/etc/codex/managed_config.toml` is a symlink to this repo's `modules/codex/files/config.toml`.
 - On standalone Home Manager environments, `home-manager switch` also ensures `/etc/codex/skills` is a symlink to this repo's `modules/codex/skills`.
@@ -286,45 +286,6 @@ Resources should supplement the tools instead of expanding the tool count:
 - The activation step treats `~/.aerospace.toml` as a legacy path: if it exists, Home Manager backs it up to `~/.aerospace.toml.pre-xdg-backup` and removes the original to avoid path ambiguity.
 - The checked-in config keeps `config-version = 2` plus AeroSpace's default `main` and `service` keybindings.
 - Omitted scalar options still fall back to AeroSpace's built-in defaults, but keyboard bindings do not inherit from the built-in config and must be declared explicitly in the repo file.
-
-## macOS (`nix-darwin`)
-
-Available Darwin hosts:
-
-- `devsisters-macbook`
-- `devsisters-macstudio`
-
-### First bootstrap
-
-Run this once from the repo root to install and invoke `darwin-rebuild` through the flake:
-
-```bash
-sudo nix run github:nix-darwin/nix-darwin/master#darwin-rebuild -- switch --flake .#devsisters-macbook
-```
-
-For the Mac Studio host:
-
-```bash
-sudo nix run github:nix-darwin/nix-darwin/master#darwin-rebuild -- switch --flake .#devsisters-macstudio
-```
-
-If the Darwin profile uses agenix-managed secrets, make sure the decrypting SSH key already exists at `~/.ssh/id_ed25519` or `~/.ssh/id_rsa` before the first switch.
-
-### Rebuild after bootstrap
-
-```bash
-sudo darwin-rebuild switch --flake .#devsisters-macbook
-
-sudo darwin-rebuild switch --flake .#devsisters-macstudio
-```
-
-### Build without switching
-
-```bash
-nix build .#darwinConfigurations.devsisters-macbook.system
-
-nix build .#darwinConfigurations.devsisters-macstudio.system
-```
 
 ## Standalone Home Manager
 

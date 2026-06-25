@@ -12,12 +12,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # nix-darwin - macOS system configuration
-    nix-darwin = {
-      url = "github:nix-darwin/nix-darwin/master";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # Disko - declarative disk partitioning
     disko = {
       url = "github:nix-community/disko";

@@ -57,18 +57,18 @@ nixos-rebuild switch --flake .#<host>
 
 ### Architecture
 
-Nix flakes-based Home Manager and NixOS configuration supporting multiple environments (macOS and Linux) with layered base system.
+Nix flakes-based standalone Home Manager and NixOS configuration supporting multiple environments (macOS and Linux) with layered base system.
 
 ```text
 flake.nix                         # Main flake configuration
-inventory.nix                     # All host/environment definitions (kind, system, profile)
-base/default.nix                  # Common configuration for all environments
-base/<company>/home.nix           # Company-specific extensions (devsisters, pylv)
-modules/<name>/default.nix        # Reusable module
+inventory.nix                     # All Home Manager environments and NixOS hosts
+base/default.nix                  # Common Home Manager configuration
+base/<profile>/home.nix           # Profile-specific Home Manager extensions
+modules/<name>/default.nix        # Reusable Home Manager or NixOS module
 hosts/<name>/configuration.nix    # NixOS host configuration
-lib/builders.nix                  # mkHomeConfig, mkNixOSConfig helpers
+lib/builders.nix                  # Compatibility exports for configuration builders
 overlays/default.nix              # nixpkgs version overlays
-secrets/secrets.nix               # Agenix secrets configuration
+secrets/secrets.nix               # Agenix recipient configuration
 ```
 
 #### Environments

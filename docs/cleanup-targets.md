@@ -90,8 +90,6 @@ Each finding lists the evidence (where it *should* be referenced but isn't).
 
 | Path | Evidence |
 |---|---|
-| `hosts/devsisters-macbook/configuration.nix` | `inventory.nix` marks `devsisters-macbook` as `kind = "home-only"`. `lib/builders.nix` imports host configuration only via `mkNixOSConfig`, filtered to `kind == "nixos"`. No `darwinConfigurations` output exists in `flake.nix`. |
-| `hosts/devsisters-macstudio/configuration.nix` | Same as above: `home-only` host, never wired into `nixosConfigurations` or `darwinConfigurations`. Also imports from the other dead host file. |
 | `hosts/pylv-sepia/hardware-configuration.nix` | `hosts/pylv-sepia/configuration.nix` imports `./disk-config.nix`, `./obsidian-headless.nix`, `./obsidian-maintenance`, and `../../modules/nixos` — but not `./hardware-configuration.nix`. Nothing else imports it. |
 | `modules/vscode/default.nix` | `base/default.nix` does not import `../modules/vscode`; no other `.nix` file does either. Project docs also mark VSCode as disabled. |
 | `secrets/secrets.nix` | No `.nix` file imports it. Live configs reference encrypted files directly via `age.secrets.*.file`. Not on the flake evaluation path (may still be useful for the `agenix` CLI, but it is not live configuration). |
@@ -158,7 +156,15 @@ No dead code found in this category.
 | Module Options | 1 (inside dead VSCode module) |
 | Docs | 6 |
 
-Overall: the main dead areas are disabled VSCode/nix-darwin leftovers, an unwired `pylv-sepia` hardware config, uninstalled helper and test scripts, and orphaned documentation. Overlay wiring and all package derivations outside the dead VSCode module appear live.
+Overall: the main dead areas are disabled VSCode leftovers, an unwired `pylv-sepia` hardware config, uninstalled helper and test scripts, and orphaned documentation. Overlay wiring and all package derivations outside the dead VSCode module appear live.
+
+---
+
+### Resolved
+
+- `hosts/devsisters-macbook/configuration.nix` and
+  `hosts/devsisters-macstudio/configuration.nix` were removed with the unused
+  nix-darwin input.
 
 ---
 
@@ -174,12 +180,6 @@ I verified Codex's new claims with `rg` before recording them here.
 - `docs/superpowers/plans/*.md` — completed-plan artifacts.
 
 ### New, confirmed by Codex (advisory pass missed these)
-- **`hosts/devsisters-macbook/configuration.nix` + `hosts/devsisters-macstudio/configuration.nix`** —
-  **confirmed dead.** `flake.nix` exposes only `homeConfigurations` and
-  `nixosConfigurations` (no `darwinConfigurations`); `mkHomeConfig` never imports
-  `hosts/<name>/`. These nix-darwin system configs are unreachable. macstudio also
-  imports macbook's config. *Higher-impact removal — confirm this isn't a staged
-  future nix-darwin adoption before deleting.*
 - **`hosts/pylv-sepia/hardware-configuration.nix`** — confirmed not imported by
   `hosts/pylv-sepia/configuration.nix` (contrast: pylv-onyx imports its own).
   *Note: verify this is vestigial and not a latent missing-import bug before removing.*
