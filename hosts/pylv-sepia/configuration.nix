@@ -1,4 +1,5 @@
 {
+  inputs,
   modulesPath,
   pkgs,
   ...
@@ -7,6 +8,8 @@
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
     (modulesPath + "/profiles/qemu-guest.nix")
+    inputs.disko.nixosModules.disko
+    inputs.copyparty.nixosModules.default
     ./disk-config.nix
     ./obsidian-headless.nix
     ./obsidian-maintenance

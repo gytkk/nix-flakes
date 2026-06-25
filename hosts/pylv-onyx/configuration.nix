@@ -1,11 +1,16 @@
 {
   config,
+  inputs,
   pkgs,
   username,
   ...
 }:
 {
   imports = [
+    inputs.disko.nixosModules.disko
+    inputs.niri.nixosModules.niri
+    inputs.dms.nixosModules.dank-material-shell
+    inputs.dms.nixosModules.greeter
     ./hardware-configuration.nix
     ./open-webui.nix
     ./openclaw-cron-dashboard.nix

@@ -65,7 +65,10 @@ base/default.nix                  # Common Home Manager configuration
 base/<profile>/home.nix           # Profile-specific Home Manager extensions
 modules/<name>/default.nix        # Reusable Home Manager or NixOS module
 hosts/<name>/configuration.nix    # NixOS host configuration
-lib/builders.nix                  # Compatibility exports for configuration builders
+lib/pkgs.nix                      # Overlay and per-system package-set construction
+lib/home-configurations.nix       # Home Manager configuration builder
+lib/nixos-configurations.nix      # NixOS configuration builder
+lib/builders.nix                  # Backward-compatible builder aggregation
 overlays/default.nix              # nixpkgs version overlays
 secrets/secrets.nix               # Agenix recipient configuration
 ```
