@@ -64,6 +64,7 @@ inventory.nix                     # All Home Manager environments and NixOS host
 base/default.nix                  # Common Home Manager configuration
 base/<profile>/home.nix           # Profile-specific Home Manager extensions
 modules/<name>/default.nix        # Reusable Home Manager or NixOS module
+modules/nixos/                    # Common NixOS modules and shared secrets
 hosts/<name>/configuration.nix    # NixOS host configuration
 lib/pkgs.nix                      # Overlay and per-system package-set construction
 lib/home-configurations.nix       # Home Manager configuration builder
@@ -79,8 +80,8 @@ Defined in `inventory.nix` (single source of truth). `kind` field determines bui
 
 - **devsisters-macbook / devsisters-macstudio**: ARM64 macOS, devsisters base, home-only
 - **pylv-denim**: x86_64 Linux/WSL, pylv base, home-only
-- **pylv-sepia**: x86_64 Linux/NixOS server, pylv base (with Disko, agenix, copyparty, OpenClaw)
-- **pylv-onyx**: x86_64 Linux/NixOS, pylv base
+- **pylv-sepia**: x86_64 Linux/NixOS server, pylv base (with Disko, agenix, copyparty)
+- **pylv-onyx**: x86_64 Linux/NixOS, pylv base (with niri, DankMaterialShell, OpenClaw)
 
 #### Base System
 
@@ -92,6 +93,11 @@ Defined in `inventory.nix` (single source of truth). `kind` field determines bui
 ### Module System
 
 Each module in `modules/` manages a specific tool. **When modifying settings for any tool, look in the corresponding module directory first.**
+
+Common NixOS modules live under `modules/nixos`; host-specific NixOS input
+modules and values live in `hosts/<name>/configuration.nix`. OpenClaw host
+values are set in `hosts/pylv-onyx/configuration.nix` through
+`modules.openclaw`.
 
 ```text
 modules/<name>/

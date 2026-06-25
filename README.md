@@ -18,6 +18,35 @@ echo "experimental-features = nix-command flakes" | sudo tee -a /etc/nix/nix.con
   The checkout path still matters for modules that intentionally install
   out-of-store symlinks back to the repo.
 
+## Architecture
+
+This flake supports standalone Home Manager environments and NixOS hosts.
+macOS entries in `inventory.nix` are Home Manager only; Linux NixOS entries
+compose system configuration plus a Home Manager user.
+
+```text
+flake.nix                         # Main flake configuration
+inventory.nix                     # All Home Manager environments and NixOS hosts
+base/default.nix                  # Common Home Manager imports and default enables
+base/<profile>/home.nix           # Profile-specific Home Manager extensions
+modules/<name>/default.nix        # Reusable Home Manager or NixOS module
+modules/nixos/                    # Common NixOS modules and shared secrets
+hosts/<name>/configuration.nix    # Host-specific NixOS imports and values
+lib/pkgs.nix                      # Overlay and per-system package-set construction
+lib/home-configurations.nix       # Home Manager configuration builder
+lib/nixos-configurations.nix      # NixOS configuration builder
+lib/builders.nix                  # Backward-compatible builder aggregation
+```
+
+Home Manager modules expose `modules.<name>.enable`; `base/default.nix` owns
+common default enables, and profile files can override them. NixOS input modules
+that are host-specific, such as Disko, Copyparty, niri, and DankMaterialShell,
+are imported by the relevant `hosts/<name>/configuration.nix`.
+
+`modules/openclaw` is a parameterized NixOS module. `pylv-onyx` currently
+enables it and provides host values such as `lanInterface`, proxy ports, and
+`stateDir` in `hosts/pylv-onyx/configuration.nix`.
+
 ## Codex Plugin for Claude Code
 
 The official [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc) plugin is installed, enabling Codex integration from within Claude Code.
@@ -339,8 +368,8 @@ nix build .#nixosConfigurations.pylv-sepia.config.system.build.toplevel
 - For Cloudflare Tunnel / Access exposure, use the separate loopback-only origin `http://127.0.0.1:18791` instead of reusing the LAN listener
 - Suggested public hostname target: map your Cloudflare public hostname to `http://127.0.0.1:18791`, then protect it with a Cloudflare Access self-hosted app
 - `openclaw dashboard --no-open` on the host now prints the bare local URL `http://127.0.0.1:18789/`; for a remote LAN browser, just open `http://pylv-onyx:18790` or `http://192.168.0.10:18790`
-- OpenClaw bootstrap and guardrails live in [`modules/openclaw/default.nix`](./modules/openclaw/default.nix)
-- Nix now seeds `/etc/openclaw/openclaw.seed.json` and `/etc/openclaw/openclaw.guardrails.json`, while the mutable runtime config lives at `~/.openclaw/openclaw.json`
+- OpenClaw reusable wiring lives in [`modules/openclaw/default.nix`](./modules/openclaw/default.nix); `pylv-onyx` supplies host values through `modules.openclaw`.
+- Nix seeds `/etc/openclaw/openclaw.seed.json`, while the mutable runtime config lives at `~/.openclaw/openclaw.json`.
 - The host-level `openclaw` command is a hybrid wrapper: Nix installs the package, but CLI service management overrides the upstream `OPENCLAW_NIX_MODE=1` default with an empty value so `openclaw gateway install` can manage the user service directly
 
 ### `pylv-onyx` OpenClaw Open WebUI access

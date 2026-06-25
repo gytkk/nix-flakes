@@ -11,6 +11,14 @@ are defined but not actively referenced/imported/used anywhere in the repo.
 > Nothing has been removed. This is a decision document; act on targets only after
 > confirming the medium/low-confidence items.
 
+Current unresolved cleanup targets outside the structure refactor:
+
+- `modules/vscode/`
+- `modules/hermes-agent/README.md`
+- `docs/superpowers/plans/*.md`
+- uninstalled one-shot helper scripts
+- stale or unlinked README files
+
 ---
 
 ## Advisory review findings
