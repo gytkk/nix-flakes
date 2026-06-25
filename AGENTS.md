@@ -49,7 +49,7 @@ nixos-rebuild switch --flake .#<host>
 
 - **Formatting**: Enforced by `nixfmt` (2-space indent). Use `with pkgs;` for package lists.
 - **Naming**: Variables/options use camelCase, files use lowercase, directories use lowercase/kebab, environments use kebab-case.
-- **Module pattern**: `let cfg = config.modules.name; in { options.modules.name = { enable = lib.mkOption { ... }; }; config = lib.mkIf cfg.enable { ... }; }`
+- **Module pattern**: Home Manager modules expose `options.modules.<name>.enable` and gate runtime config with `lib.mkIf cfg.enable`. `base/default.nix` owns common default enable values; profile files override with `lib.mkForce` or plain assignments when needed.
 - **Imports**: Use relative paths, import directories by name (e.g., `../modules/claude`)
 - **Conditionals**: `lib.mkIf`, `lib.mkMerge`, `lib.mkForce`
 - **Host definition**: See `inventory.nix` for required fields (`kind`, `system`, `username`, `homeDirectory`, `profile`)

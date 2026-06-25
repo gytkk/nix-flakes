@@ -7,6 +7,7 @@
 }:
 
 let
+  cfg = config.modules.zellij;
   generatedThemes = config.lib.file.mkOutOfStoreSymlink (themeExports.mutableDir "zellij");
   configTemplate = builtins.readFile ./files/config.kdl;
   platformSettings = lib.optionalString pkgs.stdenv.isDarwin ''
@@ -34,8 +35,16 @@ let
 in
 
 {
-  home.packages = [ zellijWrapper ];
+  options.modules.zellij.enable = lib.mkOption {
+    type = lib.types.bool;
+    default = false;
+    description = "Enable Zellij module";
+  };
 
-  xdg.configFile."zellij/config.kdl".source = renderedConfig;
-  xdg.configFile."zellij/themes".source = generatedThemes;
+  config = lib.mkIf cfg.enable {
+    home.packages = [ zellijWrapper ];
+
+    xdg.configFile."zellij/config.kdl".source = renderedConfig;
+    xdg.configFile."zellij/themes".source = generatedThemes;
+  };
 }

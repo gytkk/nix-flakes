@@ -1,12 +1,14 @@
 {
   config,
   flakeDirectory,
+  lib,
   pkgs,
   themeExports,
   ...
 }:
 
 let
+  cfg = config.modules.tmux;
   mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/tmux/${path}";
   generatedThemes = themeExports.mutableDirLink config.lib.file "tmux";
   selectedTheme =
@@ -34,19 +36,27 @@ let
   '';
 in
 {
-  home.packages = [
-    pkgs.tmux
-    tmuxSessionManager
-    tmuxAgentStatus
-    tmuxAgentWindowStatus
-    tmuxAgentRun
-  ];
+  options.modules.tmux.enable = lib.mkOption {
+    type = lib.types.bool;
+    default = false;
+    description = "Enable tmux module";
+  };
 
-  xdg.configFile = {
-    "tmux/tmux.conf".source = mkSymlink "files/tmux.conf";
-    "tmux/keybindings.conf".source = mkSymlink "files/keybindings.conf";
-    "tmux/statusline.conf".source = mkSymlink "files/statusline.conf";
-    "tmux/themes".source = generatedThemes;
-    "tmux/theme.conf".source = selectedTheme;
+  config = lib.mkIf cfg.enable {
+    home.packages = [
+      pkgs.tmux
+      tmuxSessionManager
+      tmuxAgentStatus
+      tmuxAgentWindowStatus
+      tmuxAgentRun
+    ];
+
+    xdg.configFile = {
+      "tmux/tmux.conf".source = mkSymlink "files/tmux.conf";
+      "tmux/keybindings.conf".source = mkSymlink "files/keybindings.conf";
+      "tmux/statusline.conf".source = mkSymlink "files/statusline.conf";
+      "tmux/themes".source = generatedThemes;
+      "tmux/theme.conf".source = selectedTheme;
+    };
   };
 }

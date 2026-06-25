@@ -1,26 +1,36 @@
 {
   config,
+  lib,
   pkgs,
   flakeDirectory,
   ...
 }:
 
 let
+  cfg = config.modules.opencode;
   mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/opencode/${path}";
 in
 {
-  # Install OpenCode via gytkk/flake-stores (pre-built binaries)
-  home.packages = [
-    pkgs.opencode
-  ];
+  options.modules.opencode.enable = lib.mkOption {
+    type = lib.types.bool;
+    default = false;
+    description = "Enable OpenCode module";
+  };
 
-  # Create ~/.config/opencode/opencode.json file
-  home.file.".config/opencode/opencode.json".source = mkSymlink "files/opencode.json";
+  config = lib.mkIf cfg.enable {
+    # Install OpenCode via gytkk/flake-stores (pre-built binaries)
+    home.packages = [
+      pkgs.opencode
+    ];
 
-  # Deploy native notification plugin (uses OSC 777 for Ghostty desktop notifications)
-  home.file.".config/opencode/plugins/native-notify.ts".source =
-    mkSymlink "files/plugins/native-notify.ts";
+    # Create ~/.config/opencode/opencode.json file
+    home.file.".config/opencode/opencode.json".source = mkSymlink "files/opencode.json";
 
-  # Create ~/.config/opencode/AGENTS.md file
-  home.file.".config/opencode/AGENTS.md".source = mkSymlink "files/AGENTS.md";
+    # Deploy native notification plugin (uses OSC 777 for Ghostty desktop notifications)
+    home.file.".config/opencode/plugins/native-notify.ts".source =
+      mkSymlink "files/plugins/native-notify.ts";
+
+    # Create ~/.config/opencode/AGENTS.md file
+    home.file.".config/opencode/AGENTS.md".source = mkSymlink "files/AGENTS.md";
+  };
 }

@@ -1,11 +1,13 @@
 {
   config,
   flakeDirectory,
+  lib,
   themeExports,
   ...
 }:
 
 let
+  cfg = config.modules.wezterm;
   mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/wezterm/${path}";
   generatedThemes = themeExports.mutableDirLink config.lib.file "wezterm";
   selectedTheme = ''
@@ -14,9 +16,17 @@ let
   '';
 in
 {
-  xdg.configFile = {
-    "wezterm/wezterm.lua".source = mkSymlink "files/wezterm.lua";
-    "wezterm/theme.lua".text = selectedTheme;
-    "wezterm/themes".source = generatedThemes;
+  options.modules.wezterm.enable = lib.mkOption {
+    type = lib.types.bool;
+    default = false;
+    description = "Enable WezTerm module";
+  };
+
+  config = lib.mkIf cfg.enable {
+    xdg.configFile = {
+      "wezterm/wezterm.lua".source = mkSymlink "files/wezterm.lua";
+      "wezterm/theme.lua".text = selectedTheme;
+      "wezterm/themes".source = generatedThemes;
+    };
   };
 }

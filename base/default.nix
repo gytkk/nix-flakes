@@ -17,6 +17,7 @@
     ../modules/claude
     ../modules/cmux
     ../modules/codex
+    ../modules/ghostty
     ../modules/git
     ../modules/k9s
     ../modules/opencode
@@ -38,7 +39,25 @@
   };
 
   config = {
-    modules.agentSessionRecord.enable = lib.mkDefault true;
+    modules = {
+      agentSessionRecord.enable = lib.mkDefault true;
+      aerospace.enable = lib.mkDefault pkgs.stdenv.isDarwin;
+      claude.enable = lib.mkDefault true;
+      cmux.enable = lib.mkDefault true;
+      codex.enable = lib.mkDefault true;
+      ghostty.enable = lib.mkDefault true;
+      git.enable = lib.mkDefault true;
+      k9s.enable = lib.mkDefault true;
+      lsp.enable = lib.mkDefault true;
+      omnigent.enable = lib.mkDefault true;
+      opencode.enable = lib.mkDefault true;
+      tmux.enable = lib.mkDefault true;
+      vim.enable = lib.mkDefault true;
+      wezterm.enable = lib.mkDefault true;
+      zed.enable = lib.mkDefault true;
+      zellij.enable = lib.mkDefault true;
+      zsh.enable = lib.mkDefault true;
+    };
 
     # Disable news on update
     news.display = "silent";

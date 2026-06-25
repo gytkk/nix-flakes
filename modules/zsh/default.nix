@@ -9,6 +9,7 @@
 }:
 
 let
+  cfg = config.modules.zsh;
   isPylvOnyx = osConfig != null && (osConfig.networking.hostName or null) == "pylv-onyx";
 in
 let
@@ -17,218 +18,226 @@ let
   );
 in
 {
-  home.packages = with pkgs; [
-    zsh
-  ];
+  options.modules.zsh.enable = lib.mkOption {
+    type = lib.types.bool;
+    default = false;
+    description = "Enable Zsh module";
+  };
 
-  # Zsh configuration
-  programs.zsh = {
-    enable = true;
+  config = lib.mkIf cfg.enable {
+    home.packages = with pkgs; [
+      zsh
+    ];
 
-    # Use XDG config directory for zsh configuration files
-    dotDir = "${config.xdg.configHome}/zsh";
+    # Zsh configuration
+    programs.zsh = {
+      enable = true;
 
-    # Enable features
-    autosuggestion.enable = true;
-    enableCompletion = true;
-    syntaxHighlighting.enable = true;
+      # Use XDG config directory for zsh configuration files
+      dotDir = "${config.xdg.configHome}/zsh";
 
-    # History
-    history = {
-      size = 10000;
-      save = 10000;
-      path = "${config.home.homeDirectory}/.zsh_history";
-      ignoreDups = true;
-      share = true;
-      extended = true;
-    };
+      # Enable features
+      autosuggestion.enable = true;
+      enableCompletion = true;
+      syntaxHighlighting.enable = true;
 
-    shellAliases = {
-      # Home manager aliases
-      hm = "home-manager";
-      hmb = "home-manager build";
-      hms = "home-manager switch";
+      # History
+      history = {
+        size = 10000;
+        save = 10000;
+        path = "${config.home.homeDirectory}/.zsh_history";
+        ignoreDups = true;
+        share = true;
+        extended = true;
+      };
 
-      # ls aliases with color by default
-      ls = "ls --color=auto";
-      ll = "ls -la --color=auto";
-      lh = "ls -lh --color=auto";
+      shellAliases = {
+        # Home manager aliases
+        hm = "home-manager";
+        hmb = "home-manager build";
+        hms = "home-manager switch";
 
-      # git
-      ga = "git add";
-      gb = "git branch";
-      gc = "git commit";
-      gp = "git push";
-      gl = "git pull";
-      gst = "git status";
-      gsw = "git switch";
-      gco = "git checkout";
-      gd = "git diff";
-      lg = "lazygit";
+        # ls aliases with color by default
+        ls = "ls --color=auto";
+        ll = "ls -la --color=auto";
+        lh = "ls -lh --color=auto";
 
-      # Neovim
-      vim = "nvim";
-      vi = "nvim";
-      vimdiff = "nvim -d";
+        # git
+        ga = "git add";
+        gb = "git branch";
+        gc = "git commit";
+        gp = "git push";
+        gl = "git pull";
+        gst = "git status";
+        gsw = "git switch";
+        gco = "git checkout";
+        gd = "git diff";
+        lg = "lazygit";
 
-      # OpenCode
-      oc = "opencode";
+        # Neovim
+        vim = "nvim";
+        vi = "nvim";
+        vimdiff = "nvim -d";
 
-      # Zellij
-      zj = "zellij";
+        # OpenCode
+        oc = "opencode";
 
-      # k8s aliases
-      kl = "kubectl";
-      kx = "kubectx";
-      kn = "kubens";
-    }
-    // lib.optionalAttrs (!pkgs.stdenv.isDarwin) {
-      zed = if isWSL then "zed.exe" else "zeditor";
-    };
+        # Zellij
+        zj = "zellij";
 
-    # Environment variables
-    sessionVariables = {
-      SHELL = "${pkgs.zsh}/bin/zsh";
-      EDITOR = "nvim";
-      VISUAL = "nvim";
-      COLORTERM = "truecolor";
-      LANG = "en_US.UTF-8";
-      LC_CTYPE = "en_US.UTF-8";
-    };
+        # k8s aliases
+        kl = "kubectl";
+        kx = "kubectx";
+        kn = "kubens";
+      }
+      // lib.optionalAttrs (!pkgs.stdenv.isDarwin) {
+        zed = if isWSL then "zed.exe" else "zeditor";
+      };
 
-    # Zsh initialization
-    # https://nix-community.github.io/home-manager/options.xhtml#opt-programs.zsh.initContent
-    initContent =
-      let
-        earlyInit = lib.mkOrder 500 ''
-          # Load Nix if not ready
-          if [[ ! $(command -v nix) && -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]]; then
-            source '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
-          fi
+      # Environment variables
+      sessionVariables = {
+        SHELL = "${pkgs.zsh}/bin/zsh";
+        EDITOR = "nvim";
+        VISUAL = "nvim";
+        COLORTERM = "truecolor";
+        LANG = "en_US.UTF-8";
+        LC_CTYPE = "en_US.UTF-8";
+      };
 
-          # Prevent LC_ALL from overriding LANG/LC_CTYPE
-          unset LC_ALL
-
-          # Temporary workaround for headless user-systemd sessions so Hermes CLI
-          # can discover the running gateway service via `systemctl --user`.
-          if [[ -z "''${XDG_RUNTIME_DIR:-}" ]]; then
-            export XDG_RUNTIME_DIR="/run/user/$(id -u)"
-          fi
-          if [[ -z "''${DBUS_SESSION_BUS_ADDRESS:-}" && -S "$XDG_RUNTIME_DIR/bus" ]]; then
-            export DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR/bus"
-          fi
-        '';
-
-        zshConfig = lib.mkOrder 1000 ''
-          # gh auth 후 자동으로 ~/.netrc 업데이트 (Nix flake용)
-          gh-auth-netrc() {
-            gh auth "$@"
-            if [[ $? -eq 0 ]] && gh auth status &>/dev/null; then
-              local token=$(gh auth token 2>/dev/null)
-              if [[ -n "$token" ]]; then
-                # 기존 github.com 항목 제거 후 새로 추가
-                grep -v "machine github.com" ~/.netrc > ~/.netrc.tmp 2>/dev/null || touch ~/.netrc.tmp
-                echo "machine github.com login oauth password $token" >> ~/.netrc.tmp
-                mv ~/.netrc.tmp ~/.netrc
-                chmod 600 ~/.netrc
-                echo "Updated ~/.netrc with GitHub token for Nix"
-              fi
+      # Zsh initialization
+      # https://nix-community.github.io/home-manager/options.xhtml#opt-programs.zsh.initContent
+      initContent =
+        let
+          earlyInit = lib.mkOrder 500 ''
+            # Load Nix if not ready
+            if [[ ! $(command -v nix) && -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]]; then
+              source '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
             fi
-          }
 
-          # History prefix search with up/down arrows
-          autoload -U up-line-or-beginning-search down-line-or-beginning-search
-          zle -N up-line-or-beginning-search
-          zle -N down-line-or-beginning-search
-          # ^[[A/^[[B: normal mode (macOS, some Linux terminals)
-          # ^[OA/^[OB: application mode (Linux, WSL, tmux)
-          bindkey "^[[A" up-line-or-beginning-search
-          bindkey "^[[B" down-line-or-beginning-search
-          bindkey "^[OA" up-line-or-beginning-search
-          bindkey "^[OB" down-line-or-beginning-search
+            # Prevent LC_ALL from overriding LANG/LC_CTYPE
+            unset LC_ALL
 
-          # Home/End key bindings (for vi mode compatibility)
-          # ^[[H/^[[F: normal mode, ^[OH/^[OF: application mode
-          bindkey "^[[H" beginning-of-line
-          bindkey "^[[F" end-of-line
-          bindkey "^[OH" beginning-of-line
-          bindkey "^[OF" end-of-line
-          bindkey -M vicmd "^[[H" beginning-of-line
-          bindkey -M vicmd "^[[F" end-of-line
-          bindkey -M vicmd "^[OH" beginning-of-line
-          bindkey -M vicmd "^[OF" end-of-line
-
-          # Enable colors
-          autoload -U colors && colors
-
-          # Set zsh completion to use LS_COLORS
-          zstyle ':completion:*' list-colors "$LS_COLORS"
-
-          # Set uv shell completion
-          if command -v uv > /dev/null; then
-            eval "$(uv generate-shell-completion zsh)"
-          fi
-
-          # Initialize micromamba
-          if command -v micromamba > /dev/null; then
-            eval "$(micromamba shell hook --shell zsh)"
-          fi
-        '';
-
-        openclawCompletion = lib.mkIf isPylvOnyx (
-          lib.mkOrder 1100 ''
-            # OpenClaw completion is managed declaratively here so the CLI's
-            # one-shot installer does not get reverted by Home Manager.
-            if command -v openclaw > /dev/null; then
-              local_openclaw_completion_cache="$HOME/.openclaw/completions/openclaw.zsh"
-              if [[ ! -r "$local_openclaw_completion_cache" ]]; then
-                openclaw completion --write-state >/dev/null 2>&1 || true
-              fi
-              # OpenClaw Completion
-              [[ -r "$local_openclaw_completion_cache" ]] && source "$local_openclaw_completion_cache"
-              unset local_openclaw_completion_cache
+            # Temporary workaround for headless user-systemd sessions so Hermes CLI
+            # can discover the running gateway service via `systemctl --user`.
+            if [[ -z "''${XDG_RUNTIME_DIR:-}" ]]; then
+              export XDG_RUNTIME_DIR="/run/user/$(id -u)"
             fi
-          ''
-        );
-      in
-      lib.mkMerge [
-        earlyInit
-        zshConfig
-        openclawCompletion
-      ];
-  };
+            if [[ -z "''${DBUS_SESSION_BUS_ADDRESS:-}" && -S "$XDG_RUNTIME_DIR/bus" ]]; then
+              export DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR/bus"
+            fi
+          '';
 
-  # Starship prompt
-  programs.starship = {
-    enable = true;
-    enableZshIntegration = true;
-  };
+          zshConfig = lib.mkOrder 1000 ''
+            # gh auth 후 자동으로 ~/.netrc 업데이트 (Nix flake용)
+            gh-auth-netrc() {
+              gh auth "$@"
+              if [[ $? -eq 0 ]] && gh auth status &>/dev/null; then
+                local token=$(gh auth token 2>/dev/null)
+                if [[ -n "$token" ]]; then
+                  # 기존 github.com 항목 제거 후 새로 추가
+                  grep -v "machine github.com" ~/.netrc > ~/.netrc.tmp 2>/dev/null || touch ~/.netrc.tmp
+                  echo "machine github.com login oauth password $token" >> ~/.netrc.tmp
+                  mv ~/.netrc.tmp ~/.netrc
+                  chmod 600 ~/.netrc
+                  echo "Updated ~/.netrc with GitHub token for Nix"
+                fi
+              fi
+            }
 
-  # Starship configuration from generated canonical theme export
-  xdg.configFile."starship.toml".source = starshipThemeConfig;
+            # History prefix search with up/down arrows
+            autoload -U up-line-or-beginning-search down-line-or-beginning-search
+            zle -N up-line-or-beginning-search
+            zle -N down-line-or-beginning-search
+            # ^[[A/^[[B: normal mode (macOS, some Linux terminals)
+            # ^[OA/^[OB: application mode (Linux, WSL, tmux)
+            bindkey "^[[A" up-line-or-beginning-search
+            bindkey "^[[B" down-line-or-beginning-search
+            bindkey "^[OA" up-line-or-beginning-search
+            bindkey "^[OB" down-line-or-beginning-search
 
-  # dircolors for LS_COLORS
-  programs.dircolors = {
-    enable = true;
-    enableZshIntegration = true;
-  };
+            # Home/End key bindings (for vi mode compatibility)
+            # ^[[H/^[[F: normal mode, ^[OH/^[OF: application mode
+            bindkey "^[[H" beginning-of-line
+            bindkey "^[[F" end-of-line
+            bindkey "^[OH" beginning-of-line
+            bindkey "^[OF" end-of-line
+            bindkey -M vicmd "^[[H" beginning-of-line
+            bindkey -M vicmd "^[[F" end-of-line
+            bindkey -M vicmd "^[OH" beginning-of-line
+            bindkey -M vicmd "^[OF" end-of-line
 
-  # zoxide (replacement for z)
-  programs.zoxide = {
-    enable = true;
-    enableZshIntegration = true;
-  };
+            # Enable colors
+            autoload -U colors && colors
 
-  # fzf configuration
-  programs.fzf = {
-    enable = true;
-    enableZshIntegration = true;
-  };
+            # Set zsh completion to use LS_COLORS
+            zstyle ':completion:*' list-colors "$LS_COLORS"
 
-  # direnv configuration
-  programs.direnv = {
-    enable = true;
-    enableZshIntegration = true;
-    nix-direnv.enable = true;
+            # Set uv shell completion
+            if command -v uv > /dev/null; then
+              eval "$(uv generate-shell-completion zsh)"
+            fi
+
+            # Initialize micromamba
+            if command -v micromamba > /dev/null; then
+              eval "$(micromamba shell hook --shell zsh)"
+            fi
+          '';
+
+          openclawCompletion = lib.mkIf isPylvOnyx (
+            lib.mkOrder 1100 ''
+              # OpenClaw completion is managed declaratively here so the CLI's
+              # one-shot installer does not get reverted by Home Manager.
+              if command -v openclaw > /dev/null; then
+                local_openclaw_completion_cache="$HOME/.openclaw/completions/openclaw.zsh"
+                if [[ ! -r "$local_openclaw_completion_cache" ]]; then
+                  openclaw completion --write-state >/dev/null 2>&1 || true
+                fi
+                # OpenClaw Completion
+                [[ -r "$local_openclaw_completion_cache" ]] && source "$local_openclaw_completion_cache"
+                unset local_openclaw_completion_cache
+              fi
+            ''
+          );
+        in
+        lib.mkMerge [
+          earlyInit
+          zshConfig
+          openclawCompletion
+        ];
+    };
+
+    # Starship prompt
+    programs.starship = {
+      enable = true;
+      enableZshIntegration = true;
+    };
+
+    # Starship configuration from generated canonical theme export
+    xdg.configFile."starship.toml".source = starshipThemeConfig;
+
+    # dircolors for LS_COLORS
+    programs.dircolors = {
+      enable = true;
+      enableZshIntegration = true;
+    };
+
+    # zoxide (replacement for z)
+    programs.zoxide = {
+      enable = true;
+      enableZshIntegration = true;
+    };
+
+    # fzf configuration
+    programs.fzf = {
+      enable = true;
+      enableZshIntegration = true;
+    };
+
+    # direnv configuration
+    programs.direnv = {
+      enable = true;
+      enableZshIntegration = true;
+      nix-direnv.enable = true;
+    };
   };
 }
