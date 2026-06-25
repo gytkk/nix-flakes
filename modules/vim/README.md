@@ -16,6 +16,7 @@ This module configures Neovim as the primary editor with a modern Lua-based setu
 - `snacks.nvim` for file picking, explorer, notifications, status column, inlay hint toggles, and lazygit integration
 - `snacks.nvim` extras for git browse, file rename, smooth scrolling, and inline image rendering
 - `snacks.nvim` GitHub integration for issues and pull requests via the `gh` CLI
+- `persistence.nvim` for directory and branch-aware session saving and restore on bare `nvim` startup
 - `blink.cmp` completion with LSP, snippets, path, buffer, and on-demand Minuet AI suggestions
 - `minuet-ai.nvim` inline suggestions backed by the OpenAI API
 - Built-in Neovim LSP configuration for Nix, Go, Rust, TypeScript, Terraform, YAML, Markdown, and Python via `ty`
@@ -56,6 +57,10 @@ EDITOR=vim agenix -e secrets/openai-api-key.age
 - `<leader>gh`: blame current line
 - `<leader>gi`: open GitHub issues
 - `<leader>gp`: open GitHub pull requests
+- `<leader>qs`: restore the current directory session
+- `<leader>qS`: select a saved session
+- `<leader>ql`: restore the last saved session
+- `<leader>qd`: stop saving the current session on exit
 - `gd`: go to definition
 - `gb`: jump back in the jumplist
 - `<leader>cR`: rename current file with LSP-aware updates

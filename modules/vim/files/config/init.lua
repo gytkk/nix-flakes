@@ -666,6 +666,21 @@ local trouble = {
   },
 }
 
+local persistence = {
+  "folke/persistence.nvim",
+  event = "BufReadPre",
+  opts = {
+    need = 1,
+    branch = true,
+  },
+  keys = {
+    { "<leader>qs", function() require("persistence").load() end,               desc = "Restore Session" },
+    { "<leader>qS", function() require("persistence").select() end,             desc = "Select Session" },
+    { "<leader>ql", function() require("persistence").load({ last = true }) end, desc = "Restore Last Session" },
+    { "<leader>qd", function() require("persistence").stop() end,               desc = "Stop Session Save" },
+  },
+}
+
 -------------------------------------------------------------------------------
 -- Setup lazy.nvim
 -------------------------------------------------------------------------------
@@ -688,6 +703,7 @@ require("lazy").setup({
     conform,
     rendermd,
     trouble,
+    persistence,
   },
 })
 
@@ -747,12 +763,28 @@ vim.api.nvim_create_autocmd("BufEnter", {
   end,
 })
 
--- Open file picker when neovim starts with no arguments
+local function hasCurrentSession(persistence_module)
+  local session = persistence_module.current()
+  if vim.fn.filereadable(session) ~= 0 then return true end
+
+  session = persistence_module.current({ branch = false })
+  return vim.fn.filereadable(session) ~= 0
+end
+
+-- Restore the current directory session on bare startup, or open the file picker
+-- when no session has been saved yet.
 vim.api.nvim_create_autocmd("VimEnter", {
+  nested = true,
   callback = function()
-    if vim.fn.argc() == 0 then
-      Snacks.picker.files()
+    if vim.fn.argc() ~= 0 then return end
+
+    local ok, persistence_module = pcall(require, "persistence")
+    if ok and hasCurrentSession(persistence_module) then
+      persistence_module.load()
+      return
     end
+
+    Snacks.picker.files()
   end,
 })
 
