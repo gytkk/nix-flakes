@@ -42,10 +42,10 @@ config.enable_tab_bar = true
 config.hide_tab_bar_if_only_one_tab = false
 config.show_new_tab_button_in_tab_bar = false
 config.tab_bar_at_bottom = false
-config.tab_max_width = 30
+config.tab_max_width = 32
 config.use_fancy_tab_bar = true
 
-local tab_min_width = 17
+local tab_min_width = 18
 
 local function tab_title(tab)
   local title = tab.tab_title
