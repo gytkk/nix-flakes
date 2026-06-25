@@ -11,6 +11,7 @@ vim.opt.termguicolors = true
 vim.opt.mousescroll = "ver:1,hor:1"
 vim.opt.clipboard:append("unnamedplus")
 vim.opt.updatetime = 1000
+vim.opt.sessionoptions:remove("blank")
 
 -- Indentation
 vim.opt.expandtab = true
@@ -770,6 +771,45 @@ local function hasCurrentSession(persistence_module)
   session = persistence_module.current({ branch = false })
   return vim.fn.filereadable(session) ~= 0
 end
+
+local function isEmptyNormalBuffer(buf)
+  if vim.bo[buf].buftype ~= "" or vim.bo[buf].modified then return false end
+  if vim.api.nvim_buf_get_name(buf) ~= "" then return false end
+  if vim.api.nvim_buf_line_count(buf) ~= 1 then return false end
+
+  return vim.api.nvim_buf_get_lines(buf, 0, 1, false)[1] == ""
+end
+
+local function closeSessionBlankWindows()
+  local normal_wins = {}
+  local blank_wins = {}
+
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    if vim.api.nvim_win_is_valid(win) and vim.api.nvim_win_get_config(win).relative == "" then
+      normal_wins[#normal_wins + 1] = win
+
+      local buf = vim.api.nvim_win_get_buf(win)
+      if isEmptyNormalBuffer(buf) then
+        blank_wins[#blank_wins + 1] = win
+      end
+    end
+  end
+
+  for _, win in ipairs(blank_wins) do
+    if #normal_wins <= 1 then return end
+    if vim.api.nvim_win_is_valid(win) then
+      pcall(vim.api.nvim_win_close, win, false)
+      normal_wins = vim.tbl_filter(function(normal_win)
+        return vim.api.nvim_win_is_valid(normal_win)
+      end, normal_wins)
+    end
+  end
+end
+
+vim.api.nvim_create_autocmd("User", {
+  pattern = "PersistenceLoadPost",
+  callback = closeSessionBlankWindows,
+})
 
 -- Restore the current directory session on bare startup, or open the file picker
 -- when no session has been saved yet.
