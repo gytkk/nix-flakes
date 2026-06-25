@@ -79,6 +79,14 @@ EDITOR=vim agenix -e secrets/openai-api-key.age
 
 ## Usage
 
+Open a project with the saved session and the left file explorer:
+
+```bash
+nvim
+```
+
+Opening a specific file skips startup session restore and explorer opening:
+
 ```bash
 nvim filename.txt
 vim filename.txt

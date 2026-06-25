@@ -811,8 +811,33 @@ vim.api.nvim_create_autocmd("User", {
   callback = closeSessionBlankWindows,
 })
 
--- Restore the current directory session on bare startup, or open the file picker
--- when no session has been saved yet.
+local function openStartupExplorer()
+  if #Snacks.picker.get({ source = "explorer", tab = false }) > 0 then return end
+
+  local current_win = vim.api.nvim_get_current_win()
+  Snacks.explorer()
+
+  vim.defer_fn(function()
+    if vim.api.nvim_win_is_valid(current_win) and not vim.w[current_win].snacks_layout then
+      vim.api.nvim_set_current_win(current_win)
+      return
+    end
+
+    for _, win in ipairs(vim.api.nvim_list_wins()) do
+      if vim.api.nvim_win_is_valid(win)
+          and vim.api.nvim_win_get_config(win).relative == ""
+          and not vim.w[win].snacks_layout
+      then
+        vim.api.nvim_set_current_win(win)
+        return
+      end
+    end
+  end, 50)
+end
+
+-- Restore the current directory session on bare startup, then keep the explorer
+-- visible for project navigation without stealing focus from a restored edit
+-- window. If no session exists yet, start directly in the explorer.
 vim.api.nvim_create_autocmd("VimEnter", {
   nested = true,
   callback = function()
@@ -821,10 +846,11 @@ vim.api.nvim_create_autocmd("VimEnter", {
     local ok, persistence_module = pcall(require, "persistence")
     if ok and hasCurrentSession(persistence_module) then
       persistence_module.load()
+      openStartupExplorer()
       return
     end
 
-    Snacks.picker.files()
+    Snacks.explorer()
   end,
 })
 
