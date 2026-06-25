@@ -47,13 +47,94 @@ config.use_fancy_tab_bar = true
 
 local tab_min_width = 18
 
+local function basename(path)
+  if not path or #path == 0 then
+    return nil
+  end
+
+  local normalized = path:gsub('\\', '/'):gsub('/+$', '')
+  return normalized:match('([^/]+)$') or normalized
+end
+
+local function decode_uri_path(path)
+  return path:gsub('%%(%x%x)', function(hex)
+    return string.char(tonumber(hex, 16))
+  end)
+end
+
+local function cwd_path(cwd)
+  if not cwd then
+    return nil
+  end
+
+  if type(cwd) == 'table' and cwd.file_path and #cwd.file_path > 0 then
+    return cwd.file_path
+  end
+
+  local path = tostring(cwd)
+  if path:match('^file://') then
+    path = path:gsub('^file://[^/]*', '')
+    return decode_uri_path(path)
+  end
+
+  return path
+end
+
+local function compact_path(path)
+  if not path or #path == 0 then
+    return nil
+  end
+
+  path = path:gsub('\\', '/'):gsub('/+$', '')
+
+  local home = os.getenv('HOME')
+  if home and #home > 0 then
+    home = home:gsub('\\', '/'):gsub('/+$', '')
+    if path == home then
+      return '~'
+    end
+    if path:sub(1, #home + 1) == home .. '/' then
+      path = path:sub(#home + 2)
+    end
+  end
+
+  local parts = {}
+  for part in path:gmatch('[^/]+') do
+    table.insert(parts, part)
+  end
+
+  if #parts == 0 then
+    return '/'
+  end
+  if #parts == 1 then
+    return parts[1]
+  end
+
+  return parts[#parts - 1] .. '/' .. parts[#parts]
+end
+
 local function tab_title(tab)
   local title = tab.tab_title
   if title and #title > 0 then
     return title
   end
 
-  return tab.active_pane.title
+  local pane = tab.active_pane
+  local pane_title = pane.title or ''
+  local process_name = basename(pane.foreground_process_name)
+  if process_name == 'tmux' then
+    return pane_title
+  end
+
+  local cwd = compact_path(cwd_path(pane.current_working_dir))
+  if cwd and process_name and (pane_title == '' or pane_title == process_name) then
+    return process_name .. ': ' .. cwd
+  end
+  if cwd and pane_title == '' then
+    return cwd
+  end
+
+  return pane_title
 end
 
 wezterm.on('format-tab-title', function(tab, tabs, panes, config, hover, max_width)

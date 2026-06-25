@@ -257,7 +257,8 @@ Resources should supplement the tools instead of expanding the tool count:
 - The checked-in defaults keep `xterm-256color`, the generated shared theme,
   JetBrains Mono with Sarasa Mono CL fallback, a beam cursor, opaque
   background, hidden titlebar via resize-only decorations, a compact tab bar,
-  and IME-safe physical `Ctrl+letter` bindings.
+  shell/process tab titles enriched with compact current-directory context, and
+  IME-safe physical `Ctrl+letter` bindings.
 
 ## cmux config
 
