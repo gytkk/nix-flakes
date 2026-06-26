@@ -74,5 +74,6 @@
   "skipWorkflowUsageWarning": true,
   "theme": "auto",
   "teammateMode": "auto",
-  "skipAutoPermissionPrompt": true
+  "skipAutoPermissionPrompt": true,
+  "tui": "fullscreen"
 }
