@@ -167,7 +167,10 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    home.packages = [ pkgs.codex ];
+    home.packages = [
+      pkgs.codex
+      pkgs.mcp-nixos
+    ];
 
     home.file.".codex/AGENTS.md".source = mkSymlink "files/AGENTS.md";
     home.file.".codex/hooks.json".text = codexHooksJson;

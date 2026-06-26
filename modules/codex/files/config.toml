@@ -13,6 +13,9 @@ url = "https://developers.openai.com/mcp"
 [mcp_servers.context7]
 url = "https://mcp.context7.com/mcp"
 
+[mcp_servers.nixos]
+command = "mcp-nixos"
+
 [mcp_servers.playwright]
 command = "npx"
 args = ["-y", "@playwright/mcp@latest"]
