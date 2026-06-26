@@ -13,6 +13,7 @@ local p = {
   search_active = "#8a91c4",
   fg = "#cdd6f4",
   fg_muted = "#a6adc8",
+  fg_inactive = "#bac2de",
   fg_bright = "#b4befe",
   comment = "#9399b2",
   ghost_text = "#8fa4d0",
@@ -357,8 +358,14 @@ function M.setup()
   hl("MinuetVirtualText", { link = "BlinkCmpGhostText" })
 
   -- Plugin: snacks.nvim
-  hl("SnacksPickerDir", { fg = p.comment })
+  hl("SnacksPickerDir", { fg = p.fg_inactive })
   hl("SnacksPickerFile", { fg = p.fg })
+  hl("SnacksPickerPathIgnored", { fg = p.fg_inactive })
+  hl("SnacksPickerPathHidden", { fg = p.fg_inactive })
+  hl("SnacksPickerDimmed", { fg = p.fg_inactive })
+  hl("SnacksPickerGitStatus", { fg = p.fg_inactive })
+  hl("SnacksPickerGitStatusUntracked", { fg = p.fg_inactive })
+  hl("SnacksPickerGitStatusIgnored", { fg = p.fg_inactive })
   hl("SnacksPickerMatch", { fg = p.blue, bold = true })
   hl("SnacksPickerPrompt", { fg = p.blue })
   hl("SnacksIndent", { fg = p.bg_alt })

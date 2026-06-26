@@ -674,6 +674,7 @@ def nvim_lua(ctx: dict[str, Any], root: Path) -> str:
         "search_active": sharpen(r["ui"]["borderActive"], r["ui"]["bg"], light=is_light),
         "fg": r["ui"]["fg"],
         "fg_muted": r["ui"]["fgMuted"],
+        "fg_inactive": r["ui"]["fgInactive"],
         "fg_bright": r["ui"]["currentLineNumber"],
         "comment": r["syntax"]["comment"],
         "ghost_text": mix(r["syntax"]["comment"], p["blue"], 0.42 if is_light else 0.42),

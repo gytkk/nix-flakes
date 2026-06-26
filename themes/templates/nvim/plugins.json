@@ -131,13 +131,49 @@
         {
           "group": "SnacksPickerDir",
           "attrs": {
-            "fg": "$comment"
+            "fg": "$fg_inactive"
           }
         },
         {
           "group": "SnacksPickerFile",
           "attrs": {
             "fg": "$fg"
+          }
+        },
+        {
+          "group": "SnacksPickerPathIgnored",
+          "attrs": {
+            "fg": "$fg_inactive"
+          }
+        },
+        {
+          "group": "SnacksPickerPathHidden",
+          "attrs": {
+            "fg": "$fg_inactive"
+          }
+        },
+        {
+          "group": "SnacksPickerDimmed",
+          "attrs": {
+            "fg": "$fg_inactive"
+          }
+        },
+        {
+          "group": "SnacksPickerGitStatus",
+          "attrs": {
+            "fg": "$fg_inactive"
+          }
+        },
+        {
+          "group": "SnacksPickerGitStatusUntracked",
+          "attrs": {
+            "fg": "$fg_inactive"
+          }
+        },
+        {
+          "group": "SnacksPickerGitStatusIgnored",
+          "attrs": {
+            "fg": "$fg_inactive"
           }
         },
         {

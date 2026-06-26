@@ -13,6 +13,7 @@ local p = {
   search_active = "#5a5c53",
   fg = "#fdfff1",
   fg_muted = "#6e7066",
+  fg_inactive = "#939284",
   fg_bright = "#c0c1b5",
   comment = "#6e7066",
   ghost_text = "#729d9d",
@@ -382,6 +383,12 @@ function M.setup()
   -- Plugin: snacks.nvim
   hl("SnacksPickerDir", { fg = "#6e7066" })
   hl("SnacksPickerFile", { fg = "#fdfff1" })
+  hl("SnacksPickerPathIgnored", { fg = p.fg_inactive })
+  hl("SnacksPickerPathHidden", { fg = p.fg_inactive })
+  hl("SnacksPickerDimmed", { fg = p.fg_inactive })
+  hl("SnacksPickerGitStatus", { fg = p.fg_inactive })
+  hl("SnacksPickerGitStatusUntracked", { fg = p.fg_inactive })
+  hl("SnacksPickerGitStatusIgnored", { fg = p.fg_inactive })
   hl("SnacksPickerMatch", { fg = "#66d9ef", bold = true })
   hl("SnacksPickerPrompt", { fg = "#fd971f" })
   hl("SnacksIndent", { fg = "#57584f" })
