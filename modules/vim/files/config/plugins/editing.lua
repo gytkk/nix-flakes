@@ -8,10 +8,16 @@ M.conform = {
     { "<leader>cf", function() require("conform").format({ async = true }) end, mode = "", desc = "Format Buffer" },
   },
   opts = {
-    format_on_save = {
-      lsp_format = "fallback",
-      timeout_ms = 1000,
-    },
+    format_on_save = function(bufnr)
+      if vim.bo[bufnr].filetype == "markdown" then
+        return
+      end
+
+      return {
+        lsp_format = "fallback",
+        timeout_ms = 1000,
+      }
+    end,
     formatters_by_ft = {
       nix = { "nixfmt" },
       go = { "gofmt" },
