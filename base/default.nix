@@ -109,6 +109,11 @@
         base = "ko_KR.UTF-8";
       };
 
+      # Keep legacy nix profile installs visible in interactive shells.
+      sessionPath = [
+        "$HOME/.nix-profile/bin"
+      ];
+
       # 기본 패키지 (모든 환경에서 공통)
       packages = with pkgs; [
         # Nix
