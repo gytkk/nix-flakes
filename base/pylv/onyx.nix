@@ -1,4 +1,10 @@
-{ inputs, pkgs, ... }:
+{
+  inputs,
+  pkgs,
+  username,
+  homeDirectory,
+  ...
+}:
 {
   # pylv-onyx 데스크톱 환경 전용 설정
 
@@ -37,6 +43,11 @@
   programs.niri.settings.binds = {
     "Alt+Space".action.spawn = "walker";
   };
+
+  xdg.configFile."systemd/user/hermes-gateway.service.d/10-nix-profile-path.conf".text = ''
+    [Service]
+    Environment="PATH=${homeDirectory}/.hermes/hermes-agent/venv/bin:${homeDirectory}/.hermes/hermes-agent/node_modules/.bin:/run/current-system/sw/bin:${homeDirectory}/.nix-profile/bin:/etc/profiles/per-user/${username}/bin:${homeDirectory}/.local/bin:${homeDirectory}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+  '';
 
   programs.zen-browser.enable = true;
 }
