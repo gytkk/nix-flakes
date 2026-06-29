@@ -20,9 +20,10 @@
     ../modules/ghostty
     ../modules/git
     ../modules/k9s
-    ../modules/opencode
     ../modules/lsp
     ../modules/omnigent
+    ../modules/opencode
+    ../modules/orca
     ../modules/tmux
     ../modules/vim
     ../modules/wezterm
@@ -51,6 +52,7 @@
       lsp.enable = lib.mkDefault true;
       omnigent.enable = lib.mkDefault true;
       opencode.enable = lib.mkDefault true;
+      orca.enable = lib.mkDefault isWSL;
       tmux.enable = lib.mkDefault true;
       vim.enable = lib.mkDefault true;
       wezterm.enable = lib.mkDefault true;
