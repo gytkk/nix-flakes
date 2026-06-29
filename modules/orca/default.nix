@@ -179,8 +179,8 @@ let
 
     if command -v powershell.exe >/dev/null 2>&1; then
       if powershell.exe -NoProfile -Command "if (Get-Process -Name Orca -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }" >/dev/null 2>&1; then
-        echo "Skipping Orca data update: Orca is running. Quit Orca and rerun home-manager switch to apply terminal settings."
-        exit 0
+        echo "Cannot update Orca settings while Orca is running. Quit Orca and rerun home-manager switch to apply terminal settings." >&2
+        exit 1
       fi
     fi
 
