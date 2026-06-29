@@ -108,7 +108,7 @@
 
       # Set language for shell sessions managed by home-manager
       language = {
-        base = "ko_KR.UTF-8";
+        base = if isWSL then "C.UTF-8" else "ko_KR.UTF-8";
       };
 
       # Keep legacy nix profile installs visible in interactive shells.

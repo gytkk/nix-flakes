@@ -11,6 +11,7 @@
 let
   cfg = config.modules.zsh;
   isPylvOnyx = osConfig != null && (osConfig.networking.hostName or null) == "pylv-onyx";
+  locale = if isWSL then "C.UTF-8" else "en_US.UTF-8";
 in
 let
   starshipThemeConfig = config.lib.file.mkOutOfStoreSymlink (
@@ -100,8 +101,8 @@ in
         EDITOR = "nvim";
         VISUAL = "nvim";
         COLORTERM = "truecolor";
-        LANG = "en_US.UTF-8";
-        LC_CTYPE = "en_US.UTF-8";
+        LANG = locale;
+        LC_CTYPE = locale;
       };
 
       # Zsh initialization
