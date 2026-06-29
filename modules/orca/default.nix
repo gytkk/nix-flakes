@@ -108,9 +108,25 @@ let
   );
 
   terminalColorOverrides = directColorOverrides // paletteColorOverrides;
+  terminalDividerColor = terminalColorOverrides.selectionBackground or "#474747";
+  orcaTerminalThemeId = "ghostty:${config.modules.commonTheme}";
+  orcaTerminalThemeSelection = "custom:${orcaTerminalThemeId}";
+  orcaTerminalThemeName =
+    if config.modules.commonTheme == "vira-graphene" then
+      "Vira Graphene"
+    else
+      config.modules.commonTheme;
+  orcaTerminalTheme = {
+    id = orcaTerminalThemeId;
+    name = orcaTerminalThemeName;
+    source = "ghostty";
+    mode = "dark";
+    terminal = terminalColorOverrides;
+    importedAt = "2026-06-29T00:00:00.000Z";
+    sourceLabel = "themes/exports/ghostty/${config.modules.commonTheme}.conf";
+  };
 
   windowsRoamingPath = "/mnt/c/Users/${cfg.windowsUsername}/AppData/Roaming";
-  windowsGhosttyConfigPath = "${windowsRoamingPath}/ghostty/config.ghostty";
   windowsOrcaDataPath = "${windowsRoamingPath}/orca/orca-data.json";
 
   wslSettings = lib.optionalAttrs (cfg.wslDistro != "") {
@@ -131,6 +147,11 @@ let
     terminalCursorStyle = cfg.cursorStyle;
     terminalCursorStyleDefaultedToBlock = false;
     terminalCursorBlink = cfg.cursorBlink;
+    terminalThemeDark = orcaTerminalThemeSelection;
+    terminalThemeLight = orcaTerminalThemeSelection;
+    terminalCustomThemes = [ orcaTerminalTheme ];
+    terminalDividerColorDark = terminalDividerColor;
+    terminalDividerColorLight = terminalDividerColor;
     terminalBackgroundOpacity = cfg.backgroundOpacity;
     terminalInactivePaneOpacity = cfg.inactivePaneOpacity;
     terminalActivePaneOpacity = cfg.activePaneOpacity;
@@ -139,7 +160,6 @@ let
   }
   // wslSettings;
 
-  ghosttyImportFile = pkgs.writeText "orca-ghostty-import.conf" orcaGhosttyImportConfig;
   orcaSettingsPatchFile = pkgs.writeText "orca-settings-patch.json" (
     builtins.toJSON orcaSettingsPatch
   );
@@ -151,19 +171,17 @@ let
       exit 0
     fi
 
-    ghostty_config="${windowsGhosttyConfigPath}"
-    mkdir -p "$(dirname "$ghostty_config")"
-    if [ -f "$ghostty_config" ] && ! cmp -s "$ghostty_config" "${ghosttyImportFile}"; then
-      if [ ! -f "$ghostty_config.pre-nix-orca.bak" ]; then
-        cp "$ghostty_config" "$ghostty_config.pre-nix-orca.bak"
-      fi
-    fi
-    cp "${ghosttyImportFile}" "$ghostty_config"
-
     orca_data="${windowsOrcaDataPath}"
     if [ ! -f "$orca_data" ]; then
-      echo "Orca data file not found; wrote Ghostty import seed to $ghostty_config"
+      echo "Skipping Orca Windows config: $orca_data does not exist"
       exit 0
+    fi
+
+    if command -v powershell.exe >/dev/null 2>&1; then
+      if powershell.exe -NoProfile -Command "if (Get-Process -Name Orca -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }" >/dev/null 2>&1; then
+        echo "Skipping Orca data update: Orca is running. Quit Orca and rerun home-manager switch to apply terminal settings."
+        exit 0
+      fi
     fi
 
     if [ ! -f "$orca_data.pre-nix-orca.bak" ]; then
@@ -172,7 +190,25 @@ let
 
     tmp="$orca_data.tmp.$$"
     if ${pkgs.jq}/bin/jq --slurpfile patch "${orcaSettingsPatchFile}" \
-      '.settings = ((.settings // {}) + $patch[0])' "$orca_data" > "$tmp"; then
+      '
+        def as_array: if type == "array" then . else [] end;
+        def merge_custom_themes($existing; $incoming):
+          (($incoming // []) | as_array) as $incomingThemes
+          | ($incomingThemes | map(.id)) as $ids
+          | ((($existing // []) | as_array)
+              | map(select(.id as $id | ($ids | index($id) | not))))
+            + $incomingThemes;
+
+        .settings = (
+          (.settings // {}) as $settings
+          | $patch[0] as $patchData
+          | ($settings + $patchData)
+          | .terminalCustomThemes = merge_custom_themes(
+              $settings.terminalCustomThemes;
+              ($patchData.terminalCustomThemes // [])
+            )
+        )
+      ' "$orca_data" > "$tmp"; then
       if cmp -s "$tmp" "$orca_data"; then
         rm -f "$tmp"
       else
