@@ -206,8 +206,8 @@ in
 
     fontFamily = lib.mkOption {
       type = lib.types.str;
-      default = "JetBrains Mono";
-      description = "Primary Orca terminal font family.";
+      default = "Sarasa Mono CL";
+      description = "Primary Orca terminal font family. Orca stores one family, so use a Korean-capable monospace font here.";
     };
 
     fontSize = lib.mkOption {
