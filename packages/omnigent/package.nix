@@ -19,13 +19,13 @@
 }:
 
 let
-  version = "0.2.0";
+  version = "0.3.0";
 
   src = fetchFromGitHub {
     owner = "omnigent-ai";
     repo = "omnigent";
     rev = "v${version}";
-    hash = "sha256-uHx5aUdYAYr2SFEnkk0t91MSIIsyqZd2wXorDhZVKKQ=";
+    hash = "sha256-Caypds51+SbeaQYLnbWtfNXbG12eL1KpZQEL/Vdw+l8=";
   };
 
   # Load the uv workspace (pyproject.toml + uv.lock, including the sibling
