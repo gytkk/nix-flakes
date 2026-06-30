@@ -14,6 +14,7 @@ type JsonObject = dict[str, JsonValue]
 
 ROOT = Path(__file__).resolve().parent
 MERGE_FILTER = ROOT / "files" / "merge-orca-data.jq"
+MODULE_FILE = ROOT / "default.nix"
 
 
 class OrcaMergeTest(unittest.TestCase):
@@ -111,6 +112,28 @@ class OrcaMergeTest(unittest.TestCase):
         self.assertEqual({"keep": True}, merged["repos"])
         self.assertEqual({"terminalFontSize": 14}, merged["settings"])
         self.assertEqual({"statusBarVisible": True}, merged["ui"])
+
+    def test_module_exposes_only_settings_and_ui_orca_values(self) -> None:
+        module = MODULE_FILE.read_text(encoding="utf-8")
+
+        self.assertIn("settings = lib.mkOption", module)
+        self.assertIn("ui = lib.mkOption", module)
+        self.assertIn("settings = cfg.settings;", module)
+        self.assertIn("ui = cfg.ui;", module)
+
+        removed_fragments = [
+            "themeExports",
+            "commonTheme",
+            "ghostty",
+            "orcaGhostty",
+            "terminalColorOverrides",
+            "terminalCustomThemes",
+            "extraSettings",
+            "uiSettings",
+            "fontFallbackFamilies",
+        ]
+        for fragment in removed_fragments:
+            self.assertNotIn(fragment, module)
 
 
 if __name__ == "__main__":
