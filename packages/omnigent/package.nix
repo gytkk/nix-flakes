@@ -41,6 +41,12 @@ let
     # UI, which needs network access unavailable in the nix sandbox. Build the
     # API-only server (CLI + terminal sessions work; no localhost:6767 web UI).
     omnigent = prev.omnigent.overrideAttrs (old: {
+      # Home Manager exposes agent bundles from the read-only Nix store; make
+      # omnigent's temp override copy writable before it rewrites config.yaml.
+      patches = (old.patches or [ ]) ++ [
+        ./writable-materialized-config.patch
+      ];
+
       env = (old.env or { }) // {
         OMNIGENT_SKIP_WEB_UI = "true";
       };
