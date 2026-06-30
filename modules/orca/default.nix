@@ -120,7 +120,7 @@ let
   };
 
   defaultSettings = {
-    terminalFontSize = 14;
+    terminalFontSize = 12;
     terminalFontFamily = ''JetBrains Mono", "Sarasa Mono CL", "D2Coding'';
     terminalFontWeight = 400;
     terminalLineHeight = 1;
