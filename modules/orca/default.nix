@@ -4,12 +4,120 @@
   pkgs,
   username,
   homeDirectory,
+  themeExports,
   isWSL ? false,
   ...
 }:
 
 let
   cfg = config.modules.orca;
+
+  themeFile = themeExports.file "ghostty" "${cfg.theme}.conf";
+  themeConfig = builtins.readFile themeFile;
+
+  parseThemeLine =
+    line:
+    let
+      trimmed = lib.trim line;
+      match = builtins.match "([^=]+)=(.*)" trimmed;
+    in
+    if trimmed == "" || lib.hasPrefix "#" trimmed || match == null then
+      null
+    else
+      {
+        key = lib.trim (builtins.elemAt match 0);
+        value = lib.trim (builtins.elemAt match 1);
+      };
+
+  themeEntries = builtins.filter (entry: entry != null) (
+    builtins.map parseThemeLine (lib.splitString "\n" themeConfig)
+  );
+
+  directColorKeys = {
+    background = "background";
+    foreground = "foreground";
+    "cursor-color" = "cursor";
+    "cursor-text" = "cursorAccent";
+    "selection-background" = "selectionBackground";
+    "selection-foreground" = "selectionForeground";
+  };
+
+  directColorOverrides = builtins.listToAttrs (
+    builtins.filter (entry: entry != null) (
+      builtins.map (
+        entry:
+        if builtins.hasAttr entry.key directColorKeys then
+          {
+            name = directColorKeys.${entry.key};
+            inherit (entry) value;
+          }
+        else
+          null
+      ) themeEntries
+    )
+  );
+
+  paletteColorKeys = {
+    "0" = "black";
+    "1" = "red";
+    "2" = "green";
+    "3" = "yellow";
+    "4" = "blue";
+    "5" = "magenta";
+    "6" = "cyan";
+    "7" = "white";
+    "8" = "brightBlack";
+    "9" = "brightRed";
+    "10" = "brightGreen";
+    "11" = "brightYellow";
+    "12" = "brightBlue";
+    "13" = "brightMagenta";
+    "14" = "brightCyan";
+    "15" = "brightWhite";
+  };
+
+  parsePaletteEntry =
+    entry:
+    let
+      match = builtins.match "([0-9]+)=(#[0-9a-fA-F]+)" entry.value;
+      index = if match == null then null else builtins.elemAt match 0;
+    in
+    if entry.key != "palette" || match == null || !(builtins.hasAttr index paletteColorKeys) then
+      null
+    else
+      {
+        name = paletteColorKeys.${index};
+        value = builtins.elemAt match 1;
+      };
+
+  paletteColorOverrides = builtins.listToAttrs (
+    builtins.filter (entry: entry != null) (builtins.map parsePaletteEntry themeEntries)
+  );
+
+  terminalColorOverrides = directColorOverrides // paletteColorOverrides;
+  terminalDividerColor = terminalColorOverrides.selectionBackground or "#474747";
+  terminalThemeId = "ghostty:${cfg.theme}";
+  terminalThemeSelection = "custom:${terminalThemeId}";
+  terminalThemeName = if cfg.theme == "vira-graphene" then "Vira Graphene" else cfg.theme;
+  terminalTheme = {
+    id = terminalThemeId;
+    name = terminalThemeName;
+    source = "ghostty";
+    mode = "dark";
+    terminal = terminalColorOverrides;
+    importedAt = "2026-06-29T00:00:00.000Z";
+    sourceLabel = "themes/exports/ghostty/${cfg.theme}.conf";
+  };
+
+  themeSettings = {
+    terminalThemeDark = terminalThemeSelection;
+    terminalThemeLight = terminalThemeSelection;
+    terminalCustomThemes = [ terminalTheme ];
+    terminalDividerColorDark = terminalDividerColor;
+    terminalDividerColorLight = terminalDividerColor;
+    terminalUseSeparateLightTheme = false;
+    inherit terminalColorOverrides;
+  };
 
   defaultSettings = {
     terminalFontSize = 14;
@@ -24,6 +132,7 @@ let
     terminalInactivePaneOpacity = 0.9;
     terminalActivePaneOpacity = 1;
   }
+  // themeSettings
   // lib.optionalAttrs isWSL {
     terminalWindowsShell = "wsl.exe";
     terminalWindowsWslDistro = "Ubuntu";
@@ -113,6 +222,12 @@ in
       type = lib.types.str;
       default = username;
       description = "Windows user profile name used when configuring Orca from WSL.";
+    };
+
+    theme = lib.mkOption {
+      type = lib.types.str;
+      default = "vira-graphene";
+      description = "Theme export name used to build Orca terminal theme settings.";
     };
 
     settings = lib.mkOption {

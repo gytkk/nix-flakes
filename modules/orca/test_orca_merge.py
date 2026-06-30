@@ -13,11 +13,29 @@ type JsonObject = dict[str, JsonValue]
 
 
 ROOT = Path(__file__).resolve().parent
+REPO_ROOT = ROOT.parent.parent
 MERGE_FILTER = ROOT / "files" / "merge-orca-data.jq"
 MODULE_FILE = ROOT / "default.nix"
 
 
 class OrcaMergeTest(unittest.TestCase):
+    def nix_eval_json(self, attr: str) -> JsonValue:
+        result = subprocess.run(
+            [
+                "nix",
+                "eval",
+                attr,
+                "--json",
+            ],
+            cwd=REPO_ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertEqual(0, result.returncode, result.stderr)
+        return json.loads(result.stdout)
+
     def merge_orca_data(self, data: JsonObject, patch: JsonObject) -> JsonObject:
         self.assertTrue(MERGE_FILTER.exists(), f"missing jq filter: {MERGE_FILTER}")
 
@@ -122,18 +140,42 @@ class OrcaMergeTest(unittest.TestCase):
         self.assertIn("ui = cfg.ui;", module)
 
         removed_fragments = [
-            "themeExports",
-            "commonTheme",
-            "ghostty",
             "orcaGhostty",
-            "terminalColorOverrides",
-            "terminalCustomThemes",
+            "ghostty-import",
+            "xdg.configFile",
             "extraSettings",
             "uiSettings",
             "fontFallbackFamilies",
         ]
         for fragment in removed_fragments:
             self.assertNotIn(fragment, module)
+
+    def test_default_settings_include_vira_graphene_terminal_theme(self) -> None:
+        settings = self.nix_eval_json(
+            ".#homeConfigurations.devsisters-macbook.config.modules.orca.settings"
+        )
+        self.assertIsInstance(settings, dict)
+
+        self.assertEqual("custom:ghostty:vira-graphene", settings["terminalThemeDark"])
+        self.assertEqual("custom:ghostty:vira-graphene", settings["terminalThemeLight"])
+        self.assertEqual(False, settings["terminalUseSeparateLightTheme"])
+        self.assertEqual("#474747", settings["terminalDividerColorDark"])
+        self.assertEqual("#474747", settings["terminalDividerColorLight"])
+
+        color_overrides = settings["terminalColorOverrides"]
+        self.assertEqual("#212121", color_overrides["background"])
+        self.assertEqual("#D9D9D9", color_overrides["foreground"])
+        self.assertEqual("#f07178", color_overrides["red"])
+        self.assertEqual("#ffffff", color_overrides["brightWhite"])
+
+        custom_themes = settings["terminalCustomThemes"]
+        self.assertEqual(1, len(custom_themes))
+        theme = custom_themes[0]
+        self.assertEqual("ghostty:vira-graphene", theme["id"])
+        self.assertEqual("Vira Graphene", theme["name"])
+        self.assertEqual("ghostty", theme["source"])
+        self.assertEqual("dark", theme["mode"])
+        self.assertEqual(color_overrides, theme["terminal"])
 
 
 if __name__ == "__main__":

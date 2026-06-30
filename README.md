@@ -289,6 +289,17 @@ Resources should supplement the tools instead of expanding the tool count:
   shell/process tab titles enriched with compact current-directory context, and
   IME-safe physical `Ctrl+letter` bindings.
 
+## Orca config
+
+- Orca is managed through `modules/orca/default.nix` on Darwin and WSL hosts.
+- `home-manager switch` patches only the `settings` and `ui` objects inside
+  Orca's app-owned `orca-data.json`; project, session, workspace, and other
+  app state stays untouched.
+- The checked-in defaults build Orca terminal theme settings from
+  `themes/exports/ghostty/vira-graphene.conf`. Change `modules.orca.theme` to
+  another generated Ghostty theme export, or override individual
+  `modules.orca.settings` values directly.
+
 ## cmux config
 
 - cmux app-owned settings are managed through `modules/cmux/default.nix` on
