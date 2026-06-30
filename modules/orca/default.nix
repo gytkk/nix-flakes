@@ -3,6 +3,8 @@
   lib,
   pkgs,
   username,
+  homeDirectory,
+  flakeDirectory,
   themeExports,
   isWSL ? false,
   ...
@@ -11,6 +13,7 @@
 let
   cfg = config.modules.orca;
 
+  orcaModulePath = "${flakeDirectory}/modules/orca";
   ghosttyThemeFile = themeExports.file "ghostty" "${config.modules.commonTheme}.conf";
   ghosttyThemeConfig = builtins.readFile ghosttyThemeFile;
   orcaFontFamilies = [ cfg.fontFamily ] ++ cfg.fontFallbackFamilies;
@@ -133,8 +136,11 @@ let
 
   windowsRoamingPath = "/mnt/c/Users/${cfg.windowsUsername}/AppData/Roaming";
   windowsOrcaDataPath = "${windowsRoamingPath}/orca/orca-data.json";
+  darwinOrcaDataPath = "${homeDirectory}/Library/Application Support/orca/orca-data.json";
+  managedOrcaDataFile = if isWSL then "orca-data.wsl.json" else "orca-data.darwin.json";
+  managedOrcaDataPath = "${orcaModulePath}/files/${managedOrcaDataFile}";
 
-  wslSettings = lib.optionalAttrs (cfg.wslDistro != "") {
+  wslSettings = lib.optionalAttrs (isWSL && cfg.wslDistro != "") {
     terminalWindowsShell = "wsl.exe";
     terminalWindowsWslDistro = cfg.wslDistro;
     localWindowsRuntimeDefault = {
@@ -169,31 +175,18 @@ let
     builtins.toJSON orcaSettingsPatch
   );
 
-  windowsActivationScript = ''
-    roaming_dir="${windowsRoamingPath}"
-    if [ ! -d "$roaming_dir" ]; then
-      echo "Skipping Orca Windows config: $roaming_dir does not exist"
-      exit 0
-    fi
+  ensureManagedOrcaDataScript = ''
+    mkdir -p "$(dirname "$managed_data")"
 
-    orca_data="${windowsOrcaDataPath}"
-    if [ ! -f "$orca_data" ]; then
-      echo "Skipping Orca Windows config: $orca_data does not exist"
-      exit 0
-    fi
-
-    if command -v powershell.exe >/dev/null 2>&1; then
-      if powershell.exe -NoProfile -Command "if (Get-Process -Name Orca -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }" >/dev/null 2>&1; then
-        echo "Cannot update Orca settings while Orca is running. Quit Orca and rerun home-manager switch to apply terminal settings." >&2
-        exit 1
+    if [ ! -e "$managed_data" ]; then
+      if [ -f "$orca_data" ] && [ ! -L "$orca_data" ]; then
+        cp "$orca_data" "$managed_data"
+      else
+        printf '%s\n' '{"schemaVersion":1,"settings":{}}' > "$managed_data"
       fi
     fi
 
-    if [ ! -f "$orca_data.pre-nix-orca.bak" ]; then
-      cp "$orca_data" "$orca_data.pre-nix-orca.bak"
-    fi
-
-    tmp="$orca_data.tmp.$$"
+    tmp="$managed_data.tmp.$$"
     if ${pkgs.jq}/bin/jq --slurpfile patch "${orcaSettingsPatchFile}" \
       '
         def as_array: if type == "array" then . else [] end;
@@ -213,14 +206,94 @@ let
               ($patchData.terminalCustomThemes // [])
             )
         )
-      ' "$orca_data" > "$tmp"; then
-      if cmp -s "$tmp" "$orca_data"; then
+      ' "$managed_data" > "$tmp"; then
+      if cmp -s "$tmp" "$managed_data"; then
         rm -f "$tmp"
       else
-        mv "$tmp" "$orca_data"
+        mv "$tmp" "$managed_data"
       fi
     else
       rm -f "$tmp"
+      exit 1
+    fi
+  '';
+
+  backupExistingOrcaDataScript = ''
+    if [ -e "$orca_data" ] && [ ! -L "$orca_data" ]; then
+      backup="$orca_data.pre-nix-orca.bak"
+      if [ ! -e "$backup" ]; then
+        cp "$orca_data" "$backup"
+      fi
+    fi
+  '';
+
+  linkUnixOrcaDataScript = ''
+    if [ -L "$orca_data" ]; then
+      current_target="$(readlink "$orca_data")"
+      if [ "$current_target" != "$managed_data" ]; then
+        rm -f "$orca_data"
+        ln -s "$managed_data" "$orca_data"
+      fi
+    else
+      ${backupExistingOrcaDataScript}
+      rm -f "$orca_data"
+      ln -s "$managed_data" "$orca_data"
+    fi
+  '';
+
+  darwinActivationScript = ''
+    orca_data="${darwinOrcaDataPath}"
+    managed_data="${managedOrcaDataPath}"
+
+    if command -v pgrep >/dev/null 2>&1 && pgrep -x Orca >/dev/null 2>&1; then
+      echo "Cannot update Orca settings while Orca is running. Quit Orca and rerun home-manager switch to apply terminal settings." >&2
+      exit 1
+    fi
+
+    mkdir -p "$(dirname "$orca_data")"
+    ${ensureManagedOrcaDataScript}
+    ${linkUnixOrcaDataScript}
+  '';
+
+  windowsActivationScript = ''
+    roaming_dir="${windowsRoamingPath}"
+    if [ ! -d "$roaming_dir" ]; then
+      echo "Skipping Orca Windows config: $roaming_dir does not exist"
+      exit 0
+    fi
+
+    orca_data="${windowsOrcaDataPath}"
+    managed_data="${managedOrcaDataPath}"
+
+    if command -v powershell.exe >/dev/null 2>&1; then
+      if powershell.exe -NoProfile -Command "if (Get-Process -Name Orca -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }" >/dev/null 2>&1; then
+        echo "Cannot update Orca settings while Orca is running. Quit Orca and rerun home-manager switch to apply terminal settings." >&2
+        exit 1
+      fi
+    fi
+
+    mkdir -p "$(dirname "$orca_data")"
+    ${ensureManagedOrcaDataScript}
+    ${backupExistingOrcaDataScript}
+    rm -f "$orca_data"
+
+    if ! command -v powershell.exe >/dev/null 2>&1 || ! command -v wslpath >/dev/null 2>&1; then
+      echo "Cannot create Windows-readable Orca symlink: powershell.exe and wslpath are required." >&2
+      exit 1
+    fi
+
+    native_win="$(wslpath -w "$orca_data")"
+    target_win="$(wslpath -w "$managed_data")"
+    if ! powershell.exe -NoProfile -Command '
+      $ErrorActionPreference = "Stop"
+      $Path = $args[0]
+      $Target = $args[1]
+      if (Test-Path -LiteralPath $Path) {
+        Remove-Item -LiteralPath $Path -Force
+      }
+      New-Item -ItemType SymbolicLink -Path $Path -Target $Target | Out-Null
+    ' "$native_win" "$target_win"; then
+      echo "Cannot create Windows Orca symlink. Enable Windows Developer Mode or create the link manually, then rerun home-manager switch." >&2
       exit 1
     fi
   '';
@@ -339,6 +412,12 @@ in
         home.activation.orcaWindowsConfig = lib.hm.dag.entryAfter [
           "writeBoundary"
         ] windowsActivationScript;
+      })
+
+      (lib.mkIf pkgs.stdenv.isDarwin {
+        home.activation.orcaDarwinConfig = lib.hm.dag.entryAfter [
+          "writeBoundary"
+        ] darwinActivationScript;
       })
     ]
   );

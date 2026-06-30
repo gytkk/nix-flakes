@@ -52,7 +52,7 @@
       lsp.enable = lib.mkDefault true;
       omnigent.enable = lib.mkDefault true;
       opencode.enable = lib.mkDefault true;
-      orca.enable = lib.mkDefault isWSL;
+      orca.enable = lib.mkDefault (isWSL || pkgs.stdenv.isDarwin);
       tmux.enable = lib.mkDefault true;
       vim.enable = lib.mkDefault true;
       wezterm.enable = lib.mkDefault true;
