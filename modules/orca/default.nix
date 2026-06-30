@@ -3,6 +3,7 @@
   lib,
   pkgs,
   username,
+  homeDirectory,
   themeExports,
   isWSL ? false,
   ...
@@ -133,8 +134,10 @@ let
 
   windowsRoamingPath = "/mnt/c/Users/${cfg.windowsUsername}/AppData/Roaming";
   windowsOrcaDataPath = "${windowsRoamingPath}/orca/orca-data.json";
+  darwinOrcaDataPath = "${homeDirectory}/Library/Application Support/orca/orca-data.json";
+  orcaMergeFilter = ./files/merge-orca-data.jq;
 
-  wslSettings = lib.optionalAttrs (cfg.wslDistro != "") {
+  wslSettings = lib.optionalAttrs (isWSL && cfg.wslDistro != "") {
     terminalWindowsShell = "wsl.exe";
     terminalWindowsWslDistro = cfg.wslDistro;
     localWindowsRuntimeDefault = {
@@ -163,30 +166,20 @@ let
     terminalUseSeparateLightTheme = false;
     inherit terminalColorOverrides;
   }
-  // wslSettings;
+  // wslSettings
+  // cfg.extraSettings;
 
-  orcaSettingsPatchFile = pkgs.writeText "orca-settings-patch.json" (
-    builtins.toJSON orcaSettingsPatch
-  );
+  orcaDataPatch = {
+    settings = orcaSettingsPatch;
+    ui = cfg.uiSettings;
+  };
 
-  windowsActivationScript = ''
-    roaming_dir="${windowsRoamingPath}"
-    if [ ! -d "$roaming_dir" ]; then
-      echo "Skipping Orca Windows config: $roaming_dir does not exist"
-      exit 0
-    fi
+  orcaDataPatchFile = pkgs.writeText "orca-data-patch.json" (builtins.toJSON orcaDataPatch);
 
-    orca_data="${windowsOrcaDataPath}"
+  mergeOrcaDataScript = ''
     if [ ! -f "$orca_data" ]; then
-      echo "Skipping Orca Windows config: $orca_data does not exist"
+      echo "Skipping Orca $orca_target config: $orca_data does not exist"
       exit 0
-    fi
-
-    if command -v powershell.exe >/dev/null 2>&1; then
-      if powershell.exe -NoProfile -Command "if (Get-Process -Name Orca -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }" >/dev/null 2>&1; then
-        echo "Cannot update Orca settings while Orca is running. Quit Orca and rerun home-manager switch to apply terminal settings." >&2
-        exit 1
-      fi
     fi
 
     if [ ! -f "$orca_data.pre-nix-orca.bak" ]; then
@@ -194,26 +187,8 @@ let
     fi
 
     tmp="$orca_data.tmp.$$"
-    if ${pkgs.jq}/bin/jq --slurpfile patch "${orcaSettingsPatchFile}" \
-      '
-        def as_array: if type == "array" then . else [] end;
-        def merge_custom_themes($existing; $incoming):
-          (($incoming // []) | as_array) as $incomingThemes
-          | ($incomingThemes | map(.id)) as $ids
-          | ((($existing // []) | as_array)
-              | map(select(.id as $id | ($ids | index($id) | not))))
-            + $incomingThemes;
-
-        .settings = (
-          (.settings // {}) as $settings
-          | $patch[0] as $patchData
-          | ($settings + $patchData)
-          | .terminalCustomThemes = merge_custom_themes(
-              $settings.terminalCustomThemes;
-              ($patchData.terminalCustomThemes // [])
-            )
-        )
-      ' "$orca_data" > "$tmp"; then
+    if ${pkgs.jq}/bin/jq --slurpfile patch "${orcaDataPatchFile}" \
+      -f "${orcaMergeFilter}" "$orca_data" > "$tmp"; then
       if cmp -s "$tmp" "$orca_data"; then
         rm -f "$tmp"
       else
@@ -223,6 +198,38 @@ let
       rm -f "$tmp"
       exit 1
     fi
+  '';
+
+  darwinActivationScript = ''
+    orca_target="macOS"
+    orca_data="${darwinOrcaDataPath}"
+
+    if command -v pgrep >/dev/null 2>&1 && pgrep -x Orca >/dev/null 2>&1; then
+      echo "Cannot update Orca settings while Orca is running. Quit Orca and rerun home-manager switch to apply terminal settings." >&2
+      exit 1
+    fi
+
+    ${mergeOrcaDataScript}
+  '';
+
+  windowsActivationScript = ''
+    roaming_dir="${windowsRoamingPath}"
+    if [ ! -d "$roaming_dir" ]; then
+      echo "Skipping Orca Windows config: $roaming_dir does not exist"
+      exit 0
+    fi
+
+    orca_target="Windows"
+    orca_data="${windowsOrcaDataPath}"
+
+    if command -v powershell.exe >/dev/null 2>&1; then
+      if powershell.exe -NoProfile -Command "if (Get-Process -Name Orca -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }" >/dev/null 2>&1; then
+        echo "Cannot update Orca settings while Orca is running. Quit Orca and rerun home-manager switch to apply terminal settings." >&2
+        exit 1
+      fi
+    fi
+
+    ${mergeOrcaDataScript}
   '';
 in
 {
@@ -322,6 +329,18 @@ in
       description = "Opacity for active Orca terminal panes.";
     };
 
+    extraSettings = lib.mkOption {
+      type = lib.types.attrs;
+      default = { };
+      description = "Additional values to merge into Orca's settings object.";
+    };
+
+    uiSettings = lib.mkOption {
+      type = lib.types.attrs;
+      default = { };
+      description = "Values to merge into Orca's ui object.";
+    };
+
     applyWindowsSettings = lib.mkOption {
       type = lib.types.bool;
       default = true;
@@ -339,6 +358,12 @@ in
         home.activation.orcaWindowsConfig = lib.hm.dag.entryAfter [
           "writeBoundary"
         ] windowsActivationScript;
+      })
+
+      (lib.mkIf pkgs.stdenv.isDarwin {
+        home.activation.orcaDarwinConfig = lib.hm.dag.entryAfter [
+          "writeBoundary"
+        ] darwinActivationScript;
       })
     ]
   );
