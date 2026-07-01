@@ -28,6 +28,10 @@ let
     hash = "sha256-Caypds51+SbeaQYLnbWtfNXbG12eL1KpZQEL/Vdw+l8=";
   };
 
+  # The browser web UI (ap-web SPA), built offline from the same pinned src.
+  # Injected into omnigent's package data below so the server can mount it.
+  webUI = callPackage ./web-ui.nix { inherit src version; };
+
   # Load the uv workspace (pyproject.toml + uv.lock, including the sibling
   # sdks/* path members) and turn the lockfile into a nixpkgs python overlay.
   workspace = uv2nix.lib.workspace.loadWorkspace { workspaceRoot = src; };
@@ -38,8 +42,11 @@ let
   # Per-package build fixups.
   pyprojectOverrides = _final: prev: {
     # omnigent's setuptools build shells out to `npm` to bundle the browser web
-    # UI, which needs network access unavailable in the nix sandbox. Build the
-    # API-only server (CLI + terminal sessions work; no localhost:6767 web UI).
+    # UI, which needs network access unavailable in the nix sandbox. We instead
+    # build the SPA separately (see web-ui.nix) and drop the prebuilt bundle
+    # into the source tree here, so setuptools' `static/web-ui/**/*` package
+    # data ships it into the wheel. OMNIGENT_SKIP_WEB_UI stays set so the
+    # setup.py build hook never attempts its own (network-bound) npm build.
     omnigent = prev.omnigent.overrideAttrs (old: {
       # Home Manager exposes agent bundles from the read-only Nix store; make
       # omnigent's temp override copy writable before it rewrites config.yaml.
@@ -50,6 +57,12 @@ let
       env = (old.env or { }) // {
         OMNIGENT_SKIP_WEB_UI = "true";
       };
+
+      postPatch = (old.postPatch or "") + ''
+        mkdir -p omnigent/server/static
+        cp -r ${webUI} omnigent/server/static/web-ui
+        chmod -R u+w omnigent/server/static/web-ui
+      '';
     });
   };
 
