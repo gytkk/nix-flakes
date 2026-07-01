@@ -139,12 +139,14 @@ let
     markdownReviewToolsEnabled = true;
     androidSdkPath = null;
     terminalFontSize = 12;
+    # Orca wraps this value in quotes before passing it to xterm, so keep the
+    # edge quotes implicit to produce a CSS fallback stack.
     terminalFontFamily = ''JetBrains Mono", "Sarasa Mono CL", "D2Coding'';
     terminalFontWeight = 400;
     terminalLineHeight = 1;
     terminalScrollSensitivity = 1.15;
     terminalFastScrollSensitivity = 5;
-    terminalTuiScrollSensitivity = 3;
+    terminalTuiScrollSensitivity = 1;
     terminalGpuAcceleration = "auto";
     terminalLigatures = "auto";
     terminalCursorStyle = "block";
