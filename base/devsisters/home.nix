@@ -25,9 +25,6 @@
     vault
     inputs.keycloak2aws.packages.${pkgs.stdenv.hostPlatform.system}.kc2aws
 
-    # Databricks
-    databricks-cli
-
     # Ruby
     pkgs.stable-25_05.ruby_3_2
 
