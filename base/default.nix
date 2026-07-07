@@ -77,6 +77,14 @@
       KeepAlive = lib.mkForce null;
     };
 
+    # Home Manager agenix defaults to DARWIN_USER_TEMP_DIR on macOS. Keep
+    # decrypted generations in XDG state so temp cleanup does not break apps
+    # that read long-lived secrets such as Neovim's OpenAI API key.
+    age = lib.mkIf pkgs.stdenv.isDarwin {
+      secretsDir = "${config.xdg.stateHome}/agenix";
+      secretsMountPoint = "${config.xdg.stateHome}/agenix.d";
+    };
+
     # macOS `launchctl bootout` rejects the `--wait` flag that Home Manager
     # passes since nix-community/home-manager@9cb587a (2026-05-01), so its
     # agent reload aborts with "Unrecognized target specifier" and the
