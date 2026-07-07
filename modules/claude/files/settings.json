@@ -9,15 +9,10 @@
       "Bash",
       "Read",
       "Edit",
+      "Write",
       "WebFetch",
       "WebSearch",
-      "mcp__context7__*",
-      "Write(~/.ai)",
-      "Write(~/.config)",
-      "Write(~/.local)",
-      "Write(~/workspace)",
-      "Write(~/development)",
-      "Write(/tmp)"
+      "mcp__context7__*"
     ],
     "defaultMode": "acceptEdits"
   },
