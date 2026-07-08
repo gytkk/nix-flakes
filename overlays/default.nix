@@ -54,9 +54,6 @@
         "rust-analyzer"
         "rust-src"
       ];
-      targets = [
-        "wasm32-wasip1"
-      ];
     };
   };
 }
