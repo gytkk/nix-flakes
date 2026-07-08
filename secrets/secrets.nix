@@ -43,9 +43,6 @@ in
   # Open WebUI initial admin environment file
   "open-webui-env.age".publicKeys = allUsers ++ allHosts;
 
-  # Google Workspace CLI credentials for obsidian-maintenance calendar sync
-  "gws-credentials.age".publicKeys = allUsers ++ allHosts;
-
   # Databricks OTEL token (devsisters environments only)
   "databricks-token.age".publicKeys = allUsers ++ devsistersHosts;
 

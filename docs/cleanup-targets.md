@@ -77,7 +77,7 @@ Each finding lists the evidence (where it *should* be referenced but isn't).
 
 - `themes/` + its Python generator — produces `themes/exports`, consumed by the zed
   module and `lib/themes.nix`.
-- `packages/` — `notion-cli`, `obsidian-headless`, `qmd` are each `callPackage`'d.
+- `packages/` — `notion-cli`, `qmd` are each `callPackage`'d.
 - All sub-`.nix` files — `modules/codex/system.nix`,
   `modules/openclaw/{nginx-proxy,state-sync}.nix`, and the pylv-onyx host files are
   properly imported.

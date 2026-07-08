@@ -11,8 +11,6 @@
     inputs.disko.nixosModules.disko
     inputs.copyparty.nixosModules.default
     ./disk-config.nix
-    ./obsidian-headless.nix
-    ./obsidian-maintenance
     ../../modules/nixos
   ];
 
