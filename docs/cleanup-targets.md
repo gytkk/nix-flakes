@@ -75,12 +75,9 @@ Each finding lists the evidence (where it *should* be referenced but isn't).
 
 ## Verified NOT dead (false-positive guard)
 
-- `apps/openclaw-cron-dashboard` — used by `hosts/pylv-onyx/openclaw-cron-dashboard.nix`
-  (`appRoot`) and `packages/openclaw-cron-dashboard-frontend/package.nix` (`src`).
 - `themes/` + its Python generator — produces `themes/exports`, consumed by the zed
   module and `lib/themes.nix`.
-- `packages/` — `notion-cli`, `obsidian-headless`, `qmd`,
-  `openclaw-cron-dashboard-frontend` are each `callPackage`'d.
+- `packages/` — `notion-cli`, `obsidian-headless`, `qmd` are each `callPackage`'d.
 - All sub-`.nix` files — `modules/codex/system.nix`,
   `modules/openclaw/{nginx-proxy,state-sync}.nix`, and the pylv-onyx host files are
   properly imported.

@@ -98,16 +98,6 @@ in
       XCONTENT_TYPE = "nosniff";
       REFERRER_POLICY = "strict-origin-when-cross-origin";
       PERMISSIONS_POLICY = "camera=(),microphone=(),geolocation=()";
-      WEBUI_BANNERS = builtins.toJSON [
-        {
-          id = "openclaw-cron";
-          type = "info";
-          title = "";
-          content = ''&#128368; <a href="/apps/openclaw-cron/" target="_blank" style="color:inherit;text-decoration:underline">OpenClaw Cron Dashboard</a> — 예약 작업 상태 확인'';
-          dismissible = true;
-          timestamp = 1713070800;
-        }
-      ];
     };
     environmentFile = config.age.secrets.open-webui-env.path;
   };
