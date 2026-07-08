@@ -15,7 +15,6 @@
     ../modules/agent-session-record
     ../modules/aerospace
     ../modules/claude
-    ../modules/cmux
     ../modules/codex
     ../modules/ghostty
     ../modules/git
@@ -44,7 +43,6 @@
       agentSessionRecord.enable = lib.mkDefault true;
       aerospace.enable = lib.mkDefault pkgs.stdenv.isDarwin;
       claude.enable = lib.mkDefault true;
-      cmux.enable = lib.mkDefault true;
       codex.enable = lib.mkDefault true;
       ghostty.enable = lib.mkDefault true;
       git.enable = lib.mkDefault true;

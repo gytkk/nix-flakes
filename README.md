@@ -289,18 +289,6 @@ Resources should supplement the tools instead of expanding the tool count:
   shell/process tab titles enriched with compact current-directory context, and
   IME-safe physical `Ctrl+letter` bindings.
 
-## cmux config
-
-- cmux app-owned settings are managed through `modules/cmux/default.nix` on
-  Darwin hosts.
-- `home-manager switch` installs `~/.config/cmux/cmux.json` as an out-of-store
-  symlink to `modules/cmux/files/cmux.json`, so edits made through the cmux
-  settings UI are written back to the repo-managed file.
-- The checked-in defaults use the official schema URL, dark app/browser
-  appearance, minimal UI mode, and let terminal rendering continue to come from
-  the WezTerm config and generated WezTerm themes.
-- The module only manages config. Install the `cmux` app separately.
-
 ## Kitty config
 
 - Kitty is managed through `modules/kitty/default.nix`.
