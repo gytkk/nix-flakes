@@ -97,6 +97,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # wg-cli - Devsisters WireGuard VPN CLI (Devsisters 전용, private repo → SSH)
+    devsisters-wg = {
+      url = "git+ssh://git@github.com/devsisters/wg";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-utils.follows = "gws/flake-utils";
+    };
+
     # gws - Google Workspace CLI
     gws = {
       url = "github:googleworkspace/cli";

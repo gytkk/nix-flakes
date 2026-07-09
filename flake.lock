@@ -82,6 +82,31 @@
         "type": "github"
       }
     },
+    "devsisters-wg": {
+      "inputs": {
+        "flake-utils": [
+          "gws",
+          "flake-utils"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "nixpkgs-old": "nixpkgs-old"
+      },
+      "locked": {
+        "lastModified": 1783054386,
+        "narHash": "sha256-UbsRNZ+RDDXXx13j02dCCEb8S5cz/A9EfhnQ4PREXHA=",
+        "ref": "refs/heads/main",
+        "rev": "9698a19ae548f978276c8ef9dae726f6a8c07c11",
+        "revCount": 371,
+        "type": "git",
+        "url": "ssh://git@github.com/devsisters/wg"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/devsisters/wg"
+      }
+    },
     "disko": {
       "inputs": {
         "nixpkgs": [
@@ -461,6 +486,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-old": {
+      "locked": {
+        "lastModified": 1688392541,
+        "narHash": "sha256-lHrKvEkCPTUO+7tPfjIcb7Trk6k31rz18vkyqmkeJfY=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "ea4c80b39be4c09702b0cb3b42eab59e2ba4f24b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-22.11",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixpkgs-stable": {
       "locked": {
         "lastModified": 1778003029,
@@ -589,6 +630,7 @@
         "agenix": "agenix",
         "catppuccin-ghostty": "catppuccin-ghostty",
         "copyparty": "copyparty",
+        "devsisters-wg": "devsisters-wg",
         "disko": "disko",
         "dms": "dms",
         "flake-stores": "flake-stores",
