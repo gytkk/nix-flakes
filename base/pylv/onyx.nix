@@ -9,7 +9,6 @@
   # pylv-onyx 데스크톱 환경 전용 설정
 
   imports = [
-    inputs.zen-browser.homeModules.beta
     inputs.dms.homeModules.dank-material-shell
     inputs.dms.homeModules.niri
   ];
@@ -48,6 +47,4 @@
     [Service]
     Environment="PATH=${homeDirectory}/.hermes/hermes-agent/venv/bin:${homeDirectory}/.hermes/hermes-agent/node_modules/.bin:/run/current-system/sw/bin:${homeDirectory}/.nix-profile/bin:/etc/profiles/per-user/${username}/bin:${homeDirectory}/.local/bin:${homeDirectory}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
   '';
-
-  programs.zen-browser.enable = true;
 }

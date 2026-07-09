@@ -103,12 +103,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Zen Browser
-    zen-browser = {
-      url = "github:0xc000022070/zen-browser-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # niri - scrollable tiling Wayland compositor
     niri.url = "github:sodiboo/niri-flake";
 
