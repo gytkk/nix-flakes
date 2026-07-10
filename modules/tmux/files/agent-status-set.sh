@@ -40,6 +40,10 @@ if [ -z "${target_window}" ] && [ -n "${TMUX_AGENT_WINDOW_ID:-}" ]; then
   target_window="${TMUX_AGENT_WINDOW_ID}"
 fi
 
+if [ -z "${target_window}" ] && [ -n "${TMUX_PANE:-}" ] && command -v tmux >/dev/null 2>&1; then
+  target_window="$(tmux display-message -p -t "${TMUX_PANE}" '#{window_id}' 2>/dev/null || true)"
+fi
+
 if [ -z "${target_window}" ] && [ -n "${TMUX:-}" ] && command -v tmux >/dev/null 2>&1; then
   target_window="$(tmux display-message -p '#{window_id}' 2>/dev/null || true)"
 fi

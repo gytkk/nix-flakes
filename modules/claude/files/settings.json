@@ -18,6 +18,28 @@
   },
   "enableAllProjectMcpServers": true,
   "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "tmux-agent-status claude running",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "tmux-agent-status claude done",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
     "SessionEnd": [
       {
         "matcher": "*",
@@ -27,6 +49,11 @@
             "command": "~/.local/bin/claude-session-upload",
             "timeout": 10,
             "async": true
+          },
+          {
+            "type": "command",
+            "command": "tmux-agent-status claude done",
+            "timeout": 5
           }
         ]
       }
