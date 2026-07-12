@@ -2,8 +2,8 @@
 
 main () {
   vault login -method=oidc
-  kc2aws login
   wg-cli login "$@"
+  kc2aws login
 }
 
 main "$@"
