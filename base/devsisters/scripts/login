@@ -1,8 +1,8 @@
 #!/bin/sh
 
 main () {
-  vault login -method=oidc
   wg-cli login "$@"
+  vault login -method=oidc
   kc2aws login
 }
 
