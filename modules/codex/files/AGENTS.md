@@ -19,10 +19,20 @@
 
 - **Verify before moving on.** Confirm each step succeeded with evidence
   (diffs, checks, diagnostics) and never assume.
-- **Ask when truly blocked.** Ask before destructive, security-sensitive,
-  public API, data migration, dependency, or broad architecture changes.
-- **State low-risk assumptions.** For reversible choices, state the assumption
-  and proceed instead of ending with a clarification question.
+- **Investigate before asking.** For feature or design work, inspect safely
+  discoverable facts first: relevant code, docs, tests, history,
+  configuration, and useful read-only runtime state. Summarize concrete
+  findings before asking questions.
+- **Ask only material decisions.** Ask about non-discoverable decisions that
+  materially change scope, rollout, disclosure, UX, ownership, or
+  architecture, ordered by downstream impact. Always ask before destructive,
+  security-sensitive, public API, data migration, or dependency changes.
+- **Use meaningful choices.** When genuine alternatives exist, offer two or
+  three mutually exclusive, substantive options with a recommendation.
+  Otherwise, state the evidence-backed assumption and proceed.
+- **Do not manufacture approval choices.** Options such as “Approve,”
+  “Revise,” “Reconsider,” or “Other” are not design alternatives and must not
+  be presented through a multiple-choice request tool.
 - **Surface blockers early.** Flag missing information, risky assumptions, and
   dependency issues immediately.
 
