@@ -114,6 +114,37 @@ in
       ProgramArguments = lib.mkIf (agenixMountCommand != null) (lib.mkForce [ agenixLaunchdWrapper ]);
     };
 
+    # Daily session-mining loop: generate agent-core improvement candidates from
+    # the workspace's new Claude Code transcripts, so the reflect -> promote loop
+    # keeps improving on its own. The runner lives in the gytkk-space repo at a
+    # stable path, so the plist bytes do not change between generations (same BTM
+    # notification concern as agenix above). launchd catches up a missed 06:00 run
+    # after the Mac wakes from sleep. See gytkk-space/automation/mine-sessions.sh.
+    launchd.agents.claude-session-mining.config = lib.mkIf pkgs.stdenv.isDarwin {
+      ProgramArguments = [
+        "/bin/sh"
+        "-c"
+        "/bin/wait4path /nix/store && exec ${homeDirectory}/workspace/gytkk-space/automation/mine-sessions.sh"
+      ];
+      StartCalendarInterval = [
+        {
+          Hour = 6;
+          Minute = 0;
+        }
+      ];
+      ProcessType = "Background";
+      StandardOutPath = "${homeDirectory}/Library/Logs/claude-mining/launchd.stdout";
+      StandardErrorPath = "${homeDirectory}/Library/Logs/claude-mining/launchd.stderr";
+    };
+
+    # launchd opens the agent's StandardOut/ErrorPath at spawn time, before the
+    # runner can create the directory itself, so ensure it exists at activation.
+    home.activation.claudeMiningLogDir = lib.mkIf pkgs.stdenv.isDarwin (
+      lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        run mkdir -p ${lib.escapeShellArg "${homeDirectory}/Library/Logs/claude-mining"}
+      ''
+    );
+
     # Surface introspection failure instead of silently reverting to the
     # notification churn (the freeze above simply stays inactive then).
     warnings =
