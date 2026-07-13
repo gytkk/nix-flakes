@@ -3,7 +3,8 @@
 main () {
   case "$(hostname -s)" in
     macbook-*)
-      wg-cli login "$@"
+      wg-cli login
+      wg-cli renew "macbook" --reason "재택 근무"
       ;;
   esac
   vault login -method=oidc
