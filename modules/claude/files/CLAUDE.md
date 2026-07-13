@@ -14,20 +14,8 @@
 ## Git & Commit Workflow
 
 1. Complete one logical change
-2. If subject to review → Use `@review` agent
-   - No issues → Proceed to commit
-   - Issues found → Fix and re-verify
-3. Otherwise → Commit immediately
-4. One logical change per commit
-
-**Review targets** (review when one or more apply):
-
-- 2+ files modified
-- New feature/module added
-- Refactoring or existing behavior changes
-- Public interface (API, export, option) changes
-
-**Not subject to review**: Single-file typo/wording fixes, comment/docs-only changes, formatting-only changes
+2. Commit immediately
+3. One logical change per commit
 
 **Commit rules**:
 
