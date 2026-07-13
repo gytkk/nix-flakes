@@ -1,5 +1,6 @@
 {
   config,
+  options,
   lib,
   pkgs,
   username,
@@ -9,6 +10,41 @@
   ...
 }:
 
+let
+  # agenix's launchd agent execs a mount-secrets store path that changes with
+  # every secrets/input update, and Home Manager wraps every agent command as
+  # `/bin/sh -c "/bin/wait4path /nix/store && exec ..."`. Each plist change
+  # therefore re-registers a new "sh" background item with macOS Background
+  # Task Management and pops a notification. Freeze the plist by pointing it
+  # at this stable out-of-store wrapper; writeAgenixLaunchdWrapper below
+  # rewrites the wrapper (and remounts secrets) when the script changes.
+  agenixLaunchdWrapper = "${config.xdg.stateHome}/agenix-launchd-wrapper";
+
+  # Recover agenix's original mount command from the raw option definitions:
+  # the merged config value is mkForce-replaced with the wrapper path, but the
+  # definition list still contains agenix's plain list. Our own definition is
+  # skipped because its nested mkIf marker is not discharged at this level
+  # (and the ProgramArguments below it is an mkForce marker), so lib.isList
+  # rejects it either way. Remove this workaround if Home Manager's launchd
+  # module gains a stable-exec-path/BTM story or agenix exposes a stable
+  # entry point.
+  agenixMountCommand =
+    let
+      args = lib.findFirst lib.isList null (
+        map (d: d.activate-agenix.config.ProgramArguments or null) options.launchd.agents.definitions
+      );
+    in
+    if args == null then null else lib.escapeShellArgs args;
+
+  agenixWrapperSource =
+    if agenixMountCommand == null then
+      null
+    else
+      pkgs.writeScript "agenix-launchd-wrapper" ''
+        #!/bin/sh
+        exec ${agenixMountCommand}
+      '';
+in
 {
   imports = [
     # 기본 모듈들 (항상 import됨)
@@ -71,9 +107,37 @@
     # agenix's Home Manager LaunchAgent is a one-shot secret activation step.
     # Its upstream KeepAlive.Crashed=false makes launchd rerun it continuously
     # after normal exits, which can race with Home Manager's agent reload.
+    # ProgramArguments is frozen to the stable wrapper path so the plist bytes
+    # never change between generations (see agenixLaunchdWrapper above).
     launchd.agents.activate-agenix.config = lib.mkIf pkgs.stdenv.isDarwin {
       KeepAlive = lib.mkForce null;
+      ProgramArguments = lib.mkIf (agenixMountCommand != null) (lib.mkForce [ agenixLaunchdWrapper ]);
     };
+
+    # Surface introspection failure instead of silently reverting to the
+    # notification churn (the freeze above simply stays inactive then).
+    warnings =
+      lib.optional (pkgs.stdenv.isDarwin && config.age.secrets != { } && agenixMountCommand == null)
+        "agenix launchd command could not be recovered from option definitions; plist freeze is inactive and 'sh' background notifications will return.";
+
+    # Keep the wrapper pointing at the current generation's mount script. The
+    # stable plist means launchd no longer restarts the agent on switch, so
+    # remount secrets here whenever the script changed. Runs after
+    # writeBoundary so a failed pre-flight check cannot leave a rewritten
+    # wrapper behind; a failed remount is non-fatal because launchd retries
+    # at next login (RunAtLoad).
+    home.activation.writeAgenixLaunchdWrapper =
+      lib.mkIf (pkgs.stdenv.isDarwin && agenixMountCommand != null)
+        (
+          lib.hm.dag.entryBetween [ "setupLaunchAgents" ] [ "writeBoundary" ] ''
+            wrapperPath=${lib.escapeShellArg agenixLaunchdWrapper}
+            if ! cmp -s ${agenixWrapperSource} "$wrapperPath" || [ ! -x "$wrapperPath" ]; then
+              run install -D -m 0755 ${agenixWrapperSource} "$wrapperPath"
+              run "$wrapperPath" \
+                || warnEcho "[agenix] secret remount failed; will retry at next login (see ~/Library/Logs/agenix)"
+            fi
+          ''
+        );
 
     # Home Manager agenix defaults to DARWIN_USER_TEMP_DIR on macOS. Keep
     # decrypted generations in XDG state so temp cleanup does not break apps
