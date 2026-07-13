@@ -27,15 +27,9 @@ modules.terraform = {
 };
 ```
 
-### 다중 버전 설정
-
-```nix
-modules.terraform = {
-  enable = true;
-  versions = [ "1.10.5" "1.11.4" "1.12.2" ];  # direnv에서 인식할 버전 목록
-  defaultVersion = "1.12.2";
-};
-```
+사용 가능한 버전 목록은 별도 설정 없이 `nixpkgs-terraform` flake input이 제공하는
+전체 버전(1.0.0 이상)에서 자동으로 파생됩니다. 새 버전이 필요하면
+`nix flake update nixpkgs-terraform` 후 `home-manager switch`를 실행하세요.
 
 ## 설정 옵션
 
@@ -44,12 +38,6 @@ modules.terraform = {
 - **타입**: `bool`
 - **기본값**: `true`
 - **설명**: Terraform 모듈 활성화
-
-### `versions`
-
-- **타입**: `list of strings`
-- **기본값**: `[]`
-- **설명**: direnv에서 사용 가능한 Terraform 버전 목록 (lazy loading)
 
 ### `defaultVersion`
 
@@ -67,14 +55,17 @@ modules.terraform = {
 
 ## Direnv 통합
 
-`backend.tf` 파일의 `required_version`을 자동으로 감지하여 해당 버전의 Terraform을 로드합니다.
+디렉토리 내 `.tf` 파일의 `required_version`을 자동으로 감지하여 해당 버전의 Terraform을 로드합니다.
 
 ### 작동 방식
 
 1. 프로젝트 디렉토리에 `.envrc` 파일 생성
 2. `use_terraform` 함수 호출
-3. `backend.tf`, `versions.tf`, `main.tf`에서 `required_version` 파싱
-4. 기본 버전과 다르면 **nix-direnv를 통해 lazy load**
+3. 디렉토리의 모든 `*.tf` 파일에서 `required_version` 파싱 (첫 번째 발견된 스펙 사용)
+4. 제약 조건을 만족하는 버전 선택:
+   - 기본 버전이 조건을 만족하면 기본 버전 사용 (추가 로드 없음)
+   - 아니면 조건을 만족하는 **가장 높은 버전**을 nix-direnv로 lazy load
+   - 만족하는 버전이 없거나 스펙을 파싱할 수 없으면 경고 후 기본 버전 사용
 5. `/nix/store`에 캐시되어 이후 즉시 로드
 
 ### 사용법
@@ -98,17 +89,23 @@ direnv allow
 terraform {
   # 정확한 버전
   required_version = "= 1.10.5"
-  
-  # 최소 버전
+
+  # 비교 연산자 (>=, <=, >, <)
   required_version = ">= 1.10.5"
-  
-  # 범위 버전
-  required_version = "~> 1.10.0"
-  
+
+  # Pessimistic 연산자 (Terraform 의미론 준수)
+  required_version = "~> 1.10"    # >= 1.10.0, < 2.0.0
+  required_version = "~> 1.10.2"  # >= 1.10.2, < 1.11.0
+
   # 버전만 지정
   required_version = "1.10.5"
+
+  # 쉼표로 구분된 복합 조건 (AND)
+  required_version = ">= 1.10.0, < 2.0.0"
 }
 ```
+
+`!=` 등 지원하지 않는 연산자가 포함된 스펙은 경고를 출력하고 기본 버전으로 동작합니다.
 
 ## 캐시 동작
 
@@ -136,7 +133,7 @@ direnv allow
 
 3. 수동으로 버전 확인:
 ```bash
-nix shell github:stackbuilders/nixpkgs-terraform#1.10.5 --command terraform version
+nix shell github:stackbuilders/nixpkgs-terraform#terraform-1.10.5 --command terraform version
 ```
 
 ### 빌드가 오래 걸리는 경우

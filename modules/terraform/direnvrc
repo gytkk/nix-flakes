@@ -3,6 +3,86 @@
 # Terraform version management with lazy loading via nix-direnv
 # Versions are loaded on-demand from nixpkgs-terraform, cached in /nix/store
 
+# Compare two dotted versions numerically: prints -1, 0, or 1
+_tf_vercmp() {
+  local IFS=.
+  # shellcheck disable=SC2206
+  local a=($1) b=($2)
+  local i x y
+  for i in 0 1 2; do
+    x=${a[i]:-0}
+    y=${b[i]:-0}
+    if ((x < y)); then
+      echo -1
+      return
+    elif ((x > y)); then
+      echo 1
+      return
+    fi
+  done
+  echo 0
+}
+
+# Regex kept in a variable: macOS bash 3.2 mishandles escaped
+# metacharacters written inline in [[ =~ ]]
+_TF_CONSTRAINT_RE='^(~>|>=|<=|=|>|<)?[[:space:]]*([0-9]+(\.[0-9]+)*)[[:space:]]*$'
+
+# Check whether every comma-separated constraint in $1 uses a supported operator
+_tf_spec_parseable() {
+  local constraint
+  local IFS=','
+  for constraint in $1; do
+    constraint="${constraint#"${constraint%%[![:space:]]*}"}"
+    [[ "$constraint" =~ $_TF_CONSTRAINT_RE ]] || return 1
+  done
+  return 0
+}
+
+# Check whether version $1 satisfies constraint string $2
+# (comma-separated Terraform constraints, e.g. ">= 1.2.0, < 2.0.0")
+_tf_satisfies() {
+  local ver="$1" spec="$2"
+  local constraint op req
+  local IFS=','
+  for constraint in $spec; do
+    constraint="${constraint#"${constraint%%[![:space:]]*}"}"
+    if [[ "$constraint" =~ $_TF_CONSTRAINT_RE ]]; then
+      op="${BASH_REMATCH[1]:-=}"
+      req="${BASH_REMATCH[2]}"
+    else
+      # Unsupported operator (e.g. !=): treat as unsatisfied so resolution
+      # falls back to the default instead of picking a forbidden version
+      return 1
+    fi
+    case "$op" in
+      "~>")
+        # Pessimistic operator: only the rightmost component may increase
+        local parts upper
+        IFS=. read -ra parts <<< "$req"
+        if ((${#parts[@]} <= 2)); then
+          upper="$((parts[0] + 1)).0.0"
+        else
+          upper="${parts[0]}.$((parts[1] + 1)).0"
+        fi
+        [[ $(_tf_vercmp "$ver" "$req") -ge 0 && $(_tf_vercmp "$ver" "$upper") -lt 0 ]] || return 1
+        ;;
+      "=")
+        if [[ "$req" == *.*.* ]]; then
+          [[ $(_tf_vercmp "$ver" "$req") -eq 0 ]] || return 1
+        else
+          # Two-component exact spec matches any patch level
+          [[ "$ver" == "$req".* ]] || return 1
+        fi
+        ;;
+      ">=") [[ $(_tf_vercmp "$ver" "$req") -ge 0 ]] || return 1 ;;
+      "<=") [[ $(_tf_vercmp "$ver" "$req") -le 0 ]] || return 1 ;;
+      ">") [[ $(_tf_vercmp "$ver" "$req") -gt 0 ]] || return 1 ;;
+      "<") [[ $(_tf_vercmp "$ver" "$req") -lt 0 ]] || return 1 ;;
+    esac
+  done
+  return 0
+}
+
 use_terraform() {
   # Watch terraform config files for version changes
   watch_file backend.tf
@@ -10,42 +90,49 @@ use_terraform() {
   watch_file main.tf
   watch_file terraform.tf
 
-  # Default version (substituted by Nix)
+  # Substituted by Nix (modules/terraform/default.nix)
   local DEFAULT_VERSION="@DEFAULT_VERSION@"
-  local AVAILABLE_VERSIONS="@AVAILABLE_VERSIONS@"
+  local AVAILABLE_VERSIONS="@AVAILABLE_VERSIONS@" # ascending order
+  local FLAKE_REF="@FLAKE_REF@"
+  local NIXPKGS_REF="@NIXPKGS_REF@"
   local TERRAFORM_VERSION="$DEFAULT_VERSION"
 
-  # Parse required_version from terraform config files
-  for file in "backend.tf" "versions.tf" "main.tf" "terraform.tf"; do
-    if [[ -f "$file" ]]; then
-      local VERSION_SPEC
-      VERSION_SPEC=$(grep -o 'required_version[ ]*=[ ]*"[^"]*"' "$file" 2>/dev/null | sed 's/.*"\([^"]*\)".*/\1/' | head -1)
-      if [[ -n "$VERSION_SPEC" ]]; then
-        log_status "Found version spec in $file: $VERSION_SPEC"
-
-        # Parse version from spec
-        if [[ "$VERSION_SPEC" =~ ~\>[[:space:]]*([0-9]+\.[0-9]+)([\.0-9]*) ]]; then
-          # ~> 1.10 or ~> 1.10.0 style
-          local MAJOR_MINOR="${BASH_REMATCH[1]}"
-          for version in $AVAILABLE_VERSIONS; do
-            if [[ "$version" =~ ^$MAJOR_MINOR\.[0-9]+$ ]]; then
-              TERRAFORM_VERSION="$version"
-            fi
-          done
-        elif [[ "$VERSION_SPEC" =~ =[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+) ]]; then
-          # = 1.10.5 style
-          TERRAFORM_VERSION="${BASH_REMATCH[1]}"
-        elif [[ "$VERSION_SPEC" =~ \>=[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+) ]]; then
-          # >= 1.10.5 style - use the specified version
-          TERRAFORM_VERSION="${BASH_REMATCH[1]}"
-        elif [[ "$VERSION_SPEC" =~ ^[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+)[[:space:]]*$ ]]; then
-          # Plain version: 1.10.5
-          TERRAFORM_VERSION="${BASH_REMATCH[1]}"
-        fi
-        break
-      fi
+  # Find required_version in any .tf file in this directory
+  local VERSION_SPEC="" SPEC_FILE="" file spec
+  for file in *.tf; do
+    [[ -f "$file" ]] || continue
+    watch_file "$file"
+    spec=$(grep -o 'required_version[[:space:]]*=[[:space:]]*"[^"]*"' "$file" 2> /dev/null | sed 's/.*"\([^"]*\)".*/\1/' | head -1)
+    if [[ -n "$spec" ]]; then
+      VERSION_SPEC="$spec"
+      SPEC_FILE="$file"
+      break
     fi
   done
+
+  if [[ -n "$VERSION_SPEC" ]]; then
+    log_status "Found version spec in $SPEC_FILE: $VERSION_SPEC"
+
+    if ! _tf_spec_parseable "$VERSION_SPEC"; then
+      log_error "use_terraform: unsupported version spec '$VERSION_SPEC', falling back to $DEFAULT_VERSION"
+    elif _tf_satisfies "$DEFAULT_VERSION" "$VERSION_SPEC"; then
+      TERRAFORM_VERSION="$DEFAULT_VERSION"
+    else
+      # Pick the highest available version satisfying the constraint
+      local candidate=""
+      local version
+      for version in $AVAILABLE_VERSIONS; do
+        if _tf_satisfies "$version" "$VERSION_SPEC"; then
+          candidate="$version"
+        fi
+      done
+      if [[ -n "$candidate" ]]; then
+        TERRAFORM_VERSION="$candidate"
+      else
+        log_error "use_terraform: no available terraform version satisfies '$VERSION_SPEC', falling back to $DEFAULT_VERSION"
+      fi
+    fi
+  fi
 
   log_status "Using Terraform version: $TERRAFORM_VERSION"
 
@@ -57,10 +144,9 @@ use_terraform() {
 
   # Lazy load the requested version via nix-direnv
   # This will fetch/build only on first use, then cache in /nix/store
-  local FLAKE_REF="github:stackbuilders/nixpkgs-terraform/67111c56b525073991fcb656ce30e9ad25a78826"
 
   # Check if nix-direnv's use_flake is available
-  if type use_flake &>/dev/null; then
+  if type use_flake &> /dev/null; then
     # Create a temporary flake expression for the specific terraform version
     local FLAKE_DIR="${PWD}/.direnv/terraform-flake"
     mkdir -p "$FLAKE_DIR"
@@ -69,7 +155,7 @@ use_terraform() {
 {
   inputs.nixpkgs-terraform.url = "${FLAKE_REF}";
   inputs.nixpkgs-terraform.inputs.nixpkgs.follows = "nixpkgs";
-  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+  inputs.nixpkgs.url = "${NIXPKGS_REF}";
 
   outputs = { nixpkgs, nixpkgs-terraform, ... }:
     let
@@ -79,7 +165,7 @@ use_terraform() {
       devShells = forAllSystems (system: {
         default = let
           pkgs = nixpkgs.legacyPackages.\${system};
-          terraform = nixpkgs-terraform.packages.\${system}."${TERRAFORM_VERSION}";
+          terraform = nixpkgs-terraform.packages.\${system}."terraform-${TERRAFORM_VERSION}";
         in pkgs.mkShell {
           buildInputs = [ terraform ];
         };
@@ -94,12 +180,11 @@ EOF
   else
     # Fallback: use nix-shell directly (slower, but works without nix-direnv)
     log_status "nix-direnv not available, using nix-shell fallback"
-    local NIX_EXPR="(builtins.getFlake \"${FLAKE_REF}\").packages.\${builtins.currentSystem}.\"${TERRAFORM_VERSION}\""
 
     mkdir -p "${PWD}/.direnv/bin"
     cat > "${PWD}/.direnv/bin/terraform" << WRAPPER
 #!/usr/bin/env bash
-exec nix shell "${FLAKE_REF}#${TERRAFORM_VERSION}" --command terraform "\$@"
+exec nix shell "${FLAKE_REF}#terraform-${TERRAFORM_VERSION}" --command terraform "\$@"
 WRAPPER
     chmod +x "${PWD}/.direnv/bin/terraform"
     PATH_add "${PWD}/.direnv/bin"

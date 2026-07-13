@@ -10,6 +10,15 @@ let
   cfg = config.modules.terraform;
   system = pkgs.stdenv.hostPlatform.system;
   terraformPkgs = inputs.nixpkgs-terraform.packages.${system};
+  availableVersions = lib.sort lib.versionOlder (
+    lib.concatMap (
+      n:
+      let
+        m = builtins.match "terraform-([0-9]+\\.[0-9]+\\.[0-9]+)" n;
+      in
+      if m == null then [ ] else m
+    ) (builtins.attrNames terraformPkgs)
+  );
 in
 {
   options.modules.terraform = {
@@ -17,16 +26,6 @@ in
       type = lib.types.bool;
       default = false;
       description = "Enable Terraform version management with nixpkgs-terraform";
-    };
-
-    versions = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = [ ];
-      description = "List of available terraform versions (loaded lazily via direnv)";
-      example = [
-        "1.10.5"
-        "1.12.2"
-      ];
     };
 
     defaultVersion = lib.mkOption {
@@ -75,8 +74,18 @@ in
     # Add use_terraform function to direnv stdlib (preserves nix-direnv setup)
     programs.direnv.stdlib =
       builtins.replaceStrings
-        [ "@DEFAULT_VERSION@" "@AVAILABLE_VERSIONS@" ]
-        [ cfg.defaultVersion (lib.concatStringsSep " " cfg.versions) ]
+        [
+          "@DEFAULT_VERSION@"
+          "@AVAILABLE_VERSIONS@"
+          "@FLAKE_REF@"
+          "@NIXPKGS_REF@"
+        ]
+        [
+          cfg.defaultVersion
+          (lib.concatStringsSep " " availableVersions)
+          "github:stackbuilders/nixpkgs-terraform/${inputs.nixpkgs-terraform.rev}"
+          "github:nixos/nixpkgs/${inputs.nixpkgs.rev}"
+        ]
         (builtins.readFile ./direnvrc);
   };
 }
