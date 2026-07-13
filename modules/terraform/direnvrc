@@ -151,7 +151,8 @@ use_terraform() {
     local FLAKE_DIR="${PWD}/.direnv/terraform-flake"
     mkdir -p "$FLAKE_DIR"
 
-    cat > "$FLAKE_DIR/flake.nix" << EOF
+    local FLAKE_CONTENT
+    FLAKE_CONTENT=$(cat << EOF
 {
   inputs.nixpkgs-terraform.url = "${FLAKE_REF}";
   inputs.nixpkgs-terraform.inputs.nixpkgs.follows = "nixpkgs";
@@ -173,10 +174,23 @@ use_terraform() {
     };
 }
 EOF
+    )
 
-    # Use the flake (nix-direnv will cache this)
-    use flake "$FLAKE_DIR"
-    log_status "Loaded Terraform $TERRAFORM_VERSION via nix-direnv (cached in /nix/store)"
+    # Only rewrite on change: a fresh mtime on every eval would permanently
+    # invalidate nix-direnv's dev-shell cache
+    if [[ ! -f "$FLAKE_DIR/flake.nix" ]] || [[ "$FLAKE_CONTENT" != "$(< "$FLAKE_DIR/flake.nix")" ]]; then
+      printf '%s\n' "$FLAKE_CONTENT" > "$FLAKE_DIR/flake.nix"
+      rm -f "$FLAKE_DIR/flake.lock"
+    fi
+
+    # path: prefix keeps Nix from treating the flake as part of an enclosing
+    # git repository, where untracked .direnv/ contents are invisible
+    unset NIX_DIRENV_DID_FALLBACK
+    if use flake "path:$FLAKE_DIR" && [[ -z "${NIX_DIRENV_DID_FALLBACK:-}" ]]; then
+      log_status "Loaded Terraform $TERRAFORM_VERSION via nix-direnv (cached in /nix/store)"
+    else
+      log_error "use_terraform: failed to load Terraform $TERRAFORM_VERSION, terraform in PATH is still $DEFAULT_VERSION"
+    fi
   else
     # Fallback: use nix-shell directly (slower, but works without nix-direnv)
     log_status "nix-direnv not available, using nix-shell fallback"
