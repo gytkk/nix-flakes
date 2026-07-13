@@ -169,6 +169,7 @@
 
         # JavaScript + Node.js
         bun
+        pnpm
         nodejs
         typescript
 
