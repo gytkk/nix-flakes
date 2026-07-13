@@ -1,7 +1,11 @@
 #!/bin/sh
 
 main () {
-  wg-cli login "$@"
+  case "$(hostname -s)" in
+    macbook-*)
+      wg-cli login "$@"
+      ;;
+  esac
   vault login -method=oidc
   kc2aws login
 }
