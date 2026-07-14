@@ -29,6 +29,9 @@
     # Ruby
     pkgs.stable-25_05.ruby_3_2
 
+    # Databricks CLI (Go 구현체, GitHub 릴리스 바이너리)
+    databricks-cli
+
     # Custom scripts
     (pkgs.writeShellScriptBin "sign" (builtins.readFile ./scripts/sign))
     (pkgs.writeShellScriptBin "dlg" (builtins.readFile ./scripts/login))
