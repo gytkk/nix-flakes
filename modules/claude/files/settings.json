@@ -16,7 +16,6 @@
     ],
     "defaultMode": "acceptEdits"
   },
-  "model": "opus[1m]",
   "enableAllProjectMcpServers": true,
   "hooks": {
     "UserPromptSubmit": [
@@ -98,5 +97,7 @@
   "skipWorkflowUsageWarning": true,
   "theme": "auto",
   "teammateMode": "auto",
-  "skipAutoPermissionPrompt": true
+  "skipAutoPermissionPrompt": true,
+  "includeCoAuthoredBy": false,
+  "askUserQuestionTimeout": "15m"
 }
