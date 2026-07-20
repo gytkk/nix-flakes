@@ -63,31 +63,6 @@
     port = 2283;
   };
 
-  # K3s - lightweight Kubernetes
-  services.k3s = {
-    enable = true;
-    role = "server";
-    extraFlags = toString [
-      "--disable=traefik" # Cloudflare Tunnel 사용하므로 비활성화
-    ];
-  };
-
-  # K3s kubeconfig for non-root users
-  environment.variables.KUBECONFIG = "/etc/rancher/k3s/k3s.yaml";
-
-  # Fix kubeconfig permissions after k3s starts
-  systemd.services.k3s-kubeconfig-permissions = {
-    description = "Fix k3s kubeconfig permissions for wheel group";
-    after = [ "k3s.service" ];
-    requires = [ "k3s.service" ];
-    wantedBy = [ "multi-user.target" ];
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-      ExecStart = "${pkgs.coreutils}/bin/chmod 644 /etc/rancher/k3s/k3s.yaml";
-    };
-  };
-
   # Cloudflare Tunnel (token-based, managed via Zero Trust dashboard)
   age.secrets.cloudflare-tunnel-sepia-token = {
     file = ../../secrets/cloudflare-tunnel-sepia-token.age;
