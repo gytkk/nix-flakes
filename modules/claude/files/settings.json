@@ -17,7 +17,6 @@
     ],
     "defaultMode": "acceptEdits"
   },
-  "model": "claude-fable-5[1m]",
   "enableAllProjectMcpServers": true,
   "hooks": {
     "UserPromptSubmit": [
