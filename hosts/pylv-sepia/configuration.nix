@@ -11,6 +11,7 @@
     inputs.disko.nixosModules.disko
     inputs.copyparty.nixosModules.default
     ./disk-config.nix
+    ./ghost.nix
     ../../modules/nixos
   ];
 
