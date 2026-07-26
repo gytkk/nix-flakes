@@ -43,7 +43,6 @@ in
         "--security-opt=no-new-privileges"
         ''--health-cmd=node -e "require('http').get('http://127.0.0.1:2368/',r=>process.exit(r.statusCode>=200&&r.statusCode<400?0:1)).on('error',()=>process.exit(1))"''
         "--health-interval=30s"
-        "--health-start-interval=5s"
         "--health-start-period=60s"
         "--health-timeout=5s"
         "--health-retries=3"
