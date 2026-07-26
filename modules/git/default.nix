@@ -70,6 +70,17 @@ in
           pruneTags = true;
         };
 
+        credential = {
+          "https://github.com".helper = [
+            ""
+            "!gh auth git-credential"
+          ];
+          "https://gist.github.com".helper = [
+            ""
+            "!gh auth git-credential"
+          ];
+        };
+
         filter.codex-clean = {
           clean = "sed '/^\\[projects\\./,/^$/d'";
           smudge = "cat";
