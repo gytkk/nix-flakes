@@ -79,6 +79,7 @@ return {
     -- Picker: search
     { "<leader>/",  function() Snacks.picker.grep() end,                      desc = "Grep (Project)" },
     { "<leader>sg", function() Snacks.picker.grep() end,                      desc = "Grep" },
+    { "<leader>sr", function() Snacks.picker.resume() end,                    desc = "Resume Search" },
     { "<leader>sw", function() Snacks.picker.grep_word() end,                 desc = "Grep Word",                  mode = { "n", "x" } },
     { "<leader>s/", function() Snacks.picker.lines() end,                     desc = "Buffer Lines" },
     -- Picker: git
