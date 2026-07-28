@@ -267,6 +267,8 @@ Resources should supplement the tools instead of expanding the tool count:
   show a `SYNC` indicator.
 - Resize the active pane in five-cell steps with `Ctrl+a`, then
   `Ctrl+h`/`Ctrl+j`/`Ctrl+k`/`Ctrl+l`.
+- Close the active pane immediately with `Ctrl+a`, then `x`; use uppercase
+  `X` to close the entire window.
 - tmux sets the outer terminal title to the current session name, so terminal
   tabs that use pane titles, including WezTerm, show the tmux session instead
   of the `tmux` process name.
