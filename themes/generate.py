@@ -1283,7 +1283,7 @@ def build_tmux_slots(ctx: dict[str, Any]) -> dict[str, str]:
     )
     status_right = (
         f'#{{?client_prefix,{tmux_style(fg=status_fg)} '
-        '? help | w tree | s sessions | #, rename | %%%%/" split | z zoom | [ copy #[default],}'
+        '? help | w tree | s sessions | #, rename | %%%% side split | " stack split | C-hjkl resize | z zoom | [ copy #[default],}'
     )
     agent_status = '#(tmux-agent-window-status #{window_id})'
     window_status = f"{tmux_style(fg=r['ui']['fgMuted'], bg=status_bg)} #I #W#F {agent_status} #[default]"
