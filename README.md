@@ -265,6 +265,8 @@ Resources should supplement the tools instead of expanding the tool count:
   top with generated canonical theme colors. Pressing the prefix accent-colors
   the session segment and shows key hints on the right; synchronized panes still
   show a `SYNC` indicator.
+- Resize the active pane in five-cell steps with `Ctrl+a`, then
+  `Ctrl+h`/`Ctrl+j`/`Ctrl+k`/`Ctrl+l`.
 - tmux sets the outer terminal title to the current session name, so terminal
   tabs that use pane titles, including WezTerm, show the tmux session instead
   of the `tmux` process name.
