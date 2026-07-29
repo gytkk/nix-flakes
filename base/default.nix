@@ -307,6 +307,12 @@ in
       # Rust/C 빌드 시 라이브러리 경로 (특히 macOS에서 libiconv 링킹용)
       sessionVariables = {
         LIBRARY_PATH = lib.makeLibraryPath [ pkgs.libiconv ];
+
+        # pup 바이너리는 nix store에서 ad-hoc 서명되므로 rebuild마다 코드 서명
+        # identity가 바뀐다. macOS 키체인 ACL이 유지되지 않아 매 호출마다 접근
+        # 허용 알림이 뜨므로, 토큰을 ~/.config/pup/tokens_<site>.json (0600)에
+        # 저장하도록 강제한다.
+        DD_TOKEN_STORAGE = "file";
       };
     };
 
