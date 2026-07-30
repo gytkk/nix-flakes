@@ -28,6 +28,15 @@ in
       # TypeScript
       typescript-language-server
 
+      # Web (HTML, CSS, JSON)
+      vscode-langservers-extracted
+
+      # Lua
+      lua-language-server
+
+      # Shell
+      bash-language-server
+
       # Terraform
       terraform-ls
 
@@ -42,6 +51,9 @@ in
 
       # Markdown
       marksman
+
+      # TOML
+      taplo
 
       # Rust: rust-analyzer is bundled with pkgs.rustToolchain in base/default.nix
     ];

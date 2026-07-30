@@ -9,10 +9,13 @@ M.minuet = {
     require("minuet").setup({
       provider = "openai",
       n_completions = 1,
-      context_window = 8000,
-      throttle = 500,
-      debounce = 200,
-      request_timeout = 2.5,
+      -- Keep inline completions responsive without sending a request for every
+      -- keystroke. A slightly longer timeout avoids silently dropping useful
+      -- streamed completions.
+      context_window = 6000,
+      throttle = 900,
+      debounce = 180,
+      request_timeout = 4,
       notify = "warn",
       after_cursor_filter_length = 24,
       before_cursor_filter_length = 4,
@@ -45,7 +48,7 @@ M.minuet = {
       },
       provider_options = {
         openai = {
-          model = "gpt-5.4-nano",
+          model = "gpt-5.6-luna",
           api_key = ai.getOpenAIKey,
           optional = {
             max_completion_tokens = 128,
@@ -101,7 +104,9 @@ M.blink = {
             name = "minuet",
             module = "minuet.blink",
             async = true,
-            timeout_ms = 2500,
+            -- Keep Blink's manual Minuet source timeout aligned with
+            -- minuet.request_timeout above.
+            timeout_ms = 4000,
             score_offset = 50,
           },
         },

@@ -1,4 +1,19 @@
-local lspServers = { "nixd", "gopls", "rust_analyzer", "ts_ls", "terraformls", "yamlls", "marksman", "ty" }
+local lspServers = {
+  "nixd",
+  "gopls",
+  "rust_analyzer",
+  "ts_ls",
+  "html",
+  "cssls",
+  "jsonls",
+  "lua_ls",
+  "bashls",
+  "terraformls",
+  "yamlls",
+  "marksman",
+  "taplo",
+  "ty",
+}
 
 local function setupLspDiagnostics()
   vim.diagnostic.config({
