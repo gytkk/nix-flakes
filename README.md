@@ -392,17 +392,6 @@ nix build .#nixosConfigurations.pylv-sepia.config.system.build.toplevel
 - Nix seeds `/etc/openclaw/openclaw.seed.json`, while the mutable runtime config lives at `~/.openclaw/openclaw.json`.
 - The host-level `openclaw` command is a hybrid wrapper: Nix installs the package, but CLI service management overrides the upstream `OPENCLAW_NIX_MODE=1` default with an empty value so `openclaw gateway install` can manage the user service directly
 
-### `pylv-onyx` OpenClaw Open WebUI access
-
-- Public hostname: `https://openwebui.pylv.dev` once the existing `pylv-onyx` Cloudflare Tunnel is mapped to that hostname in Cloudflare Zero Trust
-- Access control: protect the public hostname with a Cloudflare Access self-hosted app; for your current plan, allow only `gytk.kim@gmail.com` and keep Google MFA/passkey enabled on that account
-- The nginx origin listens only on loopback `127.0.0.1:8787`; the raw Open WebUI backend stays loopback-only on `127.0.0.1:8788`
-- Open WebUI talks to the local OpenClaw reverse proxy on `http://127.0.0.1:18790/v1` and defaults to `openclaw/main`
-- `nginx` injects the loopback gateway bearer token for OpenClaw and trusted-auth headers for Open WebUI, so the public path auto-signs in as `gytk.kim@gmail.com` after Cloudflare Access admits the request
-- `secrets/open-webui-env.age` seeds the initial Open WebUI admin environment
-- Mutable Open WebUI data lives under `/var/lib/open-webui`
-- Suggested Cloudflare origin target: `http://127.0.0.1:8787`
-
 ### `pylv-onyx` Hermes Dashboard access
 
 - Suggested public hostname: `https://hermes.pylv.dev`

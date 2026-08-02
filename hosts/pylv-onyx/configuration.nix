@@ -17,7 +17,6 @@ in
     inputs.dms.nixosModules.dank-material-shell
     inputs.dms.nixosModules.greeter
     ./hardware-configuration.nix
-    ./open-webui.nix
     ./hermes-dashboard.nix
     ../../modules/openclaw
     ../../modules/nixos

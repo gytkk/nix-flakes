@@ -39,14 +39,8 @@ in
   # Cloudflare Tunnel token for pylv-sepia
   "cloudflare-tunnel-sepia-token.age".publicKeys = sepiaRecipients;
 
-  # Cloudflare Tunnel token for pylv-onyx Open WebUI
-  "cloudflare-tunnel-onyx-token.age".publicKeys = onyxRecipients;
-
   # Discord bot token for openclaw
   "discord-bot-token.age".publicKeys = onyxRecipients;
-
-  # Open WebUI initial admin environment file
-  "open-webui-env.age".publicKeys = onyxRecipients;
 
   # Databricks OTEL token (devsisters environments only)
   "databricks-token.age".publicKeys = devsistersRecipients;
