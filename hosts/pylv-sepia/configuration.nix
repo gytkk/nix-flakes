@@ -16,6 +16,7 @@
   ];
 
   time.timeZone = "Asia/Seoul";
+  networking.hostName = "pylv-sepia";
 
   boot.loader.grub = {
     efiSupport = true;
