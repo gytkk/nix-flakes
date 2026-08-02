@@ -35,10 +35,12 @@ in production mode with SQLite and persists its complete content directory at
 `/var/lib/ghost` on the host. No database password or other Ghost secret is
 stored in Nix.
 
-The application port is published only as `127.0.0.1:2368`. Nginx provides the
-Cloudflare Tunnel origin only at `http://127.0.0.1:12368`, forwards requests to
-Ghost, and fixes the public scheme and host as `https://ghost.pylv.dev`. Neither
-port is opened in the NixOS firewall.
+The container shares the host network, but Ghost binds only to
+`127.0.0.1:2368`. This avoids a Podman DNAT dependency while keeping the
+application private. Nginx provides the Cloudflare Tunnel origin only at
+`http://127.0.0.1:12368`, forwards requests to Ghost, and fixes the public
+scheme and host as `https://ghost.pylv.dev`. Neither port is opened in the
+NixOS firewall.
 
 The Ghost 6 runtime in the image accepts the SQLite configuration override, but
 the Docker Official Image documentation only supports the SQLite filename in

@@ -9,7 +9,7 @@ in
 {
   systemd.tmpfiles.rules = [
     "d ${ghostContentDir} 0750 1000 1000 -"
-    "d ${ghostBackupDir} 0700 root root -"
+    "d ${ghostBackupDir} 0700 1000 1000 -"
   ];
 
   virtualisation.oci-containers = {
@@ -19,9 +19,6 @@ in
       image = "docker.io/library/ghost@sha256:94b71e5058d8d0adbb76267e007da09d049f00fe285a186fac2c5a5641e256e8";
       pull = "missing";
       user = "1000:1000";
-      ports = [
-        "127.0.0.1:${toString ghostPort}:2368"
-      ];
       volumes = [
         "${ghostContentDir}:/var/lib/ghost/content"
       ];
@@ -30,7 +27,7 @@ in
         url = "https://${ghostFqdn}";
         database__client = "sqlite3";
         database__connection__filename = "/var/lib/ghost/content/data/ghost.db";
-        server__host = "0.0.0.0";
+        server__host = "127.0.0.1";
         server__port = "2368";
         logging__transports = ''["stdout"]'';
       };
@@ -38,6 +35,7 @@ in
         ALL = false;
       };
       extraOptions = [
+        "--network=host"
         "--read-only"
         "--tmpfs=/tmp:rw,nosuid,nodev,noexec,size=64m"
         "--security-opt=no-new-privileges"
@@ -124,6 +122,8 @@ in
     ];
     serviceConfig = {
       Type = "oneshot";
+      User = "1000";
+      Group = "1000";
       UMask = "0077";
       Nice = 10;
       IOSchedulingClass = "best-effort";
