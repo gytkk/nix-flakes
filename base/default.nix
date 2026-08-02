@@ -5,12 +5,30 @@
   pkgs,
   username,
   homeDirectory,
+  flakeDirectory,
   inputs,
   isWSL ? false,
   ...
 }:
 
 let
+  agenixPackage = inputs.agenix.packages.${pkgs.stdenv.hostPlatform.system}.default;
+  agx = pkgs.writeShellScriptBin "agx" ''
+    set -eu
+
+    secretsDir=${lib.escapeShellArg "${flakeDirectory}/secrets"}
+    identity="$HOME/.ssh/id_ed25519"
+
+    if [ ! -r "$identity" ]; then
+      echo "agx: identity is not readable: $identity" >&2
+      exit 1
+    fi
+
+    cd "$secretsDir"
+    export RULES="$secretsDir/secrets.nix"
+    exec ${agenixPackage}/bin/agenix "$@" -i "$identity"
+  '';
+
   # agenix's launchd agent execs a mount-secrets store path that changes with
   # every secrets/input update, and Home Manager wraps every agent command as
   # `/bin/sh -c "/bin/wait4path /nix/store && exec ..."`. Each plist change
@@ -170,10 +188,13 @@ in
           ''
         );
 
-    # Home Manager agenix defaults to DARWIN_USER_TEMP_DIR on macOS. Keep
-    # decrypted generations in XDG state so temp cleanup does not break apps
-    # that read long-lived secrets such as Neovim's OpenAI API key.
-    age = lib.mkIf pkgs.stdenv.isDarwin {
+    age = {
+      identityPaths = [ "${homeDirectory}/.ssh/id_ed25519" ];
+    }
+    // lib.optionalAttrs pkgs.stdenv.isDarwin {
+      # Home Manager agenix defaults to DARWIN_USER_TEMP_DIR on macOS. Keep
+      # decrypted generations in XDG state so temp cleanup does not break apps
+      # that read long-lived secrets such as Neovim's OpenAI API key.
       secretsDir = "${config.xdg.stateHome}/agenix";
       secretsMountPoint = "${config.xdg.stateHome}/agenix.d";
     };
@@ -279,7 +300,8 @@ in
         # Secrets
         _1password-cli
         keybase
-        inputs.agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
+        agenixPackage
+        agx
 
         # Modeling
         ffmpeg

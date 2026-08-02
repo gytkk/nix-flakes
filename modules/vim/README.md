@@ -38,7 +38,7 @@ This module configures Neovim as the primary editor with a modern Lua-based setu
 Create or update the secret with:
 
 ```bash
-EDITOR=vim agenix -e secrets/openai-api-key.age
+EDITOR=vim agx -e openai-api-key.age
 ```
 
 ## Notable Keymaps

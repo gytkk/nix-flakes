@@ -3,13 +3,14 @@
 #
 # Usage:
 #   1. Add your public key below
-#   2. Create encrypted secrets: agenix -e secret-name.age
+#   2. Create encrypted secrets: agx -e secret-name.age
 #   3. Reference in NixOS config: age.secrets.secretName.file = ./secret-name.age;
 #
-# The decrypted secret will be available at /run/agenix/secretName
+# NixOS secrets are decrypted under /run/agenix. Home Manager consumers should
+# use the path exposed by config.age.secrets.<name>.path.
 let
-  # User SSH public keys (for encrypting secrets)
-  gytkk = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJhE4Uakcz7usa0aetMqb99LYybOQ0I+sWKOiAidmBio";
+  # Primary administrator SSH public key (for editing and recovery)
+  agenixAdmin = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJhE4Uakcz7usa0aetMqb99LYybOQ0I+sWKOiAidmBio";
 
   # Host SSH public keys (for host-specific secrets)
   pylv-sepia = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIC6EAZczgXONlXiwh946SidpRKSMw7fehg0u2L5SkHmd";
@@ -20,7 +21,7 @@ let
   devsisters-macstudio = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHGIGT6Zgg4TW74umgyjlpk1b056LXDoC1kbBfPcqRuz";
 
   # Key groups
-  allUsers = [ gytkk ];
+  adminRecipients = [ agenixAdmin ];
   allHosts = [
     pylv-sepia
     pylv-onyx
@@ -29,23 +30,27 @@ let
     devsisters-macbook
     devsisters-macstudio
   ];
+  sepiaRecipients = adminRecipients ++ [ pylv-sepia ];
+  onyxRecipients = adminRecipients ++ [ pylv-onyx ];
+  devsistersRecipients = adminRecipients ++ devsistersHosts;
+  allEnvironmentRecipients = adminRecipients ++ allHosts ++ devsistersHosts;
 in
 {
   # Cloudflare Tunnel token for pylv-sepia
-  "cloudflare-tunnel-sepia-token.age".publicKeys = allUsers ++ allHosts;
+  "cloudflare-tunnel-sepia-token.age".publicKeys = sepiaRecipients;
 
   # Cloudflare Tunnel token for pylv-onyx Open WebUI
-  "cloudflare-tunnel-onyx-token.age".publicKeys = allUsers ++ allHosts;
+  "cloudflare-tunnel-onyx-token.age".publicKeys = onyxRecipients;
 
   # Discord bot token for openclaw
-  "discord-bot-token.age".publicKeys = allUsers ++ allHosts;
+  "discord-bot-token.age".publicKeys = onyxRecipients;
 
   # Open WebUI initial admin environment file
-  "open-webui-env.age".publicKeys = allUsers ++ allHosts;
+  "open-webui-env.age".publicKeys = onyxRecipients;
 
   # Databricks OTEL token (devsisters environments only)
-  "databricks-token.age".publicKeys = allUsers ++ devsistersHosts;
+  "databricks-token.age".publicKeys = devsistersRecipients;
 
   # OpenAI API key for Neovim Minuet
-  "openai-api-key.age".publicKeys = allUsers ++ allHosts ++ devsistersHosts;
+  "openai-api-key.age".publicKeys = allEnvironmentRecipients;
 }

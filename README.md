@@ -18,6 +18,34 @@ echo "experimental-features = nix-command flakes" | sudo tee -a /etc/nix/nix.con
   The checkout path still matters for modules that intentionally install
   out-of-store symlinks back to the repo.
 
+## Secrets with agenix and 1Password
+
+Encrypted secrets live in `secrets/*.age`, while `secrets/secrets.nix` defines
+which administrator, host, or workstation public keys may decrypt each file.
+Only public keys and encrypted files belong in Git.
+
+- Home Manager uses each workstation's `~/.ssh/id_ed25519` as its agenix
+  identity.
+- NixOS hosts use their SSH host keys for unattended system secret activation.
+- The current workstation key is the primary agenix administrator key. Keep its
+  recovery copy in the 1Password item `pylv/agenix-admin-key`; never commit or
+  symlink the private key into this repository.
+
+Home Manager installs `agx`, which fixes the checkout's `secrets` directory,
+rules file, and `~/.ssh/id_ed25519` identity for every operation:
+
+```bash
+agx -e openai-api-key.age
+agx -d cloudflare-tunnel-sepia-token.age
+agx -r
+```
+
+`agx -d` writes plaintext to standard output. After adding or removing a
+recipient in `secrets/secrets.nix`, run `agx -r` and commit the rules and all
+changed `.age` files together. To recover the administrator identity, restore
+it from 1Password to `~/.ssh/id_ed25519`, set mode `0600`, and verify its public
+key matches `agenixAdmin` before editing or rekeying secrets.
+
 ## Architecture
 
 This flake supports standalone Home Manager environments and NixOS hosts.
