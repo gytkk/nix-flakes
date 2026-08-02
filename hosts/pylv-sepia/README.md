@@ -49,6 +49,168 @@ Treat this single-instance production SQLite deployment as an intentional,
 locally operated exception and test Ghost upgrades against a restored backup
 before changing the pinned image.
 
+### Declarative Settings and Theme Plan
+
+Status: proposed. Implement this only after approving the remaining product and
+security decisions below.
+
+#### Desired State
+
+- Anyone can read public posts without creating an account.
+- Member signup, newsletters, and comments are disabled initially.
+- Staff continue to authenticate through Ghost Admin at `/ghost`.
+- Supported publication settings are reconciled through the Ghost Admin API;
+  the SQLite database is never edited directly.
+- A repository-managed custom theme controls layout and styling.
+- Secrets remain encrypted with agenix and never enter the Nix store, generated
+  units, logs, or Git history.
+
+The initial managed Ghost settings are:
+
+| Ghost setting | Desired value | Purpose |
+| --- | --- | --- |
+| `is_private` | `false` | Allow unauthenticated site visits |
+| `members_signup_access` | `none` | Disable member signup and member features |
+| `default_content_visibility` | `public` | Make new posts public by default |
+| `comments_enabled` | `off` | Disable member-only comments |
+
+#### Configuration Boundaries
+
+| Concern | Source of truth |
+| --- | --- |
+| Container, database, URL, mail, storage, and proxy | `ghost.nix` |
+| Selected publication settings and navigation | Admin API desired-state file |
+| Owner account and initial custom integration | One-time Ghost Admin bootstrap |
+| Admin API credential | agenix secret |
+| Layout, templates, CSS, JavaScript, and theme defaults | Repository-managed Ghost theme |
+| Posts, pages, images, and other editorial content | Ghost content database and uploads |
+| Public hostname and optional admin access policy | Cloudflare Zero Trust dashboard |
+
+Editorial content should not be continuously reconciled by Nix. This keeps
+normal authoring in Ghost Admin independent from infrastructure deployments.
+
+#### Proposed Repository Layout
+
+```text
+hosts/pylv-sepia/
+├── ghost.nix
+└── ghost/
+    ├── settings.json
+    ├── sync-settings.js
+    ├── routes.yaml
+    └── theme/
+        ├── package.json
+        ├── default.hbs
+        ├── index.hbs
+        ├── post.hbs
+        ├── page.hbs
+        ├── partials/
+        └── assets/
+            ├── css/
+            ├── js/
+            └── images/
+```
+
+Keep the sync script narrow: it should update only keys explicitly present in
+`settings.json`. It must not overwrite unrelated settings changed through Ghost
+Admin.
+
+#### Implementation Phases
+
+1. **Finish the current runtime rollout**
+   - Activate the host-network and backup ownership fix.
+   - Run a manual backup and verify the SQLite integrity check and archive.
+   - Confirm the origin returns HTTP 200 after a Ghost restart.
+
+2. **Bootstrap Admin API access**
+   - Create the Owner account manually if it does not exist.
+   - Create one custom integration dedicated to configuration reconciliation.
+   - Encrypt its Admin API key as a new agenix secret.
+   - Confirm the key can read and update settings without printing it in logs.
+
+3. **Add idempotent settings reconciliation**
+   - Add the desired-state JSON and a small Admin API client.
+   - Generate short-lived Admin API JWTs only in memory.
+   - Add `ghost-settings-sync.service` after `podman-ghost.service`.
+   - Wait for the Ghost health check before calling the API, use bounded retries,
+     and fail with actionable errors.
+   - Snapshot the currently managed values before the first write so they can be
+     restored without editing SQLite.
+
+4. **Add the repository-managed theme**
+   - Start from the current Source theme behavior rather than rebuilding every
+     feature at once.
+   - Package the theme from the repository and mount it read-only into
+     `/var/lib/ghost/content/themes`.
+   - Validate it with GScan during checks.
+   - Activate it through the Admin API only after validation and Ghost startup.
+   - Keep Source available as the immediate fallback theme.
+   - Put adjustable colors, typography, and layout choices in Ghost custom theme
+     settings; keep structural layout in Handlebars and CSS.
+
+5. **Add routing only when required**
+   - Keep Ghost's default routes for the first theme release.
+   - Add and mount `routes.yaml` only for a concrete collection, channel, or URL
+     requirement.
+   - Validate feeds, pagination, tags, authors, and canonical URLs after routing
+     changes.
+
+6. **Make the publication public safely**
+   - Remove the current host-wide Cloudflare Access requirement before launch.
+   - Prefer Ghost's built-in Staff authentication initially.
+   - If Cloudflare Access is retained for admin defense in depth, do not protect
+     `/ghost*` blindly: explicitly verify that the public Content API,
+     ActivityPub endpoints, assets, feeds, and any member endpoints remain
+     reachable without Cloudflare authentication.
+
+#### Verification and Rollout
+
+Before committing each logical change:
+
+```bash
+nixfmt hosts/pylv-sepia/ghost.nix
+nix flake check --no-build
+nix build .#nixosConfigurations.pylv-sepia.config.system.build.toplevel
+```
+
+Also verify:
+
+- GScan accepts the packaged theme.
+- The generated Podman unit mounts the intended theme and no secret value.
+- The sync unit is idempotent and a second run makes no unexpected changes.
+- An unauthenticated request can read the home page and a public post.
+- Member signup, newsletter subscription, and comments are unavailable.
+- Ghost Admin still accepts the Owner account.
+- RSS, sitemap, public assets, Content API, and ActivityPub endpoints do not
+  redirect to Cloudflare Access.
+- A manual `ghost-backup.service` run produces an integrity-checked archive.
+
+Activate only after the checks pass:
+
+```bash
+sudo nixos-rebuild switch --flake .#pylv-sepia
+```
+
+#### Rollback
+
+- Retain a pre-change backup and the API snapshot of managed settings.
+- Revert the relevant Git commit and switch the previous NixOS configuration.
+- Reactivate Source through Ghost Admin or the Admin API if the custom theme
+  fails.
+- Restore managed settings through the API snapshot; do not patch SQLite.
+
+#### Decisions Required Before Implementation
+
+- Select the first theme direction: Source-derived minimal customization or a
+  new visual design.
+- Decide whether Ghost Staff authentication alone is sufficient or whether a
+  carefully scoped Cloudflare Access policy is required for admin routes.
+- Decide whether navigation should be API-managed or remain editorial.
+- Select an SMTP provider before enabling password recovery, staff invitations,
+  or members. Select Mailgun separately before enabling newsletters.
+- Decide whether GScan is run through a pinned package derivation or a separate
+  repository check.
+
 ### Deploy
 
 Review and activate the configuration from the repository root:
