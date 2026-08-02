@@ -1,4 +1,6 @@
 {
+  config,
+  pkgs,
   username,
   homeDirectory,
   ...
@@ -11,6 +13,20 @@ let
   hermesBin = "${homeDirectory}/.local/bin/hermes";
 in
 {
+  age.secrets.cloudflare-tunnel-onyx-token = {
+    file = ../../secrets/cloudflare-tunnel-onyx-token.age;
+    owner = "cloudflared";
+    group = "cloudflared";
+  };
+
+  users.users.cloudflared = {
+    isSystemUser = true;
+    group = "cloudflared";
+  };
+  users.groups.cloudflared = { };
+
+  environment.systemPackages = [ pkgs.cloudflared ];
+
   systemd.services.hermes-dashboard = {
     description = "Hermes Agent web dashboard";
     after = [ "network-online.target" ];
@@ -66,6 +82,31 @@ in
         proxy_set_header X-Forwarded-Host $host;
         proxy_set_header X-Forwarded-Proto https;
       '';
+    };
+  };
+
+  systemd.services.cloudflared-tunnel-hermes-dashboard = {
+    description = "Cloudflare Tunnel for Hermes Dashboard";
+    after = [
+      "network-online.target"
+      "nginx.service"
+      "hermes-dashboard.service"
+    ];
+    wants = [
+      "network-online.target"
+      "nginx.service"
+      "hermes-dashboard.service"
+    ];
+    wantedBy = [ "multi-user.target" ];
+    script = ''
+      ${pkgs.cloudflared}/bin/cloudflared tunnel --no-autoupdate run \
+        --token "$(cat ${config.age.secrets.cloudflare-tunnel-onyx-token.path})"
+    '';
+    serviceConfig = {
+      Restart = "always";
+      RestartSec = 5;
+      User = "cloudflared";
+      Group = "cloudflared";
     };
   };
 }

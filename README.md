@@ -400,7 +400,8 @@ nix build .#nixosConfigurations.pylv-sepia.config.system.build.toplevel
 - Suggested public hostname: `https://hermes.pylv.dev`
 - Access control: protect the public hostname with a Cloudflare Access self-hosted app. The dashboard can expose Hermes config/API-key management, so do not publish it without Access.
 - The `hermes dashboard` process stays loopback-only on `127.0.0.1:9119`; nginx exposes a separate Cloudflare Tunnel origin on `127.0.0.1:19119`.
-- Suggested Cloudflare origin target: `http://127.0.0.1:19119`
+- NixOS runs the `pylv-onyx` Cloudflare Tunnel connector with the agenix-managed `cloudflare-tunnel-onyx-token` secret.
+- The Cloudflare-managed ingress maps `hermes.pylv.dev` to `http://127.0.0.1:19119`.
 
 ## Helpers
 
