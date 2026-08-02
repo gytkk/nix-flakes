@@ -105,6 +105,9 @@ official plugin marketplaces.
   TUI state.
 - Repo-managed admin skills currently include `karpathy-guidelines`,
   `parallel-research-merge`, and `devils-advocate`.
+- The Cloudflare API MCP uses OAuth at `https://mcp.cloudflare.com/mcp`; run
+  `codex mcp login cloudflare` once per Codex host. Write-capable tools require
+  approval by default.
 - `home-manager switch` ensures `superpowers@openai-curated` is installed and
   enabled for Codex CLI; restart Codex after switching so plugin skills are
   rediscovered.
