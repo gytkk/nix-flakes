@@ -1,0 +1,18 @@
+version: 1
+
+meta:
+  app: nvim
+  theme: vira-graphene
+  variant: dark
+
+groups:
+  Comment:
+    fg: "{palette.lineNumber}"
+  SpecialComment:
+    fg: "{palette.lineNumber}"
+  @comment:
+    fg: "{palette.lineNumber}"
+  @comment.documentation:
+    fg: "{palette.lineNumber}"
+
+links:
