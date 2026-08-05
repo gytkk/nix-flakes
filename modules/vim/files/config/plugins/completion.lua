@@ -53,6 +53,7 @@ M.minuet = {
           optional = {
             max_completion_tokens = 128,
             reasoning_effort = "none",
+            service_tier = "fast",
           },
         },
       },

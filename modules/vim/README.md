@@ -31,6 +31,7 @@ This module configures Neovim as the primary editor with a modern Lua-based setu
 - NixOS hosts decrypt the secret with system agenix under `/run/agenix/openai-api-key`; home-only environments decrypt it with Home Manager agenix.
 - The vim module wires the decrypted agenix path into Neovim as `vim.g.openai_api_key_path` on every environment.
 - Inline suggestions use Minuet's virtual text frontend to avoid duplicate OpenAI API requests from the completion menu.
+- Minuet requests OpenAI Fast mode for lower latency at the Fast mode token rate.
 - Minuet uses a 6,000-character context window, a 900ms request throttle, and a 4-second streamed-response timeout. The on-demand Blink source uses the same 4-second timeout. This keeps AI suggestions responsive without requesting a completion on every keystroke.
 - Press `<Tab>` to accept the current Minuet inline suggestion when one is visible.
 - Press `<C-y>` to open Minuet suggestions in the `blink.cmp` menu on demand.
