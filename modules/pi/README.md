@@ -59,7 +59,9 @@ module exposes `mcp-nixos` and loads these selected Codex MCP servers through
 
 The servers are declared explicitly because the adapter's Codex import reads
 `~/.codex/config.toml`, while this repository installs the shared Codex MCP
-configuration at `/etc/codex/managed_config.toml`.
+configuration at `/etc/codex/managed_config.toml`. Keep
+`settings.showStatusIcon` disabled so the footer uses plain `MCP: ...` status
+text without the plug emoji.
 
 ### Cloudflare OAuth known issue
 
