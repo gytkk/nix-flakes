@@ -304,6 +304,8 @@ Resources should supplement the tools instead of expanding the tool count:
 - tmux sets the outer terminal title to the current session name, so terminal
   tabs that use pane titles, including WezTerm, show the tmux session instead
   of the `tmux` process name.
+- Pi windows use `pi` as their tmux window label instead of the underlying
+  `node` process name and keep that label while tmux copy mode is active.
 - tmux enables CSI-u extended keys so modified keys such as `Shift+Enter`
   survive through tmux into TUI apps like Codex. Restart tmux fully after
   changing this setting, because existing clients keep the old key mode.
