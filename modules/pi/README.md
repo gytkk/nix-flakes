@@ -61,6 +61,29 @@ The servers are declared explicitly because the adapter's Codex import reads
 `~/.codex/config.toml`, while this repository installs the shared Codex MCP
 configuration at `/etc/codex/managed_config.toml`.
 
+### Cloudflare OAuth known issue
+
+The pinned `pi-mcp-adapter` `2.20.1` cannot complete Cloudflare OAuth and fails
+after browser approval with an error similar to:
+
+```text
+Issuer mismatch in authorization response (RFC 9207):
+expected "https://mcp.cloudflare.com", received undefined
+```
+
+Cloudflare returns the RFC 9207 `iss` callback parameter correctly. The adapter
+parses and validates it, but `2.20.1` drops it before invoking the MCP SDK, so
+the SDK rejects the authorization-code exchange. This is an adapter bug rather
+than a Cloudflare account or permission problem.
+
+The upstream fix was merged in
+[`pi-mcp-adapter#294`](https://github.com/nicobailon/pi-mcp-adapter/pull/294)
+([commit `78e46c7`](https://github.com/nicobailon/pi-mcp-adapter/commit/78e46c702c496de0f303f173101ca13aa6d929db)).
+While this repository remains pinned to `2.20.1`, wait for a release containing
+that fix or use a Cloudflare API token through bearer authentication. Do not
+disable issuer validation as a workaround. After upgrading, restart Pi and run
+`/mcp-auth cloudflare` again because the failed OAuth flow is not reusable.
+
 ## Codex adapter scope
 
 Use the normal structured adapter, not Code Mode or extra-tools-only mode. The
