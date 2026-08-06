@@ -198,6 +198,20 @@ software cursor while preserving the cursor marker used to position Ghostty's
 hardware cursor. If a future Pi release changes its editor cursor escape
 sequence, review the extension before updating the managed Pi package.
 
+## Claude-like theme
+
+Manage the dark-only `claude-like` theme from
+`modules/pi/files/themes/claude-like.json` and expose it as
+`~/.pi/agent/themes/claude-like.json`. It uses an Anthropic orange accent and
+warm neutral text and border colors. User messages have a subtle warm-gray
+background, while pending, successful, and failed tool blocks use restrained
+neutral, green, and red tints. Markdown, diffs, syntax highlighting, and thinking
+borders use the same palette.
+
+Keep ordinary text on the terminal's default foreground so the theme remains
+readable with the selected terminal scheme. The custom footer intentionally
+keeps its Claude-matching ANSI palette independent of this global theme.
+
 ## Structured questions
 
 Load `@juicesharp/rpiv-ask-user-question` without custom configuration at first.
@@ -323,7 +337,7 @@ reviewed starter configuration is:
 
 ```json
 {
-  "theme": "dark",
+  "theme": "claude-like",
   "defaultProvider": "openai-codex",
   "defaultModel": "gpt-5.6-sol",
   "defaultThinkingLevel": "high",
@@ -376,6 +390,8 @@ reviewed starter configuration is:
 
 Review notes:
 
+- Use the repository-managed `claude-like` dark theme for Pi's main UI; the
+  custom footer remains independently styled.
 - Keep Sol/high as the quality-oriented parent default.
 - Scope model cycling to Luna, Terra, and Sol rather than every authenticated
   model.
