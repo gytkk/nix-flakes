@@ -161,6 +161,14 @@ Keep `modules/pi/files/extensions/codex-fast-mode.ts` as the sole owner of
 remain off. Verify after integration that only one footer is installed and that
 `/fast status` still reports the effective state.
 
+### Hardware cursor rendering
+
+Keep `showHardwareCursor` enabled for IME positioning. The global
+`hardware-cursor-only.ts` extension removes Pi 0.83's hard-coded reverse-video
+software cursor while preserving the cursor marker used to position Ghostty's
+hardware cursor. If a future Pi release changes its editor cursor escape
+sequence, review the extension before updating the managed Pi package.
+
 ## Structured questions
 
 Load `@juicesharp/rpiv-ask-user-question` without custom configuration at first.
