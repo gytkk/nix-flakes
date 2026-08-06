@@ -293,9 +293,10 @@ Resources should supplement the tools instead of expanding the tool count:
   create it, `Ctrl+r` to rename, and `Ctrl+d` to delete.
 - The checked-in tmux config uses `Ctrl+a` as the prefix, starts window and
   pane indexes at `1`, enables mouse support, and keeps the statusline at the
-  top with generated canonical theme colors. Pressing the prefix accent-colors
-  the session segment and shows key hints on the right; synchronized panes still
-  show a `SYNC` indicator.
+  top with generated canonical theme colors. Mouse-wheel scrolling moves one
+  line per event in copy mode. Pressing the prefix accent-colors the session
+  segment and shows key hints on the right; synchronized panes still show a
+  `SYNC` indicator.
 - Resize the active pane in five-cell steps with `Ctrl+a`, then
   `Ctrl+h`/`Ctrl+j`/`Ctrl+k`/`Ctrl+l`.
 - Close the active pane immediately with `Ctrl+a`, then `x`; use uppercase
