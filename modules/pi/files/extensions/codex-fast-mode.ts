@@ -9,6 +9,17 @@ import { sep } from "node:path";
 const STATE_TYPE = "codex-fast-mode";
 const DEFAULT_ENABLED = true;
 const HORIZONTAL_PADDING = 1;
+const ANSI_RESET = "\x1b[0m";
+
+const CLAUDE_ANSI = {
+  red: "\x1b[31m",
+  green: "\x1b[32m",
+  yellow: "\x1b[33m",
+  cyan: "\x1b[36m",
+  dim: "\x1b[2m",
+  boldBlue: "\x1b[1;34m",
+  brightOrange: "\x1b[1;38;5;214m",
+} as const;
 
 type FastModeState = {
   enabled: boolean;
@@ -85,6 +96,10 @@ function sanitizeStatusText(text: string): string {
   return text.replace(/[\r\n\t]/g, " ").replace(/ +/g, " ").trim();
 }
 
+function styleStatus(text: string, ansi: string): string {
+  return `${ansi}${text}${ANSI_RESET}`;
+}
+
 export default function (pi: ExtensionAPI) {
   let enabled = DEFAULT_ENABLED;
   let requestRender: (() => void) | undefined;
@@ -92,7 +107,7 @@ export default function (pi: ExtensionAPI) {
   const installFooter = (ctx: ExtensionContext): void => {
     if (ctx.mode !== "tui") return;
 
-    ctx.ui.setFooter((tui, theme, footerData) => {
+    ctx.ui.setFooter((tui, _theme, footerData) => {
       requestRender = () => tui.requestRender();
       const unsubscribe = footerData.onBranchChange(() => tui.requestRender());
 
@@ -103,41 +118,55 @@ export default function (pi: ExtensionAPI) {
           const contentWidth = width - sidePadding * 2;
           if (contentWidth <= 0) return [" ".repeat(width)];
 
-          const separator = ` ${theme.fg("dim", "|")} `;
+          const separator = ` ${styleStatus("|", CLAUDE_ANSI.dim)} `;
           const sections: string[] = [];
 
-          sections.push(theme.fg("accent", formatCwd(ctx.sessionManager.getCwd())));
+          sections.push(
+            styleStatus(formatCwd(ctx.sessionManager.getCwd()), CLAUDE_ANSI.cyan),
+          );
 
           const branch = footerData.getGitBranch();
-          if (branch) sections.push(theme.fg("text", sanitizeStatusText(branch)));
+          if (branch) sections.push(sanitizeStatusText(branch));
 
           const modelParts = [sanitizeStatusText(ctx.model?.id ?? "no-model")];
-          if (ctx.model?.reasoning) modelParts.push(ctx.thinkingLevel ?? "off");
-          if (supportsFastMode(ctx)) modelParts.push(`fast(${enabled ? "on" : "off"})`);
-          const modelStatus = theme.fg("text", modelParts.join(" · "));
+          if (ctx.model?.reasoning) {
+            modelParts.push(
+              styleStatus(ctx.thinkingLevel ?? "off", CLAUDE_ANSI.brightOrange),
+            );
+          }
+          if (supportsFastMode(ctx)) {
+            modelParts.push(
+              styleStatus(
+                `fast(${enabled ? "on" : "off"})`,
+                CLAUDE_ANSI.brightOrange,
+              ),
+            );
+          }
+          const modelSeparator = ` ${styleStatus("·", CLAUDE_ANSI.dim)} `;
+          const modelStatus = modelParts.join(modelSeparator);
 
           const contextUsage = ctx.getContextUsage();
           const percent = contextUsage?.percent;
           if (percent === null || percent === undefined) {
-            sections.push(`${theme.fg("dim", "----------")} ?%`);
+            sections.push(`${styleStatus("----------", CLAUDE_ANSI.dim)} ?%`);
           } else {
             const boundedPercent = Math.max(0, Math.min(100, percent));
             const filled = Math.floor((boundedPercent * 10) / 100);
             const contextColor =
               boundedPercent >= 90
-                ? "error"
+                ? CLAUDE_ANSI.red
                 : boundedPercent >= 70
-                  ? "warning"
-                  : "success";
+                  ? CLAUDE_ANSI.yellow
+                  : CLAUDE_ANSI.green;
             const bar =
-              theme.fg(contextColor, "#".repeat(filled)) +
-              theme.fg("dim", "-".repeat(10 - filled));
+              styleStatus("#".repeat(filled), contextColor) +
+              styleStatus("-".repeat(10 - filled), CLAUDE_ANSI.dim);
             sections.push(`${bar} ${Math.floor(boundedPercent)}%`);
           }
 
           const totals = getTokenTotals(ctx);
           sections.push(
-            `${theme.fg("dim", "tokens")} ${theme.fg("accent", `↓${formatTokens(totals.input)}`)} ${theme.fg("warning", `↑${formatTokens(totals.output)}`)}`,
+            `${styleStatus("tokens", CLAUDE_ANSI.dim)} ${styleStatus(`↓${formatTokens(totals.input)}`, CLAUDE_ANSI.boldBlue)} ${styleStatus(`↑${formatTokens(totals.output)}`, CLAUDE_ANSI.brightOrange)}`,
           );
 
           for (const status of footerData.getExtensionStatuses().values()) {
@@ -147,7 +176,7 @@ export default function (pi: ExtensionAPI) {
 
           const left = sections.join(separator);
           const modelWidth = visibleWidth(modelStatus);
-          const ellipsis = theme.fg("dim", "...");
+          const ellipsis = styleStatus("...", CLAUDE_ANSI.dim);
           const margin = " ".repeat(sidePadding);
           if (modelWidth + 2 > contentWidth) {
             const truncatedModel = truncateToWidth(modelStatus, contentWidth, ellipsis);
