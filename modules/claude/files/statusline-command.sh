@@ -155,8 +155,8 @@ compose_left
 right_output="$model"
 right_plain="$model"
 if [ -n "$effort" ]; then
-  right_output="${right_output} ${DIM}· effort${RESET} ${BRIGHT_ORANGE}${effort}${RESET}"
-  right_plain="${right_plain} · effort ${effort}"
+  right_output="${right_output} ${DIM}· ${RESET} ${BRIGHT_ORANGE}${effort}${RESET}"
+  right_plain="${right_plain} · ${effort}"
 fi
 
 # Claude Code exports COLUMNS for statusline sizing. tput cannot read the width
