@@ -138,21 +138,26 @@ in
     # stable path, so the plist bytes do not change between generations (same BTM
     # notification concern as agenix above). launchd catches up a missed 06:00 run
     # after the Mac wakes from sleep. See gytkk-space/automation/mine-sessions.sh.
-    launchd.agents.claude-session-mining.config = lib.mkIf pkgs.stdenv.isDarwin {
-      ProgramArguments = [
-        "/bin/sh"
-        "-c"
-        "/bin/wait4path /nix/store && exec ${homeDirectory}/workspace/gytkk-space/automation/mine-sessions.sh"
-      ];
-      StartCalendarInterval = [
-        {
-          Hour = 6;
-          Minute = 0;
-        }
-      ];
-      ProcessType = "Background";
-      StandardOutPath = "${homeDirectory}/Library/Logs/claude-mining/launchd.stdout";
-      StandardErrorPath = "${homeDirectory}/Library/Logs/claude-mining/launchd.stderr";
+    launchd.agents.claude-session-mining = lib.mkIf pkgs.stdenv.isDarwin {
+      # Home Manager's launchd.agents.<name>.enable defaults to false, so a
+      # config-only definition silently produces no plist at all.
+      enable = true;
+      config = {
+        ProgramArguments = [
+          "/bin/sh"
+          "-c"
+          "/bin/wait4path /nix/store && exec ${homeDirectory}/workspace/gytkk-space/automation/mine-sessions.sh"
+        ];
+        StartCalendarInterval = [
+          {
+            Hour = 6;
+            Minute = 0;
+          }
+        ];
+        ProcessType = "Background";
+        StandardOutPath = "${homeDirectory}/Library/Logs/claude-mining/launchd.stdout";
+        StandardErrorPath = "${homeDirectory}/Library/Logs/claude-mining/launchd.stderr";
+      };
     };
 
     # launchd opens the agent's StandardOut/ErrorPath at spawn time, before the
