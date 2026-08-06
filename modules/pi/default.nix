@@ -22,7 +22,9 @@ in
       pkgs.pi
     ];
 
+    home.file.".pi/agent/AGENTS.md".source = mkSymlink "files/AGENTS.md";
     home.file.".pi/agent/extensions/codex-fast-mode.ts".source =
       mkSymlink "files/extensions/codex-fast-mode.ts";
+    home.file.".pi/agent/skills".source = mkSymlink "skills";
   };
 }
