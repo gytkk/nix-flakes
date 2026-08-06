@@ -24,6 +24,7 @@ in
     ];
 
     home.file.".pi/agent/AGENTS.md".source = mkSymlink "files/AGENTS.md";
+    home.file.".pi/agent/APPEND_SYSTEM.md".source = mkSymlink "files/SYSTEM_PROMPT.md";
     home.file.".pi/agent/mcp.json".source = mkSymlink "files/mcp.json";
     home.file.".pi/agent/settings.json".source = mkSymlink "files/settings.json";
     home.file.".pi/agent/themes/claude-like.json".source = mkSymlink "files/themes/claude-like.json";

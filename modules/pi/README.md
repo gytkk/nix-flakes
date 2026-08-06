@@ -14,6 +14,15 @@ reviewable.
   generation, memory, and autonomous scheduling out of the first stage.
 - Keep package versions pinned and configuration managed from this repository.
 
+## Global operating prompt
+
+Manage the concise, repository-independent operating principles in
+`modules/pi/files/SYSTEM_PROMPT.md`. The Pi module exposes this file as
+`~/.pi/agent/APPEND_SYSTEM.md` through an out-of-store symlink so it augments
+Pi's maintained system prompt instead of replacing the default scaffold.
+Keep environment-specific commands and detailed workflows in `AGENTS.md` or
+focused skills rather than duplicating them here.
+
 ## Packages
 
 Pin the initial package set in Pi's global `settings.json`:
