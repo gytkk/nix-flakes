@@ -205,8 +205,9 @@ Manage the dark-only `claude-like` theme from
 `~/.pi/agent/themes/claude-like.json`. It uses an Anthropic orange accent and
 warm neutral text and border colors. User messages have a subtle warm-gray
 background, while pending, successful, and failed tool blocks use restrained
-neutral, green, and red tints. Markdown, diffs, syntax highlighting, and thinking
-borders use the same palette.
+neutral, green, and red tints. Markdown, diffs, and syntax highlighting use the
+same palette. The editor's top and bottom borders stay warm gray-white at every
+thinking effort level.
 
 Keep ordinary text on the terminal's default foreground so the theme remains
 readable with the selected terminal scheme. The custom footer intentionally
