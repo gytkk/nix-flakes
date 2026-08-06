@@ -46,7 +46,7 @@ EDITOR=vim agx -e openai-api-key.age
 
 - `<leader>e`: file explorer
 - `<leader>ff`: find files
-- `<leader>sg`: grep
+- `<leader>sg`: grep (saves the current modified file and reloads external changes first)
 - `<leader>gs`: git status picker
 - `<leader>gb`: git branches picker
 - `<leader>gd`: git diff picker

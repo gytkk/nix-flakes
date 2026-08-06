@@ -1,3 +1,15 @@
+local function sync_search_files()
+  local buf = vim.api.nvim_get_current_buf()
+  if vim.bo[buf].buftype == ""
+      and vim.bo[buf].modified
+      and vim.api.nvim_buf_get_name(buf) ~= ""
+  then
+    vim.cmd("update")
+  end
+
+  vim.cmd("checktime")
+end
+
 return {
   "folke/snacks.nvim",
   priority = 1000,
@@ -77,10 +89,10 @@ return {
     { "<leader>b",  function() Snacks.picker.buffers() end,                   desc = "Buffers" },
     { "<leader>fb", function() Snacks.picker.buffers() end,                   desc = "Buffers" },
     -- Picker: search
-    { "<leader>/",  function() Snacks.picker.grep() end,                      desc = "Grep (Project)" },
-    { "<leader>sg", function() Snacks.picker.grep() end,                      desc = "Grep" },
+    { "<leader>/",  function() sync_search_files(); Snacks.picker.grep() end, desc = "Grep (Project)" },
+    { "<leader>sg", function() sync_search_files(); Snacks.picker.grep() end, desc = "Grep" },
     { "<leader>sr", function() Snacks.picker.resume() end,                    desc = "Resume Search" },
-    { "<leader>sw", function() Snacks.picker.grep_word() end,                 desc = "Grep Word",                  mode = { "n", "x" } },
+    { "<leader>sw", function() sync_search_files(); Snacks.picker.grep_word() end, desc = "Grep Word",             mode = { "n", "x" } },
     { "<leader>s/", function() Snacks.picker.lines() end,                     desc = "Buffer Lines" },
     -- Picker: git
     { "<leader>gb", function() Snacks.picker.git_branches() end,              desc = "Git Branches" },
