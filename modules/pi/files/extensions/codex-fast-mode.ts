@@ -8,6 +8,7 @@ import { sep } from "node:path";
 
 const STATE_TYPE = "codex-fast-mode";
 const DEFAULT_ENABLED = true;
+const HORIZONTAL_PADDING = 1;
 
 type FastModeState = {
   enabled: boolean;
@@ -97,6 +98,11 @@ export default function (pi: ExtensionAPI) {
 
       return {
         render: (width: number): string[] => {
+          const sidePadding =
+            width >= HORIZONTAL_PADDING * 2 ? HORIZONTAL_PADDING : 0;
+          const contentWidth = width - sidePadding * 2;
+          if (contentWidth <= 0) return [" ".repeat(width)];
+
           const separator = ` ${theme.fg("dim", "|")} `;
           const sections: string[] = [];
 
@@ -142,14 +148,21 @@ export default function (pi: ExtensionAPI) {
           const left = sections.join(separator);
           const modelWidth = visibleWidth(modelStatus);
           const ellipsis = theme.fg("dim", "...");
-          if (modelWidth + 2 > width) {
-            return [truncateToWidth(modelStatus, width, ellipsis)];
+          const margin = " ".repeat(sidePadding);
+          if (modelWidth + 2 > contentWidth) {
+            const truncatedModel = truncateToWidth(modelStatus, contentWidth, ellipsis);
+            const modelPadding = " ".repeat(
+              contentWidth - visibleWidth(truncatedModel),
+            );
+            return [margin + modelPadding + truncatedModel + margin];
           }
 
-          const availableLeft = width - modelWidth - 2;
+          const availableLeft = contentWidth - modelWidth - 2;
           const truncatedLeft = truncateToWidth(left, availableLeft, ellipsis);
-          const padding = " ".repeat(width - visibleWidth(truncatedLeft) - modelWidth);
-          return [truncatedLeft + padding + modelStatus];
+          const padding = " ".repeat(
+            contentWidth - visibleWidth(truncatedLeft) - modelWidth,
+          );
+          return [margin + truncatedLeft + padding + modelStatus + margin];
         },
         invalidate: () => {},
         dispose: () => {
