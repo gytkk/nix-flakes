@@ -160,9 +160,12 @@ if [ -n "$effort" ]; then
 fi
 
 # Claude Code exports COLUMNS for statusline sizing. tput cannot read the width
-# reliably because the command does not own the terminal.
+# reliably because the command does not own the terminal. Its footer reserves
+# two columns on each side outside the custom status line.
 columns=${COLUMNS:-0}
 if [[ "$columns" =~ ^[0-9]+$ ]] && [ "$columns" -gt 0 ]; then
+  columns=$((columns - 4))
+  [ "$columns" -lt 1 ] && columns=1
   while [ "$section_count" -gt 1 ] &&
     [ $((${#left_plain} + ${#right_plain} + 2)) -gt "$columns" ]; do
     section_count=$((section_count - 1))
