@@ -3,7 +3,7 @@ import {
   type ExtensionAPI,
   type ExtensionContext,
 } from "@earendil-works/pi-coding-agent";
-import { truncateToWidth } from "@earendil-works/pi-tui";
+import { truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
 import { sep } from "node:path";
 
 const STATE_TYPE = "codex-fast-mode";
@@ -108,7 +108,7 @@ export default function (pi: ExtensionAPI) {
           const modelParts = [sanitizeStatusText(ctx.model?.id ?? "no-model")];
           if (ctx.model?.reasoning) modelParts.push(ctx.thinkingLevel ?? "off");
           if (supportsFastMode(ctx)) modelParts.push(`fast(${enabled ? "on" : "off"})`);
-          sections.push(theme.fg("text", modelParts.join(" · ")));
+          const modelStatus = theme.fg("text", modelParts.join(" · "));
 
           const contextUsage = ctx.getContextUsage();
           const percent = contextUsage?.percent;
@@ -139,8 +139,17 @@ export default function (pi: ExtensionAPI) {
             if (sanitized) sections.push(sanitized);
           }
 
-          const line = sections.join(separator);
-          return [truncateToWidth(line, width, theme.fg("dim", "..."))];
+          const left = sections.join(separator);
+          const modelWidth = visibleWidth(modelStatus);
+          const ellipsis = theme.fg("dim", "...");
+          if (modelWidth + 2 > width) {
+            return [truncateToWidth(modelStatus, width, ellipsis)];
+          }
+
+          const availableLeft = width - modelWidth - 2;
+          const truncatedLeft = truncateToWidth(left, availableLeft, ellipsis);
+          const padding = " ".repeat(width - visibleWidth(truncatedLeft) - modelWidth);
+          return [truncatedLeft + padding + modelStatus];
         },
         invalidate: () => {},
         dispose: () => {
