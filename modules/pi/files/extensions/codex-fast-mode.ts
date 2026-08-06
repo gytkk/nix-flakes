@@ -101,7 +101,7 @@ export default function (pi: ExtensionAPI) {
           const sidePadding =
             width >= HORIZONTAL_PADDING * 2 ? HORIZONTAL_PADDING : 0;
           const contentWidth = width - sidePadding * 2;
-          if (contentWidth <= 0) return [" ".repeat(width), ""];
+          if (contentWidth <= 0) return [" ".repeat(width)];
 
           const separator = ` ${theme.fg("dim", "|")} `;
           const sections: string[] = [];
@@ -154,7 +154,7 @@ export default function (pi: ExtensionAPI) {
             const modelPadding = " ".repeat(
               contentWidth - visibleWidth(truncatedModel),
             );
-            return [margin + modelPadding + truncatedModel + margin, ""];
+            return [margin + modelPadding + truncatedModel + margin];
           }
 
           const availableLeft = contentWidth - modelWidth - 2;
@@ -162,7 +162,7 @@ export default function (pi: ExtensionAPI) {
           const padding = " ".repeat(
             contentWidth - visibleWidth(truncatedLeft) - modelWidth,
           );
-          return [margin + truncatedLeft + padding + modelStatus + margin, ""];
+          return [margin + truncatedLeft + padding + modelStatus + margin];
         },
         invalidate: () => {},
         dispose: () => {
