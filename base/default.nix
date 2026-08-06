@@ -143,11 +143,10 @@ in
       # config-only definition silently produces no plist at all.
       enable = true;
       config = {
-        ProgramArguments = [
-          "/bin/sh"
-          "-c"
-          "/bin/wait4path /nix/store && exec ${homeDirectory}/workspace/gytkk-space/automation/mine-sessions.sh"
-        ];
+        # Home Manager's launchd module already wraps ProgramArguments in
+        # `/bin/sh -c '/bin/wait4path /nix/store && exec ...'`, so name the
+        # runner directly instead of hand-rolling a second wait4path layer.
+        ProgramArguments = [ "${homeDirectory}/workspace/gytkk-space/automation/mine-sessions.sh" ];
         StartCalendarInterval = [
           {
             Hour = 6;
