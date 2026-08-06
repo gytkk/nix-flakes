@@ -180,9 +180,12 @@ native disable option.
 ### Existing fast extension
 
 Keep `modules/pi/files/extensions/codex-fast-mode.ts` as the sole owner of
-`service_tier: "priority"` and `/fast`. The Codex adapter's own fast mode must
-remain off. Verify after integration that only one footer is installed and that
-`/fast status` still reports the effective state.
+`service_tier: "priority"`, `/fast`, and the custom footer. The one-line footer
+mirrors the Claude status line with the shortened working directory, Git branch,
+model/thinking/fast state, a ten-cell context bar, and cumulative input/output
+tokens. The Codex adapter's own fast mode and status line must remain off. After
+integration, verify that only one footer is installed and that `/fast status`
+still reports the effective state.
 
 ### Hardware cursor rendering
 
