@@ -6,6 +6,7 @@ input=$(cat)
 # Extract fields from JSON input
 cwd=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // "?"')
 model=$(echo "$input" | jq -r '.model.display_name // "?"')
+effort=$(echo "$input" | jq -r '.effort.level // empty')
 used=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
 input_tokens=$(echo "$input" | jq -r '.context_window.total_input_tokens // empty')
 output_tokens=$(echo "$input" | jq -r '.context_window.total_output_tokens // empty')
@@ -77,6 +78,7 @@ SEP=" ${DIM}|${RESET} "
 
 # Context progress bar (colored = for filled, dim . for empty)
 context_info=""
+context_plain=""
 if [ -n "$used" ]; then
   used_int=${used%.*}
   BAR_WIDTH=10
@@ -88,30 +90,94 @@ if [ -n "$used" ]; then
   else BAR_COLOR="$GREEN"; fi
 
   BAR=""
-  [ "$FILLED" -gt 0 ] && BAR="${BAR_COLOR}$(printf "%${FILLED}s" | tr ' ' '#')${RESET}"
-  [ "$EMPTY" -gt 0 ] && BAR="${BAR}${DIM}$(printf "%${EMPTY}s" | tr ' ' '-')${RESET}"
+  PLAIN_BAR=""
+  if [ "$FILLED" -gt 0 ]; then
+    FILLED_BAR=$(printf "%${FILLED}s" | tr ' ' '#')
+    BAR="${BAR_COLOR}${FILLED_BAR}${RESET}"
+    PLAIN_BAR="${FILLED_BAR}"
+  fi
+  if [ "$EMPTY" -gt 0 ]; then
+    EMPTY_BAR=$(printf "%${EMPTY}s" | tr ' ' '-')
+    BAR="${BAR}${DIM}${EMPTY_BAR}${RESET}"
+    PLAIN_BAR="${PLAIN_BAR}${EMPTY_BAR}"
+  fi
 
   context_info="${BAR} ${used_int}%"
+  context_plain="${PLAIN_BAR} ${used_int}%"
 fi
 
 # Token usage (arrow indicators: input↓ output↑)
 token_info=""
+token_plain=""
 if [ -n "$input_tokens" ] && [ -n "$output_tokens" ]; then
-  token_info="${DIM}tokens${RESET} ${BOLD_BLUE}↓$(format_tokens "$input_tokens")${RESET} ${BRIGHT_ORANGE}↑$(format_tokens "$output_tokens")${RESET}"
+  formatted_input=$(format_tokens "$input_tokens")
+  formatted_output=$(format_tokens "$output_tokens")
+  token_info="${DIM}tokens${RESET} ${BOLD_BLUE}↓${formatted_input}${RESET} ${BRIGHT_ORANGE}↑${formatted_output}${RESET}"
+  token_plain="tokens ↓${formatted_input} ↑${formatted_output}"
 fi
 
 # Lines changed
 lines_info=""
+lines_plain=""
 if [ -n "$lines_added" ] && [ -n "$lines_removed" ]; then
   lines_info="${DIM}lines${RESET} ${GREEN}+${lines_added}${RESET} ${RED}-${lines_removed}${RESET}"
+  lines_plain="lines +${lines_added} -${lines_removed}"
 fi
 
-# Compose status line
-output="${CYAN}${short_cwd}${RESET}"
-[ -n "$git_branch" ] && output="${output}${SEP}${git_branch}"
-output="${output}${SEP}${model}"
-[ -n "$context_info" ] && output="${output}${SEP}${context_info}"
-[ -n "$token_info" ] && output="${output}${SEP}${token_info}"
-[ -n "$lines_info" ] && output="${output}${SEP}${lines_info}"
+# Compose left-aligned sections. Less important trailing sections are dropped
+# first when the terminal is too narrow to preserve the right-aligned model.
+styled_sections=("${CYAN}${short_cwd}${RESET}")
+plain_sections=("${short_cwd}")
 
-printf '%b' "$output"
+append_section() {
+  local index=${#styled_sections[@]}
+  styled_sections[$index]="$1"
+  plain_sections[$index]="$2"
+}
+
+[ -n "$git_branch" ] && append_section "$git_branch" "$git_branch"
+[ -n "$context_info" ] && append_section "$context_info" "$context_plain"
+[ -n "$token_info" ] && append_section "$token_info" "$token_plain"
+[ -n "$lines_info" ] && append_section "$lines_info" "$lines_plain"
+
+section_count=${#styled_sections[@]}
+compose_left() {
+  left_output="${styled_sections[0]}"
+  left_plain="${plain_sections[0]}"
+  local i
+  for ((i = 1; i < section_count; i++)); do
+    left_output="${left_output}${SEP}${styled_sections[$i]}"
+    left_plain="${left_plain} | ${plain_sections[$i]}"
+  done
+}
+compose_left
+
+right_output="$model"
+right_plain="$model"
+if [ -n "$effort" ]; then
+  right_output="${right_output} ${DIM}· effort${RESET} ${BRIGHT_ORANGE}${effort}${RESET}"
+  right_plain="${right_plain} · effort ${effort}"
+fi
+
+# Claude Code exports COLUMNS for statusline sizing. tput cannot read the width
+# reliably because the command does not own the terminal.
+columns=${COLUMNS:-0}
+if [[ "$columns" =~ ^[0-9]+$ ]] && [ "$columns" -gt 0 ]; then
+  while [ "$section_count" -gt 1 ] &&
+    [ $((${#left_plain} + ${#right_plain} + 2)) -gt "$columns" ]; do
+    section_count=$((section_count - 1))
+    compose_left
+  done
+
+  if [ $((${#left_plain} + ${#right_plain} + 2)) -le "$columns" ]; then
+    padding=$((columns - ${#left_plain} - ${#right_plain}))
+    printf '%b%*s%b' "$left_output" "$padding" '' "$right_output"
+  elif [ "${#right_plain}" -lt "$columns" ]; then
+    padding=$((columns - ${#right_plain}))
+    printf '%*s%b' "$padding" '' "$right_output"
+  else
+    printf '%b' "$right_output"
+  fi
+else
+  printf '%b%b%b' "$left_output" "$SEP" "$right_output"
+fi

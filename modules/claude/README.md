@@ -20,6 +20,7 @@ This module installs and configures Claude Code, Anthropic's AI coding assistant
 - **Permissions**: Pre-approved tools (Bash, Read, Edit, WebFetch, Context7)
 - **Permission Mode**: `acceptEdits` for the working directory and Claude default repo-local worktrees
 - **Memory** (experimental): `autoMemoryEnabled` + `autoDreamEnabled` — native background insight extraction and 24h consolidation
+- **Status line**: Working directory, Git branch, context/tokens/line changes, plus the selected model and effort right-aligned
 - **Language**: English
 
 ### CLAUDE.md
