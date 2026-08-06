@@ -108,8 +108,8 @@
   `ls`, `git show`, `nl`, and `wc`.
 - Use sequential reads only when the next file cannot be known until seeing
   prior output.
-- Use `apply_patch` for manual file edits. Formatting commands and generated
-  outputs do not need `apply_patch`.
+- Use the `edit` tool for precise manual file edits. Formatting commands and
+  generated outputs do not need `edit`.
 - Always set the working directory for shell commands. Avoid `cd` unless
   necessary.
 - After editing, inspect the changed file or `git diff` before moving on.
