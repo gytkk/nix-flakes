@@ -24,6 +24,7 @@ Pin the initial package set in Pi's global `settings.json`:
 | `@juicesharp/rpiv-ask-user-question` | `2.4.0` | Structured `ask_user_question` interaction |
 | `pi-web-access` | `0.18.0` | Web search, source verification, and content extraction |
 | `pi-subagents` | `0.41.0` | Focused scout, planner, worker, reviewer, researcher, and oracle agents |
+| `pi-mcp-adapter` | `2.20.1` | Token-efficient access to the selected Codex MCP servers |
 
 Expected package declarations:
 
@@ -33,7 +34,8 @@ Expected package declarations:
     "npm:@howaboua/pi-codex-conversion@3.0.8",
     "npm:@juicesharp/rpiv-ask-user-question@2.4.0",
     "npm:pi-web-access@0.18.0",
-    "npm:pi-subagents@0.41.0"
+    "npm:pi-subagents@0.41.0",
+    "npm:pi-mcp-adapter@2.20.1"
   ]
 }
 ```
@@ -44,6 +46,20 @@ unbounded runtime updates.
 
 Pi packages execute with the full permissions of the Pi process. Review package
 source and release changes before updating a pin.
+
+## MCP integration
+
+Manage Pi's global MCP configuration from `modules/pi/files/mcp.json`. The Pi
+module exposes `mcp-nixos` and loads these selected Codex MCP servers through
+`pi-mcp-adapter`:
+
+- `nixos`
+- `cloudflare` (OAuth; authenticate with `/mcp-auth cloudflare`)
+- `context7`
+
+The servers are declared explicitly because the adapter's Codex import reads
+`~/.codex/config.toml`, while this repository installs the shared Codex MCP
+configuration at `/etc/codex/managed_config.toml`.
 
 ## Codex adapter scope
 
@@ -287,7 +303,8 @@ reviewed starter configuration is:
     "npm:@howaboua/pi-codex-conversion@3.0.8",
     "npm:@juicesharp/rpiv-ask-user-question@2.4.0",
     "npm:pi-web-access@0.18.0",
-    "npm:pi-subagents@0.41.0"
+    "npm:pi-subagents@0.41.0",
+    "npm:pi-mcp-adapter@2.20.1"
   ],
   "subagents": {
     "agentOverrides": {

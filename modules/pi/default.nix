@@ -20,9 +20,11 @@ in
   config = lib.mkIf cfg.enable {
     home.packages = [
       pkgs.pi
+      pkgs.mcp-nixos
     ];
 
     home.file.".pi/agent/AGENTS.md".source = mkSymlink "files/AGENTS.md";
+    home.file.".pi/agent/mcp.json".source = mkSymlink "files/mcp.json";
     home.file.".pi/agent/settings.json".source = mkSymlink "files/settings.json";
     home.file.".pi/agent/extensions/codex-fast-mode.ts".source =
       mkSymlink "files/extensions/codex-fast-mode.ts";
