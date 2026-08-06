@@ -1,7 +1,12 @@
-import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import {
+  FooterComponent,
+  SettingsManager,
+  type AgentSession,
+  type ExtensionAPI,
+  type ExtensionContext,
+} from "@earendil-works/pi-coding-agent";
 
 const STATE_TYPE = "codex-fast-mode";
-const STATUS_KEY = "codex-fast-mode";
 const DEFAULT_ENABLED = true;
 
 type FastModeState = {
@@ -17,18 +22,74 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
+function supportsFastMode(ctx: ExtensionContext): boolean {
+  return ctx.model?.provider === "openai-codex";
+}
+
 export default function (pi: ExtensionAPI) {
   let enabled = DEFAULT_ENABLED;
+  let requestRender: (() => void) | undefined;
 
-  const updateStatus = (ctx: ExtensionContext): void => {
-    const active = enabled && ctx.model?.provider === "openai-codex";
-    ctx.ui.setStatus(STATUS_KEY, active ? "fast" : undefined);
+  const installFooter = (ctx: ExtensionContext): void => {
+    if (ctx.mode !== "tui") return;
+
+    ctx.ui.setFooter((tui, _theme, footerData) => {
+      requestRender = () => tui.requestRender();
+
+      const session = {
+        get state() {
+          const model = ctx.model;
+          const thinkingLevel = ctx.thinkingLevel ?? "off";
+          if (!model || !supportsFastMode(ctx)) return { model, thinkingLevel };
+
+          const fastStatus = `fast(${enabled ? "on" : "off"})`;
+          if (!model.reasoning) {
+            return {
+              model: { ...model, id: `${model.id} • ${fastStatus}` },
+              thinkingLevel,
+            };
+          }
+          if (thinkingLevel === "off") {
+            return {
+              model: {
+                ...model,
+                id: `${model.id} • thinking off • ${fastStatus}`,
+                reasoning: false,
+              },
+              thinkingLevel,
+            };
+          }
+          return { model, thinkingLevel: `${thinkingLevel} • ${fastStatus}` };
+        },
+        sessionManager: ctx.sessionManager,
+        getContextUsage: () => ctx.getContextUsage(),
+        modelRuntime: {
+          isUsingOAuth: (provider: string) =>
+            ctx.model?.provider === provider && ctx.modelRegistry.isUsingOAuth(ctx.model),
+        },
+      } as unknown as AgentSession;
+
+      const footer = new FooterComponent(session, footerData);
+      const settings = SettingsManager.create(ctx.cwd, undefined, {
+        projectTrusted: ctx.isProjectTrusted(),
+      });
+      footer.setAutoCompactEnabled(settings.getCompactionEnabled());
+
+      return {
+        render: (width: number) => footer.render(width),
+        invalidate: () => footer.invalidate(),
+        dispose: () => {
+          requestRender = undefined;
+          footer.dispose();
+        },
+      };
+    });
   };
 
   const setEnabled = (next: boolean, ctx: ExtensionContext): void => {
     enabled = next;
     pi.appendEntry(STATE_TYPE, { enabled } satisfies FastModeState);
-    updateStatus(ctx);
+    requestRender?.();
   };
 
   pi.on("session_start", (_event, ctx) => {
@@ -37,11 +98,11 @@ export default function (pi: ExtensionAPI) {
       if (entry.type !== "custom" || entry.customType !== STATE_TYPE) continue;
       if (isFastModeState(entry.data)) enabled = entry.data.enabled;
     }
-    updateStatus(ctx);
+    installFooter(ctx);
   });
 
-  pi.on("model_select", (_event, ctx) => {
-    updateStatus(ctx);
+  pi.on("model_select", () => {
+    requestRender?.();
   });
 
   pi.on("before_provider_request", (event, ctx) => {
