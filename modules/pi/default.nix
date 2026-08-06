@@ -2,11 +2,13 @@
   config,
   lib,
   pkgs,
+  flakeDirectory,
   ...
 }:
 
 let
   cfg = config.modules.pi;
+  mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/pi/${path}";
 in
 {
   options.modules.pi.enable = lib.mkOption {
@@ -19,5 +21,8 @@ in
     home.packages = [
       pkgs.pi
     ];
+
+    home.file.".pi/agent/extensions/codex-fast-mode.ts".source =
+      mkSymlink "files/extensions/codex-fast-mode.ts";
   };
 }
