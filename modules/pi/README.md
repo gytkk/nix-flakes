@@ -41,10 +41,28 @@ The package list is intentionally version-pinned:
 | `@juicesharp/rpiv-ask-user-question` | `2.4.0` | Structured user questions |
 | `pi-web-access` | `0.18.0` | Web search, source checks, and content fetching |
 | `pi-mcp-adapter` | `2.20.1` | Token-efficient MCP discovery and calls |
+| `pi-subagents` | `0.41.0` | Foreground-first delegated Pi sessions |
 
 Versioned npm packages are skipped by `pi update --extensions`. Update pins
 through a reviewed repository change, and review package source and release
 notes because Pi packages execute with the permissions of the Pi process.
+
+`pi-subagents` loads only its extension; its bundled skills and prompt
+templates are filtered out so they cannot opt into background workflows or
+wide fanout. The initial rollout uses packaged agents with explicit
+Luna/Terra/Sol routing. Delegation defaults to foreground, stores artifacts
+under the parent Pi session, allows eight child launches per parent session,
+and blocks nested delegation at child depth. Automatic missions, schedules,
+and the generic `delegate` agent are disabled.
+
+Only `worker` retains normal implementation tools. `scout`, `researcher`,
+`context-builder`, and `reviewer` have no `edit` or `write` tool. Their `bash`
+access is for inspection and verification and is not a security boundary; Pi
+packages and child processes still run with the current user's permissions.
+For the initial rollout, use one direct foreground child at a time and do not
+request `workflowScript`, background runs, or worktrees. The configured global
+concurrency limit protects legacy multi-child paths but does not cap
+`workflowScript` `runs.all()` fanout in pi-subagents 0.41.0.
 
 ## Global prompts and skills
 
@@ -77,6 +95,10 @@ The currently managed skills are:
 Fast mode starts enabled in each new session. Toggle changes are stored in the
 session so resumed branches recover their previous state. The extension is the
 sole owner of the custom footer and priority-mode request field.
+
+Subagent child processes are detected through
+`PI_SUBAGENT_PARENT_SESSION` and do not receive the priority service tier.
+Parent Pi sessions continue to use fast mode normally.
 
 ### Hardware cursor rendering
 
@@ -148,6 +170,12 @@ After changing this module:
 
 6. In Pi, verify `/fast status`, MCP discovery, structured questions, and the
    web-access tools relevant to the change.
+
+For the subagent rollout, also run `/subagents-doctor` and
+`/subagents-models`, then verify one foreground `scout`, one `researcher`, and
+a read-only `reviewer` before trying `worker` against a disposable fixture.
+Confirm that no `.pi-subagents/` directory or additional Git worktree appears
+in the repository.
 
 Do not commit credentials, OAuth tokens, API keys, `auth.json`, session files,
 or MCP credential caches. Pi has no built-in sandbox; packages, extensions,

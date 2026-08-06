@@ -32,6 +32,8 @@ in
       mkSymlink "files/extensions/codex-fast-mode.ts";
     home.file.".pi/agent/extensions/hardware-cursor-only.ts".source =
       mkSymlink "files/extensions/hardware-cursor-only.ts";
+    home.file.".pi/agent/extensions/subagent/config.json".source =
+      mkSymlink "files/extensions/subagent/config.json";
     home.file.".pi/agent/skills".source = mkSymlink "skills";
   };
 }

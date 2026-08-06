@@ -1,0 +1,27 @@
+{
+  "asyncByDefault": false,
+  "forceTopLevelAsync": false,
+  "toolDescriptionMode": "compact",
+  "inlineToolDisplay": "summary",
+  "fleetView": true,
+  "fleetViewPlacement": "aboveEditor",
+  "asyncWidget": false,
+  "artifactDir": "session",
+  "maxSubagentDepth": 1,
+  "maxSubagentSpawnsPerSession": 8,
+  "globalConcurrencyLimit": 2,
+  "parallel": {
+    "maxTasks": 4,
+    "concurrency": 2
+  },
+  "scheduledRuns": {
+    "enabled": false
+  },
+  "missions": {
+    "enabled": false
+  },
+  "proactiveSkillSubagents": false,
+  "authorityPolicy": {
+    "scheduleCreate": "forbid"
+  }
+}

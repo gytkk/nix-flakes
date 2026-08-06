@@ -7,8 +7,56 @@
   "packages": [
     "npm:@juicesharp/rpiv-ask-user-question@2.4.0",
     "npm:pi-web-access@0.18.0",
-    "npm:pi-mcp-adapter@2.20.1"
+    "npm:pi-mcp-adapter@2.20.1",
+    {
+      "source": "npm:pi-subagents@0.41.0",
+      "skills": [],
+      "prompts": []
+    }
   ],
+  "subagents": {
+    "defaultModel": "openai-codex/gpt-5.6-terra",
+    "defaultThinking": "medium",
+    "modelScope": {
+      "enforce": true,
+      "allow": [
+        "openai-codex/gpt-5.6-luna",
+        "openai-codex/gpt-5.6-terra",
+        "openai-codex/gpt-5.6-sol"
+      ]
+    },
+    "agentOverrides": {
+      "scout": {
+        "model": "openai-codex/gpt-5.6-luna",
+        "tools": ["read", "grep", "find", "ls", "bash", "intercom"]
+      },
+      "researcher": {
+        "model": "openai-codex/gpt-5.6-luna",
+        "thinking": "low",
+        "tools": ["read", "web_search", "fetch_content", "get_search_content", "intercom"]
+      },
+      "worker": {
+        "thinking": "medium"
+      },
+      "reviewer": {
+        "thinking": "medium",
+        "acceptanceRole": "read-only",
+        "tools": ["read", "grep", "find", "ls", "bash", "intercom"]
+      },
+      "context-builder": {
+        "tools": ["read", "grep", "find", "ls", "bash", "web_search", "intercom"]
+      },
+      "planner": {
+        "model": "openai-codex/gpt-5.6-sol"
+      },
+      "oracle": {
+        "model": "openai-codex/gpt-5.6-sol"
+      },
+      "delegate": {
+        "disabled": true
+      }
+    }
+  },
   "editorPaddingX": 1,
   "outputPad": 1,
   "showHardwareCursor": true

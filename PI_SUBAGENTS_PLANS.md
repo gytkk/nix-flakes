@@ -2,10 +2,12 @@
 
 ## 상태
 
-- 계획만 수립된 상태이며 아직 `pi-subagents`를 설치하거나 설정하지 않았다.
-- 검토 대상 버전은 현재 최신인 `pi-subagents` `0.41.0`이다.
+- `pi-subagents` `0.41.0` 도입 설정을 구현했다.
 - 대상 Pi 버전은 `0.83.0`이다.
-- 구현 전 사용자의 승인이 필요하다.
+- package cache에는 `pi-subagents@0.41.0`이 설치됐지만 runtime config
+  symlink는 Home Manager 적용 전이라 아직 없다.
+- Home Manager 적용과 새 Pi session에서의 runtime 검증은 아직 남아 있다.
+- 사용자는 `nicobailon/pi-subagents` 사용과 보수적인 1차 rollout을 승인했다.
 
 ## 목표
 
@@ -65,9 +67,15 @@ Pi-native tool 이름이 현재 tool surface와 일치한다.
 ### 패키지 및 모델 라우팅
 
 `modules/pi/files/settings.json`의 package 목록에 다음 pin을 추가한다.
+번들 skill과 prompt는 0.41.0의 async/workflow 우선 지침을 자동으로
+불러오지 않도록 제외한다.
 
 ```json
-"npm:pi-subagents@0.41.0"
+{
+  "source": "npm:pi-subagents@0.41.0",
+  "skills": [],
+  "prompts": []
+}
 ```
 
 같은 파일에 다음 `subagents` 설정을 추가한다.
@@ -87,11 +95,13 @@ Pi-native tool 이름이 현재 tool surface와 일치한다.
     },
     "agentOverrides": {
       "scout": {
-        "model": "openai-codex/gpt-5.6-luna"
+        "model": "openai-codex/gpt-5.6-luna",
+        "tools": ["read", "grep", "find", "ls", "bash", "intercom"]
       },
       "researcher": {
         "model": "openai-codex/gpt-5.6-luna",
-        "thinking": "low"
+        "thinking": "low",
+        "tools": ["read", "web_search", "fetch_content", "get_search_content", "intercom"]
       },
       "worker": {
         "thinking": "medium"
@@ -99,14 +109,10 @@ Pi-native tool 이름이 현재 tool surface와 일치한다.
       "reviewer": {
         "thinking": "medium",
         "acceptanceRole": "read-only",
-        "tools": [
-          "read",
-          "grep",
-          "find",
-          "ls",
-          "bash",
-          "intercom"
-        ]
+        "tools": ["read", "grep", "find", "ls", "bash", "intercom"]
+      },
+      "context-builder": {
+        "tools": ["read", "grep", "find", "ls", "bash", "web_search", "intercom"]
       },
       "planner": {
         "model": "openai-codex/gpt-5.6-sol"
@@ -159,7 +165,7 @@ Pi-native tool 이름이 현재 tool surface와 일치한다.
   "asyncWidget": false,
   "artifactDir": "session",
   "maxSubagentDepth": 1,
-  "maxSubagentSpawnsPerSession": 12,
+  "maxSubagentSpawnsPerSession": 8,
   "globalConcurrencyLimit": 2,
   "parallel": {
     "maxTasks": 4,
@@ -182,13 +188,19 @@ Pi-native tool 이름이 현재 tool surface와 일치한다.
 
 - top-level child는 foreground 기본
 - artifact는 Pi session 디렉터리에 저장
-- 동시에 최대 2개 child 실행
-- 한 parent session에서 최대 12개 child spawn
-- nested delegation은 한 단계로 제한
+- legacy multi-child 경로에서는 동시에 최대 2개 child 실행
+- 한 parent session에서 최대 8개 child spawn
+- direct child는 실행할 수 있지만 child의 추가 delegation은 차단
 - schedules와 자동 mission 생성 비활성화
 - proactive subagent 추천 비활성화
 - FleetView는 유지하되 중복 async widget 제거
 - compact tool description으로 parent context 사용량 절감
+- 1차 rollout에서는 direct foreground child만 사용하고 `workflowScript`,
+  background 실행, worktree를 요청하지 않음
+
+`globalConcurrencyLimit`와 `parallel` 설정은 0.41.0의 legacy multi-child
+경로에만 적용된다. 신규 `workflowScript`의 `runs.all()` 동시 실행을 hard
+cap하지 않으므로 이를 동시 실행 보장으로 간주하지 않는다.
 
 `defaultSessionDir`와 `singleRunOutputBaseDir`은 설정하지 않는다.
 `artifactDir: "session"`과 parent session에서 파생되는 기본 경로를
@@ -221,7 +233,8 @@ PI_SUBAGENT_PARENT_SESSION
 - child subagent는 일반 service tier를 사용한다.
 - 병렬 실행으로 priority 사용량이 예상보다 커지는 것을 방지한다.
 
-Child도 fast mode를 사용해야 한다면 구현 시 이 단계만 제외한다.
+이 정책을 구현해 parent만 fast mode를 사용하고 child는 일반 tier를
+사용한다.
 
 ## Home Manager wiring
 
@@ -244,7 +257,7 @@ home.file.".pi/agent/extensions/subagent/config.json".source =
 | --- | --- |
 | `modules/pi/files/settings.json` | package pin과 모델 라우팅 추가 |
 | `modules/pi/files/extensions/subagent/config.json` | 보수적인 runtime 설정 추가 |
-| `modules/pi/files/extensions/codex-fast-mode.ts` | 선택적으로 child fast-mode guard 추가 |
+| `modules/pi/files/extensions/codex-fast-mode.ts` | child fast-mode guard 추가 |
 | `modules/pi/default.nix` | subagent config symlink 연결 |
 | `modules/pi/README.md` | 실제 활성화된 subagent 구성과 운영법 문서화 |
 
@@ -256,7 +269,7 @@ provider profile을 추가하지 않는다.
 1. `config.json`을 먼저 추가하고 JSON 문법을 검증한다.
 2. `default.nix`에 runtime config symlink를 추가하고 `nixfmt`를 실행한다.
 3. `settings.json`에 package pin과 모델 라우팅을 추가한다.
-4. 승인된 경우 `codex-fast-mode.ts`에 child guard를 추가한다.
+4. `codex-fast-mode.ts`에 child guard를 추가한다.
 5. README에 실제 설정, 역할, 제한, 운영 명령을 추가한다.
 6. 전체 diff와 정적 검증을 완료한다.
 7. 하나의 rollback 가능한 Pi subagent 도입 커밋으로 남긴다.
@@ -301,7 +314,8 @@ home-manager switch --flake .#<environment>
 9. artifact가 Pi session 디렉터리에 생성되는지 확인한다.
 10. 저장소에 `.pi-subagents/`나 `progress.md`가 생성되지 않았는지 확인한다.
 11. `git worktree list`에 새 worktree가 없는지 확인한다.
-12. 병렬 실행이 동시 2개를 넘지 않는지 확인한다.
+12. 1차 검증에서는 direct foreground child를 한 번에 하나만 실행하고
+    `workflowScript`가 사용되지 않았는지 확인한다.
 13. parent `/fast status`가 기존대로 동작하고 child tier 정책이 승인안과 일치하는지 확인한다.
 14. 마지막으로 `git status --short`가 예상 상태인지 확인한다.
 
@@ -340,11 +354,10 @@ Home Manager 적용 전에는 새 Pi process를 시작하거나 `/reload`하지
 - child별 extension allowlist
 - hard worktree-disable 정책을 제공하는 별도 extension
 
-## 구현 전 결정사항
+## 확정된 결정사항
 
-구현 전 다음 한 가지를 확정한다.
-
-- **권장:** parent만 fast mode를 사용하고 child는 일반 tier를 사용한다.
-- **대안:** parent와 child 모두 fast mode를 사용한다.
-
-그 외 항목은 이 문서의 보수적인 1차 도입안을 기본안으로 한다.
+- parent만 fast mode를 사용하고 child는 일반 tier를 사용한다.
+- package의 extension만 로드하고 번들 skill과 prompt는 제외한다.
+- 1차 rollout은 direct foreground child만 사용한다.
+- 병렬 `workflowScript`, background 실행, worktree는 후속 검토 전까지
+  사용하지 않는다.

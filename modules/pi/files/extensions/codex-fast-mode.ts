@@ -39,8 +39,12 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
+function isSubagentProcess(): boolean {
+  return process.env.PI_SUBAGENT_PARENT_SESSION !== undefined;
+}
+
 function supportsFastMode(ctx: ExtensionContext): boolean {
-  return ctx.model?.provider === "openai-codex";
+  return ctx.model?.provider === "openai-codex" && !isSubagentProcess();
 }
 
 function addUsage(totals: TokenTotals, usage: Usage): void {
@@ -226,7 +230,7 @@ export default function (pi: ExtensionAPI) {
   });
 
   pi.on("before_provider_request", (event, ctx) => {
-    if (!enabled || ctx.model?.provider !== "openai-codex") return;
+    if (!enabled || !supportsFastMode(ctx)) return;
     if (!isRecord(event.payload)) return;
 
     return {
