@@ -43,9 +43,14 @@ in
         # Color configuration
         color = {
           ui = "auto";
-          diff = "auto";
+          diff = "always";
           status = "auto";
           branch = "auto";
+        };
+
+        "color \"diff\"" = {
+          old = "#fca5a5";
+          new = "#86efac";
         };
 
         # Pull configuration
