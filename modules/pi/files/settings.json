@@ -87,5 +87,6 @@
   },
   "editorPaddingX": 1,
   "outputPad": 1,
-  "showHardwareCursor": true
+  "showHardwareCursor": true,
+  "tuiMode": "fullscreen"
 }
