@@ -119,7 +119,8 @@ updating Pi if cursor rendering or IME positioning changes.
 
 The servers are declared explicitly because this repository does not rely on
 the adapter importing another agent's MCP configuration. The adapter status
-icon is disabled so the footer uses plain `MCP: ...` status text.
+icon is disabled so the footer uses plain `MCP: ...` status text, rendered in
+bright green by the custom footer.
 
 Authenticate Cloudflare with:
 

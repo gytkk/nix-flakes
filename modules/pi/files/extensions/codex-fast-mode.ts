@@ -18,6 +18,7 @@ const CLAUDE_ANSI = {
   cyan: "\x1b[36m",
   dim: "\x1b[2m",
   boldBlue: "\x1b[1;34m",
+  brightGreen: "\x1b[1;38;2;134;239;172m",
   brightOrange: "\x1b[1;38;5;214m",
 } as const;
 
@@ -104,6 +105,15 @@ function styleStatus(text: string, ansi: string): string {
   return `${ansi}${text}${ANSI_RESET}`;
 }
 
+function styleExtensionStatus(status: string): string {
+  const sanitized = sanitizeStatusText(status);
+  const unstyled = sanitized.replace(/\x1b\[[0-9;]*m/g, "");
+  if (/^MCP(?::|\s)/.test(unstyled)) {
+    return styleStatus(unstyled, CLAUDE_ANSI.brightGreen);
+  }
+  return sanitized;
+}
+
 export default function (pi: ExtensionAPI) {
   let enabled = DEFAULT_ENABLED;
   let requestRender: (() => void) | undefined;
@@ -174,8 +184,8 @@ export default function (pi: ExtensionAPI) {
           );
 
           for (const status of footerData.getExtensionStatuses().values()) {
-            const sanitized = sanitizeStatusText(status);
-            if (sanitized) sections.push(sanitized);
+            const styled = styleExtensionStatus(status);
+            if (styled) sections.push(styled);
           }
 
           const left = sections.join(separator);
