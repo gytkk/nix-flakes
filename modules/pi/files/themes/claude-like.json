@@ -12,6 +12,7 @@
     "red": "#f07178",
     "diffGreen": "#86efac",
     "diffRed": "#fca5a5",
+    "diffContext": "#e5e5e5",
     "yellow": "#ffaf00",
     "blue": "#82aaff",
     "purple": "#afafff",
@@ -21,7 +22,7 @@
     "userMessageBg": "#2c2c2a",
     "customMessageBg": "#2b2726",
     "toolPendingBg": "#272725",
-    "toolSuccessBg": "#252b27",
+    "toolSuccessBg": "#373737",
     "toolErrorBg": "#302625"
   },
   "colors": {
@@ -59,7 +60,7 @@
     "mdListBullet": "",
     "toolDiffAdded": "diffGreen",
     "toolDiffRemoved": "diffRed",
-    "toolDiffContext": "muted",
+    "toolDiffContext": "diffContext",
     "syntaxComment": "green",
     "syntaxKeyword": "blue",
     "syntaxFunction": "cyan",
