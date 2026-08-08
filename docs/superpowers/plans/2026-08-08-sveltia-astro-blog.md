@@ -89,7 +89,7 @@ nginx 루프백 오리진 127.0.0.1:<blog-origin-port>
 | 페이지, 컴포넌트, 스타일, Astro 설정 | 별도 블로그 저장소 |
 | 게시물과 소규모 미디어 | 별도 블로그 저장소 |
 | CMS 컬렉션/필드 정의 | 블로그 저장소의 `public/admin/config.yml` |
-| 의존성 버전 및 빌드 명령 | 블로그 저장소의 lockfile과 패키지 스크립트 |
+| Bun 및 의존성 버전, 빌드 명령 | 블로그 저장소의 CI 설정, `bun.lock`, 패키지 스크립트 |
 | 배포 계정, 디렉터리, nginx, 로컬 배포 명령 | 이 flake의 `hosts/pylv-sepia/` |
 | 공개 호스트명과 선택적 `/admin/*` Access 정책 | Cloudflare 대시보드 |
 | GitHub 토큰/OAuth 인가 | GitHub와 편집자 브라우저 |
@@ -138,7 +138,7 @@ blog/
 │   └── content.config.ts
 ├── astro.config.mjs
 ├── package.json
-├── pnpm-lock.yaml
+├── bun.lock
 ├── tsconfig.json
 └── README.md
 ```
@@ -199,7 +199,7 @@ hosts/pylv-sepia/
 ### 단계 1: Astro 프로젝트 기본 구조 생성
 
 - [ ] 승인 후에만 별도 저장소를 생성한다.
-- [ ] Node/패키지 관리자 요구사항을 고정하고 lockfile을 커밋한다.
+- [ ] Bun을 패키지 관리자로 사용하고, 로컬·CI의 Bun 버전을 동일하게 고정한 뒤 `bun.lock`을 커밋한다.
 - [ ] 포맷, 타입/콘텐츠 검사, 테스트, 빌드, 빌드 결과 smoke test용 최소 스크립트를 추가한다.
 - [ ] Astro를 정적 출력으로 설정하고 승인된 canonical `site` URL을 지정한다.
 - [ ] 빌드 타임 콘텐츠 컬렉션과 대표 초안 및 게시 fixture를 각각 하나씩 추가한다.
@@ -272,7 +272,7 @@ hosts/pylv-sepia/
 
 수동 배포와 롤백 경로를 통과한 후에만 시작한다.
 
-- [ ] lockfile 기반 설치, 포맷, Astro/콘텐츠 검사, 테스트, 빌드, 아티팩트 smoke test를 수행하는 CI를 추가한다.
+- [ ] `bun ci` 기반 설치, 포맷, Astro/콘텐츠 검사, 테스트, 빌드, 아티팩트 smoke test를 수행하는 CI를 추가한다.
 - [ ] 빌드와 배포 job을 분리하여 서버에서 다시 빌드하지 않고 프로덕션에 검증된 동일 아티팩트를 배포한다.
 - [ ] GitHub Environment로 프로덕션 배포를 보호하고 승인된 브랜치로 제한한다.
 - [ ] 승인된 Tailscale workload identity 또는 최소 권한 임시 자격 증명으로 hosted runner를 tailnet에 연결한다.
@@ -300,12 +300,12 @@ Astro의 공개 경로와 릴리스 롤백을 검증한 후 기존 테스트 구
 정확한 블로그 명령은 커밋된 `package.json`에서 정의하되, 다음 검사를 목표로 한다.
 
 ```bash
-pnpm install --frozen-lockfile
-pnpm run format:check
-pnpm run check
-pnpm test
-pnpm run build
-pnpm run smoke
+bun ci
+bun run format:check
+bun run check
+bun run test
+bun run build
+bun run smoke
 ```
 
 Nix flake 검사:
@@ -366,6 +366,7 @@ readlink -f /srv/astro-blog/current
 - Astro 콘텐츠 컬렉션: <https://docs.astro.build/en/guides/content-collections/>
 - Astro 설정(`site`, 정적 출력, `outDir`): <https://docs.astro.build/en/reference/configuration-reference/>
 - Astro 배포 안내: <https://docs.astro.build/en/guides/deploy/>
+- Bun 패키지 설치 및 CI: <https://bun.sh/docs/pm/cli/install>
 - Sveltia CMS 시작 안내: <https://sveltiacms.app/en/docs/start>
 - Sveltia CMS 기본 설정: <https://sveltiacms.app/en/docs/config-basics>
 - Sveltia CMS GitHub 백엔드: <https://sveltiacms.app/en/docs/backends/github>
