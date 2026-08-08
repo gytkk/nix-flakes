@@ -30,7 +30,7 @@ in
     shell = pkgs.bashInteractive;
     hashedPassword = "!";
     openssh.authorizedKeys.keys = [
-      ''restrict,command="${deployCommand}",no-pty,no-agent-forwarding,no-port-forwarding,no-X11-forwarding,no-user-rc ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPrHRWb6oJD4lMJMYMJWY8SgEwVzvhSt4wB0Qb8aHYXo astro-blog-deploy@pylv-sepia''
+      ''restrict,command="${deployCommand}",no-pty,no-agent-forwarding,no-port-forwarding,no-X11-forwarding,no-user-rc ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ/J/YaTkH8JdmW576GXjNHHqMy7GkG4nWI6aTdw8gn2 astro-blog-deploy@pylv-sepia''
     ];
   };
 

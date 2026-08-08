@@ -34,6 +34,19 @@ The static Astro origin listens only on `127.0.0.1:12369` for
 `/srv/astro-blog/current`, an atomic symlink to a validated release.
 
 The dedicated `astro-blog-deploy` account accepts only its forced SSH command.
+Its client private key lives at `~/.ssh/astro-blog-deploy`; an encrypted
+recovery copy for the administrator and deployment Mac is stored in
+`secrets/astro-blog-deploy-key.age`. The server is intentionally not a
+recipient of that secret. To recover the local key from the repository root:
+
+```bash
+umask 077
+agenix -d secrets/astro-blog-deploy-key.age > ~/.ssh/astro-blog-deploy
+ssh-keygen -y -f ~/.ssh/astro-blog-deploy > ~/.ssh/astro-blog-deploy.pub
+public_key="$(cut -d ' ' -f 2 ~/.ssh/astro-blog-deploy.pub)"
+rg --fixed-strings "$public_key" hosts/pylv-sepia/astro-blog.nix
+```
+
 From an authorized deployment machine, stream a verified tar archive with the
 exact commit and archive SHA-256:
 
