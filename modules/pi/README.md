@@ -96,9 +96,10 @@ Fast mode starts enabled in each new session. Toggle changes are stored in the
 session so resumed branches recover their previous state. The extension is the
 sole owner of the custom footer and priority-mode request field.
 
-Subagent child processes are detected through
-`PI_SUBAGENT_PARENT_SESSION` and do not receive the priority service tier.
-Parent Pi sessions continue to use fast mode normally.
+Subagent child processes are detected through `PI_SUBAGENT_CHILD=1` and do
+not receive the priority service tier. `PI_SUBAGENT_PARENT_SESSION` is also set
+in the parent UI session for permission forwarding, so it must not be used as
+the child-process signal. Parent Pi sessions continue to use fast mode normally.
 
 ### Hardware cursor rendering
 

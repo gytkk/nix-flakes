@@ -41,7 +41,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function isSubagentProcess(): boolean {
-  return process.env.PI_SUBAGENT_PARENT_SESSION !== undefined;
+  return process.env.PI_SUBAGENT_CHILD === "1";
 }
 
 function supportsFastMode(ctx: ExtensionContext): boolean {
