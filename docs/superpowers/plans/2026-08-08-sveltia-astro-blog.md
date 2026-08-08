@@ -20,23 +20,39 @@
 | 미디어 | Cloudflare R2의 `pylv-blog-media`, 공개 도메인 `media.pylv.dev`, prefix `blog/` |
 | 발행 경로 | 수동 배포와 롤백을 먼저 검증한 뒤 GitHub Actions 자동화 |
 | 오리진 | `127.0.0.1:12369`; NixOS 방화벽에는 추가하지 않음 |
-| 배포 키 | 새 Ed25519 키 사용; 공개키만 Nix에 포함하고 개인키는 로컬에만 보관 |
+| 배포 키 | 전용 Ed25519 키 사용; 공개키는 Nix에 포함하고 개인키는 로컬 `0600` 파일과 관리자·배포 Mac 전용 agenix 백업에 보관하며 서버는 복호화 대상에서 제외 |
+| Cloudflare Access | 공개 블로그와 `media.pylv.dev`는 인증 없이 제공하고 `/admin/*`만 Access로 보호 |
 
 ### 완료된 구현과 검증
 
-- 블로그 저장소 단계 1~2를 로컬 커밋 `3f60f9d`로 구현했다. 정적 Astro, Markdown/MDX 컬렉션, frontmatter 검증, 초안 제외, 홈/게시물/태그/RSS/사이트맵/robots/404, 반응형 접근성 스타일과 smoke test를 포함한다.
-- 블로그 저장소에서 `bun ci`, 포맷 검사, `astro check`, Bun 테스트 6개, 프로덕션 빌드, 산출물 smoke test와 `bun audit`를 통과했다.
-- `pylv-sepia` 단계 4의 NixOS 코드와 운영 문서를 로컬 커밋 `180d680`으로 구현했다. 전용 강제 명령 계정, 제한된 아카이브 검증, 원자적 릴리스 전환/롤백, 보존 정책과 루프백 nginx 오리진을 포함한다.
+- 유실된 블로그 작업을 `~/development/blog`에서 재구성해 단계 1~2를 커밋 `82c75aa`로 구현하고 `gytkk/blog`의 `main`에 push했다. 정적 Astro, Markdown/MDX 컬렉션, frontmatter 검증, 초안 제외, 홈/게시물/태그/RSS/사이트맵/robots/404, 반응형 접근성 스타일과 전체 `dist/` smoke 검사를 포함한다.
+- 단계 3의 자동화 가능한 부분을 커밋 `9d78429`로 구현하고 push했다. Sveltia CMS `0.181.1` 자체 호스팅, GitHub `main` 백엔드, Astro와 일치하는 필드, 안전한 초안 기본값, R2 공개 설정, 공식 JSON Schema 검증과 credential-shaped 값 검사를 포함한다. R2 Secret Access Key와 GitHub PAT는 저장하거나 출력하지 않았다.
+- 블로그 저장소에서 Bun 1.3.13 기반 `bun ci`, 포맷 검사, CMS schema 검사, `astro check`, Bun 테스트 8개, 프로덕션 빌드, 산출물 smoke test, 로컬 `/admin/index.html` 및 자체 호스팅 CMS script 응답 검사와 `bun audit`를 통과했다.
+- `pylv-sepia` 단계 4의 NixOS 코드와 운영 문서를 커밋 `180d680`으로 구현했다. 전용 강제 명령 계정, 제한된 아카이브 검증, 원자적 릴리스 전환/롤백, 보존 정책과 루프백 nginx 오리진을 포함한다.
+- 새 배포 키를 생성하고 공개키 교체와 관리자·배포 Mac 전용 agenix 백업을 커밋 `3369718`로 push했다. 로컬 개인키 모드 `0600`, agenix 암복호화 round-trip, 서버 recipient 제외와 렌더된 강제 명령 공개키를 검증했다.
 - 배포 명령 테스트 8개, `ruff`, `nix flake check --no-build`, 전체 `nix flake check`, `pylv-sepia` NixOS toplevel 빌드와 렌더된 계정/공개키/리스너/방화벽 값을 검증했다.
-- Cloudflare R2 버킷 `pylv-blog-media`, `media.pylv.dev` 커스텀 도메인과 `https://blog.pylv.dev` 전용 `GET`/`PUT`/`HEAD` CORS 정책을 생성했다. 커스텀 도메인의 소유권과 TLS 인증서 상태도 `active`로 확인했다.
+- Cloudflare R2 버킷 `pylv-blog-media`, `media.pylv.dev` 커스텀 도메인과 `https://blog.pylv.dev` 전용 `GET`/`PUT`/`HEAD` CORS 정책을 생성했다. 버킷 한정 Object Read & Write Access Key ID를 CMS 공개 설정에 반영했고, 커스텀 도메인의 소유권과 TLS 인증서 상태도 `active`로 확인했다.
 
 ### 진행 중 또는 차단된 항목
 
-- R2 버킷 한정 Object Read & Write 토큰의 Access Key ID가 준비되면 단계 3의 Sveltia CMS/R2 설정을 구현한다. Secret Access Key는 저장소나 공개 설정에 넣지 않고 편집자 브라우저에만 저장한다.
-- 두 저장소의 커밋은 아직 원격으로 push하지 않았다. `gytkk/blog` 원격은 생성됐지만 비어 있다.
-- `pylv-sepia`에 NixOS 설정을 적용하지 않았으므로 실제 포트 충돌, nginx 응답, 권한 경계, 수동 배포와 롤백은 아직 런타임 검증 전이다.
-- Cloudflare Tunnel의 `blog.pylv.dev` 경로, GitHub Actions/Tailscale 자동 배포와 Ghost 제거는 시작하지 않았다.
-- 프로비저닝에 사용한 Wrangler OAuth 세션은 남은 R2 설정이 끝난 뒤 로그아웃한다.
+- 로컬 Tailscale은 시작했지만 `pylv-sepia` peer의 node key가 만료되어 offline 상태다. 서버 콘솔이나 LAN 경로에서 `sudo tailscale up`으로 인증을 갱신하기 전에는 SSH preflight와 실제 포트 `12369` 충돌 검사를 진행할 수 없다.
+- `pylv-sepia`에 커밋 `3369718`의 NixOS 설정을 아직 적용하지 않았다. 따라서 nginx 응답, 계정·권한 경계, 수동 배포와 롤백은 런타임 검증 전이다.
+- Sveltia의 GitHub PAT 로그인과 게시물 생성·편집·게시·삭제, 브라우저에만 입력하는 R2 Secret Access Key 기반 이미지 업로드는 배포 후 수동 검증이 필요하다.
+- `blog.pylv.dev`와 `media.pylv.dev`는 현재 동일한 Cloudflare Access 로그인으로 HTTP 302 응답을 반환한다. 최종 정책은 공개 블로그·미디어와 `/admin/*` 전용 Access로 확정했지만 아직 대시보드에 반영하지 않았다.
+- Wrangler 4.90.0으로 R2와 Tunnel 목록·상태는 관리할 수 있지만 기존 Tunnel public hostname/ingress와 Zero Trust Access 앱·정책은 변경할 수 없다. 이 변경은 Cloudflare Zero Trust 대시보드에서 수동으로 수행한다.
+- GitHub Actions/Tailscale 자동 배포와 Ghost 제거는 수동 2회 배포·롤백 및 공개 경로 검증 뒤에만 시작한다.
+- 프로비저닝에 사용한 Wrangler OAuth 세션은 남은 Cloudflare 설정과 최종 검증이 끝난 뒤 로그아웃한다.
+
+### 다음 재개 순서
+
+1. `pylv-sepia`에서 `sudo tailscale up`을 실행해 만료된 node key를 갱신하고 peer online 상태를 확인한다.
+2. 배포 전에 SSH로 `127.0.0.1:12369` 리스너 충돌, nginx/cloudflared 상태와 `/srv/astro-blog` 미적용 상태를 읽기 전용으로 확인한다.
+3. 사용자가 커밋 `3369718`의 `pylv-sepia` NixOS 구성을 switch하고 nginx, 배포 계정, 공개키와 루프백 listener를 확인한다.
+4. 블로그 커밋 `9d78429`를 고정된 Bun 도구 체인으로 다시 빌드하고 `~/.ssh/astro-blog-deploy` 키로 첫 번째 수동 릴리스를 배포한다.
+5. 루프백에서 홈, 게시물, 태그, RSS, sitemap, 404, asset, `/admin/`과 캐시 헤더를 검증한다.
+6. Cloudflare Zero Trust 대시보드에서 `blog.pylv.dev`를 `http://127.0.0.1:12369`에 연결하고 공개 블로그·미디어 및 `/admin/*` 전용 Access 정책을 적용한다.
+7. 공개 경로에서 Sveltia GitHub PAT CRUD와 R2 이미지 업로드를 시험하고 생성된 Git diff와 Astro 빌드를 확인한다.
+8. 두 번째 검증된 릴리스를 배포한 뒤 첫 번째 릴리스로 롤백한다. 모두 통과한 후에만 단계 7 자동화와 단계 8 Ghost 제거를 시작한다.
 
 ## 1. 현재 상태와 제약 사항
 
@@ -44,7 +60,7 @@
 - 호스트에서 이미 nginx와 토큰 기반 Cloudflare Tunnel을 실행하고 있다.
 - 테스트용 Ghost 서비스가 남아 있으며 Astro 공개 경로 검증 후 제거할 대상이다.
 - Cloudflare Tunnel 호스트명 매핑은 이 저장소가 아니라 Cloudflare Zero Trust 대시보드에서 관리한다.
-- Tailscale 인터페이스와 LAN을 통해 SSH로 접근할 수 있으며 비밀번호 로그인은 비활성화되어 있다.
+- 정상 상태에서는 Tailscale 인터페이스와 LAN을 통해 SSH로 접근하고 비밀번호 로그인은 비활성화되어 있다. 현재는 `pylv-sepia`의 Tailscale node key 만료로 원격 접근이 차단되어 있다.
 - 루프백 전용 nginx 오리진을 추가하기 위해 인바운드 방화벽 포트를 열 필요가 없다.
 
 ## 2. 구현 전에 결정할 사항
@@ -251,13 +267,13 @@ hosts/pylv-sepia/
 
 ### 단계 3: Sveltia CMS 추가
 
-**상태:** R2 버킷, 공개 도메인과 CORS는 준비됐다. 버킷 한정 Access Key ID 발급을 기다리고 있다.
+**상태:** 코드, R2 공개 설정과 자동 검증은 커밋 `9d78429`로 완료했다. 실제 GitHub PAT CRUD와 R2 브라우저 업로드는 공개 배포 및 Access 정책 수정 후 수동 검증한다.
 
-- [ ] 고정된 버전의 자체 호스팅 Sveltia CMS를 `/admin/`에 추가한다.
-- [ ] GitHub 백엔드, 승인된 브랜치, 게시물 컬렉션, 필드, slug 동작, 미디어 경로를 설정한다.
-- [ ] 새 게시물의 기본 상태를 초안으로 지정하는 등 안전한 기본값을 설정한다.
-- [ ] Sveltia가 제공하는 JSON Schema로 `config.yml`을 검증한다.
-- [ ] 프로덕션 자격 증명을 노출하지 않고 Sveltia가 지원하는 로컬/테스트 경로에서 콘텐츠 편집을 시험한다.
+- [x] 고정된 버전의 자체 호스팅 Sveltia CMS를 `/admin/`에 추가한다.
+- [x] GitHub 백엔드, 승인된 브랜치, 게시물 컬렉션, 필드, slug 동작, 미디어 경로를 설정한다.
+- [x] 새 게시물의 기본 상태를 초안으로 지정하는 등 안전한 기본값을 설정한다.
+- [x] Sveltia가 제공하는 JSON Schema로 `config.yml`을 검증한다.
+- [ ] 프로덕션 자격 증명을 노출하지 않고 Sveltia가 지원하는 로컬/테스트 경로에서 콘텐츠 편집을 시험한다. 로컬 admin page와 CMS artifact 응답까지만 검증했다.
 - [ ] 스테이징에서 승인된 GitHub 인증 경로를 시험한다.
 - [ ] 테스트 게시물을 생성, 편집, 게시, 삭제한 다음 생성된 Git diff와 Astro 빌드를 검증한다.
 
@@ -265,7 +281,7 @@ hosts/pylv-sepia/
 
 ### 단계 4: `pylv-sepia` 정적 오리진 추가
 
-**상태:** NixOS 코드와 빌드 검증은 완료했다. 호스트 활성화와 런타임 검증은 단계 5에서 수행한다.
+**상태:** NixOS 코드와 빌드 검증은 완료했다. 커밋 `3369718`에서 실제 보관 중인 배포 키로 공개키를 교체하고 개인키의 agenix 복구 경로도 검증했다. 호스트 활성화와 런타임 검증은 Tailscale node key 갱신 후 단계 5에서 수행한다.
 
 - [x] `hosts/pylv-sepia/astro-blog.nix`를 추가하고 `configuration.nix`에서 import한다.
 - [x] `wheel`에 속하지 않고 공유 관리자 키가 없으며 제한 없는 대화형 세션을 열 수 없는 전용 비특권 배포 사용자/그룹을 생성한다.
@@ -293,6 +309,8 @@ hosts/pylv-sepia/
 **완료 조건:** root shell 접근이나 nginx 재시작 없이 배포와 롤백을 반복할 수 있다.
 
 ### 단계 6: Cloudflare Tunnel 연결
+
+**상태:** `pylv-sepia` Tunnel과 R2 custom domain은 존재하지만 현재 `blog.pylv.dev`와 `media.pylv.dev` 모두 광범위한 Access 앱에 의해 보호된다. Wrangler는 필요한 ingress/Access 수정을 지원하지 않으므로 배포 후 Zero Trust 대시보드에서 공개 경로와 `/admin/*` 전용 정책을 수동 적용한다.
 
 - [ ] 승인된 스테이징 공개 호스트명을 기존 sepia tunnel에 추가한다.
 - [ ] `http://127.0.0.1:12369`로 라우팅한다.
