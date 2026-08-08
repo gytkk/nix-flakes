@@ -29,6 +29,13 @@ let
     exec ${agenixPackage}/bin/agenix "$@" -i "$identity"
   '';
 
+  # Avoid exposing Wrangler's bundled node_modules, which conflicts with pkgs.typescript.
+  wranglerBin = pkgs.buildEnv {
+    name = "wrangler-bin-${pkgs.wrangler.version}";
+    paths = [ pkgs.wrangler ];
+    pathsToLink = [ "/bin" ];
+  };
+
   # agenix's launchd agent execs a mount-secrets store path that changes with
   # every secrets/input update, and Home Manager wraps every agent command as
   # `/bin/sh -c "/bin/wait4path /nix/store && exec ..."`. Each plist change
@@ -259,7 +266,7 @@ in
 
         # Dev tools
         awscli2
-        (lib.lowPrio wrangler)
+        wranglerBin
         jq
         sqlite
         yq-go # yq 패키지는 더 이상 관리되지 않음
