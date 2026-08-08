@@ -79,6 +79,7 @@ in
     ../modules/codex
     ../modules/ghostty
     ../modules/git
+    ../modules/herdr
     ../modules/k9s
     ../modules/lsp
     ../modules/omnigent
@@ -107,6 +108,7 @@ in
       codex.enable = lib.mkDefault true;
       ghostty.enable = lib.mkDefault true;
       git.enable = lib.mkDefault true;
+      herdr.enable = lib.mkDefault true;
       k9s.enable = lib.mkDefault true;
       lsp.enable = lib.mkDefault true;
       omnigent.enable = lib.mkDefault true;
@@ -321,9 +323,8 @@ in
         pkgs.stable-25_05.micromamba
         yt-dlp
 
-        # AI / agent tools
+        # AI / Browser automation
         agent-browser
-        herdr
 
         # etc
         direnv

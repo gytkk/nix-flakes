@@ -279,6 +279,18 @@ Resources should supplement the tools instead of expanding the tool count:
 - Local interactive shells started from the terminal automatically `exec zellij`.
 - SSH sessions and shells already inside `zellij` or `tmux` are excluded from that auto-start.
 
+## Herdr config
+
+- Herdr is managed through `modules/herdr/default.nix` and enabled by default.
+- Home Manager links `~/.config/herdr/config.toml` to
+  `modules/herdr/files/config.toml` as an out-of-store symlink, so changes made
+  through Herdr settings update the checked-in source file directly.
+- The configured prefix is `Ctrl+a`. Press `Ctrl+a` twice to send a literal
+  `Ctrl+a` to a shell or application inside a pane. If tmux is ever nested
+  inside Herdr, press `Ctrl+a` twice before the tmux command key.
+- Reload a running server after editing the config with
+  `herdr server reload-config`.
+
 ## tmux config
 
 - tmux is managed through `modules/tmux/default.nix`.
