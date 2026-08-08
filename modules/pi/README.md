@@ -4,6 +4,9 @@ This module manages the global Pi coding-agent setup used by this repository.
 It installs Pi and the NixOS MCP server, then exposes tracked configuration
 under `~/.pi/agent/` with Home Manager out-of-store symlinks.
 
+See [`docs/pi-performance-audit.md`](../../docs/pi-performance-audit.md) for the
+current performance findings, measurements, and prioritized action items.
+
 ## Managed resources
 
 | Repository path | Runtime path | Purpose |
