@@ -38,6 +38,7 @@ in
           themeExports = import ./themes.nix { inherit flakeDirectory; };
           isWSL = config.isWSL or false;
           hasSystemCodexConfig = false;
+          hasSystemNiriConfig = false;
         };
         modules = [
           inputs.agenix.homeManagerModules.default

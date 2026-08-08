@@ -24,6 +24,7 @@
         themeExports = import ./themes.nix { inherit flakeDirectory; };
         isWSL = config.isWSL or false;
         hasSystemCodexConfig = true;
+        hasSystemNiriConfig = true;
       };
 
       homeConfig = ../base + "/${config.profile}/home.nix";

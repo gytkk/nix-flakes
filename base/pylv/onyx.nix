@@ -1,14 +1,16 @@
 {
   inputs,
+  lib,
   pkgs,
   username,
   homeDirectory,
+  hasSystemNiriConfig,
   ...
 }:
 {
   # pylv-onyx 데스크톱 환경 전용 설정
 
-  imports = [
+  imports = (lib.optional (!hasSystemNiriConfig) inputs.niri.homeModules.config) ++ [
     inputs.dms.homeModules.dank-material-shell
     inputs.dms.homeModules.niri
   ];
@@ -22,6 +24,7 @@
     enableClipboardPaste = true;
     niri = {
       enableKeybinds = true;
+      includes.enable = false;
     };
   };
 
