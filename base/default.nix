@@ -259,6 +259,7 @@ in
 
         # Dev tools
         awscli2
+        wrangler
         jq
         sqlite
         yq-go # yq 패키지는 더 이상 관리되지 않음
