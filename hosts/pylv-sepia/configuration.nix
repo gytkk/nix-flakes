@@ -12,6 +12,7 @@
     inputs.copyparty.nixosModules.default
     ./disk-config.nix
     ./ghost.nix
+    ./astro-blog.nix
     ../../modules/nixos
   ];
 

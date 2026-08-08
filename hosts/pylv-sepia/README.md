@@ -27,6 +27,46 @@ nix run nixpkgs#nixos-rebuild -- switch \
 sudo nixos-rebuild switch --flake github:gytkk/nix-flakes#pylv-sepia
 ```
 
+## Astro blog
+
+The static Astro origin listens only on `127.0.0.1:12369` for
+`blog.pylv.dev`; it is intentionally absent from the firewall. Nginx serves
+`/srv/astro-blog/current`, an atomic symlink to a validated release.
+
+The dedicated `astro-blog-deploy` account accepts only its forced SSH command.
+From an authorized deployment machine, stream a verified tar archive with the
+exact commit and archive SHA-256:
+
+```bash
+archive="$(mktemp)"
+trap 'rm -f "$archive"' EXIT
+tar --create --file "$archive" --directory dist .
+revision="$(git rev-parse HEAD)"
+archive_sha256="$(sha256sum "$archive" | cut --delimiter=' ' --fields=1)"
+ssh -i ~/.ssh/astro-blog-deploy astro-blog-deploy@pylv-sepia \
+  "deploy $revision $archive_sha256" < "$archive"
+```
+
+The archive must include `index.html`, `404.html`, `rss.xml`,
+`sitemap-index.xml`, `admin/index.html`, and `admin/config.yml`. The server
+validates and extracts it into `/srv/astro-blog/releases/<sha>/`, then switches
+`current` without restarting nginx. To roll back a retained validated release:
+
+```bash
+ssh -i ~/.ssh/astro-blog-deploy astro-blog-deploy@pylv-sepia \
+  "rollback <40-or-64-lowercase-hex-sha>"
+```
+
+Run the following checks on `pylv-sepia` after deployment:
+
+```bash
+curl --fail --header 'Host: blog.pylv.dev' http://127.0.0.1:12369/
+readlink -f /srv/astro-blog/current
+```
+
+Cloudflare Tunnel routing and the public hostname are managed separately in
+Cloudflare and are not configured by this flake.
+
 ## Ghost
 
 Ghost runs as one declarative Podman container using the
