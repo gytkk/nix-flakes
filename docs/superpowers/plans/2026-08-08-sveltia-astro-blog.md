@@ -4,7 +4,7 @@
 
 **권장 아키텍처:** 블로그 소스와 콘텐츠는 별도 GitHub 저장소에서 관리한다. Astro는 불변 `dist/` 아티팩트를 빌드하고, Sveltia CMS는 GitHub를 통해 Markdown과 미디어를 편집한다. `pylv-sepia`는 원자적으로 배포된 릴리스를 루프백 전용 nginx 오리진에서 제공한다. 이 Nix flake는 호스트 계정, 디렉터리, 배포 명령, nginx 설정, 운영 문서를 관리하며 편집 콘텐츠는 관리하지 않는다.
 
-**초기 운영 방식:** 기존 Ghost 서비스와 함께 스테이징 호스트명을 사용한다. 먼저 수동 배포를 검증한 다음 Tailscale 네트워크를 통한 GitHub Actions 배포를 활성화한다. Astro 사이트와 콘텐츠 마이그레이션이 승인되기 전에는 Ghost를 제거하거나 변경하지 않는다.
+**초기 운영 방식:** 먼저 수동 배포를 검증한 다음 Tailscale 네트워크를 통한 GitHub Actions 배포를 활성화한다.
 
 ---
 
@@ -12,11 +12,10 @@
 
 - `pylv-sepia`는 이 flake에 정의된 x86_64 NixOS 호스트다.
 - 호스트에서 이미 nginx와 토큰 기반 Cloudflare Tunnel을 실행하고 있다.
-- Ghost는 내부적으로 `127.0.0.1:2368`을 사용하며, `ghost.pylv.dev`용 nginx 오리진은 `127.0.0.1:12368`이다.
+- 테스트용 Ghost 서비스가 남아 있으며 Astro 공개 경로 검증 후 제거할 대상이다.
 - Cloudflare Tunnel 호스트명 매핑은 이 저장소가 아니라 Cloudflare Zero Trust 대시보드에서 관리한다.
 - Tailscale 인터페이스와 LAN을 통해 SSH로 접근할 수 있으며 비밀번호 로그인은 비활성화되어 있다.
 - 루프백 전용 nginx 오리진을 추가하기 위해 인바운드 방화벽 포트를 열 필요가 없다.
-- Ghost 백업 타이머는 Ghost만 백업한다. Astro/Sveltia 백업으로 간주해서는 안 된다.
 
 ## 2. 구현 전에 결정할 사항
 
@@ -25,8 +24,7 @@
 | 결정 사항 | 권장 기본값 | 대안 및 영향 |
 | --- | --- | --- |
 | 블로그 소스 위치 | `gytkk/blog`와 같은 별도 GitHub 저장소 | 게시물을 `nix-flakes`에 두면 일반 콘텐츠 발행이 인프라 이력 및 배포와 결합된다. |
-| 초기 호스트명 | `blog.pylv.dev`와 같은 스테이징 호스트명 | 처음부터 최종 apex 도메인을 사용하면 롤백과 Ghost 비교가 어려워진다. |
-| Ghost 운영 방안 | 두 사이트를 함께 운영한 후 별도로 전환 계획 수립 | 즉시 교체하면 콘텐츠 마이그레이션, 리다이렉트, 롤백 위험이 MVP에 포함된다. |
+| 초기 호스트명 | `blog.pylv.dev`와 같은 스테이징 호스트명 | 먼저 스테이징에서 검증하면 최종 도메인 연결 전 문제를 발견하기 쉽다. |
 | CMS 사용자 | MVP에서는 기술 사용자 한 명이 GitHub 토큰으로 로그인 | 여러 사용자 또는 비기술 사용자가 있다면 Sveltia CMS Authenticator를 통한 GitHub OAuth를 사용한다. |
 | 발행 경로 | 수동 원자적 배포 검증 후 Tailscale 네트워크를 통한 GitHub Actions 자동화 | 수동 전용 워크플로는 단순하지만 Sveltia에서 저장한 변경이 자동으로 공개되지 않는다. |
 | 미디어 저장소 | 적절히 최적화한 소규모 이미지를 블로그 저장소에 커밋 | 미디어 용량이나 저장소 크기가 커지면 Cloudflare R2를 사용한다. |
@@ -55,10 +53,7 @@ GitHub 저장소, OAuth 애플리케이션, Cloudflare Worker, Tailscale ID, 배
 - Astro SSR, Node 프로덕션 서버 또는 데이터베이스
 - 댓글, 멤버십, 뉴스레터, 전문 검색, 분석 또는 문의 양식
 - 사용자 정의 CMS 백엔드
-- Ghost SQLite 데이터베이스 직접 수정
-- 자동 Ghost-to-Markdown 마이그레이션
 - `pylv-sepia`의 self-hosted GitHub Actions runner
-- 생성된 `dist/` 아티팩트를 기본 데이터로 백업하는 방식. Git을 원본 데이터로 사용한다.
 
 ## 4. 목표 아키텍처
 
@@ -198,7 +193,6 @@ hosts/pylv-sepia/
 - [ ] Git 기반 미디어 또는 R2를 선택한다.
 - [ ] 수동 전용 또는 자동 배포 목표를 선택한다.
 - [ ] 선택한 루프백 오리진 포트가 `pylv-sepia`에서 사용 중이지 않은지 확인한다.
-- [ ] 승인 후 Ghost를 유지, 마이그레이션 또는 중단할지 기록한다.
 
 **완료 조건:** 보안, 공개 URL, 저장소 소유권 또는 배포 접근에 영향을 주는 placeholder가 남아 있지 않다.
 
@@ -249,7 +243,6 @@ hosts/pylv-sepia/
 - [ ] 정적 파일 fallback, 실제 404 응답, MIME 타입, 압축, 보안 헤더를 설정한다.
 - [ ] fingerprint가 포함된 Astro asset은 장기간 캐시하고 HTML, `/admin/`, `/admin/config.yml`은 장기 캐시하지 않는다.
 - [ ] NixOS 방화벽에서 오리진 포트를 열지 않는다.
-- [ ] 모든 Ghost 포트, 디렉터리, 서비스, 백업 작업을 변경하지 않는다.
 
 **검증:** 로컬 `Host` 헤더 curl로 nginx를 통해 스테이징 블로그에 접근할 수 있고 오리진 포트는 외부에서 접근할 수 없다.
 
@@ -261,7 +254,6 @@ hosts/pylv-sepia/
 - [ ] Nix가 관리하는 배포 명령으로 릴리스를 활성화한다.
 - [ ] 루프백 오리진에서 홈, 게시물 하나, 태그 하나, RSS, 사이트맵, 404, 정적 asset, `/admin/`을 확인한다.
 - [ ] 두 번째 릴리스를 배포하고 NixOS를 다시 빌드하지 않은 상태에서 첫 번째 릴리스로 롤백한다.
-- [ ] 유효한 `current` 릴리스가 없을 때의 복구 절차를 문서화한다.
 
 **완료 조건:** root shell 접근이나 nginx 재시작 없이 배포와 롤백을 반복할 수 있다.
 
@@ -292,18 +284,16 @@ hosts/pylv-sepia/
 
 **검증:** Sveltia에서 작성한 테스트 커밋이 CI를 통과하고 정확히 한 번 배포되며 이전 릴리스로 롤백할 수 있다.
 
-### 단계 8: 선택적 Ghost 마이그레이션 및 최종 전환
+### 단계 8: 테스트용 Ghost 구성 제거
 
-마이그레이션은 별도로 승인받은 변경으로 취급한다.
+Astro의 공개 경로와 릴리스 롤백을 검증한 후 기존 테스트 구성을 제거한다.
 
-- [ ] SQLite를 직접 수정하지 않고 Ghost 게시물과 이미지를 export한다.
-- [ ] 복사본을 Astro 스키마로 변환하고 렌더링 결과를 수동으로 검토한다.
-- [ ] 가능한 경우 원본 게시일, canonical slug, 이미지 참조, 메타데이터를 보존한다.
-- [ ] 변경되는 모든 URL의 리다이렉트 목록을 작성한다.
-- [ ] 검증한 Ghost 백업과 이전 NixOS generation을 유지한다.
-- [ ] 스테이징 승인 후에만 최종 호스트명을 전환한다.
-- [ ] 롤백 기간에 404, 피드, 인덱싱, Cloudflare 오류를 모니터링한다.
-- [ ] 명시적인 승인과 보존 요구사항 충족 후에만 Ghost를 제거한다.
+- [ ] `hosts/pylv-sepia/configuration.nix`에서 `./ghost.nix` import를 제거한다.
+- [ ] `hosts/pylv-sepia/ghost.nix`와 Ghost 전용 운영 문서를 제거한다.
+- [ ] NixOS 설정을 적용하고 Ghost 컨테이너, nginx 오리진, timer unit이 사라졌는지 확인한다.
+- [ ] Cloudflare Zero Trust 대시보드에서 `ghost.pylv.dev` 공개 호스트명 경로를 제거한다.
+- [ ] Ghost 테스트 데이터 디렉터리는 삭제 직전에 경로와 내용을 다시 확인하고 명시적으로 제거한다.
+- [ ] Ghost 제거 후에도 Astro 사이트와 Cloudflare 공개 경로가 정상인지 확인한다.
 
 ## 8. 검증 명령
 
@@ -348,32 +338,9 @@ readlink -f /srv/astro-blog/current
 - fingerprint가 포함된 asset에 immutable 캐시 헤더가 적용된다.
 - CMS에서 생성한 이미지와 게시물이 배포 후 올바르게 렌더링된다.
 - RSS와 사이트맵이 최종 HTTPS canonical 호스트명을 사용한다.
-- 스테이징 rollout 동안 Ghost가 정상 상태를 유지한다.
 - 배포 사용자가 `/run/agenix`를 읽거나 nginx 설정을 변경하거나 제한 없는 sudo를 실행할 수 없다.
 
-## 9. 백업 및 복구
-
-- GitHub는 Markdown과 Git 기반 미디어의 기본 off-host 복사본이지만, 저장소 삭제나 계정 손실에 대비한 별도 복구 정책이 필요하다.
-- 주기적인 Git bundle 또는 저장소 mirror는 off-host 대상과 보존 정책을 선택한 후에만 추가한다.
-- R2를 도입하면 provider 측 versioning/lifecycle을 설정하고 독립적인 복구 테스트를 문서화한다.
-- 생성된 릴리스는 폐기 가능하다. 빠른 롤백을 위해 로컬에 여러 개를 보존하되 재해 복구 시에는 태그 또는 알려진 커밋에서 다시 빌드한다.
-- Astro 사이트를 `ghost-backup.service`에 추가하지 않는다. 백업 책임과 복구 절차를 독립적으로 유지한다.
-
-### 릴리스 롤백
-
-1. `/srv/astro-blog/releases/` 아래에서 정상 동작이 확인된 디렉터리를 선택한다.
-2. Nix가 관리하는 배포/롤백 명령으로 `current`를 원자적으로 변경한다.
-3. 루프백 오리진과 공개 호스트명에 curl을 실행한다.
-4. 원인을 파악할 때까지 실패한 릴리스와 로그를 보존한다.
-
-### 인프라 롤백
-
-1. 관련 Nix 커밋을 되돌린다.
-2. 이전 NixOS 설정을 빌드하고 활성화한다.
-3. 변경했다면 이전 Cloudflare 호스트명 경로를 복원한다.
-4. 최종 전환 승인 전까지 Ghost를 fallback으로 계속 실행한다.
-
-## 10. 채택하지 않은 대안
+## 9. 채택하지 않은 대안
 
 - **프로덕션에서 Astro preview 서버 실행:** Astro는 preview를 로컬 미리보기 도구로 정의한다. nginx 정적 제공은 필요한 런타임 구성요소가 더 적다.
 - **즉시 SSR 사용:** 초기 콘텐츠와 CMS 워크플로는 Git/빌드 기반이며 요청 시점 렌더링이 필요하지 않다.
@@ -382,18 +349,17 @@ readlink -f /srv/astro-blog/current
 - **`pylv-sepia`에서 임의의 새 커밋을 root로 직접 빌드:** 의존성이나 콘텐츠 빌드가 침해되면 프로덕션 호스트에서 과도한 권한으로 코드가 실행된다.
 - **서버에서 상시 self-hosted GitHub runner 사용:** 호스트에 광범위한 원격 코드 실행 공격 표면을 추가한다.
 - **버전이 지정되지 않은 Sveltia CDN 스크립트 사용:** 검토된 커밋 없이 upstream 변경이 관리자 애플리케이션을 변경할 수 있다.
-- **첫 배포 중 Ghost 제거:** 기능 동등성과 마이그레이션을 검증하기 전에 가장 쉬운 롤백 수단을 제거한다.
 
-## 11. 문서화 결과물
+## 10. 문서화 결과물
 
 구현 후 다음 문서를 갱신한다.
 
 - 블로그 저장소 `README.md`: 로컬 작성, 스키마, CMS 로그인, 빌드, 미디어 정책, CI 동작
-- `hosts/pylv-sepia/README.md`: 서비스 구조, 수동 배포, 상태 검사, Cloudflare 오리진, 롤백, 복구
+- `hosts/pylv-sepia/README.md`: 서비스 구조, 수동 배포, 상태 검사, Cloudflare 오리진, 롤백
 - 루트 `README.md`: 필요한 경우에만 호스트별 블로그 운영 섹션으로 연결하는 간단한 링크
 - 실제 토큰, OAuth secret, 개인 키, tunnel token 또는 비밀 값을 문서화하지 않는다.
 
-## 12. 주요 참고 자료
+## 11. 주요 참고 자료
 
 2026-08-08 확인:
 
@@ -409,7 +375,7 @@ readlink -f /srv/astro-blog/current
 - Cloudflare Tunnel: <https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/>
 - Tailscale GitHub Action: <https://github.com/tailscale/github-action>
 
-## 13. 완료 정의
+## 12. 완료 정의
 
 - Astro 프로젝트를 고정된 의존성 집합에서 재현 가능하게 빌드할 수 있다.
 - Sveltia가 수동 수정 없이 Astro 스키마를 통과하는 콘텐츠를 생성하고 편집할 수 있다.
@@ -418,4 +384,4 @@ readlink -f /srv/astro-blog/current
 - Cloudflare가 새로운 인바운드 방화벽 포트를 열지 않고 공개 호스트명을 노출한다.
 - 배포가 원자적이고 최소 권한이며 관찰 및 롤백 가능하다.
 - 정상적인 Sveltia 콘텐츠 커밋이 CI를 통과하고 승인된 발행 경로를 통해 스테이징에 도달할 수 있다.
-- 별도로 승인된 전환을 완료할 때까지 Ghost를 독립적으로 운영할 수 있다.
+- 테스트용 Ghost 서비스와 공개 호스트명 경로가 제거되어 있다.
