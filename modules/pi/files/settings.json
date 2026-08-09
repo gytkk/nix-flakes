@@ -40,6 +40,7 @@
       "researcher": {
         "model": "openai-codex/gpt-5.6-luna",
         "thinking": "low",
+        "inheritProjectContext": false,
         "tools": [
           "read",
           "web_search",
@@ -49,7 +50,8 @@
         ]
       },
       "worker": {
-        "thinking": "medium"
+        "thinking": "medium",
+        "defaultContext": "fresh"
       },
       "reviewer": {
         "thinking": "medium",
@@ -75,10 +77,12 @@
         ]
       },
       "planner": {
-        "model": "openai-codex/gpt-5.6-sol"
+        "model": "openai-codex/gpt-5.6-sol",
+        "defaultContext": "fresh"
       },
       "oracle": {
-        "model": "openai-codex/gpt-5.6-sol"
+        "model": "openai-codex/gpt-5.6-sol",
+        "defaultContext": "fresh"
       },
       "delegate": {
         "disabled": true

@@ -64,6 +64,15 @@ under the parent Pi session, allows eight child launches per parent session,
 and blocks nested delegation at child depth. Automatic missions, schedules,
 and the generic `delegate` agent are disabled.
 
+The packaged `planner`, `worker`, and `oracle` fork defaults are overridden to
+fresh context. Use an explicit `context: "fork"` only when the child genuinely
+needs the parent transcript; otherwise pass a compact task contract. The
+`researcher` also skips inherited project instructions because its role prompt
+and research task provide its operating context. Other agents retain project
+instruction inheritance. When a child persists a substantial artifact, prefer
+`outputMode: "file-only"` so the full result is not injected back into the
+parent context.
+
 Only `worker` retains normal implementation tools. `scout`, `researcher`,
 `context-builder`, and `reviewer` have no `edit` or `write` tool. Their `bash`
 access is for inspection and verification and is not a security boundary; Pi

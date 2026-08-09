@@ -119,6 +119,16 @@
 - Use parallel workers only when the session exposes an executable worker or
   subagent tool; otherwise, run the same scopes sequentially.
 
+## Subagent Context
+
+- Default delegated runs to fresh context and pass a compact task contract with
+  the required files, decisions, constraints, and validation. Use forked context
+  only when the parent transcript itself is essential and cannot be summarized
+  safely.
+- When a child persists a substantial output artifact, prefer `file-only`
+  output and read only the needed portions. Use inline output for short results
+  or when no output path is available.
+
 ## Completion
 
 Before finishing:
