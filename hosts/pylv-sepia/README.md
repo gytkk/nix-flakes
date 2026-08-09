@@ -50,6 +50,25 @@ public_key="$(cut -d ' ' -f 2 ~/.ssh/menu-deploy.pub)"
 rg --fixed-strings "$public_key" hosts/pylv-sepia/menu.nix
 ```
 
+The Sveltia CMS GitHub PAT has a recovery-only encrypted backup at
+`secrets/menu-github-pat.age`. Its recipients are the administrator and both
+Devsisters workstations; neither NixOS server can decrypt it. Create or rotate
+the backup from the repository root with:
+
+```bash
+(
+  cd secrets
+  agx -e menu-github-pat.age
+)
+```
+
+Use a fine-grained PAT restricted to `gytkk/menu` with `Contents: Read and
+write`, and give it a short expiration. To recover it for Sveltia, decrypt it
+locally with `agx -d menu-github-pat.age` from `secrets/`, paste it only into
+the CMS token prompt on a trusted browser, and clear the terminal and clipboard
+afterward. The secret is intentionally not declared under `age.secrets`,
+deployed to a host, or included in the CMS configuration.
+
 From an authorized deployment machine, stream a verified tar archive with the
 exact commit and archive SHA-256:
 

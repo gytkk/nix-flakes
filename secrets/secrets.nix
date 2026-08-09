@@ -42,6 +42,9 @@ in
   "menu-deploy-key.age".publicKeys = deployMachineRecipients;
   "menu-r2-secret-access-key.age".publicKeys = deployMachineRecipients;
 
+  # Menu CMS credential backup (workstations only; no servers)
+  "menu-github-pat.age".publicKeys = adminRecipients ++ devsistersHosts;
+
   # Cloudflare Tunnel token for pylv-sepia
   "cloudflare-tunnel-sepia-token.age".publicKeys = sepiaRecipients;
 
