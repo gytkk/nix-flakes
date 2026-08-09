@@ -45,6 +45,9 @@ in
   # Menu CMS credential backup (workstations only; no servers)
   "menu-github-pat.age".publicKeys = adminRecipients ++ devsistersHosts;
 
+  # Cloudflare administration token (administrator workstation only)
+  "cloudflare-access-api-token.age".publicKeys = adminRecipients;
+
   # Cloudflare Tunnel token for pylv-sepia
   "cloudflare-tunnel-sepia-token.age".publicKeys = sepiaRecipients;
 

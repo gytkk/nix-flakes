@@ -8,7 +8,8 @@
     },
     "cloudflare": {
       "url": "https://mcp.cloudflare.com/mcp",
-      "auth": "oauth"
+      "auth": "bearer",
+      "bearerToken": "!agx -d cloudflare-access-api-token.age"
     },
     "context7": {
       "url": "https://mcp.context7.com/mcp"

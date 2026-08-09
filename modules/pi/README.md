@@ -132,7 +132,7 @@ updating Pi if cursor rendering or IME positioning changes.
 `files/mcp.json` configures `pi-mcp-adapter` with:
 
 - `nixos`, provided by the installed `mcp-nixos` executable
-- `cloudflare`, using OAuth
+- `cloudflare`, using an agenix-decrypted bearer token
 - `context7`, using its remote MCP endpoint
 
 The servers are declared explicitly because this repository does not rely on
@@ -140,11 +140,20 @@ the adapter importing another agent's MCP configuration. The adapter status
 icon is disabled so the footer uses plain `MCP: ...` status text, rendered in
 bright green by the custom footer.
 
-Authenticate Cloudflare with:
+Create an account-owned Cloudflare API token scoped to the intended account
+with `Account Resources Read`, `Access: Apps and Policies Read`, and
+`Access: Apps and Policies Write`. Set an expiry appropriate for the intended
+rotation interval, then store it without exposing the plaintext to the
+repository or shell history:
 
-```text
-/mcp-auth cloudflare
+```bash
+agx -e cloudflare-access-api-token.age
 ```
+
+The Cloudflare MCP entry resolves
+`!agx -d cloudflare-access-api-token.age` only when it connects. The adapter
+suppresses the command's standard error and uses its trimmed standard output as
+the bearer token; the plaintext is not stored in `mcp.json`.
 
 ### Cloudflare OAuth limitation
 
@@ -154,9 +163,9 @@ SDK then reports an issuer mismatch even though Cloudflare returned the issuer.
 
 The upstream fix was merged in
 [`pi-mcp-adapter#294`](https://github.com/nicobailon/pi-mcp-adapter/pull/294),
-but is not included in the pinned release. Wait for a release containing that
-fix or use bearer-token authentication. Do not disable issuer validation as a
-workaround. After upgrading, restart Pi and authenticate again.
+but is not included in the pinned release. This module therefore uses the
+agenix-backed bearer token above. Do not disable issuer validation as a
+workaround. After upgrading, OAuth can be reconsidered separately.
 
 ## Theme
 
