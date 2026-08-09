@@ -21,11 +21,8 @@
         );
     in
     {
-      # stable-25_05: ruby_3_2, micromamba 사용
-      stable-25_05 = mkLazyPkgs inputs.nixpkgs-25_05 [
-        "ruby_3_2"
-        "micromamba"
-      ];
+      # stable-25_05: ruby_3_2 사용
+      stable-25_05 = mkLazyPkgs inputs.nixpkgs-25_05 [ "ruby_3_2" ];
 
     };
 

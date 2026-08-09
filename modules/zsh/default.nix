@@ -177,11 +177,6 @@ in
             if command -v uv > /dev/null; then
               eval "$(uv generate-shell-completion zsh)"
             fi
-
-            # Initialize micromamba
-            if command -v micromamba > /dev/null; then
-              eval "$(micromamba shell hook --shell zsh)"
-            fi
           '';
 
           openclawCompletion = lib.mkIf isPylvOnyx (
