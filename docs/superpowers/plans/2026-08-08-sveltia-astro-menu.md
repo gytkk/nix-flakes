@@ -36,24 +36,22 @@
 - 사용자가 NixOS 구성을 switch했다. `menu-deploy`와 legacy 계정, `/srv/menu`와 `/srv/astro-blog`, nginx·Tailscale·cloudflared·sshd active, 루프백 `12369`, LAN 미노출과 placeholder 응답을 확인했다.
 - 빈 `pylv-blog-media`를 `pylv-menu-media`로 교체하고 `media.pylv.dev`, TLS 1.2, `https://menu.pylv.dev` 전용 CORS와 bucket-scoped Object Read & Write Access Key를 구성했다. 기존 버킷은 삭제되었다.
 - `pylv-sepia` Tunnel에 `menu.pylv.dev` → `http://127.0.0.1:12369` ingress를 추가했다.
+- `gytkk/menu` 기능 브랜치 HEAD `c78524a`를 원격 `main`에 fast-forward push하고 Bun 1.3.13 전체 검증을 다시 통과한 동일 `dist/`를 첫 수동 릴리스로 배포했다. `/srv/menu/current`가 정확한 SHA를 가리키며 필수 경로, canonical, RSS, sitemap, CMS bucket/prefix, 초안 비노출, 404, 보안·no-cache 헤더를 확인했다.
 
 ### 진행 중 또는 차단된 항목
 
-- `gytkk/menu` 원격 `main`은 아직 `9d78429`이며 로컬 기능 브랜치 HEAD `c78524a`는 push하지 않았다.
-- `/srv/menu/current`는 아직 Nix placeholder이며 실제 메뉴 릴리스를 배포하지 않았다.
-- `astro-blog-legacy.nix`가 기존 강제 명령 계정·키와 `/srv/astro-blog`를 유지하되 old nginx origin은 제공하지 않는다. encrypted backup과 함께 새 배포 2회 및 롤백 전까지 보존한다.
+- 첫 릴리스 `c78524a07117f33a1dd441ac0d69efec1755f754`가 활성 상태다. 두 번째 릴리스와 첫 릴리스 rollback은 아직 검증하지 않았다.
+- `astro-blog-legacy.nix`가 기존 강제 명령 계정·키와 `/srv/astro-blog`를 유지하되 old nginx origin은 제공하지 않는다. encrypted backup과 함께 두 번째 새 배포 및 롤백 전까지 보존한다.
 - `menu.pylv.dev`와 `media.pylv.dev`는 여전히 광범위한 Cloudflare Access에 의해 `302` 로그인으로 보호된다. 공개 경로와 `/admin/*` 전용 정책으로 조정해야 한다.
 - Sveltia의 GitHub PAT CRUD와 브라우저 전용 R2 Secret Access Key 이미지 업로드는 공개 배포 후 수동 검증한다.
 - GitHub Actions 자동화와 Ghost 제거는 수동 2회 배포·롤백 및 공개 경로 검증 뒤에만 시작한다.
 
 ### 다음 재개 순서
 
-1. 메뉴 기능 브랜치를 검토한 뒤 사용자가 원격 `main`에 반영한다.
-2. 메뉴 커밋을 고정된 Bun 도구 체인으로 빌드하고 첫 번째 수동 릴리스를 배포한다.
-3. 루프백에서 홈, 레시피, 태그, RSS, sitemap, 404, asset, `/admin/`과 캐시 헤더를 검증한다.
-4. 두 번째 릴리스를 배포하고 첫 번째 릴리스로 롤백한다.
-5. 공개 사이트·미디어 및 `/admin/*` 전용 Access 정책을 적용하고 검증한다.
-6. 모두 통과한 후에만 기존 Astro 배포 경계 정리, 자동화와 Ghost 제거를 시작한다.
+1. 실제 레시피 변경을 포함한 두 번째 릴리스를 배포하고 첫 번째 릴리스로 롤백한다.
+2. 공개 사이트·미디어 및 `/admin/*` 전용 Access 정책을 적용하고 검증한다.
+3. Sveltia GitHub PAT CRUD와 R2 브라우저 업로드를 검증한다.
+4. 모두 통과한 후에만 기존 Astro 배포 경계 정리, 자동화와 Ghost 제거를 시작한다.
 
 ## 1. 현재 상태와 제약 사항
 
@@ -303,11 +301,11 @@ hosts/pylv-sepia/
 
 ### 단계 5: 수동 배포와 롤백 검증
 
-- [ ] 고정된 도구 체인으로 정확한 커밋을 빌드한다.
-- [ ] 검증한 `dist/` 출력과 Git 커밋 메타데이터만 패키징한다.
-- [ ] Tailscale 인터페이스에서 일반 OpenSSH로 아티팩트를 강제 배포 명령에 스트리밍한다. 이 호스트에서 Tailscale SSH 자체는 계속 비활성화한다.
-- [ ] Nix가 관리하는 배포 명령으로 릴리스를 활성화한다.
-- [ ] 루프백 오리진에서 홈, 게시물 하나, 태그 하나, RSS, 사이트맵, 404, 정적 asset, `/admin/`을 확인한다.
+- [x] 고정된 도구 체인으로 정확한 커밋을 빌드한다.
+- [x] 검증한 `dist/` 출력과 Git 커밋 메타데이터만 패키징한다.
+- [ ] Tailscale 인터페이스에서 일반 OpenSSH로 아티팩트를 강제 배포 명령에 스트리밍한다. 첫 릴리스는 승인된 LAN OpenSSH 경로로 배포했으며 이 호스트에서 Tailscale SSH 자체는 계속 비활성화한다.
+- [x] Nix가 관리하는 배포 명령으로 첫 릴리스를 활성화한다.
+- [x] 루프백 오리진에서 홈, 레시피 하나, 태그, RSS, 사이트맵, 404, `/admin/`과 캐시 헤더를 확인한다. 현재 build에는 별도 fingerprint asset이 없다.
 - [ ] 두 번째 릴리스를 배포하고 NixOS를 다시 빌드하지 않은 상태에서 첫 번째 릴리스로 롤백한다.
 
 **완료 조건:** root shell 접근이나 nginx 재시작 없이 배포와 롤백을 반복할 수 있다.
