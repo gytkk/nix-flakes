@@ -40,6 +40,7 @@ in
   # Deployment key backups (administrator/deployment Mac only)
   "astro-blog-deploy-key.age".publicKeys = deployMachineRecipients;
   "menu-deploy-key.age".publicKeys = deployMachineRecipients;
+  "menu-r2-secret-access-key.age".publicKeys = deployMachineRecipients;
 
   # Cloudflare Tunnel token for pylv-sepia
   "cloudflare-tunnel-sepia-token.age".publicKeys = sepiaRecipients;
