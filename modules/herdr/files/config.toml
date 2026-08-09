@@ -4,5 +4,9 @@ prefix = "ctrl+a"
 [theme]
 name = "one-dark"
 
+[theme.custom]
+overlay0 = "#ffffff"
+surface0 = "#2c313a"
+
 [ui]
 prompt_new_tab_name = false
