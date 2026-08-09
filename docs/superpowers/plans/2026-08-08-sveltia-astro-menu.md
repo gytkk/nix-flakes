@@ -32,12 +32,12 @@
 - 기능 브랜치 커밋 `3cedc59`에서 canonical URL, `Menu by pylv` 브랜딩, `/recipes/` 경로, `recipes` 콘텐츠 컬렉션, CMS backend와 R2 `menu/` prefix, 테스트와 문서를 변경했다.
 - Bun 1.3.13 기반 설치, 포맷, CMS schema, `astro check`, 테스트 8개, 프로덕션 빌드와 전체 `dist/` smoke 검사를 통과했다.
 - `pylv-sepia`에서 기존 Astro 오리진과 Tailscale 연결이 동작하며 포트 `12369`가 루프백에만 노출되는 것을 확인했다.
-- 새 `menu-deploy` 키를 생성하고 Nix 공개키와 관리자·배포 Mac 전용 agenix 복구 사본을 구성했으며 암복호화 round-trip을 확인했다.
+- 인프라 커밋 `9337eee`에서 `menu.nix`, `menu-deploy`, transitional legacy 경계와 새 agenix key backup을 구현했다. Python 테스트 8개, ruff, nixfmt, `nix flake check --no-build`, 전체 `nix flake check`, `pylv-sepia` toplevel 빌드, 렌더된 계정·키·listener·방화벽·recipient 경계를 검증했다.
 
 ### 진행 중 또는 차단된 항목
 
 - `gytkk/menu` 원격 `main`은 아직 `9d78429`이며 로컬 기능 브랜치 커밋 `3cedc59`는 push하지 않았다.
-- 새 `menu.nix`, `menu-deploy`, `/srv/menu` 구성은 코드 검증 후 사용자가 NixOS switch해야 한다.
+- 새 `menu.nix`, `menu-deploy`, `/srv/menu` 구성은 커밋 `9337eee`에 있으며 사용자가 NixOS switch해야 한다.
 - `astro-blog-legacy.nix`가 기존 강제 명령 계정·키와 `/srv/astro-blog`를 유지하되 old nginx origin은 제공하지 않는다. encrypted backup과 함께 새 배포 2회 및 롤백 전까지 보존한다.
 - R2 CORS는 아직 `https://blog.pylv.dev`를 허용하므로 rollout 시 `https://menu.pylv.dev`로 변경해야 한다. 기존 `blog/` 객체가 있다면 삭제하지 않고 필요한 객체만 `menu/`로 복사한다.
 - `pylv-sepia` Tunnel에는 아직 `menu.pylv.dev` ingress가 없다. Wrangler 4.90.0은 기존 Tunnel ingress와 Access 앱·정책을 수정하지 못하므로 Zero Trust 대시보드에서 적용한다.
@@ -46,14 +46,13 @@
 
 ### 다음 재개 순서
 
-1. Nix/Python 검증과 `pylv-sepia` toplevel 빌드를 완료하고 인프라 변경을 커밋한다.
-2. 메뉴 기능 브랜치를 검토한 뒤 사용자가 원격 `main`에 반영한다.
-3. 사용자가 `pylv-sepia` NixOS 구성을 switch하고 `menu-deploy`, `/srv/menu`, nginx listener와 새 공개키를 확인한다.
-4. 메뉴 커밋을 고정된 Bun 도구 체인으로 빌드하고 첫 번째 수동 릴리스를 배포한다.
-5. 루프백에서 홈, 레시피, 태그, RSS, sitemap, 404, asset, `/admin/`과 캐시 헤더를 검증한다.
-6. 두 번째 릴리스를 배포하고 첫 번째 릴리스로 롤백한다.
-7. R2 CORS와 Tunnel hostname을 `menu.pylv.dev`로 전환하고 공개 사이트·미디어 및 `/admin/*` Access를 검증한다.
-8. 모두 통과한 후에만 기존 Astro 배포 경계 정리, 자동화와 Ghost 제거를 시작한다.
+1. 메뉴 기능 브랜치를 검토한 뒤 사용자가 원격 `main`에 반영한다.
+2. 사용자가 `pylv-sepia` NixOS 구성 커밋 `9337eee`를 switch하고 `menu-deploy`, `/srv/menu`, nginx listener와 새 공개키를 확인한다.
+3. 메뉴 커밋을 고정된 Bun 도구 체인으로 빌드하고 첫 번째 수동 릴리스를 배포한다.
+4. 루프백에서 홈, 레시피, 태그, RSS, sitemap, 404, asset, `/admin/`과 캐시 헤더를 검증한다.
+5. 두 번째 릴리스를 배포하고 첫 번째 릴리스로 롤백한다.
+6. R2 CORS와 Tunnel hostname을 `menu.pylv.dev`로 전환하고 공개 사이트·미디어 및 `/admin/*` Access를 검증한다.
+7. 모두 통과한 후에만 기존 Astro 배포 경계 정리, 자동화와 Ghost 제거를 시작한다.
 
 ## 1. 현재 상태와 제약 사항
 
@@ -284,7 +283,7 @@ hosts/pylv-sepia/
 
 ### 단계 4: `pylv-sepia` 정적 오리진 추가
 
-**상태:** 기존 Astro 오리진은 런타임 검증을 마쳤다. 새 `menu.nix`, `menu-deploy` 키와 agenix 복구 경로는 로컬에서 구현·검증 중이며, 인프라 커밋 후 사용자가 NixOS switch하고 단계 5 런타임 검증을 수행한다.
+**상태:** 기존 Astro 오리진은 런타임 검증을 마쳤다. 새 `menu.nix`, `menu-deploy` 키, agenix 복구 경로와 transitional legacy 경계는 커밋 `9337eee`에서 빌드 검증했으며, 사용자가 NixOS switch한 뒤 단계 5 런타임 검증을 수행한다.
 
 - [x] `hosts/pylv-sepia/menu.nix`를 추가하고 `configuration.nix`에서 import한다.
 - [x] 전환 중 기존 계정·키와 `/srv/astro-blog`를 보존하는 `astro-blog-legacy.nix`를 추가하되 old nginx origin은 제거한다.
