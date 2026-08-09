@@ -37,6 +37,7 @@
 - 빈 `pylv-blog-media`를 `pylv-menu-media`로 교체하고 `media.pylv.dev`, TLS 1.2, `https://menu.pylv.dev` 전용 CORS와 bucket-scoped Object Read & Write Access Key를 구성했다. 기존 버킷은 삭제되었다.
 - `pylv-sepia` Tunnel에 `menu.pylv.dev` → `http://127.0.0.1:12369` ingress를 추가했다.
 - `gytkk/menu` 기능 브랜치 HEAD `c78524a`를 원격 `main`에 fast-forward push하고 Bun 1.3.13 전체 검증을 다시 통과한 동일 `dist/`를 첫 수동 릴리스로 배포했다. `/srv/menu/current`가 정확한 SHA를 가리키며 필수 경로, canonical, RSS, sitemap, CMS bucket/prefix, 초안 비노출, 404, 보안·no-cache 헤더를 확인했다.
+- 커밋 `2f38d50`에서 R2 Secret Access Key의 agenix encrypted recovery를 추가했다. recipient는 관리자와 배포 Mac 2개뿐이고 서버는 제외되며 로컬 복호화 검사를 통과했다.
 
 ### 진행 중 또는 차단된 항목
 
@@ -139,6 +140,7 @@ Sveltia CMS(블로그가 제공하는 정적 파일)
 | 배포 계정, 디렉터리, nginx, 로컬 배포 명령 | 이 flake의 `hosts/pylv-sepia/` |
 | 공개 호스트명과 선택적 `/admin/*` Access 정책 | Cloudflare 대시보드 |
 | GitHub 토큰/OAuth 인가 | GitHub와 편집자 브라우저 |
+| R2 Secret Access Key | 편집자 브라우저 local storage와 `secrets/menu-r2-secret-access-key.age` encrypted recovery |
 | OAuth 클라이언트 비밀정보(OAuth 선택 시) | 암호화된 Cloudflare Worker secret |
 | CI 배포 자격 증명 | GitHub Environment secret 또는 승인된 workload identity |
 | 생성된 릴리스 | `pylv-sepia`의 `/srv/menu/releases/` |
@@ -225,7 +227,7 @@ hosts/pylv-sepia/
 - Sveltia의 필드 이름, 날짜 형식, 기본값, 미디어 경로를 Astro 스키마와 정확히 일치시킨다.
 - Sveltia 게시물 컬렉션에 `folder: src/content/recipes`를 지정해 엔트리가 Astro의 `glob()` 컬렉션 안에 저장되게 한다.
 - `media_libraries.cloudflare_r2`에 버킷 `pylv-menu-media`, 공개 URL `https://media.pylv.dev`, prefix `menu/`, 기본 jurisdiction과 공개 가능한 Account ID/Access Key ID를 지정한다.
-- R2 Secret Access Key는 `public/admin/config.yml`에 넣지 않는다. Sveltia가 최초 사용 시 입력받아 편집자 브라우저 로컬 저장소에만 보관하게 한다.
+- R2 Secret Access Key는 `public/admin/config.yml`에 넣지 않는다. Sveltia가 최초 사용 시 입력받아 편집자 브라우저 local storage에 보관한다. 복구 사본은 관리자·배포 Mac만 recipient인 `secrets/menu-r2-secret-access-key.age`로 암호화하며 서버는 recipient에서 제외한다.
 - R2 업로드에는 브라우저 기반 파일명 slug 변환과 제한된 이미지 크기/형식 변환을 활성화한다.
 - R2 CORS는 `https://menu.pylv.dev`에서 오는 `GET`, `PUT`, `HEAD`를 허용한다. SigV4 업로드를 위해 요청 헤더는 `*`로 허용하고 `ETag`를 노출한다.
 - `public/admin/config.yml`은 공개적으로 읽을 수 있으므로 비밀번호, Secret Access Key, OAuth 클라이언트 secret, 배포 키 등 비밀정보를 넣지 않는다.
