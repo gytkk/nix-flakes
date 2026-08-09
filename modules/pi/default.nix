@@ -27,6 +27,7 @@ in
     home.file.".pi/agent/APPEND_SYSTEM.md".source = mkSymlink "files/SYSTEM_PROMPT.md";
     home.file.".pi/agent/mcp.json".source = mkSymlink "files/mcp.json";
     home.file.".pi/agent/settings.json".source = mkSymlink "files/settings.json";
+    home.file.".pi/web-search.json".source = mkSymlink "files/web-search.json";
     home.file.".pi/agent/themes/claude-like.json".source = mkSymlink "files/themes/claude-like.json";
     home.file.".pi/agent/extensions/codex-fast-mode.ts".source =
       mkSymlink "files/extensions/codex-fast-mode.ts";

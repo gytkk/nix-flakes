@@ -12,6 +12,7 @@ current performance findings, measurements, and prioritized action items.
 | Repository path | Runtime path | Purpose |
 | --- | --- | --- |
 | `files/settings.json` | `~/.pi/agent/settings.json` | Pi defaults and pinned packages |
+| `files/web-search.json` | `~/.pi/web-search.json` | Web Access defaults |
 | `files/mcp.json` | `~/.pi/agent/mcp.json` | MCP adapter and server configuration |
 | `files/AGENTS.md` | `~/.pi/agent/AGENTS.md` | Global agent instructions |
 | `files/SYSTEM_PROMPT.md` | `~/.pi/agent/APPEND_SYSTEM.md` | Additions to Pi's maintained system prompt |
@@ -36,6 +37,11 @@ Pi configuration interactively.
 - the `claude-like` theme
 - one-cell editor and output padding
 - the hardware terminal cursor for IME positioning
+
+`files/web-search.json` sets the default Web Access workflow to `none`, so
+ordinary searches return directly without opening the curator. Requests that
+need human source selection can still set `workflow: "summary-review"` or use
+`/curator` explicitly.
 
 The package list is intentionally version-pinned:
 
