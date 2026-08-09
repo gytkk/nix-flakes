@@ -70,6 +70,7 @@ in
         add_header Referrer-Policy "strict-origin-when-cross-origin" always;
         add_header Permissions-Policy "geolocation=(), microphone=(), camera=()" always;
       '';
+      locations."= /admin".return = "308 https://${host}/admin/";
       locations."/admin/config.yml".extraConfig = ''
         try_files $uri =404;
       '';
