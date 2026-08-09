@@ -2,8 +2,8 @@ onboarding = false
 [keys]
 prefix = "ctrl+a"
 new_workspace = ""
-previous_workspace = "prefix+ctrl+up"
-next_workspace = "prefix+ctrl+down"
+previous_workspace = "prefix+shift+up"
+next_workspace = "prefix+shift+down"
 switch_workspace = "prefix+shift+1..9"
 
 [[keys.command]]
