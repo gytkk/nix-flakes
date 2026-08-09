@@ -1,7 +1,20 @@
 onboarding = false
 [keys]
 prefix = "ctrl+a"
+new_workspace = ""
 switch_workspace = "prefix+shift+1..9"
+
+[[keys.command]]
+key = "prefix+shift+n"
+type = "popup"
+description = "Select a directory and create a workspace"
+width = "80%"
+height = "60%"
+command = '''
+selected_dir="$(zoxide query -l | fzf --prompt='Workspace cwd> ')" || exit 0
+[ -n "$selected_dir" ] || exit 0
+"$HERDR_BIN_PATH" workspace create --cwd "$selected_dir" --focus >/dev/null
+'''
 
 [theme]
 name = "vesper"

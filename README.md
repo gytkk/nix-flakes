@@ -288,6 +288,8 @@ Resources should supplement the tools instead of expanding the tool count:
 - The configured prefix is `Ctrl+a`. Press `Ctrl+a` twice to send a literal
   `Ctrl+a` to a shell or application inside a pane. If tmux is ever nested
   inside Herdr, press `Ctrl+a` twice before the tmux command key.
+- `Ctrl+a`, then `Shift+n`, opens a popup that selects a previously visited
+  directory with `zoxide` and `fzf`, then creates and focuses a workspace there.
 - Reload a running server after editing the config with
   `herdr server reload-config`.
 
