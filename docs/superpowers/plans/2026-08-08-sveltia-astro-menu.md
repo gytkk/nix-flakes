@@ -316,10 +316,72 @@ hosts/pylv-sepia/
 
 **상태:** `pylv-sepia` Tunnel ingress, R2 bucket/custom domain/CORS는 `menu.pylv.dev` 기준으로 구성했다. `menu.pylv.dev`와 `media.pylv.dev` 모두 광범위한 Access 앱에 의해 보호되므로 배포 후 Zero Trust 대시보드에서 공개 경로와 `/admin/*` 전용 정책을 수동 적용한다.
 
+#### Access 분리 실행 계획 (2026-08-09)
+
+**현재 상태:** self-hosted Access 앱 `pylv-dev`가 `*.pylv.dev`를 보호하며 `allow-by-email` 정책으로 관리자 이메일만 허용한다. 비인증 요청은 `menu.pylv.dev`의 홈, RSS, 사이트맵, 관리자 경로와 `media.pylv.dev`에서 모두 Access 로그인으로 `302`된다.
+
+**선택한 방식:** 기존 wildcard 앱을 축소하지 않고 더 구체적인 host/path 앱을 추가하는 계층형 Bypass를 사용한다. Cloudflare Access는 공통 root 아래에서 더 구체적인 경로 앱을 우선하며 상위 앱의 정책을 상속하지 않는다. 따라서 `menu.pylv.dev/admin`과 `menu.pylv.dev/admin/*`의 Allow 앱이 `menu.pylv.dev`의 Bypass 앱보다 우선한다. `/admin/*`는 `/admin` 자체를 포함하지 않으므로 두 destination이 모두 필요하다.
+
+목표 앱 구성:
+
+| 앱 | Destination | 정책 | 목적 |
+| --- | --- | --- | --- |
+| 기존 `pylv-dev` | `*.pylv.dev` | 기존 이메일 Allow | 다른 현재·미래 서브도메인의 기본 보호 유지 |
+| `menu-admin` | `menu.pylv.dev/admin`, `menu.pylv.dev/admin/*` | 관리자 이메일 Allow | CMS 경로 보호 |
+| `menu-public` | `menu.pylv.dev` | Bypass + Everyone | 정적 사이트와 공개 API/asset 제공 |
+| `media-public` | `media.pylv.dev` | Bypass + Everyone | R2 custom domain의 공개 미디어 제공 |
+
+적용 순서:
+
+1. **읽기 전용 사전 점검**
+   - 공식 Cloudflare MCP로 `pylv-dev` 앱과 정책을 다시 조회해 이름, destination, 정책 대상과 우선순위가 변하지 않았는지 확인한다.
+   - 홈, RSS, 사이트맵, `/admin`, `/admin/`, `/admin/config.yml`, 존재하지 않는 경로와 미디어 호스트의 기준 응답을 기록한다.
+   - 동일 이름 또는 destination을 가진 앱이 이미 있으면 새 앱을 만들지 않고 중단한다.
+2. **관리자 앱을 먼저 생성**
+   - `menu-admin` self-hosted 앱에 exact `/admin`과 descendant `/admin/*` destination을 함께 설정한다.
+   - 기존과 동일한 관리자 이메일 Allow 정책과 `730h` 세션을 연결하고 App Launcher에는 노출하지 않는다.
+   - `/admin`, `/admin/`, `/admin/config.yml`이 계속 Access 로그인 `302` 또는 비인증 `403`을 반환하는지 확인한다. 하나라도 공개 응답이면 이후 단계를 수행하지 않고 새 앱을 삭제한다.
+3. **메뉴 공개 앱 생성**
+   - `menu-public` self-hosted 앱에 `menu.pylv.dev` destination과 Bypass + Everyone 정책을 설정한다.
+   - 공개 페이지를 확인하기 전에 관리자 세 경로를 먼저 재검사한다. 관리자 경로가 Access로 보호되지 않으면 `menu-public`을 즉시 삭제한다.
+   - 관리자 보호가 유지될 때만 홈, RSS, 사이트맵과 404가 오리진 응답을 반환하는지 확인한다.
+4. **미디어 공개 앱 생성**
+   - `media-public` self-hosted 앱에 `media.pylv.dev` destination과 Bypass + Everyone 정책을 설정한다.
+   - 루트가 Access 로그인으로 redirect되지 않는지 확인한다. 루트는 R2 구성에 따라 `200` 또는 의도한 `404`일 수 있으므로 실제 알려진 객체 URL도 함께 검사한다.
+5. **최종 회귀 검사**
+   - `pylv-dev` 앱과 기존 정책이 수정되지 않았는지 다시 조회한다.
+   - `hermes.pylv.dev` 등 menu/media 외 서브도메인이 계속 wildcard Access 보호를 받는지 확인한다.
+   - 오리진 `12369`가 계속 `127.0.0.1`에만 bind되고 NixOS firewall에 공개 포트가 없는지 확인한다.
+
+외부 검증 행렬:
+
+| 요청 | 기대 결과 |
+| --- | --- |
+| `GET https://menu.pylv.dev/` | 공개 `200` |
+| `GET https://menu.pylv.dev/rss.xml` | 공개 `200` |
+| `GET https://menu.pylv.dev/sitemap-index.xml` | 공개 `200` |
+| `GET https://menu.pylv.dev/robots.txt` | Access redirect 없음; Cloudflare Managed Content 또는 오리진 응답 |
+| `GET https://menu.pylv.dev/__access-check-not-found__` | 오리진 `404`, Access redirect 없음 |
+| `GET https://menu.pylv.dev/admin` | Access `302` 또는 `403` |
+| `GET https://menu.pylv.dev/admin/` | Access `302` 또는 `403` |
+| `GET https://menu.pylv.dev/admin/config.yml` | Access `302` 또는 `403` |
+| `GET https://media.pylv.dev/` | Access redirect 없음 |
+| menu/media 외 보호 대상 | 기존 Access 동작 유지 |
+
+롤백:
+
+- 메뉴 공개만 취소하려면 `menu-public`을 삭제한다. 즉시 기존 wildcard 앱의 보호로 복귀한다.
+- 미디어 공개만 취소하려면 `media-public`을 삭제한다.
+- 전체 변경을 취소하려면 새로 만든 `menu-public`, `media-public`, `menu-admin`을 이 순서로 삭제한다.
+- 기존 `pylv-dev` 앱은 적용과 롤백 모두에서 수정하거나 삭제하지 않는다.
+- 각 생성 API 응답의 앱 ID는 실행 중에만 기록하고, 다음 단계 실패 시 해당 ID로 방금 만든 앱만 삭제한다.
+
+Cloudflare는 Bypass를 내부 애플리케이션의 영구 공개 수단으로 일반 권장하지 않는다. 이 구성에서는 공개 대상이 정적 사이트와 공개 R2 미디어이고 오리진이 Cloudflare Tunnel 뒤의 루프백 listener에만 있으므로 Bypass를 제한적으로 사용한다. 실행 전에는 별도 승인을 받고, 쓰기 작업은 관리자 앱 생성부터 위 순서를 지켜 수행한다.
+
 - [ ] 승인된 스테이징 공개 호스트명을 기존 sepia tunnel에 추가한다.
 - [ ] `http://127.0.0.1:12369`로 라우팅한다.
 - [ ] 공개 사이트에 인증 없이 접근할 수 있고 캐시 동작이 올바른지 확인한다.
-- [ ] 선택했다면 `/admin/*`에만 적용되는 좁은 범위의 Cloudflare Access 정책을 추가한다.
+- [ ] 선택했다면 `/admin`과 `/admin/*`에만 적용되는 좁은 범위의 Cloudflare Access 정책을 추가한다.
 - [ ] Access가 게시물, asset, RSS, 사이트맵, robots, 404 페이지를 보호하지 않는지 확인한다.
 - [ ] TLS/공개 오리진 검사를 rollout 체크리스트에 추가한다.
 
