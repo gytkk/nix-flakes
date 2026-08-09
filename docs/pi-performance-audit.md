@@ -8,7 +8,8 @@
 - **Default runtime:** `openai-codex/gpt-5.6-sol`, thinking `high`
 - **Scope:** `modules/pi/`, `~/.pi/agent/`의 실제 로드 상태, 설치된 Pi 패키지,
   현재 저장소의 상위 레벨 세션
-- **Status:** 분석 및 제안만 기록했으며 아래 action item은 아직 적용하지 않았다.
+- **Status:** Web Access의 `workflow: "none"`과 prompt/skill responsibility
+  cleanup을 적용했다. 나머지 action item은 아직 적용하지 않았다.
 
 ## Executive summary
 
@@ -225,8 +226,8 @@ Subagent 기능을 유지하면서 성능을 개선하려면 extension을 삭제
 매칭된다. 따라서 대부분의 코딩 작업에서 모델이 본 작업 전에 `SKILL.md`를 읽는
 추가 라운드를 만들 수 있다.
 
-해당 스킬의 핵심 원칙은 글로벌 `AGENTS.md`와 `APPEND_SYSTEM.md`에 이미 포함되어
-있다.
+감사 당시 해당 스킬의 핵심 원칙은 글로벌 `AGENTS.md`와
+`APPEND_SYSTEM.md`에도 중복되어 있었다.
 
 - 단순성
 - 작은 변경
@@ -234,8 +235,11 @@ Subagent 기능을 유지하면서 성능을 개선하려면 extension을 삭제
 - 검증 가능한 성공 조건
 - 관련 없는 변경 금지
 
-전문화된 skill의 progressive disclosure는 유지하되 범용 중복 skill은 자동
-호출 대상에서 제외하는 편이 효율적이다.
+적용 단계에서는 추가 `read` 라운드보다 코딩 규율의 일관성을 우선하기로 했다.
+`karpathy-guidelines`를 코딩 방법론의 canonical owner로 유지하고 글로벌
+`AGENTS.md`가 코드 작성, 리뷰, 리팩터링 전에 이를 읽도록 요구한다. Pi의 skill
+선택은 모델 기반이므로 결정적 로딩이 필요하면 `/skill:karpathy-guidelines`를
+명시한다.
 
 ### 4. Always-on instructions contain duplication
 
@@ -383,44 +387,37 @@ Inactive candidates:
 권장 순서는 1 또는 2다. 별도 config directory는 설정 중복과 drift가 생기므로
 마지막 선택지로 둔다.
 
-### P1: Remove generic skill round trips and prompt duplication
+### P1: Separate prompt and skill responsibilities
 
-**Proposed changes**
+**Applied changes**
 
-1. `karpathy-guidelines`에 다음 frontmatter를 추가하거나 skill을 제거한다.
-
-   ```yaml
-   disable-model-invocation: true
-   ```
-
-2. 글로벌 skill discovery 규칙을 다음 의미로 완화한다.
-
-   ```text
-   Read a skill when its specialized workflow clearly matches the request.
-   Do not load generic skills that merely restate always-on coding rules.
-   ```
-
-3. `SYSTEM_PROMPT.md`에는 system-level로 반드시 필요한 고유 규칙만 남긴다.
-4. 언어별 Python 실행 규칙, Git commit 정책, 저장소 운영 규칙은 각각 적절한
-   context 또는 focused skill에 둔다.
+1. `karpathy-guidelines`를 모델에 노출하고 코드 작성, 리뷰, 리팩터링의 필수
+   routing 대상으로 유지한다.
+2. `karpathy-guidelines`는 가정과 tradeoff, 단순성, surgical scope, 검증 가능한
+   목표만 소유한다.
+3. `SYSTEM_PROMPT.md`에는 모든 작업에 필요한 안전, 근거, 검증, 보고 invariant만
+   남긴다.
+4. 글로벌 `AGENTS.md`는 skill routing, 조사와 승인, Git, 도구, 테스트, 문서,
+   보안 운영 규칙을 소유한다.
 
 **Expected impact**
 
-- 초기 prompt 크기 감소
-- 대부분의 코딩 요청에서 범용 skill을 읽는 선행 model-tool 라운드 제거
-- 중복 지침 때문에 과도한 조사 또는 검증을 선택하는 빈도 감소
+- always-on prompt 크기와 의미 중복 감소
+- 코딩 방법론을 한 focused skill에서 일관되게 적용
+- 같은 원칙의 반복 때문에 과도한 조사나 검증을 선택하는 빈도 감소
 
-**Risk control**
+**Tradeoff and risk control**
 
-삭제 전 각 규칙의 canonical owner를 정한다. 안전, 사용자 작업 보존, 검증, 비밀
-보호 규칙은 반드시 한 위치에 남겨야 한다.
+코딩 요청은 계속 선행 skill `read` 라운드를 사용할 수 있다. Pi의 자동 skill 선택은
+결정적이지 않으므로 글로벌 routing 규칙을 유지하고, 반드시 적용해야 하는 요청은
+`/skill:karpathy-guidelines`로 명시한다. 안전, 사용자 작업 보존, 검증, 비밀 보호
+규칙은 always-on prompt 또는 글로벌 운영 규칙에 남긴다.
 
 ### P1: Make raw web results the default
 
-**Proposed config**
+**Applied config**
 
-Pi Web Access의 사용자 설정을 repository-managed resource로 추가한다면 다음처럼
-시작할 수 있다.
+Pi Web Access의 사용자 설정을 repository-managed resource로 추가했다.
 
 ```json
 {
@@ -501,10 +498,10 @@ output 공간과 summary 품질에 영향을 주므로 먼저 수동 운영으�
 
 ### Phase 1: Low-risk response-latency changes
 
-1. 기본 thinking을 `medium`으로 변경
-2. 가능하면 기본 모델도 Terra로 변경
-3. Web Access workflow를 `none`으로 변경
-4. 대표 작업으로 before/after 측정
+1. [ ] 기본 thinking을 `medium`으로 변경
+2. [ ] 가능하면 기본 모델도 Terra로 변경
+3. [x] Web Access workflow를 `none`으로 변경
+4. [ ] 대표 작업으로 before/after 측정
 
 **Verification**
 
@@ -529,16 +526,16 @@ output 공간과 summary 품질에 영향을 주므로 먼저 수동 운영으�
 
 ### Phase 3: Prompt and skill cleanup
 
-1. `karpathy-guidelines` 자동 호출 비활성화
-2. 글로벌 `AGENTS.md`와 `SYSTEM_PROMPT.md` 중복 제거
-3. specialized skill discovery만 남김
+1. `karpathy-guidelines`를 코딩 요청의 필수 routing 대상으로 유지
+2. 글로벌 `AGENTS.md`, `SYSTEM_PROMPT.md`, skill의 canonical responsibility 분리
+3. 다른 specialized skill은 명확히 매칭될 때만 로드
 4. 간단한 수정, 복잡한 수정, review 요청을 각각 테스트
 
 **Verification**
 
 - system prompt chars 재측정
 - 첫 request input token 비교
-- 불필요한 skill `read` 호출 여부
+- 코딩 요청에서 `karpathy-guidelines`를 읽는지 확인
 - 안전 규칙과 commit/verification 정책 유지 여부
 
 ### Phase 4: UI-only optimization
@@ -627,9 +624,9 @@ Structured question tool은 약 4.9K자의 metadata를 사용하지만 모호한
 - [ ] 일상 기본값을 Terra/medium으로 바꿀지 결정
 - [ ] lite profile에서 subagent suite를 비활성화할지 결정
 - [ ] `/run` command만으로 manual delegation을 허용할지 결정
-- [ ] Web Access 기본 workflow를 `none`으로 바꿀지 결정
-- [ ] `karpathy-guidelines`를 manual-only로 전환할지 결정
-- [ ] 글로벌 `AGENTS.md`와 `SYSTEM_PROMPT.md`의 canonical rule owner 결정
+- [x] Web Access 기본 workflow를 `none`으로 변경
+- [x] `karpathy-guidelines`를 코딩 요청의 필수 routing 대상으로 유지
+- [x] 글로벌 `AGENTS.md`, `SYSTEM_PROMPT.md`, skill의 canonical owner 분리
 - [ ] `mcpScript` 사용 빈도를 확인하고 유지 여부 결정
 - [ ] UI lag가 실제 증상인지 provider wait가 실제 증상인지 구분
 

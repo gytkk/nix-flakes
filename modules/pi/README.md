@@ -76,11 +76,19 @@ concurrency limit protects legacy multi-child paths but does not cap
 ## Global prompts and skills
 
 `files/SYSTEM_PROMPT.md` is exposed as `APPEND_SYSTEM.md`, so it augments Pi's
-maintained system prompt instead of replacing it. Keep it concise and
-repository-independent.
+maintained system prompt instead of replacing it. It owns the small set of
+repository-independent operating invariants that must apply to every task.
 
-`files/AGENTS.md` contains the global operating rules. Project-specific rules
-belong in the project's own `AGENTS.md`; focused reusable workflows belong in
+`files/AGENTS.md` owns global operational policy: skill routing, investigation
+and approval, Git, tool use, testing, documentation, and security. It requires
+Pi to read `karpathy-guidelines` before writing, reviewing, or refactoring
+code. Pi skill selection is model-driven, so `/skill:karpathy-guidelines` is
+the explicit fallback when deterministic loading is required.
+
+The `karpathy-guidelines` skill owns coding methodology—assumptions and
+tradeoffs, simplicity, surgical scope, and verifiable goals—without repeating
+the operational and safety policies above. Project-specific rules belong in
+the project's own `AGENTS.md`; other focused workflows belong in
 `modules/pi/skills/`.
 
 The currently managed skills are:

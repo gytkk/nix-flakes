@@ -1,78 +1,49 @@
 ---
 name: karpathy-guidelines
-description: Behavioral guidelines to reduce common LLM coding mistakes. Use when writing, reviewing, or refactoring code to avoid overcomplication, make surgical changes, surface assumptions, and define verifiable success criteria.
+description: Coding discipline for avoiding common LLM mistakes when writing, reviewing, or refactoring code by surfacing assumptions, keeping solutions simple and surgical, and defining verifiable success criteria.
 license: MIT
-disable-model-invocation: true
 ---
 
 # Karpathy Guidelines
 
-Behavioral guidelines to reduce common LLM coding mistakes, derived from
-[Andrej Karpathy's observations][karpathy-post] on LLM coding pitfalls.
+Apply this workflow to coding tasks. Global and project instructions remain the
+source of truth for safety, approvals, tools, Git, testing, and delivery.
 
-**Tradeoff:** These guidelines bias toward caution over speed. For trivial
-tasks, use judgment.
+## 1. Make the Problem Explicit
 
-## 1. Think Before Coding
+Before coding:
 
-**Don't assume. Don't hide confusion. Surface tradeoffs.**
+- State the intended outcome and distinguish known facts from assumptions.
+- Surface materially different interpretations and their consequences instead
+  of choosing silently.
+- Name meaningful tradeoffs and recommend the simplest viable path.
 
-Before implementing:
+## 2. Prefer the Simplest Sufficient Solution
 
-- State your assumptions explicitly. If uncertain, ask.
-- If multiple interpretations exist, present them - don't pick silently.
-- If a simpler approach exists, say so. Push back when warranted.
-- If something is unclear, stop. Name what's confusing. Ask.
+Write the minimum code needed for the requested outcome:
 
-## 2. Simplicity First
+- Do not add speculative features, configurability, or abstractions.
+- Do not generalize a single-use path without evidence that reuse is needed.
+- Do not add handling for impossible scenarios.
+- If the implementation is substantially larger than the problem, simplify it
+  before finishing.
 
-**Minimum code that solves the problem. Nothing speculative.**
+## 3. Keep Changes Surgical
 
-- No features beyond what was asked.
-- No abstractions for single-use code.
-- No "flexibility" or "configurability" that wasn't requested.
-- No error handling for impossible scenarios.
-- If you write 200 lines and it could be 50, rewrite it.
+Every changed line should trace to the requested outcome:
 
-Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+- Match the existing style and structure.
+- Do not refactor, reformat, or clean up unrelated code.
+- Do not remove pre-existing dead code unless asked.
+- Remove only the imports, variables, or helpers made obsolete by your change.
 
-## 3. Surgical Changes
+## 4. Work Against Verifiable Goals
 
-**Touch only what you must. Clean up only your own mess.**
+Convert the request into observable success criteria before implementation:
 
-When editing existing code:
-
-- Don't "improve" adjacent code, comments, or formatting.
-- Don't refactor things that aren't broken.
-- Match existing style, even if you'd do it differently.
-- If you notice unrelated dead code, mention it - don't delete it.
-
-When your changes create orphans:
-
-- Remove imports/variables/functions that YOUR changes made unused.
-- Don't remove pre-existing dead code unless asked.
-
-The test: Every changed line should trace directly to the user's request.
-
-## 4. Goal-Driven Execution
-
-**Define success criteria. Loop until verified.**
-
-Transform tasks into verifiable goals:
-
-- "Add validation" → "Write tests for invalid inputs, then make them pass"
-- "Fix the bug" → "Write a test that reproduces it, then make it pass"
-- "Refactor X" → "Ensure tests pass before and after"
-
-For multi-step tasks, state a brief plan:
-
-```text
-1. [Step] → verify: [check]
-2. [Step] → verify: [check]
-3. [Step] → verify: [check]
-```
-
-Strong success criteria let you loop independently. Weak criteria ("make it
-work") require constant clarification.
+- A bug fix should reproduce the failure and then demonstrate the fix.
+- A feature should cover its intended behavior and relevant failure cases.
+- A refactor should preserve behavior before and after the change.
+- Each nontrivial plan step should name its verification evidence.
 
 [karpathy-post]: https://x.com/karpathy/status/2015883857489522876
