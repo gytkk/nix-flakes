@@ -1,9 +1,12 @@
+onboarding = false
 [keys]
 prefix = "ctrl+a"
+switch_workspace = "prefix+shift+1..9"
 
 [theme]
-name = "one-dark"
+name = "vesper"
 
+auto_switch = false
 [theme.custom]
 overlay0 = "#ffffff"
 surface0 = "#2c313a"
