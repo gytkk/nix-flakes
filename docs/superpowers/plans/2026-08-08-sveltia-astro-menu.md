@@ -19,7 +19,7 @@
 | 공개 호스트명 | `menu.pylv.dev` |
 | 콘텐츠 | `/recipes/` 아래의 자유 형식 Markdown 레시피 |
 | CMS 인증 | 단독 기술 사용자가 GitHub PAT로 로그인 |
-| 미디어 | 기존 R2 `pylv-blog-media`, `media.pylv.dev`, 새 prefix `menu/` |
+| 미디어 | R2 `pylv-menu-media`, `media.pylv.dev`, prefix `menu/` |
 | 발행 경로 | 수동 배포와 롤백을 먼저 검증한 뒤 GitHub Actions 자동화 |
 | 오리진 | `127.0.0.1:12369`; NixOS 방화벽에는 추가하지 않음 |
 | 배포 경계 | `menu-deploy`, `/srv/menu`, 별도 Ed25519 키 |
@@ -29,30 +29,31 @@
 
 - 기존 정적 Astro와 Sveltia CMS 기반은 커밋 `82c75aa`, `9d78429`에 구현되어 있다.
 - GitHub 저장소를 `gytkk/menu`로 rename했다.
-- 기능 브랜치 커밋 `3cedc59`에서 canonical URL, `Menu by pylv` 브랜딩, `/recipes/` 경로, `recipes` 콘텐츠 컬렉션, CMS backend와 R2 `menu/` prefix, 테스트와 문서를 변경했다.
+- 기능 브랜치 커밋 `3cedc59`에서 canonical URL, `Menu by pylv` 브랜딩, `/recipes/` 경로, `recipes` 콘텐츠 컬렉션, CMS backend와 R2 `menu/` prefix, 테스트와 문서를 변경했다. 커밋 `c78524a`에서 CMS bucket을 `pylv-menu-media`로 전환했다.
 - Bun 1.3.13 기반 설치, 포맷, CMS schema, `astro check`, 테스트 8개, 프로덕션 빌드와 전체 `dist/` smoke 검사를 통과했다.
 - `pylv-sepia`에서 기존 Astro 오리진과 Tailscale 연결이 동작하며 포트 `12369`가 루프백에만 노출되는 것을 확인했다.
 - 인프라 커밋 `9337eee`에서 `menu.nix`, `menu-deploy`, transitional legacy 경계와 새 agenix key backup을 구현했다. Python 테스트 8개, ruff, nixfmt, `nix flake check --no-build`, 전체 `nix flake check`, `pylv-sepia` toplevel 빌드, 렌더된 계정·키·listener·방화벽·recipient 경계를 검증했다.
+- 사용자가 NixOS 구성을 switch했다. `menu-deploy`와 legacy 계정, `/srv/menu`와 `/srv/astro-blog`, nginx·Tailscale·cloudflared·sshd active, 루프백 `12369`, LAN 미노출과 placeholder 응답을 확인했다.
+- 빈 `pylv-blog-media`를 `pylv-menu-media`로 교체하고 `media.pylv.dev`, TLS 1.2, `https://menu.pylv.dev` 전용 CORS와 bucket-scoped Object Read & Write Access Key를 구성했다. 기존 버킷은 삭제되었다.
+- `pylv-sepia` Tunnel에 `menu.pylv.dev` → `http://127.0.0.1:12369` ingress를 추가했다.
 
 ### 진행 중 또는 차단된 항목
 
-- `gytkk/menu` 원격 `main`은 아직 `9d78429`이며 로컬 기능 브랜치 커밋 `3cedc59`는 push하지 않았다.
-- 새 `menu.nix`, `menu-deploy`, `/srv/menu` 구성은 커밋 `9337eee`에 있으며 사용자가 NixOS switch해야 한다.
+- `gytkk/menu` 원격 `main`은 아직 `9d78429`이며 로컬 기능 브랜치 HEAD `c78524a`는 push하지 않았다.
+- `/srv/menu/current`는 아직 Nix placeholder이며 실제 메뉴 릴리스를 배포하지 않았다.
 - `astro-blog-legacy.nix`가 기존 강제 명령 계정·키와 `/srv/astro-blog`를 유지하되 old nginx origin은 제공하지 않는다. encrypted backup과 함께 새 배포 2회 및 롤백 전까지 보존한다.
-- R2 CORS는 아직 `https://blog.pylv.dev`를 허용하므로 rollout 시 `https://menu.pylv.dev`로 변경해야 한다. 기존 `blog/` 객체가 있다면 삭제하지 않고 필요한 객체만 `menu/`로 복사한다.
-- `pylv-sepia` Tunnel에는 아직 `menu.pylv.dev` ingress가 없다. Wrangler 4.90.0은 기존 Tunnel ingress와 Access 앱·정책을 수정하지 못하므로 Zero Trust 대시보드에서 적용한다.
+- `menu.pylv.dev`와 `media.pylv.dev`는 여전히 광범위한 Cloudflare Access에 의해 `302` 로그인으로 보호된다. 공개 경로와 `/admin/*` 전용 정책으로 조정해야 한다.
 - Sveltia의 GitHub PAT CRUD와 브라우저 전용 R2 Secret Access Key 이미지 업로드는 공개 배포 후 수동 검증한다.
 - GitHub Actions 자동화와 Ghost 제거는 수동 2회 배포·롤백 및 공개 경로 검증 뒤에만 시작한다.
 
 ### 다음 재개 순서
 
 1. 메뉴 기능 브랜치를 검토한 뒤 사용자가 원격 `main`에 반영한다.
-2. 사용자가 `pylv-sepia` NixOS 구성 커밋 `9337eee`를 switch하고 `menu-deploy`, `/srv/menu`, nginx listener와 새 공개키를 확인한다.
-3. 메뉴 커밋을 고정된 Bun 도구 체인으로 빌드하고 첫 번째 수동 릴리스를 배포한다.
-4. 루프백에서 홈, 레시피, 태그, RSS, sitemap, 404, asset, `/admin/`과 캐시 헤더를 검증한다.
-5. 두 번째 릴리스를 배포하고 첫 번째 릴리스로 롤백한다.
-6. R2 CORS와 Tunnel hostname을 `menu.pylv.dev`로 전환하고 공개 사이트·미디어 및 `/admin/*` Access를 검증한다.
-7. 모두 통과한 후에만 기존 Astro 배포 경계 정리, 자동화와 Ghost 제거를 시작한다.
+2. 메뉴 커밋을 고정된 Bun 도구 체인으로 빌드하고 첫 번째 수동 릴리스를 배포한다.
+3. 루프백에서 홈, 레시피, 태그, RSS, sitemap, 404, asset, `/admin/`과 캐시 헤더를 검증한다.
+4. 두 번째 릴리스를 배포하고 첫 번째 릴리스로 롤백한다.
+5. 공개 사이트·미디어 및 `/admin/*` 전용 Access 정책을 적용하고 검증한다.
+6. 모두 통과한 후에만 기존 Astro 배포 경계 정리, 자동화와 Ghost 제거를 시작한다.
 
 ## 1. 현재 상태와 제약 사항
 
@@ -60,7 +61,7 @@
 - 호스트에서 이미 nginx와 토큰 기반 Cloudflare Tunnel을 실행하고 있다.
 - 테스트용 Ghost 서비스가 남아 있으며 Astro 공개 경로 검증 후 제거할 대상이다.
 - Cloudflare Tunnel 호스트명 매핑은 이 저장소가 아니라 Cloudflare Zero Trust 대시보드에서 관리한다.
-- 정상 상태에서는 Tailscale 인터페이스와 LAN을 통해 SSH로 접근하고 비밀번호 로그인은 비활성화되어 있다. 현재는 `pylv-sepia`의 Tailscale node key 만료로 원격 접근이 차단되어 있다.
+- Tailscale과 LAN을 통해 SSH로 접근하며 비밀번호 로그인은 비활성화되어 있다. `pylv-sepia`의 node key를 갱신했고 peer는 online이다.
 - 루프백 전용 nginx 오리진을 추가하기 위해 인바운드 방화벽 포트를 열 필요가 없다.
 
 ## 2. 구현 전에 결정할 사항
@@ -73,7 +74,7 @@
 | 초기 호스트명 | `menu.pylv.dev`와 같은 스테이징 호스트명 | 먼저 스테이징에서 검증하면 최종 도메인 연결 전 문제를 발견하기 쉽다. |
 | CMS 사용자 | MVP에서는 기술 사용자 한 명이 GitHub 토큰으로 로그인 | 여러 사용자 또는 비기술 사용자가 있다면 Sveltia CMS Authenticator를 통한 GitHub OAuth를 사용한다. |
 | 발행 경로 | 수동 원자적 배포 검증 후 Tailscale 네트워크를 통한 GitHub Actions 자동화 | 수동 전용 워크플로는 단순하지만 Sveltia에서 저장한 변경이 자동으로 공개되지 않는다. |
-| 미디어 저장소 | Cloudflare R2의 `pylv-blog-media`와 `media.pylv.dev` | 저장소 미디어는 단순하지만 저장소 크기와 콘텐츠 이력을 결합한다. |
+| 미디어 저장소 | Cloudflare R2의 `pylv-menu-media`와 `media.pylv.dev` | 저장소 미디어는 단순하지만 저장소 크기와 콘텐츠 이력을 결합한다. |
 | 검토 워크플로 | 단독 편집자는 `main`에 직접 커밋 | Sveltia의 editorial workflow는 현재 구현되지 않았으므로 팀 검토는 별도 Git/PR 절차를 사용해야 한다. |
 | 댓글/뉴스레터/검색 | 첫 릴리스에서 제외 | 각 기능은 서비스, 개인정보 보호, 운영 검토 또는 런타임 의존성을 추가한다. |
 
@@ -134,7 +135,7 @@ Sveltia CMS(블로그가 제공하는 정적 파일)
 | --- | --- |
 | 페이지, 컴포넌트, 스타일, Astro 설정 | 별도 블로그 저장소 |
 | 게시물 | 별도 블로그 저장소 |
-| 미디어 | Cloudflare R2의 `pylv-blog-media` 버킷과 `media.pylv.dev` 공개 도메인 |
+| 미디어 | Cloudflare R2의 `pylv-menu-media` 버킷과 `media.pylv.dev` 공개 도메인 |
 | CMS 컬렉션/필드 정의 | 블로그 저장소의 `public/admin/config.yml` |
 | Bun 및 의존성 버전, 빌드 명령 | 블로그 저장소의 CI 설정, `bun.lock`, 패키지 스크립트 |
 | 배포 계정, 디렉터리, nginx, 로컬 배포 명령 | 이 flake의 `hosts/pylv-sepia/` |
@@ -225,7 +226,7 @@ hosts/pylv-sepia/
 - 게시물은 `publishedAt`으로 명시적으로 정렬하며 파일시스템 또는 API 순서에 의존하지 않는다.
 - Sveltia의 필드 이름, 날짜 형식, 기본값, 미디어 경로를 Astro 스키마와 정확히 일치시킨다.
 - Sveltia 게시물 컬렉션에 `folder: src/content/recipes`를 지정해 엔트리가 Astro의 `glob()` 컬렉션 안에 저장되게 한다.
-- `media_libraries.cloudflare_r2`에 버킷 `pylv-blog-media`, 공개 URL `https://media.pylv.dev`, prefix `menu/`, 기본 jurisdiction과 공개 가능한 Account ID/Access Key ID를 지정한다.
+- `media_libraries.cloudflare_r2`에 버킷 `pylv-menu-media`, 공개 URL `https://media.pylv.dev`, prefix `menu/`, 기본 jurisdiction과 공개 가능한 Account ID/Access Key ID를 지정한다.
 - R2 Secret Access Key는 `public/admin/config.yml`에 넣지 않는다. Sveltia가 최초 사용 시 입력받아 편집자 브라우저 로컬 저장소에만 보관하게 한다.
 - R2 업로드에는 브라우저 기반 파일명 slug 변환과 제한된 이미지 크기/형식 변환을 활성화한다.
 - R2 CORS는 `https://menu.pylv.dev`에서 오는 `GET`, `PUT`, `HEAD`를 허용한다. SigV4 업로드를 위해 요청 헤더는 `*`로 허용하고 `ETag`를 노출한다.
@@ -242,7 +243,7 @@ hosts/pylv-sepia/
 - [x] 단독 사용자 토큰 로그인 또는 다중 사용자 OAuth를 선택한다: 단독 사용자 GitHub PAT.
 - [x] Git 기반 미디어 또는 R2를 선택한다: Cloudflare R2.
 - [x] 수동 전용 또는 자동 배포 목표를 선택한다: 수동 검증 후 GitHub Actions 자동화.
-- [ ] 선택한 루프백 오리진 포트 `12369`가 실제 `pylv-sepia`에서 사용 중이지 않은지 확인한다. 선언상 충돌과 방화벽 미노출은 검증했다.
+- [x] 루프백 오리진 포트 `12369`의 충돌이 없고 LAN과 방화벽에 노출되지 않는 것을 실제 `pylv-sepia`에서 확인했다.
 
 **완료 조건:** 보안, 공개 URL, 저장소 소유권 또는 배포 접근에 영향을 주는 placeholder가 남아 있지 않다.
 
@@ -283,7 +284,7 @@ hosts/pylv-sepia/
 
 ### 단계 4: `pylv-sepia` 정적 오리진 추가
 
-**상태:** 기존 Astro 오리진은 런타임 검증을 마쳤다. 새 `menu.nix`, `menu-deploy` 키, agenix 복구 경로와 transitional legacy 경계는 커밋 `9337eee`에서 빌드 검증했으며, 사용자가 NixOS switch한 뒤 단계 5 런타임 검증을 수행한다.
+**상태:** 커밋 `9337eee`를 NixOS switch했다. `menu-deploy`와 transitional legacy 계정·경로, nginx listener, 서비스 상태, 루프백 응답, LAN 미노출을 확인했으며 실제 메뉴 릴리스 배포는 단계 5에서 수행한다.
 
 - [x] `hosts/pylv-sepia/menu.nix`를 추가하고 `configuration.nix`에서 import한다.
 - [x] 전환 중 기존 계정·키와 `/srv/astro-blog`를 보존하는 `astro-blog-legacy.nix`를 추가하되 old nginx origin은 제거한다.
@@ -313,7 +314,7 @@ hosts/pylv-sepia/
 
 ### 단계 6: Cloudflare Tunnel 연결
 
-**상태:** `pylv-sepia` Tunnel과 R2 custom domain은 존재하지만 현재 `menu.pylv.dev`와 `media.pylv.dev` 모두 광범위한 Access 앱에 의해 보호된다. Wrangler는 필요한 ingress/Access 수정을 지원하지 않으므로 배포 후 Zero Trust 대시보드에서 공개 경로와 `/admin/*` 전용 정책을 수동 적용한다.
+**상태:** `pylv-sepia` Tunnel ingress, R2 bucket/custom domain/CORS는 `menu.pylv.dev` 기준으로 구성했다. `menu.pylv.dev`와 `media.pylv.dev` 모두 광범위한 Access 앱에 의해 보호되므로 배포 후 Zero Trust 대시보드에서 공개 경로와 `/admin/*` 전용 정책을 수동 적용한다.
 
 - [ ] 승인된 스테이징 공개 호스트명을 기존 sepia tunnel에 추가한다.
 - [ ] `http://127.0.0.1:12369`로 라우팅한다.
