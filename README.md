@@ -291,6 +291,9 @@ Resources should supplement the tools instead of expanding the tool count:
 - `Ctrl+a`, then `Shift+n`, opens a popup that selects a previously visited
   directory with `zoxide` and `fzf`, then creates and focuses a workspace there.
 - `Ctrl+a`, then `Shift+Up` or `Shift+Down`, focuses the previous or next workspace.
+- Herdr uses the native terminal cursor so pane applications such as Neovim can
+  preserve mode-specific cursor shapes. On Windows or WSL, this may expose
+  ConPTY cursor flicker that Herdr's default drawn cursor avoids.
 - Reload a running server after editing the config with
   `herdr server reload-config`.
 

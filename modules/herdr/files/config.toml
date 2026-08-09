@@ -27,4 +27,5 @@ overlay0 = "#ffffff"
 surface0 = "#2c313a"
 
 [ui]
+host_cursor = "native"
 prompt_new_tab_name = false
