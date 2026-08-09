@@ -27,24 +27,27 @@ nix run nixpkgs#nixos-rebuild -- switch \
 sudo nixos-rebuild switch --flake github:gytkk/nix-flakes#pylv-sepia
 ```
 
-## Astro blog
+## Menu by pylv
 
 The static Astro origin listens only on `127.0.0.1:12369` for
-`blog.pylv.dev`; it is intentionally absent from the firewall. Nginx serves
-`/srv/astro-blog/current`, an atomic symlink to a validated release.
+`menu.pylv.dev`; it is intentionally absent from the firewall. Nginx serves
+`/srv/menu/current`, an atomic symlink to a validated release.
 
-The dedicated `astro-blog-deploy` account accepts only its forced SSH command.
-Its client private key lives at `~/.ssh/astro-blog-deploy`; an encrypted
-recovery copy for the administrator and deployment Mac is stored in
-`secrets/astro-blog-deploy-key.age`. The server is intentionally not a
-recipient of that secret. To recover the local key from the repository root:
+The dedicated `menu-deploy` account accepts only its forced SSH command. Its
+client private key lives at `~/.ssh/menu-deploy`; an encrypted recovery copy
+for the administrator and deployment Mac is stored in
+`secrets/menu-deploy-key.age`. The server is intentionally not a recipient of
+that secret. To recover the local key from the repository root:
 
 ```bash
 umask 077
-agenix -d secrets/astro-blog-deploy-key.age > ~/.ssh/astro-blog-deploy
-ssh-keygen -y -f ~/.ssh/astro-blog-deploy > ~/.ssh/astro-blog-deploy.pub
-public_key="$(cut -d ' ' -f 2 ~/.ssh/astro-blog-deploy.pub)"
-rg --fixed-strings "$public_key" hosts/pylv-sepia/astro-blog.nix
+(
+  cd secrets
+  RULES=./secrets.nix agenix -d menu-deploy-key.age
+) > ~/.ssh/menu-deploy
+ssh-keygen -y -f ~/.ssh/menu-deploy > ~/.ssh/menu-deploy.pub
+public_key="$(cut -d ' ' -f 2 ~/.ssh/menu-deploy.pub)"
+rg --fixed-strings "$public_key" hosts/pylv-sepia/menu.nix
 ```
 
 From an authorized deployment machine, stream a verified tar archive with the
@@ -56,29 +59,33 @@ trap 'rm -f "$archive"' EXIT
 tar --create --file "$archive" --directory dist .
 revision="$(git rev-parse HEAD)"
 archive_sha256="$(sha256sum "$archive" | cut --delimiter=' ' --fields=1)"
-ssh -i ~/.ssh/astro-blog-deploy astro-blog-deploy@pylv-sepia \
+ssh -i ~/.ssh/menu-deploy menu-deploy@pylv-sepia \
   "deploy $revision $archive_sha256" < "$archive"
 ```
 
 The archive must include `index.html`, `404.html`, `rss.xml`,
 `sitemap-index.xml`, `admin/index.html`, and `admin/config.yml`. The server
-validates and extracts it into `/srv/astro-blog/releases/<sha>/`, then switches
+validates and extracts it into `/srv/menu/releases/<sha>/`, then switches
 `current` without restarting nginx. To roll back a retained validated release:
 
 ```bash
-ssh -i ~/.ssh/astro-blog-deploy astro-blog-deploy@pylv-sepia \
+ssh -i ~/.ssh/menu-deploy menu-deploy@pylv-sepia \
   "rollback <40-or-64-lowercase-hex-sha>"
 ```
 
 Run the following checks on `pylv-sepia` after deployment:
 
 ```bash
-curl --fail --header 'Host: blog.pylv.dev' http://127.0.0.1:12369/
-readlink -f /srv/astro-blog/current
+curl --fail --header 'Host: menu.pylv.dev' http://127.0.0.1:12369/
+readlink -f /srv/menu/current
 ```
 
 Cloudflare Tunnel routing and the public hostname are managed separately in
-Cloudflare and are not configured by this flake.
+Cloudflare and are not configured by this flake. The transitional
+`astro-blog-legacy.nix` module keeps the old forced-command account, key and
+`/srv/astro-blog` data available without serving the old nginx origin. Keep it
+and the encrypted backup until two Menu releases and a rollback have been
+verified; remove them only as a separate cleanup step.
 
 ## Ghost
 

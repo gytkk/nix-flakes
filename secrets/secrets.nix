@@ -30,15 +30,16 @@ let
     devsisters-macbook
     devsisters-macstudio
   ];
-  astroBlogDeployRecipients = adminRecipients ++ [ devsisters-macbook ];
+  deployMachineRecipients = adminRecipients ++ [ devsisters-macbook ];
   sepiaRecipients = adminRecipients ++ [ pylv-sepia ];
   onyxRecipients = adminRecipients ++ [ pylv-onyx ];
   devsistersRecipients = adminRecipients ++ devsistersHosts;
   allEnvironmentRecipients = adminRecipients ++ allHosts ++ devsistersHosts;
 in
 {
-  # Astro blog deployment key backup (administrator/deployment Mac only)
-  "astro-blog-deploy-key.age".publicKeys = astroBlogDeployRecipients;
+  # Deployment key backups (administrator/deployment Mac only)
+  "astro-blog-deploy-key.age".publicKeys = deployMachineRecipients;
+  "menu-deploy-key.age".publicKeys = deployMachineRecipients;
 
   # Cloudflare Tunnel token for pylv-sepia
   "cloudflare-tunnel-sepia-token.age".publicKeys = sepiaRecipients;

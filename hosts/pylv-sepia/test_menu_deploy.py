@@ -1,4 +1,4 @@
-"""Tests for the constrained Astro release deploy command."""
+"""Tests for the constrained Menu by pylv release deploy command."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ import tarfile
 import tempfile
 import unittest
 
-SCRIPT = Path(__file__).with_name("astro-blog-deploy.py")
+SCRIPT = Path(__file__).with_name("menu-deploy.py")
 SHA = "a" * 40
 OTHER_SHA = "b" * 40
 REQUIRED = {
@@ -65,7 +65,9 @@ class DeployTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             self.deploy(root, SHA)
-            self.deploy(root, OTHER_SHA, {**REQUIRED, "post/index.html": b"post"})
+            self.deploy(
+                root, OTHER_SHA, {**REQUIRED, "recipe/index.html": b"recipe"}
+            )
             result = self.run_command(root, f"rollback {SHA}")
             self.assertEqual(result.returncode, 0, result.stderr.decode())
             self.assertEqual((root / "current").resolve().name, SHA)
