@@ -29,6 +29,10 @@ window-decoration = none
 
 unfocused-split-opacity = 0.9
 
+# Forward Ghostty's default tab-navigation shortcuts to Herdr workspace navigation.
+keybind = ctrl+tab=unbind
+keybind = ctrl+shift+tab=unbind
+
 link-url = true
 clipboard-trim-trailing-spaces = true
 
