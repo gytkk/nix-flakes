@@ -1,0 +1,30 @@
+{
+  "actions": [
+    {
+      "command": {
+        "action": "sendInput",
+        "input": "\u001b[9;5u"
+      },
+      "id": "User.herdrNextWorkspace",
+      "name": "Herdr: next workspace"
+    },
+    {
+      "command": {
+        "action": "sendInput",
+        "input": "\u001b[9;6u"
+      },
+      "id": "User.herdrPreviousWorkspace",
+      "name": "Herdr: previous workspace"
+    }
+  ],
+  "keybindings": [
+    {
+      "id": "User.herdrNextWorkspace",
+      "keys": "ctrl+tab"
+    },
+    {
+      "id": "User.herdrPreviousWorkspace",
+      "keys": "ctrl+shift+tab"
+    }
+  ]
+}

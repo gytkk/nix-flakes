@@ -293,6 +293,10 @@ Resources should supplement the tools instead of expanding the tool count:
 - `Ctrl+Shift+Tab` or `Ctrl+Tab` focuses the previous or next workspace. Ghostty
   forwards those shortcuts as distinct Kitty keyboard sequences so Herdr receives
   the modifiers even when the focused pane has not enabled enhanced keyboard input.
+- On WSL, the `windows-terminal` module merges equivalent `sendInput` actions into
+  the existing Windows Terminal `settings.json` during Home Manager activation.
+  Existing profiles, themes, and unrelated keybindings are preserved; the first
+  managed update creates a `settings.json.home-manager.bak` backup.
 - Herdr uses the native terminal cursor so pane applications such as Neovim can
   preserve mode-specific cursor shapes. On Windows or WSL, this may expose
   ConPTY cursor flicker that Herdr's default drawn cursor avoids.

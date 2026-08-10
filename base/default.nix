@@ -88,6 +88,7 @@ in
     ../modules/tmux
     ../modules/vim
     ../modules/wezterm
+    ../modules/windows-terminal
     ../modules/zed
     ../modules/zellij
     ../modules/zsh
@@ -117,6 +118,7 @@ in
       tmux.enable = lib.mkDefault true;
       vim.enable = lib.mkDefault true;
       wezterm.enable = lib.mkDefault true;
+      windowsTerminal.enable = lib.mkDefault true;
       zed.enable = lib.mkDefault true;
       zellij.enable = lib.mkDefault true;
       zsh.enable = lib.mkDefault true;
