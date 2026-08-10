@@ -290,8 +290,9 @@ Resources should supplement the tools instead of expanding the tool count:
   inside Herdr, press `Ctrl+a` twice before the tmux command key.
 - `Ctrl+a`, then `Shift+n`, opens a popup that selects a previously visited
   directory with `zoxide` and `fzf`, then creates and focuses a workspace there.
-- `Ctrl+Shift+Tab` or `Ctrl+Tab` focuses the previous or next workspace. Ghostty's
-  default tab-navigation bindings for those shortcuts are unbound so Herdr receives them.
+- `Ctrl+Shift+Tab` or `Ctrl+Tab` focuses the previous or next workspace. Ghostty
+  forwards those shortcuts as distinct Kitty keyboard sequences so Herdr receives
+  the modifiers even when the focused pane has not enabled enhanced keyboard input.
 - Herdr uses the native terminal cursor so pane applications such as Neovim can
   preserve mode-specific cursor shapes. On Windows or WSL, this may expose
   ConPTY cursor flicker that Herdr's default drawn cursor avoids.
