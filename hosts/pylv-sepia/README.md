@@ -33,11 +33,14 @@ The static Astro origin listens only on `127.0.0.1:12369` for
 `menu.pylv.dev`; it is intentionally absent from the firewall. Nginx serves
 `/srv/menu/current`, an atomic symlink to a validated release.
 
-The dedicated `menu-deploy` account accepts only its forced SSH command. Its
-client private key lives at `~/.ssh/menu-deploy`; an encrypted recovery copy
-for the administrator and deployment Mac is stored in
-`secrets/menu-deploy-key.age`. The server is intentionally not a recipient of
-that secret. To recover the local key from the repository root:
+The dedicated `menu-deploy` account accepts only its forced SSH command. The
+manual client private key lives at `~/.ssh/menu-deploy`; an encrypted recovery
+copy for the administrator and deployment Mac is stored in
+`secrets/menu-deploy-key.age`. GitHub Actions uses a separate CI key whose
+private half exists only as the `MENU_DEPLOY_SSH_KEY` repository secret. Both
+public keys have the same forced command and forwarding restrictions in
+`menu.nix`. The server is intentionally not a recipient of either private key.
+To recover the manual key from the repository root:
 
 ```bash
 umask 077
@@ -98,6 +101,15 @@ Run the following checks on `pylv-sepia` after deployment:
 curl --fail --header 'Host: menu.pylv.dev' http://127.0.0.1:12369/
 readlink -f /srv/menu/current
 ```
+
+GitHub-hosted deployment runners join the tailnet with Tailscale workload
+identity federation and the `tag:github-actions-menu` tag. Tailnet policy must
+permit that tag to reach only `100.65.157.38` on `tcp:22`. The federated
+identity must require GitHub's OIDC issuer, the `gytkk/menu` repository,
+`refs/heads/main`, and the deployment workflow, and must have writable
+`auth_keys` scope for the same tag. Store its non-secret client ID and audience
+as repository variables `TS_OAUTH_CLIENT_ID` and `TS_AUDIENCE`. The workflow
+pins the server's Ed25519 host key and serializes production deployments.
 
 Cloudflare Tunnel routing and the public hostname are managed separately in
 Cloudflare and are not configured by this flake. The transitional

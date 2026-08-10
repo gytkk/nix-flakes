@@ -31,6 +31,7 @@ in
     hashedPassword = "!";
     openssh.authorizedKeys.keys = [
       ''restrict,command="${deployCommand}",no-pty,no-agent-forwarding,no-port-forwarding,no-X11-forwarding,no-user-rc ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAz6TfmpUGb4lugITGkOzvPwEPYWiys6mcsvyqcyXZgP menu-deploy@pylv-sepia''
+      ''restrict,command="${deployCommand}",no-pty,no-agent-forwarding,no-port-forwarding,no-X11-forwarding,no-user-rc ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICEJZBeYjp2ypZhNs64IQJ7Lu0FCmI+pyZZlWrY/Cv6H menu-deploy-github-actions''
     ];
   };
 
