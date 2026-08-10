@@ -15,6 +15,9 @@ workspace_picker = ["prefix+shift+s"]
 navigate_workspace_up = "up"
 navigate_workspace_down = "down"
 
+# agent 간의 이동(picker)
+goto = ["prefix+shift+a"]
+
 [[keys.command]]
 key = "prefix+shift+n"
 type = "popup"
