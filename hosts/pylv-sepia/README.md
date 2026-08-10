@@ -107,9 +107,10 @@ identity federation and the `tag:github-actions-menu` tag. Tailnet policy must
 permit that tag to reach only `100.65.157.38` on `tcp:22`. The federated
 identity must require GitHub's OIDC issuer, the `gytkk/menu` repository,
 `refs/heads/main`, and the deployment workflow, and must have writable
-`auth_keys` scope for the same tag. Store its non-secret client ID and audience
-as repository variables `TS_OAUTH_CLIENT_ID` and `TS_AUDIENCE`. The workflow
-pins the server's Ed25519 host key and serializes production deployments.
+`auth_keys` scope for the same tag. The workflow pins the non-secret federated
+identity client ID and audience alongside the server's Ed25519 host key, and
+serializes production deployments. Keep only the CI SSH private key in a
+GitHub repository secret.
 
 Cloudflare Tunnel routing and the public hostname are managed separately in
 Cloudflare and are not configured by this flake. The transitional
