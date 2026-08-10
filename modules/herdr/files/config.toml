@@ -29,8 +29,8 @@ selected_dir="$(zoxide query -l | fzf --prompt='Workspace cwd> ')" || exit 0
 
 [theme]
 name = "vesper"
-
 auto_switch = false
+
 [theme.custom]
 overlay0 = "#ffffff"
 surface0 = "#2c313a"
