@@ -15,6 +15,10 @@ workspace_picker = ["prefix+shift+s"]
 navigate_workspace_up = "up"
 navigate_workspace_down = "down"
 
+# agent 간의 이동(즉시)
+previous_agent = "prefix+shift+comma"
+next_agent = "prefix+shift+period"
+
 # agent 간의 이동(picker)
 goto = ["prefix+shift+a"]
 
