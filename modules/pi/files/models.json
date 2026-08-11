@@ -1,0 +1,27 @@
+{
+  "providers": {
+    "databricks-logapne1": {
+      "baseUrl": "https://devsisters-logapne1.cloud.databricks.com/ai-gateway/mlflow/v1",
+      "api": "openai-completions",
+      "authHeader": true,
+      "apiKey": "!databricks auth token logapne1 -o json | jq -r '.access_token'",
+      "compat": {
+        "supportsStore": false,
+        "supportsDeveloperRole": false,
+        "supportsReasoningEffort": false,
+        "supportsStrictMode": false,
+        "maxTokensField": "max_tokens"
+      },
+      "models": [
+        {
+          "id": "system.ai.kimi-k3",
+          "name": "Kimi K3 via Databricks",
+          "reasoning": true,
+          "input": ["text", "image"],
+          "contextWindow": 1000000,
+          "maxTokens": 131072
+        }
+      ]
+    }
+  }
+}
