@@ -145,6 +145,39 @@ in
               fi
             }
 
+            # Remove the worktree holding a branch, then switch to it here.
+            gwt-switch() {
+              if [[ $# -ne 1 ]]; then
+                echo "Usage: gwt-switch <branch>" >&2
+                return 2
+              fi
+
+              local branch="$1"
+              local target_ref="refs/heads/$branch"
+              local current_path worktree_path candidate record
+
+              current_path="$(git rev-parse --show-toplevel 2>/dev/null)" || {
+                echo "gwt-switch: not inside a Git worktree" >&2
+                return 1
+              }
+
+              for record in "''${(@0)$(git worktree list --porcelain -z)}"; do
+                case "$record" in
+                  "worktree "*) candidate="''${record#worktree }" ;;
+                  "branch $target_ref")
+                    worktree_path="$candidate"
+                    break
+                    ;;
+                esac
+              done
+
+              if [[ -n "$worktree_path" && "$worktree_path" != "$current_path" ]]; then
+                git worktree remove "$worktree_path" || return
+              fi
+
+              git switch "$branch"
+            }
+
             # History prefix search with up/down arrows
             autoload -U up-line-or-beginning-search down-line-or-beginning-search
             zle -N up-line-or-beginning-search
