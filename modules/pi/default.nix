@@ -32,6 +32,8 @@ in
     home.file.".pi/agent/themes/claude-like.json".source = mkSymlink "files/themes/claude-like.json";
     home.file.".pi/agent/extensions/codex-fast-mode.ts".source =
       mkSymlink "files/extensions/codex-fast-mode.ts";
+    home.file.".pi/agent/extensions/codex-usage.ts".source =
+      mkSymlink "files/extensions/codex-usage.ts";
     home.file.".pi/agent/extensions/hardware-cursor-only.ts".source =
       mkSymlink "files/extensions/hardware-cursor-only.ts";
     home.file.".pi/agent/extensions/subagent/config.json".source =

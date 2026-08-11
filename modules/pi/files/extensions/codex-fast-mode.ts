@@ -5,6 +5,7 @@ import {
 } from "@earendil-works/pi-coding-agent";
 import { truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
 import { sep } from "node:path";
+import { CODEX_USAGE_STATUS_KEY } from "./codex-usage";
 
 const STATE_TYPE = "codex-fast-mode";
 const DEFAULT_ENABLED = true;
@@ -142,6 +143,10 @@ export default function (pi: ExtensionAPI) {
           const branch = footerData.getGitBranch();
           if (branch) sections.push(sanitizeStatusText(branch));
 
+          const extensionStatuses = footerData.getExtensionStatuses();
+          const codexUsageStatus = extensionStatuses.get(
+            CODEX_USAGE_STATUS_KEY,
+          );
           const modelParts = [sanitizeStatusText(ctx.model?.id ?? "no-model")];
           if (ctx.model?.reasoning) {
             modelParts.push(
@@ -157,7 +162,22 @@ export default function (pi: ExtensionAPI) {
             );
           }
           const modelSeparator = ` ${styleStatus("·", CLAUDE_ANSI.dim)} `;
-          const modelStatus = modelParts.join(modelSeparator);
+          const modelDetails = modelParts.join(modelSeparator);
+          const modelStatusWithUsage =
+            supportsFastMode(ctx) && codexUsageStatus
+              ? [
+                  styleStatus(
+                    sanitizeStatusText(codexUsageStatus),
+                    CLAUDE_ANSI.green,
+                  ),
+                  styleStatus("|", CLAUDE_ANSI.dim),
+                  modelDetails,
+                ].join(" ")
+              : modelDetails;
+          const modelStatus =
+            visibleWidth(modelStatusWithUsage) + 2 <= contentWidth
+              ? modelStatusWithUsage
+              : modelDetails;
 
           const contextUsage = ctx.getContextUsage();
           const percent = contextUsage?.percent;
@@ -183,7 +203,8 @@ export default function (pi: ExtensionAPI) {
             `${styleStatus("tokens", CLAUDE_ANSI.dim)} ${styleStatus(`↓${formatTokens(totals.input)}`, CLAUDE_ANSI.boldBlue)} ${styleStatus(`↑${formatTokens(totals.output)}`, CLAUDE_ANSI.brightOrange)}`,
           );
 
-          for (const status of footerData.getExtensionStatuses().values()) {
+          for (const [key, status] of extensionStatuses) {
+            if (key === CODEX_USAGE_STATUS_KEY) continue;
             const styled = styleExtensionStatus(status);
             if (styled) sections.push(styled);
           }

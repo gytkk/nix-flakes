@@ -127,6 +127,25 @@ not receive the priority service tier. `PI_SUBAGENT_PARENT_SESSION` is also set
 in the parent UI session for permission forwarding, so it must not be used as
 the child-process signal. Parent Pi sessions continue to use fast mode normally.
 
+### Codex usage
+
+`files/extensions/codex-usage.ts` provides `/codex-usage`, which fetches the
+current account-level Codex rate-limit windows with Pi's existing
+`openai-codex` OAuth credential. It reports remaining capacity rather than
+consumed capacity and formats reset timestamps in the local timezone.
+
+For parent sessions using an `openai-codex` model, the extension refreshes after
+the agent settles and publishes the weekly remaining percentage and reset time
+to the custom footer immediately left of the model. The status is hidden for
+other providers and for subagent child processes. Automatic refresh failures
+are silent and do not interrupt Pi; an explicit `/codex-usage` reports errors.
+OAuth tokens are used only for the request and are never persisted or logged by
+the extension.
+
+The usage request targets ChatGPT's internal Codex usage endpoint. Its schema is
+not a public API, so review this extension if OpenAI changes Codex usage
+reporting or authentication.
+
 ### Hardware cursor rendering
 
 `files/extensions/hardware-cursor-only.ts` removes Pi's reverse-video software
