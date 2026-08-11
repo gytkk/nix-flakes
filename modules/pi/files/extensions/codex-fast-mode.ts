@@ -5,11 +5,12 @@ import {
 } from "@earendil-works/pi-coding-agent";
 import { truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
 import { sep } from "node:path";
-import { CODEX_USAGE_STATUS_KEY } from "./codex-usage";
 
 const STATE_TYPE = "codex-fast-mode";
+const CODEX_USAGE_STATUS_KEY = "codex-usage";
 const DEFAULT_ENABLED = true;
 const HORIZONTAL_PADDING = 1;
+const MIN_LEFT_WIDTH_WITH_USAGE = 48;
 const ANSI_RESET = "\x1b[0m";
 
 const CLAUDE_ANSI = {
@@ -174,10 +175,15 @@ export default function (pi: ExtensionAPI) {
                   modelDetails,
                 ].join(" ")
               : modelDetails;
-          const modelStatus =
-            visibleWidth(modelStatusWithUsage) + 2 <= contentWidth
-              ? modelStatusWithUsage
-              : modelDetails;
+          const hasRoomForUsage =
+            codexUsageStatus !== undefined &&
+            visibleWidth(modelStatusWithUsage) +
+              MIN_LEFT_WIDTH_WITH_USAGE +
+              2 <=
+              contentWidth;
+          const modelStatus = hasRoomForUsage
+            ? modelStatusWithUsage
+            : modelDetails;
 
           const contextUsage = ctx.getContextUsage();
           const percent = contextUsage?.percent;

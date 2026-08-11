@@ -135,10 +135,13 @@ current account-level Codex rate-limit windows with Pi's existing
 consumed capacity and formats reset timestamps in the local timezone.
 
 For parent sessions using an `openai-codex` model, the extension refreshes after
-the agent settles and publishes the weekly remaining percentage and reset time
-to the custom footer immediately left of the model. The status is hidden for
-other providers and for subagent child processes. Automatic refresh failures
-are silent and do not interrupt Pi; an explicit `/codex-usage` reports errors.
+the agent settles and publishes a compact weekly remaining percentage and
+reset time (`W97% ↻08/18 09:29`) to the custom footer immediately left of the
+model. The footer keeps a single rendered line and hides the usage segment when
+the terminal is too narrow to preserve the existing left-side status content.
+The status is also hidden for other providers and for subagent child processes.
+Automatic refresh failures are silent and do not interrupt Pi; an explicit
+`/codex-usage` reports errors.
 OAuth tokens are used only for the request and are never persisted or logged by
 the extension.
 

@@ -25,7 +25,9 @@ describe("Codex usage parsing", () => {
     expect(snapshot.planType).toBe("prolite");
     expect(snapshot.weekly?.usedPercent).toBe(41);
     expect(snapshot.weekly?.remainingPercent).toBe(59);
-    expect(formatWeeklyStatus(snapshot)).toContain("week 59% left");
+    expect(formatWeeklyStatus(snapshot)).toMatch(
+      /^W59% ↻\d{2}\/\d{2} \d{2}:\d{2}$/,
+    );
   });
 
   test("finds the weekly window when it is secondary", () => {
@@ -48,6 +50,7 @@ describe("Codex usage parsing", () => {
     expect(snapshot.weekly?.remainingPercent).toBe(87.5);
     expect(formatUsageSummary(snapshot)).toContain("5h: 75% left");
     expect(formatUsageSummary(snapshot)).toContain("Weekly: 87.5% left");
+    expect(formatUsageSummary(snapshot)).not.toContain("\n");
   });
 
   test("clamps provider percentages before calculating remaining capacity", () => {

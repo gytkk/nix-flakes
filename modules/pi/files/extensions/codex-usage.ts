@@ -125,14 +125,14 @@ export function formatWeeklyStatus(
   const weekly = snapshot.weekly;
   if (!weekly) return undefined;
   const remaining = formatRemainingPercent(weekly.remainingPercent);
-  return `week ${remaining}% left · reset ${formatResetTime(weekly.resetsAt)}`;
+  return `W${remaining}% ↻${formatResetTime(weekly.resetsAt)}`;
 }
 
 export function formatUsageSummary(snapshot: CodexUsageSnapshot): string {
   const heading = snapshot.planType
     ? `Codex usage (${snapshot.planType})`
     : "Codex usage";
-  return [heading, ...snapshot.windows.map(formatWindow)].join("\n");
+  return [heading, ...snapshot.windows.map(formatWindow)].join(" · ");
 }
 
 function extractAccountId(accessToken: string): string {
