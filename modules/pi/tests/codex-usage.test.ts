@@ -26,7 +26,7 @@ describe("Codex usage parsing", () => {
     expect(snapshot.weekly?.usedPercent).toBe(41);
     expect(snapshot.weekly?.remainingPercent).toBe(59);
     expect(formatWeeklyStatus(snapshot)).toMatch(
-      /^W59% ↻\d{2}\/\d{2} \d{2}:\d{2}$/,
+      /^#####----- 59% ⏳ \d{2}\/\d{2} \d{2}:\d{2}$/,
     );
   });
 
@@ -75,6 +75,8 @@ describe("Codex usage parsing", () => {
 
     expect(over.weekly?.remainingPercent).toBe(0);
     expect(under.weekly?.remainingPercent).toBe(100);
+    expect(formatWeeklyStatus(over)).toStartWith("---------- 0% ⏳");
+    expect(formatWeeklyStatus(under)).toStartWith("########## 100% ⏳");
   });
 
   test("rejects responses without usable rate-limit windows", () => {

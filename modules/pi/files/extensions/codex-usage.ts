@@ -125,7 +125,9 @@ export function formatWeeklyStatus(
   const weekly = snapshot.weekly;
   if (!weekly) return undefined;
   const remaining = formatRemainingPercent(weekly.remainingPercent);
-  return `W${remaining}% ↻${formatResetTime(weekly.resetsAt)}`;
+  const filled = Math.floor((weekly.remainingPercent * 10) / 100);
+  const bar = "#".repeat(filled) + "-".repeat(10 - filled);
+  return `${bar} ${remaining}% ⏳ ${formatResetTime(weekly.resetsAt)}`;
 }
 
 export function formatUsageSummary(snapshot: CodexUsageSnapshot): string {
