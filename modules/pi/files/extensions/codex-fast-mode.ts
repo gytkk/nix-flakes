@@ -18,6 +18,7 @@ const CLAUDE_ANSI = {
   green: "\x1b[32m",
   yellow: "\x1b[33m",
   cyan: "\x1b[36m",
+  white: "\x1b[37m",
   dim: "\x1b[2m",
   boldBlue: "\x1b[1;34m",
   brightGreen: "\x1b[1;38;2;134;239;172m",
@@ -116,6 +117,17 @@ function styleExtensionStatus(status: string): string {
   return sanitized;
 }
 
+function styleCodexUsageStatus(status: string): string {
+  const sanitized = sanitizeStatusText(status);
+  const resetStart = sanitized.indexOf("⏳");
+  if (resetStart < 0) return styleStatus(sanitized, CLAUDE_ANSI.green);
+
+  return (
+    styleStatus(sanitized.slice(0, resetStart), CLAUDE_ANSI.green) +
+    styleStatus(sanitized.slice(resetStart), CLAUDE_ANSI.white)
+  );
+}
+
 export default function (pi: ExtensionAPI) {
   let enabled = DEFAULT_ENABLED;
   let requestRender: (() => void) | undefined;
@@ -167,10 +179,7 @@ export default function (pi: ExtensionAPI) {
           const modelStatusWithUsage =
             supportsFastMode(ctx) && codexUsageStatus
               ? [
-                  styleStatus(
-                    sanitizeStatusText(codexUsageStatus),
-                    CLAUDE_ANSI.green,
-                  ),
+                  styleCodexUsageStatus(codexUsageStatus),
                   styleStatus("|", CLAUDE_ANSI.dim),
                   modelDetails,
                 ].join(" ")

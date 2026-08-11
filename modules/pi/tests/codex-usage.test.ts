@@ -26,7 +26,7 @@ describe("Codex usage parsing", () => {
     expect(snapshot.weekly?.usedPercent).toBe(41);
     expect(snapshot.weekly?.remainingPercent).toBe(59);
     expect(formatWeeklyStatus(snapshot)).toMatch(
-      /^#####----- 59% ⏳ \d{2}\/\d{2} \d{2}:\d{2}$/,
+      /^#####----- 59% ⏳\d{2}\/\d{2} \d{2}:\d{2}$/,
     );
   });
 
