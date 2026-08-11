@@ -127,7 +127,7 @@ export function formatWeeklyStatus(
   const remaining = formatRemainingPercent(weekly.remainingPercent);
   const filled = Math.floor((weekly.remainingPercent * 10) / 100);
   const bar = "#".repeat(filled) + "-".repeat(10 - filled);
-  return `${bar} ${remaining}% ⏳ ${formatResetTime(weekly.resetsAt)}`;
+  return `${bar} ${remaining}% ⏳${formatResetTime(weekly.resetsAt)}`;
 }
 
 export function formatUsageSummary(snapshot: CodexUsageSnapshot): string {
@@ -190,7 +190,7 @@ async function fetchUsage(ctx: ExtensionContext): Promise<CodexUsageSnapshot> {
   return parseCodexUsagePayload((await response.json()) as unknown);
 }
 
-export default function (pi: ExtensionAPI): void {
+export default function(pi: ExtensionAPI): void {
   let cache: CachedSnapshot | undefined;
   let refreshPromise: Promise<CodexUsageSnapshot> | undefined;
   let sessionActive = false;
