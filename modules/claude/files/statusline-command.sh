@@ -95,7 +95,7 @@ if [ -n "$weekly_remaining" ]; then
   WEEKLY_EMPTY=$((10 - weekly_filled))
   WEEKLY_BAR=""
   if [ "$weekly_filled" -gt 0 ]; then
-    WEEKLY_BAR=$(printf "%${weekly_filled}s" | tr ' ' '#')
+    WEEKLY_BAR="${GREEN}$(printf "%${weekly_filled}s" | tr ' ' '#')${RESET}"
   fi
   if [ "$WEEKLY_EMPTY" -gt 0 ]; then
     WEEKLY_BAR="${WEEKLY_BAR}${DIM}$(printf "%${WEEKLY_EMPTY}s" | tr ' ' '-')${RESET}"
