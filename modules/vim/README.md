@@ -23,6 +23,7 @@ This module configures Neovim as the primary editor with a modern Lua-based setu
 - `nvim-treesitter` syntax parsing for the main languages used in this repository
 - `conform.nvim` formatting on save, including `nixfmt`, `prettier`, `rustfmt`, `gofmt`, and `ruff_format`
 - `gitsigns.nvim`, `lualine.nvim`, `flash.nvim`, `which-key.nvim`, `trouble.nvim`, and `markview.nvim`
+- Native diagnostics use color-coded filled-circle icons, highlighted line numbers, current-line inline messages, and rounded detail popups
 - Markdown rendering uses Markview's in-buffer preview, hybrid editing, and split-view support
 
 ## Minuet
@@ -67,6 +68,10 @@ EDITOR=vim agx -e openai-api-key.age
 - `gb`: jump back in the jumplist
 - `<leader>cR`: rename current file with LSP-aware updates
 - `<leader>ud`: toggle diagnostics
+- `[d` / `]d`: jump to the previous or next diagnostic
+- `<leader>d`: focus current-line diagnostics in a detailed popup (`q` or `<Esc>` closes it)
+- `<leader>xX`: show current-buffer diagnostics in Trouble
+- `<leader>xx`: show workspace diagnostics in Trouble
 - `<leader>uh`: toggle LSP inlay hints
 - `<leader>ul`: toggle line numbers
 - `<leader>uS`: toggle smooth scrolling

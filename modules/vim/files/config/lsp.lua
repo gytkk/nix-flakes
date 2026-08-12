@@ -15,14 +15,74 @@ local lspServers = {
   "ty",
 }
 
+local diagnosticIcons = {
+  [vim.diagnostic.severity.ERROR] = "●",
+  [vim.diagnostic.severity.WARN] = "●",
+  [vim.diagnostic.severity.INFO] = "●",
+  [vim.diagnostic.severity.HINT] = "●",
+}
+
+local diagnosticHighlights = {
+  [vim.diagnostic.severity.ERROR] = "DiagnosticError",
+  [vim.diagnostic.severity.WARN] = "DiagnosticWarn",
+  [vim.diagnostic.severity.INFO] = "DiagnosticInfo",
+  [vim.diagnostic.severity.HINT] = "DiagnosticHint",
+}
+
+local function openLineDiagnostics()
+  local bufnr, winid = vim.diagnostic.open_float({
+    scope = "line",
+    focusable = true,
+  })
+  if not bufnr or not winid or not vim.api.nvim_win_is_valid(winid) then
+    return
+  end
+
+  vim.keymap.set("n", "<Esc>", function()
+    if vim.api.nvim_win_is_valid(winid) then
+      vim.api.nvim_win_close(winid, true)
+    end
+  end, { buffer = bufnr, silent = true, desc = "Close Diagnostics" })
+  vim.api.nvim_set_current_win(winid)
+end
+
 local function setupLspDiagnostics()
   vim.diagnostic.config({
-    virtual_lines = { current_line = true },
+    virtual_lines = false,
+    virtual_text = {
+      current_line = true,
+      spacing = 2,
+      virt_text_pos = "eol",
+      prefix = function(diagnostic)
+        return diagnosticIcons[diagnostic.severity] or "●"
+      end,
+      suffix = function(diagnostic)
+        return diagnostic.code and (" [%s]"):format(diagnostic.code) or ""
+      end,
+    },
+    signs = {
+      text = diagnosticIcons,
+      numhl = diagnosticHighlights,
+    },
+    underline = true,
+    update_in_insert = false,
+    severity_sort = true,
+    float = {
+      border = "rounded",
+      header = "",
+      source = "if_many",
+      severity_sort = true,
+      prefix = function(diagnostic)
+        local icon = diagnosticIcons[diagnostic.severity] or "●"
+        local highlight = diagnosticHighlights[diagnostic.severity] or "NormalFloat"
+        return (" %s "):format(icon), highlight
+      end,
+    },
   })
 
   vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Previous Diagnostic" })
   vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Next Diagnostic" })
-  vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, { desc = "Line Diagnostics" })
+  vim.keymap.set("n", "<leader>d", openLineDiagnostics, { desc = "Line Diagnostics" })
   vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Diagnostics List" })
 end
 
