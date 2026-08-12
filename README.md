@@ -291,10 +291,11 @@ Resources should supplement the tools instead of expanding the tool count:
 - `Ctrl+a`, then `Shift+n`, opens a popup that selects a previously visited
   directory with `zoxide` and `fzf`, then creates and focuses a workspace there.
 - `Ctrl+Shift+Tab` or `Ctrl+Tab` focuses the previous or next workspace.
-  `Ctrl+a`, then `Shift+1..9` focuses a workspace by index on every platform;
-  `Cmd+1..9` does the same in Ghostty on macOS, and `Alt+1..9` does the same in
-  Windows Terminal on WSL. The terminal configs forward these shortcuts as
-  distinct Kitty keyboard sequences so Herdr receives every modifier.
+  `Cmd+1..9` focuses a workspace by index in Ghostty on macOS, and `Alt+1..9`
+  does the same in Windows Terminal on WSL. `Ctrl+a`, then `Shift+1..9` focuses
+  the corresponding visible agent. The terminal configs forward the direct
+  workspace shortcuts as distinct Kitty keyboard sequences so Herdr receives
+  every modifier.
 - On WSL, the `windows-terminal` module merges the corresponding `sendInput`
   actions into the existing Windows Terminal `settings.json` during Home Manager
   activation.
