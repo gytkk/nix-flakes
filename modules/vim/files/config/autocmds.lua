@@ -14,13 +14,19 @@ local function refreshReloadedBuffer(buf)
     vim.cmd("silent! syntax sync fromstart")
   end)
 
-  if vim.api.nvim_get_current_buf() == buf then
-    vim.schedule(function()
-      if vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_get_current_buf() == buf then
-        vim.cmd("redraw!")
-      end
-    end)
-  end
+  vim.schedule(function()
+    if not vim.api.nvim_buf_is_valid(buf) then return end
+
+    -- Drop extmarks anchored to the pre-reload text and request fresh hints.
+    if vim.lsp.inlay_hint.is_enabled({ bufnr = buf }) then
+      vim.lsp.inlay_hint.enable(false, { bufnr = buf })
+      vim.lsp.inlay_hint.enable(true, { bufnr = buf })
+    end
+
+    if vim.api.nvim_get_current_buf() == buf then
+      vim.cmd("redraw!")
+    end
+  end)
 end
 
 function M.setup()
