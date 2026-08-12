@@ -15,6 +15,78 @@
       },
       "id": "User.herdrPreviousWorkspace",
       "name": "Herdr: previous workspace"
+    },
+    {
+      "command": {
+        "action": "sendInput",
+        "input": "\u001b[49;3u"
+      },
+      "id": "User.herdrWorkspace1",
+      "name": "Herdr: workspace 1"
+    },
+    {
+      "command": {
+        "action": "sendInput",
+        "input": "\u001b[50;3u"
+      },
+      "id": "User.herdrWorkspace2",
+      "name": "Herdr: workspace 2"
+    },
+    {
+      "command": {
+        "action": "sendInput",
+        "input": "\u001b[51;3u"
+      },
+      "id": "User.herdrWorkspace3",
+      "name": "Herdr: workspace 3"
+    },
+    {
+      "command": {
+        "action": "sendInput",
+        "input": "\u001b[52;3u"
+      },
+      "id": "User.herdrWorkspace4",
+      "name": "Herdr: workspace 4"
+    },
+    {
+      "command": {
+        "action": "sendInput",
+        "input": "\u001b[53;3u"
+      },
+      "id": "User.herdrWorkspace5",
+      "name": "Herdr: workspace 5"
+    },
+    {
+      "command": {
+        "action": "sendInput",
+        "input": "\u001b[54;3u"
+      },
+      "id": "User.herdrWorkspace6",
+      "name": "Herdr: workspace 6"
+    },
+    {
+      "command": {
+        "action": "sendInput",
+        "input": "\u001b[55;3u"
+      },
+      "id": "User.herdrWorkspace7",
+      "name": "Herdr: workspace 7"
+    },
+    {
+      "command": {
+        "action": "sendInput",
+        "input": "\u001b[56;3u"
+      },
+      "id": "User.herdrWorkspace8",
+      "name": "Herdr: workspace 8"
+    },
+    {
+      "command": {
+        "action": "sendInput",
+        "input": "\u001b[57;3u"
+      },
+      "id": "User.herdrWorkspace9",
+      "name": "Herdr: workspace 9"
     }
   ],
   "keybindings": [
@@ -25,6 +97,42 @@
     {
       "id": "User.herdrPreviousWorkspace",
       "keys": "ctrl+shift+tab"
+    },
+    {
+      "id": "User.herdrWorkspace1",
+      "keys": "alt+1"
+    },
+    {
+      "id": "User.herdrWorkspace2",
+      "keys": "alt+2"
+    },
+    {
+      "id": "User.herdrWorkspace3",
+      "keys": "alt+3"
+    },
+    {
+      "id": "User.herdrWorkspace4",
+      "keys": "alt+4"
+    },
+    {
+      "id": "User.herdrWorkspace5",
+      "keys": "alt+5"
+    },
+    {
+      "id": "User.herdrWorkspace6",
+      "keys": "alt+6"
+    },
+    {
+      "id": "User.herdrWorkspace7",
+      "keys": "alt+7"
+    },
+    {
+      "id": "User.herdrWorkspace8",
+      "keys": "alt+8"
+    },
+    {
+      "id": "User.herdrWorkspace9",
+      "keys": "alt+9"
     }
   ]
 }

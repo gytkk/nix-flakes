@@ -8,7 +8,7 @@ new_workspace = ""
 # workspace 간의 이동(즉시)
 previous_workspace = "ctrl+shift+tab"
 next_workspace = "ctrl+tab"
-switch_workspace = "prefix+shift+1..9"
+switch_workspace = ["prefix+shift+1..9", "cmd+1..9", "alt+1..9"]
 
 # workspace 간의 이동(picker)
 workspace_picker = ["prefix+shift+s"]

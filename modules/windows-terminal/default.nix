@@ -34,14 +34,17 @@ in
             (.actions // [] | map(select(
               .id != "User.herdrNextWorkspace"
               and .id != "User.herdrPreviousWorkspace"
+              and (((.id // "") | startswith("User.herdrWorkspace")) | not)
             ))) + $managed[0].actions
           )
           | .keybindings = (
             (.keybindings // [] | map(select(
               .id != "User.herdrNextWorkspace"
               and .id != "User.herdrPreviousWorkspace"
+              and (((.id // "") | startswith("User.herdrWorkspace")) | not)
               and ((.keys // "") | ascii_downcase) != "ctrl+tab"
               and ((.keys // "") | ascii_downcase) != "ctrl+shift+tab"
+              and ((((.keys // "") | ascii_downcase | test("^alt\\+[1-9]$"))) | not)
             ))) + $managed[0].keybindings
           )
         ' "$settings" > "$tmp"; then
