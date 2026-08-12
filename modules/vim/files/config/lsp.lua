@@ -49,17 +49,7 @@ end
 local function setupLspDiagnostics()
   vim.diagnostic.config({
     virtual_lines = false,
-    virtual_text = {
-      current_line = true,
-      spacing = 2,
-      virt_text_pos = "eol",
-      prefix = function(diagnostic)
-        return diagnosticIcons[diagnostic.severity] or "●"
-      end,
-      suffix = function(diagnostic)
-        return diagnostic.code and (" [%s]"):format(diagnostic.code) or ""
-      end,
-    },
+    virtual_text = false,
     signs = {
       text = diagnosticIcons,
       numhl = diagnosticHighlights,

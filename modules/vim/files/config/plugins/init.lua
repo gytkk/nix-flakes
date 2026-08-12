@@ -15,6 +15,7 @@ return {
   completion.minuet,
   completion.blink,
   require("config.lsp"),
+  ui.tiny_diagnostics,
   ui.lualine,
   require("config.plugins.git"),
   editing.conform,
