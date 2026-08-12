@@ -114,6 +114,13 @@ M.tiny_diagnostics = {
     preset = "modern",
     options = {
       use_icons_from_diagnostic = true,
+      add_messages = {
+        show_multiple_glyphs = false,
+      },
+      show_source = {
+        enabled = true,
+        if_many = true,
+      },
     },
   },
 }
