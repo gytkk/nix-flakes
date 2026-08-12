@@ -18,7 +18,6 @@ const CLAUDE_ANSI = {
   green: "\x1b[32m",
   yellow: "\x1b[33m",
   cyan: "\x1b[36m",
-  white: "\x1b[37m",
   dim: "\x1b[2m",
   boldBlue: "\x1b[1;34m",
   brightGreen: "\x1b[1;38;2;134;239;172m",
@@ -124,7 +123,7 @@ function styleCodexUsageStatus(status: string): string {
 
   return (
     styleStatus(sanitized.slice(0, resetStart), CLAUDE_ANSI.green) +
-    styleStatus(sanitized.slice(resetStart), CLAUDE_ANSI.white)
+    styleStatus(sanitized.slice(resetStart), CLAUDE_ANSI.dim)
   );
 }
 
