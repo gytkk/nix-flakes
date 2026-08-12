@@ -37,15 +37,9 @@ M.conform = {
   },
 }
 
-M.rendermd = {
-  "MeanderingProgrammer/render-markdown.nvim",
-  dependencies = { "nvim-treesitter/nvim-treesitter", "nvim-tree/nvim-web-devicons" },
-  ft = { "markdown" },
-  opts = {
-    sign = {
-      enabled = false,
-    },
-  },
+M.markview = {
+  "OXY2DEV/markview.nvim",
+  lazy = false,
 }
 
 return M
