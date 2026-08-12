@@ -12,6 +12,18 @@ input_tokens=$(echo "$input" | jq -r '.context_window.total_input_tokens // empt
 output_tokens=$(echo "$input" | jq -r '.context_window.total_output_tokens // empty')
 lines_added=$(echo "$input" | jq -r '.cost.total_lines_added // empty')
 lines_removed=$(echo "$input" | jq -r '.cost.total_lines_removed // empty')
+IFS=$'\t' read -r weekly_remaining weekly_filled weekly_reset < <(
+  echo "$input" | jq -r '
+    .rate_limits.seven_day as $weekly
+    | select(
+        ($weekly.used_percentage | type) == "number"
+        and ($weekly.resets_at | type) == "number"
+      )
+    | ([([100 - $weekly.used_percentage, 0] | max), 100] | min) as $remaining
+    | [($remaining * 10 | round / 10), ($remaining / 10 | floor), $weekly.resets_at]
+    | @tsv
+  '
+)
 
 # ANSI colors
 GREEN='\033[32m'
@@ -75,6 +87,26 @@ format_tokens() {
 
 # Section separator
 SEP=" ${DIM}|${RESET} "
+
+# Weekly Claude.ai subscription limit (remaining percentage and reset time)
+weekly_info=""
+weekly_plain=""
+if [ -n "$weekly_remaining" ]; then
+  WEEKLY_EMPTY=$((10 - weekly_filled))
+  WEEKLY_BAR=""
+  if [ "$weekly_filled" -gt 0 ]; then
+    WEEKLY_BAR=$(printf "%${weekly_filled}s" | tr ' ' '#')
+  fi
+  if [ "$WEEKLY_EMPTY" -gt 0 ]; then
+    WEEKLY_BAR="${WEEKLY_BAR}${DIM}$(printf "%${WEEKLY_EMPTY}s" | tr ' ' '-')${RESET}"
+  fi
+
+  if weekly_reset_at=$(date -r "$weekly_reset" '+%m/%d %H:%M' 2>/dev/null) ||
+    weekly_reset_at=$(date -d "@$weekly_reset" '+%m/%d %H:%M' 2>/dev/null); then
+    weekly_info="${WEEKLY_BAR} ${weekly_remaining}% ${DIM}⏳${weekly_reset_at}${RESET}"
+    weekly_plain="$(printf "%${weekly_filled}s" | tr ' ' '#')$(printf "%${WEEKLY_EMPTY}s" | tr ' ' '-') ${weekly_remaining}% ⏳${weekly_reset_at}"
+  fi
+fi
 
 # Context progress bar (colored = for filled, dim . for empty)
 context_info=""
@@ -152,11 +184,18 @@ compose_left() {
 }
 compose_left
 
-right_output="$model"
-right_plain="$model"
+model_output="$model"
+model_plain="$model"
 if [ -n "$effort" ]; then
-  right_output="${right_output} ${DIM}· ${RESET} ${BRIGHT_ORANGE}${effort}${RESET}"
-  right_plain="${right_plain} · ${effort}"
+  model_output="${model_output} ${DIM}· ${RESET} ${BRIGHT_ORANGE}${effort}${RESET}"
+  model_plain="${model_plain} · ${effort}"
+fi
+
+right_output="$model_output"
+right_plain="$model_plain"
+if [ -n "$weekly_info" ]; then
+  right_output="${weekly_info}${SEP}${model_output}"
+  right_plain="${weekly_plain} | ${model_plain}"
 fi
 
 # Claude Code exports COLUMNS for statusline sizing. tput cannot read the width
@@ -171,6 +210,11 @@ if [[ "$columns" =~ ^[0-9]+$ ]] && [ "$columns" -gt 0 ]; then
     section_count=$((section_count - 1))
     compose_left
   done
+
+  if [ "${#right_plain}" -ge "$columns" ] && [ -n "$weekly_info" ]; then
+    right_output="$model_output"
+    right_plain="$model_plain"
+  fi
 
   if [ $((${#left_plain} + ${#right_plain} + 2)) -le "$columns" ]; then
     padding=$((columns - ${#left_plain} - ${#right_plain}))
