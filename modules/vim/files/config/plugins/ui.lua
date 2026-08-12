@@ -117,6 +117,10 @@ M.tiny_diagnostics = {
       add_messages = {
         show_multiple_glyphs = false,
       },
+      multilines = {
+        enabled = true,
+        trim_whitespaces = true,
+      },
       show_source = {
         enabled = true,
         if_many = true,
