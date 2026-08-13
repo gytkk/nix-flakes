@@ -22,8 +22,8 @@ This module configures Neovim as the primary editor with a modern Lua-based setu
 - Built-in Neovim LSP configuration for Nix, Go, Rust, TypeScript, HTML, CSS, JSON, Lua, shell, Terraform, YAML, Markdown, TOML, and Python via `ty`
 - `nvim-treesitter` syntax parsing for the main languages used in this repository
 - `conform.nvim` formatting on save, including `nixfmt`, `prettier`, `rustfmt`, `gofmt`, and `ruff_format`
-- `gitsigns.nvim`, `lualine.nvim`, `flash.nvim`, `which-key.nvim`, `trouble.nvim`, `tiny-inline-diagnostic.nvim`, and `markview.nvim`
-- Diagnostics use Tiny Inline's modern preset with multiline messages, single color-coded circle icons, conditional source labels, highlighted line numbers, and rounded detail popups
+- `gitsigns.nvim`, `lualine.nvim`, `flash.nvim`, `which-key.nvim`, `trouble.nvim`, and `markview.nvim`
+- Native diagnostics show a color-coded circle and the current-line message directly after the code
 - Markdown rendering uses Markview's in-buffer preview, hybrid editing, and split-view support
 
 ## Minuet
@@ -69,7 +69,7 @@ EDITOR=vim agx -e openai-api-key.age
 - `<leader>cR`: rename current file with LSP-aware updates
 - `<leader>ud`: toggle diagnostics
 - `[d` / `]d`: jump to the previous or next diagnostic
-- `<leader>d`: focus current-line diagnostics in a detailed popup (`q` or `<Esc>` closes it)
+- `<leader>d`: toggle all diagnostics on the current line
 - `<leader>xX`: show current-buffer diagnostics in Trouble
 - `<leader>xx`: show workspace diagnostics in Trouble
 - `<leader>uh`: toggle LSP inlay hints

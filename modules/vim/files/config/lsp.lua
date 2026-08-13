@@ -29,27 +29,28 @@ local diagnosticHighlights = {
   [vim.diagnostic.severity.HINT] = "DiagnosticHint",
 }
 
-local function openLineDiagnostics()
-  local bufnr, winid = vim.diagnostic.open_float({
-    scope = "line",
-    focusable = true,
-  })
-  if not bufnr or not winid or not vim.api.nvim_win_is_valid(winid) then
+local lineDiagnosticWin
+
+local function toggleLineDiagnostics()
+  if lineDiagnosticWin and vim.api.nvim_win_is_valid(lineDiagnosticWin) then
+    vim.api.nvim_win_close(lineDiagnosticWin, true)
+    lineDiagnosticWin = nil
     return
   end
 
-  vim.keymap.set("n", "<Esc>", function()
-    if vim.api.nvim_win_is_valid(winid) then
-      vim.api.nvim_win_close(winid, true)
-    end
-  end, { buffer = bufnr, silent = true, desc = "Close Diagnostics" })
-  vim.api.nvim_set_current_win(winid)
+  local _, winid = vim.diagnostic.open_float({ scope = "line" })
+  lineDiagnosticWin = winid
 end
 
 local function setupLspDiagnostics()
   vim.diagnostic.config({
     virtual_lines = false,
-    virtual_text = false,
+    virtual_text = {
+      current_line = true,
+      spacing = 2,
+      prefix = "●",
+      virt_text_pos = "eol",
+    },
     signs = {
       text = diagnosticIcons,
       numhl = diagnosticHighlights,
@@ -57,22 +58,11 @@ local function setupLspDiagnostics()
     underline = true,
     update_in_insert = false,
     severity_sort = true,
-    float = {
-      border = "rounded",
-      header = "",
-      source = "if_many",
-      severity_sort = true,
-      prefix = function(diagnostic)
-        local icon = diagnosticIcons[diagnostic.severity] or "●"
-        local highlight = diagnosticHighlights[diagnostic.severity] or "NormalFloat"
-        return (" %s "):format(icon), highlight
-      end,
-    },
   })
 
   vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Previous Diagnostic" })
   vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Next Diagnostic" })
-  vim.keymap.set("n", "<leader>d", openLineDiagnostics, { desc = "Line Diagnostics" })
+  vim.keymap.set("n", "<leader>d", toggleLineDiagnostics, { desc = "Toggle Line Diagnostics" })
   vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Diagnostics List" })
 end
 
