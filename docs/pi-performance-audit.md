@@ -238,20 +238,17 @@ Subagent 기능을 유지하면서 성능을 개선하려면 extension을 삭제
 규칙으로 통합하고, Pi와 Codex의 중복 skill 및 Pi의 필수 routing 규칙을 제거했다.
 코딩 규율을 유지하면서 별도 skill `read` 라운드와 에이전트별 동작 차이를 없앴다.
 
-### 4. Always-on instructions contain duplication
+### 4. Always-on instruction duplication was removed
 
 **Confidence:** high.
 
-`modules/pi/files/SYSTEM_PROMPT.md`와 글로벌 `AGENTS.md`는 조사, 최소 변경, 사용자
-작업 보존, 파괴적 명령 금지, 검증, 최종 보고 규칙을 반복한다.
+이전에는 Pi의 system prompt 추가 파일과 글로벌 `AGENTS.md`가 사용자 작업 보존,
+승인 경계, 근거, 검증, 최종 보고 규칙을 반복했다. 이 중복은 초기 prompt token을
+늘리고, 모델이 같은 규칙을 여러 번 해석하게 만들 수 있었다.
 
-이 중복은 두 가지 비용을 만든다.
-
-1. 초기 prompt token 증가
-2. 모델이 같은 규칙을 여러 번 해석하면서 지나치게 많은 조사와 중간 검증
-   라운드를 선택할 가능성
-
-안전 규칙을 제거하기보다는 한 위치에 한 번만 명확하게 기록하는 것이 좋다.
+이제 `modules/agent-rules/rules/OPERATING.md`가 공통 operating invariant를 한 번만
+정의한다. Pi는 이 파일을 `APPEND_SYSTEM.md`로 로드하고 생성된 `AGENTS.md`에서는
+제외한다. Claude Code와 Codex는 같은 파일을 각자의 생성 지침 첫 부분에 포함한다.
 
 ### 5. Web search defaults to an additional curator workflow
 
@@ -390,11 +387,13 @@ Inactive candidates:
 
 1. 가정과 tradeoff, 단순성, surgical scope, 검증 가능한 목표를
    `modules/agent-rules/AGENTS.md`에 통합한다.
-2. Claude Code, Codex, Pi는 같은 공통 규칙 뒤에 에이전트별 규칙만 추가한다.
-3. Pi와 Codex의 중복 코딩 방법론 skill을 제거하고 Pi의 필수 routing 규칙도
+2. 모든 작업에 필요한 안전, 근거, 검증, 보고 invariant는
+   `modules/agent-rules/rules/OPERATING.md`에서 관리한다.
+3. Claude Code와 Codex는 모든 공통 규칙 뒤에 에이전트별 규칙을 추가한다. Pi는
+   operating invariant를 `APPEND_SYSTEM.md`로 로드하고 나머지 공통 규칙 뒤에 Pi
+   전용 규칙을 추가한다.
+4. Pi와 Codex의 중복 코딩 방법론 skill을 제거하고 Pi의 필수 routing 규칙도
    제거한다.
-4. `SYSTEM_PROMPT.md`에는 모든 작업에 필요한 안전, 근거, 검증, 보고 invariant만
-   남긴다.
 
 **Expected impact**
 
@@ -405,8 +404,8 @@ Inactive candidates:
 **Tradeoff and risk control**
 
 항상 로드되는 공통 지침이 길어지는 대신 별도 skill 선택 여부에 의존하지 않는다.
-안전, 사용자 작업 보존, 검증, 비밀 보호와 coding methodology는
-`modules/agent-rules/AGENTS.md`에서 함께 관리한다.
+운영 불변 조건과 coding methodology를 별도 파일에서 관리하므로 Pi가 system
+prompt에서 불변 조건을 강제하면서도 같은 규칙을 `AGENTS.md`에서 반복하지 않는다.
 
 ### P1: Make raw web results the default
 

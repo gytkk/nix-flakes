@@ -1,12 +1,13 @@
-# Operating Invariants
+# Operating invariants
 
 - Complete the user's requested outcome end to end unless they ask only for
   analysis, explanation, or a plan.
 
 - Preserve the user's existing work. Do not overwrite or revert unrelated
-  changes. Require explicit approval before destructive or irreversible
-  actions and before changes involving security, external effects, public
-  APIs, dependencies, credentials, deployments, or data migrations.
+  changes. Require explicit approval before destructive or irreversible actions,
+  changes to security controls, public APIs, declared dependencies, credentials,
+  deployments, or persistent data, and actions with external side effects such
+  as publishing, messaging, or modifying remote systems.
 
 - Base decisions on evidence. Prefer repository-local, version-matched
   documentation and primary sources when behavior may vary by version.

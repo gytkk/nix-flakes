@@ -24,8 +24,10 @@ in
       pkgs.mcp-nixos
     ];
 
-    home.file.".pi/agent/AGENTS.md".source = agentRules.render "pi-AGENTS.md" [ ./files/AGENTS.md ];
-    home.file.".pi/agent/APPEND_SYSTEM.md".source = mkSymlink "files/SYSTEM_PROMPT.md";
+    home.file.".pi/agent/AGENTS.md".source = agentRules.renderWithoutOperating "pi-AGENTS.md" [
+      ./files/AGENTS.md
+    ];
+    home.file.".pi/agent/APPEND_SYSTEM.md".source = agentRules.operatingRules;
     home.file.".pi/agent/keybindings.json".source = mkSymlink "files/keybindings.json";
     home.file.".pi/agent/mcp.json".source = mkSymlink "files/mcp.json";
     home.file.".pi/agent/models.json".source = mkSymlink "files/models.json";

@@ -2,7 +2,8 @@
 
 This module manages the global Pi coding-agent setup used by this repository.
 It installs Pi and the NixOS MCP server, then exposes tracked configuration
-under `~/.pi/agent/` with Home Manager out-of-store symlinks.
+under `~/.pi/agent/` through generated files and Home Manager out-of-store
+symlinks.
 
 See [`docs/pi-performance-audit.md`](../../docs/pi-performance-audit.md) for the
 current performance findings, measurements, and prioritized action items.
@@ -15,8 +16,8 @@ current performance findings, measurements, and prioritized action items.
 | `files/web-search.json` | `~/.pi/web-search.json` | Web Access defaults |
 | `files/mcp.json` | `~/.pi/agent/mcp.json` | MCP adapter and server configuration |
 | `files/models.json` | `~/.pi/agent/models.json` | Custom Databricks model provider |
-| `files/AGENTS.md` | `~/.pi/agent/AGENTS.md` | Global agent instructions |
-| `files/SYSTEM_PROMPT.md` | `~/.pi/agent/APPEND_SYSTEM.md` | Additions to Pi's maintained system prompt |
+| `agent-rules/` and `files/AGENTS.md` | `~/.pi/agent/AGENTS.md` | Generated shared and Pi-specific instructions |
+| `agent-rules/rules/OPERATING.md` | `~/.pi/agent/APPEND_SYSTEM.md` | Operating invariants added to Pi's system prompt |
 | `files/extensions/` | `~/.pi/agent/extensions/` | Local Pi extensions |
 | `files/themes/claude-like.json` | `~/.pi/agent/themes/claude-like.json` | Global dark theme |
 | `skills/` | `~/.pi/agent/skills/` | Repository-managed Pi skills |
@@ -26,9 +27,10 @@ The module also installs:
 - `pkgs.pi`
 - `pkgs.mcp-nixos`
 
-Because these files use out-of-store symlinks, commands such as `/settings`
-can modify the tracked source files directly. Review `git diff` after changing
-Pi configuration interactively.
+Mutable configuration uses out-of-store symlinks, so commands such as
+`/settings` can modify tracked source files directly. Generated instruction
+files change only after applying the Home Manager configuration. Review
+`git diff` after changing Pi configuration interactively.
 
 ## Main settings
 
@@ -100,17 +102,18 @@ concurrency limit protects legacy multi-child paths but does not cap
 
 ## Global prompts and skills
 
-`files/SYSTEM_PROMPT.md` is exposed as `APPEND_SYSTEM.md`, so it augments Pi's
-maintained system prompt instead of replacing it. It owns the small set of
-repository-independent operating invariants that must apply to every task.
+`modules/agent-rules/rules/OPERATING.md` is exposed as `APPEND_SYSTEM.md`, so it
+augments Pi's maintained system prompt instead of replacing it. It is the single
+source of repository-independent operating invariants that must apply to every
+task.
 
-`files/AGENTS.md` contains Pi-specific operational policy. Home Manager
-prepends the shared policy from `modules/agent-rules/AGENTS.md` and
-`modules/agent-rules/rules/WRITING.md` when it generates the runtime
-`~/.pi/agent/AGENTS.md`. The shared policy owns coding methodology such as
-assumptions and tradeoffs, simplicity, surgical scope, and verifiable goals.
-Project-specific rules belong in the project's own `AGENTS.md`; focused
-workflows belong in `modules/pi/skills/`.
+`files/AGENTS.md` contains Pi-specific operational policy. Home Manager prepends
+shared methodology from `modules/agent-rules/AGENTS.md` and writing guidance
+from `modules/agent-rules/rules/WRITING.md` when it generates the runtime
+`~/.pi/agent/AGENTS.md`. It omits `OPERATING.md` from that generated file because
+Pi already loads those rules through `APPEND_SYSTEM.md`. Project-specific rules
+belong in the project's own `AGENTS.md`; focused workflows belong in
+`modules/pi/skills/`.
 
 The currently managed skills are:
 

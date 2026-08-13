@@ -122,7 +122,7 @@ modules/<name>/
 | Module       | Purpose             | Key Files                                           | Mutable |
 | ------------ | ------------------- | --------------------------------------------------- | ------- |
 | `nixos/`     | NixOS common config | `baseline.nix`, `remote-access.nix`, `user.nix`     | NO      |
-| `agent-rules/` | Shared agent rules | `AGENTS.md`, `rules/WRITING.md`, `lib.nix`          | NO      |
+| `agent-rules/` | Shared agent rules | `AGENTS.md`, `rules/OPERATING.md`, `rules/WRITING.md`, `lib.nix` | NO      |
 | `claude/`    | Claude Code         | `files/settings.json`, `files/CLAUDE.md`            | 부분적  |
 | `codex/`     | OpenAI Codex CLI    | `files/config.toml`, `files/AGENTS.md`              | YES     |
 | `ghostty/`   | Legacy Ghostty terminal | `files/config`, `themes/exports/ghostty`        | YES     |
@@ -162,7 +162,7 @@ direnv lazy loading 사용. `.envrc`에 `use_terraform` 추가하면 `required_v
 
 AI 코딩 에이전트 설정 변경 시 **로컬 프로젝트 파일이 아닌 대응 모듈의 글로벌 설정 파일**을 수정할 것. 단, 이 저장소 전용 Codex 작업 규칙은 루트 `AGENTS.md`에 둔다.
 
-- 모든 에이전트가 따르는 공통 지침은 `modules/agent-rules/AGENTS.md`와 `modules/agent-rules/rules/`에서 관리한다. 각 에이전트 모듈은 공통 지침 뒤에 자체 지침 파일을 붙여 런타임의 최종 지침 파일을 생성한다. 공통 규칙을 에이전트별 파일에 중복해서 추가하지 않는다.
+- 모든 에이전트가 따르는 공통 지침은 `modules/agent-rules/AGENTS.md`와 `modules/agent-rules/rules/`에서 관리한다. Claude Code와 Codex는 모든 공통 지침 뒤에 자체 지침을 붙인다. Pi는 `rules/OPERATING.md`를 `APPEND_SYSTEM.md`로 제공하고, 나머지 공통 지침 뒤에 Pi 전용 지침을 붙여 `AGENTS.md`를 생성한다. 공통 규칙을 에이전트별 파일에 중복해서 추가하지 않는다.
 - `modules/*/files/AGENTS.md`, `files/CLAUDE.md`, `files/config.toml` 같은 경로는 이 저장소가 관리하는 source file이다. 모듈 연결 방식을 확인해 out-of-store symlink인지 Nix가 합성한 결과인지 구분한다.
 
 - **Claude Code** (`modules/claude/`): Plugins은 [gytkk/claude-marketplace](https://github.com/gytkk/claude-marketplace)로 관리. `files/CLAUDE.md`에는 Claude Code 전용 지침만 둔다. LSP plugins은 `modules/lsp/default.nix`의 바이너리 필요.

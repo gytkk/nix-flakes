@@ -130,22 +130,7 @@ must be preserved.
 - Use sentence case for English headings rather than capitalizing every major
   word.
 
-## Final prose review
+## Final review
 
-Before finalizing substantial prose, check:
-
-1. Every factual claim comes from the source or available evidence.
-2. The reader can identify who or what performs each important action.
-3. Relevant conditions, scope, ownership, and outcomes are explicit.
-4. Unfamiliar terms are defined at first use.
-5. Metaphors, abbreviations, and noun chains do not leave multiple reasonable
-   interpretations.
-6. Filler, vague attribution, promotional language, and generic conclusions
-   have been removed.
-7. The result matches the intended author's voice rather than a generic AI
-   writing style.
-8. The prose contains no em dashes, en dashes, double hyphens used as
-   punctuation, or curly quotation marks outside preserved source material.
-9. English compound words use hyphens only where grammar, clarity, or
-   established spelling requires them.
-10. English headings use sentence case.
+Before finalizing substantive prose, reread it once against the applicable rules
+in this file.

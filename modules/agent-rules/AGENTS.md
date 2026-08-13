@@ -17,8 +17,6 @@ expressly override a global default.
 - Before changing files or asking questions, inspect applicable instructions and
   safely discoverable context: relevant code, tests, documentation, history,
   configuration, and useful read-only runtime state.
-- Verify important claims with evidence instead of assuming that an operation
-  succeeded or that remembered behavior is current.
 - Ask only about non-discoverable decisions that materially affect scope,
   rollout, disclosure, UX, ownership, or architecture.
 - When genuine alternatives exist, offer two or three mutually exclusive,
@@ -30,15 +28,12 @@ expressly override a global default.
 
 ## Execution and planning
 
-- Default to delivering a working, verified outcome unless the user asks only
-  for analysis, explanation, or a plan.
 - Handle straightforward, low-risk changes directly.
-- For multi-file, cross-module, high-risk, or behavior-changing work, present a
-  short plan and obtain approval before implementation.
+- Present a short plan and obtain approval before implementation when work is
+  high-risk, changes externally observable behavior, or crosses an explicit
+  approval boundary in these or project-specific instructions.
 - Keep plans verifiable and multi-step when needed. Reconcile each item as done,
   blocked, or cancelled before finishing.
-- Persist until the requested outcome is complete or a concrete blocker prevents
-  further safe progress.
 - Avoid repeated reading or editing without progress. If blocked, stop with a
   concise diagnosis and a targeted question.
 - Communicate at meaningful milestones or when blocked. Avoid noisy updates for
@@ -63,7 +58,8 @@ expressly override a global default.
 
 ## Git
 
-- After each self-contained logical change, commit it locally immediately.
+- After completing and validating each self-contained logical change, commit it
+  locally.
 - Stage only changes made for the current task and keep unrelated changes out of
   the commit.
 - Prefer small Conventional Commits in imperative mood and follow the
@@ -75,9 +71,6 @@ expressly override a global default.
 
 ## Repository and tool use
 
-- Use repository-local and version-matched evidence before external sources.
-- Use web search when local evidence is insufficient or current external
-  behavior matters.
 - Use `rg` (ripgrep), never `grep`, including in shell commands, scripts, and
   Nix expressions.
 - Decide which files and searches are needed before calling tools, and batch
@@ -91,10 +84,6 @@ expressly override a global default.
 - Assume the worktree may already contain user changes.
 - Ignore unrelated modified files. If a required file is already modified,
   understand and preserve those edits rather than overwriting them.
-- Never revert changes you did not make.
-- Require explicit approval before destructive or irreversible actions and
-  before changes involving security, public interfaces, dependencies,
-  credentials, deployments, or data migrations.
 - Do not use destructive commands such as `git reset --hard` or
   `git checkout --` unless explicitly requested.
 
@@ -110,7 +99,6 @@ expressly override a global default.
 - Run the narrowest relevant tests, linters, and formatters, then broaden checks
   according to scope and risk.
 - Cover relevant edge cases and failure paths for new behavior.
-- Do not weaken or bypass checks merely to hide failures.
 - For Nix-only projects, follow the repository's Nix-specific validation rules.
 
 ## Code review
@@ -124,7 +112,10 @@ expressly override a global default.
 ## Python
 
 - Run Python commands through `uv run`, not `python`, `python3`, or bare `pip`.
-- If dependencies are missing, run `uv sync` before retrying.
+- If dependencies are missing, inspect project instructions and dependency
+  metadata before retrying. Prefer `uv sync --locked` when a lockfile exists.
+  Obtain approval before synchronization that may update tracked files or
+  declared dependencies.
 - Examples: `uv run script.py`, `uv run -m pytest`, `uv run -m pip install`.
 
 ## Security
@@ -154,8 +145,4 @@ expressly override a global default.
 
 Before finishing:
 
-- Confirm the diff contains only intentional changes for the current task.
-- Record the changed files and relevant checks, and explain any skipped or
-  unavailable verification.
-- Report remaining risks or blockers without hiding them.
 - Include the local commit hash when a commit was created.
