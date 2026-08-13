@@ -109,14 +109,22 @@ expressly override a global default.
   patterns.
 - Present findings constructively with specific evidence and clear remediation.
 
-## Python
+## Tool-specific workflows
 
-- Run Python commands through `uv run`, not `python`, `python3`, or bare `pip`.
-- If dependencies are missing, inspect project instructions and dependency
+- For Python, run commands through `uv run`, not `python`, `python3`, or bare
+  `pip`. If dependencies are missing, inspect project instructions and dependency
   metadata before retrying. Prefer `uv sync --locked` when a lockfile exists.
   Obtain approval before synchronization that may update tracked files or
-  declared dependencies.
-- Examples: `uv run script.py`, `uv run -m pytest`, `uv run -m pip install`.
+  declared dependencies. Examples: `uv run script.py`, `uv run -m pytest`,
+  `uv run -m pip install`.
+- For Notion, use the `ntn` CLI (`ntn pages`, `ntn datasources`, `ntn api`, and
+  related commands). Do not use, add, or depend on a Notion MCP server.
+- For Datadog, use the `pup` CLI. Start queries with narrow time ranges and small
+  limits, and specify `--from` for time-series queries. When writing a script,
+  runbook, or command that a user or CI will run outside the agent session, pass
+  `--no-agent` so `pup` returns the same unwrapped output they will receive.
+- These tool preferences do not authorize operations with external side effects.
+  The approval requirements in the operating invariants still apply.
 
 ## Security
 
@@ -126,12 +134,6 @@ expressly override a global default.
 - Review dependency changes for known vulnerabilities before committing.
 - Remember that agent tools may run with the current user's filesystem and
   network permissions even when a harness also provides a sandbox.
-
-## Notion
-
-- Use the `ntn` CLI for Notion actions (`ntn pages`, `ntn datasources`,
-  `ntn api`, and related commands).
-- Do not use, add, or depend on a Notion MCP server.
 
 ## Documentation
 
