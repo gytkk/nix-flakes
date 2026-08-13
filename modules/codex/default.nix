@@ -9,6 +9,7 @@
 
 let
   cfg = config.modules.codex;
+  agentRules = import ../agent-rules/lib.nix { inherit lib pkgs; };
   codex = "${pkgs.codex}/bin/codex";
   mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/codex/${path}";
   codexStopUploadCommand = "${config.home.homeDirectory}/.local/bin/codex-stop-upload";
@@ -172,7 +173,7 @@ in
       pkgs.mcp-nixos
     ];
 
-    home.file.".codex/AGENTS.md".source = mkSymlink "files/AGENTS.md";
+    home.file.".codex/AGENTS.md".source = agentRules.render "codex-AGENTS.md" [ ./files/AGENTS.md ];
     home.file.".codex/hooks.json".text = codexHooksJson;
 
     home.activation.codexUserConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''

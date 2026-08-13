@@ -8,6 +8,7 @@
 
 let
   cfg = config.modules.pi;
+  agentRules = import ../agent-rules/lib.nix { inherit lib pkgs; };
   mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/pi/${path}";
 in
 {
@@ -23,7 +24,7 @@ in
       pkgs.mcp-nixos
     ];
 
-    home.file.".pi/agent/AGENTS.md".source = mkSymlink "files/AGENTS.md";
+    home.file.".pi/agent/AGENTS.md".source = agentRules.render "pi-AGENTS.md" [ ./files/AGENTS.md ];
     home.file.".pi/agent/APPEND_SYSTEM.md".source = mkSymlink "files/SYSTEM_PROMPT.md";
     home.file.".pi/agent/keybindings.json".source = mkSymlink "files/keybindings.json";
     home.file.".pi/agent/mcp.json".source = mkSymlink "files/mcp.json";

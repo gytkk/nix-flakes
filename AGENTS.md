@@ -65,6 +65,7 @@ inventory.nix                     # All Home Manager environments and NixOS host
 base/default.nix                  # Common Home Manager configuration
 base/<profile>/home.nix           # Profile-specific Home Manager extensions
 modules/<name>/default.nix        # Reusable Home Manager or NixOS module
+modules/agent-rules/              # Shared global rules for coding agents
 modules/nixos/                    # Common NixOS modules and shared secrets
 hosts/<name>/configuration.nix    # NixOS host configuration
 lib/pkgs.nix                      # Overlay and per-system package-set construction
@@ -93,7 +94,7 @@ Defined in `inventory.nix` (single source of truth). `kind` field determines bui
 
 ### Module System
 
-Each module in `modules/` manages a specific tool. **When modifying settings for any tool, look in the corresponding module directory first.**
+Each module in `modules/` manages a specific tool. **When modifying settings for any tool, look in the corresponding module directory first.** `modules/agent-rules/` is a shared source and rendering helper rather than a Home Manager module, so it does not have a `default.nix` or an enable option.
 
 Common NixOS modules live under `modules/nixos`; host-specific NixOS input
 modules and values live in `hosts/<name>/configuration.nix`. OpenClaw host
@@ -121,6 +122,7 @@ modules/<name>/
 | Module       | Purpose             | Key Files                                           | Mutable |
 | ------------ | ------------------- | --------------------------------------------------- | ------- |
 | `nixos/`     | NixOS common config | `baseline.nix`, `remote-access.nix`, `user.nix`     | NO      |
+| `agent-rules/` | Shared agent rules | `AGENTS.md`, `rules/WRITING.md`, `lib.nix`          | NO      |
 | `claude/`    | Claude Code         | `files/settings.json`, `files/CLAUDE.md`            | 부분적  |
 | `codex/`     | OpenAI Codex CLI    | `files/config.toml`, `files/AGENTS.md`              | YES     |
 | `ghostty/`   | Legacy Ghostty terminal | `files/config`, `themes/exports/ghostty`        | YES     |
@@ -161,11 +163,13 @@ direnv lazy loading 사용. `.envrc`에 `use_terraform` 추가하면 `required_v
 
 AI 코딩 에이전트 설정 변경 시 **로컬 프로젝트 파일이 아닌 대응 모듈의 글로벌 설정 파일**을 수정할 것. 단, 이 저장소 전용 Codex 작업 규칙은 루트 `AGENTS.md`에 둔다.
 
-- `modules/*/files/AGENTS.md`, `files/CLAUDE.md`, `files/config.toml` 같은 경로는 이 저장소가 관리하는 source file이다. 런타임에서 out-of-store symlink로 노출될 수는 있지만, 저장소 안의 파일 자체를 generated live copy로 취급하지 말고 module wiring에서 실제 연결 방식을 확인할 것.
+- 모든 에이전트가 따르는 공통 지침은 `modules/agent-rules/AGENTS.md`와 `modules/agent-rules/rules/`에서 관리한다. 각 에이전트 모듈은 공통 지침 뒤에 자체 지침 파일을 붙여 런타임의 최종 지침 파일을 생성한다. 공통 규칙을 에이전트별 파일에 중복해서 추가하지 않는다.
+- `modules/*/files/AGENTS.md`, `files/CLAUDE.md`, `files/config.toml` 같은 경로는 이 저장소가 관리하는 source file이다. 모듈 연결 방식을 확인해 out-of-store symlink인지 Nix가 합성한 결과인지 구분한다.
 
-- **Claude Code** (`modules/claude/`): Plugins은 [gytkk/claude-marketplace](https://github.com/gytkk/claude-marketplace)로 관리. LSP plugins은 `modules/lsp/default.nix`의 바이너리 필요.
-- **Codex CLI** (`modules/codex/`): 기본 설정은 `files/config.toml`, 글로벌 기본 지침은 `files/AGENTS.md`, 이 저장소 전용 규칙은 루트 `AGENTS.md`.
-- **OpenCode** (`modules/opencode/`): `files/opencode.json`으로 모델/MCP/플러그인 설정.
+- **Claude Code** (`modules/claude/`): Plugins은 [gytkk/claude-marketplace](https://github.com/gytkk/claude-marketplace)로 관리. `files/CLAUDE.md`에는 Claude Code 전용 지침만 둔다. LSP plugins은 `modules/lsp/default.nix`의 바이너리 필요.
+- **Codex CLI** (`modules/codex/`): 기본 설정은 `files/config.toml`, Codex 전용 지침은 `files/AGENTS.md`, 이 저장소 전용 규칙은 루트 `AGENTS.md`에 둔다.
+- **OpenCode** (`modules/opencode/`): `files/opencode.json`으로 모델/MCP/플러그인 설정하고 `files/AGENTS.md`에는 OpenCode 전용 지침만 둔다.
+- **Pi** (`modules/pi/`): `files/AGENTS.md`에는 Pi 전용 지침만 두고 공통 지침은 `modules/agent-rules/`에서 관리한다.
 - **Codex Skills**: `codex` plugin — `/codex:critic`, `/codex:hephaestus`, `/codex:analyze`
 
 ### Package Management

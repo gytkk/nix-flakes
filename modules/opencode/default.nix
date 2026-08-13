@@ -8,6 +8,7 @@
 
 let
   cfg = config.modules.opencode;
+  agentRules = import ../agent-rules/lib.nix { inherit lib pkgs; };
   mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/opencode/${path}";
 in
 {
@@ -31,6 +32,8 @@ in
       mkSymlink "files/plugins/native-notify.ts";
 
     # Create ~/.config/opencode/AGENTS.md file
-    home.file.".config/opencode/AGENTS.md".source = mkSymlink "files/AGENTS.md";
+    home.file.".config/opencode/AGENTS.md".source = agentRules.render "opencode-AGENTS.md" [
+      ./files/AGENTS.md
+    ];
   };
 }
