@@ -48,6 +48,7 @@ Global development guidelines deployed to `~/.claude/CLAUDE.md`. Includes:
 
 - `document-skills`, `commit-commands`, `security-guidance`
 - `ralph-loop`, `superpowers`
+- `slack` (Slack's hosted MCP server plus Slack developer skills)
 - LSP plugins: `gopls-lsp`, `rust-analyzer-lsp`, `typescript-lsp`, `metals-lsp`, `ty-lsp`, `terraform-ls`, `nixd-lsp`
 - `plannotator` (visual plan annotation and review)
 - `codex` (official OpenAI Codex plugin — provides `/codex:review`, `/codex:rescue`, etc.)
@@ -56,6 +57,12 @@ Global development guidelines deployed to `~/.claude/CLAUDE.md`. Includes:
 ## MCP Servers
 
 - **context7**: Library documentation lookup
+- **slack**: Provided by the `slack` plugin, not by `claude mcp add`. The plugin
+  ships a pre-registered OAuth client id for `https://mcp.slack.com/mcp`;
+  registering that URL directly would fail because Claude Code only performs
+  Dynamic Client Registration, which Slack does not support. Authenticate with
+  `/mcp` inside Claude Code. A Slack workspace admin must approve MCP
+  integration for the workspace before authentication succeeds.
 
 ## Notion
 

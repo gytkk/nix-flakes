@@ -38,6 +38,8 @@ let
     "ralph-loop@claude-plugins-official"
     "superpowers@claude-plugins-official"
 
+    "slack@claude-plugins-official"
+
     "gopls-lsp@claude-plugins-official"
     "rust-analyzer-lsp@claude-plugins-official"
     "typescript-lsp@claude-plugins-official"
