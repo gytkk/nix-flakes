@@ -78,8 +78,8 @@ enables it and provides host values such as `lanInterface`, proxy ports, and
 
 Global coding-agent instructions are assembled from shared rules under
 `modules/agent-rules/` and a harness-specific file under each agent module.
-Home Manager generates the final Claude Code, Codex, OpenCode, and Pi
-instruction files, so rule changes take effect after the relevant Home Manager
+Home Manager generates the final Claude Code, Codex, and Pi instruction files,
+so rule changes take effect after the relevant Home Manager
 configuration is applied.
 
 ## Codex Plugin for Claude Code
@@ -147,7 +147,7 @@ implemented yet.
 - Give Codex symbol-aware navigation and diagnostics through MCP instead of
   relying on plain text search alone.
 - Reuse LSP binaries already installed by this flake when possible, while also
-  supporting language servers that Claude Code or OpenCode treat as built-in.
+  supporting language servers that Claude Code treats as built-in.
 - Auto-detect roughly ten languages from the current workspace without
   requiring per-repo manual MCP edits.
 - Keep the first rollout read-only and deterministic so it is safe to enable by

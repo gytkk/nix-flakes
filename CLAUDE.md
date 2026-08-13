@@ -119,7 +119,6 @@ modules/<name>/
 | `k9s/`       | Kubernetes manager  | `default.nix`                                       | NO      |
 | `kitty/`     | Kitty terminal      | `files/kitty.conf`                                  | YES     |
 | `lsp/`       | LSP server packages | `default.nix`                                       | NO      |
-| `opencode/`  | OpenCode AI agent   | `files/opencode.json`, `files/AGENTS.md`            | YES     |
 | `terraform/` | Terraform versions  | `default.nix` (direnv lazy-load)                    | NO      |
 | `vim/`       | Neovim              | `files/config/init.lua`, `files/onelight.lua`       | YES     |
 | `vscode/`    | VSCode (DISABLED)   | `default.nix`, `one-half-light-theme/`              | NO      |
@@ -155,7 +154,6 @@ AI 코딩 에이전트 설정 변경 시 **로컬 프로젝트 파일이 아닌 
 - `modules/*/files/AGENTS.md`, `files/CLAUDE.md`, `files/config.toml` 같은 경로는 이 저장소가 관리하는 source file이다. 런타임에서 out-of-store symlink로 노출될 수는 있지만, 저장소 안의 파일 자체를 generated live copy로 취급하지 말고 module wiring에서 실제 연결 방식을 확인할 것.
 
 - **Claude Code** (`modules/claude/`): Plugins은 [gytkk/claude-marketplace](https://github.com/gytkk/claude-marketplace)로 관리. LSP plugins은 `modules/lsp/default.nix`의 바이너리 필요.
-- **OpenCode** (`modules/opencode/`): `files/opencode.json`으로 모델/MCP/플러그인 설정.
 - **Codex Skills**: `codex` plugin — `/codex:critic`, `/codex:hephaestus`, `/codex:analyze`
 
 ### Package Management

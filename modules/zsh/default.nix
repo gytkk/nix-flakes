@@ -80,9 +80,6 @@ in
         vi = "nvim";
         vimdiff = "nvim -d";
 
-        # OpenCode
-        oc = "opencode";
-
         # Zellij
         zj = "zellij";
 

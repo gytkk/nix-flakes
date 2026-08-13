@@ -83,7 +83,6 @@ in
     ../modules/k9s
     ../modules/lsp
     ../modules/omnigent
-    ../modules/opencode
     ../modules/pi
     ../modules/tmux
     ../modules/vim
@@ -113,7 +112,6 @@ in
       k9s.enable = lib.mkDefault true;
       lsp.enable = lib.mkDefault true;
       omnigent.enable = lib.mkDefault true;
-      opencode.enable = lib.mkDefault true;
       pi.enable = lib.mkDefault true;
       tmux.enable = lib.mkDefault true;
       vim.enable = lib.mkDefault true;

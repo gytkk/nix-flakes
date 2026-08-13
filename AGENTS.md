@@ -130,7 +130,6 @@ modules/<name>/
 | `k9s/`       | Kubernetes manager  | `default.nix`                                       | NO      |
 | `kitty/`     | Kitty terminal      | `files/kitty.conf`                                  | YES     |
 | `lsp/`       | LSP server packages | `default.nix`                                       | NO      |
-| `opencode/`  | OpenCode AI agent   | `files/opencode.json`, `files/AGENTS.md`            | YES     |
 | `terraform/` | Terraform versions  | `default.nix` (direnv lazy-load)                    | NO      |
 | `vim/`       | Neovim              | `files/config/init.lua`, `files/onelight.lua`       | YES     |
 | `vscode/`    | VSCode (DISABLED)   | `default.nix`, `one-half-light-theme/`              | NO      |
@@ -168,7 +167,6 @@ AI 코딩 에이전트 설정 변경 시 **로컬 프로젝트 파일이 아닌 
 
 - **Claude Code** (`modules/claude/`): Plugins은 [gytkk/claude-marketplace](https://github.com/gytkk/claude-marketplace)로 관리. `files/CLAUDE.md`에는 Claude Code 전용 지침만 둔다. LSP plugins은 `modules/lsp/default.nix`의 바이너리 필요.
 - **Codex CLI** (`modules/codex/`): 기본 설정은 `files/config.toml`, Codex 전용 지침은 `files/AGENTS.md`, 이 저장소 전용 규칙은 루트 `AGENTS.md`에 둔다.
-- **OpenCode** (`modules/opencode/`): `files/opencode.json`으로 모델/MCP/플러그인 설정하고 `files/AGENTS.md`에는 OpenCode 전용 지침만 둔다.
 - **Pi** (`modules/pi/`): `files/AGENTS.md`에는 Pi 전용 지침만 두고 공통 지침은 `modules/agent-rules/`에서 관리한다.
 - **Codex Skills**: `codex` plugin — `/codex:critic`, `/codex:hephaestus`, `/codex:analyze`
 

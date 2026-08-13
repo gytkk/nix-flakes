@@ -390,8 +390,7 @@ Inactive candidates:
 
 1. 가정과 tradeoff, 단순성, surgical scope, 검증 가능한 목표를
    `modules/agent-rules/AGENTS.md`에 통합한다.
-2. Claude Code, Codex, OpenCode, Pi는 같은 공통 규칙 뒤에 에이전트별 규칙만
-   추가한다.
+2. Claude Code, Codex, Pi는 같은 공통 규칙 뒤에 에이전트별 규칙만 추가한다.
 3. Pi와 Codex의 중복 코딩 방법론 skill을 제거하고 Pi의 필수 routing 규칙도
    제거한다.
 4. `SYSTEM_PROMPT.md`에는 모든 작업에 필요한 안전, 근거, 검증, 보고 invariant만
