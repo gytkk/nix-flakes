@@ -5,8 +5,6 @@ behavior.
 
 ## Skill routing
 
-- For every request that writes, reviews, or refactors code, read and apply the
-  `karpathy-guidelines` skill before proceeding.
 - Use `parallel-research-merge` for bounded multi-axis investigation when the
   task benefits from independent research scopes.
 - Use parallel workers only when the session exposes an executable worker or

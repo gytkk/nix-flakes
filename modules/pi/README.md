@@ -104,22 +104,17 @@ concurrency limit protects legacy multi-child paths but does not cap
 maintained system prompt instead of replacing it. It owns the small set of
 repository-independent operating invariants that must apply to every task.
 
-`files/AGENTS.md` owns global operational policy: skill routing, investigation
-and approval, Git, tool use, testing, documentation, and security. It requires
-Pi to read `karpathy-guidelines` before writing, reviewing, or refactoring
-code. Pi skill selection is model-driven, so `/skill:karpathy-guidelines` is
-the explicit fallback when deterministic loading is required.
-
-The `karpathy-guidelines` skill owns coding methodology—assumptions and
-tradeoffs, simplicity, surgical scope, and verifiable goals—without repeating
-the operational and safety policies above. Project-specific rules belong in
-the project's own `AGENTS.md`; other focused workflows belong in
-`modules/pi/skills/`.
+`files/AGENTS.md` contains Pi-specific operational policy. Home Manager
+prepends the shared policy from `modules/agent-rules/AGENTS.md` and
+`modules/agent-rules/rules/WRITING.md` when it generates the runtime
+`~/.pi/agent/AGENTS.md`. The shared policy owns coding methodology such as
+assumptions and tradeoffs, simplicity, surgical scope, and verifiable goals.
+Project-specific rules belong in the project's own `AGENTS.md`; focused
+workflows belong in `modules/pi/skills/`.
 
 The currently managed skills are:
 
 - `devils-advocate`
-- `karpathy-guidelines`
 - `parallel-research-merge`
 - `pi-agent`
 

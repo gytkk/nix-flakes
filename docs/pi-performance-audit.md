@@ -8,8 +8,8 @@
 - **Default runtime:** `openai-codex/gpt-5.6-sol`, thinking `high`
 - **Scope:** `modules/pi/`, `~/.pi/agent/`의 실제 로드 상태, 설치된 Pi 패키지,
   현재 저장소의 상위 레벨 세션
-- **Status:** Web Access의 `workflow: "none"`과 prompt/skill responsibility
-  cleanup을 적용했다. 나머지 action item은 아직 적용하지 않았다.
+- **Status:** Web Access의 `workflow: "none"`과 전역 agent rule 통합을
+  적용했다. 나머지 action item은 아직 적용하지 않았다.
 
 ## Executive summary
 
@@ -20,9 +20,9 @@
 2. 매 모델 요청에 15개 활성 도구와 약 42K자의 도구 메타데이터가 노출된다.
 
 특히 `subagent` 도구 하나가 약 18K자이고, subagent 관련 도구 전체가 활성
-도구 메타데이터의 약 51%를 차지한다. 글로벌 및 저장소 지침도 약 19K자이며,
-범용 `karpathy-guidelines` 스킬은 대부분의 코딩 요청에서 추가 스킬 읽기
-라운드를 유발할 수 있다.
+도구 메타데이터의 약 51%를 차지한다. 글로벌 및 저장소 지침도 약 19K자였다.
+감사 이후 범용 코딩 원칙은 `modules/agent-rules/AGENTS.md`로 통합하고, 별도
+코딩 방법론 스킬을 읽는 라운드는 제거했다.
 
 확장 전체의 warm startup 비용은 약 0.44초였다. 무시할 수는 없지만 모델 호출
 한 번이 수 초에서 수십 초 걸리는 것과 비교하면 우선순위가 낮다.
@@ -221,13 +221,12 @@ Subagent 기능을 유지하면서 성능을 개선하려면 extension을 삭제
 
 **Confidence:** high for matching behavior; exact frequency depends on model decisions.
 
-글로벌 지침은 모든 요청 전에 matching skill을 확인하도록 강제한다.
-`karpathy-guidelines` description은 writing, reviewing, refactoring code 전반에
-매칭된다. 따라서 대부분의 코딩 작업에서 모델이 본 작업 전에 `SKILL.md`를 읽는
-추가 라운드를 만들 수 있다.
+감사 당시 글로벌 지침은 모든 요청 전에 matching skill을 확인하도록 했고,
+범용 코딩 방법론 스킬은 writing, reviewing, refactoring code 전반에 매칭됐다.
+따라서 대부분의 코딩 작업에서 모델이 본 작업 전에 `SKILL.md`를 읽는 추가
+라운드를 만들 수 있었다.
 
-감사 당시 해당 스킬의 핵심 원칙은 글로벌 `AGENTS.md`와
-`APPEND_SYSTEM.md`에도 중복되어 있었다.
+해당 스킬의 핵심 원칙은 글로벌 지침에도 중복되어 있었다.
 
 - 단순성
 - 작은 변경
@@ -235,11 +234,9 @@ Subagent 기능을 유지하면서 성능을 개선하려면 extension을 삭제
 - 검증 가능한 성공 조건
 - 관련 없는 변경 금지
 
-적용 단계에서는 추가 `read` 라운드보다 코딩 규율의 일관성을 우선하기로 했다.
-`karpathy-guidelines`를 코딩 방법론의 canonical owner로 유지하고 글로벌
-`AGENTS.md`가 코드 작성, 리뷰, 리팩터링 전에 이를 읽도록 요구한다. Pi의 skill
-선택은 모델 기반이므로 결정적 로딩이 필요하면 `/skill:karpathy-guidelines`를
-명시한다.
+후속 변경에서는 이 원칙을 `modules/agent-rules/AGENTS.md`의 항상 로드되는 공통
+규칙으로 통합하고, Pi와 Codex의 중복 skill 및 Pi의 필수 routing 규칙을 제거했다.
+코딩 규율을 유지하면서 별도 skill `read` 라운드와 에이전트별 동작 차이를 없앴다.
 
 ### 4. Always-on instructions contain duplication
 
@@ -387,31 +384,30 @@ Inactive candidates:
 권장 순서는 1 또는 2다. 별도 config directory는 설정 중복과 drift가 생기므로
 마지막 선택지로 둔다.
 
-### P1: Separate prompt and skill responsibilities
+### P1: Consolidate global coding methodology
 
 **Applied changes**
 
-1. `karpathy-guidelines`를 모델에 노출하고 코드 작성, 리뷰, 리팩터링의 필수
-   routing 대상으로 유지한다.
-2. `karpathy-guidelines`는 가정과 tradeoff, 단순성, surgical scope, 검증 가능한
-   목표만 소유한다.
-3. `SYSTEM_PROMPT.md`에는 모든 작업에 필요한 안전, 근거, 검증, 보고 invariant만
+1. 가정과 tradeoff, 단순성, surgical scope, 검증 가능한 목표를
+   `modules/agent-rules/AGENTS.md`에 통합한다.
+2. Claude Code, Codex, OpenCode, Pi는 같은 공통 규칙 뒤에 에이전트별 규칙만
+   추가한다.
+3. Pi와 Codex의 중복 코딩 방법론 skill을 제거하고 Pi의 필수 routing 규칙도
+   제거한다.
+4. `SYSTEM_PROMPT.md`에는 모든 작업에 필요한 안전, 근거, 검증, 보고 invariant만
    남긴다.
-4. 글로벌 `AGENTS.md`는 skill routing, 조사와 승인, Git, 도구, 테스트, 문서,
-   보안 운영 규칙을 소유한다.
 
 **Expected impact**
 
-- always-on prompt 크기와 의미 중복 감소
-- 코딩 방법론을 한 focused skill에서 일관되게 적용
-- 같은 원칙의 반복 때문에 과도한 조사나 검증을 선택하는 빈도 감소
+- 코딩 요청 전 선행 skill `read` 라운드 제거
+- 에이전트 사이의 코딩 규율 통일
+- 같은 원칙의 반복과 drift 감소
 
 **Tradeoff and risk control**
 
-코딩 요청은 계속 선행 skill `read` 라운드를 사용할 수 있다. Pi의 자동 skill 선택은
-결정적이지 않으므로 글로벌 routing 규칙을 유지하고, 반드시 적용해야 하는 요청은
-`/skill:karpathy-guidelines`로 명시한다. 안전, 사용자 작업 보존, 검증, 비밀 보호
-규칙은 always-on prompt 또는 글로벌 운영 규칙에 남긴다.
+항상 로드되는 공통 지침이 길어지는 대신 별도 skill 선택 여부에 의존하지 않는다.
+안전, 사용자 작업 보존, 검증, 비밀 보호와 coding methodology는
+`modules/agent-rules/AGENTS.md`에서 함께 관리한다.
 
 ### P1: Make raw web results the default
 
@@ -526,16 +522,16 @@ output 공간과 summary 품질에 영향을 주므로 먼저 수동 운영으�
 
 ### Phase 3: Prompt and skill cleanup
 
-1. `karpathy-guidelines`를 코딩 요청의 필수 routing 대상으로 유지
-2. 글로벌 `AGENTS.md`, `SYSTEM_PROMPT.md`, skill의 canonical responsibility 분리
-3. 다른 specialized skill은 명확히 매칭될 때만 로드
+1. 공통 coding methodology를 `modules/agent-rules/AGENTS.md`에서 관리
+2. 에이전트별 파일에는 harness-specific rule만 유지
+3. specialized skill은 명확히 매칭될 때만 로드
 4. 간단한 수정, 복잡한 수정, review 요청을 각각 테스트
 
 **Verification**
 
 - system prompt chars 재측정
 - 첫 request input token 비교
-- 코딩 요청에서 `karpathy-guidelines`를 읽는지 확인
+- 코딩 요청에서 불필요한 선행 skill read가 없는지 확인
 - 안전 규칙과 commit/verification 정책 유지 여부
 
 ### Phase 4: UI-only optimization
@@ -625,8 +621,8 @@ Structured question tool은 약 4.9K자의 metadata를 사용하지만 모호한
 - [ ] lite profile에서 subagent suite를 비활성화할지 결정
 - [ ] `/run` command만으로 manual delegation을 허용할지 결정
 - [x] Web Access 기본 workflow를 `none`으로 변경
-- [x] `karpathy-guidelines`를 코딩 요청의 필수 routing 대상으로 유지
-- [x] 글로벌 `AGENTS.md`, `SYSTEM_PROMPT.md`, skill의 canonical owner 분리
+- [x] coding methodology를 `modules/agent-rules/AGENTS.md`로 통합
+- [x] 중복 coding methodology skill과 필수 routing 규칙 제거
 - [ ] `mcpScript` 사용 빈도를 확인하고 유지 여부 결정
 - [ ] UI lag가 실제 증상인지 provider wait가 실제 증상인지 구분
 

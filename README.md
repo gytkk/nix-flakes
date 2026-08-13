@@ -110,8 +110,8 @@ official plugin marketplaces.
 - `~/.codex/config.toml` stays writable and is not rewritten by activation,
   preserving user-local state such as project trust, hook trust, notices, and
   TUI state.
-- Repo-managed admin skills currently include `karpathy-guidelines`,
-  `parallel-research-merge`, and `devils-advocate`.
+- Repo-managed admin skills currently include `parallel-research-merge` and
+  `devils-advocate`.
 - The Cloudflare API MCP uses OAuth at `https://mcp.cloudflare.com/mcp`; run
   `codex mcp login cloudflare` once per Codex host. Write-capable tools require
   approval by default.

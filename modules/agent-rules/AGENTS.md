@@ -47,13 +47,19 @@ expressly override a global default.
 ## Scope discipline
 
 - Make the smallest change that fully satisfies the request.
+- Every changed line should trace to the requested outcome.
 - Do not add features, refactor nearby code, or introduce abstractions beyond
   what the task requires.
+- Do not generalize a single-use path without evidence that reuse is needed.
 - Do not design for hypothetical future requirements.
 - Do not add validation, fallbacks, or compatibility layers for scenarios that
   cannot occur under the system's stated guarantees.
 - Follow the existing code patterns and module structure in the working
   directory.
+- Remove only imports, variables, or helpers made obsolete by the current
+  change. Do not remove pre-existing dead code unless asked.
+- If the implementation is substantially larger than the problem requires,
+  simplify it before finishing.
 
 ## Git
 
@@ -98,6 +104,9 @@ expressly override a global default.
 - Use specific types rather than `any` type hints.
 - Handle errors explicitly with meaningful messages and enough context for
   debugging. Avoid silent failures.
+- Define observable success criteria for nontrivial changes. Reproduce a bug
+  before demonstrating its fix, verify intended and failure behavior for a
+  feature, and confirm behavior before and after a refactor.
 - Run the narrowest relevant tests, linters, and formatters, then broaden checks
   according to scope and risk.
 - Cover relevant edge cases and failure paths for new behavior.
