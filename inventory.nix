@@ -33,6 +33,7 @@
     username = "gyutak";
     homeDirectory = "/Users/gyutak";
     profile = "devsisters";
+    homeModules = [ ./base/devsisters/macbook.nix ];
   };
 
   "devsisters-macstudio" = {

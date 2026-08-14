@@ -1,0 +1,20 @@
+{
+  "profiles": [
+    {
+      "name": "Default profile",
+      "selected": true,
+      "simple_modifications": [
+        {
+          "from": {
+            "key_code": "right_command"
+          },
+          "to": [
+            {
+              "key_code": "f13"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
