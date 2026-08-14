@@ -2,6 +2,6 @@
   "tui.editor.cursorLineStart": [
     "home",
     "ctrl+home",
-    "ctrl+r"
+    "ctrl+a"
   ]
 }
