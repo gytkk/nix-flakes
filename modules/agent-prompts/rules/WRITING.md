@@ -9,22 +9,16 @@ Treat prose as a maintained artifact whose ambiguity can propagate into later de
 - Never add facts, names, numbers, dates, quotes, citations, causal claims, or concrete details that are not supported by the source or available evidence.
 - Do not replace uncertainty with invented specificity.
   Preserve or clarify the uncertainty, or ask the author when it blocks an accurate result.
-- Do not silently remove a substantive claim merely because it is difficult to phrase.
-  Clarify it, mark the uncertainty, or ask the author.
 - Preserve exact identifiers, official names, quotations, and established domain terminology.
-- Match the language, tone, and formality of the surrounding project.
   When the author provides a writing sample, prefer that voice over a generic polished style.
 
 ## Write clearly and directly
 
 - Write so that a reader unfamiliar with the immediate context can determine the intended meaning from the text itself.
 - State the main point without ceremonial introductions, conversational warm-ups, or announcements such as `Let's dive in` and `Here is what you need to know`.
-- Prefer complete sentences with concrete subjects and verbs.
-  Make actors, actions, conditions, ownership, and outcomes explicit when they matter.
+- Prefer complete sentences with concrete subjects and verbs. Make actors, actions, conditions, ownership, and outcomes explicit when they matter.
 - Prefer simple constructions such as `is`, `has`, and `does` when a more elaborate expression adds no meaning.
 - Remove filler, repeated conclusions, excessive hedging, promotional language, and unsupported claims of importance.
-- Replace vague attributions such as `experts believe` and `industry reports suggest` with a specific source.
-  Remove the claim if no source supports it.
 - Avoid abstract noun chains, compressed jargon, and metaphors that hide the actual mechanism.
 - Define unfamiliar abbreviations and newly introduced terms at first use.
 
@@ -36,12 +30,9 @@ Treat prose as a maintained artifact whose ambiguity can propagate into later de
 - Avoid promotional adjectives, inflated statements about significance, and analysis that is not supported by concrete evidence.
 - Do not manufacture emphasis with repeated sentence fragments, rhetorical questions, aphorisms, or uniformly dramatic conclusions.
 - Avoid excessive headings, bold labels, decorative formatting, and emojis.
-- Do not add chatbot artifacts such as praise, offers to continue, or `I hope this helps` to content intended for reuse.
 - Treat suspected AI-writing patterns as warning signs, not automatic violations.
   Rewrite them when they reduce clarity, accuracy, or consistency with the intended voice.
-- Do not remove deliberate humor, uncertainty, unusual details, or stylistic variation merely to make writing more uniform.
 - Technical, legal, and reference documentation should remain neutral and plain.
-  Do not inject personality where it does not belong.
 
 ## Technical writing
 
@@ -52,8 +43,20 @@ Treat prose as a maintained artifact whose ambiguity can propagate into later de
 - Do not use decorative section banners, ASCII boxes, or separator comments.
 - Use lists only when items are genuinely parallel or independently actionable.
   Do not convert ordinary prose into a list of bold inline headings.
-- Break prose at semantic boundaries such as sentences or clauses.
-  Do not mechanically wrap comments or documentation at a fixed column width unless a project formatter requires it.
+
+## Punctuation and Style
+
+These rules apply to prose written by the agent.
+Do not alter code, commands, identifiers, URLs, generated content, or quotations whose original punctuation must be preserved.
+
+- Always use plain ASCII characters rather than non-ASCII equivalents.
+  - Replace them with a period, comma, colon, parentheses, or a restructured sentence.
+  - Do not use em dashes (`—`) or en dashes (`–`).
+  - Do not use double hyphens (`--`) as sentence punctuation.
+  - Use straight ASCII quotation marks (`"` and `'`) instead of curly quotation marks (`“”` and `‘’`).
+- Use hyphens in compound expressions only when grammar or clarity requires them:
+  - Preserve established spellings, official names, command-line flags, identifiers, and project-specific conventions.
+- Use sentence case for English headings rather than capitalizing every major word.
 
 ## Korean prose
 
@@ -79,21 +82,6 @@ When writing Korean:
   Otherwise use a concrete phrase such as `데이터에 기록된`, `실제로 발생한`, or `활동 기록`.
 - Replace metaphorical policy or architecture statements with the mechanism they imply.
   For example, replace `사본은 따로 늙는다` with `원본이 변경되어도 사본은 자동으로 갱신되지 않으므로 원문을 복사하지 않는다`.
-
-## Punctuation and English style
-
-These rules apply to prose written by the agent.
-Do not alter code, commands, identifiers, URLs, generated content, or quotations whose original punctuation must be preserved.
-
-- Do not use em dashes (`—`) or en dashes (`–`).
-  Replace them with a period, comma, colon, parentheses, or a restructured sentence.
-- Do not use double hyphens (`--`) as sentence punctuation.
-- Use straight ASCII quotation marks (`"` and `'`) instead of curly quotation marks (`“”` and `‘’`).
-- Use hyphens in compound expressions only when grammar or clarity requires them:
-  - Keep them when the compound modifies a following noun, such as `a high-quality report`.
-  - Usually omit them when the expression follows the noun, such as `the report is high quality`.
-  - Preserve established spellings, official names, command-line flags, identifiers, and project-specific conventions.
-- Use sentence case for English headings rather than capitalizing every major word.
 
 ## Final review
 

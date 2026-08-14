@@ -13,22 +13,16 @@ Project instructions closer to the working directory take precedence when they e
 ## Investigation and decisions
 
 - Before changing files or asking questions, inspect applicable instructions and safely discoverable context: relevant code, tests, documentation, history, configuration, and useful read-only runtime state.
-- Ask only about non-discoverable decisions that materially affect scope, rollout, disclosure, UX, ownership, or architecture.
+- Ask only about non-discoverable decisions that materially affect scope, rollout, UX, ownership, or architecture.
 - When genuine alternatives exist, offer two or three mutually exclusive, substantive choices with a recommendation.
-  Otherwise, state the evidence-backed assumption and proceed.
-- Do not present manufactured approval choices such as "Approve", "Revise", or "Reconsider" through a multiple-choice tool.
 - Surface blockers, risky assumptions, and dependency issues early.
 
 ## Execution and planning
 
-- Handle straightforward, low-risk changes directly.
 - Present a short plan and obtain approval before implementation when work is high-risk, changes externally observable behavior, or crosses an explicit approval boundary in these or project-specific instructions.
-- Keep plans verifiable and multi-step when needed.
-  Reconcile each item as done, blocked, or cancelled before finishing.
-- Avoid repeated reading or editing without progress.
-  If blocked, stop with a concise diagnosis and a targeted question.
-- Communicate at meaningful milestones or when blocked.
-  Avoid noisy updates for routine tool calls.
+- Keep plans verifiable and multi-step when needed. Reconcile each item as done, blocked, or cancelled before finishing.
+- Avoid repeated reading or editing without progress. If blocked, stop with a concise diagnosis and a targeted question.
+- Communicate at meaningful milestones or when blocked. Avoid noisy updates for routine tool calls.
 
 ## Scope discipline
 
@@ -49,7 +43,6 @@ Project instructions closer to the working directory take precedence when they e
 - Use `rg` (ripgrep), never `grep`, including in shell commands, scripts, and Nix expressions.
 - Decide which files and searches are needed before calling tools, and batch independent reads where practical.
 - Set the working directory explicitly for shell commands and avoid `cd` unless necessary.
-- Inspect each changed file or the final diff after editing.
 
 ## Editing safety
 
@@ -73,11 +66,9 @@ Project instructions closer to the working directory take precedence when they e
 
 ## Tool-specific workflows
 
-- For Python, run commands through `uv run`, not `python`, `python3`, or bare `pip`.
+- For Python, use `uv`. Run commands through `uv run`, not `python`, `python3`, or bare `pip`.
   If dependencies are missing, inspect project instructions and dependency metadata before retrying.
   Prefer `uv sync --locked` when a lockfile exists.
-  Obtain approval before synchronization that may update tracked files or declared dependencies.
-  Examples: `uv run script.py`, `uv run -m pytest`, `uv run -m pip install`.
 - For Notion, use the `ntn` CLI (`ntn pages`, `ntn datasources`, `ntn api`, and related commands).
   Do not use, add, or depend on a Notion MCP server.
 - For Datadog, use the `pup` CLI.
@@ -96,8 +87,3 @@ Project instructions closer to the working directory take precedence when they e
 - Update existing maintained documentation when user-facing behavior changes.
   Do not create temporary or one-off documentation files unless requested.
 
-## Completion
-
-Before finishing:
-
-- Include the local commit hash when a commit was created.
