@@ -58,17 +58,12 @@ Project instructions closer to the working directory take precedence when they e
   If a required file is already modified, understand and preserve those edits rather than overwriting them.
 - Do not use destructive commands such as `git reset --hard` or `git checkout --` unless explicitly requested.
 
-## Code, tests, and errors
+## Code and verification
 
-- Prefer docstrings and unit tests before or alongside implementation.
-- Use specific types rather than `any` type hints.
-- Handle errors explicitly with meaningful messages and enough context for debugging.
-  Avoid silent failures.
-- Define observable success criteria for nontrivial changes.
-  Reproduce a bug before demonstrating its fix, verify intended and failure behavior for a feature, and confirm behavior before and after a refactor.
-- Run the narrowest relevant tests, linters, and formatters, then broaden checks according to scope and risk.
-- Cover relevant edge cases and failure paths for new behavior.
-- For Nix-only projects, follow the repository's Nix-specific validation rules.
+- Handle errors explicitly and include enough context to diagnose failures.
+  Do not silently ignore errors.
+- For nontrivial changes, define observable success criteria and verify behavior before and after the change, including relevant failure paths.
+- Run the narrowest relevant tests, linters, and formatters first, then broaden checks according to risk.
 
 ## Code review
 
