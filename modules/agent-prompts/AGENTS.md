@@ -40,16 +40,9 @@ Project instructions closer to the working directory take precedence when they e
 
 ## Git
 
-- Before substantive work in a Git repository with an `origin` remote, identify the intended base branch from project instructions or the task context.
-  If it is not specified, use `origin/HEAD`, then fall back to an existing `origin/develop`, `origin/main`, or `origin/master`, in that order.
-  Fetch the selected branch from `origin` before editing files so its remote-tracking ref is current.
-  Do not checkout, pull, merge, rebase, or reset the current branch as part of this update.
-  If the fetch fails, report the blocker and do not edit files unless the user explicitly approves proceeding with a stale base.
-- After completing and validating each self-contained logical change, commit it locally.
-- Stage only changes made for the current task and keep unrelated changes out of the commit.
-- Prefer small Conventional Commits in imperative mood and follow the repository's existing commit style.
-- Do not commit analysis-only work, failed checks without an explicit decision to preserve the failure, or changes the user asked not to commit.
-- Do not push unless the user explicitly requests it in the current conversation.
+- Unless the user asks otherwise, commit each completed and validated change using only files changed for the current task.
+  Follow the repository's commit style, falling back to a small imperative Conventional Commit when none is established.
+- Do not push unless the user explicitly requests it.
 
 ## Repository and tool use
 
