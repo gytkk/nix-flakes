@@ -88,17 +88,13 @@ Project instructions closer to the working directory take precedence when they e
 
 ## Security
 
-- Never commit secrets, credentials, API keys, or generated authentication material.
-- Use environment variables or secret-management tools for sensitive data.
-- Review dependency changes for known vulnerabilities before committing.
-- Remember that agent tools may run with the current user's filesystem and network permissions even when a harness also provides a sandbox.
+- Never expose or commit secrets, credentials, API keys, or generated authentication material.
+  Use environment variables or the project's secret-management mechanism.
 
 ## Documentation
 
-- Update README documentation when behavior or user-facing features change.
-- Add comments or docstrings only when they clarify logic that the code does not make obvious.
-- Keep maintained documentation synchronized with implementation.
-- Do not create one-off or temporary documentation files.
+- Update existing maintained documentation when user-facing behavior changes.
+  Do not create temporary or one-off documentation files unless requested.
 
 ## Completion
 
