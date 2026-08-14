@@ -16,8 +16,8 @@ current performance findings, measurements, and prioritized action items.
 | `files/web-search.json` | `~/.pi/web-search.json` | Web Access defaults |
 | `files/mcp.json` | `~/.pi/agent/mcp.json` | MCP adapter and server configuration |
 | `files/models.json` | `~/.pi/agent/models.json` | Custom Databricks model provider |
-| `agent-rules/` and `files/AGENTS.md` | `~/.pi/agent/AGENTS.md` | Generated shared and Pi-specific instructions |
-| `agent-rules/rules/OPERATING.md` | `~/.pi/agent/APPEND_SYSTEM.md` | Operating invariants added to Pi's system prompt |
+| `agent-prompts/` and `files/AGENTS.md` | `~/.pi/agent/AGENTS.md` | Generated shared and Pi-specific instructions |
+| `agent-prompts/rules/OPERATING.md` | `~/.pi/agent/APPEND_SYSTEM.md` | Operating invariants added to Pi's system prompt |
 | `files/extensions/` | `~/.pi/agent/extensions/` | Local Pi extensions |
 | `files/themes/claude-like.json` | `~/.pi/agent/themes/claude-like.json` | Global dark theme |
 | `skills/` | `~/.pi/agent/skills/` | Repository-managed Pi skills |
@@ -102,14 +102,14 @@ concurrency limit protects legacy multi-child paths but does not cap
 
 ## Global prompts and skills
 
-`modules/agent-rules/rules/OPERATING.md` is exposed as `APPEND_SYSTEM.md`, so it
+`modules/agent-prompts/rules/OPERATING.md` is exposed as `APPEND_SYSTEM.md`, so it
 augments Pi's maintained system prompt instead of replacing it. It is the single
 source of repository-independent operating invariants that must apply to every
 task.
 
 `files/AGENTS.md` contains Pi-specific operational policy. Home Manager prepends
-shared methodology from `modules/agent-rules/AGENTS.md` and writing guidance
-from `modules/agent-rules/rules/WRITING.md` when it generates the runtime
+shared methodology from `modules/agent-prompts/AGENTS.md` and writing guidance
+from `modules/agent-prompts/rules/WRITING.md` when it generates the runtime
 `~/.pi/agent/AGENTS.md`. It omits `OPERATING.md` from that generated file because
 Pi already loads those rules through `APPEND_SYSTEM.md`. Project-specific rules
 belong in the project's own `AGENTS.md`; focused workflows belong in

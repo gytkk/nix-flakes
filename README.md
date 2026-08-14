@@ -58,7 +58,7 @@ inventory.nix                     # All Home Manager environments and NixOS host
 base/default.nix                  # Common Home Manager imports and default enables
 base/<profile>/home.nix           # Profile-specific Home Manager extensions
 modules/<name>/default.nix        # Reusable Home Manager or NixOS module
-modules/agent-rules/              # Shared global rules for coding agents
+modules/agent-prompts/              # Shared global rules for coding agents
 modules/nixos/                    # Common NixOS modules and shared secrets
 hosts/<name>/configuration.nix    # Host-specific NixOS imports and values
 lib/pkgs.nix                      # Overlay and per-system package-set construction
@@ -77,7 +77,7 @@ enables it and provides host values such as `lanInterface`, proxy ports, and
 `stateDir` in `hosts/pylv-onyx/configuration.nix`.
 
 Global coding-agent instructions are assembled from shared rules under
-`modules/agent-rules/` and a harness-specific file under each agent module.
+`modules/agent-prompts/` and a harness-specific file under each agent module.
 Home Manager generates the final Claude Code, Codex, and Pi instruction files,
 so rule changes take effect after the relevant Home Manager
 configuration is applied.

@@ -8,7 +8,7 @@
 
 let
   cfg = config.modules.claude;
-  agentRules = import ../agent-rules/lib.nix { inherit lib pkgs; };
+  agentPrompts = import ../agent-prompts/lib.nix { inherit lib pkgs; };
   claude = "${pkgs.claude-code}/bin/claude";
   timeout = "${pkgs.coreutils}/bin/timeout --foreground";
   mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/claude/${path}";
@@ -90,7 +90,7 @@ in
       source = mkSymlink "files/settings.json";
       force = true;
     };
-    home.file.".claude/CLAUDE.md".source = agentRules.render "claude-CLAUDE.md" [ ./files/CLAUDE.md ];
+    home.file.".claude/CLAUDE.md".source = agentPrompts.render "claude-CLAUDE.md" [ ./files/CLAUDE.md ];
     home.file.".claude/statusline-command.sh" = {
       source = ./files/statusline-command.sh;
       executable = true;
