@@ -58,6 +58,14 @@ expressly override a global default.
 
 ## Git
 
+- Before substantive work in a Git repository with an `origin` remote, identify
+  the intended base branch from project instructions or the task context. If it
+  is not specified, use `origin/HEAD`, then fall back to an existing
+  `origin/develop`, `origin/main`, or `origin/master`, in that order. Fetch the
+  selected branch from `origin` before editing files so its remote-tracking ref
+  is current. Do not checkout, pull, merge, rebase, or reset the current branch
+  as part of this update. If the fetch fails, report the blocker and do not edit
+  files unless the user explicitly approves proceeding with a stale base.
 - After completing and validating each self-contained logical change, commit it
   locally.
 - Stage only changes made for the current task and keep unrelated changes out of
