@@ -1,6 +1,6 @@
 onboarding = false
 [keys]
-prefix = "ctrl+a"
+prefix = "ctrl+space"
 
 # workspace 생성 popup을 위해 비워둠
 new_workspace = ""
