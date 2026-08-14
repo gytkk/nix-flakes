@@ -5,8 +5,7 @@
 - Preserve the user's existing work.
   Do not overwrite or revert unrelated changes.
 
-- Require explicit approval before destructive or irreversible actions.
-  For instance, changes to security controls, public APIs, declared dependencies, credentials, deployments, or persistent data, and actions with external side effects.
+- Require explicit approval before destructive or irreversible actions; changes to security controls, public APIs, declared dependencies, credentials, deployments, or persistent data; and external side effects such as publishing, messaging, or modifying remote systems.
 
 - Base decisions on evidence.
   Prefer repository-local, version-matched documentation and primary sources when behavior may vary by version.

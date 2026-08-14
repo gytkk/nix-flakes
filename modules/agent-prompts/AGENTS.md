@@ -1,8 +1,8 @@
 # Global agent rules
 
 These rules apply across agent harnesses.
-Harness-specific instructions may add tool usage details but should not duplicate or weaken these shared rules.
-Project instructions closer to the working directory take precedence when they expressly override a global default.
+Harness-specific instructions may adapt non-safety defaults to the deployed model and tools, but must not weaken the operating invariants.
+Project instructions closer to the working directory override global defaults within their scope, but must not weaken the operating invariants.
 
 ## Skill discovery
 
@@ -19,8 +19,8 @@ Project instructions closer to the working directory take precedence when they e
 
 ## Execution and planning
 
-- Present a short plan and obtain approval before implementation when work is high-risk, changes externally observable behavior, or crosses an explicit approval boundary in these or project-specific instructions.
-- Keep plans verifiable and multi-step when needed. Reconcile each item as done, blocked, or cancelled before finishing.
+- For complex or ambiguous work, make a short, verifiable plan. Obtain approval before implementation only when work is high-risk or crosses an explicit approval boundary.
+- Reconcile each planned item as done, blocked, or cancelled before finishing.
 - Avoid repeated reading or editing without progress. If blocked, stop with a concise diagnosis and a targeted question.
 - Communicate at meaningful milestones or when blocked. Avoid noisy updates for routine tool calls.
 
@@ -51,18 +51,20 @@ Project instructions closer to the working directory take precedence when they e
   If a required file is already modified, understand and preserve those edits rather than overwriting them.
 - Do not use destructive commands such as `git reset --hard` or `git checkout --` unless explicitly requested.
 
-## Code and verification
+## Implementation and checks
 
-- Handle errors explicitly and include enough context to diagnose failures.
-  Do not silently ignore errors.
-- For nontrivial changes, define observable success criteria and verify behavior before and after the change, including relevant failure paths.
+- Handle errors explicitly and include enough context to diagnose failures. Do not silently ignore errors.
+- For implementation tasks, use task-specific acceptance criteria and project-provided checks.
 - Run the narrowest relevant tests, linters, and formatters first, then broaden checks according to risk.
 
 ## Code review
 
-- Review for correctness, readability, maintainability, security, and material performance risks.
-- Check relevant edge cases, error handling, and alignment with existing code patterns.
-- Present findings constructively with specific evidence and clear remediation.
+When reviewing changes:
+
+- Treat the task as read-only unless the user asks for fixes. Inspect the task intent, applicable instructions, baseline, complete diff, tests, and affected call sites or dependencies before judging the change.
+- Report concrete findings first, ordered by severity. For each finding, cite a precise path and line or range, explain the impact, provide evidence, and suggest the smallest effective remediation. Do not report stylistic preferences as defects.
+- Distinguish confirmed defects from hypotheses. Run narrow checks only when they materially strengthen a finding, and report the exact command and outcome.
+- If there are no findings, state that explicitly. Then report unresolved assumptions, verification gaps, and residual risks.
 
 ## Tool-specific workflows
 
