@@ -27,6 +27,7 @@ Treat prose as maintained work: ambiguity can affect later decisions and outputs
 
 - Explain current system behavior. Outside changelogs, release notes, and migration guides, avoid narrating documentation from the latest diff's perspective.
 - Avoid comments and docstrings that restate code. Prefer explaining reasons, constraints, units, invariants, or behavior that the code does not reveal.
+- Do not write comments or docstrings that span three or more lines. Keep each one to one or two lines.
 - Avoid decorative section banners, ASCII boxes, separator comments, and lists used only to simulate structure. Prefer lists only for genuinely parallel or independently actionable items.
 
 ## Punctuation and style
