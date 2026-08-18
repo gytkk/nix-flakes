@@ -1,5 +1,10 @@
 local M = {}
 
+local skip_format_on_save = {
+  markdown = true,
+  yaml = true,
+}
+
 M.conform = {
   "stevearc/conform.nvim",
   event = "BufWritePre",
@@ -9,7 +14,8 @@ M.conform = {
   },
   opts = {
     format_on_save = function(bufnr)
-      if vim.bo[bufnr].filetype == "markdown" then
+      -- These filetypes are still formattable on demand with <leader>cf.
+      if skip_format_on_save[vim.bo[bufnr].filetype] then
         return
       end
 
