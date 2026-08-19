@@ -297,7 +297,8 @@ Resources should supplement the tools instead of expanding the tool count:
   inside Herdr, press `Ctrl+a` twice before the tmux command key.
 - `Ctrl+a`, then `Shift+n`, opens a popup that selects a previously visited
   directory with `zoxide` and `fzf`, then creates and focuses a workspace there.
-- `Ctrl+Shift+Tab` or `Ctrl+Tab` focuses the previous or next workspace.
+- `Cmd+W` closes the current workspace instead of closing the Ghostty surface.
+  `Ctrl+Shift+Tab` or `Ctrl+Tab` focuses the previous or next workspace.
   `Cmd+1..9` focuses a workspace by index in Ghostty on macOS, and `Alt+1..9`
   does the same in Windows Terminal on WSL. `Ctrl+a`, then `Shift+1..9` focuses
   the corresponding visible agent. The terminal configs forward the direct

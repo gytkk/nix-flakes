@@ -29,7 +29,8 @@ window-decoration = none
 
 unfocused-split-opacity = 0.9
 
-# Forward workspace shortcuts distinctly for Herdr workspace navigation.
+# Forward workspace shortcuts distinctly so Herdr receives every modifier.
+keybind = super+w=text:\x1b[119;9u
 keybind = ctrl+tab=text:\x1b[9;5u
 keybind = ctrl+shift+tab=text:\x1b[9;6u
 keybind = super+digit_1=text:\x1b[49;9u
