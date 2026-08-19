@@ -4,7 +4,6 @@ prefix = "ctrl+space"
 
 # workspace 생성 popup을 위해 비워둠
 new_workspace = ""
-close_workspace = "cmd+w"
 
 # workspace 간의 이동(즉시)
 previous_workspace = "ctrl+shift+tab"
