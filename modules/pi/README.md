@@ -20,7 +20,7 @@ current performance findings, measurements, and prioritized action items.
 | `agent-prompts/rules/OPERATING.md` | `~/.pi/agent/APPEND_SYSTEM.md` | Operating invariants added to Pi's system prompt |
 | `files/extensions/` | `~/.pi/agent/extensions/` | Local Pi extensions |
 | `files/themes/claude-like.json` | `~/.pi/agent/themes/claude-like.json` | Global dark theme |
-| `skills/` | `~/.pi/agent/skills/` | Repository-managed Pi skills |
+| `skills/` and `agent-prompts/skills.nix` | `~/.pi/agent/skills/` | Pi-specific and shared official skills |
 
 The module also installs:
 
@@ -112,14 +112,18 @@ shared methodology from `modules/agent-prompts/AGENTS.md` and writing guidance
 from `modules/agent-prompts/rules/WRITING.md` when it generates the runtime
 `~/.pi/agent/AGENTS.md`. It omits `OPERATING.md` from that generated file because
 Pi already loads those rules through `APPEND_SYSTEM.md`. Project-specific rules
-belong in the project's own `AGENTS.md`; focused workflows belong in
-`modules/pi/skills/`.
+belong in the project's own `AGENTS.md`. Pi-specific workflows live in
+`modules/pi/skills/`; shared workflows come from
+`modules/agent-prompts/skills.nix`.
 
-The currently managed skills are:
+The local Pi skills are:
 
 - `devils-advocate`
 - `parallel-research-merge`
 - `pi-agent`
+
+The shared registry also exposes all 25 official skills from the locked
+`mattpocock-skills` input under `~/.pi/agent/skills/`.
 
 ## Local extensions
 

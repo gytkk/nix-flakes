@@ -35,7 +35,12 @@ Global development guidelines deployed to `~/.claude/CLAUDE.md`. Includes:
 - Python conventions (`uv run`)
 - Prompt keywords (`webs` for aggressive web search)
 
-## Plugins
+## Skills and plugins
+
+Home Manager links all 25 official skills from the locked `mattpocock-skills`
+input into `~/.claude/skills/`. The shared list is defined in
+`modules/agent-prompts/skills.nix`; Claude-only additions remain separate in
+that registry.
 
 ### Marketplaces
 

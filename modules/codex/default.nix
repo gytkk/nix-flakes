@@ -2,6 +2,7 @@
   config,
   pkgs,
   lib,
+  inputs,
   flakeDirectory,
   hasSystemCodexConfig ? false,
   ...
@@ -38,8 +39,11 @@ let
       ./files/config.toml
     else
       "${flakeDirectory}/modules/codex/files/config.toml";
-  managedSkillsSource =
-    if hasSystemCodexConfig then ./skills else "${flakeDirectory}/modules/codex/skills";
+  managedSkillsSource = import ./skills.nix {
+    inherit inputs lib pkgs;
+    localSkillsRoot =
+      if hasSystemCodexConfig then ./skills else "${flakeDirectory}/modules/codex/skills";
+  };
   coreutils = pkgs.coreutils;
   ensureSystemCodexConfigFunction =
     if hasSystemCodexConfig then

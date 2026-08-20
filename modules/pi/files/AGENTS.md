@@ -24,8 +24,9 @@ behavior.
 
 - Follow Pi's Agent Skills format: a focused `SKILL.md` with valid `name` and
   `description` frontmatter.
-- Store repository-managed Pi skills under `modules/pi/skills/` so Home Manager
-  exposes them at `~/.pi/agent/skills/`.
+- Store Pi-specific repository-managed skills under `modules/pi/skills/`.
+  Shared external skills belong in `modules/agent-prompts/skills.nix`; Home
+  Manager exposes both sets at `~/.pi/agent/skills/`.
 - Keep skills focused, trim unused files, and align them with repository
   conventions.
 

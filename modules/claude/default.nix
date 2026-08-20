@@ -2,6 +2,7 @@
   config,
   pkgs,
   lib,
+  inputs,
   flakeDirectory,
   ...
 }:
@@ -9,6 +10,7 @@
 let
   cfg = config.modules.claude;
   agentPrompts = import ../agent-prompts/lib.nix { inherit lib pkgs; };
+  sharedSkills = import ../agent-prompts/skills.nix { inherit inputs lib pkgs; };
   claude = "${pkgs.claude-code}/bin/claude";
   timeout = "${pkgs.coreutils}/bin/timeout --foreground";
   mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/claude/${path}";
@@ -67,6 +69,12 @@ let
   removedMcpServers = [
     "notion"
   ];
+  sharedSkillFiles = lib.mapAttrs' (
+    name: source:
+    lib.nameValuePair ".claude/skills/${name}" {
+      inherit source;
+    }
+  ) sharedSkills.claude;
 in
 {
   options.modules.claude.enable = lib.mkOption {
@@ -85,16 +93,19 @@ in
       "${config.home.homeDirectory}/.local/bin"
     ];
 
-    # Claude plugin operations may temporarily leave this as a regular file.
-    home.file.".claude/settings.json" = {
-      source = mkSymlink "files/settings.json";
-      force = true;
-    };
-    home.file.".claude/CLAUDE.md".source = agentPrompts.render "claude-CLAUDE.md" [ ./files/CLAUDE.md ];
-    home.file.".claude/statusline-command.sh" = {
-      source = ./files/statusline-command.sh;
-      executable = true;
-    };
+    home.file = {
+      # Claude plugin operations may temporarily leave this as a regular file.
+      ".claude/settings.json" = {
+        source = mkSymlink "files/settings.json";
+        force = true;
+      };
+      ".claude/CLAUDE.md".source = agentPrompts.render "claude-CLAUDE.md" [ ./files/CLAUDE.md ];
+      ".claude/statusline-command.sh" = {
+        source = ./files/statusline-command.sh;
+        executable = true;
+      };
+    }
+    // sharedSkillFiles;
     # Install marketplaces, plugins, and MCP servers
     home.activation.setupClaudeCode = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       # Ensure git, ssh, and which are available for plugin marketplace operations

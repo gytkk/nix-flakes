@@ -14,7 +14,8 @@ behavior.
 
 - When creating or updating Codex skills for this setup, use Codex's built-in
   `$skill-creator` first.
-- Store repository-managed admin skills under `modules/codex/skills/` so they
+- Store Codex-specific repository-managed skills under `modules/codex/skills/`.
+  Shared external skills belong in `modules/agent-prompts/skills.nix`; both sets
   are exposed at `/etc/codex/skills`.
 - Treat `$skill-creator` output as a scaffold. Trim unused files, keep the skill
   focused, and align it with repository conventions before committing.

@@ -78,9 +78,11 @@ enables it and provides host values such as `lanInterface`, proxy ports, and
 
 Global coding-agent instructions are assembled from shared rules under
 `modules/agent-prompts/` and a harness-specific file under each agent module.
-Home Manager generates the final Claude Code, Codex, and Pi instruction files,
-so rule changes take effect after the relevant Home Manager
-configuration is applied.
+The same directory also owns the shared skill registry. The registry reads the
+25 official skills from the locked `mattpocock-skills` input and exposes them to
+Claude Code, Codex, and Pi. Home Manager generates the final instruction and
+skill links, so changes take effect after the relevant configuration is
+applied.
 
 ## Codex Plugin for Claude Code
 
@@ -101,17 +103,20 @@ official plugin marketplaces.
 ### Codex CLI Config
 
 - On NixOS hosts, the static Codex base config is installed to `/etc/codex/managed_config.toml`.
-- Codex admin skills live under `modules/codex/skills` in this repo and are exposed at `/etc/codex/skills`.
+- Codex-specific admin skills live under `modules/codex/skills`. They are merged with the shared official skills from `modules/agent-prompts/skills.nix` and exposed at `/etc/codex/skills`.
 - On standalone Home Manager environments, `home-manager switch` ensures `/etc/codex/managed_config.toml` is a symlink to this repo's `modules/codex/files/config.toml`.
-- On standalone Home Manager environments, `home-manager switch` also ensures `/etc/codex/skills` is a symlink to this repo's `modules/codex/skills`.
+- On standalone Home Manager environments, `home-manager switch` points `/etc/codex/skills` at the generated skill farm. Local Codex skills still link back to this checkout, while official shared skills use the revision pinned in `flake.lock`.
 - Standalone activation only prompts for `sudo` when `/etc/codex` needs to be created or repaired, or when migrating from the legacy `/etc/codex/config.toml` path.
 - Using the repo path instead of the flake source store path avoids repeated sudo prompts after unrelated repo changes.
 - If `/etc/codex/managed_config.toml` or the legacy `/etc/codex/config.toml` already exists as a regular file, activation stops instead of overwriting it.
 - `~/.codex/config.toml` stays writable and is not rewritten by activation,
   preserving user-local state such as project trust, hook trust, notices, and
   TUI state.
-- Repo-managed admin skills currently include `parallel-research-merge` and
-  `devils-advocate`.
+- Repo-managed Codex-specific skills currently include
+  `parallel-research-merge` and `devils-advocate`. The shared registry adds the
+  25 official Matt Pocock skills.
+- Update the shared upstream revision explicitly with
+  `nix flake update mattpocock-skills`.
 - The Cloudflare API MCP uses OAuth at `https://mcp.cloudflare.com/mcp`; run
   `codex mcp login cloudflare` once per Codex host. Write-capable tools require
   approval by default.

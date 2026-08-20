@@ -61,6 +61,12 @@
       flake = false;
     };
 
+    # Shared Agent Skills for Claude Code, Codex, and Pi
+    mattpocock-skills = {
+      url = "github:mattpocock/skills";
+      flake = false;
+    };
+
     # copyparty - file server
     copyparty = {
       url = "github:9001/copyparty";
