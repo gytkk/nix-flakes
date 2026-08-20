@@ -48,6 +48,7 @@ These rules apply to agent-written prose, not code, commands, identifiers, URLs,
 - Avoid mechanically expanding familiar expressions. Keep terms such as `미확인`, `비정상`, `[추정]`, and `[미확인]` when their meaning is clear.
 - Avoid informal uses of `박다`, `박아 넣다`, and `박아 두다`. Prefer the intended operation, such as `명시하다`, `포함하다`, `고정하다`, or `저장하다`.
 - Avoid noun chains that make readers infer relationships. Prefer sentences that state what acts on what.
+- Do not omit Korean particles, endings, predicates, or other sentence components when doing so makes relationships or responsibilities unclear. Headings and short list labels may remain phrases.
 - Use Korean script in otherwise Korean prose instead of mixing in Chinese characters.
 - Keep English when it is an official name or clearer than an unfamiliar literal translation. Avoid Korean transliterations that still need explanation; describe the meaning and include the original term in parentheses when useful.
 - Use `관측` only to contrast what is defined or expected with data that actually appears. Otherwise prefer `데이터에 기록된`, `실제로 발생한`, or `활동 기록`.
