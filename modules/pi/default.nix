@@ -49,6 +49,7 @@ in
       ];
       ".pi/agent/APPEND_SYSTEM.md".source = agentPrompts.operatingRules;
       ".pi/agent/keybindings.json".source = mkSymlink "files/keybindings.json";
+      ".pi/agent/lsp.json".source = mkSymlink "files/lsp.json";
       ".pi/agent/mcp.json".source = mkSymlink "files/mcp.json";
       ".pi/agent/models.json".source = mkSymlink "files/models.json";
       ".pi/agent/settings.json".source = mkSymlink "files/settings.json";

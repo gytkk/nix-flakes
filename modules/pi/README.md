@@ -14,6 +14,7 @@ current performance findings, measurements, and prioritized action items.
 | --- | --- | --- |
 | `files/settings.json` | `~/.pi/agent/settings.json` | Pi defaults and pinned packages |
 | `files/web-search.json` | `~/.pi/web-search.json` | Web Access defaults |
+| `files/lsp.json` | `~/.pi/agent/lsp.json` | LSP server routes and diagnostics settings |
 | `files/mcp.json` | `~/.pi/agent/mcp.json` | MCP adapter and server configuration |
 | `files/models.json` | `~/.pi/agent/models.json` | Custom Databricks model provider |
 | `agent-prompts/` and `files/AGENTS.md` | `~/.pi/agent/AGENTS.md` | Generated shared and Pi-specific instructions |
@@ -66,6 +67,7 @@ The package list is intentionally version-pinned:
 | Package | Version | Purpose |
 | --- | --- | --- |
 | `@juicesharp/rpiv-ask-user-question` | `2.4.0` | Structured user questions |
+| `pi-lsp` | `0.1.7` | Lazy language-server diagnostics and navigation |
 | `pi-web-access` | `0.18.0` | Web search, source checks, and content fetching |
 | `pi-mcp-adapter` | `2.20.1` | Token-efficient MCP discovery and calls |
 | `pi-subagents` | `0.41.0` | Foreground-first delegated Pi sessions |
@@ -177,6 +179,35 @@ paired with `showHardwareCursor: true` in `settings.json`.
 This extension depends on Pi 0.83's editor rendering behavior. Review it when
 updating Pi if cursor rendering or IME positioning changes.
 
+## LSP diagnostics
+
+`pi-lsp` starts a configured language server only after a matching file is
+written, edited, or passed to an LSP navigation tool. After a successful
+built-in `edit` or `write`, diagnostics for that file are appended to the tool
+result so the model can correct problems in the same turn. The package also
+provides `lsp_diagnostics`, `lsp_hover`, `lsp_definition`, `lsp_references`,
+and `lsp_symbols` tools.
+
+`files/lsp.json` configures every server installed by `modules/lsp`, plus
+`rust-analyzer` from the shared Rust toolchain:
+
+- `nixd`, `gopls`, and `typescript-language-server`
+- the JSON, CSS, and HTML servers from `vscode-langservers-extracted`
+- `lua-language-server`, `bash-language-server`, and `terraform-ls`
+- `metals`, `ty`, `yaml-language-server`, `marksman`, and `taplo`
+- `rust-analyzer`
+
+Server processes are scoped by configured project root markers and stop when
+the Pi session shuts down. Generated output, dependency directories, and
+language-specific build directories are excluded where applicable. Missing
+binaries produce diagnostics warnings instead of causing Pi startup to fail.
+
+LSP output is targeted feedback, not the authoritative project check. Continue
+to run the repository's formatter, tests, type checker, or build before
+finishing a change. `pi-lsp` is a third-party package that runs configured
+binaries with the permissions of the Pi process, so update its version pin only
+after reviewing the new source and release notes.
+
 ## MCP integration
 
 `files/mcp.json` configures `pi-mcp-adapter` with:
@@ -246,7 +277,10 @@ After changing this module:
    pi list
    ```
 
-6. In Pi, verify `/fast status`, MCP discovery, structured questions, and the
+6. In Pi, edit a supported disposable file and confirm that its LSP diagnostics
+   are appended to the tool result. Also verify `lsp_hover` or `lsp_symbols` on
+   that file.
+7. Verify `/fast status`, MCP discovery, structured questions, and the
    web-access tools relevant to the change.
 
 For the subagent rollout, also run `/subagents-doctor` and
