@@ -104,7 +104,8 @@ if [ -n "$weekly_remaining" ]; then
   if weekly_reset_at=$(date -r "$weekly_reset" '+%m/%d %H:%M' 2>/dev/null) ||
     weekly_reset_at=$(date -d "@$weekly_reset" '+%m/%d %H:%M' 2>/dev/null); then
     weekly_info="${WEEKLY_BAR} ${weekly_remaining}% ${DIM}⏳${weekly_reset_at}${RESET}"
-    weekly_plain="$(printf "%${weekly_filled}s" | tr ' ' '#')$(printf "%${WEEKLY_EMPTY}s" | tr ' ' '-') ${weekly_remaining}% ⏳${weekly_reset_at}"
+    # The plain form tracks terminal cells; ⏳ occupies two.
+    weekly_plain="$(printf "%${weekly_filled}s" | tr ' ' '#')$(printf "%${WEEKLY_EMPTY}s" | tr ' ' '-') ${weekly_remaining}%   ${weekly_reset_at}"
   fi
 fi
 
@@ -187,7 +188,7 @@ compose_left
 model_output="$model"
 model_plain="$model"
 if [ -n "$effort" ]; then
-  model_output="${model_output} ${DIM}· ${RESET} ${BRIGHT_ORANGE}${effort}${RESET}"
+  model_output="${model_output} ${DIM}·${RESET} ${BRIGHT_ORANGE}${effort}${RESET}"
   model_plain="${model_plain} · ${effort}"
 fi
 
