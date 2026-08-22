@@ -5,45 +5,14 @@
 
 from __future__ import annotations
 
-import json
 import os
-import shlex
 import subprocess
 import sys
 import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
 
-
-def load_config(home: Path) -> dict[str, str]:
-    values = dict(os.environ)
-    config_dir = home / ".config/agent-session-record"
-    json_path = config_dir / "config.json"
-    if json_path.is_file():
-        try:
-            config = json.loads(json_path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            config = {}
-        if isinstance(config, dict):
-            values.update(
-                {key: value for key, value in config.items() if isinstance(value, str)}
-            )
-        return values
-    shell_path = config_dir / "config.sh"
-    if not shell_path.is_file():
-        return values
-    for raw_line in shell_path.read_text(encoding="utf-8").splitlines():
-        line = raw_line.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        key, raw_value = line.split("=", 1)
-        try:
-            parsed = shlex.split(raw_value, posix=True)
-        except ValueError:
-            continue
-        if len(parsed) == 1:
-            values[key] = parsed[0]
-    return values
+from agent_session_config import load_config
 
 
 def warn(path: Path, command: str, message: str) -> None:
@@ -76,7 +45,16 @@ def main(command: str | None = None) -> int:
         sys.stderr.write(f"{error}\n")
         return 1
     home = Path(os.environ.get("HOME", Path.home()))
-    config = load_config(home)
+    default_state_dir = Path(
+        os.environ.get("XDG_STATE_HOME", home / ".local/state")
+    ) / "agent-session-record"
+    try:
+        config = load_config(home)
+    except ValueError as error:
+        warn(default_state_dir / "warnings.log", command, str(error))
+        if returns_continue:
+            print('{"continue":true}')
+        return 0
     state_dir = Path(
         config.get(
             "AGENT_SESSION_RECORD_STATE_DIR",

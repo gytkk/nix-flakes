@@ -8,8 +8,12 @@
 
 let
   cfg = config.modules.agentSessionRecord;
-  mkSymlink =
-    path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/agent-session-record/${path}";
+  scriptRoot = "${flakeDirectory}/modules/agent-session-record/files";
+  mkPythonEntrypoint =
+    name: script:
+    pkgs.writeShellScript name ''
+      exec ${pkgs.python3}/bin/python3 ${lib.escapeShellArg "${scriptRoot}/${script}"} "$@"
+    '';
   stateDir = "${config.home.homeDirectory}/.local/state/agent-session-record";
   configFile = builtins.toJSON {
     AGENT_SESSION_RECORD_REMOTE_HOST = cfg.remoteHost;
@@ -80,18 +84,18 @@ in
       xdg.configFile."agent-session-record/config.json".text = configFile;
 
       home.file.".local/bin/agent-session-upload-worker".source =
-        mkSymlink "files/agent_session_upload_worker.py";
+        mkPythonEntrypoint "agent-session-upload-worker" "agent_session_upload_worker.py";
 
       home.file.".local/bin/claude-session-upload".source = lib.mkIf cfg.agents.claude.enable (
-        mkSymlink "files/claude_session_upload.py"
+        mkPythonEntrypoint "claude-session-upload" "claude_session_upload.py"
       );
 
       home.file.".local/bin/codex-stop-upload".source = lib.mkIf cfg.agents.codex.enable (
-        mkSymlink "files/codex_stop_upload.py"
+        mkPythonEntrypoint "codex-stop-upload" "codex_stop_upload.py"
       );
 
       home.file.".local/bin/codex-session-start-sweep".source = lib.mkIf cfg.agents.codex.enable (
-        mkSymlink "files/codex_session_start_sweep.py"
+        mkPythonEntrypoint "codex-session-start-sweep" "codex_session_start_sweep.py"
       );
     })
 

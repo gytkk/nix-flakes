@@ -24,17 +24,28 @@ from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
-SCHEMA_VERSION = 1
+from agent_session_config import load_config
+
+SCHEMA_VERSION = 2
 REDACTION_POLICY_VERSION = "builtin-v1"
+PRIVACY_POLICY_VERSION = "builtin-pii-v1"
 RUN_ID_PATTERN = re.compile(r"^run_[0-9a-f]{32}$")
 FINGERPRINT_PATTERN = re.compile(r"^[0-9a-f]{64}$")
-QUEUE_ITEM_PATTERN = re.compile(r"^(claude|codex)-(run_[0-9a-f]{32})-([0-9a-f]{64})$")
+QUEUE_ITEM_PATTERN = re.compile(
+    r"^(personal|organization)-(claude|codex)-(run_[0-9a-f]{32})-([0-9a-f]{64})$"
+)
 SECRET_KEY_PATTERN = re.compile(
     r"(api[_-]?key|access[_-]?token|auth[_-]?token|refresh[_-]?token|"
     r"session[_-]?token|id[_-]?token|password|secret|private[_-]?key|credential)",
     re.IGNORECASE,
 )
-STRING_REDACTIONS = (
+PII_KEY_PATTERN = re.compile(
+    r"(^|[_-])(full[_-]?name|display[_-]?name|first[_-]?name|last[_-]?name|"
+    r"employee[_-]?id|customer[_-]?id|account[_-]?id|person[_-]?id|"
+    r"user[_-]?id|username)([_-]|$)",
+    re.IGNORECASE,
+)
+SECRET_STRING_REDACTIONS = (
     (
         re.compile(
             r"-----BEGIN [A-Z ]*PRIVATE KEY-----.*?-----END [A-Z ]*PRIVATE KEY-----",
@@ -54,55 +65,30 @@ STRING_REDACTIONS = (
         re.compile(r"Bearer\s+[A-Za-z0-9._~+/-]{20,}={0,2}", re.IGNORECASE),
         "Bearer [REDACTED_SECRET]",
     ),
+)
+PRIVACY_STRING_REDACTIONS = (
     (
         re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"),
         "[REDACTED_EMAIL]",
     ),
+    (
+        re.compile(r"(?<!\d)(?:\+?82[- ]?)?0?1[016789][- ]?\d{3,4}[- ]?\d{4}(?!\d)"),
+        "[REDACTED_PHONE]",
+    ),
+    (re.compile(r"\b\d{6}-?[1-4]\d{6}\b"), "[REDACTED_NATIONAL_ID]"),
 )
+STRING_REDACTIONS = SECRET_STRING_REDACTIONS + PRIVACY_STRING_REDACTIONS
 
 
 def utc_now() -> str:
     return dt.datetime.now(dt.UTC).isoformat(timespec="seconds")
 
 
-def read_shell_config(path: Path) -> dict[str, str]:
-    values: dict[str, str] = {}
-    if not path.is_file():
-        return values
-    for raw_line in path.read_text(encoding="utf-8").splitlines():
-        line = raw_line.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        key, raw_value = line.split("=", 1)
-        if not re.fullmatch(r"[A-Z][A-Z0-9_]*", key):
-            continue
-        try:
-            parsed = shlex.split(raw_value, posix=True)
-        except ValueError:
-            continue
-        if len(parsed) == 1:
-            values[key] = parsed[0]
-        elif not parsed and raw_value == "":
-            values[key] = ""
-    return values
-
-
 class Recorder:
     def __init__(self, agent: str, environ: dict[str, str] | None = None) -> None:
         env = dict(os.environ if environ is None else environ)
         home = Path(env.get("HOME", str(Path.home())))
-        config_dir = home / ".config/agent-session-record"
-        json_config = self.read_json(config_dir / "config.json")
-        if json_config:
-            env.update(
-                {
-                    key: value
-                    for key, value in json_config.items()
-                    if isinstance(value, str)
-                }
-            )
-        else:
-            env.update(read_shell_config(config_dir / "config.sh"))
+        env = load_config(home, env)
         xdg_state = Path(env.get("XDG_STATE_HOME", home / ".local/state"))
 
         self.agent = agent
@@ -139,6 +125,7 @@ class Recorder:
         self.tmp_dir = self.state_dir / "tmp"
         self.run_dir = self.state_dir / "runs"
         self.attempt_dir = self.state_dir / "attempts"
+        self.manifest_dir = self.state_dir / "manifests"
         self.quarantine_dir = self.state_dir / "quarantine"
         self.warning_log = self.state_dir / "warnings.log"
         self.ensure_dirs()
@@ -152,6 +139,7 @@ class Recorder:
             self.tmp_dir,
             self.run_dir,
             self.attempt_dir,
+            self.manifest_dir,
             self.quarantine_dir,
         ):
             path.mkdir(parents=True, exist_ok=True, mode=0o700)
@@ -276,8 +264,8 @@ class Recorder:
         except OSError:
             return {}
 
-    def session_state_file(self, provider: str, session_id: str) -> Path:
-        return self.session_state_dir / f"{provider}-{session_id}.json"
+    def session_state_file(self, scope: str, provider: str, session_id: str) -> Path:
+        return self.session_state_dir / f"{scope}-{provider}-{session_id}.json"
 
     def allocate_run_id(self, provider: str, provider_identity: str) -> str:
         registry_key = hashlib.sha256(
@@ -354,28 +342,49 @@ class Recorder:
                 "provider_session_id": manifest["provider_session_id"],
                 "transcript_fingerprint": manifest["transcript_fingerprint"],
                 "redaction_status": manifest["redaction_status"],
+                "privacy_check_status": manifest["privacy_check_status"],
                 "status": status,
                 "recorded_at": utc_now(),
             },
             f"attempt-{run_id}.lock",
         )
 
-    def redact_value(self, value: Any) -> Any:
+    def redact_secret_value(self, value: Any) -> Any:
         if isinstance(value, dict):
             return {
                 key: (
                     "[REDACTED_SECRET]"
                     if SECRET_KEY_PATTERN.search(key)
-                    else self.redact_value(item)
+                    else self.redact_secret_value(item)
                 )
                 for key, item in value.items()
             }
         if isinstance(value, list):
-            return [self.redact_value(item) for item in value]
+            return [self.redact_secret_value(item) for item in value]
         if isinstance(value, str):
-            for pattern, replacement in STRING_REDACTIONS:
+            for pattern, replacement in SECRET_STRING_REDACTIONS:
                 value = pattern.sub(replacement, value)
         return value
+
+    def redact_privacy_value(self, value: Any) -> Any:
+        if isinstance(value, dict):
+            return {
+                key: (
+                    "[REDACTED_PERSONAL_DATA]"
+                    if PII_KEY_PATTERN.search(key)
+                    else self.redact_privacy_value(item)
+                )
+                for key, item in value.items()
+            }
+        if isinstance(value, list):
+            return [self.redact_privacy_value(item) for item in value]
+        if isinstance(value, str):
+            for pattern, replacement in PRIVACY_STRING_REDACTIONS:
+                value = pattern.sub(replacement, value)
+        return value
+
+    def redact_value(self, value: Any) -> Any:
+        return self.redact_privacy_value(self.redact_secret_value(value))
 
     def contains_sensitive_string(self, value: Any) -> bool:
         if isinstance(value, dict):
@@ -434,6 +443,7 @@ class Recorder:
     ) -> dict[str, Any]:
         mtime_ns = self.mtime_ns(transcript_path)
         fingerprint = self.fingerprint(transcript_path)
+        empty_transcript = transcript_path.stat().st_size == 0
         manifest: dict[str, Any] = {
             "schema_version": SCHEMA_VERSION,
             "run_id": run_id,
@@ -452,9 +462,14 @@ class Recorder:
             "transcript_fingerprint": fingerprint,
             "redaction_status": "pending",
             "redaction_policy_version": REDACTION_POLICY_VERSION,
+            "privacy_check_status": "pending",
+            "privacy_policy_version": PRIVACY_POLICY_VERSION,
             "redacted_transcript_fingerprint": None,
             "eligible_for_derivation": False,
-            "summary_status": "not_started",
+            "summary_status": "excluded" if empty_transcript else "not_started",
+            "derivation_exclusion_reason": (
+                "empty_transcript" if empty_transcript else None
+            ),
             "capture_receipt": {
                 "status": "pending",
                 "stored_at": None,
@@ -488,8 +503,8 @@ class Recorder:
         if not isinstance(session_id, str) or not isinstance(transcript_raw, str):
             raise TypeError("Claude payload missing session_id or transcript_path")
         transcript = Path(transcript_raw)
-        if not transcript.is_file() or transcript.stat().st_size == 0:
-            raise ValueError(f"Claude transcript missing or empty: {transcript}")
+        if not transcript.is_file():
+            raise ValueError(f"Claude transcript missing: {transcript}")
         if "subagents" in transcript.parts:
             parent_id = self.first_jsonl_value(
                 transcript, lambda item: item.get("sessionId")
@@ -546,14 +561,8 @@ class Recorder:
         transcript = Path(transcript_raw) if isinstance(transcript_raw, str) else None
         if transcript is None or not transcript.is_file():
             transcript = self.find_codex_rollout(session_id)
-        if (
-            transcript is None
-            or not transcript.is_file()
-            or transcript.stat().st_size == 0
-        ):
-            raise ValueError(
-                f"Codex transcript missing or empty for session {session_id}"
-            )
+        if transcript is None or not transcript.is_file():
+            raise ValueError(f"Codex transcript missing for session {session_id}")
 
         first = self.first_jsonl_object(transcript)
         transcript_session_id = self.nested(first, "payload", "id")
@@ -610,6 +619,8 @@ class Recorder:
         self, transcript: Path, parent_session_id: str
     ) -> dict[str, Any]:
         agent_id = self.first_jsonl_value(transcript, lambda item: item.get("agentId"))
+        if not agent_id and transcript.stem.startswith("agent-"):
+            agent_id = transcript.stem.removeprefix("agent-")
         if not agent_id:
             raise ValueError(
                 f"Claude subagent transcript missing agent id: {transcript}"
@@ -655,9 +666,12 @@ class Recorder:
         relationship = manifest.get("relationship_status")
         receipt = manifest.get("capture_receipt")
         redaction_status = manifest.get("redaction_status")
+        privacy_check_status = manifest.get("privacy_check_status")
+        summary_status = manifest.get("summary_status")
+        exclusion_reason = manifest.get("derivation_exclusion_reason")
         return all(
             (
-                manifest.get("schema_version") == 1,
+                manifest.get("schema_version") == SCHEMA_VERSION,
                 isinstance(run_id, str) and RUN_ID_PATTERN.fullmatch(run_id),
                 manifest.get("provider") in {"claude", "codex"},
                 isinstance(manifest.get("provider_session_id"), str)
@@ -695,13 +709,24 @@ class Recorder:
                 and FINGERPRINT_PATTERN.fullmatch(manifest["transcript_fingerprint"]),
                 redaction_status in {"succeeded", "failed"},
                 manifest.get("redaction_policy_version") == REDACTION_POLICY_VERSION,
+                privacy_check_status in {"succeeded", "failed"},
+                manifest.get("privacy_policy_version") == PRIVACY_POLICY_VERSION,
+                privacy_check_status == redaction_status,
                 isinstance(manifest.get("redacted_transcript_fingerprint"), str)
                 and FINGERPRINT_PATTERN.fullmatch(
                     manifest["redacted_transcript_fingerprint"]
                 ),
                 manifest.get("eligible_for_derivation")
-                == (redaction_status == "succeeded"),
-                manifest.get("summary_status") == "not_started",
+                == (
+                    redaction_status == "succeeded"
+                    and summary_status == "not_started"
+                ),
+                summary_status in {"not_started", "excluded"},
+                (
+                    summary_status == "excluded"
+                    and exclusion_reason == "empty_transcript"
+                )
+                or (summary_status == "not_started" and exclusion_reason is None),
                 isinstance(receipt, dict)
                 and receipt.get("status") == "pending"
                 and receipt.get("stored_at") is None
@@ -710,14 +735,21 @@ class Recorder:
         )
 
     def state_is_stale(
-        self, provider: str, session_id: str, mtime_ns: int, fingerprint: str
+        self,
+        scope: str,
+        provider: str,
+        session_id: str,
+        mtime_ns: int,
+        fingerprint: str,
     ) -> bool:
-        state = self.read_json(self.session_state_file(provider, session_id))
+        state = self.read_json(self.session_state_file(scope, provider, session_id))
         if not state:
             return False
         if (
             state.get("redaction_status") != "succeeded"
             or state.get("redaction_policy_version") != REDACTION_POLICY_VERSION
+            or state.get("privacy_check_status") != "succeeded"
+            or state.get("privacy_policy_version") != PRIVACY_POLICY_VERSION
         ):
             return False
         if state.get("snapshot_fingerprint") == fingerprint:
@@ -729,15 +761,17 @@ class Recorder:
 
     def queue_item(self, manifest: dict[str, Any]) -> Path:
         return self.queue_dir / (
-            f"{manifest['provider']}-{manifest['run_id']}-"
+            f"{manifest['scope']}-{manifest['provider']}-{manifest['run_id']}-"
             f"{manifest['transcript_fingerprint']}"
         )
 
     def queue_lock(self, item: Path) -> Path:
         match = QUEUE_ITEM_PATTERN.fullmatch(item.name)
         if match:
-            provider, run_id, fingerprint = match.groups()
-            return self.lock_dir / f"queue-{provider}-{run_id}-{fingerprint}.lock"
+            scope, provider, run_id, fingerprint = match.groups()
+            return self.lock_dir / (
+                f"queue-{scope}-{provider}-{run_id}-{fingerprint}.lock"
+            )
         key = hashlib.sha256(item.name.encode()).hexdigest()
         return self.lock_dir / f"queue-legacy-{key}.lock"
 
@@ -765,10 +799,14 @@ class Recorder:
                 and all(
                     existing.get(key) == manifest.get(key)
                     for key in (
+                        "scope",
+                        "provider",
                         "run_id",
                         "transcript_fingerprint",
                         "redaction_status",
                         "redaction_policy_version",
+                        "privacy_check_status",
+                        "privacy_policy_version",
                         "redacted_transcript_fingerprint",
                     )
                 )
@@ -808,17 +846,22 @@ class Recorder:
     ) -> None:
         self.atomic_json(
             self.session_state_file(
-                manifest["provider"], manifest["provider_session_id"]
+                manifest["scope"],
+                manifest["provider"],
+                manifest["provider_session_id"],
             ),
             {
                 "session_id": manifest["provider_session_id"],
                 "run_id": manifest["run_id"],
                 "provider": manifest["provider"],
+                "scope": manifest["scope"],
                 "snapshot_mtime_ns": manifest["snapshot_mtime_ns"],
                 "snapshot_fingerprint": manifest["snapshot_fingerprint"],
                 "transcript_fingerprint": manifest["transcript_fingerprint"],
                 "redaction_status": manifest["redaction_status"],
                 "redaction_policy_version": REDACTION_POLICY_VERSION,
+                "privacy_check_status": manifest["privacy_check_status"],
+                "privacy_policy_version": PRIVACY_POLICY_VERSION,
                 "uploaded_at": uploaded_at,
                 "target_dir": str(target_dir),
                 "capture_receipt": {
@@ -844,6 +887,47 @@ class Recorder:
         }
         return remote
 
+    def append_manifest_ledger(self, manifest: dict[str, Any]) -> None:
+        seconds = int(manifest["snapshot_mtime_ns"]) / 1_000_000_000
+        date = dt.datetime.fromtimestamp(seconds, dt.UTC)
+        ledger = (
+            self.manifest_dir
+            / manifest["scope"]
+            / manifest["provider"]
+            / date.strftime("%Y/%m")
+            / f"{date:%d}.jsonl"
+        )
+        ledger.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        key = (
+            manifest["scope"],
+            manifest["provider"],
+            manifest["run_id"],
+            manifest["transcript_fingerprint"],
+            manifest["redaction_policy_version"],
+            manifest["privacy_policy_version"],
+        )
+        lock_name = (
+            f"manifest-{manifest['scope']}-{manifest['provider']}-{date:%Y%m%d}.lock"
+        )
+        with self.lock(self.lock_dir / lock_name):
+            if ledger.is_file():
+                for entry in self.jsonl_objects(ledger):
+                    if (
+                        entry.get("scope"),
+                        entry.get("provider"),
+                        entry.get("run_id"),
+                        entry.get("transcript_fingerprint"),
+                        entry.get("redaction_policy_version"),
+                        entry.get("privacy_policy_version"),
+                    ) == key:
+                        return
+            with ledger.open("a", encoding="utf-8") as handle:
+                handle.write(
+                    json.dumps(manifest, ensure_ascii=False, separators=(",", ":"))
+                    + "\n"
+                )
+            ledger.chmod(0o600)
+
     def upload_snapshot(self, manifest: dict[str, Any], transcript: Path) -> bool:
         seconds = int(manifest["snapshot_mtime_ns"]) / 1_000_000_000
         date_path = dt.datetime.fromtimestamp(seconds, dt.UTC).strftime("%Y/%m/%d")
@@ -851,24 +935,36 @@ class Recorder:
             self.remote_base / manifest["scope"] / manifest["provider"] / date_path
         )
         uploaded_at = utc_now()
+        stored_manifest = self.render_remote_manifest(
+            manifest, uploaded_at, target_dir
+        )
         fd, raw_meta = tempfile.mkstemp(dir=self.tmp_dir, prefix="meta-")
         os.close(fd)
         meta_path = Path(raw_meta)
         self.write_json(
             meta_path,
-            self.render_remote_manifest(manifest, uploaded_at, target_dir),
+            stored_manifest,
         )
         try:
             if self.current_host == self.local_short_circuit_host:
                 self.upload_local(transcript, meta_path, target_dir, manifest)
             else:
                 self.upload_remote(transcript, meta_path, target_dir, manifest)
+            self.append_manifest_ledger(stored_manifest)
             self.write_session_state(manifest, uploaded_at, target_dir)
             return True
         except (OSError, subprocess.SubprocessError) as error:
+            detail = str(error)
+            if isinstance(error, subprocess.CalledProcessError):
+                output = error.stderr or error.stdout or ""
+                for pattern, replacement in STRING_REDACTIONS:
+                    output = pattern.sub(replacement, output)
+                output = " ".join(output.split())[:2000]
+                if output:
+                    detail = f"{detail}; output: {output}"
             self.warn(
                 f"upload transport failed for {manifest['provider']}/"
-                f"{manifest['provider_session_id']}: {error}"
+                f"{manifest['provider_session_id']}: {detail}"
             )
             return False
         finally:
@@ -941,8 +1037,8 @@ class Recorder:
             [str(argument) for argument in arguments],
             check=True,
             stdin=subprocess.DEVNULL,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+            capture_output=True,
+            text=True,
         )
 
     def process_queued_item(self, item: Path) -> bool:
@@ -953,6 +1049,7 @@ class Recorder:
             return False
         provider = manifest.get("provider") or manifest.get("agent")
         session_id = manifest.get("provider_session_id") or manifest.get("session_id")
+        scope = manifest.get("scope")
         try:
             mtime_ns = int(manifest.get("snapshot_mtime_ns", 0))
         except (TypeError, ValueError):
@@ -961,13 +1058,16 @@ class Recorder:
         if (
             not isinstance(provider, str)
             or not isinstance(session_id, str)
+            or scope not in {"personal", "organization"}
             or not mtime_ns
             or not isinstance(fingerprint, str)
         ):
             return False
-        session_lock = self.lock_dir / f"{provider}-{session_id}.lock"
+        session_lock = self.lock_dir / f"{scope}-{provider}-{session_id}.lock"
         with self.lock(session_lock):
-            if self.state_is_stale(provider, session_id, mtime_ns, fingerprint):
+            if self.state_is_stale(
+                scope, provider, session_id, mtime_ns, fingerprint
+            ):
                 shutil.rmtree(item, ignore_errors=True)
                 return True
             if self.upload_snapshot(manifest, transcript):
@@ -986,6 +1086,7 @@ class Recorder:
             if self.redact_transcript(transcript, redacted):
                 archive = redacted
                 manifest["redaction_status"] = "succeeded"
+                manifest["privacy_check_status"] = "succeeded"
                 redacted_fingerprint = self.fingerprint(redacted)
             else:
                 self.warn(
@@ -994,11 +1095,14 @@ class Recorder:
                 )
                 archive = transcript
                 manifest["redaction_status"] = "failed"
+                manifest["privacy_check_status"] = "failed"
                 redacted_fingerprint = manifest["transcript_fingerprint"]
             manifest["redaction_policy_version"] = REDACTION_POLICY_VERSION
+            manifest["privacy_policy_version"] = PRIVACY_POLICY_VERSION
             manifest["redacted_transcript_fingerprint"] = redacted_fingerprint
             manifest["eligible_for_derivation"] = (
                 manifest["redaction_status"] == "succeeded"
+                and manifest["summary_status"] == "not_started"
             )
             if not self.validate_manifest(manifest):
                 self.warn(
@@ -1030,8 +1134,6 @@ class Recorder:
         if not directory.is_dir():
             return
         for transcript in sorted(directory.glob("agent-*.jsonl")):
-            if transcript.stat().st_size == 0:
-                continue
             try:
                 self.process_capture(
                     self.build_claude_subagent_manifest(transcript, parent_session_id)
@@ -1086,6 +1188,7 @@ class Recorder:
     def migrate_legacy_queue(self, item: Path, manifest: dict[str, Any]) -> None:
         provider = manifest.get("provider") or manifest.get("agent")
         session_id = manifest.get("provider_session_id") or manifest.get("session_id")
+        scope = manifest.get("scope", self.scope)
         if provider not in {"claude", "codex"} or not isinstance(session_id, str):
             self.warn(f"legacy queue item cannot be migrated: {item.name}")
             self.quarantine(item)
@@ -1104,6 +1207,8 @@ class Recorder:
                 if provider == "claude"
                 else self.build_codex_manifest(payload)
             )
+            if scope in {"personal", "organization"}:
+                migrated["scope"] = scope
             if self.process_capture(migrated):
                 shutil.rmtree(item, ignore_errors=True)
         except (OSError, TimeoutError, TypeError, ValueError) as error:
@@ -1131,6 +1236,8 @@ class Recorder:
                         manifest.get("schema_version") != SCHEMA_VERSION
                         or manifest.get("redaction_policy_version")
                         != REDACTION_POLICY_VERSION
+                        or manifest.get("privacy_policy_version")
+                        != PRIVACY_POLICY_VERSION
                     ):
                         self.migrate_legacy_queue(item, manifest)
                         continue
@@ -1166,7 +1273,9 @@ class Recorder:
                 continue
             fingerprint = self.fingerprint(transcript)
             mtime_ns = self.mtime_ns(transcript)
-            if self.state_is_stale("codex", session_id, mtime_ns, fingerprint):
+            if self.state_is_stale(
+                self.scope, "codex", session_id, mtime_ns, fingerprint
+            ):
                 continue
             cwd = self.nested(first, "payload", "cwd")
             payload = {
@@ -1200,9 +1309,13 @@ def parse_arguments() -> argparse.Namespace:
 def main() -> int:
     os.umask(0o077)
     arguments = parse_arguments()
-    recorder = Recorder(arguments.agent)
     payload_file: Path | None = arguments.payload_file
     try:
+        try:
+            recorder = Recorder(arguments.agent)
+        except (OSError, ValueError) as error:
+            sys.stderr.write(f"agent-session-upload-worker: {error}\n")
+            return 1
         if arguments.mode == "payload" and payload_file is not None:
             recorder.process_payload(payload_file)
         else:

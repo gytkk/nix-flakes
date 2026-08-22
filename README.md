@@ -131,28 +131,34 @@ official plugin marketplaces.
 
 - Claude `SessionEnd` and Codex `Stop` / `SessionStart` hooks are installed by
   default through `modules/agent-session-record`.
-- The recorder, hook adapters, replay tools, and contract tests are Python 3.11
-  programs executed through `uv`; Home Manager writes their runtime settings to
-  `~/.config/agent-session-record/config.json`.
+- The recorder, hook adapters, replay tools, and contract tests require Python
+  3.11 or newer. Installed hook entry points use the Nix-provided Python path,
+  while repository commands and tests run through `uv`. Home Manager writes
+  runtime settings to `~/.config/agent-session-record/config.json`.
 - Direct sessions and identifiable subagent sessions receive an opaque `run_id`.
   The private run registry also reserves a stable parent ID when a child is
   captured first. Unproven parent relationships remain `unknown`.
 - Before transport, the worker redacts common secret formats, secret-bearing
-  JSON fields, bearer credentials, and email addresses. A parse failure is
-  recorded as `redaction_status = "failed"`; the issue's capture-first policy
-  still archives that snapshot, but marks it ineligible for derived knowledge.
+  JSON fields, and bearer credentials. A separate local privacy pass removes
+  identifying fields, email addresses, Korean phone numbers, and resident
+  registration number formats. A parse failure records both checks as failed.
+  The capture-first policy still archives that snapshot, but marks it ineligible
+  for derived knowledge. Empty transcripts are also archived and excluded.
 - Every snapshot is written to a private local queue before upload. Successful
   local copies or `rsync` + SSH transfers produce a versioned common manifest,
   a local receipt, and an archive under
   `/home/gytkk/agent-sessions/<scope>/<provider>/<YYYY>/<MM>/<DD>/<run_id>.*`.
-- Mode `0600` ledgers record each hook as received, accepted, or failed and each
-  run as queued or stored. Later monitoring can compare local hook activity
-  with archive receipts.
+- Scope-specific append-only manifest ledgers are staged locally under
+  `~/.local/state/agent-session-record/manifests/<scope>/<provider>/<YYYY>/<MM>/<DD>.jsonl`.
+  Mode `0600` attempt ledgers record each hook as received, accepted, or failed
+  and each run as queued or stored. Later monitoring can compare local hook
+  activity with archive receipts.
 - Queue, run registry, lock, and receipt state directories use mode `0700`;
   queued and archived files use mode `0600`.
-- Capture manifests use the `personal` scope by default and archives are stored
-  below a matching scope directory. The devsisters profile disables capture
-  during the personal-only shadow rollout.
+- Capture manifests use the `personal` scope by default. Queue identity, receipt
+  state, manifest ledgers, and archives remain separate for each scope. The
+  devsisters profile disables capture because the current shadow rollout accepts
+  personal sessions only.
 - `pylv-denim` overrides the agent session upload target to `192.168.0.10`
   because that machine reaches `pylv-onyx` over the local network instead of
   the tailnet.

@@ -15,7 +15,7 @@
     ../../modules/terraform
   ];
 
-  # Issue 3 starts with a personal-only shadow rollout.
+  # The current shadow rollout records personal sessions only.
   modules.agentSessionRecord.enable = lib.mkForce false;
 
   # Devsisters 특화 패키지 추가

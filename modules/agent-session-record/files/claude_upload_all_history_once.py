@@ -15,41 +15,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-
-def read_shell_config(path: Path) -> dict[str, str]:
-    values: dict[str, str] = {}
-    if not path.is_file():
-        return values
-    for raw_line in path.read_text(encoding="utf-8").splitlines():
-        line = raw_line.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        key, raw_value = line.split("=", 1)
-        try:
-            parsed = shlex.split(raw_value, posix=True)
-        except ValueError:
-            continue
-        if len(parsed) == 1:
-            values[key] = parsed[0]
-    return values
-
-
-def load_config(home: Path) -> dict[str, str]:
-    values = dict(os.environ)
-    config_dir = home / ".config/agent-session-record"
-    json_path = config_dir / "config.json"
-    if json_path.is_file():
-        try:
-            config = json.loads(json_path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            config = {}
-        if isinstance(config, dict):
-            values.update(
-                {key: value for key, value in config.items() if isinstance(value, str)}
-            )
-        return values
-    values.update(read_shell_config(config_dir / "config.sh"))
-    return values
+from agent_session_config import load_config
 
 
 def jsonl_objects(path: Path) -> list[dict[str, Any]]:
@@ -92,6 +58,8 @@ def transcript_metadata(path: Path) -> tuple[str, str, str]:
             ),
             "",
         )
+        if not session_id and path.stem.startswith("agent-"):
+            session_id = path.stem.removeprefix("agent-")
     else:
         session_id = path.stem
     cwd = next(
@@ -118,7 +86,11 @@ def transcript_metadata(path: Path) -> tuple[str, str, str]:
 def main() -> int:
     os.umask(0o077)
     home = Path(os.environ.get("HOME", Path.home()))
-    config = load_config(home)
+    try:
+        config = load_config(home)
+    except ValueError as error:
+        sys.stderr.write(f"{error}\n")
+        return 1
     state_dir = Path(
         config.get(
             "AGENT_SESSION_RECORD_STATE_DIR",
@@ -130,6 +102,7 @@ def main() -> int:
     worker = home / ".local/bin/agent-session-upload-worker"
     session_state_dir = state_dir / "sessions"
     temp_dir = state_dir / "tmp"
+    scope = config.get("AGENT_SESSION_RECORD_SCOPE", "personal")
     if not os.access(worker, os.X_OK):
         sys.stderr.write(f"worker command missing: {worker}\n")
         return 1
@@ -154,7 +127,7 @@ def main() -> int:
             sys.stderr.write(f"skip (missing session id): {transcript}\n")
             failed += 1
             continue
-        state_file = session_state_dir / f"claude-{session_id}.json"
+        state_file = session_state_dir / f"{scope}-claude-{session_id}.json"
         state_file.unlink(missing_ok=True)
         payload = {
             "session_id": session_id,

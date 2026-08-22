@@ -71,6 +71,7 @@ with Path(os.environ["AGENT_SESSION_TEST_TRANSPORT_OBSERVATION"]).open(
     "a", encoding="utf-8"
 ) as handle:
     handle.write(status + "\\n")
+sys.stderr.write("simulated ssh transport failure\\n")
 raise SystemExit(1)
 """,
             encoding="utf-8",
@@ -267,6 +268,34 @@ raise SystemExit(1)
             {"received", "accepted"},
         )
 
+    def test_local_privacy_check_redacts_identifying_fields(self) -> None:
+        transcript = self.fixtures / "privacy.jsonl"
+        self.write_jsonl(
+            transcript,
+            {
+                "type": "user",
+                "timestamp": "2026-08-22T00:20:00Z",
+                "profile": {
+                    "display_name": "Alice Example",
+                    "employee_id": "DEV-EMP-12345",
+                    "contact": "+82-10-1234-5678",
+                },
+            },
+        )
+
+        self.run_worker(
+            "claude",
+            self.payload("privacy", "privacy-session", transcript),
+        )
+
+        meta_path = self.find_meta("privacy-session")
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        archive = meta_path.parent / f"{meta['run_id']}.jsonl"
+        content = archive.read_text(encoding="utf-8")
+        for sensitive in ("Alice Example", "DEV-EMP-12345", "+82-10-1234-5678"):
+            self.assertNotIn(sensitive, content)
+        self.assertEqual(meta["privacy_check_status"], "succeeded")
+
     def test_codex_hook_adapter_returns_continue_and_starts_worker(self) -> None:
         transcript = self.fixtures / "codex-sessions/rollout-hook.jsonl"
         self.write_jsonl(
@@ -310,6 +339,29 @@ raise SystemExit(1)
                 time.sleep(0.05)
         else:
             self.fail("Codex hook did not produce an archived session")
+
+    def test_invalid_json_config_stops_capture_with_diagnostic(self) -> None:
+        config = self.home / ".config/agent-session-record/config.json"
+        config.parent.mkdir(parents=True)
+        config.write_text("{invalid\n", encoding="utf-8")
+        transcript = self.fixtures / "invalid-config.jsonl"
+        self.write_jsonl(
+            transcript,
+            {"type": "user", "timestamp": "2026-08-22T00:35:00Z"},
+        )
+        payload = self.payload("invalid-config", "invalid-config", transcript)
+
+        result = subprocess.run(
+            self.worker_command("claude", payload),
+            env=self.environment(),
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn(str(config), result.stderr)
+        self.assertEqual(list(self.archive.rglob("*.jsonl")), [])
 
     def test_claude_history_replay_captures_direct_and_orphan_sessions(self) -> None:
         projects = self.home / ".claude/projects/project"
@@ -404,6 +456,30 @@ raise SystemExit(1)
         self.assertEqual(child_meta["parent_run_id"], parent_meta["run_id"])
         self.assertEqual(child_meta["agent_role"], "subagent")
 
+    def test_empty_claude_subagent_is_preserved_and_excluded(self) -> None:
+        parent_id = "claude-empty-parent"
+        child_id = "empty-child"
+        parent = self.fixtures / "claude-project" / f"{parent_id}.jsonl"
+        child = parent.with_suffix("") / "subagents" / f"agent-{child_id}.jsonl"
+        self.write_jsonl(
+            parent,
+            {
+                "type": "user",
+                "sessionId": parent_id,
+                "timestamp": "2026-08-22T01:10:00Z",
+            },
+        )
+        child.parent.mkdir(parents=True)
+        child.touch()
+
+        self.run_worker("claude", self.payload("empty-parent", parent_id, parent))
+
+        parent_meta = json.loads(self.find_meta(parent_id).read_text(encoding="utf-8"))
+        child_meta = json.loads(self.find_meta(child_id).read_text(encoding="utf-8"))
+        self.assertEqual(child_meta["parent_run_id"], parent_meta["run_id"])
+        self.assertEqual(child_meta["summary_status"], "excluded")
+        self.assertFalse(child_meta["eligible_for_derivation"])
+
     def test_scope_selects_a_physically_separate_archive(self) -> None:
         transcript = self.fixtures / "organization.jsonl"
         self.write_jsonl(
@@ -420,6 +496,29 @@ raise SystemExit(1)
         self.assertEqual(
             json.loads(meta.read_text(encoding="utf-8"))["scope"], "organization"
         )
+
+    def test_same_session_is_archived_independently_per_scope(self) -> None:
+        transcript = self.fixtures / "scope-transition.jsonl"
+        self.write_jsonl(
+            transcript,
+            {"type": "user", "timestamp": "2026-08-22T01:45:00Z"},
+        )
+        self.run_worker(
+            "claude",
+            self.payload("personal-scope", "shared-session", transcript),
+            scope="personal",
+        )
+        self.run_worker(
+            "claude",
+            self.payload("organization-scope", "shared-session", transcript),
+            scope="organization",
+        )
+
+        archived_scopes = {
+            json.loads(path.read_text(encoding="utf-8"))["scope"]
+            for path in self.archive.rglob("*.meta.json")
+        }
+        self.assertEqual(archived_scopes, {"personal", "organization"})
 
     def test_codex_child_reserves_stable_parent_run_id(self) -> None:
         directory = self.fixtures / "codex-sessions/2026/08/22"
@@ -471,11 +570,12 @@ raise SystemExit(1)
         self.write_jsonl(
             transcript, {"type": "user", "timestamp": "2026-08-22T03:00:00Z"}
         )
-        self.run_worker(
+        result = self.run_worker(
             "claude",
             self.payload("durable", "durable-claude", transcript),
             failed_transport=True,
         )
+        self.assertIn("simulated ssh transport failure", result.stderr)
         self.assertEqual(
             self.observation.read_text(encoding="utf-8").splitlines()[0],
             "queue-present",
@@ -497,6 +597,49 @@ raise SystemExit(1)
             .splitlines()
         }
         self.assertEqual(attempts, {"queued", "stored"})
+
+    def test_stored_snapshots_append_to_scope_manifest_ledger(self) -> None:
+        transcript = self.fixtures / "ledger.jsonl"
+        self.write_jsonl(
+            transcript,
+            {"type": "user", "timestamp": "2026-08-22T03:15:00Z"},
+        )
+        self.run_worker(
+            "claude",
+            self.payload("ledger-first", "ledger-session", transcript),
+        )
+        with transcript.open("a", encoding="utf-8") as handle:
+            handle.write(
+                json.dumps(
+                    {"type": "assistant", "timestamp": "2026-08-22T03:16:00Z"}
+                )
+                + "\n"
+            )
+        self.run_worker(
+            "claude",
+            self.payload("ledger-second", "ledger-session", transcript),
+        )
+
+        meta_path = self.find_meta("ledger-session")
+        archive_date = meta_path.parent.relative_to(
+            self.archive / "personal/claude"
+        )
+        ledger_path = (
+            self.state
+            / "manifests/personal/claude"
+            / archive_date.parent
+            / f"{archive_date.name}.jsonl"
+        )
+        entries = [
+            json.loads(line)
+            for line in ledger_path.read_text(encoding="utf-8").splitlines()
+        ]
+        self.assertEqual(len(entries), 2)
+        self.assertEqual({entry["scope"] for entry in entries}, {"personal"})
+        self.assertEqual(
+            {entry["capture_receipt"]["status"] for entry in entries}, {"stored"}
+        )
+        self.assertEqual(len({entry["transcript_fingerprint"] for entry in entries}), 2)
 
     def test_replay_quarantines_modified_queue_transcript(self) -> None:
         transcript = self.fixtures / "modified.jsonl"
@@ -594,6 +737,23 @@ raise SystemExit(1)
             "sk-test-secret", (self.state / "warnings.log").read_text(encoding="utf-8")
         )
 
+    def test_empty_transcript_is_archived_but_excluded_from_derivation(self) -> None:
+        transcript = self.fixtures / "empty.jsonl"
+        transcript.touch()
+
+        self.run_worker(
+            "claude",
+            self.payload("empty", "empty-session", transcript),
+        )
+
+        meta_path = self.find_meta("empty-session")
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        archive = meta_path.parent / f"{meta['run_id']}.jsonl"
+        self.assertEqual(archive.read_bytes(), b"")
+        self.assertFalse(meta["eligible_for_derivation"])
+        self.assertEqual(meta["summary_status"], "excluded")
+        self.assertEqual(meta["derivation_exclusion_reason"], "empty_transcript")
+
     def test_codex_session_start_sweep_uses_capture_contract(self) -> None:
         transcript = self.fixtures / "codex-sessions/rollout-sweep.jsonl"
         self.write_jsonl(
@@ -633,6 +793,7 @@ raise SystemExit(1)
             {
                 "agent": "claude",
                 "session_id": session_id,
+                "scope": "organization",
                 "cwd": "/workspace/legacy",
                 "snapshot_mtime_ns": str(transcript.stat().st_mtime_ns),
                 "snapshot_fingerprint": fingerprint,
@@ -642,6 +803,7 @@ raise SystemExit(1)
         self.assertFalse(transcript.parent.exists())
         meta_path = self.find_meta(session_id)
         meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        self.assertEqual(meta["scope"], "organization")
         archive = meta_path.parent / f"{meta['run_id']}.jsonl"
         self.assertNotIn("legacy@example.test", archive.read_text(encoding="utf-8"))
 
@@ -659,7 +821,7 @@ raise SystemExit(1)
         )
         fingerprint = hashlib.sha256(transcript.read_bytes()).hexdigest()
         self.write_json(
-            self.state / f"sessions/claude-{session_id}.json",
+            self.state / f"sessions/personal-claude-{session_id}.json",
             {
                 "snapshot_mtime_ns": str(transcript.stat().st_mtime_ns),
                 "snapshot_fingerprint": fingerprint,
