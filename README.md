@@ -131,28 +131,8 @@ official plugin marketplaces.
 
 - Claude `SessionEnd` and Codex `Stop` / `SessionStart` hooks are installed by
   default through `modules/agent-session-record`.
-- The recorder, hook adapters, replay tools, and contract tests are Python 3.11
-  programs executed through `uv`; Home Manager writes their runtime settings to
-  `~/.config/agent-session-record/config.json`.
-- Direct sessions and identifiable subagent sessions receive an opaque `run_id`.
-  The private run registry also reserves a stable parent ID when a child is
-  captured first. Unproven parent relationships remain `unknown`.
-- Before transport, the worker redacts common secret formats, secret-bearing
-  JSON fields, bearer credentials, and email addresses. A parse failure is
-  recorded as `redaction_status = "failed"`; the issue's capture-first policy
-  still archives that snapshot, but marks it ineligible for derived knowledge.
-- Every snapshot is written to a private local queue before upload. Successful
-  local copies or `rsync` + SSH transfers produce a versioned common manifest,
-  a local receipt, and an archive under
-  `/home/gytkk/agent-sessions/<scope>/<provider>/<YYYY>/<MM>/<DD>/<run_id>.*`.
-- Mode `0600` ledgers record each hook as received, accepted, or failed and each
-  run as queued or stored. Later monitoring can compare local hook activity
-  with archive receipts.
-- Queue, run registry, lock, and receipt state directories use mode `0700`;
-  queued and archived files use mode `0600`.
-- Capture manifests use the `personal` scope by default and archives are stored
-  below a matching scope directory. The devsisters profile disables capture
-  during the personal-only shadow rollout.
+- Session transcripts are uploaded best-effort to `pylv-onyx` over `rsync` +
+  SSH and stored under `/home/gytkk/agent-sessions/<agent>/<YYYY>/<MM>/<DD>/`.
 - `pylv-denim` overrides the agent session upload target to `192.168.0.10`
   because that machine reaches `pylv-onyx` over the local network instead of
   the tailnet.

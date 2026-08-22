@@ -1,9 +1,0 @@
-#!/usr/bin/env -S uv run --script
-# /// script
-# requires-python = ">=3.11"
-# ///
-
-from agent_session_hook import main
-
-if __name__ == "__main__":
-    raise SystemExit(main("codex-session-start-sweep"))
