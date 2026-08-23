@@ -2,8 +2,6 @@
   inputs,
   lib,
   pkgs,
-  username,
-  homeDirectory,
   hasSystemNiriConfig,
   ...
 }:
@@ -13,7 +11,13 @@
   imports = (lib.optional (!hasSystemNiriConfig) inputs.niri.homeModules.config) ++ [
     inputs.dms.homeModules.dank-material-shell
     inputs.dms.homeModules.niri
+    ../../modules/openclaw/home.nix
   ];
+
+  modules.openclaw = {
+    enable = true;
+    disableHermesGateway = true;
+  };
 
   # DankMaterialShell
   programs.dank-material-shell = {
@@ -40,14 +44,6 @@
     pkgs.pretendard
     pkgs.moonlight-qt
   ];
-
-  home.sessionPath = [ "${homeDirectory}/.openclaw/bin" ];
-
-  xdg.configFile."systemd/user/openclaw-gateway.service.d/20-nix-runtime.conf".text = ''
-    [Service]
-    Environment="PATH=${homeDirectory}/.openclaw/bin:${homeDirectory}/.openclaw/tools/node/bin:/run/current-system/sw/bin:${homeDirectory}/.nix-profile/bin:/etc/profiles/per-user/${username}/bin:${homeDirectory}/.local/bin:${homeDirectory}/bin:/usr/local/bin:/usr/bin:/bin"
-    Environment="LD_LIBRARY_PATH=${lib.makeLibraryPath [ pkgs.libcap ]}"
-  '';
 
   # Alt+Space로 walker 실행 (Spotlight 스타일)
   programs.niri.settings.binds = {

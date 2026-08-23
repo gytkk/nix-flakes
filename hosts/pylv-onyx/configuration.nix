@@ -12,9 +12,14 @@
     inputs.dms.nixosModules.greeter
     ./hardware-configuration.nix
     ./hermes-dashboard.nix
-    ./openclaw.nix
+    ../../modules/openclaw
     ../../modules/nixos
   ];
+
+  modules.openclaw = {
+    enable = true;
+    lanInterface = "wlo1";
+  };
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.systemd-boot.graceful = true;

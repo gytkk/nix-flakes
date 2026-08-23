@@ -54,7 +54,7 @@ lib/builders.nix                  # Backward-compatible builder aggregation
 
 Home Manager modules expose `modules.<name>.enable`; `base/default.nix` owns common default enables, and profile files can override them. NixOS input modules that are host-specific, such as Disko, Copyparty, niri, and DankMaterialShell, are imported by the relevant `hosts/<name>/configuration.nix`.
 
-OpenClaw on `pylv-onyx` is installed under `~/.openclaw` with the official rootless installer. OpenClaw owns its CLI, plugins, mutable configuration, and systemd user service. `hosts/pylv-onyx/openclaw.nix` only provides NixOS dependencies, the agenix Discord token, and the existing nginx and firewall integration.
+OpenClaw on `pylv-onyx` is installed under `~/.openclaw` with the official rootless installer. OpenClaw owns its CLI, plugins, mutable configuration, and systemd user service. `modules/openclaw` provides the declarative NixOS and Home Manager integration.
 
 Install or recover the user-owned stable release without onboarding:
 
@@ -328,9 +328,10 @@ nix build .#nixosConfigurations.pylv-sepia.config.system.build.toplevel
 - For Cloudflare Tunnel / Access exposure, use the separate loopback-only origin `http://127.0.0.1:18791` instead of reusing the LAN listener
 - Suggested public hostname target: map your Cloudflare public hostname to `http://127.0.0.1:18791`, then protect it with a Cloudflare Access self-hosted app
 - `openclaw dashboard --no-open` on the host now prints the bare local URL `http://127.0.0.1:18789/`; for a remote LAN browser, just open `http://pylv-onyx:18790` or `http://192.168.0.10:18790`
-- Host integration lives in [`hosts/pylv-onyx/openclaw.nix`](./hosts/pylv-onyx/openclaw.nix). Nix supplies runtime dependencies, the agenix Discord token, proxy authentication, and the firewall rule.
+- Declarative integration lives in [`modules/openclaw`](./modules/openclaw). Nix supplies runtime dependencies, the agenix Discord token, proxy authentication, the firewall rule, and the user service runtime paths.
 - Mutable state, configuration, plugins, and the executable live under `~/.openclaw`. The official CLI owns the systemd user service and updates itself on the stable channel.
 - Home Manager adds the user-owned CLI and Node runtime to the service path. Nix does not set `OPENCLAW_NIX_MODE` or install an OpenClaw package.
+- During the cutover, Home Manager stops and disables `hermes-gateway.service` so Hermes cannot connect to Discord. The Hermes dashboard and archived state remain available.
 
 ### `pylv-onyx` Hermes Dashboard access
 

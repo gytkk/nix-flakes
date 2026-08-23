@@ -97,9 +97,9 @@ Defined in `inventory.nix` (single source of truth). `kind` field determines bui
 Each module in `modules/` manages a specific tool. **When modifying settings for any tool, look in the corresponding module directory first.** `modules/agent-prompts/` owns shared instructions and the cross-harness skill registry rather than acting as a Home Manager module, so it does not have a `default.nix` or an enable option.
 
 Common NixOS modules live under `modules/nixos`; host-specific NixOS input
-modules and values live in `hosts/<name>/configuration.nix`. The user-managed
-OpenClaw install on `pylv-onyx` keeps only its NixOS dependencies, agenix
-secret, proxy, and firewall integration in `hosts/pylv-onyx/openclaw.nix`.
+modules and values live in `hosts/<name>/configuration.nix`. `modules/openclaw`
+keeps the NixOS and Home Manager integration for the user-managed OpenClaw
+install. It does not own the OpenClaw package, mutable state, or user service.
 
 For theme-backed apps, prefer the canonical theme pipeline under `themes/` over app-local theme copies:
 

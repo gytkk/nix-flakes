@@ -67,11 +67,12 @@ hermes update
 
 ## Session record integration
 
-The `pylv-onyx` Home Manager profile installs the
-`agent-session-record` plugin under `~/.hermes/plugins/` and enables it with
-Hermes's `plugins enable` command. The module does not manage `SOUL.md`,
-`config.yaml`, memories, or local skills. The enable command only adds the
-plugin name to Hermes's existing enabled plugin list.
+When enabled, the Home Manager module installs the `agent-session-record`
+plugin under `~/.hermes/plugins/` and enables it with Hermes's `plugins enable`
+command. The module does not manage `SOUL.md`, `config.yaml`, memories, or
+local skills. The enable command only adds the plugin name to Hermes's existing
+enabled plugin list. This integration is disabled on `pylv-onyx` while the
+OpenClaw migration is active.
 
 Hermes v0.14.0 does not provide a `sessions export --redact` option. The
 recorder therefore exports one session to a mode `0600` temporary file, removes
@@ -80,8 +81,8 @@ and then deletes the temporary file. A malformed export or failed redaction is
 not queued or uploaded for the Hermes provider. Claude and Codex retain their
 existing redaction failure behavior.
 
-After applying the Home Manager configuration and restarting the user-managed
-gateway, verify the plugin and recorder configuration:
+After enabling this module and restarting the user-managed gateway, verify the
+plugin and recorder configuration:
 
 ```bash
 hermes plugins list
