@@ -15,6 +15,9 @@
     ../../modules/terraform
   ];
 
+  # The current shadow rollout records personal sessions only.
+  modules.agentSessionRecord.enable = lib.mkForce false;
+
   # Devsisters 특화 패키지 추가
   home.packages = with pkgs; [
     # Scala (default to 2.12, compatible with existing projects)

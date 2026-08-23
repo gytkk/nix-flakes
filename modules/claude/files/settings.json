@@ -47,7 +47,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.local/bin/claude-session-upload",
+            "command": "~/.local/bin/agent-session-record hook claude session-end",
             "timeout": 10,
             "async": true
           },
