@@ -19,13 +19,11 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
 
-SUBJECT = (
-    Path(__file__).resolve().parent / ".." / "files" / "agent_session_upload_worker.py"
-)
+SUBJECT = Path(__file__).resolve().parent / ".." / "files" / "agent_session_record.py"
 UV = shutil.which("uv") or "uv"
 
 
-class AgentSessionUploadWorkerTest(unittest.TestCase):
+class AgentSessionRecordTest(unittest.TestCase):
     def setUp(self) -> None:
         self.temp = tempfile.TemporaryDirectory(prefix="agent-session-worker-test-")
         self.root = Path(self.temp.name)
@@ -130,9 +128,10 @@ raise SystemExit(1)
             "run",
             "--script",
             str(SUBJECT),
+            "_worker",
             "--mode",
             "session-start-sweep" if sweep else "payload",
-            "--agent",
+            "--provider",
             agent,
         ]
         if payload is not None:
@@ -155,6 +154,18 @@ raise SystemExit(1)
             capture_output=True,
             text=True,
         )
+
+    def replay_environment(self) -> dict[str, str]:
+        env = self.environment()
+        env.update(
+            {
+                "AGENT_SESSION_RECORD_SSH_BIN": str(self.fake_ssh_dir),
+                "AGENT_SESSION_TEST_STATE_DIR": str(self.state),
+                "AGENT_SESSION_TEST_TRANSPORT_OBSERVATION": str(self.observation),
+                "AGENT_SESSION_TEST_SSH_LOG": str(self.ssh_log),
+            }
+        )
+        return env
 
     @staticmethod
     def write_json(path: Path, value: Any) -> None:
@@ -312,9 +323,8 @@ raise SystemExit(1)
         )
         local_bin = self.home / ".local/bin"
         local_bin.mkdir(parents=True)
-        (local_bin / "agent-session-upload-worker").symlink_to(SUBJECT)
-        installed_hook = local_bin / "codex-stop-upload"
-        installed_hook.symlink_to(SUBJECT.parent / "codex_stop_upload.py")
+        installed_hook = local_bin / "agent-session-record"
+        installed_hook.symlink_to(SUBJECT)
         payload = {
             "session_id": "codex-hook",
             "transcript_path": str(transcript),
@@ -322,7 +332,7 @@ raise SystemExit(1)
             "hook_event_name": "Stop",
         }
         result = subprocess.run(
-            [str(installed_hook)],
+            [str(installed_hook), "hook", "codex", "stop"],
             input=json.dumps(payload),
             env=self.environment(),
             check=True,
@@ -339,6 +349,32 @@ raise SystemExit(1)
                 time.sleep(0.05)
         else:
             self.fail("Codex hook did not produce an archived session")
+
+    def test_cli_rejects_invalid_provider_event_pair(self) -> None:
+        result = subprocess.run(
+            [UV, "run", "--script", str(SUBJECT), "hook", "claude", "stop"],
+            input="{}",
+            env=self.environment(),
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("invalid choice: 'stop'", result.stderr)
+
+    def test_disabled_provider_hook_is_a_successful_noop(self) -> None:
+        config = self.home / ".config/agent-session-record/config.json"
+        self.write_json(config, {"AGENT_SESSION_RECORD_ENABLED_PROVIDERS": "claude"})
+        result = subprocess.run(
+            [UV, "run", "--script", str(SUBJECT), "hook", "codex", "stop"],
+            input="{}",
+            env=self.environment(),
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(json.loads(result.stdout), {"continue": True})
+        self.assertEqual(list(self.archive.rglob("*.jsonl")), [])
 
     def test_invalid_json_config_stops_capture_with_diagnostic(self) -> None:
         config = self.home / ".config/agent-session-record/config.json"
@@ -400,20 +436,9 @@ raise SystemExit(1)
         )
         local_bin = self.home / ".local/bin"
         local_bin.mkdir(parents=True)
-        (local_bin / "agent-session-upload-worker").symlink_to(SUBJECT)
-        env = self.environment()
-        env.update(
-            {
-                "AGENT_SESSION_RECORD_SSH_BIN": str(self.fake_ssh_dir),
-                "AGENT_SESSION_TEST_STATE_DIR": str(self.state),
-                "AGENT_SESSION_TEST_TRANSPORT_OBSERVATION": str(self.observation),
-                "AGENT_SESSION_TEST_SSH_LOG": str(self.ssh_log),
-            }
-        )
-        history = SUBJECT.parent / "claude_upload_all_history_once.py"
         subprocess.run(
-            [UV, "run", "--script", str(history)],
-            env=env,
+            [UV, "run", "--script", str(SUBJECT), "replay", "claude"],
+            env=self.replay_environment(),
             check=True,
             capture_output=True,
             text=True,
@@ -421,6 +446,31 @@ raise SystemExit(1)
         self.find_meta("history-parent")
         self.find_meta("history-child")
         self.find_meta("history-orphan")
+        self.assert_mode(self.state / "sessions", 0o700)
+        self.assert_mode(self.state / "tmp", 0o700)
+
+    def test_codex_history_replay_uses_common_cli(self) -> None:
+        transcript = self.fixtures / "codex-sessions/rollout-history.jsonl"
+        self.write_jsonl(
+            transcript,
+            {
+                "type": "session_meta",
+                "payload": {
+                    "id": "codex-history",
+                    "timestamp": "2026-08-22T00:45:00Z",
+                    "cwd": "/workspace/codex-history",
+                    "source": {},
+                },
+            },
+        )
+        subprocess.run(
+            [UV, "run", "--script", str(SUBJECT), "replay", "codex"],
+            env=self.replay_environment(),
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        self.find_meta("codex-history")
         self.assert_mode(self.state / "sessions", 0o700)
         self.assert_mode(self.state / "tmp", 0o700)
 

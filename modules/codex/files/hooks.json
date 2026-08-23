@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.local/bin/codex-session-start-sweep",
+            "command": "~/.local/bin/agent-session-record hook codex session-start",
             "timeout": 10
           }
         ]
@@ -28,7 +28,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.local/bin/codex-stop-upload",
+            "command": "~/.local/bin/agent-session-record hook codex stop",
             "timeout": 10
           }
         ]

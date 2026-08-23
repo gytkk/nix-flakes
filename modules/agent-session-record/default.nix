@@ -25,6 +25,9 @@ let
     AGENT_SESSION_RECORD_CODEX_SESSIONS_DIR = "${config.home.homeDirectory}/.codex/sessions";
     AGENT_SESSION_RECORD_SSH_BIN = "${pkgs.openssh}/bin";
     AGENT_SESSION_RECORD_RSYNC_BIN = "${pkgs.rsync}/bin";
+    AGENT_SESSION_RECORD_ENABLED_PROVIDERS = lib.concatStringsSep "," (
+      lib.optional cfg.agents.claude.enable "claude" ++ lib.optional cfg.agents.codex.enable "codex"
+    );
   };
   disabledHook = pkgs.writeTextFile {
     name = "agent-session-record-disabled";
@@ -83,29 +86,12 @@ in
     (lib.mkIf cfg.enable {
       xdg.configFile."agent-session-record/config.json".text = configFile;
 
-      home.file.".local/bin/agent-session-upload-worker".source =
-        mkPythonEntrypoint "agent-session-upload-worker" "agent_session_upload_worker.py";
-
-      home.file.".local/bin/claude-session-upload".source = lib.mkIf cfg.agents.claude.enable (
-        mkPythonEntrypoint "claude-session-upload" "claude_session_upload.py"
-      );
-
-      home.file.".local/bin/codex-stop-upload".source = lib.mkIf cfg.agents.codex.enable (
-        mkPythonEntrypoint "codex-stop-upload" "codex_stop_upload.py"
-      );
-
-      home.file.".local/bin/codex-session-start-sweep".source = lib.mkIf cfg.agents.codex.enable (
-        mkPythonEntrypoint "codex-session-start-sweep" "codex_session_start_sweep.py"
-      );
+      home.file.".local/bin/agent-session-record".source =
+        mkPythonEntrypoint "agent-session-record" "agent_session_record.py";
     })
 
-    (lib.mkIf (!cfg.enable || !cfg.agents.claude.enable) {
-      home.file.".local/bin/claude-session-upload".source = disabledHook;
-    })
-
-    (lib.mkIf (!cfg.enable || !cfg.agents.codex.enable) {
-      home.file.".local/bin/codex-stop-upload".source = disabledHook;
-      home.file.".local/bin/codex-session-start-sweep".source = disabledHook;
+    (lib.mkIf (!cfg.enable) {
+      home.file.".local/bin/agent-session-record".source = disabledHook;
     })
   ];
 }

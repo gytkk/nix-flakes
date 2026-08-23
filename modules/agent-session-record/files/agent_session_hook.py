@@ -9,10 +9,12 @@ import os
 import subprocess
 import sys
 import tempfile
+from collections.abc import Sequence
 from datetime import UTC, datetime
 from pathlib import Path
 
 from agent_session_config import load_config
+from agent_session_provider import ProviderAdapter
 
 
 def warn(path: Path, command: str, message: str) -> None:
@@ -26,33 +28,22 @@ def warn(path: Path, command: str, message: str) -> None:
         pass
 
 
-def hook_contract(command: str) -> tuple[str, str, bool]:
-    if command == "claude-session-upload":
-        return "claude", "payload", False
-    if command == "codex-stop-upload":
-        return "codex", "payload", True
-    if command == "codex-session-start-sweep":
-        return "codex", "session-start-sweep", True
-    raise ValueError(f"unsupported hook command: {command}")
-
-
-def main(command: str | None = None) -> int:
+def run_hook(
+    provider: ProviderAdapter, event: str, worker_command: Sequence[str]
+) -> int:
     os.umask(0o077)
-    command = command or Path(sys.argv[0]).name
-    try:
-        agent, mode, returns_continue = hook_contract(command)
-    except ValueError as error:
-        sys.stderr.write(f"{error}\n")
-        return 1
+    contract = provider.hook_contract(event)
+    command = f"{provider.name}-{event}"
     home = Path(os.environ.get("HOME", Path.home()))
-    default_state_dir = Path(
-        os.environ.get("XDG_STATE_HOME", home / ".local/state")
-    ) / "agent-session-record"
+    default_state_dir = (
+        Path(os.environ.get("XDG_STATE_HOME", home / ".local/state"))
+        / "agent-session-record"
+    )
     try:
         config = load_config(home)
     except ValueError as error:
         warn(default_state_dir / "warnings.log", command, str(error))
-        if returns_continue:
+        if contract.returns_continue:
             print('{"continue":true}')
         return 0
     state_dir = Path(
@@ -64,11 +55,15 @@ def main(command: str | None = None) -> int:
     )
     warning_log = state_dir / "warnings.log"
     debug_log = state_dir / "debug.log"
-    worker = home / ".local/bin/agent-session-upload-worker"
-
-    if not os.access(worker, os.X_OK):
-        warn(warning_log, command, "worker command missing")
-        if returns_continue:
+    enabled_providers = {
+        name.strip()
+        for name in config.get(
+            "AGENT_SESSION_RECORD_ENABLED_PROVIDERS", "claude,codex"
+        ).split(",")
+        if name.strip()
+    }
+    if provider.name not in enabled_providers:
+        if contract.returns_continue:
             print('{"continue":true}')
         return 0
 
@@ -79,16 +74,16 @@ def main(command: str | None = None) -> int:
             handle.write(sys.stdin.buffer.read())
     except OSError as error:
         warn(warning_log, command, f"failed to persist hook payload: {error}")
-        if returns_continue:
+        if contract.returns_continue:
             print('{"continue":true}')
         return 0
 
     arguments = [
-        str(worker),
+        *worker_command,
         "--mode",
-        mode,
-        "--agent",
-        agent,
+        contract.mode,
+        "--provider",
+        provider.name,
         "--payload-file",
         str(payload),
     ]
@@ -110,10 +105,6 @@ def main(command: str | None = None) -> int:
     except OSError as error:
         payload.unlink(missing_ok=True)
         warn(warning_log, command, f"failed to start worker: {error}")
-    if returns_continue:
+    if contract.returns_continue:
         print('{"continue":true}')
     return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())

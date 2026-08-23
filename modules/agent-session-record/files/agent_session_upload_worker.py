@@ -5,7 +5,6 @@
 
 from __future__ import annotations
 
-import argparse
 import contextlib
 import datetime as dt
 import hashlib
@@ -146,7 +145,7 @@ class Recorder:
             path.chmod(0o700)
 
     def warn(self, message: str) -> None:
-        line = f"{utc_now()} agent-session-upload-worker: {message}\n"
+        line = f"{utc_now()} agent-session-record worker: {message}\n"
         try:
             with self.warning_log.open("a", encoding="utf-8") as handle:
                 handle.write(line)
@@ -1293,30 +1292,15 @@ class Recorder:
                 self.warn(f"Codex sweep failed for {session_id}: {error}")
 
 
-def parse_arguments() -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--mode", choices=("payload", "session-start-sweep"), default="payload"
-    )
-    parser.add_argument("--agent", choices=("claude", "codex"), required=True)
-    parser.add_argument("--payload-file", type=Path)
-    arguments = parser.parse_args()
-    if arguments.mode == "payload" and arguments.payload_file is None:
-        parser.error("--payload-file is required in payload mode")
-    return arguments
-
-
-def main() -> int:
+def run_worker(provider: str, mode: str, payload_file: Path | None) -> int:
     os.umask(0o077)
-    arguments = parse_arguments()
-    payload_file: Path | None = arguments.payload_file
     try:
         try:
-            recorder = Recorder(arguments.agent)
+            recorder = Recorder(provider)
         except (OSError, ValueError) as error:
-            sys.stderr.write(f"agent-session-upload-worker: {error}\n")
+            sys.stderr.write(f"agent-session-record worker: {error}\n")
             return 1
-        if arguments.mode == "payload" and payload_file is not None:
+        if mode == "payload" and payload_file is not None:
             recorder.process_payload(payload_file)
         else:
             recorder.scan_codex_rollouts()
@@ -1325,7 +1309,3 @@ def main() -> int:
     finally:
         if payload_file is not None:
             payload_file.unlink(missing_ok=True)
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())

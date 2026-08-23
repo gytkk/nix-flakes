@@ -13,19 +13,16 @@ let
   agentPrompts = import ../agent-prompts/lib.nix { inherit lib pkgs; };
   codex = "${pkgs.codex}/bin/codex";
   mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/codex/${path}";
-  codexStopUploadCommand = "${config.home.homeDirectory}/.local/bin/codex-stop-upload";
-  codexSessionStartSweepCommand = "${config.home.homeDirectory}/.local/bin/codex-session-start-sweep";
+  agentSessionRecordCommand = "${config.home.homeDirectory}/.local/bin/agent-session-record";
   plannotatorCommand = "${config.home.homeDirectory}/.local/bin/plannotator";
   codexHooksJson =
     builtins.replaceStrings
       [
-        "~/.local/bin/codex-session-start-sweep"
-        "~/.local/bin/codex-stop-upload"
+        "~/.local/bin/agent-session-record"
         "~/.local/bin/plannotator"
       ]
       [
-        codexSessionStartSweepCommand
-        codexStopUploadCommand
+        agentSessionRecordCommand
         plannotatorCommand
       ]
       (builtins.readFile ./files/hooks.json);
