@@ -10,11 +10,6 @@
 {
   # pylv-onyx 데스크톱 환경 전용 설정
 
-  modules = {
-    agentSessionRecord.agents.hermes.enable = true;
-    hermesAgent.enable = true;
-  };
-
   imports = (lib.optional (!hasSystemNiriConfig) inputs.niri.homeModules.config) ++ [
     inputs.dms.homeModules.dank-material-shell
     inputs.dms.homeModules.niri
@@ -46,13 +41,16 @@
     pkgs.moonlight-qt
   ];
 
+  home.sessionPath = [ "${homeDirectory}/.openclaw/bin" ];
+
+  xdg.configFile."systemd/user/openclaw-gateway.service.d/20-nix-runtime.conf".text = ''
+    [Service]
+    Environment="PATH=${homeDirectory}/.openclaw/bin:${homeDirectory}/.openclaw/tools/node/bin:/run/current-system/sw/bin:${homeDirectory}/.nix-profile/bin:/etc/profiles/per-user/${username}/bin:${homeDirectory}/.local/bin:${homeDirectory}/bin:/usr/local/bin:/usr/bin:/bin"
+    Environment="LD_LIBRARY_PATH=${lib.makeLibraryPath [ pkgs.libcap ]}"
+  '';
+
   # Alt+Space로 walker 실행 (Spotlight 스타일)
   programs.niri.settings.binds = {
     "Alt+Space".action.spawn = "walker";
   };
-
-  xdg.configFile."systemd/user/hermes-gateway.service.d/10-nix-profile-path.conf".text = ''
-    [Service]
-    Environment="PATH=${homeDirectory}/.hermes/hermes-agent/venv/bin:${homeDirectory}/.hermes/hermes-agent/node_modules/.bin:/run/current-system/sw/bin:${homeDirectory}/.nix-profile/bin:/etc/profiles/per-user/${username}/bin:${homeDirectory}/.local/bin:${homeDirectory}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-  '';
 }

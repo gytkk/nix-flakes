@@ -54,7 +54,19 @@ lib/builders.nix                  # Backward-compatible builder aggregation
 
 Home Manager modules expose `modules.<name>.enable`; `base/default.nix` owns common default enables, and profile files can override them. NixOS input modules that are host-specific, such as Disko, Copyparty, niri, and DankMaterialShell, are imported by the relevant `hosts/<name>/configuration.nix`.
 
-`modules/openclaw` is a parameterized NixOS module. `pylv-onyx` currently enables it and provides host values such as `lanInterface`, proxy ports, and `stateDir` in `hosts/pylv-onyx/configuration.nix`.
+OpenClaw on `pylv-onyx` is installed under `~/.openclaw` with the official rootless installer. OpenClaw owns its CLI, plugins, mutable configuration, and systemd user service. `hosts/pylv-onyx/openclaw.nix` only provides NixOS dependencies, the agenix Discord token, and the existing nginx and firewall integration.
+
+Install or recover the user-owned stable release without onboarding:
+
+```bash
+curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install-cli.sh | \
+  bash -s -- --prefix ~/.openclaw --version latest --no-onboard
+openclaw gateway install --force --wrapper ~/.openclaw/bin/openclaw
+```
+
+Use `openclaw update` for verified core and plugin updates. The mutable config may enable OpenClaw's stable auto updater. Nix does not pin or replace the OpenClaw executable.
+
+The 2026-08 Hermes migration used OpenClaw's bundled `hermes` provider. It imports compatible model, MCP, persona, memory, and skill data after a preview and verified backup. Hermes cron jobs, sessions, logs, plugins, and SQLite state remain archive-only and require manual review. Keep `~/.hermes` and the Hermes dashboard until those records are no longer needed.
 
 Global coding-agent instructions are assembled from shared rules under `modules/agent-prompts/` and a harness-specific file under each agent module. The same directory also owns the shared skill registry. The registry reads the 25 official skills from the locked `mattpocock-skills` input and exposes them to Claude Code, Codex, and Pi. Home Manager generates the final instruction and skill links, so changes take effect after the relevant configuration is applied.
 
@@ -316,9 +328,9 @@ nix build .#nixosConfigurations.pylv-sepia.config.system.build.toplevel
 - For Cloudflare Tunnel / Access exposure, use the separate loopback-only origin `http://127.0.0.1:18791` instead of reusing the LAN listener
 - Suggested public hostname target: map your Cloudflare public hostname to `http://127.0.0.1:18791`, then protect it with a Cloudflare Access self-hosted app
 - `openclaw dashboard --no-open` on the host now prints the bare local URL `http://127.0.0.1:18789/`; for a remote LAN browser, just open `http://pylv-onyx:18790` or `http://192.168.0.10:18790`
-- OpenClaw reusable wiring lives in [`modules/openclaw/default.nix`](./modules/openclaw/default.nix); `pylv-onyx` supplies host values through `modules.openclaw`.
-- Nix seeds `/etc/openclaw/openclaw.seed.json`, while the mutable runtime config lives at `~/.openclaw/openclaw.json`.
-- The host-level `openclaw` command is a hybrid wrapper: Nix installs the package, but CLI service management overrides the upstream `OPENCLAW_NIX_MODE=1` default with an empty value so `openclaw gateway install` can manage the user service directly
+- Host integration lives in [`hosts/pylv-onyx/openclaw.nix`](./hosts/pylv-onyx/openclaw.nix). Nix supplies runtime dependencies, the agenix Discord token, proxy authentication, and the firewall rule.
+- Mutable state, configuration, plugins, and the executable live under `~/.openclaw`. The official CLI owns the systemd user service and updates itself on the stable channel.
+- Home Manager adds the user-owned CLI and Node runtime to the service path. Nix does not set `OPENCLAW_NIX_MODE` or install an OpenClaw package.
 
 ### `pylv-onyx` Hermes Dashboard access
 
