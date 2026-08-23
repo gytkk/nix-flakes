@@ -6,21 +6,33 @@
 from __future__ import annotations
 
 import hashlib
+import importlib.util
 import json
 import os
 import shutil
 import socket
 import stat
 import subprocess
+import sys
 import tempfile
 import time
 import unittest
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
+from unittest import mock
 
-SUBJECT = Path(__file__).resolve().parent / ".." / "files" / "agent_session_record.py"
+FILES_DIR = (Path(__file__).resolve().parent / ".." / "files").resolve()
+SUBJECT = FILES_DIR / "agent_session_record.py"
+HERMES_PLUGIN = (
+    FILES_DIR.parent.parent
+    / "hermes-agent/files/plugins/agent-session-record/__init__.py"
+)
 UV = shutil.which("uv") or "uv"
+
+sys.path.insert(0, str(FILES_DIR))
+
+from agent_session_provider import CaptureContext, get_provider  # noqa: E402
 
 
 class AgentSessionRecordTest(unittest.TestCase):
@@ -33,6 +45,8 @@ class AgentSessionRecordTest(unittest.TestCase):
         self.fixtures = self.root / "fixtures"
         self.fake_ssh_dir = self.root / "fake-ssh-bin"
         self.fake_rsync_dir = self.root / "fake-rsync-bin"
+        self.fake_hermes = self.root / "fake-hermes"
+        self.hermes_log = self.root / "hermes.log"
         self.observation = self.root / "transport-observation"
         self.ssh_log = self.root / "ssh.log"
         for path in (
@@ -45,6 +59,7 @@ class AgentSessionRecordTest(unittest.TestCase):
         ):
             path.mkdir(parents=True)
         self.write_fake_transports()
+        self.write_fake_hermes()
 
     def tearDown(self) -> None:
         self.temp.cleanup()
@@ -87,6 +102,34 @@ raise SystemExit(1)
         ssh.chmod(0o755)
         rsync.chmod(0o755)
 
+    def write_fake_hermes(self) -> None:
+        self.fake_hermes.write_text(
+            """#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# ///
+import json
+import os
+import sys
+from pathlib import Path
+
+with Path(os.environ["AGENT_SESSION_TEST_HERMES_LOG"]).open(
+    "a", encoding="utf-8"
+) as handle:
+    handle.write(json.dumps(sys.argv[1:]) + "\\n")
+if os.environ.get("AGENT_SESSION_TEST_HERMES_FAIL") == "1":
+    sys.stderr.write("simulated Hermes export failure\\n")
+    raise SystemExit(1)
+if sys.argv[1:3] != ["sessions", "export"] or sys.argv[4] != "--session-id":
+    raise SystemExit(2)
+Path(sys.argv[3]).write_text(
+    os.environ["AGENT_SESSION_TEST_HERMES_EXPORT"] + "\\n", encoding="utf-8"
+)
+""",
+            encoding="utf-8",
+        )
+        self.fake_hermes.chmod(0o755)
+
     def environment(
         self, *, failed_transport: bool = False, scope: str = "personal"
     ) -> dict[str, str]:
@@ -105,6 +148,8 @@ raise SystemExit(1)
                     self.fixtures / "codex-sessions"
                 ),
                 "AGENT_SESSION_RECORD_SCOPE": scope,
+                "AGENT_SESSION_RECORD_HERMES_BIN": str(self.fake_hermes),
+                "AGENT_SESSION_TEST_HERMES_LOG": str(self.hermes_log),
             }
         )
         if failed_transport:
@@ -824,6 +869,303 @@ raise SystemExit(1)
         self.assertEqual(meta["hook_event_name"], "SessionStart")
         self.assertEqual(meta["model"], "gpt-sweep")
         self.assertEqual(meta["redaction_status"], "succeeded")
+
+    def test_claude_provider_normalizes_hook_captures(self) -> None:
+        parent = self.fixtures / "claude-project/provider-parent.jsonl"
+        child = parent.with_suffix("") / "subagents/agent-provider-child.jsonl"
+        self.write_jsonl(
+            parent,
+            {
+                "type": "assistant",
+                "sessionId": "provider-parent",
+                "cwd": "/workspace/provider",
+                "timestamp": "2026-08-23T00:00:00Z",
+                "message": {"model": "claude-provider"},
+            },
+        )
+        self.write_jsonl(
+            child,
+            {
+                "type": "assistant",
+                "sessionId": "provider-parent",
+                "agentId": "provider-child",
+                "cwd": "/workspace/provider",
+                "timestamp": "2026-08-23T00:00:01Z",
+                "message": {"model": "claude-provider"},
+            },
+        )
+
+        payload = self.payload("provider", "provider-parent", parent)
+        captures = get_provider("claude").captures_from_event(
+            json.loads(payload.read_text(encoding="utf-8")),
+            CaptureContext(home=self.home, config=self.environment()),
+        )
+
+        self.assertEqual(
+            [(capture.session_id, capture.agent_role) for capture in captures],
+            [("provider-parent", "direct"), ("provider-child", "subagent")],
+        )
+        self.assertEqual(captures[1].parent_identity, "provider-parent")
+        self.assertEqual(captures[1].provider_identity, "provider-parent:provider-child")
+
+    def test_codex_provider_normalizes_hook_and_discovered_captures(self) -> None:
+        transcript = self.fixtures / "codex-sessions/rollout-provider.jsonl"
+        self.write_jsonl(
+            transcript,
+            {
+                "type": "session_meta",
+                "payload": {
+                    "id": "codex-provider",
+                    "timestamp": "2026-08-23T00:10:00Z",
+                    "cwd": "/workspace/provider",
+                    "source": {},
+                },
+            },
+            {"type": "turn_context", "payload": {"model": "gpt-provider"}},
+        )
+        provider = get_provider("codex")
+        context = CaptureContext(home=self.home, config=self.environment())
+
+        payload = self.payload("provider", "codex-provider", transcript)
+        event_captures = provider.captures_from_event(
+            json.loads(payload.read_text(encoding="utf-8")), context
+        )
+        discovered = provider.discover_captures(context)
+
+        self.assertEqual(len(event_captures), 1)
+        self.assertEqual(event_captures[0].session_id, "codex-provider")
+        self.assertEqual(event_captures[0].model, "gpt-provider")
+        self.assertEqual(event_captures[0].manifest_fields["turn_id"], None)
+        self.assertEqual(
+            [(capture.session_id, capture.hook_event_name) for capture in discovered],
+            [("codex-provider", "SessionStart")],
+        )
+
+    def test_hermes_export_is_redacted_and_archived_once(self) -> None:
+        session_id = "hermes-session"
+        raw_user_id = "discord-user-123456"
+        env = self.environment()
+        env["AGENT_SESSION_TEST_HERMES_EXPORT"] = json.dumps(
+            {
+                "id": session_id,
+                "source": "discord",
+                "user_id": raw_user_id,
+                "routing": {
+                    "channel_id": "discord-channel-987654",
+                    "guild_id": "discord-guild-456789",
+                    "platform_message_id": "discord-message-112233",
+                },
+                "model": "hermes-model",
+                "started_at": 1787445600.0,
+                "ended_at": 1787445660.0,
+                "end_reason": "completed",
+                "system_prompt": "token sk-test-secret-value-that-is-long",
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": "contact hermes@example.test",
+                        "timestamp": 1787445601.0,
+                    }
+                ],
+            }
+        )
+        payload = self.fixtures / "hermes-payload.json"
+        hook_payload = {
+            "session_id": session_id,
+            "hook_event_name": "on_session_end",
+            "platform": "discord",
+            "model": "hermes-model",
+            "completed": True,
+            "interrupted": False,
+        }
+        self.write_json(payload, hook_payload)
+
+        subprocess.run(
+            self.worker_command("hermes", payload),
+            env=env,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        self.write_json(payload, hook_payload)
+        subprocess.run(
+            self.worker_command("hermes", payload),
+            env=env,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+        meta_path = self.find_meta(session_id)
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        archive = meta_path.parent / f"{meta['run_id']}.jsonl"
+        self.assertEqual(meta["provider"], "hermes")
+        self.assertEqual(meta["platform"], "discord")
+        self.assertNotIn(raw_user_id, json.dumps(meta))
+        content = archive.read_text(encoding="utf-8")
+        self.assertNotIn(raw_user_id, content)
+        self.assertNotIn("discord-channel-987654", content)
+        self.assertNotIn("discord-guild-456789", content)
+        self.assertNotIn("discord-message-112233", content)
+        self.assertNotIn("hermes@example.test", content)
+        self.assertNotIn("sk-test-secret", content)
+        argv = json.loads(self.hermes_log.read_text(encoding="utf-8").splitlines()[0])
+        self.assertEqual(argv[:2], ["sessions", "export"])
+        self.assertEqual(argv[3:], ["--session-id", session_id])
+        self.assertFalse(Path(argv[2]).exists())
+        ledgers = list((self.state / "manifests/personal/hermes").rglob("*.jsonl"))
+        self.assertEqual(len(ledgers), 1)
+        self.assertEqual(len(ledgers[0].read_text(encoding="utf-8").splitlines()), 1)
+
+    def test_hermes_export_failure_does_not_archive(self) -> None:
+        env = self.environment()
+        env["AGENT_SESSION_TEST_HERMES_EXPORT"] = "{}"
+        env["AGENT_SESSION_TEST_HERMES_FAIL"] = "1"
+        payload = self.fixtures / "hermes-failure-payload.json"
+        self.write_json(payload, {"session_id": "hermes-failure"})
+
+        result = subprocess.run(
+            self.worker_command("hermes", payload),
+            env=env,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertEqual(list(self.archive.rglob("*.jsonl")), [])
+        self.assertIn("Hermes export failed", result.stderr)
+
+    def test_hermes_redaction_failure_is_not_archived(self) -> None:
+        env = self.environment()
+        env["AGENT_SESSION_TEST_HERMES_EXPORT"] = (
+            json.dumps({"id": "hermes-redaction-failure", "source": "cli"})
+            + "\nnot-json sk-test-secret-value-that-is-long"
+        )
+        payload = self.fixtures / "hermes-redaction-failure-payload.json"
+        self.write_json(payload, {"session_id": "hermes-redaction-failure"})
+
+        result = subprocess.run(
+            self.worker_command("hermes", payload),
+            env=env,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertEqual(list(self.archive.rglob("*.jsonl")), [])
+        self.assertEqual(list((self.state / "queue").iterdir()), [])
+        self.assertIn("exactly one JSON record", result.stderr)
+        argv = json.loads(self.hermes_log.read_text(encoding="utf-8").splitlines()[0])
+        self.assertFalse(Path(argv[2]).exists())
+
+    def test_hermes_hook_returns_before_archiving(self) -> None:
+        session_id = "hermes-hook"
+        env = self.environment()
+        env["AGENT_SESSION_TEST_HERMES_EXPORT"] = json.dumps(
+            {
+                "id": session_id,
+                "source": "cli",
+                "started_at": 1787445600.0,
+                "messages": [],
+            }
+        )
+        local_bin = self.home / ".local/bin"
+        local_bin.mkdir(parents=True)
+        installed_hook = local_bin / "agent-session-record"
+        installed_hook.symlink_to(SUBJECT)
+
+        result = subprocess.run(
+            [str(installed_hook), "hook", "hermes", "session-end"],
+            input=json.dumps({"session_id": session_id, "platform": "cli"}),
+            env=env,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertEqual(result.stdout, "")
+        deadline = time.monotonic() + 5
+        while time.monotonic() < deadline:
+            try:
+                self.find_meta(session_id)
+                break
+            except AssertionError:
+                time.sleep(0.05)
+        else:
+            self.fail("Hermes hook did not produce an archived session")
+
+    def test_hermes_plugin_forwards_only_capture_metadata(self) -> None:
+        recorder = self.root / "fake-recorder"
+        recorder_log = self.root / "recorder.log"
+        recorder.write_text(
+            """#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# ///
+import json
+import os
+import sys
+from pathlib import Path
+
+with Path(os.environ["AGENT_SESSION_TEST_RECORDER_LOG"]).open(
+    "w", encoding="utf-8"
+) as handle:
+    json.dump({"argv": sys.argv[1:], "payload": json.load(sys.stdin)}, handle)
+""",
+            encoding="utf-8",
+        )
+        recorder.chmod(0o755)
+        callbacks: dict[str, Any] = {}
+
+        class Context:
+            @staticmethod
+            def register_hook(name: str, callback: Any) -> None:
+                callbacks[name] = callback
+
+        spec = importlib.util.spec_from_file_location(
+            "agent_session_record_hermes_plugin", HERMES_PLUGIN
+        )
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader if spec else None)
+        module = importlib.util.module_from_spec(spec)
+        assert spec and spec.loader
+        with mock.patch.dict(
+            os.environ,
+            {
+                "AGENT_SESSION_RECORD_BIN": str(recorder),
+                "AGENT_SESSION_TEST_RECORDER_LOG": str(recorder_log),
+            },
+        ):
+            spec.loader.exec_module(module)
+            module.register(Context())
+            callbacks["on_session_end"](
+                session_id="plugin-session",
+                completed=True,
+                interrupted=False,
+                model="hermes-model",
+                platform="discord",
+                user_id="raw-user-id",
+                channel_id="raw-channel-id",
+            )
+            deadline = time.monotonic() + 5
+            while time.monotonic() < deadline and not recorder_log.is_file():
+                time.sleep(0.05)
+
+        event = json.loads(recorder_log.read_text(encoding="utf-8"))
+        self.assertEqual(event["argv"], ["hook", "hermes", "session-end"])
+        self.assertEqual(
+            event["payload"],
+            {
+                "session_id": "plugin-session",
+                "hook_event_name": "on_session_end",
+                "completed": True,
+                "interrupted": False,
+                "model": "hermes-model",
+                "platform": "discord",
+            },
+        )
+        self.assertNotIn("raw-user-id", recorder_log.read_text(encoding="utf-8"))
+        self.assertNotIn("raw-channel-id", recorder_log.read_text(encoding="utf-8"))
 
     def test_legacy_queue_is_migrated_and_redacted(self) -> None:
         session_id = "legacy-session"

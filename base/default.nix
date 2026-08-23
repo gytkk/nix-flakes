@@ -80,6 +80,7 @@ in
     ../modules/ghostty
     ../modules/git
     ../modules/herdr
+    ../modules/hermes-agent
     ../modules/k9s
     ../modules/lsp
     ../modules/omnigent
@@ -109,6 +110,7 @@ in
       ghostty.enable = lib.mkDefault true;
       git.enable = lib.mkDefault true;
       herdr.enable = lib.mkDefault true;
+      hermesAgent.enable = lib.mkDefault false;
       k9s.enable = lib.mkDefault true;
       lsp.enable = lib.mkDefault true;
       omnigent.enable = lib.mkDefault true;

@@ -10,6 +10,11 @@
 {
   # pylv-onyx 데스크톱 환경 전용 설정
 
+  modules = {
+    agentSessionRecord.agents.hermes.enable = true;
+    hermesAgent.enable = true;
+  };
+
   imports = (lib.optional (!hasSystemNiriConfig) inputs.niri.homeModules.config) ++ [
     inputs.dms.homeModules.dank-material-shell
     inputs.dms.homeModules.niri

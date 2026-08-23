@@ -23,10 +23,13 @@ let
     AGENT_SESSION_RECORD_SCOPE = cfg.scope;
     AGENT_SESSION_RECORD_STATE_DIR = stateDir;
     AGENT_SESSION_RECORD_CODEX_SESSIONS_DIR = "${config.home.homeDirectory}/.codex/sessions";
+    AGENT_SESSION_RECORD_HERMES_BIN = "${config.home.homeDirectory}/.local/bin/hermes";
     AGENT_SESSION_RECORD_SSH_BIN = "${pkgs.openssh}/bin";
     AGENT_SESSION_RECORD_RSYNC_BIN = "${pkgs.rsync}/bin";
     AGENT_SESSION_RECORD_ENABLED_PROVIDERS = lib.concatStringsSep "," (
-      lib.optional cfg.agents.claude.enable "claude" ++ lib.optional cfg.agents.codex.enable "codex"
+      lib.optional cfg.agents.claude.enable "claude"
+      ++ lib.optional cfg.agents.codex.enable "codex"
+      ++ lib.optional cfg.agents.hermes.enable "hermes"
     );
   };
   disabledHook = pkgs.writeTextFile {
@@ -78,6 +81,11 @@ in
         type = lib.types.bool;
         default = true;
         description = "Enable Codex session transcript upload hooks";
+      };
+      hermes.enable = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Enable Hermes session transcript upload hooks";
       };
     };
   };

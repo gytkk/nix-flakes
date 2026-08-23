@@ -1,9 +1,15 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+import hashlib
+import os
+import re
+import subprocess
+import tempfile
+from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Protocol
+from typing import Any, Mapping, Protocol
 
 
 @dataclass(frozen=True)
@@ -20,11 +26,42 @@ class ReplaySession:
     reason: str = ""
 
 
+@dataclass(frozen=True)
+class CaptureContext:
+    home: Path
+    config: Mapping[str, str]
+
+
+@dataclass(frozen=True)
+class CaptureSource:
+    session_id: str
+    transcript: Path
+    cwd: str
+    hook_event_name: str
+    source: str
+    provider_identity: str
+    parent_identity: str | None
+    relationship_status: str
+    model: str
+    agent_role: str
+    started_at: str
+    termination_status: str
+    manifest_fields: Mapping[str, Any] = field(default_factory=dict)
+    delete_after_capture: bool = False
+
+
 class ProviderAdapter(Protocol):
     name: str
     hook_events: tuple[str, ...]
+    archive_on_redaction_failure: bool
 
     def hook_contract(self, event: str) -> HookContract: ...
+
+    def captures_from_event(
+        self, payload: Mapping[str, object], context: CaptureContext
+    ) -> list[CaptureSource]: ...
+
+    def discover_captures(self, context: CaptureContext) -> list[CaptureSource]: ...
 
     def sessions_dir(self, home: Path, config: dict[str, str]) -> Path: ...
 
@@ -69,9 +106,18 @@ def nested(value: dict[str, Any], *keys: str) -> Any:
     return current
 
 
+def first_jsonl_value(path: Path, reader: Any) -> str:
+    for item in jsonl_objects(path):
+        value = reader(item)
+        if isinstance(value, str) and value:
+            return value
+    return ""
+
+
 class ClaudeProvider:
     name = "claude"
     hook_events = ("session-end",)
+    archive_on_redaction_failure = True
 
     def hook_contract(self, event: str) -> HookContract:
         if event == "session-end":
@@ -80,6 +126,105 @@ class ClaudeProvider:
 
     def sessions_dir(self, home: Path, config: dict[str, str]) -> Path:
         return home / ".claude/projects"
+
+    def captures_from_event(
+        self, payload: Mapping[str, object], context: CaptureContext
+    ) -> list[CaptureSource]:
+        session_id = payload.get("session_id")
+        transcript_raw = payload.get("transcript_path")
+        if not isinstance(session_id, str) or not isinstance(transcript_raw, str):
+            raise TypeError("Claude payload missing session_id or transcript_path")
+        transcript = Path(transcript_raw)
+        if not transcript.is_file():
+            raise ValueError(f"Claude transcript missing: {transcript}")
+        if "subagents" in transcript.parts:
+            parent_id = first_jsonl_value(
+                transcript, lambda item: item.get("sessionId")
+            )
+            return [self._subagent_capture(transcript, parent_id)]
+
+        model = first_jsonl_value(
+            transcript,
+            lambda item: (
+                nested(item, "message", "model")
+                if item.get("type") == "assistant"
+                else None
+            ),
+        )
+        started_at = first_jsonl_value(transcript, lambda item: item.get("timestamp"))
+        raw_reason = payload.get("reason")
+        reason = raw_reason if isinstance(raw_reason, str) else ""
+        raw_cwd = payload.get("cwd")
+        cwd = raw_cwd if isinstance(raw_cwd, str) else ""
+        captures = [
+            CaptureSource(
+                session_id=session_id,
+                transcript=transcript,
+                cwd=cwd,
+                hook_event_name=str(payload.get("hook_event_name") or "SessionEnd"),
+                source="session-end",
+                provider_identity=session_id,
+                parent_identity=None,
+                relationship_status="direct",
+                model=model,
+                agent_role="direct",
+                started_at=started_at,
+                termination_status=reason or "captured",
+                manifest_fields={"end_reason": reason},
+            )
+        ]
+        subagents = transcript.with_suffix("") / "subagents"
+        if subagents.is_dir():
+            for child in sorted(subagents.glob("agent-*.jsonl")):
+                captures.append(self._subagent_capture(child, session_id))
+        return captures
+
+    def discover_captures(self, context: CaptureContext) -> list[CaptureSource]:
+        captures: list[CaptureSource] = []
+        config = dict(context.config)
+        for session in self.discover_replay_sessions(context.home, config):
+            captures.extend(
+                self.captures_from_event(self.replay_payload(session), context)
+            )
+        return captures
+
+    def _subagent_capture(
+        self, transcript: Path, parent_session_id: str
+    ) -> CaptureSource:
+        agent_id = first_jsonl_value(transcript, lambda item: item.get("agentId"))
+        if not agent_id and transcript.stem.startswith("agent-"):
+            agent_id = transcript.stem.removeprefix("agent-")
+        if not agent_id:
+            raise ValueError(
+                f"Claude subagent transcript missing agent id: {transcript}"
+            )
+        relationship = "identified" if parent_session_id else "unknown"
+        model = first_jsonl_value(
+            transcript,
+            lambda item: (
+                nested(item, "message", "model")
+                if item.get("type") == "assistant"
+                else None
+            ),
+        )
+        identity = f"{parent_session_id or 'unknown'}:{agent_id}"
+        return CaptureSource(
+            session_id=agent_id,
+            transcript=transcript,
+            cwd=first_jsonl_value(transcript, lambda item: item.get("cwd")),
+            hook_event_name="SubagentSweep",
+            source="claude-subagent",
+            provider_identity=identity,
+            parent_identity=parent_session_id or None,
+            relationship_status=relationship,
+            model=model,
+            agent_role="subagent",
+            started_at=first_jsonl_value(
+                transcript, lambda item: item.get("timestamp")
+            ),
+            termination_status="captured",
+            manifest_fields={"end_reason": ""},
+        )
 
     def discover_replay_sessions(
         self, home: Path, config: dict[str, str]
@@ -152,6 +297,7 @@ class ClaudeProvider:
 class CodexProvider:
     name = "codex"
     hook_events = ("session-start", "stop")
+    archive_on_redaction_failure = True
 
     def hook_contract(self, event: str) -> HookContract:
         if event == "stop":
@@ -166,6 +312,115 @@ class CodexProvider:
                 "AGENT_SESSION_RECORD_CODEX_SESSIONS_DIR", home / ".codex/sessions"
             )
         )
+
+    def captures_from_event(
+        self, payload: Mapping[str, object], context: CaptureContext
+    ) -> list[CaptureSource]:
+        session_id = payload.get("session_id")
+        if not isinstance(session_id, str) or not session_id:
+            raise ValueError("Codex payload missing session_id")
+        transcript_raw = payload.get("transcript_path")
+        transcript = Path(transcript_raw) if isinstance(transcript_raw, str) else None
+        if transcript is None or not transcript.is_file():
+            candidates = list(
+                self.sessions_dir(context.home, dict(context.config)).rglob(
+                    f"rollout-*-{session_id}.jsonl"
+                )
+            )
+            transcript = (
+                max(candidates, key=lambda path: path.stat().st_mtime_ns)
+                if candidates
+                else None
+            )
+        if transcript is None or not transcript.is_file():
+            raise ValueError(f"Codex transcript missing for session {session_id}")
+
+        first = first_record(transcript)
+        transcript_session_id = nested(first, "payload", "id")
+        if isinstance(transcript_session_id, str) and transcript_session_id:
+            session_id = transcript_session_id
+        source = nested(first, "payload", "source")
+        parent_id = nested(
+            first, "payload", "source", "subagent", "thread_spawn", "parent_thread_id"
+        ) or nested(first, "payload", "parent_thread_id")
+        is_subagent = (
+            isinstance(source, dict) and source.get("subagent") is not None
+        ) or nested(first, "payload", "parent_thread_id") is not None
+        relationship = "direct"
+        role = "direct"
+        parent_identity = None
+        if is_subagent:
+            role = "subagent"
+            relationship = "unknown"
+            if isinstance(parent_id, str) and parent_id:
+                parent_identity = parent_id
+                relationship = "identified"
+
+        model = first_jsonl_value(
+            transcript,
+            lambda item: (
+                nested(item, "payload", "model")
+                if item.get("type") == "turn_context"
+                else None
+            ),
+        )
+        started_at = nested(first, "payload", "timestamp")
+        raw_cwd = payload.get("cwd")
+        cwd = raw_cwd if isinstance(raw_cwd, str) else ""
+        return [
+            CaptureSource(
+                session_id=session_id,
+                transcript=transcript,
+                cwd=cwd,
+                hook_event_name=str(payload.get("hook_event_name") or "Stop"),
+                source="stop",
+                provider_identity=session_id,
+                parent_identity=parent_identity,
+                relationship_status=relationship,
+                model=model,
+                agent_role=role,
+                started_at=started_at if isinstance(started_at, str) else "",
+                termination_status="snapshot",
+                manifest_fields={
+                    "turn_id": str(payload.get("turn_id") or "") or None,
+                    "stop_hook_active": payload.get("stop_hook_active") is True,
+                    "last_assistant_message": str(
+                        payload.get("last_assistant_message") or ""
+                    )
+                    or None,
+                },
+            )
+        ]
+
+    def discover_captures(self, context: CaptureContext) -> list[CaptureSource]:
+        captures: list[CaptureSource] = []
+        for transcript in sorted(
+            self.sessions_dir(context.home, dict(context.config)).rglob(
+                "rollout-*.jsonl"
+            )
+        ):
+            if transcript.stat().st_size == 0:
+                continue
+            first = first_record(transcript)
+            session_id = nested(first, "payload", "id")
+            if not isinstance(session_id, str) or not session_id:
+                continue
+            cwd = nested(first, "payload", "cwd")
+            captures.extend(
+                self.captures_from_event(
+                    {
+                        "session_id": session_id,
+                        "transcript_path": str(transcript),
+                        "cwd": cwd if isinstance(cwd, str) else "",
+                        "hook_event_name": "SessionStart",
+                        "turn_id": "",
+                        "stop_hook_active": False,
+                        "last_assistant_message": "",
+                    },
+                    context,
+                )
+            )
+        return captures
 
     def discover_replay_sessions(
         self, home: Path, config: dict[str, str]
@@ -198,9 +453,204 @@ class CodexProvider:
         }
 
 
+class HermesProvider:
+    name = "hermes"
+    hook_events = ("session-end", "session-finalize")
+    archive_on_redaction_failure = False
+
+    def hook_contract(self, event: str) -> HookContract:
+        if event in self.hook_events:
+            return HookContract(mode="payload", returns_continue=False)
+        raise ValueError(f"unsupported Hermes hook event: {event}")
+
+    def sessions_dir(self, home: Path, config: dict[str, str]) -> Path:
+        return home / ".hermes"
+
+    def captures_from_event(
+        self, payload: Mapping[str, object], context: CaptureContext
+    ) -> list[CaptureSource]:
+        session_id = payload.get("session_id")
+        if not isinstance(session_id, str) or not session_id:
+            raise ValueError("Hermes payload missing session_id")
+        state_dir = Path(
+            context.config.get(
+                "AGENT_SESSION_RECORD_STATE_DIR",
+                context.home / ".local/state/agent-session-record",
+            )
+        )
+        temp_dir = state_dir / "tmp"
+        temp_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
+        temp_dir.chmod(0o700)
+        descriptor, raw_export = tempfile.mkstemp(
+            dir=temp_dir, prefix="hermes-export-", suffix=".jsonl"
+        )
+        os.close(descriptor)
+        export = Path(raw_export)
+        export.chmod(0o600)
+        hermes = context.config.get("AGENT_SESSION_RECORD_HERMES_BIN", "hermes")
+        try:
+            result = subprocess.run(
+                [
+                    hermes,
+                    "sessions",
+                    "export",
+                    str(export),
+                    "--session-id",
+                    session_id,
+                ],
+                stdin=subprocess.DEVNULL,
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=30,
+            )
+        except (OSError, subprocess.TimeoutExpired) as error:
+            export.unlink(missing_ok=True)
+            raise ValueError(f"Hermes export failed: {error}") from error
+        if result.returncode != 0:
+            export.unlink(missing_ok=True)
+            raise ValueError(
+                f"Hermes export failed with exit status {result.returncode}"
+            )
+        try:
+            lines = [
+                line
+                for line in export.read_text(encoding="utf-8").splitlines()
+                if line.strip()
+            ]
+            record = json.loads(lines[0]) if len(lines) == 1 else None
+        except (OSError, UnicodeError, json.JSONDecodeError):
+            record = None
+        if not isinstance(record, dict):
+            export.unlink(missing_ok=True)
+            raise ValueError(
+                f"Hermes export did not contain exactly one JSON record for {session_id}"
+            )
+        exported_id = record.get("id")
+        if not isinstance(exported_id, str) or exported_id != session_id:
+            export.unlink(missing_ok=True)
+            raise ValueError(f"Hermes export session did not match {session_id}")
+        sanitized = self._redact_routing_identifiers(record)
+        try:
+            export.write_text(
+                json.dumps(sanitized, ensure_ascii=False, separators=(",", ":"))
+                + "\n",
+                encoding="utf-8",
+            )
+            export.chmod(0o600)
+        except OSError as error:
+            export.unlink(missing_ok=True)
+            raise ValueError(f"Hermes export sanitization failed: {error}") from error
+
+        raw_platform = payload.get("platform") or record.get("source")
+        platform = self._safe_label(raw_platform)
+        profile = self._safe_label(payload.get("profile"))
+        raw_model = payload.get("model") or record.get("model")
+        model = raw_model if isinstance(raw_model, str) else ""
+        parent_id = record.get("parent_session_id")
+        parent_identity = (
+            parent_id if isinstance(parent_id, str) and parent_id else None
+        )
+        end_reason = record.get("end_reason")
+        interrupted = payload.get("interrupted") is True
+        completed = payload.get("completed") is True
+        termination_status = (
+            "interrupted"
+            if interrupted
+            else end_reason
+            if isinstance(end_reason, str) and end_reason
+            else "turn-complete"
+            if completed
+            else "snapshot"
+        )
+        system_prompt = record.get("system_prompt")
+        prompt_fingerprint = None
+        if isinstance(system_prompt, str) and system_prompt:
+            prompt_fingerprint = hashlib.sha256(system_prompt.encode()).hexdigest()
+        return [
+            CaptureSource(
+                session_id=exported_id,
+                transcript=export,
+                cwd="",
+                hook_event_name=str(
+                    payload.get("hook_event_name") or "on_session_end"
+                ),
+                source="hermes-export",
+                provider_identity=exported_id,
+                parent_identity=parent_identity,
+                relationship_status="identified" if parent_identity else "direct",
+                model=model,
+                agent_role="subagent" if parent_identity else "direct",
+                started_at=self._timestamp(record.get("started_at")),
+                termination_status=str(termination_status),
+                manifest_fields={
+                    "platform": platform,
+                    "profile": profile,
+                    "system_prompt_fingerprint": prompt_fingerprint,
+                    "compression_count": None,
+                    "parent_session_id_hash": None,
+                },
+                delete_after_capture=True,
+            )
+        ]
+
+    def discover_captures(self, context: CaptureContext) -> list[CaptureSource]:
+        return []
+
+    def discover_replay_sessions(
+        self, home: Path, config: dict[str, str]
+    ) -> list[ReplaySession]:
+        return []
+
+    def replay_payload(self, session: ReplaySession) -> dict[str, Any]:
+        return {
+            "session_id": session.session_id,
+            "hook_event_name": "ManualReplay",
+        }
+
+    @staticmethod
+    def _safe_label(value: object) -> str | None:
+        if isinstance(value, str) and re.fullmatch(r"[a-zA-Z0-9_.-]{1,64}", value):
+            return value
+        return None
+
+    @classmethod
+    def _redact_routing_identifiers(cls, value: Any) -> Any:
+        routing_keys = {
+            "channel_id",
+            "guild_id",
+            "platform_message_id",
+            "session_key",
+            "user_id",
+            "username",
+        }
+        if isinstance(value, dict):
+            return {
+                key: (
+                    "[REDACTED_ROUTING_ID]"
+                    if key.lower() in routing_keys
+                    else cls._redact_routing_identifiers(item)
+                )
+                for key, item in value.items()
+            }
+        if isinstance(value, list):
+            return [cls._redact_routing_identifiers(item) for item in value]
+        return value
+
+    @staticmethod
+    def _timestamp(value: object) -> str:
+        if isinstance(value, (int, float)):
+            try:
+                return datetime.fromtimestamp(value, UTC).isoformat()
+            except (OSError, OverflowError, ValueError):
+                return ""
+        return value if isinstance(value, str) else ""
+
+
 PROVIDERS: dict[str, ProviderAdapter] = {
     "claude": ClaudeProvider(),
     "codex": CodexProvider(),
+    "hermes": HermesProvider(),
 }
 
 

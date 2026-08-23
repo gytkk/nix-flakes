@@ -14,7 +14,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from agent_session_config import load_config
-from agent_session_provider import ProviderAdapter
+from agent_session_provider import PROVIDERS, ProviderAdapter
 
 
 def warn(path: Path, command: str, message: str) -> None:
@@ -58,7 +58,7 @@ def run_hook(
     enabled_providers = {
         name.strip()
         for name in config.get(
-            "AGENT_SESSION_RECORD_ENABLED_PROVIDERS", "claude,codex"
+            "AGENT_SESSION_RECORD_ENABLED_PROVIDERS", ",".join(PROVIDERS)
         ).split(",")
         if name.strip()
     }

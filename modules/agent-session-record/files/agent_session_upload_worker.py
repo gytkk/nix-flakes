@@ -24,14 +24,23 @@ from pathlib import Path
 from typing import Any
 
 from agent_session_config import load_config
+from agent_session_provider import (
+    PROVIDERS,
+    CaptureContext,
+    CaptureSource,
+    ProviderAdapter,
+    get_provider,
+)
 
 SCHEMA_VERSION = 2
 REDACTION_POLICY_VERSION = "builtin-v1"
 PRIVACY_POLICY_VERSION = "builtin-pii-v1"
 RUN_ID_PATTERN = re.compile(r"^run_[0-9a-f]{32}$")
 FINGERPRINT_PATTERN = re.compile(r"^[0-9a-f]{64}$")
+PROVIDER_PATTERN = "|".join(re.escape(name) for name in PROVIDERS)
 QUEUE_ITEM_PATTERN = re.compile(
-    r"^(personal|organization)-(claude|codex)-(run_[0-9a-f]{32})-([0-9a-f]{64})$"
+    rf"^(personal|organization)-({PROVIDER_PATTERN})-"
+    r"(run_[0-9a-f]{32})-([0-9a-f]{64})$"
 )
 SECRET_KEY_PATTERN = re.compile(
     r"(api[_-]?key|access[_-]?token|auth[_-]?token|refresh[_-]?token|"
@@ -84,13 +93,16 @@ def utc_now() -> str:
 
 
 class Recorder:
-    def __init__(self, agent: str, environ: dict[str, str] | None = None) -> None:
+    def __init__(
+        self, provider: ProviderAdapter, environ: dict[str, str] | None = None
+    ) -> None:
         env = dict(os.environ if environ is None else environ)
         home = Path(env.get("HOME", str(Path.home())))
         env = load_config(home, env)
         xdg_state = Path(env.get("XDG_STATE_HOME", home / ".local/state"))
 
-        self.agent = agent
+        self.provider = provider
+        self.agent = provider.name
         self.home = home
         self.remote_host = env.get("AGENT_SESSION_RECORD_REMOTE_HOST", "pylv-onyx")
         self.remote_user = env.get("AGENT_SESSION_RECORD_REMOTE_USER", "gytkk")
@@ -108,9 +120,7 @@ class Recorder:
                 "AGENT_SESSION_RECORD_STATE_DIR", xdg_state / "agent-session-record"
             )
         )
-        self.codex_sessions_dir = Path(
-            env.get("AGENT_SESSION_RECORD_CODEX_SESSIONS_DIR", home / ".codex/sessions")
-        )
+        self.capture_context = CaptureContext(home=home, config=env)
         self.scope = env.get("AGENT_SESSION_RECORD_SCOPE", "personal")
         self.ssh = Path(env.get("AGENT_SESSION_RECORD_SSH_BIN", "/usr/bin")) / "ssh"
         self.rsync = (
@@ -237,31 +247,6 @@ class Recorder:
                     continue
                 if isinstance(value, dict):
                     yield value
-
-    @staticmethod
-    def nested(value: dict[str, Any], *keys: str) -> Any:
-        current: Any = value
-        for key in keys:
-            if not isinstance(current, dict):
-                return None
-            current = current.get(key)
-        return current
-
-    def first_jsonl_value(self, path: Path, reader: Any) -> str:
-        try:
-            for item in self.jsonl_objects(path):
-                value = reader(item)
-                if isinstance(value, str) and value:
-                    return value
-        except OSError:
-            pass
-        return ""
-
-    def first_jsonl_object(self, path: Path) -> dict[str, Any]:
-        try:
-            return next(self.jsonl_objects(path), {})
-        except OSError:
-            return {}
 
     def session_state_file(self, scope: str, provider: str, session_id: str) -> Path:
         return self.session_state_dir / f"{scope}-{provider}-{session_id}.json"
@@ -421,43 +406,36 @@ class Recorder:
 
     def build_manifest(
         self,
-        *,
-        provider: str,
-        session_id: str,
-        cwd: str,
-        hook_event_name: str,
-        transcript_path: Path,
-        source: str,
-        run_id: str,
-        parent_run_id: str | None,
-        relationship_status: str,
-        model: str,
-        agent_role: str,
-        started_at: str,
-        termination_status: str,
-        end_reason: str = "",
-        turn_id: str = "",
-        stop_hook_active: bool = False,
-        last_assistant_message: str = "",
+        capture: CaptureSource,
+        provider: ProviderAdapter | None = None,
     ) -> dict[str, Any]:
-        mtime_ns = self.mtime_ns(transcript_path)
-        fingerprint = self.fingerprint(transcript_path)
-        empty_transcript = transcript_path.stat().st_size == 0
+        adapter = self.provider if provider is None else provider
+        transcript = capture.transcript
+        mtime_ns = self.mtime_ns(transcript)
+        fingerprint = self.fingerprint(transcript)
+        empty_transcript = transcript.stat().st_size == 0
+        parent_run_id = (
+            self.allocate_run_id(adapter.name, capture.parent_identity)
+            if capture.parent_identity
+            else None
+        )
         manifest: dict[str, Any] = {
             "schema_version": SCHEMA_VERSION,
-            "run_id": run_id,
-            "provider": provider,
-            "provider_session_id": session_id,
+            "run_id": self.allocate_run_id(
+                adapter.name, capture.provider_identity
+            ),
+            "provider": adapter.name,
+            "provider_session_id": capture.session_id,
             "parent_run_id": parent_run_id,
-            "relationship_status": relationship_status,
-            "model": model or None,
-            "agent_role": agent_role,
-            "repository": cwd or None,
+            "relationship_status": capture.relationship_status,
+            "model": capture.model or None,
+            "agent_role": capture.agent_role,
+            "repository": capture.cwd or None,
             "scope": self.scope,
             "knowledge_commit": None,
-            "started_at": started_at or None,
+            "started_at": capture.started_at or None,
             "ended_at": self.file_timestamp(mtime_ns),
-            "termination_status": termination_status,
+            "termination_status": capture.termination_status,
             "transcript_fingerprint": fingerprint,
             "redaction_status": "pending",
             "redaction_policy_version": REDACTION_POLICY_VERSION,
@@ -474,189 +452,22 @@ class Recorder:
                 "stored_at": None,
                 "target_dir": None,
             },
-            "agent": provider,
-            "session_id": session_id,
+            "agent": adapter.name,
+            "session_id": capture.session_id,
             "hostname": self.current_host,
-            "cwd": cwd,
-            "hook_event_name": hook_event_name,
-            "transcript_path": str(transcript_path),
-            "source": source,
+            "cwd": capture.cwd,
+            "hook_event_name": capture.hook_event_name,
+            "transcript_path": str(transcript),
+            "source": capture.source,
             "snapshot_mtime_ns": str(mtime_ns),
             "snapshot_fingerprint": fingerprint,
         }
-        if provider == "claude":
-            manifest["end_reason"] = end_reason
-        else:
-            manifest.update(
-                {
-                    "turn_id": turn_id or None,
-                    "stop_hook_active": stop_hook_active,
-                    "last_assistant_message": last_assistant_message or None,
-                }
-            )
+        collisions = manifest.keys() & capture.manifest_fields.keys()
+        if collisions:
+            names = ", ".join(sorted(collisions))
+            raise ValueError(f"provider manifest fields replace common fields: {names}")
+        manifest.update(capture.manifest_fields)
         return manifest
-
-    def build_claude_manifest(self, payload: dict[str, Any]) -> dict[str, Any]:
-        session_id = payload.get("session_id")
-        transcript_raw = payload.get("transcript_path")
-        if not isinstance(session_id, str) or not isinstance(transcript_raw, str):
-            raise TypeError("Claude payload missing session_id or transcript_path")
-        transcript = Path(transcript_raw)
-        if not transcript.is_file():
-            raise ValueError(f"Claude transcript missing: {transcript}")
-        if "subagents" in transcript.parts:
-            parent_id = self.first_jsonl_value(
-                transcript, lambda item: item.get("sessionId")
-            )
-            return self.build_claude_subagent_manifest(transcript, parent_id)
-
-        model = self.first_jsonl_value(
-            transcript,
-            lambda item: (
-                self.nested(item, "message", "model")
-                if item.get("type") == "assistant"
-                else None
-            ),
-        )
-        started_at = self.first_jsonl_value(
-            transcript, lambda item: item.get("timestamp")
-        )
-        raw_end_reason = payload.get("reason")
-        end_reason: str = raw_end_reason if isinstance(raw_end_reason, str) else ""
-        raw_cwd = payload.get("cwd")
-        cwd: str = raw_cwd if isinstance(raw_cwd, str) else ""
-        return self.build_manifest(
-            provider="claude",
-            session_id=session_id,
-            cwd=cwd,
-            hook_event_name=str(payload.get("hook_event_name") or "SessionEnd"),
-            transcript_path=transcript,
-            source="session-end",
-            run_id=self.allocate_run_id("claude", session_id),
-            parent_run_id=None,
-            relationship_status="direct",
-            model=model,
-            agent_role="direct",
-            started_at=started_at,
-            termination_status=end_reason or "captured",
-            end_reason=end_reason,
-        )
-
-    def find_codex_rollout(self, session_id: str) -> Path | None:
-        if not self.codex_sessions_dir.is_dir():
-            return None
-        candidates = list(
-            self.codex_sessions_dir.rglob(f"rollout-*-{session_id}.jsonl")
-        )
-        if not candidates:
-            return None
-        return max(candidates, key=lambda path: path.stat().st_mtime_ns)
-
-    def build_codex_manifest(self, payload: dict[str, Any]) -> dict[str, Any]:
-        session_id = payload.get("session_id")
-        if not isinstance(session_id, str) or not session_id:
-            raise ValueError("Codex payload missing session_id")
-        transcript_raw = payload.get("transcript_path")
-        transcript = Path(transcript_raw) if isinstance(transcript_raw, str) else None
-        if transcript is None or not transcript.is_file():
-            transcript = self.find_codex_rollout(session_id)
-        if transcript is None or not transcript.is_file():
-            raise ValueError(f"Codex transcript missing for session {session_id}")
-
-        first = self.first_jsonl_object(transcript)
-        transcript_session_id = self.nested(first, "payload", "id")
-        if isinstance(transcript_session_id, str) and transcript_session_id:
-            session_id = transcript_session_id
-        source = self.nested(first, "payload", "source")
-        parent_id = self.nested(
-            first, "payload", "source", "subagent", "thread_spawn", "parent_thread_id"
-        ) or self.nested(first, "payload", "parent_thread_id")
-        is_subagent = (
-            isinstance(source, dict) and source.get("subagent") is not None
-        ) or self.nested(first, "payload", "parent_thread_id") is not None
-        parent_run_id = None
-        relationship = "direct"
-        role = "direct"
-        if is_subagent:
-            role = "subagent"
-            relationship = "unknown"
-            if isinstance(parent_id, str) and parent_id:
-                parent_run_id = self.allocate_run_id("codex", parent_id)
-                relationship = "identified"
-
-        model = self.first_jsonl_value(
-            transcript,
-            lambda item: (
-                self.nested(item, "payload", "model")
-                if item.get("type") == "turn_context"
-                else None
-            ),
-        )
-        started_at = self.nested(first, "payload", "timestamp")
-        raw_cwd = payload.get("cwd")
-        cwd: str = raw_cwd if isinstance(raw_cwd, str) else ""
-        return self.build_manifest(
-            provider="codex",
-            session_id=session_id,
-            cwd=cwd,
-            hook_event_name=str(payload.get("hook_event_name") or "Stop"),
-            transcript_path=transcript,
-            source="stop",
-            run_id=self.allocate_run_id("codex", session_id),
-            parent_run_id=parent_run_id,
-            relationship_status=relationship,
-            model=model,
-            agent_role=role,
-            started_at=started_at if isinstance(started_at, str) else "",
-            termination_status="snapshot",
-            turn_id=str(payload.get("turn_id") or ""),
-            stop_hook_active=payload.get("stop_hook_active") is True,
-            last_assistant_message=str(payload.get("last_assistant_message") or ""),
-        )
-
-    def build_claude_subagent_manifest(
-        self, transcript: Path, parent_session_id: str
-    ) -> dict[str, Any]:
-        agent_id = self.first_jsonl_value(transcript, lambda item: item.get("agentId"))
-        if not agent_id and transcript.stem.startswith("agent-"):
-            agent_id = transcript.stem.removeprefix("agent-")
-        if not agent_id:
-            raise ValueError(
-                f"Claude subagent transcript missing agent id: {transcript}"
-            )
-        parent_run_id = None
-        relationship = "unknown"
-        if parent_session_id:
-            parent_run_id = self.allocate_run_id("claude", parent_session_id)
-            relationship = "identified"
-        model = self.first_jsonl_value(
-            transcript,
-            lambda item: (
-                self.nested(item, "message", "model")
-                if item.get("type") == "assistant"
-                else None
-            ),
-        )
-        cwd = self.first_jsonl_value(transcript, lambda item: item.get("cwd"))
-        started_at = self.first_jsonl_value(
-            transcript, lambda item: item.get("timestamp")
-        )
-        identity = f"{parent_session_id or 'unknown'}:{agent_id}"
-        return self.build_manifest(
-            provider="claude",
-            session_id=agent_id,
-            cwd=cwd,
-            hook_event_name="SubagentSweep",
-            transcript_path=transcript,
-            source="claude-subagent",
-            run_id=self.allocate_run_id("claude", identity),
-            parent_run_id=parent_run_id,
-            relationship_status=relationship,
-            model=model,
-            agent_role="subagent",
-            started_at=started_at,
-            termination_status="captured",
-        )
 
     @staticmethod
     def validate_manifest(manifest: dict[str, Any]) -> bool:
@@ -668,11 +479,17 @@ class Recorder:
         privacy_check_status = manifest.get("privacy_check_status")
         summary_status = manifest.get("summary_status")
         exclusion_reason = manifest.get("derivation_exclusion_reason")
+        platform = manifest.get("platform")
+        profile = manifest.get("profile")
+        prompt_fingerprint = manifest.get("system_prompt_fingerprint")
+        compression_count = manifest.get("compression_count")
+        parent_session_id_hash = manifest.get("parent_session_id_hash")
+        routing_key_hash = manifest.get("routing_key_hash")
         return all(
             (
                 manifest.get("schema_version") == SCHEMA_VERSION,
                 isinstance(run_id, str) and RUN_ID_PATTERN.fullmatch(run_id),
-                manifest.get("provider") in {"claude", "codex"},
+                manifest.get("provider") in PROVIDERS,
                 isinstance(manifest.get("provider_session_id"), str)
                 and bool(manifest["provider_session_id"]),
                 (
@@ -682,6 +499,37 @@ class Recorder:
                 )
                 or (relationship in {"direct", "unknown"} and parent_run_id is None),
                 manifest.get("agent_role") in {"direct", "subagent"},
+                platform is None
+                or (
+                    isinstance(platform, str)
+                    and re.fullmatch(r"[a-zA-Z0-9_.-]{1,64}", platform)
+                ),
+                profile is None
+                or (
+                    isinstance(profile, str)
+                    and re.fullmatch(r"[a-zA-Z0-9_.-]{1,64}", profile)
+                ),
+                prompt_fingerprint is None
+                or (
+                    isinstance(prompt_fingerprint, str)
+                    and FINGERPRINT_PATTERN.fullmatch(prompt_fingerprint)
+                ),
+                compression_count is None
+                or (
+                    isinstance(compression_count, int)
+                    and not isinstance(compression_count, bool)
+                    and compression_count >= 0
+                ),
+                parent_session_id_hash is None
+                or (
+                    isinstance(parent_session_id_hash, str)
+                    and FINGERPRINT_PATTERN.fullmatch(parent_session_id_hash)
+                ),
+                routing_key_hash is None
+                or (
+                    isinstance(routing_key_hash, str)
+                    and FINGERPRINT_PATTERN.fullmatch(routing_key_hash)
+                ),
                 manifest.get("scope") in {"personal", "organization"},
                 "model" in manifest
                 and (manifest["model"] is None or isinstance(manifest["model"], str)),
@@ -1088,6 +936,13 @@ class Recorder:
                 manifest["privacy_check_status"] = "succeeded"
                 redacted_fingerprint = self.fingerprint(redacted)
             else:
+                provider = get_provider(str(manifest["provider"]))
+                if not provider.archive_on_redaction_failure:
+                    self.warn(
+                        f"redaction failed for {manifest['provider']}/"
+                        f"{manifest['provider_session_id']}; snapshot was not archived"
+                    )
+                    return False
                 self.warn(
                     f"redaction failed for {manifest['provider']}/"
                     f"{manifest['provider_session_id']}; archiving original snapshot"
@@ -1128,18 +983,6 @@ class Recorder:
         finally:
             redacted.unlink(missing_ok=True)
 
-    def scan_claude_subagents(self, parent: Path, parent_session_id: str) -> None:
-        directory = parent.with_suffix("") / "subagents"
-        if not directory.is_dir():
-            return
-        for transcript in sorted(directory.glob("agent-*.jsonl")):
-            try:
-                self.process_capture(
-                    self.build_claude_subagent_manifest(transcript, parent_session_id)
-                )
-            except (OSError, TimeoutError, TypeError, ValueError) as error:
-                self.warn(str(error))
-
     def process_payload(self, payload_path: Path) -> None:
         try:
             self.append_hook_attempt(payload_path, "received")
@@ -1151,30 +994,40 @@ class Recorder:
         if payload is None:
             self.record_failed_hook(payload_path, "payload is not a JSON object")
             return
+        captures: list[CaptureSource] = []
         try:
-            manifest = (
-                self.build_claude_manifest(payload)
-                if self.agent == "claude"
-                else self.build_codex_manifest(payload)
+            captures = self.provider.captures_from_event(
+                payload, self.capture_context
             )
-            accepted = self.process_capture(manifest)
+            if not captures:
+                raise ValueError(f"{self.agent} event did not produce a capture")
+            primary = self.build_manifest(captures[0])
+            accepted = self.process_capture(primary)
+            for related_capture in captures[1:]:
+                try:
+                    related = self.build_manifest(related_capture)
+                    related_accepted = self.process_capture(related)
+                except (OSError, TimeoutError, TypeError, ValueError) as error:
+                    self.warn(f"related capture failed: {error}")
+                    continue
+                if not related_accepted:
+                    self.warn(
+                        f"related capture failed for {related['provider']}/"
+                        f"{related['provider_session_id']}"
+                    )
         except (OSError, TimeoutError, TypeError, ValueError) as error:
             self.record_failed_hook(payload_path, str(error))
             return
+        finally:
+            for capture in captures:
+                if capture.delete_after_capture:
+                    capture.transcript.unlink(missing_ok=True)
         try:
             self.append_hook_attempt(payload_path, "accepted" if accepted else "failed")
         except (OSError, TimeoutError, TypeError, ValueError) as error:
             self.warn(
                 f"failed to record hook result for {self.agent}/"
-                f"{manifest['provider_session_id']}: {error}"
-            )
-        if (
-            accepted
-            and self.agent == "claude"
-            and "subagents" not in Path(manifest["transcript_path"]).parts
-        ):
-            self.scan_claude_subagents(
-                Path(manifest["transcript_path"]), manifest["provider_session_id"]
+                f"{primary['provider_session_id']}: {error}"
             )
 
     def record_failed_hook(self, payload_path: Path, reason: str) -> None:
@@ -1188,7 +1041,7 @@ class Recorder:
         provider = manifest.get("provider") or manifest.get("agent")
         session_id = manifest.get("provider_session_id") or manifest.get("session_id")
         scope = manifest.get("scope", self.scope)
-        if provider not in {"claude", "codex"} or not isinstance(session_id, str):
+        if provider not in PROVIDERS or not isinstance(session_id, str):
             self.warn(f"legacy queue item cannot be migrated: {item.name}")
             self.quarantine(item)
             return
@@ -1201,11 +1054,13 @@ class Recorder:
             "stop_hook_active": False,
         }
         try:
-            migrated = (
-                self.build_claude_manifest(payload)
-                if provider == "claude"
-                else self.build_codex_manifest(payload)
+            adapter = get_provider(provider)
+            captures = adapter.captures_from_event(
+                payload, self.capture_context
             )
+            if not captures:
+                raise ValueError(f"{provider} queue item did not produce a capture")
+            migrated = self.build_manifest(captures[0], adapter)
             if scope in {"personal", "organization"}:
                 migrated["scope"] = scope
             if self.process_capture(migrated):
@@ -1260,50 +1115,39 @@ class Recorder:
             except (OSError, TimeoutError, TypeError, ValueError) as error:
                 self.warn(f"queue replay failed for {item.name}: {error}")
 
-    def scan_codex_rollouts(self) -> None:
-        if not self.codex_sessions_dir.is_dir():
-            return
-        for transcript in sorted(self.codex_sessions_dir.rglob("rollout-*.jsonl")):
-            if transcript.stat().st_size == 0:
-                continue
-            first = self.first_jsonl_object(transcript)
-            session_id = self.nested(first, "payload", "id")
-            if not isinstance(session_id, str) or not session_id:
-                continue
-            fingerprint = self.fingerprint(transcript)
-            mtime_ns = self.mtime_ns(transcript)
+    def scan_provider_captures(self) -> None:
+        for capture in self.provider.discover_captures(self.capture_context):
+            fingerprint = self.fingerprint(capture.transcript)
+            mtime_ns = self.mtime_ns(capture.transcript)
             if self.state_is_stale(
-                self.scope, "codex", session_id, mtime_ns, fingerprint
+                self.scope,
+                self.provider.name,
+                capture.session_id,
+                mtime_ns,
+                fingerprint,
             ):
                 continue
-            cwd = self.nested(first, "payload", "cwd")
-            payload = {
-                "session_id": session_id,
-                "transcript_path": str(transcript),
-                "cwd": cwd if isinstance(cwd, str) else "",
-                "hook_event_name": "SessionStart",
-                "turn_id": "",
-                "stop_hook_active": False,
-                "last_assistant_message": "",
-            }
             try:
-                self.process_capture(self.build_codex_manifest(payload))
+                self.process_capture(self.build_manifest(capture))
             except (OSError, TimeoutError, TypeError, ValueError) as error:
-                self.warn(f"Codex sweep failed for {session_id}: {error}")
+                self.warn(
+                    f"{self.provider.name} sweep failed for "
+                    f"{capture.session_id}: {error}"
+                )
 
 
 def run_worker(provider: str, mode: str, payload_file: Path | None) -> int:
     os.umask(0o077)
     try:
         try:
-            recorder = Recorder(provider)
+            recorder = Recorder(get_provider(provider))
         except (OSError, ValueError) as error:
             sys.stderr.write(f"agent-session-record worker: {error}\n")
             return 1
         if mode == "payload" and payload_file is not None:
             recorder.process_payload(payload_file)
         else:
-            recorder.scan_codex_rollouts()
+            recorder.scan_provider_captures()
         recorder.replay_queue()
         return 0
     finally:
