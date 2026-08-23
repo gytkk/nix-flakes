@@ -129,44 +129,45 @@ official plugin marketplaces.
 
 ### Agent Session Record Hooks
 
-- Claude `SessionEnd` and Codex `Stop` / `SessionStart` hooks are installed by
-  default through `modules/agent-session-record`.
-- The recorder, hook adapters, replay tools, and contract tests require Python
-  3.11 or newer. Installed hook entry points use the Nix-provided Python path,
-  while repository commands and tests run through `uv`. Home Manager writes
-  runtime settings to `~/.config/agent-session-record/config.json`.
-- Direct sessions and identifiable subagent sessions receive an opaque `run_id`.
-  The private run registry also reserves a stable parent ID when a child is
-  captured first. Unproven parent relationships remain `unknown`.
-- Before transport, the worker redacts common secret formats, secret-bearing
-  JSON fields, and bearer credentials. A separate local privacy pass removes
-  identifying fields, email addresses, Korean phone numbers, and resident
-  registration number formats. A parse failure records both checks as failed.
-  The capture-first policy still archives that snapshot, but marks it ineligible
-  for derived knowledge. Empty transcripts are also archived and excluded.
-- Every snapshot is written to a private local queue before upload. Successful
-  local copies or `rsync` + SSH transfers produce a versioned common manifest,
-  a local receipt, and an archive under
-  `/home/gytkk/agent-sessions/<scope>/<provider>/<YYYY>/<MM>/<DD>/<run_id>.*`.
-- Scope-specific append-only manifest ledgers are staged locally under
-  `~/.local/state/agent-session-record/manifests/<scope>/<provider>/<YYYY>/<MM>/<DD>.jsonl`.
-  Mode `0600` attempt ledgers record each hook as received, accepted, or failed
-  and each run as queued or stored. Later monitoring can compare local hook
-  activity with archive receipts.
-- Queue, run registry, lock, and receipt state directories use mode `0700`;
-  queued and archived files use mode `0600`.
-- Capture manifests use the `personal` scope by default. Queue identity, receipt
-  state, manifest ledgers, and archives remain separate for each scope. The
-  devsisters profile disables capture because the current shadow rollout accepts
-  personal sessions only.
-- `pylv-denim` overrides the agent session upload target to `192.168.0.10`
-  because that machine reaches `pylv-onyx` over the local network instead of
-  the tailnet.
-- Hook failures append one-line summaries under
-  `~/.local/state/agent-session-record/warnings.log`.
-- Detailed worker stderr from SSH / `rsync` failures is appended to
-  `~/.local/state/agent-session-record/debug.log`.
-- These logs do not block Claude exit or Codex continuation.
+- `modules/agent-session-record`가 Claude의 `SessionEnd` hook과 Codex의 `Stop`,
+  `SessionStart` hook을 기본으로 설치한다.
+- recorder와 hook adapter, replay 도구, contract test는 Python 3.11 이상을
+  요구한다. 설치된 hook entry point는 Nix가 제공하는 Python 경로를 쓰고,
+  저장소에서 직접 실행하는 명령과 test는 `uv`로 실행한다. Home Manager는 실행
+  시점 설정을 `~/.config/agent-session-record/config.json`에 쓴다.
+- 직접 실행한 세션과 신원을 확인할 수 있는 subagent 세션에는 내용을 드러내지
+  않는 `run_id`를 부여한다. 자식 세션이 먼저 기록되는 경우에도 private run
+  registry가 부모 ID를 미리 확보해 같은 값을 유지한다. 부모 관계를 확인하지
+  못하면 `unknown`으로 남는다.
+- worker는 전송하기 전에 흔한 secret 형식과 secret이 담긴 JSON field, bearer
+  자격 증명을 가린다. 별도의 로컬 개인 정보 검사는 신원을 드러내는 field와
+  이메일 주소, 한국 휴대전화 번호, 주민등록번호 형식을 제거한다. 파싱이
+  실패하면 두 검사를 모두 실패로 기록한다. 먼저 기록한다는 정책에 따라 그
+  snapshot도 archive에 보관하지만, 파생 지식을 만드는 데는 쓸 수 없다고
+  표시한다. 내용이 빈 transcript도 같은 방식으로 보관하고 제외한다.
+- 모든 snapshot은 업로드하기 전에 로컬 private queue에 먼저 쓴다. 로컬 복사나
+  `rsync`와 SSH 전송이 성공하면 version이 붙은 공통 manifest와 로컬 receipt를
+  만들고,
+  `/home/gytkk/agent-sessions/<scope>/<provider>/<YYYY>/<MM>/<DD>/<run_id>.*`
+  경로에 archive를 남긴다.
+- scope별 manifest ledger는 새 줄만 덧붙이는 방식으로
+  `~/.local/state/agent-session-record/manifests/<scope>/<provider>/<YYYY>/<MM>/<DD>.jsonl`에
+  로컬로 쌓인다. 권한이 `0600`인 시도 기록 ledger는 각 hook을 received,
+  accepted, failed 중 하나로, 각 run을 queued 또는 stored로 기록한다. 이후
+  모니터링에서 로컬 hook 활동과 archive receipt를 비교할 수 있다.
+- queue와 run registry, lock, receipt 상태를 담는 디렉터리는 권한 `0700`을
+  쓰고, queue에 들어간 파일과 archive 파일은 권한 `0600`을 쓴다.
+- capture manifest는 기본값으로 `personal` scope를 쓴다. queue 식별자와 receipt
+  상태, manifest ledger, archive는 scope마다 따로 유지된다. 현재 shadow
+  rollout이 개인 세션만 받으므로 devsisters profile에서는 capture를 끈다.
+- `pylv-denim`은 tailnet이 아니라 로컬 네트워크로 `pylv-onyx`에 접속하므로,
+  세션 업로드 대상을 `192.168.0.10`으로 덮어쓴다.
+- hook이 실패하면 `~/.local/state/agent-session-record/warnings.log`에 한 줄
+  요약을 덧붙인다.
+- SSH와 `rsync` 실패로 worker가 남긴 자세한 표준 오류 출력은
+  `~/.local/state/agent-session-record/debug.log`에 덧붙인다.
+- 이 로그 기록은 Claude가 종료되는 것이나 Codex가 작업을 이어가는 것을 막지
+  않는다.
 
 ### Codex LSP MCP Implementation Plan
 
