@@ -12,27 +12,18 @@ sudo mkdir -p /etc/nix
 echo "experimental-features = nix-command flakes" | sudo tee -a /etc/nix/nix.conf
 ```
 
-- This repo assumes the checkout lives at `~/development/nix-flakes`.
-  Several modules create out-of-store symlinks from that path.
-- Standalone Home Manager commands evaluate without `--impure`.
-  The checkout path still matters for modules that intentionally install
-  out-of-store symlinks back to the repo.
+- This repo assumes the checkout lives at `~/development/nix-flakes`. Several modules create out-of-store symlinks from that path.
+- Standalone Home Manager commands evaluate without `--impure`. The checkout path still matters for modules that intentionally install out-of-store symlinks back to the repo.
 
 ## Secrets with agenix and 1Password
 
-Encrypted secrets live in `secrets/*.age`, while `secrets/secrets.nix` defines
-which administrator, host, or workstation public keys may decrypt each file.
-Only public keys and encrypted files belong in Git.
+Encrypted secrets live in `secrets/*.age`, while `secrets/secrets.nix` defines which administrator, host, or workstation public keys may decrypt each file. Only public keys and encrypted files belong in Git.
 
-- Home Manager uses each workstation's `~/.ssh/id_ed25519` as its agenix
-  identity.
+- Home Manager uses each workstation's `~/.ssh/id_ed25519` as its agenix identity.
 - NixOS hosts use their SSH host keys for unattended system secret activation.
-- The current workstation key is the primary agenix administrator key. Keep its
-  recovery copy in the 1Password item `pylv/agenix-admin-key`; never commit or
-  symlink the private key into this repository.
+- The current workstation key is the primary agenix administrator key. Keep its recovery copy in the 1Password item `pylv/agenix-admin-key`; never commit or symlink the private key into this repository.
 
-Home Manager installs `agx`, which fixes the checkout's `secrets` directory,
-rules file, and `~/.ssh/id_ed25519` identity for every operation:
+Home Manager installs `agx`, which fixes the checkout's `secrets` directory, rules file, and `~/.ssh/id_ed25519` identity for every operation:
 
 ```bash
 agx -e openai-api-key.age
@@ -40,17 +31,11 @@ agx -d cloudflare-tunnel-sepia-token.age
 agx -r
 ```
 
-`agx -d` writes plaintext to standard output. After adding or removing a
-recipient in `secrets/secrets.nix`, run `agx -r` and commit the rules and all
-changed `.age` files together. To recover the administrator identity, restore
-it from 1Password to `~/.ssh/id_ed25519`, set mode `0600`, and verify its public
-key matches `agenixAdmin` before editing or rekeying secrets.
+`agx -d` writes plaintext to standard output. After adding or removing a recipient in `secrets/secrets.nix`, run `agx -r` and commit the rules and all changed `.age` files together. To recover the administrator identity, restore it from 1Password to `~/.ssh/id_ed25519`, set mode `0600`, and verify its public key matches `agenixAdmin` before editing or rekeying secrets.
 
 ## Architecture
 
-This flake supports standalone Home Manager environments and NixOS hosts.
-macOS entries in `inventory.nix` are Home Manager only; Linux NixOS entries
-compose system configuration plus a Home Manager user.
+This flake supports standalone Home Manager environments and NixOS hosts. macOS entries in `inventory.nix` are Home Manager only; Linux NixOS entries compose system configuration plus a Home Manager user.
 
 ```text
 flake.nix                         # Main flake configuration
@@ -67,28 +52,15 @@ lib/nixos-configurations.nix      # NixOS configuration builder
 lib/builders.nix                  # Backward-compatible builder aggregation
 ```
 
-Home Manager modules expose `modules.<name>.enable`; `base/default.nix` owns
-common default enables, and profile files can override them. NixOS input modules
-that are host-specific, such as Disko, Copyparty, niri, and DankMaterialShell,
-are imported by the relevant `hosts/<name>/configuration.nix`.
+Home Manager modules expose `modules.<name>.enable`; `base/default.nix` owns common default enables, and profile files can override them. NixOS input modules that are host-specific, such as Disko, Copyparty, niri, and DankMaterialShell, are imported by the relevant `hosts/<name>/configuration.nix`.
 
-`modules/openclaw` is a parameterized NixOS module. `pylv-onyx` currently
-enables it and provides host values such as `lanInterface`, proxy ports, and
-`stateDir` in `hosts/pylv-onyx/configuration.nix`.
+`modules/openclaw` is a parameterized NixOS module. `pylv-onyx` currently enables it and provides host values such as `lanInterface`, proxy ports, and `stateDir` in `hosts/pylv-onyx/configuration.nix`.
 
-Global coding-agent instructions are assembled from shared rules under
-`modules/agent-prompts/` and a harness-specific file under each agent module.
-The same directory also owns the shared skill registry. The registry reads the
-25 official skills from the locked `mattpocock-skills` input and exposes them to
-Claude Code, Codex, and Pi. Home Manager generates the final instruction and
-skill links, so changes take effect after the relevant configuration is
-applied.
+Global coding-agent instructions are assembled from shared rules under `modules/agent-prompts/` and a harness-specific file under each agent module. The same directory also owns the shared skill registry. The registry reads the 25 official skills from the locked `mattpocock-skills` input and exposes them to Claude Code, Codex, and Pi. Home Manager generates the final instruction and skill links, so changes take effect after the relevant configuration is applied.
 
 ## Codex Plugin for Claude Code
 
-The official [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc) plugin is installed, enabling Codex integration from within Claude Code.
-Superpowers is also installed for both Codex CLI and Claude Code from their
-official plugin marketplaces.
+The official [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc) plugin is installed, enabling Codex integration from within Claude Code. Superpowers is also installed for both Codex CLI and Claude Code from their official plugin marketplaces.
 
 ### Available Commands
 
@@ -109,128 +81,67 @@ official plugin marketplaces.
 - Standalone activation only prompts for `sudo` when `/etc/codex` needs to be created or repaired, or when migrating from the legacy `/etc/codex/config.toml` path.
 - Using the repo path instead of the flake source store path avoids repeated sudo prompts after unrelated repo changes.
 - If `/etc/codex/managed_config.toml` or the legacy `/etc/codex/config.toml` already exists as a regular file, activation stops instead of overwriting it.
-- `~/.codex/config.toml` stays writable and is not rewritten by activation,
-  preserving user-local state such as project trust, hook trust, notices, and
-  TUI state.
-- Repo-managed Codex-specific skills currently include
-  `parallel-research-merge` and `devils-advocate`. The shared registry adds the
-  25 official Matt Pocock skills.
-- Update the shared upstream revision explicitly with
-  `nix flake update mattpocock-skills`.
-- The Cloudflare API MCP uses OAuth at `https://mcp.cloudflare.com/mcp`; run
-  `codex mcp login cloudflare` once per Codex host. Write-capable tools require
-  approval by default.
-- `home-manager switch` ensures `superpowers@openai-curated` is installed and
-  enabled for Codex CLI; restart Codex after switching so plugin skills are
-  rediscovered.
-- If the bundled Codex marketplace has not synced yet, activation falls back to
-  the upstream Codex install path by cloning `obra/superpowers` under
-  `~/.codex/superpowers` and linking its skills into `~/.agents/skills`.
+- `~/.codex/config.toml` stays writable and is not rewritten by activation, preserving user-local state such as project trust, hook trust, notices, and TUI state.
+- Repo-managed Codex-specific skills currently include `parallel-research-merge` and `devils-advocate`. The shared registry adds the 25 official Matt Pocock skills.
+- Update the shared upstream revision explicitly with `nix flake update mattpocock-skills`.
+- The Cloudflare API MCP uses OAuth at `https://mcp.cloudflare.com/mcp`; run `codex mcp login cloudflare` once per Codex host. Write-capable tools require approval by default.
+- `home-manager switch` ensures `superpowers@openai-curated` is installed and enabled for Codex CLI; restart Codex after switching so plugin skills are rediscovered.
+- If the bundled Codex marketplace has not synced yet, activation falls back to the upstream Codex install path by cloning `obra/superpowers` under `~/.codex/superpowers` and linking its skills into `~/.agents/skills`.
 
 ### Agent Session Record Hooks
 
-- `modules/agent-session-record`가 Claude의 `SessionEnd` hook과 Codex의 `Stop`,
-  `SessionStart` hook을 기본으로 설치한다.
-- recorder와 hook adapter, replay 도구, contract test는 Python 3.11 이상을
-  요구한다. 설치된 hook entry point는 Nix가 제공하는 Python 경로를 쓰고,
-  저장소에서 직접 실행하는 명령과 test는 `uv`로 실행한다. Home Manager는 실행
-  시점 설정을 `~/.config/agent-session-record/config.json`에 쓴다.
-- 직접 실행한 세션과 신원을 확인할 수 있는 subagent 세션에는 내용을 드러내지
-  않는 `run_id`를 부여한다. 자식 세션이 먼저 기록되는 경우에도 private run
-  registry가 부모 ID를 미리 확보해 같은 값을 유지한다. 부모 관계를 확인하지
-  못하면 `unknown`으로 남는다.
-- worker는 전송하기 전에 흔한 secret 형식과 secret이 담긴 JSON field, bearer
-  자격 증명을 가린다. 별도의 로컬 개인 정보 검사는 신원을 드러내는 field와
-  이메일 주소, 한국 휴대전화 번호, 주민등록번호 형식을 제거한다. 파싱이
-  실패하면 두 검사를 모두 실패로 기록한다. 먼저 기록한다는 정책에 따라 그
-  snapshot도 archive에 보관하지만, 파생 지식을 만드는 데는 쓸 수 없다고
-  표시한다. 내용이 빈 transcript도 같은 방식으로 보관하고 제외한다.
-- 모든 snapshot은 업로드하기 전에 로컬 private queue에 먼저 쓴다. 로컬 복사나
-  `rsync`와 SSH 전송이 성공하면 version이 붙은 공통 manifest와 로컬 receipt를
-  만들고,
-  `/home/gytkk/agent-sessions/<scope>/<provider>/<YYYY>/<MM>/<DD>/<run_id>.*`
-  경로에 archive를 남긴다.
-- scope별 manifest ledger는 새 줄만 덧붙이는 방식으로
-  `~/.local/state/agent-session-record/manifests/<scope>/<provider>/<YYYY>/<MM>/<DD>.jsonl`에
-  로컬로 쌓인다. 권한이 `0600`인 시도 기록 ledger는 각 hook을 received,
-  accepted, failed 중 하나로, 각 run을 queued 또는 stored로 기록한다. 이후
-  모니터링에서 로컬 hook 활동과 archive receipt를 비교할 수 있다.
-- queue와 run registry, lock, receipt 상태를 담는 디렉터리는 권한 `0700`을
-  쓰고, queue에 들어간 파일과 archive 파일은 권한 `0600`을 쓴다.
-- capture manifest는 기본값으로 `personal` scope를 쓴다. queue 식별자와 receipt
-  상태, manifest ledger, archive는 scope마다 따로 유지된다. 현재 shadow
-  rollout이 개인 세션만 받으므로 devsisters profile에서는 capture를 끈다.
-- `pylv-denim`은 tailnet이 아니라 로컬 네트워크로 `pylv-onyx`에 접속하므로,
-  세션 업로드 대상을 `192.168.0.10`으로 덮어쓴다.
-- hook이 실패하면 `~/.local/state/agent-session-record/warnings.log`에 한 줄
-  요약을 덧붙인다.
-- SSH와 `rsync` 실패로 worker가 남긴 자세한 표준 오류 출력은
-  `~/.local/state/agent-session-record/debug.log`에 덧붙인다.
-- 이 로그 기록은 Claude가 종료되는 것이나 Codex가 작업을 이어가는 것을 막지
-  않는다.
+- `modules/agent-session-record`는 Claude의 `SessionEnd` hook과 Codex의 `SessionStart`, `Stop` hook을 설치한다. Home Manager가 실행 설정을 `~/.config/agent-session-record/config.json`에 생성하며, 저장소의 도구와 test는 Python 3.11 이상에서 `uv`로 실행한다.
+- 직접 실행한 세션과 신원을 확인할 수 있는 subagent 세션에는 내용을 드러내지 않는 `run_id`를 부여한다. snapshot은 전송 전에 secret과 개인 정보를 가리고 로컬 private queue에 저장한다. 검사에 실패하거나 내용이 빈 snapshot도 보관하되 파생 지식에서는 제외한다.
+- 전송에 성공하면 `/home/gytkk/agent-sessions/<scope>/<provider>/<YYYY>/<MM>/<DD>/<run_id>.*`에 archive를 남기고, manifest와 receipt를 로컬 ledger에 기록한다. 상태 디렉터리는 권한 `0700`, queue와 archive 파일은 권한 `0600`을 사용한다.
+- 기본 scope는 `personal`이다. devsisters profile에서는 capture를 끄고, `pylv-denim`은 업로드 대상 `pylv-onyx`에 로컬 주소 `192.168.0.10`으로 접속한다.
+- hook과 전송 실패는 각각 `warnings.log`와 `debug.log`에 기록하며 Claude나 Codex의 실행을 막지 않는다.
 
 ### Codex LSP MCP Implementation Plan
 
-This section is a design plan only. The bridge and skills below are not
-implemented yet.
+This section is a design plan only. The bridge and skills below are not implemented yet.
 
 #### Goals
 
-- Give Codex symbol-aware navigation and diagnostics through MCP instead of
-  relying on plain text search alone.
-- Reuse LSP binaries already installed by this flake when possible, while also
-  supporting language servers that Claude Code treats as built-in.
-- Auto-detect roughly ten languages from the current workspace without
-  requiring per-repo manual MCP edits.
-- Keep the first rollout read-only and deterministic so it is safe to enable by
-  default in Codex.
+- Give Codex symbol-aware navigation and diagnostics through MCP instead of relying on plain text search alone.
+- Reuse LSP binaries already installed by this flake when possible, while also supporting language servers that Claude Code treats as built-in.
+- Auto-detect roughly ten languages from the current workspace without requiring per-repo manual MCP edits.
+- Keep the first rollout read-only and deterministic so it is safe to enable by default in Codex.
 
 #### Design Target
 
-- Follow `lspi` for runtime design: explicit workspace roots, `doctor`,
-  warmup, structured diagnostics, and server lifecycle management.
-- Follow `symbols` for agent UX: a compact MCP tool surface plus bundled skills
-  that teach Codex when to prefer semantic navigation over `rg`.
-- Expose LSP functionality through a local `stdio` MCP server because Codex
-  currently treats MCP as the primary extension path.
+- Follow `lspi` for runtime design: explicit workspace roots, `doctor`, warmup, structured diagnostics, and server lifecycle management.
+- Follow `symbols` for agent UX: a compact MCP tool surface plus bundled skills that teach Codex when to prefer semantic navigation over `rg`.
+- Expose LSP functionality through a local `stdio` MCP server because Codex currently treats MCP as the primary extension path.
 
 #### Planned Components
 
 1. `codex-lsp-mcp` local server
    - Starts as a local `stdio` process from Codex config.
-   - Owns language detection, LSP process supervision, tool dispatch, and
-     diagnostic caching.
+   - Owns language detection, LSP process supervision, tool dispatch, and diagnostic caching.
 2. Profile registry
-   - Data-driven definitions for each supported language instead of hardcoded
-     branching.
-   - Each profile includes file extensions, project markers, root markers,
-     command candidates, default args, timeouts, and capability flags.
+   - Data-driven definitions for each supported language instead of hardcoded branching.
+   - Each profile includes file extensions, project markers, root markers, command candidates, default args, timeouts, and capability flags.
 3. Workspace detector
    - Chooses the best profile from file extension plus nearby project files.
-   - Resolves the workspace root before any LSP request so definitions and
-     references stay scoped correctly.
+   - Resolves the workspace root before any LSP request so definitions and references stay scoped correctly.
 4. LSP supervisor
    - Maintains one live session per `<workspace root, profile>`.
-   - Supports lazy startup, optional warmup, restart-on-crash, and per-server
-     logs for debugging.
+   - Supports lazy startup, optional warmup, restart-on-crash, and per-server logs for debugging.
 5. Repo-local skills
-   - Add a small skill set that nudges Codex toward semantic tools first for
-     navigation, diagnostics, and safe refactors.
+   - Add a small skill set that nudges Codex toward semantic tools first for navigation, diagnostics, and safe refactors.
 
 #### Initial Language Matrix
 
 - `nix` via `nixd`, rooted by `flake.nix` or nearby `.nix` files
 - `go` via `gopls`, rooted by `go.mod`
 - `rust` via `rust-analyzer`, rooted by `Cargo.toml`
-- `typescript` and `javascript` via `typescript-language-server`, rooted by
-  `package.json`, `tsconfig.json`, or `jsconfig.json`
+- `typescript` and `javascript` via `typescript-language-server`, rooted by `package.json`, `tsconfig.json`, or `jsconfig.json`
 - `python` via `ty server` first, with room for a fallback profile later
 - `terraform` via `terraform-ls serve`
 - `scala` via `metals`, rooted by `build.sbt` or `project/build.properties`
 - `yaml` via `yaml-language-server --stdio`
 - `markdown` via `marksman server`
-- one extra slot reserved for a future default such as `clangd` or
-  `bash-language-server`
+- one extra slot reserved for a future default such as `clangd` or `bash-language-server`
 
 #### MCP Tool Shape
 
@@ -256,49 +167,37 @@ Resources should supplement the tools instead of expanding the tool count:
 - Prefer explicit project markers over extension-only guesses.
 - Resolve the workspace root first, then select or start the matching server.
 - Treat missing binaries as a diagnosable state, not a hard crash.
-- Keep auto-detection separate from auto-installation. The first version only
-  uses binaries already on `PATH`.
-- Allow profile-specific adapters where raw LSP behavior is known to need extra
-  shaping, especially for TypeScript-family servers.
+- Keep auto-detection separate from auto-installation. The first version only uses binaries already on `PATH`.
+- Allow profile-specific adapters where raw LSP behavior is known to need extra shaping, especially for TypeScript-family servers.
 
 #### Rollout Phases
 
 1. Prototype the bridge
-   - Build the MCP server with profile registry, detector, supervisor, and the
-     seven read-only tools.
-   - Add `doctor` output that explains which binaries, roots, and profiles were
-     selected.
+   - Build the MCP server with profile registry, detector, supervisor, and the seven read-only tools.
+   - Add `doctor` output that explains which binaries, roots, and profiles were selected.
 2. Integrate with `modules/codex`
-   - Add the bridge as a default local MCP entry in
-     `modules/codex/files/config.toml`.
-   - Keep the bridge opt-in or read-only until the manual smoke tests are
-     stable.
+   - Add the bridge as a default local MCP entry in `modules/codex/files/config.toml`.
+   - Keep the bridge opt-in or read-only until the manual smoke tests are stable.
 3. Add Codex skills
-   - Ship a navigation skill and a diagnostics-first editing skill so Codex
-     reaches for LSP tools before wide text scans.
+   - Ship a navigation skill and a diagnostics-first editing skill so Codex reaches for LSP tools before wide text scans.
 4. Expand carefully
-   - Add preview-first rename and other write-capable workflows only after the
-     read-only path is stable.
+   - Add preview-first rename and other write-capable workflows only after the read-only path is stable.
 
 #### Verification Plan
 
-- Unit-test profile detection from extensions, markers, and missing-binary
-  cases.
-- Add fixture workspaces for at least `nix`, `go`, `rust`, `typescript`, and
-  `python`.
+- Unit-test profile detection from extensions, markers, and missing-binary cases.
+- Add fixture workspaces for at least `nix`, `go`, `rust`, `typescript`, and `python`.
 - Verify `doctor` output for both healthy and degraded setups.
 - Smoke-test MCP registration with `codex mcp list` and direct tool calls.
 - Confirm that multiple files in the same workspace reuse one LSP session.
-- Confirm that failures degrade to actionable diagnostics rather than hanging
-  Codex.
+- Confirm that failures degrade to actionable diagnostics rather than hanging Codex.
 
 #### Non-Goals for the First Iteration
 
 - No raw 1:1 exposure of every LSP method.
 - No automatic package downloads or language server installation.
 - No write-capable refactors by default.
-- No attempt to replace broad semantic search or indexing tools across the
-  whole repository.
+- No attempt to replace broad semantic search or indexing tools across the whole repository.
 
 ## Zed config
 
@@ -306,8 +205,7 @@ Resources should supplement the tools instead of expanding the tool count:
 - On macOS and Linux, `home-manager switch` installs `~/.config/zed/settings.json` and `keymap.json` as out-of-store symlinks to the repo, and exposes the entire `themes/exports/zed` directory at `~/.config/zed/themes`.
 - That means mutable settings can switch between generated theme names without requiring another switch just to materialize a newly referenced theme file.
 - On WSL hosts, activation still copies settings, keymaps, and the full set of generated `themes/exports/zed/*.json` files into the Windows Zed config directory on each switch.
-- The checked-in defaults point both light and dark mode at the generated
-  `Catppuccin Mocha` theme.
+- The checked-in defaults point both light and dark mode at the generated `Catppuccin Mocha` theme.
 
 ## Zellij config
 
@@ -321,80 +219,35 @@ Resources should supplement the tools instead of expanding the tool count:
 ## Herdr config
 
 - Herdr is managed through `modules/herdr/default.nix` and enabled by default.
-- Home Manager links `~/.config/herdr/config.toml` to
-  `modules/herdr/files/config.toml` as an out-of-store symlink, so changes made
-  through Herdr settings update the checked-in source file directly.
-- The configured prefix is `Ctrl+a`. Press `Ctrl+a` twice to send a literal
-  `Ctrl+a` to a shell or application inside a pane. If tmux is ever nested
-  inside Herdr, press `Ctrl+a` twice before the tmux command key.
-- `Ctrl+a`, then `Shift+n`, opens a popup that selects a previously visited
-  directory with `zoxide` and `fzf`, then creates and focuses a workspace there.
-- `Ctrl+Shift+Tab` or `Ctrl+Tab` focuses the previous or next workspace.
-  `Cmd+1..9` focuses a workspace by index in Ghostty on macOS, and `Alt+1..9`
-  does the same in Windows Terminal on WSL. `Ctrl+a`, then `Shift+1..9` focuses
-  the corresponding visible agent. The terminal configs forward the direct
-  workspace shortcuts as distinct Kitty keyboard sequences so Herdr receives
-  every modifier.
-- On WSL, the `windows-terminal` module merges the corresponding `sendInput`
-  actions into the existing Windows Terminal `settings.json` during Home Manager
-  activation.
-  Existing profiles, themes, and unrelated keybindings are preserved; the first
-  managed update creates a `settings.json.home-manager.bak` backup.
-- Herdr uses the native terminal cursor so pane applications such as Neovim can
-  preserve mode-specific cursor shapes. On Windows or WSL, this may expose
-  ConPTY cursor flicker that Herdr's default drawn cursor avoids.
-- Reload a running server after editing the config with
-  `herdr server reload-config`.
+- Home Manager links `~/.config/herdr/config.toml` to `modules/herdr/files/config.toml` as an out-of-store symlink, so changes made through Herdr settings update the checked-in source file directly.
+- The configured prefix is `Ctrl+a`. Press `Ctrl+a` twice to send a literal `Ctrl+a` to a shell or application inside a pane. If tmux is ever nested inside Herdr, press `Ctrl+a` twice before the tmux command key.
+- `Ctrl+a`, then `Shift+n`, opens a popup that selects a previously visited directory with `zoxide` and `fzf`, then creates and focuses a workspace there.
+- `Ctrl+Shift+Tab` or `Ctrl+Tab` focuses the previous or next workspace. `Cmd+1..9` focuses a workspace by index in Ghostty on macOS, and `Alt+1..9` does the same in Windows Terminal on WSL. `Ctrl+a`, then `Shift+1..9` focuses the corresponding visible agent. The terminal configs forward the direct workspace shortcuts as distinct Kitty keyboard sequences so Herdr receives every modifier.
+- On WSL, the `windows-terminal` module merges the corresponding `sendInput` actions into the existing Windows Terminal `settings.json` during Home Manager activation. Existing profiles, themes, and unrelated keybindings are preserved; the first managed update creates a `settings.json.home-manager.bak` backup.
+- Herdr uses the native terminal cursor so pane applications such as Neovim can preserve mode-specific cursor shapes. On Windows or WSL, this may expose ConPTY cursor flicker that Herdr's default drawn cursor avoids.
+- Reload a running server after editing the config with `herdr server reload-config`.
 
 ## tmux config
 
 - tmux is managed through `modules/tmux/default.nix`.
-- Home Manager installs tmux plus a `tm` session-manager wrapper and links
-  `~/.config/tmux/tmux.conf`, `keybindings.conf`, and `statusline.conf` to
-  `modules/tmux/files/` through out-of-store symlinks.
-- Home Manager also links `~/.config/tmux/themes` to `themes/exports/tmux` and
-  exposes the selected `modules.commonTheme` as `~/.config/tmux/theme.conf`.
-- Running bare interactive `tm` outside tmux opens the fzf-backed session
-  manager; `tmux` remains the original tmux binary. Use arrow keys to select a
-  session, `Enter` to attach, type a new session name and press `Enter` to
-  create it, `Ctrl+r` to rename, and `Ctrl+d` to delete.
-- The checked-in tmux config uses `Ctrl+a` as the prefix, starts window and
-  pane indexes at `1`, enables mouse support, and keeps the statusline at the
-  top with generated canonical theme colors. Mouse-wheel scrolling moves one
-  line per event in copy mode. Pressing the prefix accent-colors the session
-  segment and shows key hints on the right; synchronized panes still show a
-  `SYNC` indicator.
-- Resize the active pane in five-cell steps with `Ctrl+a`, then
-  `Ctrl+h`/`Ctrl+j`/`Ctrl+k`/`Ctrl+l`.
-- Close the active pane immediately with `Ctrl+a`, then `x`; use uppercase
-  `X` to close the entire window.
-- tmux sets the outer terminal title to the current session name, so terminal
-  tabs that use pane titles, including WezTerm, show the tmux session instead
-  of the `tmux` process name.
-- Pi windows use `pi` as their tmux window label instead of the underlying
-  `node` process name and keep that label while tmux copy mode is active.
-- Claude Code windows likewise use `claude` instead of the Nix wrapper name
-  `.claude-wrapped`, including while tmux copy mode is active.
-- tmux enables CSI-u extended keys so modified keys such as `Shift+Enter`
-  survive through tmux into TUI apps like Codex. Restart tmux fully after
-  changing this setting, because existing clients keep the old key mode.
-- Press `Ctrl+a ?` for the key list, `Ctrl+a w` for the tree, and `Ctrl+a s`
-  for the session tree.
+- Home Manager installs tmux plus a `tm` session-manager wrapper and links `~/.config/tmux/tmux.conf`, `keybindings.conf`, and `statusline.conf` to `modules/tmux/files/` through out-of-store symlinks.
+- Home Manager also links `~/.config/tmux/themes` to `themes/exports/tmux` and exposes the selected `modules.commonTheme` as `~/.config/tmux/theme.conf`.
+- Running bare interactive `tm` outside tmux opens the fzf-backed session manager; `tmux` remains the original tmux binary. Use arrow keys to select a session, `Enter` to attach, type a new session name and press `Enter` to create it, `Ctrl+r` to rename, and `Ctrl+d` to delete.
+- The checked-in tmux config uses `Ctrl+a` as the prefix, starts window and pane indexes at `1`, enables mouse support, and keeps the statusline at the top with generated canonical theme colors. Mouse-wheel scrolling moves one line per event in copy mode. Pressing the prefix accent-colors the session segment and shows key hints on the right; synchronized panes still show a `SYNC` indicator.
+- Resize the active pane in five-cell steps with `Ctrl+a`, then `Ctrl+h`/`Ctrl+j`/`Ctrl+k`/`Ctrl+l`.
+- Close the active pane immediately with `Ctrl+a`, then `x`; use uppercase `X` to close the entire window.
+- tmux sets the outer terminal title to the current session name, so terminal tabs that use pane titles, including WezTerm, show the tmux session instead of the `tmux` process name.
+- Pi windows use `pi` as their tmux window label instead of the underlying `node` process name and keep that label while tmux copy mode is active.
+- Claude Code windows likewise use `claude` instead of the Nix wrapper name `.claude-wrapped`, including while tmux copy mode is active.
+- tmux enables CSI-u extended keys so modified keys such as `Shift+Enter` survive through tmux into TUI apps like Codex. Restart tmux fully after changing this setting, because existing clients keep the old key mode.
+- Press `Ctrl+a ?` for the key list, `Ctrl+a w` for the tree, and `Ctrl+a s` for the session tree.
 
 ## WezTerm config
 
 - WezTerm is managed through `modules/wezterm/default.nix`.
-- `home-manager switch` installs `~/.config/wezterm/wezterm.lua` as an
-  out-of-store symlink to `modules/wezterm/files/wezterm.lua`, so repo edits
-  are reflected in the live config file.
-- Home Manager renders `~/.config/wezterm/theme.lua` with the selected
-  `modules.commonTheme` and links `~/.config/wezterm/themes` to the generated
-  `themes/exports/wezterm` directory.
-- The checked-in defaults keep `xterm-256color`, the generated shared theme,
-  JetBrains Mono with Sarasa Mono CL fallback, a beam cursor, opaque
-  background, hidden titlebar via resize-only decorations, a compact tab bar,
-  shell/process tab titles enriched with compact current-directory context, and
-  IME-safe physical `Ctrl+letter` bindings.
+- `home-manager switch` installs `~/.config/wezterm/wezterm.lua` as an out-of-store symlink to `modules/wezterm/files/wezterm.lua`, so repo edits are reflected in the live config file.
+- Home Manager renders `~/.config/wezterm/theme.lua` with the selected `modules.commonTheme` and links `~/.config/wezterm/themes` to the generated `themes/exports/wezterm` directory.
+- The checked-in defaults keep `xterm-256color`, the generated shared theme, JetBrains Mono with Sarasa Mono CL fallback, a beam cursor, opaque background, hidden titlebar via resize-only decorations, a compact tab bar, shell/process tab titles enriched with compact current-directory context, and IME-safe physical `Ctrl+letter` bindings.
 
 ## Kitty config
 
