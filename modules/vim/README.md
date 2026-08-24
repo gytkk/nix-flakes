@@ -20,6 +20,7 @@ This module configures Neovim as the primary editor with a modern Lua-based setu
 - `blink.cmp` completion with LSP, snippets, path, buffer, and on-demand Minuet AI suggestions
 - `minuet-ai.nvim` inline suggestions backed by OpenAI `gpt-5.6-luna`
 - Built-in Neovim LSP configuration for Nix, Go, Rust, TypeScript, HTML, CSS, JSON, Lua, shell, Terraform, YAML, Markdown, TOML, and Python via `ty`
+- `rust-analyzer` keeps its server watcher and reconciles externally created or deleted Rust and Cargo files when Neovim regains focus, enters a buffer, or closes a terminal
 - `nvim-treesitter` syntax parsing for the main languages used in this repository
 - `conform.nvim` formatting on save, including `nixfmt`, `prettier`, `rustfmt`, `gofmt`, and `ruff_format`
 - `gitsigns.nvim`, `lualine.nvim`, `flash.nvim`, `which-key.nvim`, `trouble.nvim`, and `markview.nvim`
