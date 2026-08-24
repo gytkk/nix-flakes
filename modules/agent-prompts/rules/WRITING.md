@@ -36,6 +36,7 @@ These rules apply to agent-written prose, not code, commands, identifiers, URLs,
 
 - Use ASCII punctuation. Replace em dashes and en dashes with periods, commas, colons, parentheses, or revised sentence structure; use straight quotation marks (`"` and `'`) instead of curly quotation marks; and do not use double hyphens as sentence punctuation.
 - Avoid unnecessary hyphens in compounds. Use them when grammar or clarity requires them, and preserve established spellings, official names, command-line flags, identifiers, and project conventions.
+- Keep each Markdown paragraph on one source line and let editors or renderers wrap it. Add line breaks only when Markdown structure or meaning requires them, not to fit a fixed source width.
 - Use sentence case for English headings.
 
 ## Korean prose
