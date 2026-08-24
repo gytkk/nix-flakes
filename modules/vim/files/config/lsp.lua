@@ -96,7 +96,6 @@ return {
       },
     })
 
-    require("config.rust_watcher").setup()
     vim.lsp.enable(lspServers)
     setupLspDiagnostics()
 
