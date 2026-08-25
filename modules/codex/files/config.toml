@@ -42,13 +42,14 @@ alternate_screen = "never"
 notification_method = "auto"
 notifications = true
 status_line = [
-  "model-with-reasoning",
   "current-dir",
-  "project-root",
   "git-branch",
+  "branch-changes",
   "context-used",
-  "fast-mode",
+  "weekly-limit",
+  "model-with-reasoning",
 ]
+status_line_use_colors = true
 theme = "one-half-dark"
 
 [tui.keymap.editor]
