@@ -66,7 +66,7 @@ openclaw gateway install --force --wrapper ~/.openclaw/bin/openclaw
 
 Use `openclaw update` for verified core and plugin updates. The mutable config may enable OpenClaw's stable auto updater. Nix does not pin or replace the OpenClaw executable.
 
-The 2026-08 Hermes migration used OpenClaw's bundled `hermes` provider. It imports compatible model, MCP, persona, memory, and skill data after a preview and verified backup. Hermes cron jobs, sessions, logs, plugins, and SQLite state remain archive-only and require manual review. Keep `~/.hermes` and the Hermes dashboard until those records are no longer needed.
+The 2026-08 Hermes migration used OpenClaw's bundled `hermes` provider. It imports compatible model, MCP, persona, memory, and skill data after a preview and verified backup. Hermes cron jobs, sessions, logs, plugins, and SQLite state remain archive-only and require manual review. Keep `~/.hermes` until those records are no longer needed.
 
 Global coding-agent instructions are assembled from shared rules under `modules/agent-prompts/` and a harness-specific file under each agent module. The same directory also owns the shared skill registry. The registry reads the 25 official skills from the locked `mattpocock-skills` input and exposes them to Claude Code, Codex, and Pi. Home Manager generates the final instruction and skill links, so changes take effect after the relevant configuration is applied.
 
@@ -331,15 +331,7 @@ nix build .#nixosConfigurations.pylv-sepia.config.system.build.toplevel
 - Declarative integration lives in [`modules/openclaw`](./modules/openclaw). Nix supplies runtime dependencies, the agenix Discord token, proxy authentication, the firewall rule, and the user service runtime paths.
 - Mutable state, configuration, plugins, and the executable live under `~/.openclaw`. The official CLI owns the systemd user service and updates itself on the stable channel.
 - Home Manager adds the user-owned CLI and Node runtime to the service path. Nix does not set `OPENCLAW_NIX_MODE` or install an OpenClaw package.
-- During the cutover, Home Manager stops and disables `hermes-gateway.service` so Hermes cannot connect to Discord. The Hermes dashboard and archived state remain available.
-
-### `pylv-onyx` Hermes Dashboard access
-
-- Suggested public hostname: `https://hermes.pylv.dev`
-- Access control: protect the public hostname with a Cloudflare Access self-hosted app. The dashboard can expose Hermes config/API-key management, so do not publish it without Access.
-- The `hermes dashboard` process stays loopback-only on `127.0.0.1:9119`; nginx exposes a separate Cloudflare Tunnel origin on `127.0.0.1:19119`.
-- NixOS runs the `pylv-onyx` Cloudflare Tunnel connector with the agenix-managed `cloudflare-tunnel-onyx-token` secret.
-- The Cloudflare-managed ingress maps `hermes.pylv.dev` to `http://127.0.0.1:19119`.
+- During the cutover, Home Manager stops and disables `hermes-gateway.service` so Hermes cannot connect to Discord. Archived state under `~/.hermes` remains untouched.
 
 ## Helpers
 

@@ -13,7 +13,7 @@ This directory contains only declarative host integration:
 - `home.nix` adds the user-owned executable to `PATH` and supplies the NixOS
   runtime paths required by the OpenClaw-managed user service. Its optional
   cutover guard stops and disables the Hermes messaging gateway without
-  affecting the Hermes dashboard or archived state.
+  deleting archived Hermes state.
 
 The modules do not install an OpenClaw package, generate `openclaw.json`, set
 `OPENCLAW_NIX_MODE`, or own `openclaw-gateway.service`.
