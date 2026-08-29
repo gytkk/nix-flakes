@@ -9,20 +9,23 @@
 
 buildNpmPackage rec {
   pname = "qmd";
-  version = "2.1.0";
+  version = "2.8.3";
 
   src = fetchurl {
     url = "https://registry.npmjs.org/@tobilu/${pname}/-/${pname}-${version}.tgz";
-    hash = "sha256-TxsADFudqjb89dBSKNeWb9ffh2B69XL8ozYFl/ZChuY=";
+    hash = "sha256-LmCCmROgxkYjSpBc79YQQxZ6E5L9z9GbxU+JCvicoPA=";
   };
 
   sourceRoot = "package";
 
+  # The published tarball contains dist/ but omits the prepare hook dependency.
   postPatch = ''
+    substituteInPlace package.json \
+      --replace-fail '"prepare": "node scripts/install-hooks.mjs && node scripts/build.mjs",' ""
     cp ${./package-lock.json} package-lock.json
   '';
 
-  npmDepsHash = "sha256-rBQm9/5SJ+Sroe98zgkGAr2zFDMEZzpW0UXtU+KIVgc=";
+  npmDepsHash = "sha256-1HJWDUpwXCP0U+IwaSAYfk+OpCElv0r4GESGDzIIt6Y=";
 
   nodejs = nodejs_22;
   dontNpmBuild = true;
