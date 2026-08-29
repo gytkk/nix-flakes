@@ -23,13 +23,13 @@ let
     AGENT_SESSION_RECORD_SCOPE = cfg.scope;
     AGENT_SESSION_RECORD_STATE_DIR = stateDir;
     AGENT_SESSION_RECORD_CODEX_SESSIONS_DIR = "${config.home.homeDirectory}/.codex/sessions";
-    AGENT_SESSION_RECORD_HERMES_BIN = "${config.home.homeDirectory}/.local/bin/hermes";
+    AGENT_SESSION_RECORD_OPENCLAW_STATE_DIR = cfg.openclawStateDir;
     AGENT_SESSION_RECORD_SSH_BIN = "${pkgs.openssh}/bin";
     AGENT_SESSION_RECORD_RSYNC_BIN = "${pkgs.rsync}/bin";
     AGENT_SESSION_RECORD_ENABLED_PROVIDERS = lib.concatStringsSep "," (
       lib.optional cfg.agents.claude.enable "claude"
       ++ lib.optional cfg.agents.codex.enable "codex"
-      ++ lib.optional cfg.agents.hermes.enable "hermes"
+      ++ lib.optional cfg.agents.openclaw.enable "openclaw"
     );
   };
   disabledHook = pkgs.writeTextFile {
@@ -71,6 +71,11 @@ in
       default = "personal";
       description = "Trust scope recorded in capture manifests";
     };
+    openclawStateDir = lib.mkOption {
+      type = lib.types.str;
+      default = "${config.home.homeDirectory}/.openclaw";
+      description = "OpenClaw state directory containing agent session transcripts";
+    };
     agents = {
       claude.enable = lib.mkOption {
         type = lib.types.bool;
@@ -82,16 +87,23 @@ in
         default = true;
         description = "Enable Codex session transcript upload hooks";
       };
-      hermes.enable = lib.mkOption {
+      openclaw.enable = lib.mkOption {
         type = lib.types.bool;
         default = false;
-        description = "Enable Hermes session transcript upload hooks";
+        description = "Enable OpenClaw session transcript upload hooks";
       };
     };
   };
 
   config = lib.mkMerge [
     (lib.mkIf cfg.enable {
+      assertions = [
+        {
+          assertion = !cfg.agents.openclaw.enable || lib.hasPrefix "/" cfg.openclawStateDir;
+          message = "modules.agentSessionRecord.openclawStateDir must be an absolute path when OpenClaw capture is enabled.";
+        }
+      ];
+
       xdg.configFile."agent-session-record/config.json".text = configFile;
 
       home.file.".local/bin/agent-session-record".source =

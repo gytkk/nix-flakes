@@ -16,8 +16,9 @@
 
   modules.openclaw = {
     enable = true;
-    disableHermesGateway = true;
+    agentSessionRecordPlugin.enable = true;
   };
+  modules.agentSessionRecord.agents.openclaw.enable = true;
 
   # DankMaterialShell
   programs.dank-material-shell = {

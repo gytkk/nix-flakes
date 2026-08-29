@@ -350,7 +350,7 @@ hosts/pylv-sepia/
    - 루트가 Access 로그인으로 redirect되지 않는지 확인한다. 루트는 R2 구성에 따라 `200` 또는 의도한 `404`일 수 있으므로 실제 알려진 객체 URL도 함께 검사한다.
 5. **최종 회귀 검사**
    - `pylv-dev` 앱과 기존 정책이 수정되지 않았는지 다시 조회한다.
-   - `hermes.pylv.dev` 등 menu/media 외 서브도메인이 계속 wildcard Access 보호를 받는지 확인한다.
+   - menu/media 외 기존 서브도메인이 계속 wildcard Access 보호를 받는지 확인한다.
    - 오리진 `12369`가 계속 `127.0.0.1`에만 bind되고 NixOS firewall에 공개 포트가 없는지 확인한다.
 
 외부 검증 행렬:

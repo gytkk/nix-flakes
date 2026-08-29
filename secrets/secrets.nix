@@ -51,9 +51,6 @@ in
   # Cloudflare Tunnel token for pylv-sepia
   "cloudflare-tunnel-sepia-token.age".publicKeys = sepiaRecipients;
 
-  # Cloudflare Tunnel token for the pylv-onyx Hermes Dashboard
-  "cloudflare-tunnel-onyx-token.age".publicKeys = onyxRecipients;
-
   # Discord bot token for openclaw
   "discord-bot-token.age".publicKeys = onyxRecipients;
 

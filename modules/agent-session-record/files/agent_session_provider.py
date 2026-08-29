@@ -1,13 +1,10 @@
 from __future__ import annotations
 
 import json
-import hashlib
 import os
 import re
-import subprocess
 import tempfile
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Mapping, Protocol
 
@@ -453,25 +450,151 @@ class CodexProvider:
         }
 
 
-class HermesProvider:
-    name = "hermes"
-    hook_events = ("session-end", "session-finalize")
+class OpenClawProvider:
+    name = "openclaw"
+    hook_events = ("session-end",)
     archive_on_redaction_failure = False
 
     def hook_contract(self, event: str) -> HookContract:
-        if event in self.hook_events:
+        if event == "session-end":
             return HookContract(mode="payload", returns_continue=False)
-        raise ValueError(f"unsupported Hermes hook event: {event}")
+        raise ValueError(f"unsupported OpenClaw hook event: {event}")
 
     def sessions_dir(self, home: Path, config: dict[str, str]) -> Path:
-        return home / ".hermes"
+        state_dir = Path(
+            config.get("AGENT_SESSION_RECORD_OPENCLAW_STATE_DIR", home / ".openclaw")
+        )
+        return state_dir / "agents"
 
     def captures_from_event(
         self, payload: Mapping[str, object], context: CaptureContext
     ) -> list[CaptureSource]:
         session_id = payload.get("session_id")
         if not isinstance(session_id, str) or not session_id:
-            raise ValueError("Hermes payload missing session_id")
+            raise ValueError("OpenClaw payload missing session_id")
+        transcript_raw = payload.get("transcript_path")
+        if not isinstance(transcript_raw, str) or not transcript_raw:
+            raise ValueError("OpenClaw payload missing transcript_path")
+
+        transcript_path = Path(transcript_raw)
+        if transcript_path.is_symlink():
+            raise ValueError(
+                f"OpenClaw transcript must not be a symlink: {transcript_path}"
+            )
+        try:
+            transcript = transcript_path.resolve(strict=True)
+            agents_dir = self.sessions_dir(context.home, dict(context.config)).resolve(
+                strict=True
+            )
+        except OSError as error:
+            raise ValueError(
+                f"OpenClaw transcript unavailable: {transcript_path}"
+            ) from error
+        if not transcript.is_file() or not transcript.is_relative_to(agents_dir):
+            raise ValueError(
+                f"OpenClaw transcript is outside the configured agents directory: {transcript}"
+            )
+
+        first = first_record(transcript)
+        transcript_session_id = (
+            first.get("id") if first.get("type") == "session" else None
+        )
+        if transcript_session_id != session_id:
+            raise ValueError(f"OpenClaw transcript session did not match {session_id}")
+
+        sanitized = self._sanitize_transcript(transcript, context)
+        model = first_jsonl_value(
+            transcript,
+            lambda item: (
+                nested(item, "message", "model")
+                if item.get("type") == "message"
+                and nested(item, "message", "role") == "assistant"
+                else item.get("model")
+                if item.get("type") == "model_change"
+                else None
+            ),
+        )
+        model_provider = first_jsonl_value(
+            transcript,
+            lambda item: (
+                nested(item, "message", "provider")
+                if item.get("type") == "message"
+                and nested(item, "message", "role") == "assistant"
+                else item.get("provider")
+                if item.get("type") == "model_change"
+                else None
+            ),
+        )
+        raw_role = payload.get("agent_role")
+        agent_role = (
+            raw_role
+            if isinstance(raw_role, str) and raw_role in {"direct", "subagent"}
+            else "direct"
+        )
+        relationship_status = "unknown" if agent_role == "subagent" else "direct"
+        raw_reason = payload.get("reason")
+        reason = (
+            raw_reason if isinstance(raw_reason, str) and raw_reason else "captured"
+        )
+        raw_agent_id = payload.get("agent_id")
+        agent_id = self._safe_label(raw_agent_id)
+        raw_session_key_hash = payload.get("session_key_hash")
+        session_key_hash = (
+            raw_session_key_hash
+            if isinstance(raw_session_key_hash, str)
+            and re.fullmatch(r"[0-9a-f]{64}", raw_session_key_hash)
+            else None
+        )
+        raw_message_count = payload.get("message_count")
+        message_count = (
+            raw_message_count
+            if isinstance(raw_message_count, int)
+            and not isinstance(raw_message_count, bool)
+            and raw_message_count >= 0
+            else None
+        )
+        raw_duration_ms = payload.get("duration_ms")
+        duration_ms = (
+            raw_duration_ms
+            if isinstance(raw_duration_ms, int)
+            and not isinstance(raw_duration_ms, bool)
+            and raw_duration_ms >= 0
+            else None
+        )
+        compaction_count = sum(
+            item.get("type") == "compaction" for item in jsonl_objects(transcript)
+        )
+        cwd = first.get("cwd")
+        started_at = first.get("timestamp")
+        return [
+            CaptureSource(
+                session_id=session_id,
+                transcript=sanitized,
+                cwd=cwd if isinstance(cwd, str) else "",
+                hook_event_name=str(payload.get("hook_event_name") or "session_end"),
+                source="session-end",
+                provider_identity=session_id,
+                parent_identity=None,
+                relationship_status=relationship_status,
+                model=model,
+                agent_role=agent_role,
+                started_at=started_at if isinstance(started_at, str) else "",
+                termination_status=reason,
+                manifest_fields={
+                    "agent_id": agent_id,
+                    "session_key_hash": session_key_hash,
+                    "end_reason": reason,
+                    "message_count": message_count,
+                    "duration_ms": duration_ms,
+                    "compaction_count": compaction_count,
+                    "transcript_archived": payload.get("transcript_archived") is True,
+                    "model_provider": model_provider or None,
+                },
+                delete_after_capture=True,
+            )
+        ]
+
+    def _sanitize_transcript(self, transcript: Path, context: CaptureContext) -> Path:
         state_dir = Path(
             context.config.get(
                 "AGENT_SESSION_RECORD_STATE_DIR",
@@ -481,131 +604,78 @@ class HermesProvider:
         temp_dir = state_dir / "tmp"
         temp_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
         temp_dir.chmod(0o700)
-        descriptor, raw_export = tempfile.mkstemp(
-            dir=temp_dir, prefix="hermes-export-", suffix=".jsonl"
+        descriptor, raw_sanitized = tempfile.mkstemp(
+            dir=temp_dir, prefix="openclaw-session-", suffix=".jsonl"
         )
         os.close(descriptor)
-        export = Path(raw_export)
-        export.chmod(0o600)
-        hermes = context.config.get("AGENT_SESSION_RECORD_HERMES_BIN", "hermes")
+        sanitized = Path(raw_sanitized)
+        sanitized.chmod(0o600)
         try:
-            result = subprocess.run(
-                [
-                    hermes,
-                    "sessions",
-                    "export",
-                    str(export),
-                    "--session-id",
-                    session_id,
-                ],
-                stdin=subprocess.DEVNULL,
-                capture_output=True,
-                text=True,
-                check=False,
-                timeout=30,
-            )
-        except (OSError, subprocess.TimeoutExpired) as error:
-            export.unlink(missing_ok=True)
-            raise ValueError(f"Hermes export failed: {error}") from error
-        if result.returncode != 0:
-            export.unlink(missing_ok=True)
+            with (
+                transcript.open(encoding="utf-8") as input_handle,
+                sanitized.open("w", encoding="utf-8") as output_handle,
+            ):
+                for line in input_handle:
+                    value = json.loads(line)
+                    if not isinstance(value, dict):
+                        raise ValueError("record is not an object")
+                    output_handle.write(
+                        json.dumps(
+                            self._redact_routing_identifiers(value),
+                            ensure_ascii=False,
+                            separators=(",", ":"),
+                        )
+                        + "\n"
+                    )
+            sanitized.chmod(0o600)
+            return sanitized
+        except (OSError, UnicodeError, json.JSONDecodeError, ValueError) as error:
+            sanitized.unlink(missing_ok=True)
             raise ValueError(
-                f"Hermes export failed with exit status {result.returncode}"
-            )
-        try:
-            lines = [
-                line
-                for line in export.read_text(encoding="utf-8").splitlines()
-                if line.strip()
-            ]
-            record = json.loads(lines[0]) if len(lines) == 1 else None
-        except (OSError, UnicodeError, json.JSONDecodeError):
-            record = None
-        if not isinstance(record, dict):
-            export.unlink(missing_ok=True)
-            raise ValueError(
-                f"Hermes export did not contain exactly one JSON record for {session_id}"
-            )
-        exported_id = record.get("id")
-        if not isinstance(exported_id, str) or exported_id != session_id:
-            export.unlink(missing_ok=True)
-            raise ValueError(f"Hermes export session did not match {session_id}")
-        sanitized = self._redact_routing_identifiers(record)
-        try:
-            export.write_text(
-                json.dumps(sanitized, ensure_ascii=False, separators=(",", ":"))
-                + "\n",
-                encoding="utf-8",
-            )
-            export.chmod(0o600)
-        except OSError as error:
-            export.unlink(missing_ok=True)
-            raise ValueError(f"Hermes export sanitization failed: {error}") from error
-
-        raw_platform = payload.get("platform") or record.get("source")
-        platform = self._safe_label(raw_platform)
-        profile = self._safe_label(payload.get("profile"))
-        raw_model = payload.get("model") or record.get("model")
-        model = raw_model if isinstance(raw_model, str) else ""
-        parent_id = record.get("parent_session_id")
-        parent_identity = (
-            parent_id if isinstance(parent_id, str) and parent_id else None
-        )
-        end_reason = record.get("end_reason")
-        interrupted = payload.get("interrupted") is True
-        completed = payload.get("completed") is True
-        termination_status = (
-            "interrupted"
-            if interrupted
-            else end_reason
-            if isinstance(end_reason, str) and end_reason
-            else "turn-complete"
-            if completed
-            else "snapshot"
-        )
-        system_prompt = record.get("system_prompt")
-        prompt_fingerprint = None
-        if isinstance(system_prompt, str) and system_prompt:
-            prompt_fingerprint = hashlib.sha256(system_prompt.encode()).hexdigest()
-        return [
-            CaptureSource(
-                session_id=exported_id,
-                transcript=export,
-                cwd="",
-                hook_event_name=str(
-                    payload.get("hook_event_name") or "on_session_end"
-                ),
-                source="hermes-export",
-                provider_identity=exported_id,
-                parent_identity=parent_identity,
-                relationship_status="identified" if parent_identity else "direct",
-                model=model,
-                agent_role="subagent" if parent_identity else "direct",
-                started_at=self._timestamp(record.get("started_at")),
-                termination_status=str(termination_status),
-                manifest_fields={
-                    "platform": platform,
-                    "profile": profile,
-                    "system_prompt_fingerprint": prompt_fingerprint,
-                    "compression_count": None,
-                    "parent_session_id_hash": None,
-                },
-                delete_after_capture=True,
-            )
-        ]
+                f"OpenClaw transcript sanitization failed: {transcript}"
+            ) from error
 
     def discover_captures(self, context: CaptureContext) -> list[CaptureSource]:
-        return []
+        captures: list[CaptureSource] = []
+        for session in self.discover_replay_sessions(
+            context.home, dict(context.config)
+        ):
+            captures.extend(
+                self.captures_from_event(self.replay_payload(session), context)
+            )
+        return captures
 
     def discover_replay_sessions(
         self, home: Path, config: dict[str, str]
     ) -> list[ReplaySession]:
-        return []
+        sessions: list[ReplaySession] = []
+        for transcript in sorted(
+            self.sessions_dir(home, config).glob("*/sessions/*.jsonl")
+        ):
+            if transcript.name.endswith(".trajectory.jsonl") or ".checkpoint." in (
+                transcript.name
+            ):
+                continue
+            first = first_record(transcript)
+            session_id = first.get("id") if first.get("type") == "session" else None
+            if not isinstance(session_id, str) or not session_id:
+                continue
+            cwd = first.get("cwd")
+            sessions.append(
+                ReplaySession(
+                    session_id=session_id,
+                    transcript=transcript,
+                    cwd=cwd if isinstance(cwd, str) else "",
+                )
+            )
+        return sessions
 
     def replay_payload(self, session: ReplaySession) -> dict[str, Any]:
         return {
             "session_id": session.session_id,
+            "transcript_path": str(session.transcript),
             "hook_event_name": "ManualReplay",
+            "reason": "manual-replay",
         }
 
     @staticmethod
@@ -617,40 +687,49 @@ class HermesProvider:
     @classmethod
     def _redact_routing_identifiers(cls, value: Any) -> Any:
         routing_keys = {
-            "channel_id",
-            "guild_id",
-            "platform_message_id",
-            "session_key",
-            "user_id",
+            "accountid",
+            "channelid",
+            "chatid",
+            "conversationid",
+            "guildid",
+            "messageid",
+            "platformmessageid",
+            "senderid",
+            "sessionkey",
+            "target",
+            "threadid",
+            "userid",
             "username",
         }
         if isinstance(value, dict):
             return {
                 key: (
                     "[REDACTED_ROUTING_ID]"
-                    if key.lower() in routing_keys
+                    if re.sub(r"[^a-z0-9]", "", key.lower()) in routing_keys
                     else cls._redact_routing_identifiers(item)
                 )
                 for key, item in value.items()
             }
         if isinstance(value, list):
             return [cls._redact_routing_identifiers(item) for item in value]
-        return value
-
-    @staticmethod
-    def _timestamp(value: object) -> str:
-        if isinstance(value, (int, float)):
+        if isinstance(value, str):
             try:
-                return datetime.fromtimestamp(value, UTC).isoformat()
-            except (OSError, OverflowError, ValueError):
-                return ""
-        return value if isinstance(value, str) else ""
+                encoded = json.loads(value)
+            except json.JSONDecodeError:
+                return value
+            if isinstance(encoded, (dict, list)):
+                return json.dumps(
+                    cls._redact_routing_identifiers(encoded),
+                    ensure_ascii=False,
+                    separators=(",", ":"),
+                )
+        return value
 
 
 PROVIDERS: dict[str, ProviderAdapter] = {
     "claude": ClaudeProvider(),
     "codex": CodexProvider(),
-    "hermes": HermesProvider(),
+    "openclaw": OpenClawProvider(),
 }
 
 

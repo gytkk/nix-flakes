@@ -66,8 +66,6 @@ openclaw gateway install --force --wrapper ~/.openclaw/bin/openclaw
 
 Use `openclaw update` for verified core and plugin updates. The mutable config may enable OpenClaw's stable auto updater. Nix does not pin or replace the OpenClaw executable.
 
-The 2026-08 Hermes migration used OpenClaw's bundled `hermes` provider. It imports compatible model, MCP, persona, memory, and skill data after a preview and verified backup. Hermes cron jobs, sessions, logs, plugins, and SQLite state remain archive-only and require manual review. Keep `~/.hermes` until those records are no longer needed.
-
 Global coding-agent instructions are assembled from shared rules under `modules/agent-prompts/` and a harness-specific file under each agent module. The same directory also owns the shared skill registry. The registry reads the 25 official skills from the locked `mattpocock-skills` input and exposes them to Claude Code, Codex, and Pi. Home Manager generates the final instruction and skill links, so changes take effect after the relevant configuration is applied.
 
 ## Codex Plugin for Claude Code
@@ -102,11 +100,12 @@ The official [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc)
 
 ### Agent Session Record Hooks
 
-- `modules/agent-session-record`는 `agent-session-record` CLI 하나를 설치한다. Claude의 `SessionEnd`와 Codex의 `SessionStart`, `Stop` hook은 `agent-session-record hook`을 사용하고, 전체 기록을 다시 처리할 때는 `agent-session-record replay <claude|codex>`를 실행한다. Home Manager가 실행 설정을 `~/.config/agent-session-record/config.json`에 생성한다.
+- `modules/agent-session-record`는 `agent-session-record` CLI 하나를 설치한다. Claude의 `SessionEnd`, Codex의 `SessionStart`와 `Stop`, OpenClaw의 `session_end` hook은 `agent-session-record hook`을 사용한다. 전체 기록을 다시 처리할 때는 `agent-session-record replay <claude|codex|openclaw>`를 실행한다. Home Manager가 실행 설정을 `~/.config/agent-session-record/config.json`에 생성한다.
+- Home Manager는 OpenClaw recorder plugin을 `~/.openclaw/extensions/agent-session-record`에 연결한다. OpenClaw의 mutable config에 `plugins.allow`를 지정했다면 `agent-session-record`도 허용 목록에 포함해야 한다. `session_end`는 새 세션 생성, reset, idle 또는 daily rotation, compaction, deletion, shutdown, restart 때 실행되며 매 turn마다 실행되는 hook은 아니다.
 - 직접 실행한 세션과 신원을 확인할 수 있는 subagent 세션에는 내용을 드러내지 않는 `run_id`를 부여한다. snapshot은 전송 전에 secret과 개인 정보를 가리고 로컬 private queue에 저장한다. 검사에 실패하거나 내용이 빈 snapshot도 보관하되 파생 지식에서는 제외한다.
 - 전송에 성공하면 `/home/gytkk/agent-sessions/<scope>/<provider>/<YYYY>/<MM>/<DD>/<run_id>.*`에 archive를 남기고, manifest와 receipt를 로컬 ledger에 기록한다. 상태 디렉터리는 권한 `0700`, queue와 archive 파일은 권한 `0600`을 사용한다.
 - 기본 scope는 `personal`이다. devsisters profile에서는 capture를 끄고, `pylv-denim`은 업로드 대상 `pylv-onyx`에 로컬 주소 `192.168.0.10`으로 접속한다.
-- hook과 전송 실패는 각각 `warnings.log`와 `debug.log`에 기록하며 Claude나 Codex의 실행을 막지 않는다.
+- hook과 전송 실패는 각각 `warnings.log`와 `debug.log`에 기록하며 Claude, Codex 또는 OpenClaw의 실행을 막지 않는다.
 
 ### Codex LSP MCP Implementation Plan
 
@@ -331,7 +330,7 @@ nix build .#nixosConfigurations.pylv-sepia.config.system.build.toplevel
 - Declarative integration lives in [`modules/openclaw`](./modules/openclaw). Nix supplies runtime dependencies, the agenix Discord token, proxy authentication, the firewall rule, and the user service runtime paths.
 - Mutable state, configuration, plugins, and the executable live under `~/.openclaw`. The official CLI owns the systemd user service and updates itself on the stable channel.
 - Home Manager adds the user-owned CLI and Node runtime to the service path. Nix does not set `OPENCLAW_NIX_MODE` or install an OpenClaw package.
-- During the cutover, Home Manager stops and disables `hermes-gateway.service` so Hermes cannot connect to Discord. Archived state under `~/.hermes` remains untouched.
+- Home Manager links the repository-managed `agent-session-record` extension into the OpenClaw extension directory. Mutable OpenClaw configuration still controls whether the plugin is allowed and enabled.
 
 ## Helpers
 

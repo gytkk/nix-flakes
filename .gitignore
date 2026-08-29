@@ -7,6 +7,3 @@ result-*
 
 # Codex critic runtime outputs
 .ai/
-
-# Hermes plans
-.hermes/

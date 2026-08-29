@@ -1,0 +1,12 @@
+{
+  "id": "agent-session-record",
+  "name": "Agent Session Record",
+  "description": "Archives redacted OpenClaw sessions through agent-session-record.",
+  "activation": {
+    "onStartup": true
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false
+  }
+}

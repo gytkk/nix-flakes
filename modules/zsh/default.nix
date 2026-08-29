@@ -116,8 +116,7 @@ in
             # Prevent LC_ALL from overriding LANG/LC_CTYPE
             unset LC_ALL
 
-            # Temporary workaround for headless user-systemd sessions so Hermes CLI
-            # can discover the running gateway service via `systemctl --user`.
+            # Let headless shells discover user services through `systemctl --user`.
             if [[ -z "''${XDG_RUNTIME_DIR:-}" ]]; then
               export XDG_RUNTIME_DIR="/run/user/$(id -u)"
             fi
