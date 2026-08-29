@@ -1,5 +1,4 @@
 {
-  inputs,
   lib,
   pkgs,
   ...
@@ -7,7 +6,7 @@
 
 let
   managedSkills = import ./skills.nix {
-    inherit inputs lib pkgs;
+    inherit lib pkgs;
     localSkillsRoot = ./skills;
   };
 in

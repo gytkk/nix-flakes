@@ -323,22 +323,6 @@
         "url": "ssh://git@github.com/devsisters/keycloak2aws"
       }
     },
-    "mattpocock-skills": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1787144958,
-        "narHash": "sha256-BAhmwFuEZPKsnSCwZ9NzPG5b7alCXa2/f/LXSMuJX7o=",
-        "owner": "mattpocock",
-        "repo": "skills",
-        "rev": "885e2ca4d842d139e9aef4e48d366c63cb1b8013",
-        "type": "github"
-      },
-      "original": {
-        "owner": "mattpocock",
-        "repo": "skills",
-        "type": "github"
-      }
-    },
     "niri": {
       "inputs": {
         "niri-stable": "niri-stable",
@@ -653,7 +637,6 @@
         "gws": "gws",
         "home-manager": "home-manager_2",
         "keycloak2aws": "keycloak2aws",
-        "mattpocock-skills": "mattpocock-skills",
         "niri": "niri",
         "nix-vscode-extensions": "nix-vscode-extensions",
         "nix-zed-extensions": "nix-zed-extensions",

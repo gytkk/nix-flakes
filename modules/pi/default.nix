@@ -2,7 +2,6 @@
   config,
   lib,
   pkgs,
-  inputs,
   flakeDirectory,
   ...
 }:
@@ -10,7 +9,7 @@
 let
   cfg = config.modules.pi;
   agentPrompts = import ../agent-prompts/lib.nix { inherit lib pkgs; };
-  sharedSkills = import ../agent-prompts/skills.nix { inherit inputs lib pkgs; };
+  sharedSkills = import ../agent-prompts/skills.nix { inherit lib pkgs; };
   mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/pi/${path}";
   localSkillDirectories = lib.filterAttrs (_: type: type == "directory") (builtins.readDir ./skills);
   localSkillSources = lib.mapAttrs (

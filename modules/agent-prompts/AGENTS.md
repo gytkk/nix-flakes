@@ -13,6 +13,8 @@ Project instructions closer to the working directory override global defaults wi
 ## Investigation and decisions
 
 - Before changing files or asking questions, inspect applicable instructions and safely discoverable context: relevant code, tests, documentation, history, configuration, and useful read-only runtime state.
+- When present, treat `CONTEXT.md`, `CONTEXT-MAP.md`, and relevant architecture decision records as repository-local sources of truth.
+- Discover issue tracker conventions from maintained repository documentation and git remotes. Ask only when read-only discovery cannot identify the required workflow.
 - Ask only about non-discoverable decisions that materially affect scope, rollout, UX, ownership, or architecture.
 - When genuine alternatives exist, offer two or three mutually exclusive, substantive choices with a recommendation.
 - Surface blockers, risky assumptions, and dependency issues early.
@@ -88,4 +90,3 @@ When reviewing changes:
 
 - Update existing maintained documentation when user-facing behavior changes.
   Do not create temporary or one-off documentation files unless requested.
-

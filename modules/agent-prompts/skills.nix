@@ -1,25 +1,15 @@
 {
-  inputs,
   lib,
   pkgs,
 }:
 
 let
-  upstream = inputs.mattpocock-skills;
-  pluginManifest = builtins.fromJSON (builtins.readFile "${upstream}/.claude-plugin/plugin.json");
-  officialPaths =
-    pluginManifest.skills or (throw "mattpocock-skills plugin manifest has no skills list");
-  mkSkill =
-    relativePath:
-    let
-      normalizedPath = lib.removePrefix "./" relativePath;
-    in
-    {
-      name = builtins.baseNameOf normalizedPath;
-      value = upstream + "/${normalizedPath}";
-    };
-  official = builtins.listToAttrs (map mkSkill officialPaths);
-  officialNames = map (path: builtins.baseNameOf (lib.removePrefix "./" path)) officialPaths;
+  skillsRoot = builtins.path {
+    path = ./skills;
+    name = "agent-prompt-skills";
+  };
+  skillDirectories = lib.filterAttrs (_: type: type == "directory") (builtins.readDir ./skills);
+  official = lib.mapAttrs (name: _: skillsRoot + "/${name}") skillDirectories;
 
   # Keep explicit Claude-only additions separate from the portable official set.
   claudeOnly = { };
@@ -36,8 +26,6 @@ let
       }) sources
     );
 in
-assert pluginManifest.name == "mattpocock-skills";
-assert builtins.length officialNames == builtins.length (lib.unique officialNames);
 assert claudeOnlyCollisions == [ ];
 {
   inherit claudeOnly mkSkillFarm official;

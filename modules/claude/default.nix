@@ -2,7 +2,6 @@
   config,
   pkgs,
   lib,
-  inputs,
   flakeDirectory,
   ...
 }:
@@ -10,7 +9,7 @@
 let
   cfg = config.modules.claude;
   agentPrompts = import ../agent-prompts/lib.nix { inherit lib pkgs; };
-  sharedSkills = import ../agent-prompts/skills.nix { inherit inputs lib pkgs; };
+  sharedSkills = import ../agent-prompts/skills.nix { inherit lib pkgs; };
   claude = "${pkgs.claude-code}/bin/claude";
   timeout = "${pkgs.coreutils}/bin/timeout --foreground";
   mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/claude/${path}";
