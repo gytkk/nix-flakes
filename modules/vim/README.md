@@ -22,9 +22,9 @@ This module configures Neovim as the primary editor with a modern Lua-based setu
 - Built-in Neovim LSP configuration for Nix, Go, Rust, TypeScript, HTML, CSS, JSON, Lua, shell, Terraform, YAML, Markdown, TOML, and Python via `ty`
 - `nvim-treesitter` syntax parsing for the main languages used in this repository
 - `conform.nvim` formatting on save, including `nixfmt`, `prettier`, `rustfmt`, `gofmt`, and `ruff_format`
-- `gitsigns.nvim`, `lualine.nvim`, `flash.nvim`, `which-key.nvim`, `trouble.nvim`, and `markview.nvim`
+- `gitsigns.nvim`, `lualine.nvim`, `flash.nvim`, `which-key.nvim`, `trouble.nvim`, and `render-markdown.nvim`
 - Native diagnostics show a color-coded circle and the current-line message directly after the code
-- Markdown rendering uses Markview's in-buffer preview, hybrid editing, and split-view support
+- Markdown rendering uses `render-markdown.nvim` for an in-buffer preview that returns to raw Markdown in insert mode
 
 ## Minuet
 

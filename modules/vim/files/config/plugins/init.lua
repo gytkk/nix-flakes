@@ -18,7 +18,7 @@ return {
   ui.lualine,
   require("config.plugins.git"),
   editing.conform,
-  editing.markview,
+  editing.render_markdown,
   ui.trouble,
   session.plugin,
 }
