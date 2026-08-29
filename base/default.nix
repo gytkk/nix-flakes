@@ -84,6 +84,7 @@ in
     ../modules/lsp
     ../modules/omnigent
     ../modules/pi
+    ../modules/qmd
     ../modules/tmux
     ../modules/vim
     ../modules/windows-terminal
@@ -112,6 +113,7 @@ in
       lsp.enable = lib.mkDefault true;
       omnigent.enable = lib.mkDefault true;
       pi.enable = lib.mkDefault true;
+      qmd.enable = lib.mkDefault false;
       tmux.enable = lib.mkDefault true;
       vim.enable = lib.mkDefault true;
       windowsTerminal.enable = lib.mkDefault true;
