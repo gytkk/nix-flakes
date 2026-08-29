@@ -534,11 +534,6 @@ def load_ghostty_template(root: Path) -> dict[str, Any]:
     return load_json(template_path)
 
 
-def load_wezterm_template(root: Path) -> dict[str, Any]:
-    template_path = root / "templates" / "wezterm" / "official-template.json"
-    return load_json(template_path)
-
-
 def load_starship_template(root: Path) -> dict[str, Any]:
     template_path = root / "templates" / "starship" / "official-template.json"
     return load_json(template_path)
@@ -575,13 +570,6 @@ def load_nvim_override(root: Path, theme_id: str) -> dict[str, Any] | None:
 
 def load_ghostty_override(root: Path, theme_id: str) -> dict[str, Any] | None:
     path = root / "overrides" / "ghostty" / f"{theme_id}.yaml"
-    if not path.exists():
-        return None
-    return load_yaml(path)
-
-
-def load_wezterm_override(root: Path, theme_id: str) -> dict[str, Any] | None:
-    path = root / "overrides" / "wezterm" / f"{theme_id}.yaml"
     if not path.exists():
         return None
     return load_yaml(path)
@@ -846,153 +834,6 @@ def ghostty_theme_conf(ctx: dict[str, Any], root: Path) -> str:
             value = render_template_value(entry["value"], slots)
             lines.append(f"{entry['key']} = {value}")
     return "\n".join(lines) + "\n"
-
-
-def build_wezterm_slots(ctx: dict[str, Any]) -> dict[str, str]:
-    p = ctx["palette"]
-    r = ctx["roles"]
-    light = ctx["meta"]["variant"] == "light"
-
-    ansi = {
-        0: r["ansi"]["black"],
-        1: r["ansi"]["red"],
-        2: r["ansi"]["green"],
-        3: r["ansi"]["yellow"],
-        4: r["ansi"]["blue"],
-        5: r["ansi"]["magenta"],
-        6: r["ansi"]["cyan"],
-        7: r["ansi"]["white"],
-    }
-    brights = {
-        0: r["ansi"]["brightBlack"],
-        1: r["ansi"]["brightRed"],
-        2: r["ansi"]["brightGreen"],
-        3: r["ansi"]["brightYellow"],
-        4: r["ansi"]["brightBlue"],
-        5: r["ansi"]["brightMagenta"],
-        6: r["ansi"]["brightCyan"],
-        7: r["ansi"]["brightWhite"],
-    }
-    inactive_hover = raised_surface(r["ui"]["bgAlt"], r["ui"]["border"], light=light)
-
-    slots = {
-        "foreground": r["ui"]["fg"],
-        "background": r["ui"]["bg"],
-        "cursor_bg": r["ui"]["cursor"],
-        "cursor_fg": r["ui"]["caretText"],
-        "cursor_border": r["ui"]["cursor"],
-        "selection_bg": r["ui"]["selection"],
-        "selection_fg": best_contrast(r["ui"]["selection"], p["white"], r["ui"]["bg"], r["ui"]["fg"]),
-        "scrollbar_thumb": r["ui"]["fgMuted"],
-        "split": r["ui"]["border"],
-        "tab_bar.background": r["ui"]["bgAlt"],
-        "tab_bar.active_tab.bg_color": r["ui"]["currentLine"],
-        "tab_bar.active_tab.fg_color": r["ui"]["fg"],
-        "tab_bar.inactive_tab.bg_color": r["ui"]["bgAlt"],
-        "tab_bar.inactive_tab.fg_color": r["ui"]["fgInactive"],
-        "tab_bar.inactive_tab_hover.bg_color": inactive_hover,
-        "tab_bar.inactive_tab_hover.fg_color": r["ui"]["fg"],
-        "tab_bar.new_tab.bg_color": r["ui"]["bgAlt"],
-        "tab_bar.new_tab.fg_color": r["ui"]["fgMuted"],
-        "tab_bar.new_tab_hover.bg_color": r["ui"]["currentLine"],
-        "tab_bar.new_tab_hover.fg_color": r["ui"]["fg"],
-    }
-    for idx, color in ansi.items():
-        slots[f"ansi_{idx}"] = color
-    for idx, color in brights.items():
-        slots[f"bright_{idx}"] = color
-    return slots
-
-
-def apply_wezterm_override_slots(
-    slots: dict[str, str], override: dict[str, Any] | None, ctx: dict[str, Any]
-) -> dict[str, str]:
-    if not override:
-        return slots
-
-    slot_overrides = override.get("slots", {})
-    if not isinstance(slot_overrides, dict):
-        raise RuntimeError("wezterm override slots must be a mapping")
-
-    out = dict(slots)
-    for key, value in slot_overrides.items():
-        rendered = resolve_context_value(value, ctx)
-        if not isinstance(rendered, str):
-            raise RuntimeError(f"wezterm override slot {key!r} must resolve to a string")
-        out[key] = rendered
-    return out
-
-
-def render_wezterm_template_slots(template: dict[str, Any], slots: dict[str, str]) -> dict[str, str]:
-    rendered: dict[str, str] = {}
-    for section in template["sections"]:
-        for entry in section["entries"]:
-            key = entry["key"]
-            value = render_template_value(entry["value"], slots)
-            if not isinstance(key, str) or not isinstance(value, str):
-                raise RuntimeError("wezterm template entries must resolve to string keys and values")
-            rendered[key] = value
-    return rendered
-
-
-def wezterm_color_scheme(rendered: dict[str, str]) -> dict[str, object]:
-    return {
-        "foreground": rendered["foreground"],
-        "background": rendered["background"],
-        "cursor_bg": rendered["cursor_bg"],
-        "cursor_fg": rendered["cursor_fg"],
-        "cursor_border": rendered["cursor_border"],
-        "selection_bg": rendered["selection_bg"],
-        "selection_fg": rendered["selection_fg"],
-        "scrollbar_thumb": rendered["scrollbar_thumb"],
-        "split": rendered["split"],
-        "ansi": [rendered[f"ansi_{idx}"] for idx in range(8)],
-        "brights": [rendered[f"bright_{idx}"] for idx in range(8)],
-        "tab_bar": {
-            "background": rendered["tab_bar.background"],
-            "active_tab": {
-                "bg_color": rendered["tab_bar.active_tab.bg_color"],
-                "fg_color": rendered["tab_bar.active_tab.fg_color"],
-                "intensity": "Bold",
-            },
-            "inactive_tab": {
-                "bg_color": rendered["tab_bar.inactive_tab.bg_color"],
-                "fg_color": rendered["tab_bar.inactive_tab.fg_color"],
-            },
-            "inactive_tab_hover": {
-                "bg_color": rendered["tab_bar.inactive_tab_hover.bg_color"],
-                "fg_color": rendered["tab_bar.inactive_tab_hover.fg_color"],
-            },
-            "new_tab": {
-                "bg_color": rendered["tab_bar.new_tab.bg_color"],
-                "fg_color": rendered["tab_bar.new_tab.fg_color"],
-            },
-            "new_tab_hover": {
-                "bg_color": rendered["tab_bar.new_tab_hover.bg_color"],
-                "fg_color": rendered["tab_bar.new_tab_hover.fg_color"],
-            },
-        },
-    }
-
-
-def wezterm_theme_lua(ctx: dict[str, Any], root: Path) -> str:
-    meta = ctx["meta"]
-    template = load_wezterm_template(root)
-    override = load_wezterm_override(root, meta["id"])
-    slots = apply_wezterm_override_slots(build_wezterm_slots(ctx), override, ctx)
-    rendered = render_wezterm_template_slots(template, slots)
-    doc = {
-        "name": meta["name"],
-        "colors": wezterm_color_scheme(rendered),
-    }
-    return "\n".join(
-        [
-            f"-- Auto-generated from themes/core/{meta['id']}.yaml",
-            f"-- Template: {template['name']} v{template['version']}",
-            f"return {lua_literal(doc)}",
-            "",
-        ]
-    )
 
 
 def build_starship_slots(ctx: dict[str, Any]) -> dict[str, Any]:
@@ -1583,7 +1424,6 @@ def generate_theme(theme_path: Path, template: dict[str, Any], root: Path) -> li
     theme_id = ctx["meta"]["id"]
 
     ghostty_path = root / "exports" / "ghostty" / f"{theme_id}.conf"
-    wezterm_path = root / "exports" / "wezterm" / f"{theme_id}.lua"
     k9s_path = root / "exports" / "k9s" / f"{theme_id}.yaml"
     zed_path = root / "exports" / "zed" / f"{theme_id}.json"
     nvim_path = root / "exports" / "nvim" / f"{theme_id}.lua"
@@ -1592,14 +1432,13 @@ def generate_theme(theme_path: Path, template: dict[str, Any], root: Path) -> li
     tmux_path = root / "exports" / "tmux" / f"{theme_id}.conf"
 
     write_text(ghostty_path, ghostty_theme_conf(ctx, root))
-    write_text(wezterm_path, wezterm_theme_lua(ctx, root))
     write_yaml(k9s_path, k9s_theme_doc(ctx, root))
     write_json(zed_path, zed_theme_doc(ctx, root))
     write_text(nvim_path, nvim_lua(ctx, root))
     write_text(starship_path, starship_theme_toml(ctx, root))
     write_text(zellij_path, zellij_theme_kdl(ctx, root))
     write_text(tmux_path, tmux_theme_conf(ctx, root))
-    return [ghostty_path, wezterm_path, k9s_path, zed_path, nvim_path, starship_path, zellij_path, tmux_path]
+    return [ghostty_path, k9s_path, zed_path, nvim_path, starship_path, zellij_path, tmux_path]
 
 
 def discover_default_targets(root: Path) -> list[Path]:

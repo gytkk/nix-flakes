@@ -122,7 +122,6 @@ modules/<name>/
 | `terraform/` | Terraform versions  | `default.nix` (direnv lazy-load)                    | NO      |
 | `vim/`       | Neovim              | `files/config/init.lua`, `files/onelight.lua`       | YES     |
 | `vscode/`    | VSCode (DISABLED)   | `default.nix`, `one-half-light-theme/`              | NO      |
-| `wezterm/`   | WezTerm terminal    | `files/wezterm.lua`, `themes/exports/wezterm`       | YES     |
 | `zed/`       | Zed editor          | `files/settings.json`, `themes/one-half-light.json` | YES     |
 | `zellij/`    | Zellij multiplexer  | `files/config.darwin.kdl`, `files/config.linux.kdl` | YES     |
 | `zsh/`       | Zsh shell           | `default.nix`, `starship.toml`                      | 부분적  |

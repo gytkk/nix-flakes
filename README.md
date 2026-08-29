@@ -253,18 +253,11 @@ Resources should supplement the tools instead of expanding the tool count:
 - tmux enables CSI-u extended keys so modified keys such as `Shift+Enter` survive through tmux into TUI apps like Codex. Restart tmux fully after changing this setting, because existing clients keep the old key mode.
 - Press `Ctrl+a ?` for the key list, `Ctrl+a w` for the tree, and `Ctrl+a s` for the session tree.
 
-## WezTerm config
-
-- WezTerm is managed through `modules/wezterm/default.nix`.
-- `home-manager switch` installs `~/.config/wezterm/wezterm.lua` as an out-of-store symlink to `modules/wezterm/files/wezterm.lua`, so repo edits are reflected in the live config file.
-- Home Manager renders `~/.config/wezterm/theme.lua` with the selected `modules.commonTheme` and links `~/.config/wezterm/themes` to the generated `themes/exports/wezterm` directory.
-- The checked-in defaults keep `xterm-256color`, the generated shared theme, JetBrains Mono with Sarasa Mono CL fallback, a beam cursor, opaque background, hidden titlebar via resize-only decorations, a compact tab bar, shell/process tab titles enriched with compact current-directory context, and IME-safe physical `Ctrl+letter` bindings.
-
 ## Kitty config
 
 - Kitty is managed through `modules/kitty/default.nix`.
 - `home-manager switch` installs `~/.config/kitty/kitty.conf` as an out-of-store symlink to `modules/kitty/files/kitty.conf`, so the repo file stays mutable.
-- The checked-in defaults mirror the current WezTerm look and feel: One Half Light colors, JetBrains Mono with Sarasa Mono CL as the Hangul fallback, a beam cursor, opaque background, and muted split borders.
+- The checked-in defaults use One Half Light colors, JetBrains Mono with Sarasa Mono CL as the Hangul fallback, a beam cursor, opaque background, and muted split borders.
 - The module only manages config. Install the `kitty` app or binary separately.
 
 ## AeroSpace config
