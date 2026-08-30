@@ -15,7 +15,7 @@ in
 
     workspaceRoot = lib.mkOption {
       type = lib.types.str;
-      default = "${homeDirectory}/workspace/ps";
+      default = "${homeDirectory}/development/ws";
       description = "Workspace containing the canonical agent memory files.";
     };
   };
