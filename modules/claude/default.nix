@@ -73,7 +73,7 @@ let
     lib.nameValuePair ".claude/skills/${name}" {
       inherit source;
     }
-  ) sharedSkills.claude;
+  ) sharedSkills.shared;
 in
 {
   options.modules.claude.enable = lib.mkOption {

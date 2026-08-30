@@ -11,12 +11,6 @@ let
   skillDirectories = lib.filterAttrs (_: type: type == "directory") (builtins.readDir ./skills);
   official = lib.mapAttrs (name: _: skillsRoot + "/${name}") skillDirectories;
 
-  # Keep explicit Claude-only additions separate from the portable official set.
-  claudeOnly = { };
-  claudeOnlyCollisions = lib.intersectLists (builtins.attrNames official) (
-    builtins.attrNames claudeOnly
-  );
-
   mkSkillFarm =
     name: sources:
     pkgs.linkFarm name (
@@ -26,9 +20,7 @@ let
       }) sources
     );
 in
-assert claudeOnlyCollisions == [ ];
 {
-  inherit claudeOnly mkSkillFarm official;
+  inherit mkSkillFarm official;
   shared = official;
-  claude = official // claudeOnly;
 }

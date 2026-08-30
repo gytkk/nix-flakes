@@ -37,10 +37,7 @@ Global development guidelines deployed to `~/.claude/CLAUDE.md`. Includes:
 
 ## Skills and plugins
 
-Home Manager links all 25 official skills from the locked `mattpocock-skills`
-input into `~/.claude/skills/`. The shared list is defined in
-`modules/agent-prompts/skills.nix`; Claude-only additions remain separate in
-that registry.
+Home Manager links the shared skills under `modules/agent-prompts/skills/` into `~/.claude/skills/`. The shared registry is defined in `modules/agent-prompts/skills.nix`; Claude-specific skills are provided through the local marketplace under `modules/claude/marketplace/skills/`.
 
 ### Marketplaces
 
