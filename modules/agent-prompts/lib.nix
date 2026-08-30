@@ -4,7 +4,7 @@ let
   operatingRules = ./rules/OPERATING.md;
   sharedRuleFiles = [
     ./AGENTS.md
-    ./rules/WRITING.md
+    ./rules/PROSE.md
   ];
   renderFiles =
     name: ruleFiles: pkgs.writeText name (lib.concatMapStringsSep "\n\n" builtins.readFile ruleFiles);

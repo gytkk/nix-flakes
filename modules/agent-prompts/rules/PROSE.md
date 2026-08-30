@@ -1,4 +1,4 @@
-# Writing and prose quality
+# Prose quality
 
 Apply these rules to documentation, comments, reports, prompts, PR descriptions, commit messages, and other substantive prose for users or future agents.
 Treat prose as maintained work: ambiguity can affect later decisions and outputs.

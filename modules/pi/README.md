@@ -110,8 +110,8 @@ source of repository-independent operating invariants that must apply to every
 task.
 
 `files/AGENTS.md` contains Pi-specific operational policy. Home Manager prepends
-shared methodology from `modules/agent-prompts/AGENTS.md` and writing guidance
-from `modules/agent-prompts/rules/WRITING.md` when it generates the runtime
+shared methodology from `modules/agent-prompts/AGENTS.md` and prose guidance
+from `modules/agent-prompts/rules/PROSE.md` when it generates the runtime
 `~/.pi/agent/AGENTS.md`. It omits `OPERATING.md` from that generated file because
 Pi already loads those rules through `APPEND_SYSTEM.md`. Project-specific rules
 belong in the project's own `AGENTS.md`. Pi-specific workflows live in

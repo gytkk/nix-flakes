@@ -1,9 +1,11 @@
 ---
 name: writing-for-agents
-description: Writing documents for agents. Use when creating or editing skills, or modifying AGENTS.md or CLAUDE.md.
+description: Design and revise instructions consumed by agents. Use when creating or editing skills, AGENTS.md, CLAUDE.md, or referenced agent guidance, including invocation, context placement, sequencing, and completion criteria.
 ---
 
-Reference for writing any document an agent consumes: a skill, an `AGENTS.md` / `CLAUDE.md`, a doc reached by a pointer. The packaging differs; the writing does not: the same levers make each one predictable, since the agent takes the same _process_ every run rather than producing the same output.
+# Agent instruction design
+
+Use this reference to design any document an agent consumes: a skill, an `AGENTS.md` or `CLAUDE.md`, or guidance reached through those documents. Global prose rules govern sentence quality. This skill governs how instructions are discovered, loaded, structured, and executed so the agent follows the same process on each run rather than merely producing similar wording.
 
 When the document you're writing is a skill, read [`SKILL-MECHANICS.md`](SKILL-MECHANICS.md) for frontmatter, invocation choice, and router skills.
 
