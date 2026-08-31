@@ -9,7 +9,7 @@
 - **Scope:** `modules/pi/`, `~/.pi/agent/`의 실제 로드 상태, 설치된 Pi 패키지,
   현재 저장소의 상위 레벨 세션
 - **Status:** Web Access의 `workflow: "none"`, 전역 agent rule 통합, optional
-  tool의 동적 로딩을 적용했다. 모델 기본값과 PROSE 축약은 아직 적용하지 않았다.
+  tool의 동적 로딩, PROSE 축약을 적용했다. 모델 기본값 등 나머지 항목은 적용하지 않았다.
 
 ## Executive summary
 
@@ -294,7 +294,7 @@ Custom footer는 render마다 `ctx.sessionManager.getEntries()` 전체를 순회
 | --- | --- | --- | --- | --- |
 | P0 | 기본 모델을 Terra/medium으로 변경 | High | Low | 복잡한 작업의 품질 저하 가능성 |
 | Applied | optional tool을 기본 inactive로 전환 | High | Medium | optional 기능 사용 전에 동적 활성화 필요 |
-| P1 | 범용 skill과 중복 글로벌 지침 축약 | Medium-High | Medium | 규칙을 과도하게 줄이면 작업 품질 저하 |
+| Applied | 범용 skill과 중복 글로벌 지침 축약 | Medium-High | Medium | 규칙을 과도하게 줄이면 작업 품질 저하 |
 | P1 | 웹 검색 workflow를 `none`으로 변경 | High for web tasks | Low | curator 기반 사람 검토가 기본에서 사라짐 |
 | P1 | lite/full Pi 프로필 제공 | High | Medium | 프로필 간 기능 차이를 사용자가 기억해야 함 |
 | P2 | `mcpScript`와 bundled MCP skill 비활성화 | Low-Medium | Low | 다중 MCP 호출 자동화가 불편해짐 |
@@ -355,7 +355,7 @@ Pi 0.84.4에서 source extension을 직접 로드해 측정한 결과, RPC mode�
 activation을 native deferred tool loading으로 처리한다. 실제 provider token과
 latency 변화는 대표 작업으로 계속 측정해야 한다.
 
-### P1: Consolidate global coding methodology
+### Applied: Consolidate global coding methodology
 
 **Applied changes**
 
@@ -368,6 +368,8 @@ latency 변화는 대표 작업으로 계속 측정해야 한다.
    전용 규칙을 추가한다.
 4. Pi와 Codex의 중복 코딩 방법론 skill을 제거하고 Pi의 필수 routing 규칙도
    제거한다.
+5. 항상 로드되는 `PROSE.md`는 정확성, 기술 문서, 주석, 문장 부호, 한국어 문장에
+   필요한 규칙만 남겨 5,525자에서 2,755자로 줄인다.
 
 **Expected impact**
 
@@ -494,10 +496,10 @@ output 공간과 summary 품질에 영향을 주므로 먼저 수동 운영으�
 
 ### Phase 3: Prompt and skill cleanup
 
-1. 공통 coding methodology를 `modules/agent-prompts/AGENTS.md`에서 관리
-2. 에이전트별 파일에는 harness-specific rule만 유지
-3. specialized skill은 명확히 매칭될 때만 로드
-4. 간단한 수정, 복잡한 수정, review 요청을 각각 테스트
+1. [x] 공통 coding methodology를 `modules/agent-prompts/AGENTS.md`에서 관리
+2. [x] 에이전트별 파일에는 harness-specific rule만 유지
+3. [x] `PROSE.md`를 원래 크기의 절반 이하로 축약
+4. [ ] 간단한 수정, 복잡한 수정, review 요청을 각각 테스트
 
 **Verification**
 
@@ -595,6 +597,7 @@ Structured question tool은 약 4.9K자의 metadata를 사용하지만 모호한
 - [x] Web Access 기본 workflow를 `none`으로 변경
 - [x] coding methodology를 `modules/agent-prompts/AGENTS.md`로 통합
 - [x] 중복 coding methodology skill과 필수 routing 규칙 제거
+- [x] `PROSE.md`를 원래 크기의 절반 이하로 축약
 - [ ] `mcpScript` 사용 빈도를 확인하고 유지 여부 결정
 - [ ] UI lag가 실제 증상인지 provider wait가 실제 증상인지 구분
 
