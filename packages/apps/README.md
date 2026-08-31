@@ -10,7 +10,6 @@ Self-contained non-nixpkgs app packages used by the parent `nix-flakes` reposito
 ├── claude-code/
 ├── codex/
 ├── herdr/
-├── kimi-code/
 ├── opencode/
 ├── pi/
 ├── default.nix
@@ -30,7 +29,6 @@ Self-contained non-nixpkgs app packages used by the parent `nix-flakes` reposito
 | claude-code | 2.1.251 |
 | codex | 0.151.0 |
 | herdr | 0.8.2 |
-| kimi-code | 0.39.1 |
 | opencode | 1.18.25 |
 | pi | 0.84.4 |
 
