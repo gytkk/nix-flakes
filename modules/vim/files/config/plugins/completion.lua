@@ -9,9 +9,8 @@ M.minuet = {
     require("minuet").setup({
       provider = "openai",
       n_completions = 1,
-      -- Keep inline completions responsive without sending a request for every
-      -- keystroke. A slightly longer timeout avoids silently dropping useful
-      -- streamed completions.
+      -- 키 입력마다 요청하지 않으면서 인라인 완성 반응성을 유지한다.
+      -- 스트리밍 결과가 조용히 누락되지 않도록 timeout에 여유를 둔다.
       context_window = 6000,
       throttle = 900,
       debounce = 180,

@@ -128,9 +128,8 @@ in
 
       INSTALLED_PLUGINS="$HOME/.claude/plugins/installed_plugins.json"
 
-      # Pre-flight: verify Claude Code authentication by listing marketplaces.
-      # --foreground prevents timeout(1) from creating a new process group,
-      # which avoids SIGTTIN when child processes (git) open /dev/tty.
+      # marketplace 조회로 인증을 확인하며, 자식 git이 /dev/tty를 열 때 SIGTTIN이 발생하지 않도록
+      # timeout이 새 프로세스 그룹을 만들지 않는 foreground 모드로 실행한다.
       if ! MARKETPLACE_CACHE=$(${timeout} 15s ${claude} plugin marketplace list < /dev/null 2>/dev/null); then
         log "ERROR: Claude Code auth check failed (marketplace list timed out or errored)."
         log "  Skipping all plugin/marketplace/MCP setup."
@@ -150,9 +149,8 @@ in
           log "Marketplace already registered: ${mp}"
         fi'') marketplaces}
 
-      # Register local marketplaces (filesystem-sourced).
-      # If a same-named marketplace was previously registered from GitHub,
-      # remove it first so the local path takes over without name collision.
+      # 같은 이름의 GitHub marketplace를 먼저 제거해
+      # 로컬 marketplace 경로가 충돌 없이 우선하도록 한다.
       KNOWN_MARKETPLACES="$HOME/.claude/plugins/known_marketplaces.json"
       ${lib.concatMapStringsSep "\n    " (mp: ''
         LOCAL_MP_NAME=${lib.escapeShellArg mp.name}
@@ -194,10 +192,8 @@ in
         log "Temporarily made settings.json writable for plugin operations"
       fi
 
-      # Install or update plugins. Always pin to user scope: a project-scope-only
-      # install causes Claude Code to re-prompt the install in every other project,
-      # and the previous substring check on installed_plugins.json could not tell
-      # project-scope entries apart from user-scope ones.
+      # 다른 프로젝트에서 설치를 다시 묻지 않도록 플러그인은 항상 user scope에 설치한다.
+      # installed_plugins.json에서는 scope를 직접 확인해 project 항목과 구분한다.
       ${lib.concatMapStringsSep "\n    " (plugin: ''
         HAS_USER_SCOPE=0
         if [ -f "$INSTALLED_PLUGINS" ]; then
@@ -277,9 +273,8 @@ in
       log "=== Claude Code setup finished ==="
     '';
 
-    # Install plannotator CLI binary (from GitHub releases, not in nixpkgs).
-    # install.sh hardcodes INSTALL_DIR="$HOME/.local/bin" and does not honor
-    # an env override, so we just consume that location directly.
+    # plannotator의 install.sh가 INSTALL_DIR을 무시하고 ~/.local/bin에 설치하므로
+    # GitHub 릴리스 바이너리를 해당 경로에서 직접 사용한다.
     home.activation.installPlannotator = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       PLANNOTATOR_BIN="$HOME/.local/bin/plannotator"
       PLANNOTATOR_VERSION_FILE="$HOME/.local/bin/.plannotator-version"

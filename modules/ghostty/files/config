@@ -1,8 +1,7 @@
 auto-update = check
 
-# Fix Forward Delete key and other compatibility issues
-# Ghostty's default xterm-ghostty terminfo causes key binding issues with zsh
-# https://github.com/ghostty-org/ghostty/discussions/4415
+# xterm-ghostty와 zsh의 키 바인딩 충돌을 피하고 Forward Delete를 지원한다.
+# 참고: https://github.com/ghostty-org/ghostty/discussions/4415
 term = xterm-256color
 
 # Theme comes from ~/.config/ghostty/themes/<commonTheme>.conf.
@@ -54,9 +53,8 @@ keybind = super+9=text:\x1b[57;9u
 link-url = true
 clipboard-trim-trailing-spaces = true
 
-# IME(한글 등) 활성 상태에서 Ctrl+key가 자모로 변환되어 CSI u 시퀀스
-# (예: 12613;5u = Ctrl+ㅅ)가 그대로 찍히는 문제 방지.
-# W3C 물리 키 코드를 사용하면 레이아웃/IME에 관계없이 물리 키 위치로 매칭됨.
+# IME 사용 중 Ctrl+key가 자모의 CSI u 시퀀스로 입력되지 않도록
+# W3C 물리 키 코드로 레이아웃과 무관하게 키 위치를 매칭한다.
 keybind = ctrl+key_a=text:\x01
 keybind = ctrl+key_b=text:\x02
 keybind = ctrl+key_c=text:\x03

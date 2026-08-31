@@ -1,13 +1,5 @@
-# Agenix secrets configuration
-# Reference: https://github.com/ryantm/agenix
-#
-# Usage:
-#   1. Add your public key below
-#   2. Create encrypted secrets: agx -e secret-name.age
-#   3. Reference in NixOS config: age.secrets.secretName.file = ./secret-name.age;
-#
-# NixOS secrets are decrypted under /run/agenix. Home Manager consumers should
-# use the path exposed by config.age.secrets.<name>.path.
+# 공개 키를 추가한 뒤 `agx -e secret-name.age`로 암호화하고 NixOS의 age.secrets에서 참조한다.
+# NixOS는 /run/agenix를, Home Manager는 config.age.secrets.<name>.path를 사용한다.
 let
   # Primary administrator SSH public key (for editing and recovery)
   agenixAdmin = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJhE4Uakcz7usa0aetMqb99LYybOQ0I+sWKOiAidmBio";

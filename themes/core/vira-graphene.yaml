@@ -12,9 +12,8 @@ meta:
     Graphene look as closely as possible.
 
 palette:
-  # Base24-compatible base slots.
-  # Derived primarily from the provided Ghostty theme file, with semantic
-  # companion slots filled in conservatively to keep other exporters coherent.
+  # Base24 호환 슬롯은 제공된 Ghostty 테마를 기준으로 삼고,
+  # 다른 exporter도 일관되도록 나머지 의미 슬롯을 보수적으로 채웠다.
   base00: "#212121"
   base01: "#212121"
   base02: "#2b2b2b"

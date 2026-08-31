@@ -72,9 +72,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # uv2nix - build the omnigent Python app from its committed uv.lock
-    # (packages/omnigent). omnigent ships no prebuilt binary, so unlike the
-    # flake-stores apps it is built from source via uv2nix.
+    # 미리 빌드된 바이너리가 없는 omnigent는 커밋된 uv.lock을 사용해
+    # packages/omnigent에서 uv2nix로 빌드한다.
     pyproject-nix = {
       url = "github:pyproject-nix/pyproject.nix";
       inputs.nixpkgs.follows = "nixpkgs";

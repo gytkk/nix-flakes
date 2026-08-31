@@ -36,23 +36,12 @@ let
     pathsToLink = [ "/bin" ];
   };
 
-  # agenix's launchd agent execs a mount-secrets store path that changes with
-  # every secrets/input update, and Home Manager wraps every agent command as
-  # `/bin/sh -c "/bin/wait4path /nix/store && exec ..."`. Each plist change
-  # therefore re-registers a new "sh" background item with macOS Background
-  # Task Management and pops a notification. Freeze the plist by pointing it
-  # at this stable out-of-store wrapper; writeAgenixLaunchdWrapper below
-  # rewrites the wrapper (and remounts secrets) when the script changes.
+  # agenix의 store 경로 변경으로 launchd plist와 macOS 알림이 갱신되지 않도록 고정된 래퍼를 사용한다.
+  # 스크립트가 바뀌면 아래 activation에서 래퍼를 다시 쓰고 secret을 마운트한다.
   agenixLaunchdWrapper = "${config.xdg.stateHome}/agenix-launchd-wrapper";
 
-  # Recover agenix's original mount command from the raw option definitions:
-  # the merged config value is mkForce-replaced with the wrapper path, but the
-  # definition list still contains agenix's plain list. Our own definition is
-  # skipped because its nested mkIf marker is not discharged at this level
-  # (and the ProgramArguments below it is an mkForce marker), so lib.isList
-  # rejects it either way. Remove this workaround if Home Manager's launchd
-  # module gains a stable-exec-path/BTM story or agenix exposes a stable
-  # entry point.
+  # mkForce로 대체되기 전 agenix 명령은 raw option definitions의 list 값에서 복구한다.
+  # Home Manager나 agenix가 안정된 실행 경로를 제공하면 이 우회 로직을 제거한다.
   agenixMountCommand =
     let
       args = lib.findFirst lib.isList null (
@@ -125,36 +114,26 @@ in
     # Disable news on update
     news.display = "silent";
 
-    # macOS: App Management 권한 문제 방지
-    # stateVersion >= 25.11에서 copyApps가 기본 활성화되며,
-    # 매 switch마다 tccutil reset으로 TCC App Management 권한을 리셋함
-    # Nix로 .app 번들을 설치하지 않으므로 비활성화
+    # stateVersion 25.11부터 copyApps가 switch마다 TCC 권한을 초기화하므로,
+    # Nix로 .app 번들을 설치하지 않는 이 구성에서는 비활성화한다.
     targets.darwin.copyApps.enable = false;
 
-    # agenix's Home Manager LaunchAgent is a one-shot secret activation step.
-    # Its upstream KeepAlive.Crashed=false makes launchd rerun it continuously
-    # after normal exits, which can race with Home Manager's agent reload.
-    # ProgramArguments is frozen to the stable wrapper path so the plist bytes
-    # never change between generations (see agenixLaunchdWrapper above).
+    # 일회성 agenix 작업이 정상 종료 후 반복 실행되지 않도록 KeepAlive를 제거한다.
+    # 세대가 바뀌어도 plist가 유지되도록 ProgramArguments는 고정된 래퍼를 가리킨다.
     launchd.agents.activate-agenix.config = lib.mkIf pkgs.stdenv.isDarwin {
       KeepAlive = lib.mkForce null;
       ProgramArguments = lib.mkIf (agenixMountCommand != null) (lib.mkForce [ agenixLaunchdWrapper ]);
     };
 
-    # Daily session-mining loop: generate agent-core improvement candidates from
-    # the workspace's new Claude Code transcripts, so the reflect -> promote loop
-    # keeps improving on its own. The runner lives in the gytkk-space repo at a
-    # stable path, so the plist bytes do not change between generations (same BTM
-    # notification concern as agenix above). launchd catches up a missed 06:00 run
-    # after the Mac wakes from sleep. See gytkk-space/automation/mine-sessions.sh.
+    # 매일 06:00에 Claude Code 기록에서 agent-core 개선 후보를 만들며, 절전 중 놓친 실행은 기상 후 처리한다.
+    # BTM 알림을 피하도록 gytkk-space의 고정된 runner 경로를 사용한다.
     launchd.agents.claude-session-mining = lib.mkIf pkgs.stdenv.isDarwin {
       # Home Manager's launchd.agents.<name>.enable defaults to false, so a
       # config-only definition silently produces no plist at all.
       enable = true;
       config = {
-        # Home Manager's launchd module already wraps ProgramArguments in
-        # `/bin/sh -c '/bin/wait4path /nix/store && exec ...'`, so name the
-        # runner directly instead of hand-rolling a second wait4path layer.
+        # Home Manager가 ProgramArguments에 wait4path를 이미 적용하므로
+        # 중복 래퍼 없이 runner를 직접 지정한다.
         ProgramArguments = [ "${homeDirectory}/workspace/gytkk-space/automation/mine-sessions.sh" ];
         StartCalendarInterval = [
           {
@@ -182,12 +161,8 @@ in
       lib.optional (pkgs.stdenv.isDarwin && config.age.secrets != { } && agenixMountCommand == null)
         "agenix launchd command could not be recovered from option definitions; plist freeze is inactive and 'sh' background notifications will return.";
 
-    # Keep the wrapper pointing at the current generation's mount script. The
-    # stable plist means launchd no longer restarts the agent on switch, so
-    # remount secrets here whenever the script changed. Runs after
-    # writeBoundary so a failed pre-flight check cannot leave a rewritten
-    # wrapper behind; a failed remount is non-fatal because launchd retries
-    # at next login (RunAtLoad).
+    # writeBoundary 뒤에 래퍼를 현재 세대의 mount script로 갱신하고 secret을 다시 마운트한다.
+    # 마운트 실패는 다음 로그인 때 launchd가 재시도하므로 치명적 오류로 처리하지 않는다.
     home.activation.writeAgenixLaunchdWrapper =
       lib.mkIf (pkgs.stdenv.isDarwin && agenixMountCommand != null)
         (
@@ -205,21 +180,14 @@ in
       identityPaths = [ "${homeDirectory}/.ssh/id_ed25519" ];
     }
     // lib.optionalAttrs pkgs.stdenv.isDarwin {
-      # Home Manager agenix defaults to DARWIN_USER_TEMP_DIR on macOS. Keep
-      # decrypted generations in XDG state so temp cleanup does not break apps
-      # that read long-lived secrets such as Neovim's OpenAI API key.
+      # macOS 임시 디렉터리가 정리되어도 장기 사용 secret을 읽는 앱이 중단되지 않도록
+      # 복호화한 agenix 세대를 XDG state에 보관한다.
       secretsDir = "${config.xdg.stateHome}/agenix";
       secretsMountPoint = "${config.xdg.stateHome}/agenix.d";
     };
 
-    # macOS `launchctl bootout` rejects the `--wait` flag that Home Manager
-    # passes since nix-community/home-manager@9cb587a (2026-05-01), so its
-    # agent reload aborts with "Unrecognized target specifier" and the
-    # follow-up `bootstrap` fails with I/O error 5. This only bites when the
-    # activate-agenix plist changes between generations. Pre-unload (plain
-    # `bootout`, no `--wait`) and drop the stale plist so Home Manager's broken
-    # reload path is skipped and it re-bootstraps cleanly. Remove once upstream
-    # stops passing `--wait` to bootout.
+    # Home Manager의 `launchctl bootout --wait` 오류를 피하려고 변경된 agenix plist를 먼저 내리고 삭제한다.
+    # upstream이 `--wait`를 전달하지 않게 되면 이 우회 로직을 제거한다.
     home.activation.bootoutAgenixBeforeLaunchAgents = lib.mkIf pkgs.stdenv.isDarwin (
       lib.hm.dag.entryBefore [ "setupLaunchAgents" ] ''
         agentPlist="org.nix-community.home.activate-agenix.plist"
@@ -375,10 +343,8 @@ in
       sessionVariables = {
         LIBRARY_PATH = lib.makeLibraryPath [ pkgs.libiconv ];
 
-        # pup 바이너리는 nix store에서 ad-hoc 서명되므로 rebuild마다 코드 서명
-        # identity가 바뀐다. macOS 키체인 ACL이 유지되지 않아 매 호출마다 접근
-        # 허용 알림이 뜨므로, 토큰을 ~/.config/pup/tokens_<site>.json (0600)에
-        # 저장하도록 강제한다.
+        # rebuild마다 pup의 코드 서명이 바뀌어 macOS 키체인 알림이 반복되므로
+        # 토큰을 ~/.config/pup/tokens_<site>.json에 0600 권한으로 저장한다.
         DD_TOKEN_STORAGE = "file";
       };
     };

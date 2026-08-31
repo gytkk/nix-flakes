@@ -199,9 +199,8 @@ if [ -n "$weekly_info" ]; then
   right_plain="${weekly_plain} | ${model_plain}"
 fi
 
-# Claude Code exports COLUMNS for statusline sizing. tput cannot read the width
-# reliably because the command does not own the terminal. Its footer reserves
-# two columns on each side outside the custom status line.
+# 터미널을 소유하지 않아 tput 대신 Claude Code의 COLUMNS를 사용한다.
+# footer가 사용자 status line 바깥의 좌우 두 칸씩을 차지하므로 4를 뺀다.
 columns=${COLUMNS:-0}
 if [[ "$columns" =~ ^[0-9]+$ ]] && [ "$columns" -gt 0 ]; then
   columns=$((columns - 4))

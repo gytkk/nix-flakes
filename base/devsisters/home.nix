@@ -60,16 +60,8 @@
     VAULT_ADDR = "https://vault.devsisters.cloud";
     # SBT Java 호환성 설정
     SBT_OPTS = "-Xmx2G -XX:+UseG1GC";
-    # OTEL telemetry (Databricks)
-    # Generic protocol fallback: some OTLP clients (e.g. omnigent) only read
-    # the non-signal-specific OTEL_EXPORTER_OTLP_PROTOCOL and ignore the
-    # per-signal *_METRICS_/*_LOGS_PROTOCOL vars below, defaulting to gRPC.
-    # Databricks' OTLP endpoint only implements HTTP/protobuf, so an
-    # unpatched gRPC exporter fails every export with StatusCode.UNIMPLEMENTED
-    # and its idle gRPC background threads can trip grpc-python's fork-safety
-    # abort (SIGABRT) in processes that fork/spawn subprocesses, such as the
-    # omnigent runner — which then tears down anything it supervises,
-    # including a running Claude Code terminal ("required_terminal_exited").
+    # 일부 OTLP 클라이언트는 공통 프로토콜만 읽으므로 Databricks가 지원하는 HTTP/protobuf를 명시한다.
+    # gRPC 사용 시 export 실패와 fork 안전성 오류로 omnigent의 하위 터미널까지 종료될 수 있다.
     OTEL_EXPORTER_OTLP_PROTOCOL = "http/protobuf";
     OTEL_METRICS_EXPORTER = "otlp";
     OTEL_EXPORTER_OTLP_METRICS_PROTOCOL = "http/protobuf";

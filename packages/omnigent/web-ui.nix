@@ -5,14 +5,8 @@
   version,
 }:
 
-# Build the omnigent browser web UI (the ``ap-web`` Vite/React SPA) offline.
-#
-# Upstream's setuptools build shells out to ``npm install && npm run build``
-# (see the project ``setup.py``), which needs network access the Nix sandbox
-# forbids - hence the API-only build. Here we build the SPA from the same
-# pinned ``src`` as a ``buildNpmPackage`` derivation (deps fetched by hash,
-# ``npm ci`` run offline) and expose the compiled bundle. package.nix injects
-# the result into omnigent's ``server/static/web-ui`` so the server mounts it.
+# 고정된 src의 ap-web SPA를 buildNpmPackage로 오프라인 빌드한다.
+# package.nix가 결과를 server/static/web-ui에 주입해 서버에서 제공한다.
 buildNpmPackage {
   pname = "omnigent-web-ui";
   inherit version;
@@ -22,11 +16,8 @@ buildNpmPackage {
 
   npmDepsHash = "sha256-zgrihNaPy7vRs2PlCsHf3LWorPDU1784+tqv+eufpag=";
 
-  # ``npm run build`` is ``tsc -b && vite build``. Skip the ``tsc -b``
-  # type-check (irrelevant to the runtime bundle, and a version skew there
-  # would needlessly fail the derivation) and run vite directly, redirecting
-  # its output to a local ``dist`` - vite.config.ts hard-codes ``outDir`` to
-  # ``../omnigent/server/static/web-ui``, which lives outside this package root.
+  # 런타임 번들과 무관한 tsc 버전 차이로 빌드가 실패하지 않도록 Vite만 실행한다.
+  # 패키지 루트 밖을 가리키는 기본 outDir 대신 로컬 dist에 출력한다.
   buildPhase = ''
     runHook preBuild
     ./node_modules/.bin/vite build --outDir dist --emptyOutDir

@@ -1,19 +1,6 @@
 #!/usr/bin/env bash
-# Human-in-the-loop reproduction loop.
-# Copy this file, edit the steps below, and run it.
-# The agent runs the script; the user follows prompts in their terminal.
-#
-# Usage:
-#   bash hitl-loop.template.sh
-#
-# Two helpers:
-#   step "<instruction>"          → show instruction, wait for Enter
-#   capture VAR "<question>"      → show question, read response into VAR
-#
-# At the end, captured values are printed as KEY=VALUE for the agent to parse.
-#
-# `capture` prints its value back to the terminal, where the agent reads it,
-# so capture observations, and leave signing in to the user as a `step`.
+# 로그인 같은 사용자 작업은 step으로 기다리고, capture에는 비밀이 아닌 관측값만 받는다.
+# capture 값은 에이전트가 읽도록 마지막에 KEY=VALUE로 터미널에 출력된다.
 
 set -euo pipefail
 

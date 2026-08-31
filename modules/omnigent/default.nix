@@ -18,9 +18,8 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    # omnigent is built from source via uv2nix (see packages/omnigent). This is
-    # the API-only build: terminal/CLI orchestration works; there is no
-    # localhost:6767 browser UI (bundling the npm web UI is a future follow-up).
+    # omnigent는 packages/omnigent에서 uv2nix로 빌드하며
+    # 별도로 빌드한 브라우저 UI도 Python 패키지에 포함한다.
     home.packages = [ pkgs.omnigent ];
 
     # nix pins the version, so silence omnigent's per-release update notice.

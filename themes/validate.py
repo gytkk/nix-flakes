@@ -25,12 +25,8 @@ class Validator:
         self.errors.append(f"{path}: {message}")
 
 
-# Tiny YAML parser for this repo's limited schema format.
-# Supports:
-# - mappings with 2-space indentation
-# - quoted or plain scalar values
-# - folded/literal blocks using >-, >, |-, |
-# - comments and blank lines
+# 이 저장소의 제한된 스키마용 YAML parser로, 2칸 들여쓰기 mapping과 scalar를 처리한다.
+# >-, >, |-, | 블록과 주석, 빈 줄도 지원한다.
 
 def strip_inline_comment(line: str) -> str:
     in_single = False

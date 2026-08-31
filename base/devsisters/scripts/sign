@@ -8,9 +8,7 @@ if [ -z "$VAULT_ADDR" ]; then
     VAULT_ADDR=${DEFAULT_VAULT_ADDR}
 fi
 
-#
-# 도움말을 출력하는 함수
-#
+# 도움말 출력
 show_help() {
   cat <<EOF
 Usage:
@@ -33,9 +31,7 @@ Examples:
 EOF
 }
 
-#
-# 커맨드라인 인자 파싱
-#
+# 명령줄 인자 처리
 while getopts t:r:h opt; do
   case $opt in
     t)  TTL=$OPTARG;;
@@ -46,9 +42,7 @@ while getopts t:r:h opt; do
 done
 shift "$((OPTIND-1))"
 
-#
-# 첫번째 인자로 주어진 키를 서명하는 함수
-#
+# 첫 번째 인자의 키 서명
 sign_key () {
   if [[ -r "$1".pub ]]; then
     vault write \
@@ -67,9 +61,7 @@ sign_key () {
   chmod 600 "$1"-cert.pub
 }
 
-#
 # 프로그램 진입점
-#
 main () {
   local FILES=("$@") VERBOSE=true
 

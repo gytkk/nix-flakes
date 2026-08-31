@@ -41,12 +41,8 @@ let
 
   # Per-package build fixups.
   pyprojectOverrides = _final: prev: {
-    # omnigent's setuptools build shells out to `npm` to bundle the browser web
-    # UI, which needs network access unavailable in the nix sandbox. We instead
-    # build the SPA separately (see web-ui.nix) and drop the prebuilt bundle
-    # into the source tree here, so setuptools' `static/web-ui/**/*` package
-    # data ships it into the wheel. OMNIGENT_SKIP_WEB_UI stays set so the
-    # setup.py build hook never attempts its own (network-bound) npm build.
+    # Nix sandbox에서 npm 네트워크 빌드를 할 수 없어 web-ui.nix의 SPA 결과를 wheel 소스에 주입한다.
+    # setup.py가 다시 npm을 실행하지 않도록 OMNIGENT_SKIP_WEB_UI를 유지한다.
     omnigent = prev.omnigent.overrideAttrs (old: {
       # Home Manager exposes agent bundles from the read-only Nix store; make
       # omnigent's temp override copy writable before it rewrites config.yaml.
