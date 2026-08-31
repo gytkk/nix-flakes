@@ -17,7 +17,7 @@ The modules do not install an OpenClaw package, generate `openclaw.json`, set
 
 ## Agent-core integration
 
-When `modules.openclaw.agentCore.enable` is true, Home Manager installs OpenClaw's shared skill render at `~/.local/share/openclaw/agent-core/skills`, stores generated shared instructions at `~/.openclaw/managed/agent-core/AGENTS.core.md`, and installs the `agent-core-context` extension. Keeping the skill root outside mutable OpenClaw state prevents the Home Manager store symlink from entering state archives. The extension uses `before_prompt_build` to return `prependSystemContext`. It does not replace OpenClaw's system prompt or write a workspace `AGENTS.md`, so workspace instructions remain independently owned and are loaded through OpenClaw's normal bootstrap path.
+When `modules.openclaw.agentCore.enable` is true, Home Manager installs OpenClaw's shared skill render and generated instructions under `~/.local/share/openclaw/agent-core/`, and installs repository-managed extensions under `~/.local/share/openclaw/extensions/`. Keeping these immutable Home Manager store links outside mutable OpenClaw state prevents them from entering state archives. The `agent-core-context` extension uses `before_prompt_build` to return `prependSystemContext`. It does not replace OpenClaw's system prompt or write a workspace `AGENTS.md`, so workspace instructions remain independently owned and are loaded through OpenClaw's normal bootstrap path.
 
 The module does not edit mutable `openclaw.json`. Add the managed skill root to `skills.load.extraDirs`, enable the hook, and grant the conversation access required by `before_prompt_build`:
 
@@ -31,6 +31,12 @@ The module does not edit mutable `openclaw.json`. Add the managed skill root to 
     }
   },
   "plugins": {
+    "load": {
+      "paths": [
+        "/home/gytkk/.local/share/openclaw/extensions/agent-core-context",
+        "/home/gytkk/.local/share/openclaw/extensions/agent-session-record"
+      ]
+    },
     "allow": ["agent-core-context", "agent-session-record"],
     "entries": {
       "agent-core-context": {
@@ -44,7 +50,7 @@ The module does not edit mutable `openclaw.json`. Add the managed skill root to 
 }
 ```
 
-If `skills.load.extraDirs` or `plugins.allow` already exists, merge the path or IDs into the existing lists. Do not set `plugins.entries.agent-core-context.hooks.allowPromptInjection` to `false`. Restart the Gateway after changing plugin configuration or code.
+If `skills.load.extraDirs`, `plugins.load.paths`, or `plugins.allow` already exists, merge the paths or IDs into the existing lists. Do not set `plugins.entries.agent-core-context.hooks.allowPromptInjection` to `false`. Restart the Gateway after changing plugin configuration or code.
 
 After applying the Home Manager generation and restarting the Gateway, run the read-only smoke test:
 
@@ -54,14 +60,23 @@ modules/openclaw/tests/runtime-smoke.sh
 
 The script checks the generated instruction file, plugin activation and diagnostics, the single `before_prompt_build` hook, managed skill discovery for every configured agent, and workspace precedence for duplicate skill names. It reports a skipped multi-workspace check when all configured agents share one workspace. Exact live prompt contents require a trajectory export and are not collected by this smoke test.
 
-After activation, confirm that Home Manager removed the old state-owned link and that the new root exists:
+After activation, confirm that Home Manager removed the old state-owned links and that the new roots exist:
 
 ```bash
-test ! -e ~/.openclaw/skills && test ! -L ~/.openclaw/skills
+for path in \
+  ~/.openclaw/skills \
+  ~/.openclaw/managed/agent-core/AGENTS.core.md \
+  ~/.openclaw/extensions/agent-core-context \
+  ~/.openclaw/extensions/agent-session-record; do
+  test ! -e "$path" && test ! -L "$path"
+done
+test -s ~/.local/share/openclaw/agent-core/AGENTS.core.md
 test -d ~/.local/share/openclaw/agent-core/skills
+test -d ~/.local/share/openclaw/extensions/agent-core-context
+test -d ~/.local/share/openclaw/extensions/agent-session-record
 ```
 
-After updating `skills.load.extraDirs`, validating the config, and restarting the Gateway, create and verify a fresh archive outside the state and workspace trees:
+After updating `skills.load.extraDirs` and `plugins.load.paths`, validating the config, and restarting the Gateway, create and verify a fresh archive outside the state and workspace trees:
 
 ```bash
 openclaw config validate
@@ -69,7 +84,7 @@ mkdir -p ~/backups/openclaw
 openclaw backup create --output ~/backups/openclaw --verify
 ```
 
-The command prints the created archive path. Run `openclaw backup verify <archive-path>` for an independent repeat verification, then check `openclaw status --json | jq '.backups.latest'` for a recorded `status` of `success`.
+The command prints the created archive path. Run `openclaw backup verify <archive-path>` for an independent repeat verification, then check `openclaw status --json | jq '.backups.latest'` for a recorded `status` of `success`. A remaining failure at `~/.openclaw/codex-openclaw-home/auth.json` is separate legacy mutable state, not a Home Manager-owned integration resource; resolve that credential link before treating the archive as complete.
 
 ## Session recorder
 

@@ -9,8 +9,8 @@
 let
   cfg = config.modules.openclaw;
   stateDir = toString cfg.stateDir;
-  relativeStateDir = lib.removePrefix "${homeDirectory}/" stateDir;
-  agentCoreSkillsDir = ".local/share/openclaw/agent-core/skills";
+  agentCoreDir = ".local/share/openclaw/agent-core";
+  extensionsDir = ".local/share/openclaw/extensions";
   agentCoreOutput = import ../../agent-core/nix/render.nix { inherit pkgs; } {
     runtime = "openclaw";
   };
@@ -48,33 +48,25 @@ in
         assertion = !(lib.hasPrefix "/nix/store/" stateDir);
         message = "modules.openclaw.stateDir must point to mutable host storage, not the Nix store.";
       }
-      {
-        assertion =
-          !(cfg.agentCore.enable || cfg.agentSessionRecordPlugin.enable)
-          || lib.hasPrefix "${homeDirectory}/" stateDir;
-        message = "modules.openclaw.stateDir must be inside the Home Manager home when a managed plugin is enabled.";
-      }
     ];
 
     home.sessionPath = [ "${stateDir}/bin" ];
 
     home.file = lib.mkMerge [
       (lib.mkIf cfg.agentCore.enable {
-        "${relativeStateDir}/managed/agent-core/AGENTS.core.md".source =
-          "${agentCoreOutput}/AGENTS.core.md";
-        "${agentCoreSkillsDir}".source = "${agentCoreOutput}/skills";
-        "${relativeStateDir}/extensions/agent-core-context".source = ./files/extensions/agent-core-context;
+        "${agentCoreDir}/AGENTS.core.md".source = "${agentCoreOutput}/AGENTS.core.md";
+        "${agentCoreDir}/skills".source = "${agentCoreOutput}/skills";
+        "${extensionsDir}/agent-core-context".source = ./files/extensions/agent-core-context;
       })
       (lib.mkIf cfg.agentSessionRecordPlugin.enable {
-        "${relativeStateDir}/extensions/agent-session-record".source =
-          ./files/extensions/agent-session-record;
+        "${extensionsDir}/agent-session-record".source = ./files/extensions/agent-session-record;
       })
     ];
 
     xdg.configFile."systemd/user/openclaw-gateway.service.d/20-nix-runtime.conf".text = ''
       [Service]
       Environment="LD_LIBRARY_PATH=${lib.makeLibraryPath [ pkgs.libcap ]}"
-      ${lib.optionalString cfg.agentCore.enable ''Environment="AGENT_CORE_OPENCLAW_INSTRUCTIONS=${stateDir}/managed/agent-core/AGENTS.core.md"''}
+      ${lib.optionalString cfg.agentCore.enable ''Environment="AGENT_CORE_OPENCLAW_INSTRUCTIONS=${homeDirectory}/${agentCoreDir}/AGENTS.core.md"''}
     '';
 
   };

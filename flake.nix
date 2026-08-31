@@ -186,16 +186,32 @@
           ];
           onyx = nixosConfigurations.pylv-onyx.config;
           onyxHomeFiles = onyx.home-manager.users.gytkk.home.file;
+          onyxOpenClawSystemdDropIn =
+            onyx.home-manager.users.gytkk.xdg.configFile."systemd/user/openclaw-gateway.service.d/20-nix-runtime.conf".text;
           linuxMatches = [
             (
-              toString onyxHomeFiles.".openclaw/managed/agent-core/AGENTS.core.md".source
+              toString onyxHomeFiles.".local/share/openclaw/agent-core/AGENTS.core.md".source
               == "${output.openclaw}/AGENTS.core.md"
             )
             (
               toString onyxHomeFiles.".local/share/openclaw/agent-core/skills".source
               == "${output.openclaw}/skills"
             )
-            (!(builtins.hasAttr ".openclaw/skills" onyxHomeFiles))
+            (
+              toString onyxHomeFiles.".local/share/openclaw/extensions/agent-core-context".source
+              == toString ./modules/openclaw/files/extensions/agent-core-context
+            )
+            (
+              toString onyxHomeFiles.".local/share/openclaw/extensions/agent-session-record".source
+              == toString ./modules/openclaw/files/extensions/agent-session-record
+            )
+            (builtins.all (path: !(builtins.hasAttr path onyxHomeFiles)) [
+              ".openclaw/skills"
+              ".openclaw/managed/agent-core/AGENTS.core.md"
+              ".openclaw/extensions/agent-core-context"
+              ".openclaw/extensions/agent-session-record"
+            ])
+            (nixpkgs.lib.hasInfix ''Environment="AGENT_CORE_OPENCLAW_INSTRUCTIONS=/home/gytkk/.local/share/openclaw/agent-core/AGENTS.core.md"'' onyxOpenClawSystemdDropIn)
             (toString onyx.environment.etc."codex/skills".source == "${output.codex}/skills")
           ];
         in

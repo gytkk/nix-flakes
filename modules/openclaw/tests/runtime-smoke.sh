@@ -3,8 +3,7 @@
 set -euo pipefail
 
 openclaw_bin="${OPENCLAW_BIN:-openclaw}"
-state_dir="${OPENCLAW_STATE_DIR:-${HOME}/.openclaw}"
-instruction_file="${AGENT_CORE_OPENCLAW_INSTRUCTIONS:-${state_dir}/managed/agent-core/AGENTS.core.md}"
+instruction_file="${AGENT_CORE_OPENCLAW_INSTRUCTIONS:-${HOME}/.local/share/openclaw/agent-core/AGENTS.core.md}"
 managed_skills_dir="${AGENT_CORE_OPENCLAW_SKILLS:-${HOME}/.local/share/openclaw/agent-core/skills}"
 
 fail() {
