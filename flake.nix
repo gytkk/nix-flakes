@@ -191,7 +191,11 @@
               toString onyxHomeFiles.".openclaw/managed/agent-core/AGENTS.core.md".source
               == "${output.openclaw}/AGENTS.core.md"
             )
-            (toString onyxHomeFiles.".openclaw/skills".source == "${output.openclaw}/skills")
+            (
+              toString onyxHomeFiles.".local/share/openclaw/agent-core/skills".source
+              == "${output.openclaw}/skills"
+            )
+            (!(builtins.hasAttr ".openclaw/skills" onyxHomeFiles))
             (toString onyx.environment.etc."codex/skills".source == "${output.codex}/skills")
           ];
         in

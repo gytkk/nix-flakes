@@ -5,7 +5,7 @@ set -euo pipefail
 openclaw_bin="${OPENCLAW_BIN:-openclaw}"
 state_dir="${OPENCLAW_STATE_DIR:-${HOME}/.openclaw}"
 instruction_file="${AGENT_CORE_OPENCLAW_INSTRUCTIONS:-${state_dir}/managed/agent-core/AGENTS.core.md}"
-managed_skills_dir="${AGENT_CORE_OPENCLAW_SKILLS:-${state_dir}/skills}"
+managed_skills_dir="${AGENT_CORE_OPENCLAW_SKILLS:-${HOME}/.local/share/openclaw/agent-core/skills}"
 
 fail() {
   printf 'openclaw agent-core smoke failed: %s\n' "$1" >&2
@@ -49,7 +49,7 @@ for agent_id in "${agent_ids[@]}"; do
       jq -r --arg name "$skill_name" '.skills[] | select(.name == $name) | .source' <<<"$skills_json"
     )"
     case "$source_name" in
-      openclaw-managed)
+      openclaw-extra)
         ;;
       openclaw-workspace)
         resolved_source="$($openclaw_bin skills info --agent "$agent_id" "$skill_name" --json | jq -r '.source')"

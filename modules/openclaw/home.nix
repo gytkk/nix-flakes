@@ -10,6 +10,7 @@ let
   cfg = config.modules.openclaw;
   stateDir = toString cfg.stateDir;
   relativeStateDir = lib.removePrefix "${homeDirectory}/" stateDir;
+  agentCoreSkillsDir = ".local/share/openclaw/agent-core/skills";
   agentCoreOutput = import ../../agent-core/nix/render.nix { inherit pkgs; } {
     runtime = "openclaw";
   };
@@ -61,7 +62,7 @@ in
       (lib.mkIf cfg.agentCore.enable {
         "${relativeStateDir}/managed/agent-core/AGENTS.core.md".source =
           "${agentCoreOutput}/AGENTS.core.md";
-        "${relativeStateDir}/skills".source = "${agentCoreOutput}/skills";
+        "${agentCoreSkillsDir}".source = "${agentCoreOutput}/skills";
         "${relativeStateDir}/extensions/agent-core-context".source = ./files/extensions/agent-core-context;
       })
       (lib.mkIf cfg.agentSessionRecordPlugin.enable {

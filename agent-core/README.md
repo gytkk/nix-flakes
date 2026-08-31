@@ -164,7 +164,7 @@ AGENTS.core.md
 skills/
 ```
 
-OpenClaw output에는 runtime adapter가 없다. `AGENTS.core.md`는 세 공통 rule을 포함한다. Home Manager는 이 파일을 `stateDir` 아래의 관리 경로에 설치하고 선택된 shared skill tree를 OpenClaw managed skill root에 설치한다.
+OpenClaw output에는 runtime adapter가 없다. `AGENTS.core.md`는 세 공통 rule을 포함한다. Home Manager는 이 파일을 `stateDir` 아래의 관리 경로에 설치하고 선택된 shared skill tree를 `~/.local/share/openclaw/agent-core/skills`에 설치한다. Mutable OpenClaw config는 이 경로를 `skills.load.extraDirs`로 로드한다.
 
 `modules/openclaw`의 `agent-core-context` plugin은 `before_prompt_build` hook에서 `prependSystemContext`를 반환한다. Plugin은 OpenClaw system prompt를 교체하지 않고 workspace `AGENTS.md`를 생성하거나 수정하지 않는다. Mutable `openclaw.json`은 plugin enable, allowlist, conversation access를 계속 소유한다.
 
