@@ -1,6 +1,6 @@
 ---
 name: parallel-research-merge
-description: Coordinate bounded research scopes, using parallel workers when available and sequential execution otherwise, then reconcile findings and implement one verified result for complex code changes.
+description: Coordinate bounded parallel research workers in Codex, reconcile conflicting findings, and implement one verified result for complex code changes.
 ---
 
 # Parallel Research Merge

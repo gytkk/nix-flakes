@@ -8,7 +8,7 @@
 
 let
   cfg = config.modules.claude;
-  agentCoreOutput = import ../../agent-core/nix/render.nix { inherit pkgs; } "claude";
+  agentCoreOutput = import ../../agent-core/nix/render.nix { inherit pkgs; } { runtime = "claude"; };
   claude = "${pkgs.claude-code}/bin/claude";
   timeout = "${pkgs.coreutils}/bin/timeout --foreground";
   mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/claude/${path}";
@@ -50,7 +50,8 @@ let
     # openai/codex-plugin-cc — Official Codex plugin for Claude Code
     "codex@openai-codex"
 
-    # local gytkk marketplace (modules/claude/marketplace) - LSP plugins
+    # local gytkk marketplace (modules/claude/marketplace) - runtime-specific skill and LSP plugins
+    "devils-advocate@gytkk"
     "metals-lsp@gytkk"
     "ty-lsp@gytkk"
     "terraform-ls@gytkk"

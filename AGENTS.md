@@ -158,15 +158,15 @@ direnv lazy loading 사용. `.envrc`에 `use_terraform` 추가하면 `required_v
 
 ### AI Coding Agent Notes
 
-AI 코딩 에이전트 설정을 변경할 때 공통 지침, runtime adapter, skill은 `agent-core/`에서 수정한다. Runtime 설정은 대응 모듈에서 수정하고, 이 저장소에서만 적용하는 작업 규칙은 루트 `AGENTS.md`에 둔다.
+AI 코딩 에이전트 설정을 변경할 때 공통 지침, runtime adapter, portable skill은 `agent-core/`에서 수정한다. Runtime 전용 설정과 skill은 대응 모듈에서 수정하고, 이 저장소에서만 적용하는 작업 규칙은 루트 `AGENTS.md`에 둔다.
 
 - `agent-core/rules/`는 공통 지침, `agent-core/adapters/`는 runtime별 지침, `agent-core/skills/`는 portable skill의 canonical source다. `agent-core/manifest.toml`이 조합 순서와 runtime별 노출을 정의한다.
-- 모든 repository-managed skill은 portable로 작성한다. Runtime별 skill 복사본이나 별도 merge logic을 추가하지 않는다.
+- Runtime tool, SDK, metadata, plugin 형식에 의존하는 skill은 대응 module이 소유하고 `agent-core render`에 input root로 전달한다. Runtime module에 portable skill 복사본이나 별도 merge logic을 추가하지 않는다.
 - `agent-core render`의 immutable output을 Nix module에서 설치한다. Pi는 operating invariant를 `APPEND_SYSTEM.md`로 분리하고, OpenClaw는 prompt hook으로 `AGENTS.core.md`를 주입한다.
 
-- **Claude Code** (`modules/claude/`): Plugins은 [gytkk/claude-marketplace](https://github.com/gytkk/claude-marketplace)로 관리하며 이 marketplace에는 LSP plugin만 둔다. 공통 prompt와 skill은 agent-core output을 사용한다.
-- **Codex CLI** (`modules/codex/`): 기본 설정은 `files/config.toml`에서 관리하며 instruction과 skill은 agent-core output을 사용한다.
-- **Pi** (`modules/pi/`): Settings와 extension은 module에서 관리하고 instruction과 skill은 agent-core output을 사용한다.
+- **Claude Code** (`modules/claude/`): Plugins은 [gytkk/claude-marketplace](https://github.com/gytkk/claude-marketplace)로 관리한다. Runtime 전용 `devils-advocate`와 LSP plugin은 marketplace에 남기고 공통 prompt와 portable skill은 agent-core output을 사용한다.
+- **Codex CLI** (`modules/codex/`): 기본 설정은 `files/config.toml`, runtime 전용 skill은 `skills/`에서 관리하며 최종 instruction과 skill tree는 agent-core output을 사용한다.
+- **Pi** (`modules/pi/`): Settings와 extension, runtime 전용 skill은 module에서 관리하며 최종 instruction과 skill tree는 agent-core output을 사용한다.
 - **OpenClaw** (`modules/openclaw/`): Mutable `openclaw.json`, workspace, auth/session state는 Nix가 소유하지 않는다. Agent-core integration은 managed skill tree와 `before_prompt_build` hook만 설치한다.
 - **Codex Skills**: `codex` plugin — `/codex:critic`, `/codex:hephaestus`, `/codex:analyze`
 

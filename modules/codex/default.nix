@@ -9,7 +9,10 @@
 
 let
   cfg = config.modules.codex;
-  agentCoreOutput = import ../../agent-core/nix/render.nix { inherit pkgs; } "codex";
+  agentCoreOutput = import ../../agent-core/nix/render.nix { inherit pkgs; } {
+    runtime = "codex";
+    runtimeSkillRoots = [ ./skills ];
+  };
   codex = "${pkgs.codex}/bin/codex";
   agentSessionRecordCommand = "${config.home.homeDirectory}/.local/bin/agent-session-record";
   plannotatorCommand = "${config.home.homeDirectory}/.local/bin/plannotator";

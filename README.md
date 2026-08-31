@@ -68,7 +68,7 @@ openclaw gateway install --force --wrapper ~/.openclaw/bin/openclaw
 
 Use `openclaw update` for verified core and plugin updates. The mutable config may enable OpenClaw's stable auto updater. Nix does not pin or replace the OpenClaw executable.
 
-`agent-core/` is the canonical source for shared coding-agent rules, runtime adapters, and repository-managed portable skills. Its Python renderer validates `manifest.toml` and produces deterministic immutable trees for Claude Code, Codex, Pi, and OpenClaw. Nix packages the renderer and Home Manager modules install only its generated output. Run `nix run .#agent-core -- check` to validate canonical resources and golden output hashes.
+`agent-core/` is the canonical source for shared coding-agent rules, runtime adapters, and portable skills. Its Python renderer validates `manifest.toml`, merges explicit Codex and Pi runtime skill roots without implicit overrides, and produces deterministic immutable trees for Claude Code, Codex, Pi, and OpenClaw. Nix packages the renderer, validates core and final runtime golden outputs, and Home Manager modules install only generated trees. Run `nix run .#agent-core -- check` to validate canonical core resources.
 
 ## Codex Plugin for Claude Code
 

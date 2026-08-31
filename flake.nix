@@ -143,6 +143,68 @@
       # NixOS 설정 생성 함수
       mkNixOSConfig = lib.builders.mkNixOSConfig;
 
+      homeConfigurations = builtins.mapAttrs mkHomeConfig environmentConfigs;
+      nixosConfigurations = builtins.mapAttrs mkNixOSConfig hostConfigs;
+
+      runtimeGoldenHashes = import ./agent-core/nix/runtime-golden-hashes.nix;
+      mkAgentCoreOutputs =
+        systemPkgs: golden:
+        let
+          render = import ./agent-core/nix/render.nix { pkgs = systemPkgs; };
+          hashFor = runtime: if golden then runtimeGoldenHashes.${runtime} else null;
+        in
+        {
+          openclaw = render {
+            outputHash = hashFor "openclaw";
+            runtime = "openclaw";
+          };
+          claude = render {
+            outputHash = hashFor "claude";
+            runtime = "claude";
+          };
+          codex = render {
+            outputHash = hashFor "codex";
+            runtime = "codex";
+            runtimeSkillRoots = [ ./modules/codex/skills ];
+          };
+          pi = render {
+            outputHash = hashFor "pi";
+            runtime = "pi";
+            runtimeSkillRoots = [ ./modules/pi/skills ];
+          };
+        };
+      agentCoreOutputs = builtins.mapAttrs (_: systemPkgs: mkAgentCoreOutputs systemPkgs false) pkgs;
+      agentCoreGoldenOutputs = builtins.mapAttrs (_: systemPkgs: mkAgentCoreOutputs systemPkgs true) pkgs;
+
+      agentCoreSourcesMatch =
+        system:
+        let
+          output = agentCoreOutputs.${system};
+          homeName = if system == "aarch64-darwin" then "devsisters-macbook" else "pylv-denim";
+          homeFiles = homeConfigurations.${homeName}.config.home.file;
+          commonMatches = [
+            (toString homeFiles.".claude/CLAUDE.md".source == "${output.claude}/CLAUDE.md")
+            (toString homeFiles.".claude/skills".source == "${output.claude}/skills")
+            (toString homeFiles.".codex/AGENTS.md".source == "${output.codex}/AGENTS.md")
+            (toString homeFiles.".pi/agent/AGENTS.md".source == "${output.pi}/AGENTS.md")
+            (toString homeFiles.".pi/agent/APPEND_SYSTEM.md".source == "${output.pi}/APPEND_SYSTEM.md")
+            (toString homeFiles.".pi/agent/skills".source == "${output.pi}/skills")
+          ];
+          onyx = nixosConfigurations.pylv-onyx.config;
+          onyxHomeFiles = onyx.home-manager.users.gytkk.home.file;
+          linuxMatches = [
+            (
+              toString onyxHomeFiles.".openclaw/managed/agent-core/AGENTS.core.md".source
+              == "${output.openclaw}/AGENTS.core.md"
+            )
+            (toString onyxHomeFiles.".openclaw/skills".source == "${output.openclaw}/skills")
+            (toString onyx.environment.etc."codex/skills".source == "${output.codex}/skills")
+          ];
+        in
+        builtins.all (matches: matches) (
+          commonMatches ++ nixpkgs.lib.optionals (system == "x86_64-linux") linuxMatches
+        );
+
       mkDefaultCompatPackage =
         system: systemPkgs:
         let
@@ -194,15 +256,21 @@
       checks = builtins.mapAttrs (system: systemPkgs: {
         agent-core = systemPkgs.agent-core;
         agent-core-renders =
+          assert agentCoreSourcesMatch system;
           systemPkgs.runCommand "agent-core-render-check"
             {
-              nativeBuildInputs = [ systemPkgs.agent-core ];
+              nativeBuildInputs = with systemPkgs; [
+                agent-core
+                nodejs
+              ];
             }
             ''
               agent-core check
-              for runtime in openclaw codex claude pi; do
-                agent-core render --runtime "$runtime" --output "$TMPDIR/$runtime"
-              done
+              node --test ${./modules/openclaw}/tests/agent-core-context.test.js
+              test -d ${agentCoreGoldenOutputs.${system}.openclaw}/skills
+              test -d ${agentCoreGoldenOutputs.${system}.claude}/skills
+              test -d ${agentCoreGoldenOutputs.${system}.codex}/skills/devils-advocate
+              test -d ${agentCoreGoldenOutputs.${system}.pi}/skills/pi-agent
               touch "$out"
             '';
       }) pkgs;
@@ -212,8 +280,6 @@
       apps = defaultApps;
       inherit checks;
 
-      homeConfigurations = builtins.mapAttrs mkHomeConfig environmentConfigs;
-
-      nixosConfigurations = builtins.mapAttrs mkNixOSConfig hostConfigs;
+      inherit homeConfigurations nixosConfigurations;
     };
 }

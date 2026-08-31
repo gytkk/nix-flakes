@@ -39,6 +39,14 @@ The module does not edit mutable `openclaw.json`. Enable the hook there and gran
 
 If `plugins.allow` already exists, merge these IDs into the existing list. Do not set `plugins.entries.agent-core-context.hooks.allowPromptInjection` to `false`. Restart the Gateway after changing plugin configuration or code.
 
+After applying the Home Manager generation and restarting the Gateway, run the read-only smoke test:
+
+```bash
+modules/openclaw/tests/runtime-smoke.sh
+```
+
+The script checks the generated instruction file, plugin activation and diagnostics, the single `before_prompt_build` hook, managed skill discovery for every configured agent, and workspace precedence for duplicate skill names. It reports a skipped multi-workspace check when all configured agents share one workspace. Exact live prompt contents require a trajectory export and are not collected by this smoke test.
+
 ## Session recorder
 
 The session recorder subscribes to OpenClaw's `session_end` plugin event and passes the native transcript path to `agent-session-record`. It does not receive or upload the raw session key. If mutable OpenClaw configuration defines `plugins.allow`, include `agent-session-record` in that list.

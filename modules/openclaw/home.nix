@@ -10,7 +10,9 @@ let
   cfg = config.modules.openclaw;
   stateDir = toString cfg.stateDir;
   relativeStateDir = lib.removePrefix "${homeDirectory}/" stateDir;
-  agentCoreOutput = import ../../agent-core/nix/render.nix { inherit pkgs; } "openclaw";
+  agentCoreOutput = import ../../agent-core/nix/render.nix { inherit pkgs; } {
+    runtime = "openclaw";
+  };
 in
 {
   options.modules.openclaw = {

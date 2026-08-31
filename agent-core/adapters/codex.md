@@ -15,8 +15,9 @@ behavior.
 - When creating or updating repository-managed skills, use Codex's built-in
   `$skill-creator` as a scaffold when it is available.
 - Store the canonical portable skill under `agent-core/skills/` and declare its
-  runtime exposure in `agent-core/manifest.toml`. Do not add a runtime-local
-  copy.
+  runtime exposure in `agent-core/manifest.toml`.
+- Store a skill that requires Codex tools or metadata under
+  `modules/codex/skills/`; the module passes that root to the shared renderer.
 - Trim unused scaffold files, keep the skill focused, and align it with
   repository conventions before committing.
 - Use the repository-managed `parallel-research-merge` skill when a task needs

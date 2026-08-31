@@ -4,7 +4,15 @@ import argparse
 import sys
 from pathlib import Path
 
-from .core import RUNTIMES, ValidationError, compare_trees, materialize, output_hash, render, resource_root
+from .core import (
+    RUNTIMES,
+    ValidationError,
+    compare_trees,
+    materialize,
+    output_hash,
+    render,
+    resource_root,
+)
 
 
 def _check() -> list[str]:
@@ -17,7 +25,9 @@ def _check() -> list[str]:
             golden_document = tomllib.load(handle)
     except (OSError, tomllib.TOMLDecodeError) as error:
         return [f"invalid golden fixture: {error}"]
-    if set(golden_document) != {"hashes"} or not isinstance(golden_document["hashes"], dict):
+    if set(golden_document) != {"hashes"} or not isinstance(
+        golden_document["hashes"], dict
+    ):
         return ["golden fixture must contain only a hashes table"]
     goldens = golden_document["hashes"]
     if set(goldens) != set(RUNTIMES):
@@ -32,7 +42,9 @@ def _check() -> list[str]:
         if not isinstance(expected, str):
             errors.append(f"{runtime}: missing golden hash")
         elif actual != expected:
-            errors.append(f"{runtime}: output hash differs (expected {expected}, got {actual})")
+            errors.append(
+                f"{runtime}: output hash differs (expected {expected}, got {actual})"
+            )
     return errors
 
 
@@ -41,6 +53,12 @@ def main(argv: list[str] | None = None) -> int:
     commands = parser.add_subparsers(dest="command", required=True)
     render_parser = commands.add_parser("render")
     render_parser.add_argument("--runtime", choices=RUNTIMES, required=True)
+    render_parser.add_argument(
+        "--runtime-skill-root",
+        action="append",
+        default=[],
+        type=Path,
+    )
     render_parser.add_argument("--output", type=Path, required=True)
     commands.add_parser("check")
     verify_parser = commands.add_parser("verify-install")
@@ -49,7 +67,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         if args.command == "render":
-            render(args.runtime, args.output)
+            render(args.runtime, args.output, args.runtime_skill_root)
             print(f"rendered {args.runtime} to {args.output}")
             return 0
         if args.command == "check":
@@ -61,7 +79,9 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         differences = compare_trees(args.expected, args.actual)
         if differences:
-            print("install verification failed:", *differences, sep="\n", file=sys.stderr)
+            print(
+                "install verification failed:", *differences, sep="\n", file=sys.stderr
+            )
             return 1
         print("install verification passed")
         return 0

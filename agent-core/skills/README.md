@@ -10,4 +10,4 @@ The following skills came from [mattpocock/skills](https://github.com/mattpocock
 
 The selection excludes user-invoked wrappers and setup workflows. Each retained directory contains its `SKILL.md` and any file that it directly references. Plugin manifests and runtime-specific agent metadata are excluded. `code-review` discovers repository configuration without the removed setup skill. The upstream MIT license is included in `LICENSE` and applies to the imported skills.
 
-`devils-advocate`, `parallel-research-merge`, and `pi-agent` were consolidated from this repository's former runtime-local skill trees. Runtime-specific metadata may remain inside a portable skill when another runtime can safely ignore it.
+Runtime-specific skills remain under their owning runtime module and are passed to the renderer through `--runtime-skill-root`. A skill that requires runtime-specific tools, metadata, or installation behavior is not duplicated here.

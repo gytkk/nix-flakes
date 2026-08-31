@@ -29,7 +29,7 @@ Global development guidelines are rendered from shared rules under `agent-core/r
 
 ## Skills and plugins
 
-Home Manager installs the immutable Claude render of portable skills from `agent-core/skills/` into `~/.claude/skills/`. Runtime-local skill copies and skill plugins are not used.
+Home Manager installs the immutable Claude render of portable skills from `agent-core/skills/` into `~/.claude/skills/`. The local `devils-advocate` marketplace plugin remains runtime-owned because it provides a Claude command, agent, and plugin metadata that the portable renderer does not model.
 
 ### Marketplaces
 
@@ -41,6 +41,7 @@ Home Manager installs the immutable Claude render of portable skills from `agent
 ### Installed Plugins
 
 - `document-skills`, `commit-commands`, `security-guidance`
+- `devils-advocate` (runtime-specific multi-pass review command and agent)
 - `ralph-loop`, `superpowers`
 - `slack` (Slack's hosted MCP server plus Slack developer skills)
 - LSP plugins: `gopls-lsp`, `rust-analyzer-lsp`, `typescript-lsp`, `metals-lsp`, `ty-lsp`, `terraform-ls`, `nixd-lsp`
