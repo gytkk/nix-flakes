@@ -19,7 +19,7 @@
     agentCore.enable = true;
     agentSessionRecordPlugin.enable = true;
   };
-  modules.qmd.enable = true;
+  modules.sharedMemory.enable = true;
   modules.agentSessionRecord.agents.openclaw.enable = true;
 
   # DankMaterialShell

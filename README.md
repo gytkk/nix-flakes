@@ -57,7 +57,7 @@ Home Manager modules expose `modules.<name>.enable`; `base/default.nix` owns com
 
 OpenClaw on `pylv-onyx` is installed under `~/.openclaw` with the official rootless installer. OpenClaw owns its CLI, plugins, mutable configuration, and systemd user service. `modules/openclaw` provides the declarative NixOS and Home Manager integration.
 
-`modules/qmd` installs QMD for direct local agent sessions on `pylv-onyx` and indexes `USER.md`, `MEMORY.md`, and `memory/**/*.md` from `~/workspace/ps`. Codex and Pi call the QMD CLI directly. OpenClaw 2.0 uses its built-in SQLite-backed memory search and does not consume the QMD package from `modules/openclaw`.
+`modules/shared-memory` installs a read-only local MCP server on `pylv-onyx`. Codex and Pi use it to search OpenClaw's built-in SQLite index for the canonical `USER.md`, `MEMORY.md`, and `memory/**/*.md` files in `~/development/ws`. The adapter calls the OpenClaw CLI instead of reading its private database schema, and memory updates remain explicit file edits by the active agent.
 
 Install or recover the user-owned stable release without onboarding:
 
