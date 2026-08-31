@@ -67,11 +67,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    flake-stores = {
-      url = "github:gytkk/flake-stores";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # 미리 빌드된 바이너리가 없는 omnigent는 커밋된 uv.lock을 사용해
     # packages/omnigent에서 uv2nix로 빌드한다.
     pyproject-nix = {
@@ -173,6 +168,7 @@
         };
       agentCoreOutputs = builtins.mapAttrs (_: systemPkgs: mkAgentCoreOutputs systemPkgs false) pkgs;
       agentCoreGoldenOutputs = builtins.mapAttrs (_: systemPkgs: mkAgentCoreOutputs systemPkgs true) pkgs;
+      appPackages = builtins.mapAttrs (_: systemPkgs: import ./packages/apps { pkgs = systemPkgs; }) pkgs;
 
       agentCoreSourcesMatch =
         system:
@@ -231,14 +227,18 @@
           EOF
         '';
 
-      defaultPackages = builtins.mapAttrs (system: systemPkgs: {
-        default = mkDefaultCompatPackage system systemPkgs;
-        agent-core = systemPkgs.agent-core;
-        notion-cli = systemPkgs.notion-cli;
-        ntn = systemPkgs.ntn;
-        omnigent = systemPkgs.omnigent;
-        pup = systemPkgs.pup;
-      }) pkgs;
+      defaultPackages = builtins.mapAttrs (
+        system: systemPkgs:
+        {
+          default = mkDefaultCompatPackage system systemPkgs;
+          agent-core = systemPkgs.agent-core;
+          notion-cli = systemPkgs.notion-cli;
+          ntn = systemPkgs.ntn;
+          omnigent = systemPkgs.omnigent;
+          pup = systemPkgs.pup;
+        }
+        // appPackages.${system}
+      ) pkgs;
 
       defaultApps = builtins.mapAttrs (system: _: {
         default = {

@@ -46,6 +46,7 @@ agent-core/                       # Shared agent rules, adapters, skills, and re
 modules/<name>/default.nix        # Reusable Home Manager or NixOS module
 modules/nixos/                    # Common NixOS modules and shared secrets
 hosts/<name>/configuration.nix    # Host-specific NixOS imports and values
+packages/apps/                    # Non-nixpkgs app packages and manual updaters
 lib/pkgs.nix                      # Overlay and per-system package-set construction
 lib/home-configurations.nix       # Home Manager configuration builder
 lib/nixos-configurations.nix      # NixOS configuration builder

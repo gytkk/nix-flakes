@@ -186,26 +186,6 @@
         "type": "github"
       }
     },
-    "flake-stores": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1788175039,
-        "narHash": "sha256-hKcpBRtbIKG7skRNrrNblrYJSACFzLp/9dcuOnZdlbY=",
-        "owner": "gytkk",
-        "repo": "flake-stores",
-        "rev": "7fb13585bd6461310dd9e3f1eecf00fd1df80ce3",
-        "type": "github"
-      },
-      "original": {
-        "owner": "gytkk",
-        "repo": "flake-stores",
-        "type": "github"
-      }
-    },
     "flake-utils": {
       "locked": {
         "lastModified": 1678901627,
@@ -633,7 +613,6 @@
         "devsisters-wg": "devsisters-wg",
         "disko": "disko",
         "dms": "dms",
-        "flake-stores": "flake-stores",
         "gws": "gws",
         "home-manager": "home-manager_2",
         "keycloak2aws": "keycloak2aws",

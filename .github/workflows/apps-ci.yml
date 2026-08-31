@@ -1,0 +1,74 @@
+name: App Packages CI
+
+on:
+  pull_request:
+    paths:
+      - "packages/apps/**"
+      - "lib/pkgs.nix"
+      - "flake.nix"
+      - "flake.lock"
+      - ".github/workflows/apps-ci.yml"
+  push:
+    branches: [main]
+    paths:
+      - "packages/apps/**"
+      - "lib/pkgs.nix"
+      - "flake.nix"
+      - "flake.lock"
+      - ".github/workflows/apps-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  evaluate:
+    name: Evaluate app package flake
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: cachix/install-nix-action@v31
+      - run: nix flake check ./packages/apps --no-build
+
+  detect-app-changes:
+    name: Detect changed app packages
+    runs-on: ubuntu-latest
+    outputs:
+      apps: ${{ steps.detect.outputs.apps }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Detect package changes
+        id: detect
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base_sha="${{ github.event.pull_request.base.sha }}"
+          elif [ "${{ github.event_name }}" = "push" ]; then
+            base_sha="${{ github.event.before }}"
+          elif git rev-parse "${{ github.sha }}~1" >/dev/null 2>&1; then
+            base_sha="${{ github.sha }}~1"
+          else
+            base_sha=""
+          fi
+
+          apps=$(packages/apps/scripts/detect-changed-apps.sh "$base_sha" "${{ github.sha }}")
+          echo "apps=$apps" >> "$GITHUB_OUTPUT"
+
+  build-changed-apps:
+    name: Build changed app packages
+    needs:
+      - evaluate
+      - detect-app-changes
+    if: needs.detect-app-changes.outputs.apps != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: ${{ fromJson(needs.detect-app-changes.outputs.apps) }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: cachix/install-nix-action@v31
+      - name: Build package
+        run: nix build ./packages/apps#packages.x86_64-linux.${{ matrix.app }} --no-link

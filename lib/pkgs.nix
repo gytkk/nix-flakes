@@ -1,13 +1,13 @@
 { inputs, nixpkgs }:
 let
   repoOverlays = import ../overlays { inherit inputs; };
-  flakeStoresOverlay =
-    final: prev: builtins.removeAttrs (inputs.flake-stores.overlays.default final prev) [ "opencode" ];
+  localAppsOverlay =
+    final: _prev: builtins.removeAttrs (import ../packages/apps { pkgs = final; }) [ "opencode" ];
 
   commonOverlays = [
     inputs.copyparty.overlays.default
     inputs.nix-zed-extensions.overlays.default
-    flakeStoresOverlay
+    localAppsOverlay
     inputs.niri.overlays.niri
     inputs.rust-overlay.overlays.default
     repoOverlays.nixpkgs-versions
