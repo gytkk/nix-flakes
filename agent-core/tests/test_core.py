@@ -195,6 +195,29 @@ def test_cli_accepts_repeated_runtime_skill_roots(tmp_path: Path) -> None:
     assert (output / "skills/runtime-two/SKILL.md").is_file()
 
 
+def test_cli_help_describes_commands_and_render_arguments(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    with pytest.raises(SystemExit) as top_level_exit:
+        main(["--help"])
+    assert top_level_exit.value.code == 0
+    top_level_help = capsys.readouterr().out
+    assert "Render and validate shared instructions and skills" in top_level_help
+    assert "render" in top_level_help
+    assert "check" in top_level_help
+    assert "verify-install" in top_level_help
+    assert "examples:" in top_level_help
+
+    with pytest.raises(SystemExit) as render_exit:
+        main(["render", "--help"])
+    assert render_exit.value.code == 0
+    render_help = capsys.readouterr().out
+    normalized_render_help = " ".join(render_help.split())
+    assert "optional runtime-specific skills" in normalized_render_help
+    assert "--runtime-skill-root" in render_help
+    assert "Missing or empty directory" in normalized_render_help
+
+
 def test_verify_install_reports_all_difference_kinds(tmp_path: Path) -> None:
     expected, actual = tmp_path / "expected", tmp_path / "actual"
     expected.mkdir()

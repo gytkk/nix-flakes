@@ -49,21 +49,85 @@ def _check() -> list[str]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="agent-core")
-    commands = parser.add_subparsers(dest="command", required=True)
-    render_parser = commands.add_parser("render")
-    render_parser.add_argument("--runtime", choices=RUNTIMES, required=True)
+    parser = argparse.ArgumentParser(
+        prog="agent-core",
+        description=(
+            "Render and validate shared instructions and skills for coding-agent "
+            "runtimes."
+        ),
+        epilog=(
+            "examples:\n"
+            "  agent-core check\n"
+            "  agent-core render --runtime codex --output ./result\n"
+            "  agent-core verify-install --expected ./result "
+            "--actual ./installed-result"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    commands = parser.add_subparsers(
+        dest="command",
+        metavar="COMMAND",
+        required=True,
+        title="commands",
+    )
+    render_parser = commands.add_parser(
+        "render",
+        help="Create an immutable output tree for one runtime.",
+        description=(
+            "Combine canonical instructions, portable skills, and optional "
+            "runtime-specific skills into a new output tree."
+        ),
+    )
+    render_parser.add_argument(
+        "--runtime",
+        choices=RUNTIMES,
+        required=True,
+        help="Runtime whose instruction and skill tree should be rendered.",
+    )
     render_parser.add_argument(
         "--runtime-skill-root",
         action="append",
         default=[],
         type=Path,
+        help=(
+            "Directory containing runtime-specific skill directories; may be "
+            "provided more than once."
+        ),
     )
-    render_parser.add_argument("--output", type=Path, required=True)
-    commands.add_parser("check")
-    verify_parser = commands.add_parser("verify-install")
-    verify_parser.add_argument("--expected", type=Path, required=True)
-    verify_parser.add_argument("--actual", type=Path, required=True)
+    render_parser.add_argument(
+        "--output",
+        type=Path,
+        required=True,
+        help="Missing or empty directory to receive the generated tree.",
+    )
+    commands.add_parser(
+        "check",
+        help="Validate canonical resources and golden hashes.",
+        description=(
+            "Validate the manifest, canonical instructions, portable skills, "
+            "generated markers, and runtime golden hashes."
+        ),
+    )
+    verify_parser = commands.add_parser(
+        "verify-install",
+        help="Compare an expected render with an installed tree.",
+        description=(
+            "Compare two directory trees, including file contents, symlink "
+            "targets, missing paths, and unexpected paths."
+        ),
+    )
+    verify_parser.add_argument(
+        "--expected",
+        type=Path,
+        required=True,
+        help="Directory containing the expected rendered tree.",
+    )
+    verify_parser.add_argument(
+        "--actual",
+        type=Path,
+        required=True,
+        help="Directory containing the installed tree to verify.",
+    )
     args = parser.parse_args(argv)
     try:
         if args.command == "render":
