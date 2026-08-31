@@ -10,15 +10,35 @@ This directory contains only declarative host integration:
   environment variables, and proxy authentication.
 - `nginx-proxy.nix` provides the LAN and public-origin reverse proxies and the
   LAN firewall rule.
-- `home.nix` adds the user-owned executable to `PATH` and supplies the NixOS
-  runtime paths required by the OpenClaw-managed user service. It can also link
-  the repository-managed `agent-session-record` plugin into the global OpenClaw
-  extension directory.
+- `home.nix` adds the user-owned executable to `PATH` and supplies the NixOS runtime paths required by the OpenClaw-managed user service. It can also install the rendered agent-core skills and context hook plus the repository-managed `agent-session-record` plugin.
 
 The modules do not install an OpenClaw package, generate `openclaw.json`, set
 `OPENCLAW_NIX_MODE`, or own `openclaw-gateway.service`.
 
-The session recorder subscribes to OpenClaw's `session_end` plugin event and
-passes the native transcript path to `agent-session-record`. It does not receive
-or upload the raw session key. If mutable OpenClaw configuration defines
-`plugins.allow`, include `agent-session-record` in that list.
+## Agent-core integration
+
+When `modules.openclaw.agentCore.enable` is true, Home Manager installs the portable skill render at `~/.openclaw/skills`, stores generated shared instructions at `~/.openclaw/managed/agent-core/AGENTS.core.md`, and installs the `agent-core-context` extension. The extension uses `before_prompt_build` to return `prependSystemContext`. It does not replace OpenClaw's system prompt or write a workspace `AGENTS.md`, so workspace instructions remain independently owned and are loaded through OpenClaw's normal bootstrap path.
+
+The module does not edit mutable `openclaw.json`. Enable the hook there and grant the conversation access required by `before_prompt_build`:
+
+```json
+{
+  "plugins": {
+    "allow": ["agent-core-context", "agent-session-record"],
+    "entries": {
+      "agent-core-context": {
+        "enabled": true,
+        "hooks": {
+          "allowConversationAccess": true
+        }
+      }
+    }
+  }
+}
+```
+
+If `plugins.allow` already exists, merge these IDs into the existing list. Do not set `plugins.entries.agent-core-context.hooks.allowPromptInjection` to `false`. Restart the Gateway after changing plugin configuration or code.
+
+## Session recorder
+
+The session recorder subscribes to OpenClaw's `session_end` plugin event and passes the native transcript path to `agent-session-record`. It does not receive or upload the raw session key. If mutable OpenClaw configuration defines `plugins.allow`, include `agent-session-record` in that list.

@@ -28,6 +28,8 @@
 
   # 패키지 수정 overlay
   package-fixes = final: prev: {
+    agent-core = final.callPackage ../agent-core/nix/package.nix { };
+
     # databricks-cli: Go 구현체 릴리스 바이너리를 GitHub에서 직접 fetch (nixpkgs
     # 버전은 legacy Python CLI 0.290.1)
     databricks-cli = final.callPackage ../packages/databricks-cli/package.nix { };

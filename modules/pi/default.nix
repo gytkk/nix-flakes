@@ -8,19 +8,8 @@
 
 let
   cfg = config.modules.pi;
-  agentPrompts = import ../agent-prompts/lib.nix { inherit lib pkgs; };
-  sharedSkills = import ../agent-prompts/skills.nix { inherit lib pkgs; };
+  agentCoreOutput = import ../../agent-core/nix/render.nix { inherit pkgs; } "pi";
   mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/pi/${path}";
-  localSkillDirectories = lib.filterAttrs (_: type: type == "directory") (builtins.readDir ./skills);
-  localSkillSources = lib.mapAttrs (
-    name: _: "${flakeDirectory}/modules/pi/skills/${name}"
-  ) localSkillDirectories;
-  skillCollisions = lib.intersectLists (builtins.attrNames localSkillSources) (
-    builtins.attrNames sharedSkills.shared
-  );
-  managedSkills = sharedSkills.mkSkillFarm "pi-agent-skills" (
-    localSkillSources // sharedSkills.shared
-  );
 in
 {
   options.modules.pi.enable = lib.mkOption {
@@ -30,23 +19,14 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    assertions = [
-      {
-        assertion = skillCollisions == [ ];
-        message = "Pi local skills conflict with shared skills: ${lib.concatStringsSep ", " skillCollisions}";
-      }
-    ];
-
     home.packages = [
       pkgs.pi
       pkgs.mcp-nixos
     ];
 
     home.file = {
-      ".pi/agent/AGENTS.md".source = agentPrompts.renderWithoutOperating "pi-AGENTS.md" [
-        ./files/AGENTS.md
-      ];
-      ".pi/agent/APPEND_SYSTEM.md".source = agentPrompts.operatingRules;
+      ".pi/agent/AGENTS.md".source = "${agentCoreOutput}/AGENTS.md";
+      ".pi/agent/APPEND_SYSTEM.md".source = "${agentCoreOutput}/APPEND_SYSTEM.md";
       ".pi/agent/keybindings.json".source = mkSymlink "files/keybindings.json";
       ".pi/agent/lsp.json".source = mkSymlink "files/lsp.json";
       ".pi/agent/mcp.json".source = mkSymlink "files/mcp.json";
@@ -61,7 +41,7 @@ in
       ".pi/agent/extensions/tool-profiles".source = mkSymlink "files/extensions/tool-profiles";
       ".pi/agent/extensions/subagent/config.json".source =
         mkSymlink "files/extensions/subagent/config.json";
-      ".pi/agent/skills".source = managedSkills;
+      ".pi/agent/skills".source = "${agentCoreOutput}/skills";
     };
   };
 }

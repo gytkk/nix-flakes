@@ -8,8 +8,7 @@
 
 let
   cfg = config.modules.claude;
-  agentPrompts = import ../agent-prompts/lib.nix { inherit lib pkgs; };
-  sharedSkills = import ../agent-prompts/skills.nix { inherit lib pkgs; };
+  agentCoreOutput = import ../../agent-core/nix/render.nix { inherit pkgs; } "claude";
   claude = "${pkgs.claude-code}/bin/claude";
   timeout = "${pkgs.coreutils}/bin/timeout --foreground";
   mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/claude/${path}";
@@ -51,8 +50,7 @@ let
     # openai/codex-plugin-cc — Official Codex plugin for Claude Code
     "codex@openai-codex"
 
-    # local gytkk marketplace (modules/claude/marketplace) — skills and LSP plugins
-    "devils-advocate@gytkk"
+    # local gytkk marketplace (modules/claude/marketplace) - LSP plugins
     "metals-lsp@gytkk"
     "ty-lsp@gytkk"
     "terraform-ls@gytkk"
@@ -68,12 +66,6 @@ let
   removedMcpServers = [
     "notion"
   ];
-  sharedSkillFiles = lib.mapAttrs' (
-    name: source:
-    lib.nameValuePair ".claude/skills/${name}" {
-      inherit source;
-    }
-  ) sharedSkills.shared;
 in
 {
   options.modules.claude.enable = lib.mkOption {
@@ -98,13 +90,13 @@ in
         source = mkSymlink "files/settings.json";
         force = true;
       };
-      ".claude/CLAUDE.md".source = agentPrompts.render "claude-CLAUDE.md" [ ./files/CLAUDE.md ];
+      ".claude/CLAUDE.md".source = "${agentCoreOutput}/CLAUDE.md";
+      ".claude/skills".source = "${agentCoreOutput}/skills";
       ".claude/statusline-command.sh" = {
         source = ./files/statusline-command.sh;
         executable = true;
       };
-    }
-    // sharedSkillFiles;
+    };
     # Install marketplaces, plugins, and MCP servers
     home.activation.setupClaudeCode = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       # Ensure git, ssh, and which are available for plugin marketplace operations

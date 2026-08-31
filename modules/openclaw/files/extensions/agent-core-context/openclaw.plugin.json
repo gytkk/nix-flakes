@@ -1,0 +1,12 @@
+{
+  "id": "agent-core-context",
+  "name": "Agent Core Context",
+  "description": "Prepends portable agent-core instructions to each prompt.",
+  "activation": {
+    "onStartup": true
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false
+  }
+}

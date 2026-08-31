@@ -25,19 +25,11 @@ This module installs and configures Claude Code, Anthropic's AI coding assistant
 
 ### CLAUDE.md
 
-Global development guidelines deployed to `~/.claude/CLAUDE.md`. Includes:
-
-- Verification & Inquiry Protocol
-- Git conventions (conventional commits, atomic changes)
-- Worktree workflow using Claude default repo-local worktrees
-- Planning & Approval (plannotator integration)
-- Code style rules (TDD, type safety, error handling)
-- Python conventions (`uv run`)
-- Prompt keywords (`webs` for aggressive web search)
+Global development guidelines are rendered from shared rules under `agent-core/rules/` and `agent-core/adapters/claude.md`, then deployed to `~/.claude/CLAUDE.md`.
 
 ## Skills and plugins
 
-Home Manager links the shared skills under `modules/agent-prompts/skills/` into `~/.claude/skills/`. The shared registry is defined in `modules/agent-prompts/skills.nix`; Claude-specific skills are provided through the local marketplace under `modules/claude/marketplace/skills/`.
+Home Manager installs the immutable Claude render of portable skills from `agent-core/skills/` into `~/.claude/skills/`. Runtime-local skill copies and skill plugins are not used.
 
 ### Marketplaces
 
@@ -54,7 +46,6 @@ Home Manager links the shared skills under `modules/agent-prompts/skills/` into 
 - LSP plugins: `gopls-lsp`, `rust-analyzer-lsp`, `typescript-lsp`, `metals-lsp`, `ty-lsp`, `terraform-ls`, `nixd-lsp`
 - `plannotator` (visual plan annotation and review)
 - `codex` (official OpenAI Codex plugin — provides `/codex:review`, `/codex:rescue`, etc.)
-- `devils-advocate` (skeptical multi-pass review skill)
 
 ## MCP Servers
 

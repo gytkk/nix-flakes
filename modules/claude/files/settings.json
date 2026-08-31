@@ -75,7 +75,6 @@
     "typescript-lsp@claude-plugins-official": true,
     "plannotator@plannotator": true,
     "codex@openai-codex": true,
-    "devils-advocate@gytkk": true,
     "metals-lsp@gytkk": true,
     "ty-lsp@gytkk": true,
     "terraform-ls@gytkk": true,

@@ -120,7 +120,7 @@
   };
 
   outputs =
-    { self, nixpkgs, ... }@inputs:
+    { nixpkgs, ... }@inputs:
     let
       # 라이브러리 import
       lib = import ./lib { inherit inputs nixpkgs; };
@@ -173,6 +173,7 @@
 
       defaultPackages = builtins.mapAttrs (system: systemPkgs: {
         default = mkDefaultCompatPackage system systemPkgs;
+        agent-core = systemPkgs.agent-core;
         notion-cli = systemPkgs.notion-cli;
         ntn = systemPkgs.ntn;
         omnigent = systemPkgs.omnigent;
@@ -184,11 +185,32 @@
           type = "app";
           program = "${defaultPackages.${system}.default}/bin/nix-flakes";
         };
+        agent-core = {
+          type = "app";
+          program = "${defaultPackages.${system}.agent-core}/bin/agent-core";
+        };
+      }) pkgs;
+
+      checks = builtins.mapAttrs (system: systemPkgs: {
+        agent-core = systemPkgs.agent-core;
+        agent-core-renders =
+          systemPkgs.runCommand "agent-core-render-check"
+            {
+              nativeBuildInputs = [ systemPkgs.agent-core ];
+            }
+            ''
+              agent-core check
+              for runtime in openclaw codex claude pi; do
+                agent-core render --runtime "$runtime" --output "$TMPDIR/$runtime"
+              done
+              touch "$out"
+            '';
       }) pkgs;
     in
     {
       packages = defaultPackages;
       apps = defaultApps;
+      inherit checks;
 
       homeConfigurations = builtins.mapAttrs mkHomeConfig environmentConfigs;
 

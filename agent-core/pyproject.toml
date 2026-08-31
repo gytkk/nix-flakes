@@ -1,0 +1,29 @@
+[project]
+name = "agent-core"
+version = "1.0.0"
+description = "Portable agent instruction materializer"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.scripts]
+agent-core = "agent_core.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8.0"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agent_core"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"manifest.toml" = "agent_core/resources/manifest.toml"
+"rules" = "agent_core/resources/rules"
+"adapters" = "agent_core/resources/adapters"
+"skills" = "agent_core/resources/skills"
+"schema" = "agent_core/resources/schema"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

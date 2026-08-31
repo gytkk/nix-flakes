@@ -17,11 +17,11 @@ current performance findings, measurements, and prioritized action items.
 | `files/lsp.json` | `~/.pi/agent/lsp.json` | LSP server routes and diagnostics settings |
 | `files/mcp.json` | `~/.pi/agent/mcp.json` | MCP adapter and server configuration |
 | `files/models.json` | `~/.pi/agent/models.json` | Custom Databricks model provider |
-| `agent-prompts/` and `files/AGENTS.md` | `~/.pi/agent/AGENTS.md` | Generated shared and Pi-specific instructions |
-| `agent-prompts/rules/OPERATING.md` | `~/.pi/agent/APPEND_SYSTEM.md` | Operating invariants added to Pi's system prompt |
+| `agent-core/rules/` and `agent-core/adapters/pi.md` | `~/.pi/agent/AGENTS.md` | Generated shared and Pi-specific instructions |
+| `agent-core/rules/OPERATING.md` | `~/.pi/agent/APPEND_SYSTEM.md` | Operating invariants added to Pi's system prompt |
 | `files/extensions/` | `~/.pi/agent/extensions/` | Local Pi extensions |
 | `files/themes/claude-like.json` | `~/.pi/agent/themes/claude-like.json` | Global dark theme |
-| `skills/` and `agent-prompts/skills.nix` | `~/.pi/agent/skills/` | Pi-specific and shared official skills |
+| `agent-core/skills/` | `~/.pi/agent/skills/` | Portable repository-managed skills |
 
 The module also installs:
 
@@ -104,28 +104,9 @@ concurrency limit protects legacy multi-child paths but does not cap
 
 ## Global prompts and skills
 
-`modules/agent-prompts/rules/OPERATING.md` is exposed as `APPEND_SYSTEM.md`, so it
-augments Pi's maintained system prompt instead of replacing it. It is the single
-source of repository-independent operating invariants that must apply to every
-task.
+`agent-core/rules/OPERATING.md` is rendered as `APPEND_SYSTEM.md`, so it augments Pi's maintained system prompt instead of replacing it. The generated `AGENTS.md` combines shared methodology, prose guidance, and `agent-core/adapters/pi.md` without duplicating the operating invariants.
 
-`files/AGENTS.md` contains Pi-specific operational policy. Home Manager prepends
-shared methodology from `modules/agent-prompts/AGENTS.md` and prose guidance
-from `modules/agent-prompts/rules/PROSE.md` when it generates the runtime
-`~/.pi/agent/AGENTS.md`. It omits `OPERATING.md` from that generated file because
-Pi already loads those rules through `APPEND_SYSTEM.md`. Project-specific rules
-belong in the project's own `AGENTS.md`. Pi-specific workflows live in
-`modules/pi/skills/`; shared workflows come from
-`modules/agent-prompts/skills.nix`.
-
-The local Pi skills are:
-
-- `devils-advocate`
-- `parallel-research-merge`
-- `pi-agent`
-
-The shared registry also exposes all 25 official skills from the locked
-`mattpocock-skills` input under `~/.pi/agent/skills/`.
+All repository-managed skills are portable canonical sources under `agent-core/skills/`. `agent-core/manifest.toml` controls Pi exposure, and Home Manager installs the immutable render output at `~/.pi/agent/skills/`. Do not add Pi-local skill copies.
 
 ## Local extensions
 

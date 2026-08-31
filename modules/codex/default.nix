@@ -9,9 +9,8 @@
 
 let
   cfg = config.modules.codex;
-  agentPrompts = import ../agent-prompts/lib.nix { inherit lib pkgs; };
+  agentCoreOutput = import ../../agent-core/nix/render.nix { inherit pkgs; } "codex";
   codex = "${pkgs.codex}/bin/codex";
-  mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/codex/${path}";
   agentSessionRecordCommand = "${config.home.homeDirectory}/.local/bin/agent-session-record";
   plannotatorCommand = "${config.home.homeDirectory}/.local/bin/plannotator";
   codexHooksJson =
@@ -35,11 +34,7 @@ let
       ./files/config.toml
     else
       "${flakeDirectory}/modules/codex/files/config.toml";
-  managedSkillsSource = import ./skills.nix {
-    inherit lib pkgs;
-    localSkillsRoot =
-      if hasSystemCodexConfig then ./skills else "${flakeDirectory}/modules/codex/skills";
-  };
+  managedSkillsSource = "${agentCoreOutput}/skills";
   coreutils = pkgs.coreutils;
   ensureSystemCodexConfigFunction =
     if hasSystemCodexConfig then
@@ -173,7 +168,7 @@ in
       pkgs.mcp-nixos
     ];
 
-    home.file.".codex/AGENTS.md".source = agentPrompts.render "codex-AGENTS.md" [ ./files/AGENTS.md ];
+    home.file.".codex/AGENTS.md".source = "${agentCoreOutput}/AGENTS.md";
     home.file.".codex/hooks.json".text = codexHooksJson;
 
     home.activation.codexUserConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''

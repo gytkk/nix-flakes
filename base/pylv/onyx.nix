@@ -16,6 +16,7 @@
 
   modules.openclaw = {
     enable = true;
+    agentCore.enable = true;
     agentSessionRecordPlugin.enable = true;
   };
   modules.qmd.enable = true;

@@ -42,8 +42,8 @@ flake.nix                         # Main flake configuration
 inventory.nix                     # All Home Manager environments and NixOS hosts
 base/default.nix                  # Common Home Manager imports and default enables
 base/<profile>/home.nix           # Profile-specific Home Manager extensions
+agent-core/                       # Portable agent rules, adapters, skills, and renderer
 modules/<name>/default.nix        # Reusable Home Manager or NixOS module
-modules/agent-prompts/              # Shared global rules for coding agents
 modules/nixos/                    # Common NixOS modules and shared secrets
 hosts/<name>/configuration.nix    # Host-specific NixOS imports and values
 lib/pkgs.nix                      # Overlay and per-system package-set construction
@@ -68,7 +68,7 @@ openclaw gateway install --force --wrapper ~/.openclaw/bin/openclaw
 
 Use `openclaw update` for verified core and plugin updates. The mutable config may enable OpenClaw's stable auto updater. Nix does not pin or replace the OpenClaw executable.
 
-Global coding-agent instructions are assembled from shared rules under `modules/agent-prompts/` and a harness-specific file under each agent module. The same directory also owns the shared skill registry. The registry reads the 25 official skills from the locked `mattpocock-skills` input and exposes them to Claude Code, Codex, and Pi. Home Manager generates the final instruction and skill links, so changes take effect after the relevant configuration is applied.
+`agent-core/` is the canonical source for shared coding-agent rules, runtime adapters, and repository-managed portable skills. Its Python renderer validates `manifest.toml` and produces deterministic immutable trees for Claude Code, Codex, Pi, and OpenClaw. Nix packages the renderer and Home Manager modules install only its generated output. Run `nix run .#agent-core -- check` to validate canonical resources and golden output hashes.
 
 ## Codex Plugin for Claude Code
 
@@ -87,15 +87,14 @@ The official [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc)
 ### Codex CLI Config
 
 - On NixOS hosts, the static Codex base config is installed to `/etc/codex/managed_config.toml`.
-- Codex-specific admin skills live under `modules/codex/skills`. They are merged with the shared official skills from `modules/agent-prompts/skills.nix` and exposed at `/etc/codex/skills`.
+- Portable skills from `agent-core/skills/` are rendered and exposed at `/etc/codex/skills`.
 - On standalone Home Manager environments, `home-manager switch` ensures `/etc/codex/managed_config.toml` is a symlink to this repo's `modules/codex/files/config.toml`.
-- On standalone Home Manager environments, `home-manager switch` points `/etc/codex/skills` at the generated skill farm. Local Codex skills still link back to this checkout, while official shared skills use the revision pinned in `flake.lock`.
+- On standalone Home Manager environments, `home-manager switch` points `/etc/codex/skills` at the immutable agent-core render output.
 - Standalone activation only prompts for `sudo` when `/etc/codex` needs to be created or repaired, or when migrating from the legacy `/etc/codex/config.toml` path.
 - Using the repo path instead of the flake source store path avoids repeated sudo prompts after unrelated repo changes.
 - If `/etc/codex/managed_config.toml` or the legacy `/etc/codex/config.toml` already exists as a regular file, activation stops instead of overwriting it.
 - `~/.codex/config.toml` stays writable and is not rewritten by activation, preserving user-local state such as project trust, hook trust, notices, and TUI state.
-- Repo-managed Codex-specific skills currently include `parallel-research-merge` and `devils-advocate`. The shared registry adds the 25 official Matt Pocock skills.
-- Update the shared upstream revision explicitly with `nix flake update mattpocock-skills`.
+- Add or update repository-managed skills only under `agent-core/skills/`, then update `agent-core/manifest.toml` and its golden hashes.
 - The Cloudflare API MCP uses OAuth at `https://mcp.cloudflare.com/mcp`; run `codex mcp login cloudflare` once per Codex host. Write-capable tools require approval by default.
 - `home-manager switch` ensures `superpowers@openai-curated` is installed and enabled for Codex CLI; restart Codex after switching so plugin skills are rediscovered.
 - If the bundled Codex marketplace has not synced yet, activation falls back to the upstream Codex install path by cloning `obra/superpowers` under `~/.codex/superpowers` and linking its skills into `~/.agents/skills`.

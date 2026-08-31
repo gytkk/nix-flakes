@@ -1,0 +1,44 @@
+[metadata]
+marker = ".agent-core-generated"
+version = "1"
+
+[[documents]]
+runtime = "openclaw"
+output = "AGENTS.core.md"
+sources = ["rules/OPERATING.md", "rules/AGENTS.md", "rules/PROSE.md"]
+
+[[documents]]
+runtime = "claude"
+output = "CLAUDE.md"
+sources = ["rules/OPERATING.md", "rules/AGENTS.md", "rules/PROSE.md", "adapters/claude.md"]
+
+[[documents]]
+runtime = "codex"
+output = "AGENTS.md"
+sources = ["rules/OPERATING.md", "rules/AGENTS.md", "rules/PROSE.md", "adapters/codex.md"]
+
+[[documents]]
+runtime = "pi"
+output = "AGENTS.md"
+sources = ["rules/AGENTS.md", "rules/PROSE.md", "adapters/pi.md"]
+
+[[documents]]
+runtime = "pi"
+output = "APPEND_SYSTEM.md"
+sources = ["rules/OPERATING.md"]
+
+[runtimes.openclaw]
+skills = ["codebase-design", "code-review", "devils-advocate", "diagnosing-bugs", "domain-modeling", "grilling", "parallel-research-merge", "pi-agent", "prototype", "research", "resolving-merge-conflicts", "tdd", "wizard", "writing-for-agents"]
+skill_output = "skills"
+
+[runtimes.codex]
+skills = ["codebase-design", "code-review", "devils-advocate", "diagnosing-bugs", "domain-modeling", "grilling", "parallel-research-merge", "pi-agent", "prototype", "research", "resolving-merge-conflicts", "tdd", "wizard", "writing-for-agents"]
+skill_output = "skills"
+
+[runtimes.claude]
+skills = ["codebase-design", "code-review", "devils-advocate", "diagnosing-bugs", "domain-modeling", "grilling", "parallel-research-merge", "pi-agent", "prototype", "research", "resolving-merge-conflicts", "tdd", "wizard", "writing-for-agents"]
+skill_output = "skills"
+
+[runtimes.pi]
+skills = ["codebase-design", "code-review", "devils-advocate", "diagnosing-bugs", "domain-modeling", "grilling", "parallel-research-merge", "pi-agent", "prototype", "research", "resolving-merge-conflicts", "tdd", "wizard", "writing-for-agents"]
+skill_output = "skills"

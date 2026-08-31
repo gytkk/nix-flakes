@@ -21,7 +21,7 @@
 
 특히 `subagent` 도구 하나가 약 18K자이고, subagent 관련 도구 전체가 활성
 도구 메타데이터의 약 51%를 차지한다. 글로벌 및 저장소 지침도 약 19K자였다.
-감사 이후 범용 코딩 원칙은 `modules/agent-prompts/AGENTS.md`로 통합하고, 별도
+감사 이후 범용 코딩 원칙은 `agent-core/rules/AGENTS.md`로 통합하고, 별도
 코딩 방법론 스킬을 읽는 라운드는 제거했다.
 
 확장 전체의 warm startup 비용은 약 0.44초였다. 무시할 수는 없지만 모델 호출
@@ -232,7 +232,7 @@ Pi 0.84.4의 동적 tool loading을 사용하는 `tool-profiles` extension을 �
 - 검증 가능한 성공 조건
 - 관련 없는 변경 금지
 
-후속 변경에서는 이 원칙을 `modules/agent-prompts/AGENTS.md`의 항상 로드되는 공통
+후속 변경에서는 이 원칙을 `agent-core/rules/AGENTS.md`의 항상 로드되는 공통
 규칙으로 통합하고, Pi와 Codex의 중복 skill 및 Pi의 필수 routing 규칙을 제거했다.
 코딩 규율을 유지하면서 별도 skill `read` 라운드와 에이전트별 동작 차이를 없앴다.
 
@@ -244,7 +244,7 @@ Pi 0.84.4의 동적 tool loading을 사용하는 `tool-profiles` extension을 �
 승인 경계, 근거, 검증, 최종 보고 규칙을 반복했다. 이 중복은 초기 prompt token을
 늘리고, 모델이 같은 규칙을 여러 번 해석하게 만들 수 있었다.
 
-이제 `modules/agent-prompts/rules/OPERATING.md`가 공통 operating invariant를 한 번만
+이제 `agent-core/rules/OPERATING.md`가 공통 operating invariant를 한 번만
 정의한다. Pi는 이 파일을 `APPEND_SYSTEM.md`로 로드하고 생성된 `AGENTS.md`에서는
 제외한다. Claude Code와 Codex는 같은 파일을 각자의 생성 지침 첫 부분에 포함한다.
 
@@ -360,9 +360,9 @@ latency 변화는 대표 작업으로 계속 측정해야 한다.
 **Applied changes**
 
 1. 가정과 tradeoff, 단순성, surgical scope, 검증 가능한 목표를
-   `modules/agent-prompts/AGENTS.md`에 통합한다.
+   `agent-core/rules/AGENTS.md`에 통합한다.
 2. 모든 작업에 필요한 안전, 근거, 검증, 보고 invariant는
-   `modules/agent-prompts/rules/OPERATING.md`에서 관리한다.
+   `agent-core/rules/OPERATING.md`에서 관리한다.
 3. Claude Code와 Codex는 모든 공통 규칙 뒤에 에이전트별 규칙을 추가한다. Pi는
    operating invariant를 `APPEND_SYSTEM.md`로 로드하고 나머지 공통 규칙 뒤에 Pi
    전용 규칙을 추가한다.
@@ -496,7 +496,7 @@ output 공간과 summary 품질에 영향을 주므로 먼저 수동 운영으�
 
 ### Phase 3: Prompt and skill cleanup
 
-1. [x] 공통 coding methodology를 `modules/agent-prompts/AGENTS.md`에서 관리
+1. [x] 공통 coding methodology를 `agent-core/rules/AGENTS.md`에서 관리
 2. [x] 에이전트별 파일에는 harness-specific rule만 유지
 3. [x] `PROSE.md`를 원래 크기의 절반 이하로 축약
 4. [ ] 간단한 수정, 복잡한 수정, review 요청을 각각 테스트
@@ -595,7 +595,7 @@ Structured question tool은 약 4.9K자의 metadata를 사용하지만 모호한
 - [x] lite profile에서 Web Access, MCP, subagent suite 비활성화
 - [x] `/run` command와 동적 `enable_tools`로 delegation 허용
 - [x] Web Access 기본 workflow를 `none`으로 변경
-- [x] coding methodology를 `modules/agent-prompts/AGENTS.md`로 통합
+- [x] coding methodology를 `agent-core/rules/AGENTS.md`로 통합
 - [x] 중복 coding methodology skill과 필수 routing 규칙 제거
 - [x] `PROSE.md`를 원래 크기의 절반 이하로 축약
 - [ ] `mcpScript` 사용 빈도를 확인하고 유지 여부 결정
