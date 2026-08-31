@@ -17,7 +17,7 @@ The modules do not install an OpenClaw package, generate `openclaw.json`, set
 
 ## Agent-core integration
 
-When `modules.openclaw.agentCore.enable` is true, Home Manager installs the portable skill render at `~/.openclaw/skills`, stores generated shared instructions at `~/.openclaw/managed/agent-core/AGENTS.core.md`, and installs the `agent-core-context` extension. The extension uses `before_prompt_build` to return `prependSystemContext`. It does not replace OpenClaw's system prompt or write a workspace `AGENTS.md`, so workspace instructions remain independently owned and are loaded through OpenClaw's normal bootstrap path.
+When `modules.openclaw.agentCore.enable` is true, Home Manager installs OpenClaw's shared skill render at `~/.openclaw/skills`, stores generated shared instructions at `~/.openclaw/managed/agent-core/AGENTS.core.md`, and installs the `agent-core-context` extension. The extension uses `before_prompt_build` to return `prependSystemContext`. It does not replace OpenClaw's system prompt or write a workspace `AGENTS.md`, so workspace instructions remain independently owned and are loaded through OpenClaw's normal bootstrap path.
 
 The module does not edit mutable `openclaw.json`. Enable the hook there and grant the conversation access required by `before_prompt_build`:
 

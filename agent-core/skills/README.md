@@ -1,6 +1,6 @@
-# Portable skills
+# Shared skills
 
-This directory is the canonical source for repository-managed portable skills. `agent-core/manifest.toml` controls which skills each runtime receives.
+This directory is the canonical catalog for repository-managed shared skills. `agent-core/manifest.toml` controls which skills each runtime receives, so a skill can have one source without being installed for every runtime.
 
 The following skills came from [mattpocock/skills](https://github.com/mattpocock/skills):
 
@@ -8,6 +8,6 @@ The following skills came from [mattpocock/skills](https://github.com/mattpocock
 - Upstream commit: `6654f6b60cd9d5be8b54c6fafe44346dabeb3b76`
 - Retrieved: `2026-08-29`
 
-The selection excludes user-invoked wrappers and setup workflows. Each retained directory contains its `SKILL.md` and any file that it directly references. Plugin manifests and runtime-specific agent metadata are excluded. `code-review` discovers repository configuration without the removed setup skill. The upstream MIT license is included in `LICENSE` and applies to the imported skills.
+The imported selection excludes user-invoked wrappers and setup workflows. Each retained directory contains its `SKILL.md` and any file that it directly references. Plugin manifests and runtime-specific UI metadata are excluded; required discovery metadata remains in `SKILL.md` frontmatter. `code-review` discovers repository configuration without the removed setup skill. The upstream MIT license is included in `LICENSE` and applies to the imported skills.
 
-Runtime-specific skills remain under their owning runtime module and are passed to the renderer through `--runtime-skill-root`. A skill that requires runtime-specific tools, metadata, or installation behavior is not duplicated here.
+Shared skills describe required capabilities instead of naming one agent runtime. Runtime modules own packages, settings, plugins, and installation behavior, while the renderer selects skill sources only from this catalog.

@@ -21,7 +21,7 @@ current performance findings, measurements, and prioritized action items.
 | `agent-core/rules/OPERATING.md` | `~/.pi/agent/APPEND_SYSTEM.md` | Operating invariants added to Pi's system prompt |
 | `files/extensions/` | `~/.pi/agent/extensions/` | Local Pi extensions |
 | `files/themes/claude-like.json` | `~/.pi/agent/themes/claude-like.json` | Global dark theme |
-| `agent-core/skills/` and `modules/pi/skills/` | `~/.pi/agent/skills/` | Merged portable and Pi-specific skills |
+| `agent-core/skills/` | `~/.pi/agent/skills/` | Pi's selected shared skills |
 
 The module also installs:
 
@@ -106,7 +106,7 @@ concurrency limit protects legacy multi-child paths but does not cap
 
 `agent-core/rules/OPERATING.md` is rendered as `APPEND_SYSTEM.md`, so it augments Pi's maintained system prompt instead of replacing it. The generated `AGENTS.md` combines shared methodology, prose guidance, and `agent-core/adapters/pi.md` without duplicating the operating invariants.
 
-Portable skills are canonical under `agent-core/skills/`. Pi-specific `devils-advocate`, `parallel-research-merge`, and `pi-agent` remain under `modules/pi/skills/`; Home Manager passes that root to the shared renderer and installs the merged immutable output at `~/.pi/agent/skills/`. The Python renderer owns collision handling, so the module does not implement a separate merge.
+Shared skills are canonical under `agent-core/skills/`. Pi's manifest allowlist includes `devils-advocate`, `parallel-research-merge`, and `pi-agent`; Home Manager installs the selected immutable output at `~/.pi/agent/skills/`. The module does not own skill copies or merge logic.
 
 ## Local extensions
 

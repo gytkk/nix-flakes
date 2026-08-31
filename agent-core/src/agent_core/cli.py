@@ -74,8 +74,8 @@ def main(argv: list[str] | None = None) -> int:
         "render",
         help="Create an immutable output tree for one runtime.",
         description=(
-            "Combine canonical instructions, portable skills, and optional "
-            "runtime-specific skills into a new output tree."
+            "Combine canonical instructions and the runtime's selected shared "
+            "skills into a new output tree."
         ),
     )
     render_parser.add_argument(
@@ -83,16 +83,6 @@ def main(argv: list[str] | None = None) -> int:
         choices=RUNTIMES,
         required=True,
         help="Runtime whose instruction and skill tree should be rendered.",
-    )
-    render_parser.add_argument(
-        "--runtime-skill-root",
-        action="append",
-        default=[],
-        type=Path,
-        help=(
-            "Directory containing runtime-specific skill directories; may be "
-            "provided more than once."
-        ),
     )
     render_parser.add_argument(
         "--output",
@@ -104,7 +94,7 @@ def main(argv: list[str] | None = None) -> int:
         "check",
         help="Validate canonical resources and golden hashes.",
         description=(
-            "Validate the manifest, canonical instructions, portable skills, "
+            "Validate the manifest, canonical instructions, shared skills, "
             "generated markers, and runtime golden hashes."
         ),
     )
@@ -131,7 +121,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         if args.command == "render":
-            render(args.runtime, args.output, args.runtime_skill_root)
+            render(args.runtime, args.output)
             print(f"rendered {args.runtime} to {args.output}")
             return 0
         if args.command == "check":

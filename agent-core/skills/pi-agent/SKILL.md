@@ -2,7 +2,6 @@
 name: pi-agent
 description: Build with and use Pi, the minimal terminal coding harness. Use for installing Pi, configuring providers/models/settings/environment variables, creating Pi skills/extensions/packages/themes/prompt templates, embedding Pi through the SDK, integrating over RPC or JSON event streams, parsing sessions, running local models through the llama.cpp router, developing custom Pi providers and TUI components, or using ecosystem packages such as pi-subagents (delegation/orchestration), pi-mcp-adapter (MCP servers), pi-interview (interactive forms), and pi-web-access (web search, fetching, video understanding).
 license: MIT
-compatibility: Requires Node.js/npm for Pi CLI and SDK usage. Pi package name is @earendil-works/pi-coding-agent.
 metadata:
   version: "1.2"
   skill-author: K-Dense Inc.
@@ -11,6 +10,8 @@ metadata:
 # Pi Agent
 
 Use this skill when the user wants to operate Pi or build on top of Pi. Pi is a minimal terminal coding harness extended through TypeScript extensions, skills, prompt templates, themes, packages, custom models/providers, SDK integrations, RPC mode, JSON event streams, and TUI components.
+
+Tasks that execute the Pi CLI or SDK require Node.js and npm. The Pi package name is `@earendil-works/pi-coding-agent`.
 
 ## First Decision
 

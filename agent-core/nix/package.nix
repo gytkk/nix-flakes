@@ -19,7 +19,7 @@ python3Packages.buildPythonApplication {
   '';
 
   meta = {
-    description = "Portable instructions, skills, and renderers for coding-agent runtimes";
+    description = "Shared instructions, skills, and renderers for coding-agent runtimes";
     mainProgram = "agent-core";
     platforms = lib.platforms.unix;
   };

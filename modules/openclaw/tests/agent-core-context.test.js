@@ -12,11 +12,11 @@ const count = (value, marker) => value.split(marker).length - 1;
 test("prepends the rendered instructions as system context", async () => {
   const handler = createAgentCoreContextHandler(api, {
     getInstructionPath: () => "/managed/AGENTS.core.md",
-    loadInstructions: async () => "portable instructions\n",
+    loadInstructions: async () => "shared instructions\n",
   });
 
   assert.deepEqual(await handler(), {
-    prependSystemContext: "portable instructions\n",
+    prependSystemContext: "shared instructions\n",
   });
 });
 

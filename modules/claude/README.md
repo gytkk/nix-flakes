@@ -29,7 +29,7 @@ Global development guidelines are rendered from shared rules under `agent-core/r
 
 ## Skills and plugins
 
-Home Manager installs the immutable Claude render of portable skills from `agent-core/skills/` into `~/.claude/skills/`. The local `devils-advocate` marketplace plugin remains runtime-owned because it provides a Claude command, agent, and plugin metadata that the portable renderer does not model.
+Home Manager installs Claude's immutable selection of shared skills from `agent-core/skills/` into `~/.claude/skills/`. The local `devils-advocate` marketplace plugin remains separately owned because it provides a Claude command, agent, and plugin metadata that the shared renderer does not model.
 
 ### Marketplaces
 

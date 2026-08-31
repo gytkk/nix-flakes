@@ -165,12 +165,10 @@
           codex = render {
             outputHash = hashFor "codex";
             runtime = "codex";
-            runtimeSkillRoots = [ ./modules/codex/skills ];
           };
           pi = render {
             outputHash = hashFor "pi";
             runtime = "pi";
-            runtimeSkillRoots = [ ./modules/pi/skills ];
           };
         };
       agentCoreOutputs = builtins.mapAttrs (_: systemPkgs: mkAgentCoreOutputs systemPkgs false) pkgs;

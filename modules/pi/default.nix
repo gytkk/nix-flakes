@@ -8,10 +8,7 @@
 
 let
   cfg = config.modules.pi;
-  agentCoreOutput = import ../../agent-core/nix/render.nix { inherit pkgs; } {
-    runtime = "pi";
-    runtimeSkillRoots = [ ./skills ];
-  };
+  agentCoreOutput = import ../../agent-core/nix/render.nix { inherit pkgs; } { runtime = "pi"; };
   mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/pi/${path}";
 in
 {

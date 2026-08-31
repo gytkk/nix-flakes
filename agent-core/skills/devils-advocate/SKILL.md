@@ -1,10 +1,10 @@
 ---
 name: devils-advocate
 description: >-
-  Anti-sycophantic multi-pass code review for Pi. Use when the user asks for
-  a devil's advocate review, adversarial review, skeptical code review,
-  multi-pass structured review, architecture/maintainability/edge-case review,
-  or any review that should challenge assumptions instead of validating the
+  Anti-sycophantic multi-pass code review. Use when the user asks for a devil's
+  advocate review, adversarial review, skeptical code review, multi-pass
+  structured review, architecture/maintainability/edge-case review, or any
+  review that should challenge assumptions instead of validating the
   implementation.
 ---
 

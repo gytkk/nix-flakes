@@ -27,7 +27,7 @@ in
     agentCore.enable = lib.mkOption {
       type = lib.types.bool;
       default = false;
-      description = "Install portable agent-core instructions, skills, and prompt hook.";
+      description = "Install shared agent-core instructions, skills, and prompt hook.";
     };
 
     agentSessionRecordPlugin.enable = lib.mkOption {

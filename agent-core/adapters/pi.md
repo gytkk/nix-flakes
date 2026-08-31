@@ -24,10 +24,10 @@ behavior.
 
 - Follow Pi's Agent Skills format: a focused `SKILL.md` with valid `name` and
   `description` frontmatter.
-- Store the canonical portable skill under `agent-core/skills/` and declare its
+- Store the canonical shared skill under `agent-core/skills/` and declare its
   runtime exposure in `agent-core/manifest.toml`.
-- Store a skill that requires Pi tools, packages, or metadata under
-  `modules/pi/skills/`; the module passes that root to the shared renderer.
+- Express required capabilities in the shared skill. Keep Pi packages,
+  settings, extensions, and optional UI metadata in `modules/pi/`.
 - Keep skills focused, trim unused files, and align them with repository
   conventions.
 

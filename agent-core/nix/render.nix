@@ -2,14 +2,7 @@
 {
   outputHash ? null,
   runtime,
-  runtimeSkillRoots ? [ ],
 }:
-
-let
-  runtimeSkillArgs = pkgs.lib.concatMapStringsSep " " (
-    root: "--runtime-skill-root ${pkgs.lib.escapeShellArg "${root}"}"
-  ) runtimeSkillRoots;
-in
 
 assert builtins.elem runtime [
   "openclaw"
@@ -31,6 +24,5 @@ pkgs.runCommand "agent-core-${runtime}"
   ''
     agent-core render \
       --runtime ${pkgs.lib.escapeShellArg runtime} \
-      ${runtimeSkillArgs} \
       --output "$out"
   ''

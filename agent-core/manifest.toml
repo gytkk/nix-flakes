@@ -32,7 +32,7 @@ skills = ["codebase-design", "code-review", "diagnosing-bugs", "domain-modeling"
 skill_output = "skills"
 
 [runtimes.codex]
-skills = ["codebase-design", "code-review", "diagnosing-bugs", "domain-modeling", "grilling", "prototype", "research", "resolving-merge-conflicts", "tdd", "wizard", "writing-for-agents"]
+skills = ["codebase-design", "code-review", "devils-advocate", "diagnosing-bugs", "domain-modeling", "grilling", "parallel-research-merge", "prototype", "research", "resolving-merge-conflicts", "tdd", "wizard", "writing-for-agents"]
 skill_output = "skills"
 
 [runtimes.claude]
@@ -40,5 +40,5 @@ skills = ["codebase-design", "code-review", "diagnosing-bugs", "domain-modeling"
 skill_output = "skills"
 
 [runtimes.pi]
-skills = ["codebase-design", "code-review", "diagnosing-bugs", "domain-modeling", "grilling", "prototype", "research", "resolving-merge-conflicts", "tdd", "wizard", "writing-for-agents"]
+skills = ["codebase-design", "code-review", "devils-advocate", "diagnosing-bugs", "domain-modeling", "grilling", "parallel-research-merge", "pi-agent", "prototype", "research", "resolving-merge-conflicts", "tdd", "wizard", "writing-for-agents"]
 skill_output = "skills"

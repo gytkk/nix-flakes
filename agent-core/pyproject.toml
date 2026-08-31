@@ -1,7 +1,7 @@
 [project]
 name = "agent-core"
 version = "1.0.0"
-description = "Portable agent instruction materializer"
+description = "Shared agent instruction materializer"
 requires-python = ">=3.11"
 dependencies = []
 

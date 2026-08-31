@@ -59,9 +59,9 @@ behavior.
 
 - Store canonical repository-managed skills under `agent-core/skills/` and
   declare runtime exposure in `agent-core/manifest.toml`. Do not add a
-  Claude-specific copy or plugin for an otherwise portable skill.
+  Claude-specific copy or plugin for an otherwise shared skill.
 - Keep skills that require Claude commands, agents, or plugin metadata in the
-  Claude marketplace instead of passing them to the portable renderer.
+  Claude marketplace instead of adding them to the shared catalog.
 - When writing or updating prompts, skills, or agent instructions, state the
   goal and constraints rather than prescribing unnecessary step-by-step
   procedures.

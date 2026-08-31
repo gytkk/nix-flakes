@@ -3,7 +3,7 @@ from __future__ import annotations
 import hashlib
 import os
 import re
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping
 from pathlib import Path, PurePosixPath
 
 import tomllib
@@ -131,26 +131,6 @@ def _skill_name(value: object) -> str:
     return value
 
 
-def _runtime_skill_sources(root: Path) -> list[tuple[str, Path]]:
-    if root.is_symlink():
-        raise ValidationError(f"unsafe runtime skill root: {root}")
-    if not root.is_dir():
-        raise ValidationError(f"runtime skill root is not a directory: {root}")
-    try:
-        entries = sorted(root.iterdir(), key=lambda path: path.name)
-    except OSError as error:
-        raise ValidationError(
-            f"cannot read runtime skill root {root}: {error}"
-        ) from error
-    skills: list[tuple[str, Path]] = []
-    for entry in entries:
-        if entry.is_symlink():
-            raise ValidationError(f"unsafe skill source path: {entry}")
-        if entry.is_dir():
-            skills.append((_skill_name(entry.name), entry))
-    return skills
-
-
 def _materialize_skill(
     result: dict[PurePosixPath, bytes],
     skill_root: PurePosixPath,
@@ -178,10 +158,7 @@ def _materialize_skill(
         _put(result, output, content)
 
 
-def materialize(
-    runtime: str,
-    runtime_skill_roots: Sequence[Path] = (),
-) -> Mapping[PurePosixPath, bytes]:
+def materialize(runtime: str) -> Mapping[PurePosixPath, bytes]:
     """Return deterministic generated files for a supported runtime."""
     manifest = _load_manifest()
     runtimes = manifest["runtimes"]
@@ -234,11 +211,6 @@ def materialize(
         if skill_name in skill_sources:
             raise ValidationError(f"duplicate skill name: {skill_name}")
         skill_sources[skill_name] = source_root
-    for runtime_root in runtime_skill_roots:
-        for skill_name, source_root in _runtime_skill_sources(runtime_root):
-            if skill_name in skill_sources:
-                raise ValidationError(f"duplicate skill name: {skill_name}")
-            skill_sources[skill_name] = source_root
     for skill_name, source_root in sorted(skill_sources.items()):
         _materialize_skill(result, skill_root, skill_name, source_root, generated)
     return dict(sorted(result.items(), key=lambda item: item[0].as_posix()))
@@ -251,16 +223,12 @@ def output_hash(files: Mapping[PurePosixPath, bytes]) -> str:
     return digest.hexdigest()
 
 
-def render(
-    runtime: str,
-    output: Path,
-    runtime_skill_roots: Sequence[Path] = (),
-) -> None:
+def render(runtime: str, output: Path) -> None:
     if output.is_symlink() or (
         output.exists() and (not output.is_dir() or any(output.iterdir()))
     ):
         raise ValidationError(f"output directory must be missing or empty: {output}")
-    files = materialize(runtime, runtime_skill_roots)
+    files = materialize(runtime)
     output.mkdir(parents=True, exist_ok=True)
     for relative, content in files.items():
         destination = output.joinpath(*relative.parts)

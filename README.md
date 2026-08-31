@@ -42,7 +42,7 @@ flake.nix                         # Main flake configuration
 inventory.nix                     # All Home Manager environments and NixOS hosts
 base/default.nix                  # Common Home Manager imports and default enables
 base/<profile>/home.nix           # Profile-specific Home Manager extensions
-agent-core/                       # Portable agent rules, adapters, skills, and renderer
+agent-core/                       # Shared agent rules, adapters, skills, and renderer
 modules/<name>/default.nix        # Reusable Home Manager or NixOS module
 modules/nixos/                    # Common NixOS modules and shared secrets
 hosts/<name>/configuration.nix    # Host-specific NixOS imports and values
@@ -68,7 +68,7 @@ openclaw gateway install --force --wrapper ~/.openclaw/bin/openclaw
 
 Use `openclaw update` for verified core and plugin updates. The mutable config may enable OpenClaw's stable auto updater. Nix does not pin or replace the OpenClaw executable.
 
-`agent-core/` is the canonical source for shared coding-agent rules, runtime adapters, and portable skills. Its Python renderer validates `manifest.toml`, merges explicit Codex and Pi runtime skill roots without implicit overrides, and produces deterministic immutable trees for Claude Code, Codex, Pi, and OpenClaw. Nix packages the renderer, validates core and final runtime golden outputs, and Home Manager modules install only generated trees. Run `nix run .#agent-core -- check` to validate canonical core resources.
+`agent-core/` is the canonical source for shared coding-agent rules, runtime adapters, and shared skills. Its Python renderer validates `manifest.toml`, selects each runtime's declared skills from one canonical catalog, and produces deterministic immutable trees for Claude Code, Codex, Pi, and OpenClaw. Nix packages the renderer, validates core and final runtime golden outputs, and Home Manager modules install only generated trees. Run `nix run .#agent-core -- check` to validate canonical core resources.
 
 ## Codex Plugin for Claude Code
 
@@ -87,7 +87,7 @@ The official [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc)
 ### Codex CLI Config
 
 - On NixOS hosts, the static Codex base config is installed to `/etc/codex/managed_config.toml`.
-- Portable skills from `agent-core/skills/` are rendered and exposed at `/etc/codex/skills`.
+- Shared skills selected from `agent-core/skills/` are rendered and exposed at `/etc/codex/skills`.
 - On standalone Home Manager environments, `home-manager switch` ensures `/etc/codex/managed_config.toml` is a symlink to this repo's `modules/codex/files/config.toml`.
 - On standalone Home Manager environments, `home-manager switch` points `/etc/codex/skills` at the immutable agent-core render output.
 - Standalone activation only prompts for `sudo` when `/etc/codex` needs to be created or repaired, or when migrating from the legacy `/etc/codex/config.toml` path.
