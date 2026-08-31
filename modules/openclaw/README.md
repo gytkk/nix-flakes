@@ -49,4 +49,4 @@ The script checks the generated instruction file, plugin activation and diagnost
 
 ## Session recorder
 
-The session recorder subscribes to OpenClaw's `session_end` plugin event and passes the native transcript path to `agent-session-record`. It does not receive or upload the raw session key. If mutable OpenClaw configuration defines `plugins.allow`, include `agent-session-record` in that list.
+The session recorder subscribes to OpenClaw's `session_end` plugin event and reads the transcript through OpenClaw 2.0's session identity API. It passes the returned events to `agent-session-record` without depending on an active transcript file path. It does not receive or upload the raw session key. If mutable OpenClaw configuration defines `plugins.allow`, include `agent-session-record` in that list.

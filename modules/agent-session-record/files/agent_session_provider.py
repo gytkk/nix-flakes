@@ -4,9 +4,10 @@ import json
 import os
 import re
 import tempfile
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Mapping, Protocol
+from typing import Any, Protocol
 
 
 @dataclass(frozen=True)
@@ -472,59 +473,82 @@ class OpenClawProvider:
         session_id = payload.get("session_id")
         if not isinstance(session_id, str) or not session_id:
             raise ValueError("OpenClaw payload missing session_id")
-        transcript_raw = payload.get("transcript_path")
-        if not isinstance(transcript_raw, str) or not transcript_raw:
-            raise ValueError("OpenClaw payload missing transcript_path")
+        transcript_events_raw = payload.get("transcript_events")
+        transcript_events: list[dict[str, Any]] | None = None
+        if isinstance(transcript_events_raw, list):
+            if not transcript_events_raw or not all(
+                isinstance(item, dict) for item in transcript_events_raw
+            ):
+                raise ValueError("OpenClaw transcript events must be objects")
+            transcript_events = [dict(item) for item in transcript_events_raw]
+            first = transcript_events[0]
+        else:
+            transcript_raw = payload.get("transcript_path")
+            if not isinstance(transcript_raw, str) or not transcript_raw:
+                raise ValueError(
+                    "OpenClaw payload missing transcript_events or transcript_path"
+                )
 
-        transcript_path = Path(transcript_raw)
-        if transcript_path.is_symlink():
-            raise ValueError(
-                f"OpenClaw transcript must not be a symlink: {transcript_path}"
-            )
-        try:
-            transcript = transcript_path.resolve(strict=True)
-            agents_dir = self.sessions_dir(context.home, dict(context.config)).resolve(
-                strict=True
-            )
-        except OSError as error:
-            raise ValueError(
-                f"OpenClaw transcript unavailable: {transcript_path}"
-            ) from error
-        if not transcript.is_file() or not transcript.is_relative_to(agents_dir):
-            raise ValueError(
-                f"OpenClaw transcript is outside the configured agents directory: {transcript}"
-            )
+            transcript_path = Path(transcript_raw)
+            if transcript_path.is_symlink():
+                raise ValueError(
+                    f"OpenClaw transcript must not be a symlink: {transcript_path}"
+                )
+            try:
+                transcript = transcript_path.resolve(strict=True)
+                agents_dir = self.sessions_dir(
+                    context.home, dict(context.config)
+                ).resolve(strict=True)
+            except OSError as error:
+                raise ValueError(
+                    f"OpenClaw transcript unavailable: {transcript_path}"
+                ) from error
+            if not transcript.is_file() or not transcript.is_relative_to(agents_dir):
+                raise ValueError(
+                    f"OpenClaw transcript is outside the configured agents directory: {transcript}"
+                )
 
-        first = first_record(transcript)
+            first = first_record(transcript)
+            sanitized = self._sanitize_transcript(transcript, context)
+
         transcript_session_id = (
             first.get("id") if first.get("type") == "session" else None
         )
         if transcript_session_id != session_id:
             raise ValueError(f"OpenClaw transcript session did not match {session_id}")
+        if transcript_events is not None:
+            sanitized = self._sanitize_events(
+                transcript_events, context, f"session {session_id}"
+            )
 
-        sanitized = self._sanitize_transcript(transcript, context)
-        model = first_jsonl_value(
-            transcript,
-            lambda item: (
-                nested(item, "message", "model")
-                if item.get("type") == "message"
+        def read_model(item: Mapping[str, Any]) -> object:
+            if (
+                item.get("type") == "message"
                 and nested(item, "message", "role") == "assistant"
-                else item.get("model")
-                if item.get("type") == "model_change"
-                else None
-            ),
-        )
-        model_provider = first_jsonl_value(
-            transcript,
-            lambda item: (
-                nested(item, "message", "provider")
-                if item.get("type") == "message"
+            ):
+                return nested(item, "message", "model")
+            return item.get("model") if item.get("type") == "model_change" else None
+
+        def read_provider(item: Mapping[str, Any]) -> object:
+            if (
+                item.get("type") == "message"
                 and nested(item, "message", "role") == "assistant"
-                else item.get("provider")
-                if item.get("type") == "model_change"
-                else None
-            ),
-        )
+            ):
+                return nested(item, "message", "provider")
+            return item.get("provider") if item.get("type") == "model_change" else None
+
+        if transcript_events is not None:
+            model = self._first_event_value(transcript_events, read_model)
+            model_provider = self._first_event_value(transcript_events, read_provider)
+            compaction_count = sum(
+                item.get("type") == "compaction" for item in transcript_events
+            )
+        else:
+            model = first_jsonl_value(transcript, read_model)
+            model_provider = first_jsonl_value(transcript, read_provider)
+            compaction_count = sum(
+                item.get("type") == "compaction" for item in jsonl_objects(transcript)
+            )
         raw_role = payload.get("agent_role")
         agent_role = (
             raw_role
@@ -561,9 +585,6 @@ class OpenClawProvider:
             and raw_duration_ms >= 0
             else None
         )
-        compaction_count = sum(
-            item.get("type") == "compaction" for item in jsonl_objects(transcript)
-        )
         cwd = first.get("cwd")
         started_at = first.get("timestamp")
         return [
@@ -595,6 +616,22 @@ class OpenClawProvider:
         ]
 
     def _sanitize_transcript(self, transcript: Path, context: CaptureContext) -> Path:
+        def events() -> Iterable[dict[str, Any]]:
+            with transcript.open(encoding="utf-8") as input_handle:
+                for line in input_handle:
+                    value = json.loads(line)
+                    if not isinstance(value, dict):
+                        raise ValueError("record is not an object")
+                    yield value
+
+        return self._sanitize_events(events(), context, str(transcript))
+
+    def _sanitize_events(
+        self,
+        events: Iterable[Mapping[str, Any]],
+        context: CaptureContext,
+        source: str,
+    ) -> Path:
         state_dir = Path(
             context.config.get(
                 "AGENT_SESSION_RECORD_STATE_DIR",
@@ -611,12 +648,8 @@ class OpenClawProvider:
         sanitized = Path(raw_sanitized)
         sanitized.chmod(0o600)
         try:
-            with (
-                transcript.open(encoding="utf-8") as input_handle,
-                sanitized.open("w", encoding="utf-8") as output_handle,
-            ):
-                for line in input_handle:
-                    value = json.loads(line)
+            with sanitized.open("w", encoding="utf-8") as output_handle:
+                for value in events:
                     if not isinstance(value, dict):
                         raise ValueError("record is not an object")
                     output_handle.write(
@@ -632,8 +665,19 @@ class OpenClawProvider:
         except (OSError, UnicodeError, json.JSONDecodeError, ValueError) as error:
             sanitized.unlink(missing_ok=True)
             raise ValueError(
-                f"OpenClaw transcript sanitization failed: {transcript}"
+                f"OpenClaw transcript sanitization failed: {source}"
             ) from error
+
+    @staticmethod
+    def _first_event_value(
+        events: Iterable[Mapping[str, Any]],
+        reader: Callable[[Mapping[str, Any]], object],
+    ) -> str:
+        for item in events:
+            value = reader(item)
+            if isinstance(value, str) and value:
+                return value
+        return ""
 
     def discover_captures(self, context: CaptureContext) -> list[CaptureSource]:
         captures: list[CaptureSource] = []

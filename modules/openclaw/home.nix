@@ -72,7 +72,6 @@ in
 
     xdg.configFile."systemd/user/openclaw-gateway.service.d/20-nix-runtime.conf".text = ''
       [Service]
-      Environment="PATH=${stateDir}/bin:${stateDir}/tools/node/bin:/run/current-system/sw/bin:${homeDirectory}/.nix-profile/bin:/etc/profiles/per-user/${username}/bin:${homeDirectory}/.local/bin:${homeDirectory}/bin:/usr/local/bin:/usr/bin:/bin"
       Environment="LD_LIBRARY_PATH=${lib.makeLibraryPath [ pkgs.libcap ]}"
       ${lib.optionalString cfg.agentCore.enable ''Environment="AGENT_CORE_OPENCLAW_INSTRUCTIONS=${stateDir}/managed/agent-core/AGENTS.core.md"''}
     '';

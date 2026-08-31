@@ -12,7 +12,6 @@ let
   configPath = "${stateDir}/openclaw.json";
   gatewayTokenPath = "${stateDir}/gateway-auth-token";
   nginxAuthPath = "/etc/openclaw/nginx-gateway-auth.conf";
-  qmdPackage = pkgs.callPackage ../../packages/qmd/package.nix { };
 in
 {
   imports = [ ./nginx-proxy.nix ];
@@ -77,7 +76,6 @@ in
     environment.systemPackages = with pkgs; [
       chromium
       libcap
-      qmdPackage
     ];
 
     environment.sessionVariables = {

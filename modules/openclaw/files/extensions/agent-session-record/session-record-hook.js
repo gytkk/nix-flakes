@@ -20,17 +20,31 @@ const agentRole = (sessionKey) =>
 
 export const createSessionEndHandler = (
   api,
-  { spawnProcess = spawn, recorder = defaultRecorder } = {},
+  { spawnProcess = spawn, recorder = defaultRecorder, readTranscript } = {},
 ) =>
-  (event, context) => {
-    if (typeof event.sessionFile !== "string" || event.sessionFile.length === 0) {
+  async (event, context) => {
+    if (typeof readTranscript !== "function") {
       api.logger.warn?.(
-        `agent-session-record: session_end omitted sessionFile for ${event.sessionId}`,
+        "agent-session-record: transcript reader is unavailable",
       );
       return;
     }
 
     const sessionKey = event.sessionKey ?? context.sessionKey;
+    let transcriptEvents;
+    try {
+      transcriptEvents = await readTranscript({
+        agentId: context.agentId,
+        sessionId: event.sessionId,
+        sessionKey,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      api.logger.warn?.(
+        `agent-session-record: transcript read failed: ${message}`,
+      );
+      return;
+    }
     const child = spawnProcess(
       recorder(),
       ["hook", "openclaw", "session-end"],
@@ -52,7 +66,7 @@ export const createSessionEndHandler = (
     child.stdin.end(
       `${JSON.stringify({
         session_id: event.sessionId,
-        transcript_path: event.sessionFile,
+        transcript_events: transcriptEvents,
         hook_event_name: "session_end",
         reason: event.reason,
         message_count: event.messageCount,
@@ -66,6 +80,6 @@ export const createSessionEndHandler = (
     child.unref();
   };
 
-export const registerSessionRecordHook = (api) => {
-  api.on("session_end", createSessionEndHandler(api));
+export const registerSessionRecordHook = (api, options) => {
+  api.on("session_end", createSessionEndHandler(api, options));
 };

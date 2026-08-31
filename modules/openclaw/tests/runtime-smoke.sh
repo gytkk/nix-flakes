@@ -26,7 +26,8 @@ jq -e '
 ' >/dev/null <<<"$plugin_json" || fail "agent-core-context is not loaded cleanly with one before_prompt_build hook"
 
 doctor_output="$($openclaw_bin plugins doctor)"
-[[ "$doctor_output" == *"No plugin issues detected."* ]] || fail "OpenClaw reports plugin issues"
+[[ "$doctor_output" == *"Plugin discovery, module loading, compatibility, and configuration checks passed."* ]] ||
+  fail "OpenClaw reports plugin issues"
 
 shopt -s nullglob
 skill_documents=("$managed_skills_dir"/*/SKILL.md)

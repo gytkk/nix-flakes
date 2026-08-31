@@ -1000,6 +1000,55 @@ raise SystemExit(1)
             list((self.state / "tmp").glob("openclaw-session-*.jsonl")), []
         )
 
+    def test_openclaw_accepts_sqlite_transcript_events(self) -> None:
+        session_id = "openclaw-sqlite-session"
+        payload = self.fixtures / "openclaw-sqlite-payload.json"
+        self.write_json(
+            payload,
+            {
+                "session_id": session_id,
+                "transcript_events": [
+                    {
+                        "type": "session",
+                        "id": session_id,
+                        "timestamp": "2026-08-31T00:10:00Z",
+                        "cwd": "/workspace/openclaw-sqlite",
+                    },
+                    {
+                        "type": "message",
+                        "message": {
+                            "role": "assistant",
+                            "model": "gpt-openclaw",
+                            "provider": "openai",
+                            "content": [
+                                {
+                                    "type": "text",
+                                    "text": "contact sqlite@example.test",
+                                }
+                            ],
+                        },
+                    },
+                ],
+                "hook_event_name": "session_end",
+                "reason": "reset",
+                "message_count": 1,
+                "agent_id": "main",
+                "agent_role": "direct",
+            },
+        )
+
+        self.run_worker("openclaw", payload)
+
+        meta_path = self.find_meta(session_id)
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        archive = meta_path.parent / f"{meta['run_id']}.jsonl"
+        self.assertEqual(meta["model"], "gpt-openclaw")
+        self.assertEqual(meta["model_provider"], "openai")
+        self.assertNotIn("sqlite@example.test", archive.read_text(encoding="utf-8"))
+        self.assertEqual(
+            list((self.state / "tmp").glob("openclaw-session-*.jsonl")), []
+        )
+
     def test_openclaw_rejects_transcript_outside_state_dir(self) -> None:
         session_id = "openclaw-outside"
         (self.fixtures / "openclaw/agents").mkdir(parents=True)
