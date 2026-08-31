@@ -179,6 +179,32 @@ paired with `showHardwareCursor: true` in `settings.json`.
 This extension depends on Pi 0.83's editor rendering behavior. Review it when
 updating Pi if cursor rendering or IME positioning changes.
 
+### Tool profiles
+
+`files/extensions/tool-profiles/` starts each new session with the `lite`
+profile. Web Access, MCP, and subagent tools stay registered but inactive, so
+their schemas are omitted from ordinary model requests while package commands
+such as `/run` remain available.
+
+The default-active `enable_tools` tool adds optional groups without removing the
+current tools. Pi 0.84.4 can defer the newly enabled schemas on supported models,
+including GPT 5.4 and newer. The user-facing command can also replace the active
+optional set exactly:
+
+```text
+/tool-profile status
+/tool-profile lite
+/tool-profile research
+/tool-profile delegation
+/tool-profile full
+```
+
+`research` enables Web Access and MCP, `delegation` enables the subagent suite,
+and `full` enables both. The selected profile and the optional tools that were
+available at startup are stored in the session so resume and reload preserve
+the selection. CLI tool exclusions remain authoritative because the extension
+only manages optional tools that were initially active.
+
 ## LSP diagnostics
 
 `pi-lsp` starts a configured language server only after a matching file is
@@ -282,6 +308,8 @@ After changing this module:
    that file.
 7. Verify `/fast status`, MCP discovery, structured questions, and the
    web-access tools relevant to the change.
+8. Verify `/tool-profile status`, then enable `research` and `delegation` and
+   confirm that the corresponding tools appear without restarting Pi.
 
 For the subagent rollout, also run `/subagents-doctor` and
 `/subagents-models`, then verify one foreground `scout`, one `researcher`, and

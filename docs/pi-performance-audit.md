@@ -8,8 +8,8 @@
 - **Default runtime:** `openai-codex/gpt-5.6-sol`, thinking `high`
 - **Scope:** `modules/pi/`, `~/.pi/agent/`의 실제 로드 상태, 설치된 Pi 패키지,
   현재 저장소의 상위 레벨 세션
-- **Status:** Web Access의 `workflow: "none"`과 전역 agent rule 통합을
-  적용했다. 나머지 action item은 아직 적용하지 않았다.
+- **Status:** Web Access의 `workflow: "none"`, 전역 agent rule 통합, optional
+  tool의 동적 로딩을 적용했다. 모델 기본값과 PROSE 축약은 아직 적용하지 않았다.
 
 ## Executive summary
 
@@ -30,7 +30,7 @@
 가장 효과가 클 것으로 예상되는 순서는 다음과 같다.
 
 1. 일상 작업의 기본 모델을 Terra/medium으로 낮추고 Sol/high는 선택적으로 사용
-2. subagent 도구를 평상시 비활성화하는 lite 프로필 제공
+2. optional tool을 평상시 비활성화하고 필요할 때 동적으로 로드
 3. 글로벌 지침과 자동 스킬 로딩 규칙을 축약
 4. 웹 검색 기본 workflow를 `none`으로 변경
 5. UI 지연이 있을 때 fullscreen과 custom footer를 별도로 개선
@@ -202,7 +202,7 @@ reasoning 경로를 사용한다. 모델과 thinking level은 startup보다 prov
 실제 Luna/Terra/Sol A/B 요청은 quota와 외부 호출을 추가로 소비하므로 이번
 감사에서는 실행하지 않았다.
 
-### 2. Subagent schema dominates the active tool surface
+### 2. Optional tool schemas dominate the active tool surface
 
 **Confidence:** high.
 
@@ -210,12 +210,10 @@ reasoning 경로를 사용한다. 모델과 thinking level은 startup보다 prov
 schema 자체가 더 크다. 따라서 description을 조금 더 줄이는 것만으로는 효과가
 제한적이다.
 
-Subagent 기능을 유지하면서 성능을 개선하려면 extension을 삭제하기보다 다음 중
-하나가 적절하다.
-
-- 평상시 subagent 관련 tool을 inactive로 시작하고 `/run` command는 유지
-- lite/full launch profile을 분리
-- 사용자가 명시적으로 위임을 요청했을 때만 subagent tool을 활성화
+Pi 0.84.4의 동적 tool loading을 사용하는 `tool-profiles` extension을 적용했다.
+기본 `lite` profile은 Web Access, MCP, subagent suite를 inactive로 시작하고,
+`enable_tools`가 `research`, `delegation`, `full` group을 필요할 때 추가한다.
+`/run`을 포함한 package command는 extension이 로드된 상태라 계속 사용할 수 있다.
 
 ### 3. Generic skill policy can add model-tool round trips
 
@@ -295,7 +293,7 @@ Custom footer는 render마다 `ctx.sessionManager.getEntries()` 전체를 순회
 | Priority | Action | Expected impact | Effort | Main risk |
 | --- | --- | --- | --- | --- |
 | P0 | 기본 모델을 Terra/medium으로 변경 | High | Low | 복잡한 작업의 품질 저하 가능성 |
-| P0 | subagent tool을 기본 inactive로 전환 | High | Medium | 자동 위임이 기본 상태에서 불가능 |
+| Applied | optional tool을 기본 inactive로 전환 | High | Medium | optional 기능 사용 전에 동적 활성화 필요 |
 | P1 | 범용 skill과 중복 글로벌 지침 축약 | Medium-High | Medium | 규칙을 과도하게 줄이면 작업 품질 저하 |
 | P1 | 웹 검색 workflow를 `none`으로 변경 | High for web tasks | Low | curator 기반 사람 검토가 기본에서 사라짐 |
 | P1 | lite/full Pi 프로필 제공 | High | Medium | 프로필 간 기능 차이를 사용자가 기억해야 함 |
@@ -336,50 +334,26 @@ Sol/high는 다음 상황에 선택적으로 사용한다.
 - 실제 A/B 결과가 좋지 않으면 모델은 Sol로 유지하고 thinking만 medium으로 낮추는
   중간안을 사용한다.
 
-### P0: Keep subagents installed but inactive by default
+### Applied: Load optional tools dynamically
 
-**Recommended design**
+`modules/pi/files/extensions/tool-profiles/`가 새 세션을 `lite` profile로 시작한다.
+Web Access, MCP, subagent suite는 등록된 채 inactive이므로 package command는 유지되고
+일반 model request에서는 schema가 빠진다.
 
-하나의 기능을 제거하기보다 두 프로필로 나눈다.
+`enable_tools`는 현재 tool set을 줄이지 않고 다음 group을 추가한다.
 
-#### Lite profile
+- `research`: Web Access와 MCP
+- `delegation`: subagent suite
+- `full`: 두 group 모두
 
-기본 interactive coding에 사용한다.
+사람은 `/tool-profile lite|research|delegation|full|status`로 정확한 profile을 선택할
+수 있다. 선택 상태는 session에 저장되며 명시적인 CLI tool 제외는 새 startup에서
+다시 적용된다.
 
-Inactive candidates:
-
-- `subagent`
-- `subagent_wait`
-- `subagent_supervisor`
-- `intercom`
-
-`/run` 같은 사람이 직접 호출하는 command는 extension이 로드되어 있으면 유지할
-수 있다. 자동 위임이 필요한 세션은 full profile로 시작하거나 명시적으로 tool을
-활성화한다.
-
-#### Full profile
-
-다음 요청에 사용한다.
-
-- 사용자가 병렬 조사 또는 subagent를 명시적으로 요청
-- 여러 독립 subsystem을 동시에 조사
-- 별도 reviewer가 필요한 고위험 변경
-
-**Expected reduction**
-
-활성 tool metadata가 약 42,255자에서 약 20,704자로 줄어든다. 실제 provider token
-절감량과 latency 변화는 모델 serializer 및 prompt cache에 따라 달라지므로 적용 후
-측정해야 한다.
-
-**Implementation options**
-
-1. 작은 Pi extension으로 `session_start` 시 subagent tool을 inactive로 만들고
-   `/agents on|off` command 제공
-2. shell alias 또는 wrapper로 `--exclude-tools`를 사용하는 `pi-lite` 제공
-3. 서로 다른 `PI_CODING_AGENT_DIR` profile 사용
-
-권장 순서는 1 또는 2다. 별도 config directory는 설정 중복과 drift가 생기므로
-마지막 선택지로 둔다.
+Pi 0.84.4에서 source extension을 직접 로드해 측정한 결과, RPC mode의 활성 tool은
+18개, metadata 43,376자에서 11개, 10,423자로 줄었다. GPT 5.4 이상에서는 additive
+activation을 native deferred tool loading으로 처리한다. 실제 provider token과
+latency 변화는 대표 작업으로 계속 측정해야 한다.
 
 ### P1: Consolidate global coding methodology
 
@@ -506,10 +480,10 @@ output 공간과 summary 품질에 영향을 주므로 먼저 수동 운영으�
 
 ### Phase 2: Tool-surface reduction
 
-1. lite profile 추가
-2. subagent suite를 lite profile에서 inactive로 시작
-3. 필요하면 `mcpScript`도 inactive
-4. full profile로 기존 기능이 모두 복구되는지 확인
+1. [x] lite profile 추가
+2. [x] Web Access, MCP, subagent suite를 lite profile에서 inactive로 시작
+3. [x] model과 사용자가 optional group을 동적으로 활성화할 수 있게 구성
+4. [ ] Home Manager 적용 후 research, delegation, full profile을 수동 확인
 
 **Verification**
 
@@ -616,8 +590,8 @@ Structured question tool은 약 4.9K자의 metadata를 사용하지만 모호한
 실제 적용 전에 다음 결정을 내리면 된다.
 
 - [ ] 일상 기본값을 Terra/medium으로 바꿀지 결정
-- [ ] lite profile에서 subagent suite를 비활성화할지 결정
-- [ ] `/run` command만으로 manual delegation을 허용할지 결정
+- [x] lite profile에서 Web Access, MCP, subagent suite 비활성화
+- [x] `/run` command와 동적 `enable_tools`로 delegation 허용
 - [x] Web Access 기본 workflow를 `none`으로 변경
 - [x] coding methodology를 `modules/agent-prompts/AGENTS.md`로 통합
 - [x] 중복 coding methodology skill과 필수 routing 규칙 제거
