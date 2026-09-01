@@ -1,10 +1,26 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 {
   # Enable flakes
-  nix.settings.experimental-features = [
-    "nix-command"
-    "flakes"
-  ];
+  nix.settings = {
+    experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
+    min-free = lib.mkDefault (20 * 1024 * 1024 * 1024);
+    max-free = lib.mkDefault (80 * 1024 * 1024 * 1024);
+  };
+
+  # Retain a month of rollback generations and reclaim unreachable store paths weekly.
+  nix.gc = {
+    automatic = lib.mkDefault true;
+    dates = lib.mkDefault [ "Sun 04:15" ];
+    options = lib.mkDefault "--delete-older-than 30d";
+  };
+
+  nix.optimise = {
+    automatic = lib.mkDefault true;
+    dates = lib.mkDefault [ "Sun 05:00" ];
+  };
 
   # Keep the current D-Bus daemon until we do an explicit broker migration.
   services.dbus.implementation = "dbus";
