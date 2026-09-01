@@ -8,6 +8,7 @@ on:
       - "flake.nix"
       - "flake.lock"
       - ".github/workflows/apps-ci.yml"
+      - ".github/workflows/apps-update.yml"
   push:
     branches: [main]
     paths:
@@ -16,7 +17,11 @@ on:
       - "flake.nix"
       - "flake.lock"
       - ".github/workflows/apps-ci.yml"
+      - ".github/workflows/apps-update.yml"
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Update App Versions"]
+    types: [completed]
 
 permissions:
   contents: read
@@ -24,6 +29,7 @@ permissions:
 jobs:
   evaluate:
     name: Evaluate app package flake
+    if: github.event_name != 'workflow_run'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -32,6 +38,7 @@ jobs:
 
   detect-app-changes:
     name: Detect changed app packages
+    if: github.event_name != 'workflow_run'
     runs-on: ubuntu-latest
     outputs:
       apps: ${{ steps.detect.outputs.apps }}
@@ -72,3 +79,23 @@ jobs:
       - uses: cachix/install-nix-action@v31
       - name: Build package
         run: nix build ./packages/apps#packages.x86_64-linux.${{ matrix.app }} --no-link
+
+  codex-drift:
+    name: Check codex-package drift
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install ripgrep
+        run: sudo apt-get update && sudo apt-get install -y ripgrep
+      - name: Check drift
+        shell: bash
+        run: |
+          packages/apps/codex/check-drift.sh 2>&1 | tee drift.log
+          rc=${PIPESTATUS[0]}
+          {
+            echo '```'
+            sed -n '1,240p' drift.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit "$rc"
