@@ -4,6 +4,7 @@
   agent-browser = pkgs.callPackage ./agent-browser/package.nix { };
   claude-code = pkgs.callPackage ./claude-code/package.nix { };
   codex = pkgs.callPackage ./codex/package.nix { };
+  codexbar = pkgs.callPackage ./codexbar/package.nix { };
   herdr = pkgs.callPackage ./herdr/package.nix { };
   opencode = pkgs.callPackage ./opencode/package.nix { };
   pi = pkgs.callPackage ./pi/package.nix { };

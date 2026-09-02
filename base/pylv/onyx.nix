@@ -38,6 +38,7 @@
   home.packages = [
     pkgs.alacritty
     pkgs.btop
+    pkgs.codexbar
     pkgs.walker
     pkgs.wezterm
     pkgs.obsidian
