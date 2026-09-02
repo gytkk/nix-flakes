@@ -45,9 +45,12 @@ def test_every_runtime_materializes_its_selected_shared_skills(
         "domain-modeling",
         "grilling",
         "prototype",
+        "repeated-work-analyzer",
         "research",
         "resolving-merge-conflicts",
         "tdd",
+        "theme-template-authoring",
+        "user-friction-review",
         "wizard",
         "writing-for-agents",
     }

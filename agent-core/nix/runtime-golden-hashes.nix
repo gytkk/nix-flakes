@@ -1,6 +1,6 @@
 {
-  openclaw = "sha256-q7eFUN/2skzLaMtnV+krS9P8IFzJAKtn5wHHy2TJKew=";
-  claude = "sha256-MaokPkmhBN+PYlZJUyajHm0bKkM6LY3WaGOyvpaDzfQ=";
-  codex = "sha256-XrHk+GNsNo3dF4eMDhm/AlLROnY/uw+BXT26lyZ82Ls=";
-  pi = "sha256-uEOqRw0xbj0GsGwL0dBQFuU5HjpSsEHnNZAc3AgMcwQ=";
+  openclaw = "sha256-B8sQAXC0Rg8eO4r488j516BaHOZhbIDUpN2AzyfCdqo=";
+  claude = "sha256-3922ZZY/PohyI77JGqSTzmzD4Av4FLlCN5oVVxCXRkk=";
+  codex = "sha256-ZuYV9d8iqXjTq+hAFf/MoNtY26scbTWXXDmq23KbgjA=";
+  pi = "sha256-6IL45dOLGv3xXKafTqtXZUJ0SJM8mwpgy8vfEnW4HRM=";
 }
