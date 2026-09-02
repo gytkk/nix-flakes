@@ -55,7 +55,7 @@ in
       # TOML
       taplo
 
-      # Rust: rust-analyzer is bundled with pkgs.rustToolchain in base/default.nix
+      # Rust: install rust-analyzer in the active rustup toolchain
     ];
   };
 }

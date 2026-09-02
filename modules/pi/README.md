@@ -196,7 +196,7 @@ provides `lsp_diagnostics`, `lsp_hover`, `lsp_definition`, `lsp_references`,
 and `lsp_symbols` tools.
 
 `files/lsp.json` configures every server installed by `modules/lsp`, plus
-`rust-analyzer` from the shared Rust toolchain:
+`rust-analyzer` installed in the active rustup toolchain:
 
 - `nixd`, `gopls`, and `typescript-language-server`
 - the JSON, CSS, and HTML servers from `vscode-langservers-extracted`

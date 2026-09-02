@@ -306,7 +306,7 @@ in
         ruff
 
         # Rust
-        rustToolchain
+        rustup
 
         # JavaScript + Node.js
         bun

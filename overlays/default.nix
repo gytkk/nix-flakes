@@ -47,13 +47,4 @@
     pup = final.callPackage ../packages/pup/package.nix { };
   };
 
-  # Shared toolchains used across modules and hosts
-  toolchains = final: _prev: {
-    rustToolchain = final.rust-bin.stable.latest.default.override {
-      extensions = [
-        "rust-analyzer"
-        "rust-src"
-      ];
-    };
-  };
 }

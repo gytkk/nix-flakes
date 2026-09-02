@@ -37,7 +37,7 @@
       inputs.rust-overlay.follows = "rust-overlay";
     };
 
-    # rust-overlay - reproducible Rust toolchains without rustup
+    # rust-overlay - shared input for nix-zed-extensions
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";

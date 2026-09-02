@@ -158,7 +158,7 @@ AI 코딩 에이전트 설정을 변경할 때 공통 지침, runtime adapter, s
 
 ### Package Management
 
-- **Base packages** (`base/default.nix`): nixfmt, coreutils, findutils, docker, gcc, jq, fd, ripgrep, git, gh, lazygit, nodejs, bun, go, uv, ruff, `pkgs.rustToolchain`, kubectl, helm, etc.
-- **LSP servers** (`modules/lsp/`): nixd, gopls, typescript-language-server, terraform-ls, metals, ty, yaml-language-server, marksman (Rust tooling including `rust-analyzer` comes from `pkgs.rustToolchain`)
+- **Base packages** (`base/default.nix`): nixfmt, coreutils, findutils, docker, gcc, jq, fd, ripgrep, git, gh, lazygit, nodejs, bun, go, uv, ruff, rustup, kubectl, helm, etc.
+- **LSP servers** (`modules/lsp/`): nixd, gopls, typescript-language-server, terraform-ls, metals, ty, yaml-language-server, marksman (`rust-analyzer` must be installed in the active rustup toolchain)
 - **Devsisters-specific** (`base/devsisters/`): saml2aws, vault, scala, ruby, databricks-cli, kc2aws
   - `kc2aws` comes from the private `keycloak2aws` flake input (`git+ssh://...`), pinned in `flake.lock`. To pull the latest `main`: `nix flake update keycloak2aws`, then `home-manager switch`. Commit the resulting `flake.lock` change.

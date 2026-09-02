@@ -9,9 +9,7 @@ let
     inputs.nix-zed-extensions.overlays.default
     localAppsOverlay
     inputs.niri.overlays.niri
-    inputs.rust-overlay.overlays.default
     repoOverlays.nixpkgs-versions
-    repoOverlays.toolchains
     repoOverlays.package-fixes
   ];
 
