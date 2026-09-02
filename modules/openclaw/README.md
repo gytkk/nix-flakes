@@ -10,10 +10,12 @@ This directory contains only declarative host integration:
   environment variables, and proxy authentication.
 - `nginx-proxy.nix` provides the LAN and public-origin reverse proxies and the
   LAN firewall rule.
-- `home.nix` adds the user-owned executable to `PATH` and supplies the NixOS runtime paths required by the OpenClaw-managed user service. It can also install the rendered agent-core skills and context hook plus the repository-managed `agent-session-record` plugin.
+- `home.nix` adds the user-owned executable to `PATH` and supplies the NixOS runtime paths required by the OpenClaw-managed user service. Its service wrapper reads the raw agenix Discord token at startup and exports `DISCORD_BOT_TOKEN` to the Gateway, making the same token available to command automations without storing it in mutable job definitions. It can also install the rendered agent-core skills and context hook plus the repository-managed `agent-session-record` plugin.
 
 The modules do not install an OpenClaw package, generate `openclaw.json`, set
 `OPENCLAW_NIX_MODE`, or own `openclaw-gateway.service`.
+
+The Gateway wrapper fails closed when the configured Discord token file is missing or empty. The token remains file-backed in `openclaw.json`; exporting it at the service boundary additionally makes it available to every command launched by the Gateway. Do not point `modules.openclaw.discordBotTokenFile` at a multi-secret environment file.
 
 ## Agent-core integration
 

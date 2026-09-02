@@ -291,6 +291,15 @@
               test -d ${agentCoreGoldenOutputs.${system}.pi}/skills/pi-agent
               touch "$out"
             '';
+        openclaw-gateway-wrapper =
+          systemPkgs.runCommand "openclaw-gateway-wrapper-check"
+            {
+              nativeBuildInputs = with systemPkgs; [ bash ];
+            }
+            ''
+              bash ${./modules/openclaw}/tests/gateway-wrapper.test.sh ${./modules/openclaw}/files/gateway-wrapper.sh
+              touch "$out"
+            '';
       }) pkgs;
     in
     {

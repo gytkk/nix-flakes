@@ -25,8 +25,8 @@ let
       ]
       (builtins.readFile ./files/hooks.json);
   codexConfigPath = "${config.home.homeDirectory}/.codex/config.toml";
-  legacySystemCodexConfigPath = "/etc/codex/config.toml";
-  systemCodexConfigPath = "/etc/codex/managed_config.toml";
+  systemCodexConfigPath = "/etc/codex/config.toml";
+  legacyManagedCodexConfigPath = "/etc/codex/managed_config.toml";
   systemCodexSkillsPath = "/etc/codex/skills";
   systemCodexConfigDirectory = "/etc/codex";
   managedConfigSource =
@@ -77,7 +77,7 @@ let
           local sudo_bin=""
           local needs_update=0
           local current_target=""
-          local legacy_target=""
+          local legacy_managed_target=""
 
           if [ -L ${lib.escapeShellArg systemCodexConfigPath} ]; then
             current_target="$(${coreutils}/bin/readlink ${lib.escapeShellArg systemCodexConfigPath} || true)"
@@ -103,13 +103,13 @@ let
             needs_update=1
           fi
 
-          if [ -L ${lib.escapeShellArg legacySystemCodexConfigPath} ]; then
-            legacy_target="$(${coreutils}/bin/readlink ${lib.escapeShellArg legacySystemCodexConfigPath} || true)"
-            if [ -n "$legacy_target" ]; then
+          if [ -L ${lib.escapeShellArg legacyManagedCodexConfigPath} ]; then
+            legacy_managed_target="$(${coreutils}/bin/readlink ${lib.escapeShellArg legacyManagedCodexConfigPath} || true)"
+            if [ -n "$legacy_managed_target" ]; then
               needs_update=1
             fi
-          elif [ -e ${lib.escapeShellArg legacySystemCodexConfigPath} ]; then
-            errorEcho "${legacySystemCodexConfigPath} exists and is not a symlink. Move it aside and rerun home-manager switch."
+          elif [ -e ${lib.escapeShellArg legacyManagedCodexConfigPath} ]; then
+            errorEcho "${legacyManagedCodexConfigPath} exists and is not a symlink. Move it aside and rerun home-manager switch."
             exit 1
           fi
 
@@ -136,8 +136,8 @@ let
           fi
 
           run "$sudo_bin" ${coreutils}/bin/mkdir -p ${lib.escapeShellArg systemCodexConfigDirectory}
-          if [ -n "$legacy_target" ]; then
-            run "$sudo_bin" ${coreutils}/bin/rm -f ${lib.escapeShellArg legacySystemCodexConfigPath}
+          if [ -n "$legacy_managed_target" ]; then
+            run "$sudo_bin" ${coreutils}/bin/rm -f ${lib.escapeShellArg legacyManagedCodexConfigPath}
           fi
 
           ensure_system_symlink ${lib.escapeShellArg systemCodexConfigPath} "$config_target"
