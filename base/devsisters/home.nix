@@ -61,7 +61,6 @@
     # SBT Java 호환성 설정
     SBT_OPTS = "-Xmx2G -XX:+UseG1GC";
     # 일부 OTLP 클라이언트는 공통 프로토콜만 읽으므로 Databricks가 지원하는 HTTP/protobuf를 명시한다.
-    # gRPC 사용 시 export 실패와 fork 안전성 오류로 omnigent의 하위 터미널까지 종료될 수 있다.
     OTEL_EXPORTER_OTLP_PROTOCOL = "http/protobuf";
     OTEL_METRICS_EXPORTER = "otlp";
     OTEL_EXPORTER_OTLP_METRICS_PROTOCOL = "http/protobuf";

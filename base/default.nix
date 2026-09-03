@@ -72,7 +72,6 @@ in
     ../modules/herdr
     ../modules/k9s
     ../modules/lsp
-    ../modules/omnigent
     ../modules/pi
     ../modules/shared-memory
     ../modules/tmux
@@ -101,7 +100,6 @@ in
       herdr.enable = lib.mkDefault true;
       k9s.enable = lib.mkDefault true;
       lsp.enable = lib.mkDefault true;
-      omnigent.enable = lib.mkDefault true;
       pi.enable = lib.mkDefault true;
       sharedMemory.enable = lib.mkDefault false;
       tmux.enable = lib.mkDefault true;

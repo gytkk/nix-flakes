@@ -67,24 +67,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # 미리 빌드된 바이너리가 없는 omnigent는 커밋된 uv.lock을 사용해
-    # packages/omnigent에서 uv2nix로 빌드한다.
-    pyproject-nix = {
-      url = "github:pyproject-nix/pyproject.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    uv2nix = {
-      url = "github:pyproject-nix/uv2nix";
-      inputs.pyproject-nix.follows = "pyproject-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    pyproject-build-systems = {
-      url = "github:pyproject-nix/build-system-pkgs";
-      inputs.pyproject-nix.follows = "pyproject-nix";
-      inputs.uv2nix.follows = "uv2nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # kc2aws - Keycloak OIDC→SAML CLI authenticator (Devsisters 전용, private repo → SSH)
     keycloak2aws = {
       url = "git+ssh://git@github.com/devsisters/keycloak2aws";
@@ -254,7 +236,6 @@
           agent-core = systemPkgs.agent-core;
           notion-cli = systemPkgs.notion-cli;
           ntn = systemPkgs.ntn;
-          omnigent = systemPkgs.omnigent;
           pup = systemPkgs.pup;
         }
         // appPackages.${system}
