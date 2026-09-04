@@ -10,18 +10,18 @@
 }:
 
 let
-  version = "0.84.4";
+  version = "0.85.0";
 
   src = fetchurl {
     url = "https://registry.npmjs.org/@earendil-works/pi-coding-agent/-/pi-coding-agent-${version}.tgz";
-    hash = "sha512-jmOlrqUmvhh/siNWFRXjYLJzhKFIHNsAQaysRwzQPQFnPAaV/vhqHsLH/MBsIISA1Rjj7WTUFR3nJrpXoLx39w==";
+    hash = "sha512-INxVkLAVfAMju5MojJpmyu/0bMP+r+ffZuS7UqVv32E2JwHBRbcHfELDfmFNvapEbgYfKN2r9OYO1p3TqDBR+g==";
   };
 in
 buildNpmPackage {
   pname = "pi";
   inherit version src;
 
-  npmDepsHash = "sha256-nSzS3d11LCdSg6NI6QodytgQAWIswD6CO5Ff80pm33M=";
+  npmDepsHash = "sha256-XZYXKhgq3vxyZkQ2X7lpWBdcDV2grg895GyMsI1Ms6g=";
   sourceRoot = "package";
   makeCacheWritable = true;
   npmInstallFlags = [
