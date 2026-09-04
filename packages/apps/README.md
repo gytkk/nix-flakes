@@ -31,7 +31,7 @@ Self-contained non-nixpkgs app packages used by the parent `nix-flakes` reposito
 | codex | 0.153.2 |
 | codexbar | 0.56.4 |
 | herdr | 0.8.2 |
-| opencode | 1.18.27 |
+| opencode | 1.18.28 |
 | pi | 0.85.0 |
 
 ## Build entrypoints
