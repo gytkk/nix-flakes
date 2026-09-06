@@ -15,6 +15,22 @@ echo "experimental-features = nix-command flakes" | sudo tee -a /etc/nix/nix.con
 - This repo assumes the checkout lives at `~/development/nix-flakes`. Several modules create out-of-store symlinks from that path.
 - Standalone Home Manager commands evaluate without `--impure`. The checkout path still matters for modules that intentionally install out-of-store symlinks back to the repo.
 
+## Android / Termux plan
+
+`pylv-termux` is a deliberately small, ARM64 [Nix-on-Droid](https://github.com/t184256/nix-on-droid) target. It does not import the workstation Home Manager stack: that stack contains desktop and systemd assumptions which do not hold on Android.
+
+1. Keep the regular Termux layer minimal. Its non-Nix packages are listed in `hosts/pylv-termux/termux-packages.txt`; run `hosts/pylv-termux/install-termux-packages.sh` from Termux after reviewing changes.
+2. Install and initialize the Nix-on-Droid Android app. It is a separate Nix-enabled terminal environment, not an in-place replacement for the regular Termux app.
+3. Clone this repository in that environment, then activate the declarative Nix and Home Manager configuration:
+
+   ```bash
+   nix-on-droid switch --flake ~/development/nix-flakes#pylv-termux
+   ```
+
+4. Add general CLI tools to `hosts/pylv-termux/default.nix` under `environment.packages`. Add Home Manager-owned dotfile and shell configuration under `home-manager.config` in the same file. Do not add Termux repository packages there.
+
+The first activation intentionally leaves Git identity, SSH keys, Android battery-optimization exceptions, and any long-running services unmanaged. Configure those per device after deciding the required scope; do not put credentials in this repository.
+
 ## Secrets with agenix and 1Password
 
 Encrypted secrets live in `secrets/*.age`, while `secrets/secrets.nix` defines which administrator, host, or workstation public keys may decrypt each file. Only public keys and encrypted files belong in Git.

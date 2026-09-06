@@ -1,0 +1,6 @@
+# Packages that must come from Termux's APT repository, not Nix.
+# Keep this minimal: Nix-managed CLI tools belong in default.nix.
+curl
+git
+openssh
+termux-api

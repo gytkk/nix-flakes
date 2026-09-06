@@ -12,6 +12,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Android/Termux-compatible Nix environment.
+    nix-on-droid = {
+      url = "github:t184256/nix-on-droid";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+    };
+
     # Disko - declarative disk partitioning
     disko = {
       url = "github:nix-community/disko";
@@ -122,6 +129,12 @@
 
       homeConfigurations = builtins.mapAttrs mkHomeConfig environmentConfigs;
       nixosConfigurations = builtins.mapAttrs mkNixOSConfig hostConfigs;
+      nixOnDroidConfigurations = {
+        pylv-termux = inputs.nix-on-droid.lib.nixOnDroidConfiguration {
+          pkgs = import nixpkgs { system = "aarch64-linux"; };
+          modules = [ ./hosts/pylv-termux ];
+        };
+      };
 
       runtimeGoldenHashes = import ./agent-core/nix/runtime-golden-hashes.nix;
       mkAgentCoreOutputs =
@@ -279,6 +292,6 @@
       apps = defaultApps;
       inherit checks;
 
-      inherit homeConfigurations nixosConfigurations;
+      inherit homeConfigurations nixosConfigurations nixOnDroidConfigurations;
     };
 }
