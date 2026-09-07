@@ -14,6 +14,14 @@ let
   agentCoreOutput = import ../../agent-core/nix/render.nix { inherit pkgs; } {
     runtime = "openclaw";
   };
+  materializeRuntimeTree = pkgs.writeShellApplication {
+    name = "materialize-openclaw-runtime-tree";
+    runtimeInputs = with pkgs; [
+      coreutils
+      findutils
+    ];
+    text = builtins.readFile ./files/materialize-runtime-tree.sh;
+  };
 in
 {
   options.modules.openclaw = {
@@ -55,13 +63,28 @@ in
     home.file = lib.mkMerge [
       (lib.mkIf cfg.agentCore.enable {
         "${agentCoreDir}/AGENTS.core.md".source = "${agentCoreOutput}/AGENTS.core.md";
-        "${agentCoreDir}/skills".source = "${agentCoreOutput}/skills";
-        "${extensionsDir}/agent-core-context".source = ./files/extensions/agent-core-context;
-      })
-      (lib.mkIf cfg.agentSessionRecordPlugin.enable {
-        "${extensionsDir}/agent-session-record".source = ./files/extensions/agent-session-record;
       })
     ];
+
+    home.activation.materializeOpenClawRuntimeTrees =
+      lib.mkIf (cfg.agentCore.enable || cfg.agentSessionRecordPlugin.enable)
+        (
+          lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+            ${lib.optionalString cfg.agentCore.enable ''
+              ${materializeRuntimeTree}/bin/materialize-openclaw-runtime-tree \
+                ${lib.escapeShellArg "${agentCoreOutput}/skills"} \
+                ${lib.escapeShellArg "${homeDirectory}/${agentCoreDir}/skills"}
+              ${materializeRuntimeTree}/bin/materialize-openclaw-runtime-tree \
+                ${lib.escapeShellArg (toString ./files/extensions/agent-core-context)} \
+                ${lib.escapeShellArg "${homeDirectory}/${extensionsDir}/agent-core-context"}
+            ''}
+            ${lib.optionalString cfg.agentSessionRecordPlugin.enable ''
+              ${materializeRuntimeTree}/bin/materialize-openclaw-runtime-tree \
+                ${lib.escapeShellArg (toString ./files/extensions/agent-session-record)} \
+                ${lib.escapeShellArg "${homeDirectory}/${extensionsDir}/agent-session-record"}
+            ''}
+          ''
+        );
 
     xdg.configFile."systemd/user/openclaw-gateway.service.d/20-nix-runtime.conf".text = ''
       [Service]

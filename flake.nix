@@ -183,24 +183,21 @@
           onyxHomeFiles = onyx.home-manager.users.gytkk.home.file;
           onyxOpenClawSystemdDropIn =
             onyx.home-manager.users.gytkk.xdg.configFile."systemd/user/openclaw-gateway.service.d/20-nix-runtime.conf".text;
+          onyxOpenClawRuntimeMaterialization =
+            onyx.home-manager.users.gytkk.home.activation.materializeOpenClawRuntimeTrees.data;
           linuxMatches = [
             (
               toString onyxHomeFiles.".local/share/openclaw/agent-core/AGENTS.core.md".source
               == "${output.openclaw}/AGENTS.core.md"
             )
-            (
-              toString onyxHomeFiles.".local/share/openclaw/agent-core/skills".source
-              == "${output.openclaw}/skills"
-            )
-            (
-              toString onyxHomeFiles.".local/share/openclaw/extensions/agent-core-context".source
-              == toString ./modules/openclaw/files/extensions/agent-core-context
-            )
-            (
-              toString onyxHomeFiles.".local/share/openclaw/extensions/agent-session-record".source
-              == toString ./modules/openclaw/files/extensions/agent-session-record
-            )
+            (nixpkgs.lib.hasInfix (builtins.unsafeDiscardStringContext "${output.openclaw}/skills") onyxOpenClawRuntimeMaterialization)
+            (nixpkgs.lib.hasInfix "/home/gytkk/.local/share/openclaw/agent-core/skills" onyxOpenClawRuntimeMaterialization)
+            (nixpkgs.lib.hasInfix "/home/gytkk/.local/share/openclaw/extensions/agent-core-context" onyxOpenClawRuntimeMaterialization)
+            (nixpkgs.lib.hasInfix "/home/gytkk/.local/share/openclaw/extensions/agent-session-record" onyxOpenClawRuntimeMaterialization)
             (builtins.all (path: !(builtins.hasAttr path onyxHomeFiles)) [
+              ".local/share/openclaw/agent-core/skills"
+              ".local/share/openclaw/extensions/agent-core-context"
+              ".local/share/openclaw/extensions/agent-session-record"
               ".openclaw/skills"
               ".openclaw/managed/agent-core/AGENTS.core.md"
               ".openclaw/extensions/agent-core-context"
@@ -273,12 +270,15 @@
             {
               nativeBuildInputs = with systemPkgs; [
                 agent-core
+                jq
                 nodejs
               ];
             }
             ''
               agent-core check
               node --test ${./modules/openclaw}/tests/agent-core-context.test.js
+              bash ${./modules/openclaw}/tests/materialize-runtime-tree.test.sh
+              bash ${./modules/openclaw}/tests/runtime-smoke.test.sh
               test -d ${agentCoreGoldenOutputs.${system}.openclaw}/skills
               test -d ${agentCoreGoldenOutputs.${system}.claude}/skills
               test -d ${agentCoreGoldenOutputs.${system}.codex}/skills/devils-advocate

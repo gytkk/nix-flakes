@@ -15,8 +15,11 @@ command -v "$openclaw_bin" >/dev/null || fail "OpenClaw CLI is unavailable"
 command -v jq >/dev/null || fail "jq is unavailable"
 test -s "$instruction_file" || fail "rendered instructions are missing or empty: $instruction_file"
 test -d "$managed_skills_dir" || fail "managed skill directory is missing: $managed_skills_dir"
+[[ ! -L "$managed_skills_dir" ]] || fail "managed skill directory must not be a symbolic link: $managed_skills_dir"
 
-plugin_json="$($openclaw_bin plugins inspect agent-core-context --runtime --json)"
+if ! plugin_json="$($openclaw_bin plugins inspect agent-core-context --runtime --json 2>&1)"; then
+  fail "could not inspect agent-core-context: ${plugin_json:-OpenClaw returned no diagnostic}"
+fi
 jq -e '
   .plugin.enabled == true
   and .plugin.status == "loaded"
@@ -24,21 +27,33 @@ jq -e '
   and (.diagnostics | length == 0)
 ' >/dev/null <<<"$plugin_json" || fail "agent-core-context is not loaded cleanly with one before_prompt_build hook"
 
-doctor_output="$($openclaw_bin plugins doctor)"
+if ! doctor_output="$($openclaw_bin plugins doctor 2>&1)"; then
+  fail "could not run plugin diagnostics: ${doctor_output:-OpenClaw returned no diagnostic}"
+fi
 [[ "$doctor_output" == *"Plugin discovery, module loading, compatibility, and configuration checks passed."* ]] ||
   fail "OpenClaw reports plugin issues"
 
 shopt -s nullglob
 skill_documents=("$managed_skills_dir"/*/SKILL.md)
 (( ${#skill_documents[@]} > 0 )) || fail "managed skill directory contains no skills"
+for skill_document in "${skill_documents[@]}"; do
+  [[ -f "$skill_document" ]] || fail "managed skill is not a regular file: $skill_document"
+  [[ ! -L "$skill_document" ]] || fail "managed skill must not be a symbolic link: $skill_document"
+  link_count="$(stat --format=%h -- "$skill_document")" || fail "could not read managed skill link count: $skill_document"
+  [[ "$link_count" == 1 ]] || fail "managed skill must not be hardlinked (link count $link_count): $skill_document"
+done
 
-agents_json="$($openclaw_bin agents list --json)"
+if ! agents_json="$($openclaw_bin agents list --json 2>&1)"; then
+  fail "could not list agents: ${agents_json:-OpenClaw returned no diagnostic}"
+fi
 mapfile -t agent_ids < <(jq -r '.[].id' <<<"$agents_json")
 (( ${#agent_ids[@]} > 0 )) || fail "OpenClaw reports no agents"
 
 declare -A workspaces=()
 for agent_id in "${agent_ids[@]}"; do
-  skills_json="$($openclaw_bin skills list --agent "$agent_id" --json)"
+  if ! skills_json="$($openclaw_bin skills list --agent "$agent_id" --json 2>&1)"; then
+    fail "could not list skills for $agent_id: ${skills_json:-OpenClaw returned no diagnostic}"
+  fi
   workspace_dir="$(jq -r '.workspaceDir' <<<"$skills_json")"
   workspaces["$workspace_dir"]=1
 
@@ -51,7 +66,9 @@ for agent_id in "${agent_ids[@]}"; do
       openclaw-extra)
         ;;
       openclaw-workspace)
-        resolved_source="$($openclaw_bin skills info --agent "$agent_id" "$skill_name" --json | jq -r '.source')"
+        if ! resolved_source="$($openclaw_bin skills info --agent "$agent_id" "$skill_name" --json 2>&1 | jq -r '.source')"; then
+          fail "could not inspect workspace skill for $agent_id:$skill_name"
+        fi
         [[ "$resolved_source" == "openclaw-workspace" ]] || fail "workspace override did not win for $agent_id:$skill_name"
         ;;
       *)

@@ -17,7 +17,7 @@ The modules do not install an OpenClaw package, generate `openclaw.json`, set
 
 ## Agent-core integration
 
-When `modules.openclaw.agentCore.enable` is true, Home Manager installs OpenClaw's shared skill render and generated instructions under `~/.local/share/openclaw/agent-core/`, and installs repository-managed extensions under `~/.local/share/openclaw/extensions/`. Keeping these immutable Home Manager store links outside mutable OpenClaw state prevents them from entering state archives. The `agent-core-context` extension uses `before_prompt_build` to return `prependSystemContext`. It does not replace OpenClaw's system prompt or write a workspace `AGENTS.md`, so workspace instructions remain independently owned and are loaded through OpenClaw's normal bootstrap path.
+When `modules.openclaw.agentCore.enable` is true, Home Manager installs OpenClaw's generated instructions under `~/.local/share/openclaw/agent-core/`, materializes its shared skill render as read-only ordinary files, and materializes repository-managed extensions under `~/.local/share/openclaw/extensions/`. OpenClaw rejects Nix store hardlinks for externally loaded skills and plugin manifests, so activation copies those runtime trees instead of linking them into the store. Keeping the managed resources outside mutable OpenClaw state prevents them from entering state archives. The `agent-core-context` extension uses `before_prompt_build` to return `prependSystemContext`. It does not replace OpenClaw's system prompt or write a workspace `AGENTS.md`, so workspace instructions remain independently owned and are loaded through OpenClaw's normal bootstrap path.
 
 The module does not edit mutable `openclaw.json`. Add the managed skill root to `skills.load.extraDirs`, enable the hook, and grant the conversation access required by `before_prompt_build`:
 
@@ -74,6 +74,7 @@ test -s ~/.local/share/openclaw/agent-core/AGENTS.core.md
 test -d ~/.local/share/openclaw/agent-core/skills
 test -d ~/.local/share/openclaw/extensions/agent-core-context
 test -d ~/.local/share/openclaw/extensions/agent-session-record
+modules/openclaw/tests/deployed-skills.test.sh
 ```
 
 After updating `skills.load.extraDirs` and `plugins.load.paths`, validating the config, and restarting the Gateway, create and verify a fresh archive outside the state and workspace trees:
