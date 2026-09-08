@@ -5,27 +5,27 @@
 }:
 
 let
-  version = "0.56.8";
+  version = "0.57.0";
 
   platformMap = {
     "aarch64-darwin" = {
       target = "macos-arm64";
-      hash = "sha256-MkSCbkK4QJIGjIJ/WpkBcDYMJtHCRzOiuaxV7MsARtI=";
+      hash = "sha256-WoWzo264vCsNRDOkDffXHSHTTbfUwrSYvK7AZC8jB8w=";
     };
 
     "x86_64-darwin" = {
       target = "macos-x86_64";
-      hash = "sha256-yNubStPuZWj225sh1XYjdtWnSd1JWYtDeiEzO+3b8ns=";
+      hash = "sha256-m+jbojBPkjrnqLbsu+c0FxNR4ao/prZuntYprtHaFes=";
     };
 
     "x86_64-linux" = {
       target = "linux-musl-x86_64";
-      hash = "sha256-/vIZYte2trUgRVySmiEaFi0FqqLU9j7PVKrPvOCoOIc=";
+      hash = "sha256-/LmU1h6iQYD1LSwiqv85Y2nhcItj4RgyqV67Pm7qyNo=";
     };
 
     "aarch64-linux" = {
       target = "linux-musl-aarch64";
-      hash = "sha256-J1x0PBOf2vJQhJ5qehT8gQF7/eIzeP6C4/ZOkz/9teM=";
+      hash = "sha256-dY40FIufTwV5gSR/j0O7ncNZiE4ZOhERRH0ipSn58ZU=";
     };
   };
 
