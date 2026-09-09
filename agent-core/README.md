@@ -15,7 +15,7 @@ agent-core/
 ├── manifest.toml
 ├── src/agent_core/       # Python API와 CLI
 ├── rules/                # Runtime에 독립적인 공통 규칙
-├── adapters/             # Claude Code, Codex, Pi 전용 지침
+├── adapters/             # Runtime별 전용 지침
 ├── skills/               # Shared skill의 canonical catalog
 ├── schema/               # Runtime output golden hash
 ├── nix/                  # Package와 render derivation helper
@@ -31,6 +31,7 @@ Shared skill은 runtime별 복사본이나 merge input 없이 `agent-core/skills
 `agent-core/`는 다음을 소유한다.
 
 - 공통 운영 규칙과 prose 규칙
+- 공통 위임 계약과 runtime별 모델 라우팅 지침
 - Runtime adapter 원문
 - Shared skill 원문과 보조 파일
 - Runtime별 문서 조합 순서와 skill allowlist
@@ -41,7 +42,7 @@ Shared skill은 runtime별 복사본이나 merge input 없이 `agent-core/skills
 `agent-core/`는 다음을 소유하지 않는다.
 
 - Credentials, API key, provider 인증
-- 모델 선택, MCP 인증 상태, session, cache
+- Runtime의 모델 설정과 사용 가능 여부, MCP 인증 상태, session, cache
 - Runtime 홈 경로와 Home Manager activation 순서
 - OpenClaw의 mutable `openclaw.json`, workspace 선택, auth와 session state
 - OpenClaw workspace의 `AGENTS.md`, persona, memory, workspace skill
@@ -145,7 +146,7 @@ AGENTS.md
 skills/
 ```
 
-`AGENTS.md`는 공통 operating rule, 공통 agent rule, prose rule, Codex adapter 순서로 생성한다. Codex allowlist는 shared catalog의 `devils-advocate`와 `parallel-research-merge`를 포함한다. NixOS는 최종 skill tree를 `/etc/codex/skills`에 설치하고 Standalone Home Manager 환경도 같은 output을 system 경로에 연결한다.
+`AGENTS.md`는 공통 operating rule, 공통 agent rule, prose rule, 공통 위임 계약, Codex adapter 순서로 생성한다. Codex adapter는 native subagent의 명시적 모델 라우팅을 정의한다. Codex allowlist는 shared catalog의 `devils-advocate`와 `parallel-research-merge`를 포함한다. NixOS는 최종 skill tree를 `/etc/codex/skills`에 설치하고 Standalone Home Manager 환경도 같은 output을 system 경로에 연결한다.
 
 ### Pi
 
@@ -164,7 +165,7 @@ AGENTS.core.md
 skills/
 ```
 
-OpenClaw output에는 runtime adapter가 없다. `AGENTS.core.md`는 세 공통 rule을 포함한다. Home Manager는 instruction과 선택된 shared skill tree를 `~/.local/share/openclaw/agent-core/`에 설치한다. Mutable OpenClaw config는 skill 경로를 `skills.load.extraDirs`로 로드하고, systemd drop-in은 instruction 경로를 `AGENT_CORE_OPENCLAW_INSTRUCTIONS`로 전달한다.
+`AGENTS.core.md`는 세 공통 rule, 공통 위임 계약, OpenClaw adapter 순서로 생성한다. OpenClaw adapter는 mutable config에 등록된 `astra`와 `sol` agent ID의 선택 기준을 정의한다. Home Manager는 instruction과 선택된 shared skill tree를 `~/.local/share/openclaw/agent-core/`에 설치한다. Mutable OpenClaw config는 agent와 model, skill 경로를 계속 소유하고, systemd drop-in은 instruction 경로를 `AGENT_CORE_OPENCLAW_INSTRUCTIONS`로 전달한다.
 
 `modules/openclaw`의 `agent-core-context` plugin은 `before_prompt_build` hook에서 `prependSystemContext`를 반환한다. Plugin은 OpenClaw system prompt를 교체하지 않고 workspace `AGENTS.md`를 생성하거나 수정하지 않는다. Mutable `openclaw.json`은 plugin enable, allowlist, conversation access를 계속 소유한다.
 

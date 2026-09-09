@@ -5,7 +5,7 @@ version = "1"
 [[documents]]
 runtime = "openclaw"
 output = "AGENTS.core.md"
-sources = ["rules/OPERATING.md", "rules/AGENTS.md", "rules/PROSE.md"]
+sources = ["rules/OPERATING.md", "rules/AGENTS.md", "rules/PROSE.md", "rules/DELEGATION.md", "adapters/openclaw.md"]
 
 [[documents]]
 runtime = "claude"
@@ -15,7 +15,7 @@ sources = ["rules/OPERATING.md", "rules/AGENTS.md", "rules/PROSE.md", "adapters/
 [[documents]]
 runtime = "codex"
 output = "AGENTS.md"
-sources = ["rules/OPERATING.md", "rules/AGENTS.md", "rules/PROSE.md", "adapters/codex.md"]
+sources = ["rules/OPERATING.md", "rules/AGENTS.md", "rules/PROSE.md", "rules/DELEGATION.md", "adapters/codex.md"]
 
 [[documents]]
 runtime = "pi"

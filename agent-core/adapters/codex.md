@@ -27,6 +27,12 @@ behavior.
   orchestration. When delegation matters, use a skill with an explicit worker
   contract and merge checklist.
 
+## Model routing
+
+- Use native `spawn_agent` calls and select the model explicitly: `gpt-6-astra` for high-stakes or ambiguous end-to-end work, deep debugging, complex design, security-sensitive review, and costly failures; `gpt-5.6-sol` for normal implementation, testing, research, and multi-step analysis; `gpt-5.6-terra` for fast read-heavy exploration, broad scans, log triage, and supporting-document analysis; and `gpt-5.6-luna` for narrow, clear, repeatable, or high-volume tasks.
+- A model override requires `fork_turns = "none"` or a bounded positive turn count. Use a full-history fork only when the inherited context is required, and accept the inherited parent model in that case.
+- If the selected model is unavailable, use the nearest available model for the same task shape and report the fallback.
+
 ## Sandbox awareness
 
 - Codex runs with `sandbox_mode = "danger-full-access"` in this setup.

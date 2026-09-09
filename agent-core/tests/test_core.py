@@ -69,6 +69,20 @@ def test_runtime_document_layouts() -> None:
     assert PurePosixPath("AGENTS.md") not in openclaw
 
 
+def test_codex_and_openclaw_include_runtime_model_routing() -> None:
+    codex_instructions = core.materialize("codex")[PurePosixPath("AGENTS.md")]
+    assert b"# Delegated execution" in codex_instructions
+    assert b"`gpt-6-astra`" in codex_instructions
+    assert b"native `spawn_agent`" in codex_instructions
+
+    openclaw_instructions = core.materialize("openclaw")[
+        PurePosixPath("AGENTS.core.md")
+    ]
+    assert b"# Delegated execution" in openclaw_instructions
+    assert b"configured `astra` subagent" in openclaw_instructions
+    assert b"OpenClaw agent IDs" in openclaw_instructions
+
+
 def test_render_requires_missing_or_empty_directory(tmp_path: Path) -> None:
     output = tmp_path / "output"
     core.render("pi", output)
