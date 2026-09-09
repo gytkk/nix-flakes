@@ -10,7 +10,7 @@ This directory contains only declarative host integration:
   environment variables, and proxy authentication.
 - `nginx-proxy.nix` provides the LAN and public-origin reverse proxies and the
   LAN firewall rule.
-- `home.nix` adds the user-owned executable to `PATH` and supplies the NixOS runtime paths required by the OpenClaw-managed user service. It can also install the rendered agent-core skills and context hook plus the repository-managed `agent-session-record` plugin.
+- `home.nix` adds the user-owned executable to `PATH` and supplies the NixOS runtime paths required by the OpenClaw-managed user service. The systemd environment drop-in is materialized as a regular file because OpenClaw refuses update ownership checks when an effective service definition is a symlink. The module can also install the rendered agent-core skills and context hook plus the repository-managed `agent-session-record` plugin.
 
 The modules do not install an OpenClaw package, generate `openclaw.json`, set
 `OPENCLAW_NIX_MODE`, or own `openclaw-gateway.service`.

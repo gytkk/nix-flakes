@@ -11,9 +11,16 @@ let
   stateDir = toString cfg.stateDir;
   agentCoreDir = ".local/share/openclaw/agent-core";
   extensionsDir = ".local/share/openclaw/extensions";
+  gatewaySystemdDropInPath = "${homeDirectory}/.config/systemd/user/openclaw-gateway.service.d/20-nix-runtime.conf";
   agentCoreOutput = import ../../agent-core/nix/render.nix { inherit pkgs; } {
     runtime = "openclaw";
   };
+  gatewaySystemdDropIn = pkgs.writeText "20-nix-runtime.conf" ''
+    [Service]
+    UnsetEnvironment=CLAWDBOT_CONFIG_PATH CLAWDBOT_STATE_DIR
+    Environment="LD_LIBRARY_PATH=${lib.makeLibraryPath [ pkgs.libcap ]}"
+    ${lib.optionalString cfg.agentCore.enable ''Environment="AGENT_CORE_OPENCLAW_INSTRUCTIONS=${homeDirectory}/${agentCoreDir}/AGENTS.core.md"''}
+  '';
   materializeRuntimeTree = pkgs.writeShellApplication {
     name = "materialize-openclaw-runtime-tree";
     runtimeInputs = with pkgs; [
@@ -86,10 +93,16 @@ in
           ''
         );
 
-    xdg.configFile."systemd/user/openclaw-gateway.service.d/20-nix-runtime.conf".text = ''
-      [Service]
-      Environment="LD_LIBRARY_PATH=${lib.makeLibraryPath [ pkgs.libcap ]}"
-      ${lib.optionalString cfg.agentCore.enable ''Environment="AGENT_CORE_OPENCLAW_INSTRUCTIONS=${homeDirectory}/${agentCoreDir}/AGENTS.core.md"''}
+    # OpenClaw rejects symlinked effective service definitions during update
+    # ownership checks, so keep this supported Environment drop-in materialized.
+    home.activation.materializeOpenClawSystemdDropIn = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+      dropInPath=${lib.escapeShellArg gatewaySystemdDropInPath}
+      if [ -L "$dropInPath" ]; then
+        run ${pkgs.coreutils}/bin/rm "$dropInPath"
+      fi
+      if [ ! -f "$dropInPath" ] || ! ${pkgs.coreutils}/bin/cmp -s ${gatewaySystemdDropIn} "$dropInPath"; then
+        run ${pkgs.coreutils}/bin/install -D -m 0644 ${gatewaySystemdDropIn} "$dropInPath"
+      fi
     '';
 
   };

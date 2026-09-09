@@ -181,8 +181,8 @@
           ];
           onyx = nixosConfigurations.pylv-onyx.config;
           onyxHomeFiles = onyx.home-manager.users.gytkk.home.file;
-          onyxOpenClawSystemdDropIn =
-            onyx.home-manager.users.gytkk.xdg.configFile."systemd/user/openclaw-gateway.service.d/20-nix-runtime.conf".text;
+          onyxOpenClawSystemdDropInMaterialization =
+            onyx.home-manager.users.gytkk.home.activation.materializeOpenClawSystemdDropIn.data;
           onyxOpenClawRuntimeMaterialization =
             onyx.home-manager.users.gytkk.home.activation.materializeOpenClawRuntimeTrees.data;
           linuxMatches = [
@@ -203,7 +203,11 @@
               ".openclaw/extensions/agent-core-context"
               ".openclaw/extensions/agent-session-record"
             ])
-            (nixpkgs.lib.hasInfix ''Environment="AGENT_CORE_OPENCLAW_INSTRUCTIONS=/home/gytkk/.local/share/openclaw/agent-core/AGENTS.core.md"'' onyxOpenClawSystemdDropIn)
+            (
+              !(builtins.hasAttr "systemd/user/openclaw-gateway.service.d/20-nix-runtime.conf" onyx.home-manager.users.gytkk.xdg.configFile)
+            )
+            (nixpkgs.lib.hasInfix "/home/gytkk/.config/systemd/user/openclaw-gateway.service.d/20-nix-runtime.conf" onyxOpenClawSystemdDropInMaterialization)
+            (nixpkgs.lib.hasInfix "install -D -m 0644" onyxOpenClawSystemdDropInMaterialization)
             (toString onyx.environment.etc."codex/skills".source == "${output.codex}/skills")
           ];
         in
