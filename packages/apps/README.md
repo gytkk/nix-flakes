@@ -27,11 +27,11 @@ Self-contained non-nixpkgs app packages used by the parent `nix-flakes` reposito
 | App | Version |
 |-----|---------|
 | agent-browser | 0.37.1 |
-| claude-code | 2.1.265 |
+| claude-code | 2.1.266 |
 | codex | 0.153.4 |
 | codexbar | 0.57.0 |
 | herdr | 0.9.0 |
-| opencode | 1.18.29 |
+| opencode | 1.18.30 |
 | pi | 0.85.1 |
 
 ## Build entrypoints
