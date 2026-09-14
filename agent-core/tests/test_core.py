@@ -83,6 +83,24 @@ def test_codex_and_openclaw_include_runtime_model_routing() -> None:
     assert b"OpenClaw agent IDs" in openclaw_instructions
 
 
+@pytest.mark.parametrize(
+    ("runtime", "document"),
+    [
+        ("claude", PurePosixPath("CLAUDE.md")),
+        ("codex", PurePosixPath("AGENTS.md")),
+    ],
+)
+def test_claude_and_codex_include_concise_comment_rule(
+    runtime: str, document: PurePosixPath
+) -> None:
+    instructions = core.materialize(runtime)[document]
+    assert (
+        b"Write a one- or two-line comment or docstring only when it is necessary "
+        b"to explain a reason, constraint, unit, invariant, or behavior the code "
+        b"cannot reveal." in instructions
+    )
+
+
 def test_render_requires_missing_or_empty_directory(tmp_path: Path) -> None:
     output = tmp_path / "output"
     core.render("pi", output)

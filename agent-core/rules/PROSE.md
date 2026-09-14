@@ -18,7 +18,7 @@ Apply these rules to documentation, comments, reports, prompts, commit messages,
 ## Technical writing
 
 - Describe current system behavior. Reserve change narration for changelogs, release notes, and migration guides.
-- Comments and docstrings should explain reasons, constraints, units, invariants, or behavior the code does not reveal. Keep them to one or two lines.
+- Write a one- or two-line comment or docstring only when it is necessary to explain a reason, constraint, unit, invariant, or behavior the code cannot reveal.
 - Keep documentation close to the maintained source of truth. Do not copy details that readers can obtain cheaply from current configuration or command output.
 
 ## Punctuation and formatting
