@@ -2,6 +2,12 @@ vim.cmd("syntax enable")
 vim.cmd("syntax sync fromstart")
 vim.cmd("filetype plugin indent on")
 
+vim.filetype.add({
+  extension = {
+    mdx = "markdown",
+  },
+})
+
 vim.opt.encoding = "utf-8"
 vim.opt.fileencoding = "utf-8"
 vim.opt.mouse = "a"

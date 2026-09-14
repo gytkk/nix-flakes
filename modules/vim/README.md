@@ -19,12 +19,12 @@ This module configures Neovim as the primary editor with a modern Lua-based setu
 - `persistence.nvim` for directory and branch-aware session saving and restore on bare `nvim` startup
 - `blink.cmp` completion with LSP, snippets, path, buffer, and on-demand Minuet AI suggestions
 - `minuet-ai.nvim` inline suggestions backed by OpenAI `gpt-5.6-luna`
-- Built-in Neovim LSP configuration for Nix, Go, Rust, TypeScript, HTML, CSS, JSON, Lua, shell, Terraform, YAML, Markdown, TOML, and Python via `ty`
+- Built-in Neovim LSP configuration for Nix, Go, Rust, TypeScript, HTML, CSS, JSON, Lua, shell, Terraform, YAML, Markdown and MDX, TOML, and Python via `ty`
 - `nvim-treesitter` syntax parsing for the main languages used in this repository
 - `conform.nvim` formatting on save, including `nixfmt`, `prettier`, `rustfmt`, `gofmt`, and `ruff_format`
 - `gitsigns.nvim`, `lualine.nvim`, `flash.nvim`, `which-key.nvim`, `trouble.nvim`, and `render-markdown.nvim`
 - Native diagnostics show a color-coded circle and the current-line message directly after the code
-- Markdown rendering uses `render-markdown.nvim` for an in-buffer preview that returns to raw Markdown in insert mode
+- Markdown and MDX rendering uses `render-markdown.nvim` for an in-buffer preview that returns to raw Markdown or MDX source in insert mode
 
 ## Minuet
 
