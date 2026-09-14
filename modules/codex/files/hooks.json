@@ -12,17 +12,6 @@
         ]
       }
     ],
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "tmux-agent-status codex running",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
     "Stop": [
       {
         "hooks": [
@@ -39,15 +28,6 @@
             "type": "command",
             "command": "~/.local/bin/plannotator",
             "timeout": 345600
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "tmux-agent-status codex done",
-            "timeout": 5
           }
         ]
       }
