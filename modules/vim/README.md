@@ -4,7 +4,7 @@ This module configures Neovim as the primary editor with a modern Lua-based setu
 
 ## What it does
 
-- Installs and configures Neovim as the default editor
+- Installs the pinned Neovim 0.13 development build and configures it as the default editor
 - Creates `vi` and `vim` aliases that point to `nvim`
 - Loads the Neovim configuration from modular Lua files under `modules/vim/files/config/`
 - Exposes every generated colorscheme from `themes/exports/nvim/`

@@ -50,7 +50,9 @@ M.render_markdown = {
     "nvim-treesitter/nvim-treesitter",
     "nvim-tree/nvim-web-devicons",
   },
-  opts = {},
+  opts = {
+    change_events = { "FileChangedShellPost" },
+  },
 }
 
 return M
