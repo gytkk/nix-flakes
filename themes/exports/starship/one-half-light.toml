@@ -4,8 +4,9 @@
 
 palette = "one_half_light"
 format = """
-[](foam)\
-[ 󰉋 ](bg:foam fg:base)\
+[](layer1)\
+[ 󰉋 ](bg:layer1 fg:foam)\
+[](fg:layer1 bg:foam)\
 $directory\
 [](fg:foam bg:layer3)\
 $git_branch\
@@ -40,7 +41,7 @@ $character"""
 "symbol" = " "
 
 [directory]
-"style" = "bold fg:base bg:foam"
+"style" = "fg:base bg:foam"
 "format" = "[ $path ]($style)"
 "truncation_length" = 4
 "truncation_symbol" = "…/"
@@ -54,8 +55,8 @@ $character"""
 
 [git_branch]
 "symbol" = ""
-"style" = "fg:text bg:layer3"
-"format" = "[[ $symbol](fg:foam bg:layer3) $branch ]($style)"
+"style" = "fg:foam bg:layer3"
+"format" = "[ $symbol $branch ]($style)"
 
 [git_status]
 "style" = "fg:text bg:layer3"
