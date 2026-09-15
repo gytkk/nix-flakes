@@ -14,33 +14,10 @@ let
 
   logDir = "${homeDirectory}/Library/Logs/nix-gc";
 
-  # nix-collect-garbage understands an age cutoff but not a generation count, so
-  # retention is applied per profile with nix-env before the store sweep. Running
-  # both forms keeps a generation only while it is newer than maxAge *and* among
-  # the newest keepGenerations. nix-env always refuses to delete the current one.
-  prune = pkgs.writeShellApplication {
-    name = "nix-gc-prune";
-    runtimeInputs = [ nixPackage ];
-    text = ''
-      profiles="''${XDG_STATE_HOME:-$HOME/.local/state}/nix/profiles"
-
-      for profile in "$profiles"/*; do
-        # Generation links sit beside the profile symlinks they belong to and are
-        # not themselves valid --profile targets.
-        case "$profile" in
-          *-link) continue ;;
-        esac
-        [ -L "$profile" ] || continue
-        [ -e "$profile" ] || continue
-
-        echo "Pruning $profile"
-        nix-env --profile "$profile" --delete-generations "+${toString cfg.keepGenerations}"
-        nix-env --profile "$profile" --delete-generations "${cfg.maxAge}"
-      done
-
-      echo "Collecting garbage"
-      nix-collect-garbage
-    '';
+  prune = import ./prune.nix {
+    inherit (cfg) keepGenerations maxAge;
+    inherit pkgs nixPackage;
+    profilesDir = ''"''${XDG_STATE_HOME:-$HOME/.local/state}/nix/profiles"'';
   };
 
   startTime = "${lib.fixedWidthNumber 2 cfg.hour}:${lib.fixedWidthNumber 2 cfg.minute}";

@@ -10,13 +10,7 @@
     max-free = lib.mkDefault (80 * 1024 * 1024 * 1024);
   };
 
-  # Retain a month of rollback generations and reclaim unreachable store paths weekly.
-  nix.gc = {
-    automatic = lib.mkDefault true;
-    dates = lib.mkDefault [ "Sun 04:15" ];
-    options = lib.mkDefault "--delete-older-than 30d";
-  };
-
+  # Generation retention and garbage collection live in ./nix-gc.nix.
   nix.optimise = {
     automatic = lib.mkDefault true;
     dates = lib.mkDefault [ "Sun 05:00" ];
