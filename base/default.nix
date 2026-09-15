@@ -72,6 +72,7 @@ in
     ../modules/herdr
     ../modules/k9s
     ../modules/lsp
+    ../modules/nix-gc
     ../modules/pi
     ../modules/shared-memory
     ../modules/tmux
@@ -100,6 +101,8 @@ in
       herdr.enable = lib.mkDefault true;
       k9s.enable = lib.mkDefault true;
       lsp.enable = lib.mkDefault true;
+      # NixOS hosts collect garbage at the system level via modules/nixos/baseline.nix.
+      nixGc.enable = lib.mkDefault (osConfig == null);
       pi.enable = lib.mkDefault true;
       sharedMemory.enable = lib.mkDefault false;
       tmux.enable = lib.mkDefault true;
@@ -113,14 +116,9 @@ in
     # Disable news on update
     news.display = "silent";
 
-    # Standalone Home Manager environments expire their own generations.
-    # NixOS hosts use the system-level collector from modules/nixos/baseline.nix.
-    services.home-manager.autoExpire = lib.mkIf (osConfig == null) {
-      enable = lib.mkDefault true;
-      frequency = lib.mkDefault "weekly";
-      timestamp = lib.mkDefault "-30 days";
-      store.cleanup = lib.mkDefault true;
-    };
+    # services.home-manager.autoExpire is deliberately left off: it only expires
+    # the home-manager profile, while each switch also adds a generation to the
+    # nix-env profile beside it. modules/nix-gc prunes every profile instead.
 
     # stateVersion 25.11부터 copyApps가 switch마다 TCC 권한을 초기화하므로,
     # Nix로 .app 번들을 설치하지 않는 이 구성에서는 비활성화한다.
