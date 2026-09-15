@@ -7,14 +7,15 @@ meta:
 
 slots:
   foam: "{palette.blue}"
+  rose: "{palette.magenta}"
   # Git status tones mix canonical green/yellow/red with 65% ui.fg for layer3 contrast.
   pine: "#405e47"
   gold: "#68542b"
   love: "#744444"
   format: |-
-    [](layer1)\
-    [ 󰉋 ](bg:layer1 fg:foam)\
-    [](fg:layer1 bg:foam)\
+    [](rose)\
+    [ 󰉋 ](bg:rose fg:base)\
+    [](fg:rose bg:foam)\
     $directory\
     [](fg:foam bg:layer3)\
     $git_branch\
@@ -61,9 +62,9 @@ modules:
     renamed: "[»](bold fg:foam bg:layer3)$count "
     deleted: "[-](bold fg:love bg:layer3)$count "
     stashed: "[*](bold fg:foam bg:layer3)$count "
-    ahead: "[↑](bold fg:foam bg:layer3)$count"
-    behind: "[↓](bold fg:gold bg:layer3)$count"
-    diverged: "[↑](bold fg:foam bg:layer3)$ahead_count[↓](bold fg:gold bg:layer3)$behind_count"
+    ahead: "[↑](bold fg:foam bg:layer3)[$count](fg:foam bg:layer3)"
+    behind: "[↓](bold fg:gold bg:layer3)[$count](fg:foam bg:layer3)"
+    diverged: "[↑](bold fg:foam bg:layer3)[$ahead_count](fg:foam bg:layer3)[↓](bold fg:gold bg:layer3)[$behind_count](fg:foam bg:layer3)"
   c:
     style: "fg:text bg:layer2"
     format: "[ [${symbol}](fg:foam bg:layer2)($version) ]($style)"

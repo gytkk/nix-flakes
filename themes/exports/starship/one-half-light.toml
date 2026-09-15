@@ -4,9 +4,9 @@
 
 palette = "one_half_light"
 format = """
-[](layer1)\
-[ 󰉋 ](bg:layer1 fg:foam)\
-[](fg:layer1 bg:foam)\
+[](rose)\
+[ 󰉋 ](bg:rose fg:base)\
+[](fg:rose bg:foam)\
 $directory\
 [](fg:foam bg:layer3)\
 $git_branch\
@@ -68,9 +68,9 @@ $character"""
 "renamed" = "[»](bold fg:foam bg:layer3)$count "
 "deleted" = "[-](bold fg:love bg:layer3)$count "
 "stashed" = "[*](bold fg:foam bg:layer3)$count "
-"ahead" = "[↑](bold fg:foam bg:layer3)$count"
-"behind" = "[↓](bold fg:gold bg:layer3)$count"
-"diverged" = "[↑](bold fg:foam bg:layer3)$ahead_count[↓](bold fg:gold bg:layer3)$behind_count"
+"ahead" = "[↑](bold fg:foam bg:layer3)[$count](fg:foam bg:layer3)"
+"behind" = "[↓](bold fg:gold bg:layer3)[$count](fg:foam bg:layer3)"
+"diverged" = "[↑](bold fg:foam bg:layer3)[$ahead_count](fg:foam bg:layer3)[↓](bold fg:gold bg:layer3)[$behind_count](fg:foam bg:layer3)"
 
 [c]
 "symbol" = " "
@@ -172,7 +172,7 @@ subtle = "#383a42"
 text = "#383a42"
 love = "#744444"
 gold = "#68542b"
-rose = "#e06c75"
+rose = "#a626a4"
 pine = "#405e47"
 foam = "#0184bc"
 iris = "#d65d0e"
