@@ -26,6 +26,16 @@ This module configures Neovim as the primary editor with a modern Lua-based setu
 - Native diagnostics show a color-coded circle and the current-line message directly after the code
 - Markdown and MDX rendering uses `render-markdown.nvim` for an in-buffer preview that returns to raw Markdown or MDX source in insert mode
 
+## Flash compatibility
+
+`flash.nvim` is pinned to the upstream Neovim 0.13 search-state fix. Older versions access removed `search_match_*` globals and can repeatedly report `Flash error during redraw` after a character motion, including when saving MDX files. Run `:Lazy update flash.nvim` after applying this configuration and restart Neovim.
+
+Run the regression test with the installed plugin:
+
+```bash
+nvim --headless -u NONE -i NONE -n -l modules/vim/tests/flash-redraw.lua
+```
+
 ## Minuet
 
 - Store the OpenAI API key in `secrets/openai-api-key.age` before launching Neovim.

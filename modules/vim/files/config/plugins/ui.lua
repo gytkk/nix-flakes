@@ -46,6 +46,8 @@ M.noice = {
 
 M.flash = {
   "folke/flash.nvim",
+  -- Neovim 0.13 moved the search globals used by Flash into Search (upstream #496).
+  commit = "7eff7f8873f87472944d78d0e655920efdc83933",
   event = "VeryLazy",
   opts = {},
   keys = {
