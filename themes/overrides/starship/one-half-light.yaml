@@ -108,7 +108,7 @@ modules:
     style: "fg:foam bg:layer1"
     format: "[ $symbol$context ]($style)"
   time:
-    style: "fg:foam bg:layer3"
+    style: "fg:text bg:layer3"
     format: "[ 󰥔 $time ]($style)"
   hostname:
     style: "fg:love bg:layer2"

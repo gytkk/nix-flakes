@@ -146,7 +146,7 @@ $character"""
 [time]
 "disabled" = false
 "time_format" = "%R"
-"style" = "fg:foam bg:layer3"
+"style" = "fg:text bg:layer3"
 "format" = "[ 󰥔 $time ]($style)"
 
 [hostname]
