@@ -68,9 +68,9 @@ $character"""
 "renamed" = "[»](bold fg:foam bg:layer3)$count "
 "deleted" = "[-](bold fg:love bg:layer3)[$count](fg:love bg:layer3) "
 "stashed" = "[*](bold fg:foam bg:layer3)$count "
-"ahead" = "[↑](bold fg:foam bg:layer3)[$count](fg:foam bg:layer3)"
-"behind" = "[↓](bold fg:gold bg:layer3)[$count](fg:foam bg:layer3)"
-"diverged" = "[↑](bold fg:foam bg:layer3)[$ahead_count](fg:foam bg:layer3)[↓](bold fg:gold bg:layer3)[$behind_count](fg:foam bg:layer3)"
+"ahead" = "[↑$count](fg:foam bg:layer3)"
+"behind" = "[↓](fg:gold bg:layer3)[$count](fg:foam bg:layer3)"
+"diverged" = "[↑$ahead_count](fg:foam bg:layer3)[↓](fg:gold bg:layer3)[$behind_count](fg:foam bg:layer3)"
 
 [c]
 "symbol" = " "
