@@ -12,10 +12,10 @@ slots:
   gold: "#68542b"
   love: "#744444"
   format: |-
-    [](layer1)\
-    [ 󰉋 ](bg:layer1 fg:foam)\
+    [](foam)\
+    [ 󰉋 ](bg:foam fg:base)\
     $directory\
-    [](fg:layer1 bg:layer3)\
+    [](fg:foam bg:layer3)\
     $git_branch\
     $git_status\
     [](fg:layer3 bg:layer2)\
@@ -46,7 +46,7 @@ slots:
 
 modules:
   directory:
-    style: "fg:text bg:layer1"
+    style: "bold fg:base bg:foam"
   git_branch:
     style: "fg:text bg:layer3"
     format: "[[ $symbol](fg:foam bg:layer3) $branch ]($style)"

@@ -4,10 +4,10 @@
 
 palette = "one_half_light"
 format = """
-[](layer1)\
-[ 󰉋 ](bg:layer1 fg:foam)\
+[](foam)\
+[ 󰉋 ](bg:foam fg:base)\
 $directory\
-[](fg:layer1 bg:layer3)\
+[](fg:foam bg:layer3)\
 $git_branch\
 $git_status\
 [](fg:layer3 bg:layer2)\
@@ -40,7 +40,7 @@ $character"""
 "symbol" = " "
 
 [directory]
-"style" = "fg:text bg:layer1"
+"style" = "bold fg:base bg:foam"
 "format" = "[ $path ]($style)"
 "truncation_length" = 4
 "truncation_symbol" = "…/"
