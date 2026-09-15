@@ -41,20 +41,7 @@ auto_switch = false
 
 [theme.custom]
 panel_bg = "#f0f0f0"
-sidebar_bg = "#f5f5f5"
 surface0 = "#e5e5e5"
-surface1 = "#e5e5e5"
-surface_dim = "#e5e5e5"
-overlay0 = "#9d9d9f"
-overlay1 = "#696c77"
-subtext0 = "#696c77"
-mauve = "#a626a4"
-green = "#50a14f"
-yellow = "#c18401"
-red = "#e45649"
-blue = "#0184bc"
-teal = "#427b58"
-peach = "#d65d0e"
 
 [ui]
 host_cursor = "native"
