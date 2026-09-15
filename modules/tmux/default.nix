@@ -54,7 +54,6 @@ in
     xdg.configFile = {
       "tmux/tmux.conf".source = mkSymlink "files/tmux.conf";
       "tmux/keybindings.conf".source = mkSymlink "files/keybindings.conf";
-      "tmux/statusline.conf".source = mkSymlink "files/statusline.conf";
       "tmux/themes".source = generatedThemes;
       "tmux/theme.conf".source = selectedTheme;
     };

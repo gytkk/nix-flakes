@@ -33,7 +33,7 @@ CYAN='\033[36m'
 DIM='\033[2m'
 RESET='\033[0m'
 BOLD_BLUE='\033[1;34m'
-BRIGHT_ORANGE='\033[1;38;5;214m'
+BRIGHT_ORANGE='\033[1;33m'
 
 # Shorten home directory to ~
 home="$HOME"

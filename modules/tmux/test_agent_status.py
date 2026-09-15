@@ -88,7 +88,7 @@ class AgentStatusTest(unittest.TestCase):
 
             self.assertEqual(0, set_result.returncode)
             self.assertEqual(0, window_result.returncode)
-            self.assertEqual("#[fg=colour75]●#[default]", window_result.stdout)
+            self.assertEqual("#[fg=blue]●#[default]", window_result.stdout)
 
     def test_status_set_rejects_window_id_path_traversal(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

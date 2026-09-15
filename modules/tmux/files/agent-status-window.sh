@@ -54,15 +54,15 @@ fi
 
 case "${state}" in
   running)
-    printf '#[fg=colour75]●#[default]'
+    printf '#[fg=blue]●#[default]'
     ;;
   waiting)
-    printf '#[fg=colour220]?#[default]'
+    printf '#[fg=yellow]?#[default]'
     ;;
   done)
-    printf '#[fg=colour114]✓#[default]'
+    printf '#[fg=green]✓#[default]'
     ;;
   failed)
-    printf '#[fg=colour203]×#[default]'
+    printf '#[fg=red]×#[default]'
     ;;
 esac

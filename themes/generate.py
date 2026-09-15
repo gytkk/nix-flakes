@@ -554,6 +554,11 @@ def load_zellij_template(root: Path) -> dict[str, Any]:
     return load_json(template_path)
 
 
+def load_pi_template(root: Path) -> dict[str, Any]:
+    template_path = root / "templates" / "pi" / "official-template.json"
+    return load_json(template_path)
+
+
 def load_zellij_override(root: Path, theme_id: str) -> dict[str, Any] | None:
     path = root / "overrides" / "zellij" / f"{theme_id}.yaml"
     if not path.exists():
@@ -1091,6 +1096,80 @@ def k9s_theme_doc(ctx: dict[str, Any], root: Path) -> dict[str, Any]:
     return render_template_value(template["document"], build_k9s_slots(ctx))
 
 
+def build_pi_slots(ctx: dict[str, Any]) -> dict[str, str]:
+    p = ctx["palette"]
+    r = ctx["roles"]
+    is_light = ctx["meta"]["variant"] == "light"
+    bg = r["ui"]["bg"]
+    return {
+        "theme_id": ctx["meta"]["id"],
+        "accent": r["syntax"]["link"],
+        "border": r["ui"]["fgMuted"],
+        "border_accent": r["ui"]["borderActive"],
+        "border_muted": r["ui"]["border"],
+        "success": r["diagnostics"]["ok"],
+        "error": r["diagnostics"]["error"],
+        "warning": r["diagnostics"]["warning"],
+        "muted": r["ui"]["fgInactive"],
+        "dim": r["syntax"]["comment"],
+        "text": r["ui"]["fg"],
+        "thinking_text": r["ui"]["fgMuted"],
+        "selected_bg": r["ui"]["selection"],
+        "scrollbar_track": r["ui"]["border"],
+        "scrollbar_thumb": r["ui"]["fgMuted"],
+        "search_match_bg": r["ui"]["search"],
+        "search_match_text": r["ui"]["searchText"],
+        "user_message_bg": r["ui"]["bgAlt"],
+        "user_message_text": r["ui"]["fg"],
+        "custom_message_bg": soft_background(p["magenta"], bg, light=is_light, strength=0.9),
+        "custom_message_text": r["ui"]["fg"],
+        "custom_message_label": p["magenta"],
+        "tool_pending_bg": r["ui"]["bgElevated"],
+        "tool_success_bg": soft_background(r["diagnostics"]["ok"], bg, light=is_light, strength=0.9),
+        "tool_error_bg": soft_background(r["diagnostics"]["error"], bg, light=is_light, strength=0.9),
+        "tool_title": r["syntax"]["link"],
+        "tool_output": r["ui"]["fgInactive"],
+        "md_heading": r["syntax"]["constant"],
+        "md_link": r["syntax"]["link"],
+        "md_link_url": r["ui"]["fgMuted"],
+        "md_code": r["syntax"]["builtin"],
+        "md_code_block": r["syntax"]["text"],
+        "md_code_block_border": r["ui"]["border"],
+        "md_quote": r["ui"]["fgInactive"],
+        "md_quote_border": r["ui"]["fgMuted"],
+        "md_hr": r["ui"]["border"],
+        "md_list_bullet": r["diagnostics"]["ok"],
+        "tool_diff_added": r["vcs"]["added"],
+        "tool_diff_removed": r["vcs"]["removed"],
+        "tool_diff_context": r["ui"]["fgInactive"],
+        "syntax_comment": r["syntax"]["comment"],
+        "syntax_keyword": r["syntax"]["keyword"],
+        "syntax_function": r["syntax"]["function"],
+        "syntax_variable": r["syntax"]["variable"],
+        "syntax_string": r["syntax"]["string"],
+        "syntax_number": r["syntax"]["number"],
+        "syntax_type": r["syntax"]["type"],
+        "syntax_operator": r["syntax"]["operator"],
+        "syntax_punctuation": r["syntax"]["punctuation"],
+        "thinking_off": r["ui"]["border"],
+        "thinking_minimal": r["ui"]["fgMuted"],
+        "thinking_low": p["blue"],
+        "thinking_medium": p["cyan"],
+        "thinking_high": p["magenta"],
+        "thinking_xhigh": p["red"],
+        "thinking_max": p["orange"],
+        "bash_mode": r["diagnostics"]["ok"],
+        "page_bg": r["ui"]["bg"],
+        "card_bg": r["ui"]["bgAlt"],
+        "info_bg": soft_background(r["diagnostics"]["warning"], bg, light=is_light, strength=0.9),
+    }
+
+
+def pi_theme_doc(ctx: dict[str, Any], root: Path) -> dict[str, Any]:
+    template = load_pi_template(root)
+    return render_template_value(template["document"], build_pi_slots(ctx))
+
+
 def tmux_style(*, fg: str, bg: str | None = None, bold: bool = False) -> str:
     parts = [f"#[fg={fg}]"]
     if bg is not None:
@@ -1430,6 +1509,7 @@ def generate_theme(theme_path: Path, template: dict[str, Any], root: Path) -> li
     starship_path = root / "exports" / "starship" / f"{theme_id}.toml"
     zellij_path = root / "exports" / "zellij" / f"{theme_id}.kdl"
     tmux_path = root / "exports" / "tmux" / f"{theme_id}.conf"
+    pi_path = root / "exports" / "pi" / f"{theme_id}.json"
 
     write_text(ghostty_path, ghostty_theme_conf(ctx, root))
     write_yaml(k9s_path, k9s_theme_doc(ctx, root))
@@ -1438,7 +1518,8 @@ def generate_theme(theme_path: Path, template: dict[str, Any], root: Path) -> li
     write_text(starship_path, starship_theme_toml(ctx, root))
     write_text(zellij_path, zellij_theme_kdl(ctx, root))
     write_text(tmux_path, tmux_theme_conf(ctx, root))
-    return [ghostty_path, k9s_path, zed_path, nvim_path, starship_path, zellij_path, tmux_path]
+    write_json(pi_path, pi_theme_doc(ctx, root))
+    return [ghostty_path, k9s_path, zed_path, nvim_path, starship_path, zellij_path, tmux_path, pi_path]
 
 
 def discover_default_targets(root: Path) -> list[Path]:

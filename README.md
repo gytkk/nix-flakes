@@ -245,7 +245,7 @@ Resources should supplement the tools instead of expanding the tool count:
 - On macOS and Linux, `home-manager switch` installs `~/.config/zed/settings.json` and `keymap.json` as out-of-store symlinks to the repo, and exposes the entire `themes/exports/zed` directory at `~/.config/zed/themes`.
 - That means mutable settings can switch between generated theme names without requiring another switch just to materialize a newly referenced theme file.
 - On WSL hosts, activation still copies settings, keymaps, and the full set of generated `themes/exports/zed/*.json` files into the Windows Zed config directory on each switch.
-- The checked-in defaults point both light and dark mode at the generated `Catppuccin Mocha` theme.
+- The checked-in defaults point both light and dark mode at the generated `One Half Light` theme.
 
 ## Zellij config
 
@@ -270,8 +270,8 @@ Resources should supplement the tools instead of expanding the tool count:
 ## tmux config
 
 - tmux is managed through `modules/tmux/default.nix`.
-- Home Manager installs tmux plus a `tm` session-manager wrapper and links `~/.config/tmux/tmux.conf`, `keybindings.conf`, and `statusline.conf` to `modules/tmux/files/` through out-of-store symlinks.
-- Home Manager also links `~/.config/tmux/themes` to `themes/exports/tmux` and exposes the selected `modules.commonTheme` as `~/.config/tmux/theme.conf`.
+- Home Manager installs tmux plus a `tm` session-manager wrapper and links `~/.config/tmux/tmux.conf` and `keybindings.conf` to `modules/tmux/files/` through out-of-store symlinks.
+- Home Manager also links `~/.config/tmux/themes` to `themes/exports/tmux`, exposes the selected `modules.commonTheme` as `~/.config/tmux/theme.conf`, and sources that generated theme from the main tmux config.
 - Running bare interactive `tm` outside tmux opens the fzf-backed session manager; `tmux` remains the original tmux binary. Use arrow keys to select a session, `Enter` to attach, type a new session name and press `Enter` to create it, `Ctrl+r` to rename, and `Ctrl+d` to delete.
 - The checked-in tmux config uses `Ctrl+a` as the prefix, starts window and pane indexes at `1`, enables mouse support, and keeps the statusline at the top with generated canonical theme colors. Mouse-wheel scrolling moves one line per event in copy mode. Pressing the prefix accent-colors the session segment and shows key hints on the right; synchronized panes still show a `SYNC` indicator.
 - Resize the active pane in five-cell steps with `Ctrl+a`, then `Ctrl+h`/`Ctrl+j`/`Ctrl+k`/`Ctrl+l`.

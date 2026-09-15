@@ -15,7 +15,7 @@ in
       enable = true;
       enableGitIntegration = true;
       options = {
-        syntax-theme = "GitHub";
+        syntax-theme = "OneHalfLight";
         navigate = true;
         side-by-side = true;
         line-numbers = true;
@@ -49,8 +49,8 @@ in
         };
 
         "color \"diff\"" = {
-          old = "#fca5a5";
-          new = "#86efac";
+          old = "#e45649";
+          new = "#50a14f";
         };
 
         # Pull configuration

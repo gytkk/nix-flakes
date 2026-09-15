@@ -70,7 +70,7 @@
   "autoMemoryEnabled": true,
   "autoDreamEnabled": true,
   "skipWorkflowUsageWarning": true,
-  "theme": "auto",
+  "theme": "light-ansi",
   "teammateMode": "auto",
   "skipAutoPermissionPrompt": true
 }

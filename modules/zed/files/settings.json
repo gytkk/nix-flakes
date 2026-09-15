@@ -10,8 +10,8 @@
   "buffer_font_size": 13,
   "theme": {
     "mode": "system",
-    "light": "Vira Graphene",
-    "dark": "Vira Graphene",
+    "light": "One Half Light",
+    "dark": "One Half Light",
   },
   "tab_size": 2,
   "format_on_save": "on",

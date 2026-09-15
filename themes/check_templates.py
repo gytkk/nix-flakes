@@ -393,6 +393,86 @@ def check_k9s(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
     check_document_template(path_str, doc.get("document"), errors)
 
 
+def check_pi(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
+    check_common(path, doc, errors)
+    path_str = str(path)
+    contract = doc.get("theme_schema")
+    expect(isinstance(contract, dict), f"{path_str}.theme_schema must be an object", errors)
+    if isinstance(contract, dict):
+        require_keys(contract, ["schema_url", "token_prefix", "value_type"], f"{path_str}.theme_schema", errors)
+        expect(contract.get("token_prefix") == "$", f"{path_str}.theme_schema.token_prefix must be '$'", errors)
+        expect(contract.get("value_type") == "hex-color", f"{path_str}.theme_schema.value_type must be 'hex-color'", errors)
+
+    document = doc.get("document")
+    check_document_template(path_str, document, errors)
+    if not isinstance(document, dict):
+        return
+    require_keys(document, ["$schema", "name", "colors", "export"], f"{path_str}.document", errors)
+    colors = document.get("colors")
+    expect(isinstance(colors, dict), f"{path_str}.document.colors must be an object", errors)
+    if not isinstance(colors, dict):
+        return
+    required_colors = {
+        "accent",
+        "border",
+        "borderAccent",
+        "borderMuted",
+        "success",
+        "error",
+        "warning",
+        "muted",
+        "dim",
+        "text",
+        "thinkingText",
+        "selectedBg",
+        "scrollbarTrack",
+        "scrollbarThumb",
+        "searchMatchBg",
+        "searchMatchText",
+        "userMessageBg",
+        "userMessageText",
+        "customMessageBg",
+        "customMessageText",
+        "customMessageLabel",
+        "toolPendingBg",
+        "toolSuccessBg",
+        "toolErrorBg",
+        "toolTitle",
+        "toolOutput",
+        "mdHeading",
+        "mdLink",
+        "mdLinkUrl",
+        "mdCode",
+        "mdCodeBlock",
+        "mdCodeBlockBorder",
+        "mdQuote",
+        "mdQuoteBorder",
+        "mdHr",
+        "mdListBullet",
+        "toolDiffAdded",
+        "toolDiffRemoved",
+        "toolDiffContext",
+        "syntaxComment",
+        "syntaxKeyword",
+        "syntaxFunction",
+        "syntaxVariable",
+        "syntaxString",
+        "syntaxNumber",
+        "syntaxType",
+        "syntaxOperator",
+        "syntaxPunctuation",
+        "thinkingOff",
+        "thinkingMinimal",
+        "thinkingLow",
+        "thinkingMedium",
+        "thinkingHigh",
+        "thinkingXhigh",
+        "thinkingMax",
+        "bashMode",
+    }
+    expect(set(colors) == required_colors, f"{path_str}.document.colors must exactly match Pi's color tokens", errors)
+
+
 def check_nvim_override_template(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
     path_str = str(path)
     expected_top = ["version", "meta", "groups", "links"]
@@ -542,6 +622,7 @@ JSON_CHECKS = {
     ROOT / "templates" / "starship" / "official-template.json": check_starship,
     ROOT / "templates" / "zellij" / "official-template.json": check_zellij,
     ROOT / "templates" / "tmux" / "official-template.json": check_tmux,
+    ROOT / "templates" / "pi" / "official-template.json": check_pi,
 }
 
 YAML_CHECKS = {

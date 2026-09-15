@@ -20,7 +20,8 @@ current performance findings, measurements, and prioritized action items.
 | `agent-core/rules/` and `agent-core/adapters/pi.md` | `~/.pi/agent/AGENTS.md` | Generated shared and Pi-specific instructions |
 | `agent-core/rules/OPERATING.md` | `~/.pi/agent/APPEND_SYSTEM.md` | Operating invariants added to Pi's system prompt |
 | `files/extensions/` | `~/.pi/agent/extensions/` | Local Pi extensions |
-| `files/themes/claude-like.json` | `~/.pi/agent/themes/claude-like.json` | Global dark theme |
+| `themes/exports/pi/one-half-light.json` | `~/.pi/agent/themes/one-half-light.json` | Generated One Half Light theme |
+| `files/themes/claude-like.json` | `~/.pi/agent/themes/claude-like.json` | Alternate dark theme |
 | `agent-core/skills/` | `~/.pi/agent/skills/` | Pi's selected shared skills |
 
 The module also installs:
@@ -38,7 +39,7 @@ files change only after applying the Home Manager configuration. Review
 `files/settings.json` currently selects:
 
 - `openai-codex/gpt-5.6-sol` with `high` thinking
-- the `claude-like` theme
+- the generated `one-half-light` theme
 - one-cell editor and output padding
 - the hardware terminal cursor for IME positioning
 
@@ -257,12 +258,9 @@ workaround. After upgrading, OAuth can be reconsidered separately.
 
 ## Theme
 
-`files/themes/claude-like.json` is a dark theme with an Anthropic-inspired
-orange accent and warm neutral colors. It covers messages, tool blocks,
-Markdown, diffs, syntax highlighting, and editor borders.
+Pi selects `themes/exports/pi/one-half-light.json`, which the canonical theme pipeline generates from `themes/core/one-half-light.yaml`. It covers messages, tool blocks, Markdown, diffs, syntax highlighting, and editor borders. The existing `claude-like` theme remains installed as an alternate dark theme.
 
-Ordinary text uses the terminal's default foreground. The custom footer uses
-its own ANSI palette independently of the theme.
+The custom footer uses standard ANSI colors, so its accents follow the active terminal palette.
 
 ## Verification
 

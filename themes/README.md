@@ -527,6 +527,7 @@ Current generators:
 - `starship` -> `themes/exports/starship/*.toml`
 - `zellij` -> `themes/exports/zellij/*.kdl`
 - `tmux` -> `themes/exports/tmux/*.conf`
+- `pi` -> `themes/exports/pi/*.json`
 
 Adapter templates and schema helpers:
 
@@ -551,6 +552,8 @@ Adapter templates and schema helpers:
   derived from the official Zellij theme definition specification
 - `themes/templates/tmux/official-template.json` -> tmux statusline template
   derived from tmux style syntax and the existing local statusline layout
+- `themes/templates/pi/official-template.json` -> Pi TUI theme template derived
+  from Pi's published theme schema and bundled theme documentation
 - `themes/overrides/ghostty/*.yaml` -> optional Ghostty slot overrides applied
   after generator defaults
 - `themes/overrides/zellij/*.yaml` -> optional Zellij-specific

@@ -84,7 +84,7 @@ in
 
   options.modules.commonTheme = lib.mkOption {
     type = lib.types.str;
-    default = "vira-graphene";
+    default = "one-half-light";
     description = "Canonical theme id shared across theme-aware app modules.";
     example = "catppuccin-mocha";
   };
