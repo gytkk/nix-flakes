@@ -39,10 +39,6 @@ selected_dir="$(zoxide query -l | fzf --prompt='Workspace cwd> ')" || exit 0
 name = "one-light"
 auto_switch = false
 
-[theme.custom]
-panel_bg = "#f0f0f0"
-surface0 = "#e5e5e5"
-
 [ui]
 host_cursor = "native"
 prompt_new_tab_name = false
