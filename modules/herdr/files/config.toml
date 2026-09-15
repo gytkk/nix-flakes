@@ -36,21 +36,18 @@ selected_dir="$(zoxide query -l | fzf --prompt='Workspace cwd> ')" || exit 0
 '''
 
 [theme]
-name = "terminal"
+name = "one-light"
 auto_switch = false
 
 [theme.custom]
 panel_bg = "#f5f5f5"
 sidebar_bg = "#f5f5f5"
-active_row_bg = "#f0f0f0"
-selection_bg = "#bfceff"
 surface0 = "#f0f0f0"
 surface1 = "#e5e5e5"
 surface_dim = "#e5e5e5"
 overlay0 = "#9d9d9f"
 overlay1 = "#696c77"
 subtext0 = "#696c77"
-accent = "#61afef"
 mauve = "#a626a4"
 green = "#50a14f"
 yellow = "#c18401"
