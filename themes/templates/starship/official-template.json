@@ -24,6 +24,12 @@
     "palette_table_prefix": "palettes",
     "value_types": ["string", "boolean"]
   },
+  "override_schema": {
+    "path": "themes/overrides/starship/<theme-id>.yaml",
+    "version": 1,
+    "slots": "Existing palette color slots accept hex colors or canonical references; format accepts a Starship format string.",
+    "modules": "Existing string-valued settings in the template sections only. Starship validates format and style syntax at runtime."
+  },
   "format": "$format",
   "sections": [
     {

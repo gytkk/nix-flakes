@@ -31,6 +31,7 @@ GHOSTTY_SLOT_KEYS = {
 ROOT = Path(__file__).resolve().parent
 NVIM_TEMPLATE_PATH = ROOT / "templates" / "nvim" / "official-template.json"
 ZELLIJ_TEMPLATE_PATH = ROOT / "templates" / "zellij" / "official-template.json"
+STARSHIP_TEMPLATE_PATH = ROOT / "templates" / "starship" / "official-template.json"
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -260,12 +261,54 @@ def validate_zellij_override(v: Validator, path: Path, allowed_components: set[s
         v.error(path, "override must define at least one component or player override")
 
 
+def validate_starship_override(v: Validator, path: Path) -> None:
+    try:
+        data = load_yaml(path)
+    except ParseError as e:
+        v.error(path, str(e))
+        return
+
+    compare_keys(v, path, "override", data, ["version", "meta", "slots", "modules"])
+    if data.get("version") != 1:
+        v.error(path, "version must be 1")
+    meta = ensure_mapping(v, path, data.get("meta"), "meta")
+    if meta is not None:
+        validate_meta(v, path, meta, app="starship")
+
+    template = load_json(STARSHIP_TEMPLATE_PATH)
+    color_slots = {entry["value"].removeprefix("$") for entry in template["palette"]["entries"]}
+    slots = ensure_mapping(v, path, data.get("slots"), "slots")
+    if slots is not None:
+        for key, value in slots.items():
+            if key == "format":
+                if not isinstance(value, str) or not value:
+                    v.error(path, "slots.format must be a non-empty string")
+            elif key not in color_slots or not valid_color_value(value):
+                v.error(path, f"slots.{key} must be a supported color slot with a color or reference")
+
+    allowed = {
+        section["table"]: {entry["key"] for entry in section["entries"] if isinstance(entry["value"], str)}
+        for section in template["sections"]
+    }
+    modules = ensure_mapping(v, path, data.get("modules"), "modules")
+    if modules is not None:
+        for module, entries in modules.items():
+            if module not in allowed or not isinstance(entries, dict) or not entries:
+                v.error(path, f"modules.{module} must be a supported table with non-empty entries")
+                continue
+            for key, value in entries.items():
+                if key not in allowed[module] or not isinstance(value, str):
+                    v.error(path, f"modules.{module}.{key} must be an existing string-valued setting")
+    if not slots and not modules:
+        v.error(path, "override must define at least one slot or module override")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Validate theme override schema files.")
     parser.add_argument(
         "paths",
         nargs="*",
-        help="Override YAML files to validate. Defaults to themes/overrides/{ghostty,nvim,zellij}/*.yaml",
+        help="Override YAML files to validate. Defaults to themes/overrides/{ghostty,nvim,starship,zellij}/*.yaml",
     )
     args = parser.parse_args()
 
@@ -282,6 +325,7 @@ def main() -> int:
         targets = [
             *[p.resolve() for p in sorted((ROOT / "overrides" / "ghostty").glob("*.yaml")) if p.name != "TEMPLATE.yaml"],
             *[p.resolve() for p in sorted((ROOT / "overrides" / "nvim").glob("*.yaml"))],
+            *[p.resolve() for p in sorted((ROOT / "overrides" / "starship").glob("*.yaml")) if p.name != "TEMPLATE.yaml"],
             *[p.resolve() for p in sorted((ROOT / "overrides" / "zellij").glob("*.yaml")) if p.name != "TEMPLATE.yaml"],
         ]
     if not targets:
@@ -294,6 +338,8 @@ def main() -> int:
             validate_ghostty_override(v, target)
         elif target.parent.name == "nvim":
             validate_nvim_override(v, target, nvim_allowed_attrs)
+        elif target.parent.name == "starship":
+            validate_starship_override(v, target)
         elif target.parent.name == "zellij":
             validate_zellij_override(v, target, zellij_allowed_components, zellij_allowed_attrs)
         else:

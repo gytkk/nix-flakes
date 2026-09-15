@@ -1,0 +1,13 @@
+version: 1
+
+meta:
+  app: starship
+  theme: example-theme
+  variant: light
+
+slots:
+  foam: "{palette.blue}"
+
+modules:
+  directory:
+    style: "fg:text bg:layer1"

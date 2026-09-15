@@ -979,6 +979,20 @@ def write_yaml(path: Path, data: dict[str, Any]) -> None:
 def starship_theme_toml(ctx: dict[str, Any], root: Path) -> str:
     template = load_starship_template(root)
     slots = build_starship_slots(ctx)
+    module_overrides = {}
+    override_path = root / "overrides" / "starship" / f"{ctx['meta']['id']}.yaml"
+    if override_path.exists():
+        from validate_overrides import validate_starship_override
+
+        validator = Validator()
+        validate_starship_override(validator, override_path)
+        if validator.errors:
+            raise RuntimeError("\n".join(validator.errors))
+        override = load_yaml(override_path)
+        if (override["meta"]["theme"], override["meta"]["variant"]) != (ctx["meta"]["id"], ctx["meta"]["variant"]):
+            raise RuntimeError(f"{override_path}: metadata does not match the canonical theme")
+        slots.update(resolve_context_value(override["slots"], ctx))
+        module_overrides = override["modules"]
     palette = template["palette"]
     palette_name = render_template_value(palette["name"], slots)
 
@@ -993,7 +1007,8 @@ def starship_theme_toml(ctx: dict[str, Any], root: Path) -> str:
     for section in template["sections"]:
         lines.extend(["", f"[{section['table']}]"])
         for entry in section["entries"]:
-            value = render_template_value(entry["value"], slots)
+            value = module_overrides.get(section["table"], {}).get(entry["key"], entry["value"])
+            value = render_template_value(value, slots)
             lines.append(f"{json.dumps(entry['key'], ensure_ascii=False)} = {toml_literal(value)}")
     lines.extend(["", f"[palettes.{palette_name}]"])
     for entry in palette["entries"]:

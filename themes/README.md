@@ -556,12 +556,15 @@ Adapter templates and schema helpers:
   from Pi's published theme schema and bundled theme documentation
 - `themes/overrides/ghostty/*.yaml` -> optional Ghostty slot overrides applied
   after generator defaults
+- `themes/overrides/starship/*.yaml` -> optional Starship palette/format slots and string-valued module settings applied after generator defaults
 - `themes/overrides/zellij/*.yaml` -> optional Zellij-specific
   component/player overrides applied after generator defaults
 - `themes/check_templates.py` -> consistency check for app template metadata,
   contract fields, section layout, duplicate entries, and declared key coverage
 
 ## Resolution Rules
+
+Starship overrides use the ordered keys `version`, `meta`, `slots`, and `modules`; see `overrides/starship/TEMPLATE.yaml`. Color slots accept hex colors or canonical palette/role references. The `format` slot accepts a Starship format string. Module patches are limited to existing string-valued settings in the Starship template and inherit all other settings. The generator rejects invalid override keys and mismatched theme metadata. One Half Light uses neutral surfaces, dark text, blue icons, and semantic Git status markers through this override.
 
 Exporters should resolve values in this order:
 

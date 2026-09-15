@@ -1,0 +1,112 @@
+version: 1
+
+meta:
+  app: starship
+  theme: one-half-light
+  variant: light
+
+slots:
+  foam: "{palette.blue}"
+  # Git status tones mix canonical green/yellow/red with 65% ui.fg for layer3 contrast.
+  pine: "#405e47"
+  gold: "#68542b"
+  love: "#744444"
+  format: |-
+    [](layer1)\
+    [ 󰉋 ](bg:layer1 fg:foam)\
+    $directory\
+    [](fg:layer1 bg:layer3)\
+    $git_branch\
+    $git_status\
+    [](fg:layer3 bg:layer2)\
+    $c\
+    $cpp\
+    $rust\
+    $golang\
+    $nodejs\
+    $php\
+    $java\
+    $kotlin\
+    $haskell\
+    $python\
+    [](fg:layer2 bg:layer1)\
+    $docker_context\
+    $conda\
+    $pixi\
+    [](fg:layer1)\
+    $fill\
+    [](fg:layer1)\
+    $kubernetes\
+    [](fg:layer2 bg:layer1)\
+    $hostname\
+    [](fg:layer3 bg:layer2)\
+    $time\
+    [](fg:layer3)
+    $character
+
+modules:
+  directory:
+    style: "fg:text bg:layer1"
+  git_branch:
+    style: "fg:text bg:layer3"
+    format: "[[ $symbol](fg:foam bg:layer3) $branch ]($style)"
+  git_status:
+    style: "fg:text bg:layer3"
+    format: "[($conflicted$staged$modified$untracked$renamed$deleted$stashed$ahead_behind )]($style)"
+    conflicted: "[=](bold fg:love bg:layer3)$count "
+    staged: "[+](bold fg:pine bg:layer3)$count "
+    modified: "[!](bold fg:gold bg:layer3)$count "
+    untracked: "[?](bold fg:gold bg:layer3)$count "
+    renamed: "[»](bold fg:foam bg:layer3)$count "
+    deleted: "[-](bold fg:love bg:layer3)$count "
+    stashed: "[*](bold fg:foam bg:layer3)$count "
+    ahead: "[↑](bold fg:foam bg:layer3)$count"
+    behind: "[↓](bold fg:gold bg:layer3)$count"
+    diverged: "[↑](bold fg:foam bg:layer3)$ahead_count[↓](bold fg:gold bg:layer3)$behind_count"
+  c:
+    style: "fg:text bg:layer2"
+    format: "[ [${symbol}](fg:foam bg:layer2)($version) ]($style)"
+  cpp:
+    style: "fg:text bg:layer2"
+    format: "[ [${symbol}](fg:foam bg:layer2)($version) ]($style)"
+  nodejs:
+    style: "fg:text bg:layer2"
+    format: "[ [${symbol}](fg:foam bg:layer2)($version) ]($style)"
+  rust:
+    style: "fg:text bg:layer2"
+    format: "[ [${symbol}](fg:foam bg:layer2)($version) ]($style)"
+  golang:
+    style: "fg:text bg:layer2"
+    format: "[ [${symbol}](fg:foam bg:layer2)($version) ]($style)"
+  php:
+    style: "fg:text bg:layer2"
+    format: "[ [${symbol}](fg:foam bg:layer2)($version) ]($style)"
+  java:
+    style: "fg:text bg:layer2"
+    format: "[ [${symbol}](fg:foam bg:layer2)($version) ]($style)"
+  kotlin:
+    style: "fg:text bg:layer2"
+    format: "[ [${symbol}](fg:foam bg:layer2)($version) ]($style)"
+  haskell:
+    style: "fg:text bg:layer2"
+    format: "[ [${symbol}](fg:foam bg:layer2)($version) ]($style)"
+  python:
+    style: "fg:text bg:layer2"
+    format: "[ [${symbol}](fg:foam bg:layer2)($version) ]($style)"
+  docker_context:
+    style: "fg:text bg:layer1"
+    format: "[ [${symbol}](fg:foam bg:layer1)($context) ]($style)"
+  conda:
+    style: "fg:text bg:layer1"
+    format: "[ [${symbol}](fg:foam bg:layer1)($environment) ]($style)"
+  pixi:
+    style: "fg:text bg:layer1"
+    format: "[ [${symbol}](fg:foam bg:layer1)($version) ($environment) ]($style)"
+  kubernetes:
+    style: "fg:text bg:layer1"
+    format: "[ [${symbol}](fg:foam bg:layer1)$context ]($style)"
+  hostname:
+    style: "fg:text bg:layer2"
+    format: "[ $hostname ]($style)"
+  character:
+    success_symbol: "[❯](bold fg:foam)"
