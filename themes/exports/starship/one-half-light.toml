@@ -59,14 +59,14 @@ $character"""
 "format" = "[ $symbol $branch ]($style)"
 
 [git_status]
-"style" = "fg:text bg:layer3"
+"style" = "fg:foam bg:layer3"
 "format" = "[($conflicted$staged$modified$untracked$renamed$deleted$stashed$ahead_behind )]($style)"
-"conflicted" = "[=](bold fg:love bg:layer3)$count "
-"staged" = "[+](bold fg:pine bg:layer3)$count "
-"modified" = "[!](bold fg:gold bg:layer3)$count "
-"untracked" = "[?](bold fg:gold bg:layer3)$count "
+"conflicted" = "[=](bold fg:love bg:layer3)[$count](fg:love bg:layer3) "
+"staged" = "[+](bold fg:pine bg:layer3)[$count](fg:pine bg:layer3) "
+"modified" = "[!](bold fg:gold bg:layer3)[$count](fg:gold bg:layer3) "
+"untracked" = "[?](bold fg:gold bg:layer3)[$count](fg:gold bg:layer3) "
 "renamed" = "[»](bold fg:foam bg:layer3)$count "
-"deleted" = "[-](bold fg:love bg:layer3)$count "
+"deleted" = "[-](bold fg:love bg:layer3)[$count](fg:love bg:layer3) "
 "stashed" = "[*](bold fg:foam bg:layer3)$count "
 "ahead" = "[↑](bold fg:foam bg:layer3)[$count](fg:foam bg:layer3)"
 "behind" = "[↓](bold fg:gold bg:layer3)[$count](fg:foam bg:layer3)"
@@ -74,84 +74,84 @@ $character"""
 
 [c]
 "symbol" = " "
-"style" = "fg:text bg:layer2"
-"format" = "[ [${symbol}](fg:foam bg:layer2)($version) ]($style)"
+"style" = "fg:foam bg:layer2"
+"format" = "[ $symbol($version) ]($style)"
 
 [cpp]
 "symbol" = " "
-"style" = "fg:text bg:layer2"
-"format" = "[ [${symbol}](fg:foam bg:layer2)($version) ]($style)"
+"style" = "fg:foam bg:layer2"
+"format" = "[ $symbol($version) ]($style)"
 
 [nodejs]
 "symbol" = " "
-"style" = "fg:text bg:layer2"
-"format" = "[ [${symbol}](fg:foam bg:layer2)($version) ]($style)"
+"style" = "fg:pine bg:layer2"
+"format" = "[ $symbol($version) ]($style)"
 
 [rust]
 "symbol" = "󱘗 "
-"style" = "fg:text bg:layer2"
-"format" = "[ [${symbol}](fg:foam bg:layer2)($version) ]($style)"
+"style" = "fg:love bg:layer2"
+"format" = "[ $symbol($version) ]($style)"
 
 [golang]
 "symbol" = " "
-"style" = "fg:text bg:layer2"
-"format" = "[ [${symbol}](fg:foam bg:layer2)($version) ]($style)"
+"style" = "fg:foam bg:layer2"
+"format" = "[ $symbol($version) ]($style)"
 
 [php]
 "symbol" = " "
-"style" = "fg:text bg:layer2"
-"format" = "[ [${symbol}](fg:foam bg:layer2)($version) ]($style)"
+"style" = "fg:iris bg:layer2"
+"format" = "[ $symbol($version) ]($style)"
 
 [java]
 "symbol" = " "
-"style" = "fg:text bg:layer2"
-"format" = "[ [${symbol}](fg:foam bg:layer2)($version) ]($style)"
+"style" = "fg:love bg:layer2"
+"format" = "[ $symbol($version) ]($style)"
 
 [kotlin]
 "symbol" = " "
-"style" = "fg:text bg:layer2"
-"format" = "[ [${symbol}](fg:foam bg:layer2)($version) ]($style)"
+"style" = "fg:iris bg:layer2"
+"format" = "[ $symbol($version) ]($style)"
 
 [haskell]
 "symbol" = " "
-"style" = "fg:text bg:layer2"
-"format" = "[ [${symbol}](fg:foam bg:layer2)($version) ]($style)"
+"style" = "fg:iris bg:layer2"
+"format" = "[ $symbol($version) ]($style)"
 
 [python]
 "symbol" = " "
-"style" = "fg:text bg:layer2"
-"format" = "[ [${symbol}](fg:foam bg:layer2)($version) ]($style)"
+"style" = "fg:gold bg:layer2"
+"format" = "[ $symbol($version) ]($style)"
 
 [docker_context]
 "symbol" = " "
-"style" = "fg:text bg:layer1"
-"format" = "[ [${symbol}](fg:foam bg:layer1)($context) ]($style)"
+"style" = "fg:foam bg:layer1"
+"format" = "[ $symbol($context) ]($style)"
 
 [conda]
 "symbol" = " "
-"style" = "fg:text bg:layer1"
-"format" = "[ [${symbol}](fg:foam bg:layer1)($environment) ]($style)"
+"style" = "fg:pine bg:layer1"
+"format" = "[ $symbol($environment) ]($style)"
 
 [pixi]
 "symbol" = "󰏗 "
-"style" = "fg:text bg:layer1"
-"format" = "[ [${symbol}](fg:foam bg:layer1)($version) ($environment) ]($style)"
+"style" = "fg:pine bg:layer1"
+"format" = "[ $symbol($version) ($environment) ]($style)"
 
 [kubernetes]
 "disabled" = false
 "symbol" = "󱃾 "
-"style" = "fg:text bg:layer1"
-"format" = "[ [${symbol}](fg:foam bg:layer1)$context ]($style)"
+"style" = "fg:foam bg:layer1"
+"format" = "[ $symbol$context ]($style)"
 
 [time]
 "disabled" = false
 "time_format" = "%R"
-"style" = "bg:layer3"
-"format" = "[[ 󰥔 $time ](fg:text bg:layer3)]($style)"
+"style" = "fg:foam bg:layer3"
+"format" = "[ 󰥔 $time ]($style)"
 
 [hostname]
 "ssh_only" = true
-"style" = "fg:text bg:layer2"
+"style" = "fg:love bg:layer2"
 "format" = "[ $hostname ]($style)"
 
 [character]

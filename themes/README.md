@@ -564,7 +564,7 @@ Adapter templates and schema helpers:
 
 ## Resolution Rules
 
-Starship overrides use the ordered keys `version`, `meta`, `slots`, and `modules`; see `overrides/starship/TEMPLATE.yaml`. Color slots accept hex colors or canonical palette/role references. The `format` slot accepts a Starship format string. Module patches are limited to existing string-valued settings in the Starship template and inherit all other settings. The generator rejects invalid override keys and mismatched theme metadata. One Half Light separates the folder icon on a purple background from the directory name on a blue background with regular-weight bright text. The Git branch uses blue text on gray; other segments use neutral surfaces, dark text, blue icons, and semantic Git status markers.
+Starship overrides use the ordered keys `version`, `meta`, `slots`, and `modules`; see `overrides/starship/TEMPLATE.yaml`. Color slots accept hex colors or canonical palette/role references. The `format` slot accepts a Starship format string. Module patches are limited to existing string-valued settings in the Starship template and inherit all other settings. The generator rejects invalid override keys and mismatched theme metadata. One Half Light separates the folder icon on a purple background from the directory name on a blue background with regular-weight bright text. The Git branch, commit counts, and time use blue text on gray. Language and environment segments use accent-colored text, and Git change counts match their semantic status colors.
 
 Exporters should resolve values in this order:
 
