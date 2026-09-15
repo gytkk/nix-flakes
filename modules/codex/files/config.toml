@@ -26,13 +26,6 @@ command = "mcp-nixos"
 command = "npx"
 args = ["-y", "@playwright/mcp@latest"]
 
-[otel]
-environment = "dev"
-log_user_prompt = false
-exporter = { otlp-http = { endpoint = "https://otlp.datadoghq.com/v1/logs", protocol = "binary", headers = { "dd-api-key" = "${DD_API_KEY}" } } }
-metrics_exporter = { otlp-http = { endpoint = "https://otlp.datadoghq.com/v1/metrics", protocol = "binary", headers = { "dd-api-key" = "${DD_API_KEY}", "dd-otel-metric-config" = '{"resource_attributes_as_tags": true}' } } }
-trace_exporter = "none"
-
 [features]
 default_mode_request_user_input = true
 multi_agent = true
