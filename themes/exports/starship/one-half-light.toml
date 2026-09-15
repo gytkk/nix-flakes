@@ -74,27 +74,27 @@ $character"""
 
 [c]
 "symbol" = " "
-"style" = "fg:foam bg:layer2"
+"style" = "fg:iris bg:layer2"
 "format" = "[ $symbol($version) ]($style)"
 
 [cpp]
 "symbol" = " "
-"style" = "fg:foam bg:layer2"
+"style" = "fg:iris bg:layer2"
 "format" = "[ $symbol($version) ]($style)"
 
 [nodejs]
 "symbol" = " "
-"style" = "fg:pine bg:layer2"
+"style" = "fg:iris bg:layer2"
 "format" = "[ $symbol($version) ]($style)"
 
 [rust]
 "symbol" = "󱘗 "
-"style" = "fg:love bg:layer2"
+"style" = "fg:iris bg:layer2"
 "format" = "[ $symbol($version) ]($style)"
 
 [golang]
 "symbol" = " "
-"style" = "fg:foam bg:layer2"
+"style" = "fg:iris bg:layer2"
 "format" = "[ $symbol($version) ]($style)"
 
 [php]
@@ -104,7 +104,7 @@ $character"""
 
 [java]
 "symbol" = " "
-"style" = "fg:love bg:layer2"
+"style" = "fg:iris bg:layer2"
 "format" = "[ $symbol($version) ]($style)"
 
 [kotlin]
@@ -119,7 +119,7 @@ $character"""
 
 [python]
 "symbol" = " "
-"style" = "fg:gold bg:layer2"
+"style" = "fg:iris bg:layer2"
 "format" = "[ $symbol($version) ]($style)"
 
 [docker_context]
@@ -129,12 +129,12 @@ $character"""
 
 [conda]
 "symbol" = " "
-"style" = "fg:pine bg:layer1"
+"style" = "fg:iris bg:layer1"
 "format" = "[ $symbol($environment) ]($style)"
 
 [pixi]
 "symbol" = "󰏗 "
-"style" = "fg:pine bg:layer1"
+"style" = "fg:iris bg:layer1"
 "format" = "[ $symbol($version) ($environment) ]($style)"
 
 [kubernetes]

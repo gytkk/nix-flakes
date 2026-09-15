@@ -66,25 +66,25 @@ modules:
     behind: "[↓](fg:gold bg:layer3)[$count](fg:foam bg:layer3)"
     diverged: "[↑$ahead_count](fg:foam bg:layer3)[↓](fg:gold bg:layer3)[$behind_count](fg:foam bg:layer3)"
   c:
-    style: "fg:foam bg:layer2"
+    style: "fg:iris bg:layer2"
     format: "[ $symbol($version) ]($style)"
   cpp:
-    style: "fg:foam bg:layer2"
+    style: "fg:iris bg:layer2"
     format: "[ $symbol($version) ]($style)"
   nodejs:
-    style: "fg:pine bg:layer2"
+    style: "fg:iris bg:layer2"
     format: "[ $symbol($version) ]($style)"
   rust:
-    style: "fg:love bg:layer2"
+    style: "fg:iris bg:layer2"
     format: "[ $symbol($version) ]($style)"
   golang:
-    style: "fg:foam bg:layer2"
+    style: "fg:iris bg:layer2"
     format: "[ $symbol($version) ]($style)"
   php:
     style: "fg:iris bg:layer2"
     format: "[ $symbol($version) ]($style)"
   java:
-    style: "fg:love bg:layer2"
+    style: "fg:iris bg:layer2"
     format: "[ $symbol($version) ]($style)"
   kotlin:
     style: "fg:iris bg:layer2"
@@ -93,16 +93,16 @@ modules:
     style: "fg:iris bg:layer2"
     format: "[ $symbol($version) ]($style)"
   python:
-    style: "fg:gold bg:layer2"
+    style: "fg:iris bg:layer2"
     format: "[ $symbol($version) ]($style)"
   docker_context:
     style: "fg:foam bg:layer1"
     format: "[ $symbol($context) ]($style)"
   conda:
-    style: "fg:pine bg:layer1"
+    style: "fg:iris bg:layer1"
     format: "[ $symbol($environment) ]($style)"
   pixi:
-    style: "fg:pine bg:layer1"
+    style: "fg:iris bg:layer1"
     format: "[ $symbol($version) ($environment) ]($style)"
   kubernetes:
     style: "fg:foam bg:layer1"
