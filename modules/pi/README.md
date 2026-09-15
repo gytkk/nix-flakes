@@ -38,7 +38,7 @@ files change only after applying the Home Manager configuration. Review
 
 `files/settings.json` currently selects:
 
-- `openai-codex/gpt-5.6-sol` with `high` thinking
+- `openai-codex/gpt-6-astra` with `high` thinking
 - the generated `one-half-light` theme
 - one-cell editor and output padding
 - the hardware terminal cursor for IME positioning
