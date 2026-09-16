@@ -91,7 +91,7 @@ return {
     vim.lsp.config("rust_analyzer", {
       settings = {
         ["rust-analyzer"] = {
-          files = { watcher = "server" },
+          files = { watcher = "client" },
         },
       },
     })
