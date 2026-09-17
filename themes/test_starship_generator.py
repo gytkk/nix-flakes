@@ -14,14 +14,15 @@ ROOT = Path(__file__).resolve().parent
 
 
 class StarshipGeneratorTest(unittest.TestCase):
-    def test_one_half_light_text_and_status_contrast(self) -> None:
+    def test_one_half_light_text_contrast_and_canonical_status_colors(self) -> None:
         ctx = theme_context(load_yaml(ROOT / "core" / "one-half-light.yaml"))
         doc = tomllib.loads(starship_theme_toml(ctx, ROOT))
         palette = doc["palettes"][doc["palette"]]
         for layer in ("layer1", "layer2", "layer3"):
             self.assertGreaterEqual(contrast_ratio(palette["text"], palette[layer]), 4.5)
-        for status in ("pine", "gold", "love"):
-            self.assertGreaterEqual(contrast_ratio(palette[status], palette["layer3"]), 4.5)
+        for slot, color in (("pine", "green"), ("gold", "yellow"), ("love", "red")):
+            with self.subTest(slot=slot):
+                self.assertEqual(palette[slot], ctx["palette"][color])
 
     def test_other_themes_keep_their_committed_exports(self) -> None:
         for path in (ROOT / "core").glob("*.yaml"):

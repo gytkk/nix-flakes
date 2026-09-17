@@ -8,10 +8,6 @@ meta:
 slots:
   foam: "{palette.blue}"
   rose: "{palette.magenta}"
-  # Git status tones mix canonical green/yellow/red with 65% ui.fg for layer3 contrast.
-  pine: "#405e47"
-  gold: "#68542b"
-  love: "#744444"
   format: |-
     [](rose)\
     [ 󰉋 ](bg:rose fg:base)\
@@ -63,8 +59,8 @@ modules:
     deleted: "[-](bold fg:love bg:layer3)[$count](fg:love bg:layer3) "
     stashed: "[*](bold fg:foam bg:layer3)$count "
     ahead: "[↑$count](fg:foam bg:layer3)"
-    behind: "[↓](fg:gold bg:layer3)[$count](fg:foam bg:layer3)"
-    diverged: "[↑$ahead_count](fg:foam bg:layer3)[↓](fg:gold bg:layer3)[$behind_count](fg:foam bg:layer3)"
+    behind: "[↓$count](fg:foam bg:layer3)"
+    diverged: "[↑$ahead_count↓$behind_count](fg:foam bg:layer3)"
   c:
     style: "fg:iris bg:layer2"
     format: "[ $symbol($version) ]($style)"
