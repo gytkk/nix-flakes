@@ -16,7 +16,10 @@ rustPlatform.buildRustPackage {
 
   cargoHash = sources.plannotatorTui.cargoHash;
 
-  patches = [ ./selection-background.patch ];
+  patches = [
+    ./selection-background.patch
+    ./inherit-herdr-theme.patch
+  ];
 
   preCheck = ''
     export PLANNOTATOR_DATA_DIR="$TMPDIR/plannotator-test-data"

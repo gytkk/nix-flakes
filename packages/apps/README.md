@@ -62,7 +62,8 @@ The package catalog in `default.nix` is the single source of truth for exported 
 
 - Run `packages/apps/scripts/update-all.sh` from the parent repository to update every enabled package manually.
 - `Update App Versions` checks for updates every three hours, verifies changed packages, and commits successful updates to `main`.
-- `herdr-annotate` tracks the plugin's `main` commit and the versions it declares. Its updater records source hashes, release checksums for `herdr-annotate`, and the source and Cargo dependency hashes for the Rust-built `plannotator-tui` in `herdr-annotate/sources.json`, so changes are detected even when the manifest version stays the same.
+- `herdr` tracks stable releases and builds from Rust and Zig sources with a plugin palette snapshot patch. Cargo dependencies come from the source's `Cargo.lock`; Zig dependencies use its vendored Nix manifest. Older nixpkgs inputs use the pinned Zig 0.16 build tool in `herdr/zig.nix`. Its updater pins the source hash and checks the patch and Zig requirement before changing the package.
+- `herdr-annotate` tracks the plugin's `main` commit and the versions it declares. Its updater records source hashes, release checksums for `herdr-annotate`, and the source and Cargo dependency hashes for the Rust-built `plannotator-tui` in `herdr-annotate/sources.json`, so changes are detected even when the manifest version stays the same. Local reviewer patches inherit Herdr's palette and retain per-field color overrides.
 - `herdr-auto-title` tracks stable GitHub releases and builds from source. Its updater pins the source and vendored Go dependency hashes using Go from the nested flake's locked nixpkgs input.
 - `App Packages CI` evaluates the nested flake, builds changed packages, and checks Codex release-bundle drift.
 - The parent configuration overlay intentionally keeps nixpkgs `opencode`; the local package remains available through the nested and parent package outputs.

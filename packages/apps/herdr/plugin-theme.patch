@@ -1,0 +1,107 @@
+--- a/src/app/api/plugins/panes.rs
++++ b/src/app/api/plugins/panes.rs
+@@ -260,6 +260,9 @@
+             entrypoint.to_string(),
+         ));
+         env.push(("HERDR_PLUGIN_CONTEXT_JSON".to_string(), context_json));
++        let theme_json = plugin_theme_json(&self.state.palette)
++            .map_err(|err| ("invalid_plugin_theme".to_string(), err.to_string()))?;
++        env.push(("HERDR_PLUGIN_THEME_JSON".to_string(), theme_json));
+         if let Ok(current_exe) = crate::platform::launch_executable() {
+             env.push((
+                 "HERDR_BIN_PATH".to_string(),
+@@ -354,6 +357,54 @@
+             | "HERDR_PLUGIN_STATE_DIR"
+             | "HERDR_PLUGIN_ENTRYPOINT_ID"
+             | "HERDR_PLUGIN_CONTEXT_JSON"
++            | "HERDR_PLUGIN_THEME_JSON"
+             | "HERDR_BIN_PATH"
+     )
+ }
++
++fn plugin_theme_json(palette: &crate::app::state::Palette) -> serde_json::Result<String> {
++    serde_json::to_string(&serde_json::json!({
++        "version": 1,
++        "selection_bg": palette.selection_bg.to_string(),
++        "panel_bg": palette.panel_bg.to_string(),
++        "surface0": palette.surface0.to_string(),
++        "surface1": palette.surface1.to_string(),
++        "text": palette.text.to_string(),
++        "accent": palette.accent.to_string(),
++        "yellow": palette.yellow.to_string(),
++        "green": palette.green.to_string(),
++    }))
++}
++
++#[cfg(test)]
++mod tests {
++    use ratatui::style::Color;
++
++    use super::*;
++
++    #[test]
++    fn plugin_theme_snapshot_is_versioned_and_preserves_color_strings() {
++        let mut palette = crate::app::state::Palette::catppuccin();
++        palette.selection_bg = Color::Indexed(238);
++        palette.panel_bg = Color::Reset;
++
++        let value: serde_json::Value =
++            serde_json::from_str(&plugin_theme_json(&palette).expect("theme serializes"))
++                .expect("theme is JSON");
++
++        assert_eq!(value["version"], 1);
++        assert_eq!(value["selection_bg"], "238");
++        assert_eq!(value["panel_bg"], "Reset");
++        assert_eq!(value["surface0"], palette.surface0.to_string());
++        assert_eq!(value["surface1"], palette.surface1.to_string());
++        assert_eq!(value["text"], palette.text.to_string());
++        assert_eq!(value["accent"], palette.accent.to_string());
++        assert_eq!(value["yellow"], palette.yellow.to_string());
++        assert_eq!(value["green"], palette.green.to_string());
++    }
++
++    #[test]
++    fn plugin_theme_environment_key_is_protected() {
++        assert!(plugin_pane_protected_env_key("HERDR_PLUGIN_THEME_JSON"));
++    }
++}
+--- a/src/app/api/plugins/mod.rs
++++ b/src/app/api/plugins/mod.rs
+@@ -1848,6 +1848,7 @@
+     #[tokio::test]
+     async fn plugin_pane_open_uses_plugin_root_title_env_and_target_context() {
+         let mut app = test_app();
++        app.state.palette.selection_bg = ratatui::style::Color::Rgb(1, 2, 3);
+         let mut workspace = crate::workspace::Workspace::test_new("plugin-target");
+         workspace.custom_name = None;
+         let root_pane = workspace.tabs[0].root_pane;
+@@ -1880,7 +1881,7 @@
+ [[panes]]
+ id = "board"
+ title = "Plugin Board"
+-command = ["sh", "-c", "printf '%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n' \"$PWD\" \"$HERDR_PLUGIN_ID\" \"$HERDR_PLUGIN_ENTRYPOINT_ID\" \"$HERDR_WORKSPACE_ID\" \"$HERDR_PANE_ID\" \"$HERDR_BIN_PATH\" \"$HERDR_PLUGIN_CONTEXT_JSON\" \"${{HERDR_CELL_WIDTH_PX-unset}}\" \"${{HERDR_CELL_HEIGHT_PX-unset}}\" > {}"]
++command = ["sh", "-c", "printf '%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n' \"$PWD\" \"$HERDR_PLUGIN_ID\" \"$HERDR_PLUGIN_ENTRYPOINT_ID\" \"$HERDR_WORKSPACE_ID\" \"$HERDR_PANE_ID\" \"$HERDR_BIN_PATH\" \"$HERDR_PLUGIN_CONTEXT_JSON\" \"$HERDR_PLUGIN_THEME_JSON\" \"${{HERDR_CELL_WIDTH_PX-unset}}\" \"${{HERDR_CELL_HEIGHT_PX-unset}}\" > {}"]
+ "#,
+                 capture.display()
+             ),
+@@ -1911,6 +1912,10 @@
+                         "{\"spoofed\":true}".to_string(),
+                     ),
+                     (
++                        "HERDR_PLUGIN_THEME_JSON".to_string(),
++                        "{\"version\":999,\"selection_bg\":\"spoofed\"}".to_string(),
++                    ),
++                    (
+                         "HERDR_BIN_PATH".to_string(),
+                         "/tmp/spoofed-herdr".to_string(),
+                     ),
+@@ -1954,5 +1959,9 @@
+             context.focused_pane_id.as_deref(),
+             Some(target_public_pane_id.as_str())
+         );
++        let theme: serde_json::Value =
++            serde_json::from_str(lines.next().expect("theme json")).expect("theme should be JSON");
++        assert_eq!(theme["version"], 1);
++        assert_eq!(theme["selection_bg"], "#010203");
+         assert_eq!(lines.next(), Some("unset"));
+         assert_eq!(lines.next(), Some("unset"));

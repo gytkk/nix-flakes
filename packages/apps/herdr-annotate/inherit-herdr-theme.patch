@@ -1,0 +1,121 @@
+--- a/crates/plannotator-tui/src/config.rs
++++ b/crates/plannotator-tui/src/config.rs
+@@ -50,6 +50,43 @@
+ }
+
+ impl ThemeConfig {
++    pub(crate) fn for_herdr(self) -> Result<Self> {
++        if std::env::var("HERDR_ENV").as_deref() != Ok("1") {
++            return Ok(self);
++        }
++        match std::env::var("HERDR_PLUGIN_THEME_JSON") {
++            Ok(json) => self.inherit_herdr(&json).context("in HERDR_PLUGIN_THEME_JSON"),
++            Err(std::env::VarError::NotPresent) => Ok(self),
++            Err(err) => Err(err).context("reading HERDR_PLUGIN_THEME_JSON"),
++        }
++    }
++
++    fn inherit_herdr(self, json: &str) -> Result<Self> {
++        #[derive(Deserialize)]
++        struct Snapshot {
++            version: u32,
++            selection_bg: String,
++            surface0: String,
++            surface1: String,
++            accent: String,
++        }
++        let palette: Snapshot = serde_json::from_str(json).context("parsing Herdr theme snapshot")?;
++        anyhow::ensure!(palette.version == 1, "unsupported Herdr theme snapshot version {}", palette.version);
++        let color = |key: &str, value: &str| {
++            value.parse::<Color>().with_context(|| format!("invalid Herdr theme color {key}: {value:?}"))
++        };
++        Ok(Self {
++            selection_background: self
++                .selection_background
++                .or(Some(color("selection_bg", &palette.selection_bg)?)),
++            comment_background: self.comment_background.or(Some(color("surface0", &palette.surface0)?)),
++            looks_good_background: self.looks_good_background.or(Some(color("surface1", &palette.surface1)?)),
++            markdown_code_foreground: self
++                .markdown_code_foreground
++                .or(Some(color("accent", &palette.accent)?)),
++        })
++    }
++
+     pub(crate) fn selection_background(&self) -> Color {
+         self.selection_background.unwrap_or(Color::Indexed(236))
+     }
+@@ -231,6 +268,34 @@
+ #[allow(clippy::expect_used, reason = "tests assert by panicking")]
+ mod tests {
+     use super::*;
++
++    #[test]
++    fn inherited_herdr_colors_preserve_terminal_color_types_and_local_overrides() {
++        let json = r##"{"version":1,"selection_bg":"#cddbf8","surface0":"Reset","surface1":"238","accent":"Blue","future_role":"ignored"}"##;
++        let inherited = ThemeConfig::default().inherit_herdr(json).expect("snapshot");
++        assert_eq!(inherited.selection_background(), Color::Rgb(205, 219, 248));
++        assert_eq!(inherited.comment_background(), Color::Reset);
++        assert_eq!(inherited.looks_good_background(), Color::Indexed(238));
++        assert_eq!(inherited.markdown_code_foreground(), Color::Blue);
++        let config = Config::parse("[theme]\ncomment_background = \"#fff0c2\"\n").expect("config");
++        let overridden = config.theme.inherit_herdr(json).expect("snapshot");
++        assert_eq!(overridden.comment_background(), Color::Rgb(255, 240, 194));
++        assert_eq!(overridden.selection_background(), inherited.selection_background());
++        assert_eq!(overridden.looks_good_background(), inherited.looks_good_background());
++        assert_eq!(overridden.markdown_code_foreground(), inherited.markdown_code_foreground());
++    }
++
++    #[test]
++    fn invalid_herdr_snapshots_are_reported() {
++        for json in [
++            "{",
++            "{}",
++            r#"{"version":2,"selection_bg":"Reset","surface0":"Reset","surface1":"Reset","accent":"Blue"}"#,
++            r#"{"version":1,"selection_bg":"invalid","surface0":"Reset","surface1":"Reset","accent":"Blue"}"#,
++        ] {
++            assert!(ThemeConfig::default().inherit_herdr(json).is_err(), "{json}");
++        }
++    }
+
+     #[test]
+     fn empty_file_is_the_default_config() {
+--- a/crates/plannotator-tui/src/cli.rs
++++ b/crates/plannotator-tui/src/cli.rs
+@@ -67,7 +67,7 @@
+ }
+
+ fn open_app(path: &PathBuf, width: usize, interactive: bool) -> Result<App> {
+-    let theme = if interactive { Config::load()?.theme } else { Config::default().theme };
++    let theme = if interactive { Config::load()?.theme.for_herdr()? } else { Config::default().theme };
+     let delivery = delivery(interactive);
+     let mut app = if path.is_dir() {
+         App::open_folder(path, width, delivery)
+--- a/crates/plannotator-tui/src/last/mod.rs
++++ b/crates/plannotator-tui/src/last/mod.rs
+@@ -51,7 +51,7 @@
+             return Ok(());
+         }
+         let source = DocumentSource::new(text, "stdin · message", true, Provenance::Stdin);
+-        let theme = Config::load()?.theme;
++        let theme = Config::load()?.theme.for_herdr()?;
+         return cli::run_ui(|width| {
+             let mut app = App::open(source, width, cli::delivery(true))?;
+             app.set_theme(theme);
+@@ -71,7 +71,7 @@
+                 return Err(err);
+             };
+             let note = format!("{err:#} — showing the pane's recent output instead");
+-            let theme = Config::load()?.theme;
++            let theme = Config::load()?.theme.for_herdr()?;
+             return cli::run_ui(|width| {
+                 let mut app = App::open(screen, width, cli::delivery(true))?;
+                 app.set_theme(theme);
+@@ -91,7 +91,7 @@
+     let session_id = located.session_id;
+     let messages = located.messages;
+     let note = discovery_note(located.discovery, crate::herdr::context::HerdrEnv::from_env().in_herdr);
+-    let theme = Config::load()?.theme;
++    let theme = Config::load()?.theme.for_herdr()?;
+     cli::run_ui(|width| {
+         let mut app = App::open_message(
+             label,

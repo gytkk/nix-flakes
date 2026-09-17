@@ -1,61 +1,90 @@
 {
   lib,
-  stdenvNoCC,
-  fetchurl,
+  stdenv,
+  rustPlatform,
+  fetchzip,
+  callPackage,
+  runCommand,
+  git,
+  pkg-config,
+  cctools ? null,
+  xcbuild ? null,
+  zig_0_16 ? callPackage ./zig.nix { },
 }:
 
 let
   version = "0.9.1";
-
-  platformMap = {
-    "aarch64-darwin" = {
-      target = "macos-aarch64";
-      hash = "sha256-X8en5636ylb6gKqJ3LAlaTNXJo2rgoW5zi0IojE8id4=";
-    };
-
-    "x86_64-darwin" = {
-      target = "macos-x86_64";
-      hash = "sha256-BTvgY5k1/lSrXvvbRmUQVOT2p1OltDFTyIvWkSvOHpQ=";
-    };
-
-    "x86_64-linux" = {
-      target = "linux-x86_64";
-      hash = "sha256-KgL+0WvrZR7wBuHUPwSPZSyk3FitBTzS1ERQVj1cVLc=";
-    };
-
-    "aarch64-linux" = {
-      target = "linux-aarch64";
-      hash = "sha256-9Mz03nRfLLmjmpg+m6NwPa1Q7CpY3qgwJs6rchu9jZ4=";
-    };
+  src = fetchzip {
+    url = "https://github.com/herdrdev/herdr/archive/refs/tags/v${version}.tar.gz";
+    hash = "sha256-N6+kprfWRyh0AkAiopkGsNXUGGORyPVFHEaDHCpGQs8=";
   };
-
-  platform =
-    platformMap.${stdenvNoCC.hostPlatform.system}
-      or (throw "Unsupported system: ${stdenvNoCC.hostPlatform.system}");
-
-  src = fetchurl {
-    url = "https://github.com/herdrdev/herdr/releases/download/v${version}/herdr-${platform.target}";
-    hash = platform.hash;
+  zigDeps = callPackage "${src}/vendor/libghostty-vt/build.zig.zon.nix" {
+    name = "herdr-libghostty-vt-zig-cache";
+    inherit zig_0_16;
+    # Zig's system cache requires real directories rather than a symlink farm.
+    linkFarm =
+      name: entries:
+      runCommand name { } ''
+        mkdir -p $out
+        ${lib.concatMapStringsSep "\n" (entry: ''
+          cp -rL ${entry.path} $out/${entry.name}
+        '') entries}
+      '';
   };
 in
-stdenvNoCC.mkDerivation {
+rustPlatform.buildRustPackage {
   pname = "herdr";
-  inherit version;
+  inherit version src;
 
-  dontUnpack = true;
-  dontStrip = true;
+  cargoLock = {
+    lockFile = "${src}/Cargo.lock";
+  };
 
-  installPhase = ''
-    runHook preInstall
-    install -Dm755 ${src} $out/bin/herdr
-    runHook postInstall
+  patches = [ ./plugin-theme.patch ];
+
+  nativeBuildInputs = [
+    git
+    pkg-config
+  ]
+  ++ lib.optionals stdenv.hostPlatform.isDarwin [
+    cctools
+    xcbuild
+  ];
+
+  env = {
+    ZIG = lib.getExe zig_0_16;
+    LIBGHOSTTY_VT_ZIG_SYSTEM_DIR = zigDeps;
+  };
+
+  preBuild = ''
+    export ZIG_GLOBAL_CACHE_DIR="$TMPDIR/zig-global-cache"
+    export ZIG_LOCAL_CACHE_DIR="$TMPDIR/zig-local-cache"
   '';
 
+  preCheck = ''
+    export XDG_CONFIG_HOME="$TMPDIR/herdr-test-config"
+    export XDG_STATE_HOME="$TMPDIR/herdr-test-state"
+    mkdir -p "$XDG_CONFIG_HOME" "$XDG_STATE_HOME"
+  '';
+
+  # Plugin tests temporarily change process-wide configuration paths.
+  dontUseCargoParallelTests = true;
+  cargoTestFlags = [
+    "--bin"
+    "herdr"
+    "app::api::plugins"
+  ];
+
   meta = {
-    description = "Terminal workspace manager for AI coding agents";
+    description = "Terminal workspace manager with plugin theme inheritance";
     homepage = "https://herdr.dev";
     license = lib.licenses.asl20;
-    platforms = builtins.attrNames platformMap;
+    platforms = [
+      "aarch64-darwin"
+      "x86_64-darwin"
+      "aarch64-linux"
+      "x86_64-linux"
+    ];
     mainProgram = "herdr";
   };
 }

@@ -16,27 +16,39 @@ fi
 
 echo "Updating $CURRENT -> $LATEST"
 
-declare -A PLATFORM_TARGET=(
-  ["aarch64-darwin"]="macos-aarch64"
-  ["x86_64-darwin"]="macos-x86_64"
-  ["x86_64-linux"]="linux-x86_64"
-  ["aarch64-linux"]="linux-aarch64"
-)
+if [[ ! "$LATEST" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+  echo "ERROR: Unexpected stable version: $LATEST" >&2
+  exit 1
+fi
 
-declare -A HASHES
-for system in aarch64-darwin x86_64-darwin x86_64-linux aarch64-linux; do
-  target="${PLATFORM_TARGET[$system]}"
-  hex_hash=$(jq -er --arg target "$target" '.sha256[$target] // empty' <<<"$MANIFEST")
-  HASHES[$system]=$(nix hash convert --hash-algo sha256 --to sri "$hex_hash")
-  echo "  $system: ${HASHES[$system]}"
+source_json=$(nix store prefetch-file --unpack --json "https://github.com/herdrdev/herdr/archive/refs/tags/v$LATEST.tar.gz")
+source_hash=$(jq -er '.hash' <<<"$source_json")
+source_path=$(jq -er '.storePath' <<<"$source_json")
+
+for required in Cargo.lock vendor/libghostty-vt/build.zig.zon vendor/libghostty-vt/build.zig.zon.nix; do
+  if [ ! -f "$source_path/$required" ]; then
+    echo "ERROR: Herdr v$LATEST is missing $required; review the source build configuration" >&2
+    exit 1
+  fi
 done
 
-OLD="$CURRENT" NEW="$LATEST" perl -0pi -e 's/version = "\Q$ENV{OLD}\E"/version = "$ENV{NEW}"/' "$PACKAGE_NIX"
+if ! rg -q '^\s*\.minimum_zig_version\s*=\s*"0\.16\.0"' "$source_path/vendor/libghostty-vt/build.zig.zon"; then
+  echo "ERROR: Herdr v$LATEST needs a different Zig toolchain; review package.nix and zig.nix" >&2
+  exit 1
+fi
 
-for system in aarch64-darwin x86_64-darwin x86_64-linux aarch64-linux; do
-  old_hash=$(rg -A3 "\"$system\"" "$PACKAGE_NIX" | rg -m1 'hash = ' | sed 's/.*"\(.*\)".*/\1/')
-  new_hash="${HASHES[$system]}"
-  OLD="$old_hash" NEW="$new_hash" perl -0pi -e 's/\Q$ENV{OLD}\E/$ENV{NEW}/' "$PACKAGE_NIX"
-done
+if ! patch --dry-run --batch --fuzz=0 -p1 -d "$source_path" < "$SCRIPT_DIR/plugin-theme.patch"; then
+  echo "ERROR: plugin-theme.patch no longer applies to Herdr v$LATEST" >&2
+  exit 1
+fi
 
-echo "Updated package.nix to version $LATEST"
+tmp_file=$(mktemp "$SCRIPT_DIR/package.nix.XXXXXX")
+trap 'rm -f "$tmp_file"' EXIT
+cp "$PACKAGE_NIX" "$tmp_file"
+NEW_VERSION="$LATEST" SOURCE_HASH="$source_hash" perl -0pi -e '
+  s/version = "[^"]+";/version = "$ENV{NEW_VERSION}";/ == 1 or die "Expected one version\n";
+  s/\bhash = "[^"]+";/hash = "$ENV{SOURCE_HASH}";/ == 1 or die "Expected one source hash\n";
+' "$tmp_file"
+mv "$tmp_file" "$PACKAGE_NIX"
+
+echo "Updated Herdr source to version $LATEST"

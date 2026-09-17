@@ -1,8 +1,2 @@
 [herdr]
 placement = "overlay"
-
-[theme]
-selection_background = "#e5e5e5"
-comment_background = "#fff0c2"
-looks_good_background = "#e2f2df"
-markdown_code_foreground = "#8a5b00"
