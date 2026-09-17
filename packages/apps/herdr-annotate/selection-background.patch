@@ -1,0 +1,311 @@
+--- a/README.md
++++ b/README.md
+@@ -93,8 +93,13 @@
+ # ~/.config/plannotator-tui/config.toml
+ [herdr]
+ placement = "overlay"   # overlay (full tab, default) | split | popup
++
++[theme]
++selection_background = "#e5e5e5" # selected paragraph and file-tree row; must be #RRGGBB
+ ```
+ 
++Omit `selection_background` to use the terminal palette's indexed color 236.
++
+ `plannotator-tui config` prints the file's path and the values in effect. The `herdr/`
+ directory in this repo is the development manifest; users should install Herdr Annotate.
+ 
+--- a/crates/plannotator-tui/src/config.rs
++++ b/crates/plannotator-tui/src/config.rs
+@@ -9,14 +9,75 @@
+ use std::str::FromStr;
+ 
+ use anyhow::{Context, Result};
++use ratatui::style::Color;
+ use serde::{Deserialize, Serialize};
+ 
+ #[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
+ #[serde(deny_unknown_fields, default)]
+ pub(crate) struct Config {
+     pub(crate) herdr: HerdrConfig,
++    pub(crate) theme: ThemeConfig,
++}
++
++/// Colors used by the review UI.
++#[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
++#[serde(deny_unknown_fields, default)]
++pub(crate) struct ThemeConfig {
++    #[serde(
++        skip_serializing_if = "Option::is_none",
++        deserialize_with = "deserialize_selection_background",
++        serialize_with = "serialize_selection_background"
++    )]
++    selection_background: Option<Color>,
++}
++
++impl ThemeConfig {
++    pub(crate) fn selection_background(&self) -> Color {
++        self.selection_background.unwrap_or(Color::Indexed(236))
++    }
++}
++
++fn deserialize_selection_background<'de, D>(deserializer: D) -> std::result::Result<Option<Color>, D::Error>
++where
++    D: serde::Deserializer<'de>,
++{
++    let value = String::deserialize(deserializer)?;
++    let Some(hex) = value.strip_prefix('#') else {
++        return Err(serde::de::Error::custom(format!(
++            "selection_background must be a color in #RRGGBB format, got {value:?}"
++        )));
++    };
++    if hex.len() != 6 || !hex.bytes().all(|byte| byte.is_ascii_hexdigit()) {
++        return Err(serde::de::Error::custom(format!(
++            "selection_background must be a color in #RRGGBB format, got {value:?}"
++        )));
++    }
++    let rgb = u32::from_str_radix(hex, 16).map_err(serde::de::Error::custom)?;
++    let [_, red, green, blue] = rgb.to_be_bytes();
++    Ok(Some(Color::Rgb(red, green, blue)))
+ }
+ 
++#[allow(
++    clippy::ref_option,
++    clippy::trivially_copy_pass_by_ref,
++    reason = "serde's serialize_with callback receives a reference to the field"
++)]
++fn serialize_selection_background<S>(
++    color: &Option<Color>,
++    serializer: S,
++) -> std::result::Result<S::Ok, S::Error>
++where
++    S: serde::Serializer,
++{
++    match color {
++        Some(Color::Rgb(red, green, blue)) => {
++            serializer.serialize_some(&format!("#{red:02x}{green:02x}{blue:02x}"))
++        }
++        None => serializer.serialize_none(),
++        Some(_) => Err(serde::ser::Error::custom("selection background is not an RGB color")),
++    }
++}
++
+ /// How plannotator-tui opens inside Herdr.
+ #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+ #[serde(deny_unknown_fields, default)]
+@@ -151,10 +212,27 @@
+     #[test]
+     fn empty_file_is_the_default_config() {
+         assert_eq!(Config::parse("").expect("parses"), Config::default());
++        assert_eq!(Config::parse("[theme]\n").expect("parses"), Config::default());
+         assert_eq!(Config::default().herdr.placement, Placement::Overlay);
++        assert_eq!(Config::default().theme.selection_background(), Color::Indexed(236));
+     }
+ 
+     #[test]
++    fn selection_background_accepts_exact_rgb_hex() {
++        let config = Config::parse("[theme]\nselection_background = \"#e5E5e5\"\n").expect("parses");
++        assert_eq!(config.theme.selection_background(), Color::Rgb(229, 229, 229));
++    }
++
++    #[test]
++    fn selection_background_rejects_values_outside_rgb_hex_format() {
++        for value in ["e5e5e5", "#eee", "#e5e5e5ff", "#gggggg"] {
++            let text = format!("[theme]\nselection_background = {value:?}\n");
++            let err = Config::parse(&text).expect_err("rejected");
++            assert!(err.to_string().contains("#RRGGBB"), "{value:?}: {err}");
++        }
++    }
++
++    #[test]
+     fn unknown_key_error_names_the_key() {
+         let err = Config::parse("[herdr]\nplacment = \"popup\"\n").expect_err("rejected");
+         assert!(err.to_string().contains("placment"), "{err}");
+--- a/crates/plannotator-tui/src/app/mod.rs
++++ b/crates/plannotator-tui/src/app/mod.rs
+@@ -24,6 +24,7 @@
+ use anyhow::{Context, Result};
+ use plannotator_tui_schema::{DocumentSource, Kind, Provenance};
+ use ratatui::layout::Rect;
++use ratatui::style::Color;
+ 
+ use crate::delivery::Delivery;
+ use crate::doc::Document;
+@@ -183,6 +184,7 @@
+     status: Option<String>,
+     frame_ms: f64,
+     frame_max_ms: f64,
++    selection_background: Color,
+     /// Copy selections to the terminal clipboard (off for headless runs).
+     pub(crate) clipboard: bool,
+     pub(crate) quit: bool,
+@@ -247,11 +249,16 @@
+             status: None,
+             frame_ms: 0.0,
+             frame_max_ms: 0.0,
++            selection_background: Color::Indexed(236),
+             clipboard: false,
+             quit: false,
+         })
+     }
+ 
++    pub(crate) fn set_selection_background(&mut self, color: Color) {
++        self.selection_background = color;
++    }
++
+     /// Folder mode: a lazy tree on the left, the shallowest Markdown file open. A folder
+     /// with none near the top opens on a placeholder so the tree is still browsable.
+     pub(crate) fn open_folder(root: &Path, width: usize, delivery: Box<dyn Delivery>) -> Result<Self> {
+--- a/crates/plannotator-tui/src/app/draw.rs
++++ b/crates/plannotator-tui/src/app/draw.rs
+@@ -24,7 +24,6 @@
+ 
+ pub(crate) const COMMENT_BG: Color = Color::Indexed(58);
+ pub(crate) const APPROVE_BG: Color = Color::Indexed(22);
+-const BLOCK_BG: Color = Color::Indexed(236);
+ const TOOLBAR_BG: Color = Color::Indexed(238);
+ const CURSOR_BG: Color = Color::Indexed(240);
+ 
+@@ -129,7 +128,7 @@
+                 if open_path == Some(row.path.as_path()) {
+                     style = style.bold().fg(Color::Cyan);
+                 }
+-                let row_bg = (focused && i == self.tree_cursor).then_some(BLOCK_BG);
++                let row_bg = (focused && i == self.tree_cursor).then_some(self.selection_background);
+                 if let Some(bg) = row_bg {
+                     style = style.bg(bg);
+                 }
+@@ -165,7 +164,7 @@
+             if block == self.selected && !text_selection_active && self.pending.is_none() && doc_focused {
+                 buf.set_style(
+                     Rect { x: doc.x, y: screen_y, width: doc.width, height: 1 },
+-                    Style::new().bg(BLOCK_BG),
++                    Style::new().bg(self.selection_background),
+                 );
+             }
+ 
+--- a/crates/plannotator-tui/src/app/tests.rs
++++ b/crates/plannotator-tui/src/app/tests.rs
+@@ -14,7 +14,7 @@
+ };
+ 
+ use super::send::SendState;
+-use super::{App, Mode};
++use super::{App, Focus, Mode};
+ use crate::delivery::{Delivery, Discard, HerdrAgent};
+ 
+ /// A fresh, empty data directory for one test. `App::open` resolves the real one, and a
+@@ -102,6 +102,39 @@
+ }
+ 
+ #[test]
++fn configured_selection_background_colors_the_selected_document_block() {
++    let mut app = app(Box::new(Discard));
++    let color = ratatui::style::Color::Rgb(229, 229, 229);
++    app.set_selection_background(color);
++    let mut terminal = Terminal::new(TestBackend::new(80, 20)).expect("terminal");
++    terminal.draw(|frame| app.draw(frame)).expect("draw");
++    let cell = terminal
++        .backend()
++        .buffer()
++        .cell((app.geometry.doc.x, app.geometry.doc.y))
++        .expect("selected document cell");
++    assert_eq!(cell.bg, color);
++}
++
++#[test]
++fn configured_selection_background_colors_the_selected_tree_row() {
++    let root = scratch_data_dir();
++    std::fs::write(root.join("plan.md"), "# Plan\n").expect("fixture");
++    let mut app = App::open_folder(&root, 100, Box::new(Discard)).expect("folder opens");
++    let color = ratatui::style::Color::Rgb(229, 229, 229);
++    app.set_selection_background(color);
++    app.focus = Focus::Tree;
++    let mut terminal = Terminal::new(TestBackend::new(140, 20)).expect("terminal");
++    terminal.draw(|frame| app.draw(frame)).expect("draw");
++    let cell = terminal
++        .backend()
++        .buffer()
++        .cell((app.geometry.tree.x, app.geometry.tree.y))
++        .expect("selected tree cell");
++    assert_eq!(cell.bg, color);
++}
++
++#[test]
+ fn the_header_draws_the_send_button_and_records_where_it_is() {
+     let mut app = app(agent());
+     app.add_block_annotation(0, Kind::Comment, "x".to_owned()).expect("annotation");
+--- a/crates/plannotator-tui/src/cli.rs
++++ b/crates/plannotator-tui/src/cli.rs
+@@ -67,12 +67,19 @@
+ }
+ 
+ fn open_app(path: &PathBuf, width: usize, interactive: bool) -> Result<App> {
++    let selection_background = if interactive {
++        Config::load()?.theme.selection_background()
++    } else {
++        Config::default().theme.selection_background()
++    };
+     let delivery = delivery(interactive);
+-    if path.is_dir() {
++    let mut app = if path.is_dir() {
+         App::open_folder(path, width, delivery)
+     } else {
+         App::open(open_file(path)?, width, delivery)
+-    }
++    }?;
++    app.set_selection_background(selection_background);
++    Ok(app)
+ }
+ 
+ fn parse_kind(s: Option<&str>) -> Kind {
+--- a/crates/plannotator-tui/src/last/mod.rs
++++ b/crates/plannotator-tui/src/last/mod.rs
+@@ -21,6 +21,7 @@
+ use self::fallback::Discovery;
+ use crate::app::App;
+ use crate::cli;
++use crate::config::Config;
+ 
+ /// What `last` was asked to open. Every field optional; detection fills the gaps.
+ #[derive(Debug, Clone, Default, PartialEq, Eq)]
+@@ -50,7 +51,12 @@
+             return Ok(());
+         }
+         let source = DocumentSource::new(text, "stdin · message", true, Provenance::Stdin);
+-        return cli::run_ui(|width| App::open(source, width, cli::delivery(true)));
++        let selection_background = Config::load()?.theme.selection_background();
++        return cli::run_ui(|width| {
++            let mut app = App::open(source, width, cli::delivery(true))?;
++            app.set_selection_background(selection_background);
++            Ok(app)
++        });
+     }
+     let located = match locate::locate(options) {
+         Ok(located) => located,
+@@ -65,8 +71,10 @@
+                 return Err(err);
+             };
+             let note = format!("{err:#} — showing the pane's recent output instead");
++            let selection_background = Config::load()?.theme.selection_background();
+             return cli::run_ui(|width| {
+                 let mut app = App::open(screen, width, cli::delivery(true))?;
++                app.set_selection_background(selection_background);
+                 app.set_status(note.clone());
+                 Ok(app)
+             });
+@@ -83,6 +91,7 @@
+     let session_id = located.session_id;
+     let messages = located.messages;
+     let note = discovery_note(located.discovery, crate::herdr::context::HerdrEnv::from_env().in_herdr);
++    let selection_background = Config::load()?.theme.selection_background();
+     cli::run_ui(|width| {
+         let mut app = App::open_message(
+             label,
+@@ -92,6 +101,7 @@
+             width,
+             cli::delivery(true),
+         )?;
++        app.set_selection_background(selection_background);
+         if let Some(note) = note {
+             app.set_status(note);
+         }

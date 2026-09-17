@@ -5,6 +5,7 @@
   fetchzip,
   autoPatchelfHook,
   bash,
+  callPackage,
 }:
 
 let
@@ -32,10 +33,7 @@ let
     hash = sources.herdrAnnotate.hashes.${target};
   };
 
-  plannotatorTui = fetchurl {
-    url = "https://github.com/plannotator/plannotator-tui/releases/download/v${sources.plannotatorTui.version}/plannotator-tui-${target}";
-    hash = sources.plannotatorTui.hashes.${target};
-  };
+  plannotatorTui = callPackage ./plannotator-tui.nix { inherit sources; };
 in
 stdenv.mkDerivation {
   pname = "herdr-annotate";
@@ -58,7 +56,7 @@ stdenv.mkDerivation {
       --replace-fail 'command = ["sh", "-c", "exec bash ' 'command = ["${bash}/bin/bash", "-c", "exec ${bash}/bin/bash '
 
     install -Dm755 ${herdrAnnotate} "$pluginRoot/bin/herdr-annotate.exe"
-    install -Dm755 ${plannotatorTui} "$pluginRoot/bin/plannotator-tui.exe"
+    install -Dm755 ${plannotatorTui}/bin/plannotator-tui "$pluginRoot/bin/plannotator-tui.exe"
     install -Dm755 scripts/plannotator-tui.sh "$pluginRoot/scripts/plannotator-tui.sh"
     substituteInPlace "$pluginRoot/scripts/plannotator-tui.sh" \
       --replace-fail '#!/usr/bin/env bash' '#!${bash}/bin/bash'

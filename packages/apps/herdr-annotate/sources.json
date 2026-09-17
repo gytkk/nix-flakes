@@ -13,11 +13,7 @@
   },
   "plannotatorTui": {
     "version": "0.8.0",
-    "hashes": {
-      "aarch64-apple-darwin": "sha256-fQV/Oho6ojywpEhD/tPwTUmKHaUhl83sAhLG+OFhjLI=",
-      "x86_64-apple-darwin": "sha256-a2CE0W7YqgmRWJL5B+WBhqbsacVgdSz/nQQr3Ltigg8=",
-      "x86_64-unknown-linux-gnu": "sha256-+qZROtGkdXooYelVcBaPLIEY8hm36NalF1oAj+I0/gs=",
-      "aarch64-unknown-linux-gnu": "sha256-I/keWx5dBKGsQfHY9Q6/TCDwRhFBlShilypjDvaQ4Y4="
-    }
+    "sourceHash": "sha256-m/2NHrdMbXbiUJFr5tRZBacDiwEOzHLGr3TIwh68+0Y=",
+    "cargoHash": "sha256-N8ls2zp9YuMuPlLs7NknUbXPOX0EI9e3fDStsNUVm9c="
   }
 }
