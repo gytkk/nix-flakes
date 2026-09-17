@@ -30,7 +30,8 @@ Apply these rules to documentation, comments, reports, prompts, commit messages,
 
 ## Korean prose
 
-- Prefer complete sentences with clear particles and predicates over compressed noun chains or uncommon prefixed and Sino-Korean nouns.
+- Prefer complete sentences with clear particles and predicates over compressed noun chains or uncommon prefixed and Sino-Korean nouns, except for PR titles as specified below.
+- When creating a PR with a Korean title, end the title with a concise action noun such as `분리`, `추가`, `수정`, or `제거`, rather than a sentence ending such as `분리한다`. Attach Korean particles directly to the preceding word, including English identifiers. Example: `feat(core)!: schema와 composite의 summary를 doc에서 분리`.
 - Use precise verbs such as `명시하다`, `포함하다`, `고정하다`, and `저장하다` instead of informal `박다` expressions.
 - Keep familiar concise terms when they are clear. Use Korean script in Korean prose, while retaining official English names when they are clearer than literal translations.
 - Use `관측` only when contrasting actual data with defined or expected behavior. Otherwise state what the data records or what actually happened.
