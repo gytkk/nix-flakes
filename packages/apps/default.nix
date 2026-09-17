@@ -7,6 +7,7 @@
   codexbar = pkgs.callPackage ./codexbar/package.nix { };
   herdr = pkgs.callPackage ./herdr/package.nix { };
   herdr-annotate = pkgs.callPackage ./herdr-annotate/package.nix { };
+  herdr-auto-title = pkgs.callPackage ./herdr-auto-title/package.nix { };
   opencode = pkgs.callPackage ./opencode/package.nix { };
   pi = pkgs.callPackage ./pi/package.nix { };
 }

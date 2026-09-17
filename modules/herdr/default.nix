@@ -27,5 +27,10 @@ in
       run ${pkgs.herdr}/bin/herdr plugin link \
         ${pkgs.herdr-annotate}/share/herdr/plugins/annotate --enabled
     '';
+
+    home.activation.linkHerdrAutoTitle = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+      run ${pkgs.herdr}/bin/herdr plugin link \
+        ${pkgs.herdr-auto-title}/share/herdr/plugins/auto-title --enabled
+    '';
   };
 }
