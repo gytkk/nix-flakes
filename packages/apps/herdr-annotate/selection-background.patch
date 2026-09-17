@@ -1,28 +1,30 @@
 --- a/README.md
 +++ b/README.md
-@@ -93,8 +93,13 @@
+@@ -93,7 +93,15 @@
  # ~/.config/plannotator-tui/config.toml
  [herdr]
  placement = "overlay"   # overlay (full tab, default) | split | popup
 +
 +[theme]
-+selection_background = "#e5e5e5" # selected paragraph and file-tree row; must be #RRGGBB
++selection_background = "#e5e5e5" # selected paragraph and file-tree row
++comment_background = "#fff0c2" # comment highlight in the document
++looks_good_background = "#e2f2df" # approval highlight in the document
++markdown_code_foreground = "#8a5b00" # inline and fenced code text
  ```
- 
-+Omit `selection_background` to use the terminal palette's indexed color 236.
 +
++Theme colors accept `#RRGGBB`. Omitted settings keep the defaults: indexed colors 236, 58, and 22 for the three backgrounds, and bright yellow for code text. Colors are loaded when an interactive review opens; headless commands retain the defaults.
+
  `plannotator-tui config` prints the file's path and the values in effect. The `herdr/`
  directory in this repo is the development manifest; users should install Herdr Annotate.
- 
 --- a/crates/plannotator-tui/src/config.rs
 +++ b/crates/plannotator-tui/src/config.rs
-@@ -9,14 +9,75 @@
+@@ -9,12 +9,96 @@
  use std::str::FromStr;
- 
+
  use anyhow::{Context, Result};
 +use ratatui::style::Color;
  use serde::{Deserialize, Serialize};
- 
+
  #[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
  #[serde(deny_unknown_fields, default)]
  pub(crate) struct Config {
@@ -31,52 +33,75 @@
 +}
 +
 +/// Colors used by the review UI.
-+#[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
++#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 +#[serde(deny_unknown_fields, default)]
 +pub(crate) struct ThemeConfig {
 +    #[serde(
 +        skip_serializing_if = "Option::is_none",
-+        deserialize_with = "deserialize_selection_background",
-+        serialize_with = "serialize_selection_background"
++        deserialize_with = "deserialize_rgb_color",
++        serialize_with = "serialize_rgb_color"
 +    )]
 +    selection_background: Option<Color>,
++    #[serde(
++        skip_serializing_if = "Option::is_none",
++        deserialize_with = "deserialize_rgb_color",
++        serialize_with = "serialize_rgb_color"
++    )]
++    comment_background: Option<Color>,
++    #[serde(
++        skip_serializing_if = "Option::is_none",
++        deserialize_with = "deserialize_rgb_color",
++        serialize_with = "serialize_rgb_color"
++    )]
++    looks_good_background: Option<Color>,
++    #[serde(
++        skip_serializing_if = "Option::is_none",
++        deserialize_with = "deserialize_rgb_color",
++        serialize_with = "serialize_rgb_color"
++    )]
++    markdown_code_foreground: Option<Color>,
 +}
 +
 +impl ThemeConfig {
 +    pub(crate) fn selection_background(&self) -> Color {
 +        self.selection_background.unwrap_or(Color::Indexed(236))
 +    }
++
++    pub(crate) fn comment_background(&self) -> Color {
++        self.comment_background.unwrap_or(Color::Indexed(58))
++    }
++
++    pub(crate) fn looks_good_background(&self) -> Color {
++        self.looks_good_background.unwrap_or(Color::Indexed(22))
++    }
++
++    pub(crate) fn markdown_code_foreground(&self) -> Color {
++        self.markdown_code_foreground.unwrap_or(Color::LightYellow)
++    }
 +}
 +
-+fn deserialize_selection_background<'de, D>(deserializer: D) -> std::result::Result<Option<Color>, D::Error>
++fn deserialize_rgb_color<'de, D>(deserializer: D) -> std::result::Result<Option<Color>, D::Error>
 +where
 +    D: serde::Deserializer<'de>,
 +{
 +    let value = String::deserialize(deserializer)?;
 +    let Some(hex) = value.strip_prefix('#') else {
-+        return Err(serde::de::Error::custom(format!(
-+            "selection_background must be a color in #RRGGBB format, got {value:?}"
-+        )));
++        return Err(serde::de::Error::custom(format!("expected a color in #RRGGBB format, got {value:?}")));
 +    };
 +    if hex.len() != 6 || !hex.bytes().all(|byte| byte.is_ascii_hexdigit()) {
-+        return Err(serde::de::Error::custom(format!(
-+            "selection_background must be a color in #RRGGBB format, got {value:?}"
-+        )));
++        return Err(serde::de::Error::custom(format!("expected a color in #RRGGBB format, got {value:?}")));
 +    }
 +    let rgb = u32::from_str_radix(hex, 16).map_err(serde::de::Error::custom)?;
 +    let [_, red, green, blue] = rgb.to_be_bytes();
 +    Ok(Some(Color::Rgb(red, green, blue)))
- }
- 
++}
++
 +#[allow(
 +    clippy::ref_option,
 +    clippy::trivially_copy_pass_by_ref,
 +    reason = "serde's serialize_with callback receives a reference to the field"
 +)]
-+fn serialize_selection_background<S>(
-+    color: &Option<Color>,
-+    serializer: S,
-+) -> std::result::Result<S::Ok, S::Error>
++fn serialize_rgb_color<S>(color: &Option<Color>, serializer: S) -> std::result::Result<S::Ok, S::Error>
 +where
 +    S: serde::Serializer,
 +{
@@ -85,123 +110,236 @@
 +            serializer.serialize_some(&format!("#{red:02x}{green:02x}{blue:02x}"))
 +        }
 +        None => serializer.serialize_none(),
-+        Some(_) => Err(serde::ser::Error::custom("selection background is not an RGB color")),
++        Some(_) => Err(serde::ser::Error::custom("theme color is not an RGB color")),
 +    }
-+}
-+
+ }
+
  /// How plannotator-tui opens inside Herdr.
- #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
- #[serde(deny_unknown_fields, default)]
-@@ -151,10 +212,27 @@
+@@ -151,7 +235,50 @@
      #[test]
      fn empty_file_is_the_default_config() {
          assert_eq!(Config::parse("").expect("parses"), Config::default());
 +        assert_eq!(Config::parse("[theme]\n").expect("parses"), Config::default());
          assert_eq!(Config::default().herdr.placement, Placement::Overlay);
 +        assert_eq!(Config::default().theme.selection_background(), Color::Indexed(236));
-     }
- 
-     #[test]
-+    fn selection_background_accepts_exact_rgb_hex() {
-+        let config = Config::parse("[theme]\nselection_background = \"#e5E5e5\"\n").expect("parses");
-+        assert_eq!(config.theme.selection_background(), Color::Rgb(229, 229, 229));
++        assert_eq!(Config::default().theme.comment_background(), Color::Indexed(58));
++        assert_eq!(Config::default().theme.looks_good_background(), Color::Indexed(22));
++        assert_eq!(Config::default().theme.markdown_code_foreground(), Color::LightYellow);
 +    }
 +
 +    #[test]
-+    fn selection_background_rejects_values_outside_rgb_hex_format() {
-+        for value in ["e5e5e5", "#eee", "#e5e5e5ff", "#gggggg"] {
-+            let text = format!("[theme]\nselection_background = {value:?}\n");
-+            let err = Config::parse(&text).expect_err("rejected");
-+            assert!(err.to_string().contains("#RRGGBB"), "{value:?}: {err}");
++    fn theme_colors_accept_rgb_hex_and_roundtrip() {
++        let config = Config::parse(
++            "[theme]\nselection_background = \"#e5E5e5\"\ncomment_background = \"#fff0c2\"\nlooks_good_background = \"#e2f2df\"\nmarkdown_code_foreground = \"#8a5b00\"\n",
++        ).expect("parses");
++        assert_eq!(config.theme.selection_background(), Color::Rgb(229, 229, 229));
++        assert_eq!(config.theme.comment_background(), Color::Rgb(255, 240, 194));
++        assert_eq!(config.theme.looks_good_background(), Color::Rgb(226, 242, 223));
++        assert_eq!(config.theme.markdown_code_foreground(), Color::Rgb(138, 91, 0));
++        assert_eq!(Config::parse(&config.to_toml().expect("serializes")).expect("parses"), config);
++    }
++
++    #[test]
++    fn theme_colors_reject_values_outside_rgb_hex_format() {
++        for key in [
++            "selection_background",
++            "comment_background",
++            "looks_good_background",
++            "markdown_code_foreground",
++        ] {
++            for value in ["e5e5e5", "#eee", "#e5e5e5ff", "#gggggg"] {
++                let text = format!("[theme]\n{key} = {value:?}\n");
++                let err = Config::parse(&text).expect_err("rejected");
++                assert!(err.to_string().contains("#RRGGBB"), "{key} = {value:?}: {err}");
++            }
 +        }
 +    }
 +
 +    #[test]
-     fn unknown_key_error_names_the_key() {
-         let err = Config::parse("[herdr]\nplacment = \"popup\"\n").expect_err("rejected");
-         assert!(err.to_string().contains("placment"), "{err}");
++    fn selection_only_config_preserves_other_theme_defaults() {
++        let config = Config::parse("[theme]\nselection_background = \"#e5e5e5\"\n").expect("parses");
++        assert_eq!(config.theme.comment_background(), Color::Indexed(58));
++        assert_eq!(config.theme.looks_good_background(), Color::Indexed(22));
++        assert_eq!(config.theme.markdown_code_foreground(), Color::LightYellow);
++        assert!(!config.to_toml().expect("serializes").contains("comment_background"));
++        assert!(Config::parse("[theme]\ncomment_backgroun = \"#fff0c2\"\n").is_err());
+     }
+
+     #[test]
 --- a/crates/plannotator-tui/src/app/mod.rs
 +++ b/crates/plannotator-tui/src/app/mod.rs
-@@ -24,6 +24,7 @@
+@@ -24,7 +24,9 @@
  use anyhow::{Context, Result};
  use plannotator_tui_schema::{DocumentSource, Kind, Provenance};
  use ratatui::layout::Rect;
+-
 +use ratatui::style::Color;
- 
++
++use crate::config::ThemeConfig;
  use crate::delivery::Delivery;
  use crate::doc::Document;
-@@ -183,6 +184,7 @@
+ use crate::layout::DocLayout;
+@@ -109,9 +111,15 @@
+ }
+
+ impl Open {
+-    fn new(source: DocumentSource, width: usize, data_dir: &Path, project: &str) -> Result<Self> {
++    fn new(
++        source: DocumentSource,
++        width: usize,
++        data_dir: &Path,
++        project: &str,
++        code_foreground: Color,
++    ) -> Result<Self> {
+         let doc = Document::parse(source.content.clone());
+-        let layout = DocLayout::build(&doc, width);
++        let layout = DocLayout::build(&doc, width, code_foreground);
+         let store = match (&source.provenance, source.transient) {
+             (Provenance::File { path }, false) => {
+                 Store::load(&Location::for_file(data_dir, project, path), &doc)?
+@@ -183,6 +191,7 @@
      status: Option<String>,
      frame_ms: f64,
      frame_max_ms: f64,
-+    selection_background: Color,
++    theme: ThemeConfig,
      /// Copy selections to the terminal clipboard (off for headless runs).
      pub(crate) clipboard: bool,
      pub(crate) quit: bool,
-@@ -247,11 +249,16 @@
+@@ -205,7 +214,8 @@
+             _ => std::env::current_dir().unwrap_or_else(|_| PathBuf::from(".")),
+         };
+         let project = workspace_paths::project_name(&folder);
+-        let open = Open::new(source, width, &data_dir, &project)?;
++        let theme = ThemeConfig::default();
++        let open = Open::new(source, width, &data_dir, &project, theme.markdown_code_foreground())?;
+         let send_state = if open.store.all_delivered() { SendState::Sent } else { SendState::Ready };
+         Ok(Self {
+             open,
+@@ -247,9 +257,20 @@
              status: None,
              frame_ms: 0.0,
              frame_max_ms: 0.0,
-+            selection_background: Color::Indexed(236),
++            theme,
              clipboard: false,
              quit: false,
          })
-     }
- 
-+    pub(crate) fn set_selection_background(&mut self, color: Color) {
-+        self.selection_background = color;
 +    }
 +
++    pub(crate) fn set_theme(&mut self, theme: ThemeConfig) {
++        if self.theme.markdown_code_foreground() != theme.markdown_code_foreground() {
++            for open in std::iter::once(&mut self.open).chain(self.pick_cache.values_mut()) {
++                open.layout =
++                    DocLayout::build(&open.doc, open.layout.width, theme.markdown_code_foreground());
++            }
++        }
++        self.theme = theme;
+     }
+
      /// Folder mode: a lazy tree on the left, the shallowest Markdown file open. A folder
-     /// with none near the top opens on a placeholder so the tree is still browsable.
-     pub(crate) fn open_folder(root: &Path, width: usize, delivery: Box<dyn Delivery>) -> Result<Self> {
+@@ -273,7 +294,13 @@
+         // The project is the folder's, not the first file's parent's.
+         app.project = workspace_paths::project_name(root);
+         if let Some(path) = &first {
+-            app.open = Open::new(read_file(path)?, width, &app.data_dir, &app.project)?;
++            app.open = Open::new(
++                read_file(path)?,
++                width,
++                &app.data_dir,
++                &app.project,
++                app.theme.markdown_code_foreground(),
++            )?;
+         }
+         app.refresh_counts(&mut tree);
+         app.tree_cursor = first.as_deref().and_then(|p| tree.position(p)).unwrap_or(0);
+@@ -330,7 +357,13 @@
+             return Ok(());
+         }
+         let width = self.open.layout.width;
+-        self.open = Open::new(read_file(&path)?, width, &self.data_dir, &self.project)?;
++        self.open = Open::new(
++            read_file(&path)?,
++            width,
++            &self.data_dir,
++            &self.project,
++            self.theme.markdown_code_foreground(),
++        )?;
+         self.update_open_review_counts();
+         self.derive_send_state();
+         self.scroll = 0;
+@@ -475,7 +508,8 @@
+         let path = path.clone();
+         self.open.source = read_file(&path)?;
+         self.open.doc = Document::parse(self.open.source.content.clone());
+-        self.open.layout = DocLayout::build(&self.open.doc, self.open.layout.width);
++        self.open.layout =
++            DocLayout::build(&self.open.doc, self.open.layout.width, self.theme.markdown_code_foreground());
+         self.open.store =
+             Store::load(&Location::for_file(&self.data_dir, &self.project, &path), &self.open.doc)?;
+         self.refresh_review_counts();
 --- a/crates/plannotator-tui/src/app/draw.rs
 +++ b/crates/plannotator-tui/src/app/draw.rs
-@@ -24,7 +24,6 @@
- 
- pub(crate) const COMMENT_BG: Color = Color::Indexed(58);
- pub(crate) const APPROVE_BG: Color = Color::Indexed(22);
+@@ -22,9 +22,6 @@
+ pub(super) const TREE_MIN_TOTAL_WIDTH: u16 = 120;
+ const COMPOSE_WIDTH: u16 = 48;
+
+-pub(crate) const COMMENT_BG: Color = Color::Indexed(58);
+-pub(crate) const APPROVE_BG: Color = Color::Indexed(22);
 -const BLOCK_BG: Color = Color::Indexed(236);
  const TOOLBAR_BG: Color = Color::Indexed(238);
  const CURSOR_BG: Color = Color::Indexed(240);
- 
-@@ -129,7 +128,7 @@
+
+@@ -129,7 +126,7 @@
                  if open_path == Some(row.path.as_path()) {
                      style = style.bold().fg(Color::Cyan);
                  }
 -                let row_bg = (focused && i == self.tree_cursor).then_some(BLOCK_BG);
-+                let row_bg = (focused && i == self.tree_cursor).then_some(self.selection_background);
++                let row_bg = (focused && i == self.tree_cursor).then_some(self.theme.selection_background());
                  if let Some(bg) = row_bg {
                      style = style.bg(bg);
                  }
-@@ -165,7 +164,7 @@
+@@ -165,7 +162,7 @@
              if block == self.selected && !text_selection_active && self.pending.is_none() && doc_focused {
                  buf.set_style(
                      Rect { x: doc.x, y: screen_y, width: doc.width, height: 1 },
 -                    Style::new().bg(BLOCK_BG),
-+                    Style::new().bg(self.selection_background),
++                    Style::new().bg(self.theme.selection_background()),
                  );
              }
- 
+
+@@ -180,8 +177,8 @@
+                 let Some(kind) = kind else { continue };
+                 row_has_annotation = true;
+                 let style = match kind {
+-                    Kind::Comment => Style::new().bg(COMMENT_BG),
+-                    Kind::LooksGood => Style::new().bg(APPROVE_BG),
++                    Kind::Comment => Style::new().bg(self.theme.comment_background()),
++                    Kind::LooksGood => Style::new().bg(self.theme.looks_good_background()),
+                     Kind::Delete => {
+                         Style::new().fg(Color::Red).add_modifier(Modifier::CROSSED_OUT | Modifier::DIM)
+                     }
 --- a/crates/plannotator-tui/src/app/tests.rs
 +++ b/crates/plannotator-tui/src/app/tests.rs
-@@ -14,7 +14,7 @@
+@@ -14,7 +14,8 @@
  };
- 
+
  use super::send::SendState;
 -use super::{App, Mode};
 +use super::{App, Focus, Mode};
++use crate::config::Config;
  use crate::delivery::{Delivery, Discard, HerdrAgent};
- 
+
  /// A fresh, empty data directory for one test. `App::open` resolves the real one, and a
-@@ -102,6 +102,39 @@
- }
- 
- #[test]
+@@ -99,6 +100,129 @@
+
+ fn row(rows: &[String], index: usize) -> &str {
+     rows.get(index).map_or("", String::as_str)
++}
++
++#[test]
 +fn configured_selection_background_colors_the_selected_document_block() {
 +    let mut app = app(Box::new(Discard));
 +    let color = ratatui::style::Color::Rgb(229, 229, 229);
-+    app.set_selection_background(color);
++    app.set_theme(Config::parse("[theme]\nselection_background = \"#e5e5e5\"\n").expect("theme").theme);
 +    let mut terminal = Terminal::new(TestBackend::new(80, 20)).expect("terminal");
 +    terminal.draw(|frame| app.draw(frame)).expect("draw");
 +    let cell = terminal
@@ -218,7 +356,7 @@
 +    std::fs::write(root.join("plan.md"), "# Plan\n").expect("fixture");
 +    let mut app = App::open_folder(&root, 100, Box::new(Discard)).expect("folder opens");
 +    let color = ratatui::style::Color::Rgb(229, 229, 229);
-+    app.set_selection_background(color);
++    app.set_theme(Config::parse("[theme]\nselection_background = \"#e5e5e5\"\n").expect("theme").theme);
 +    app.focus = Focus::Tree;
 +    let mut terminal = Terminal::new(TestBackend::new(140, 20)).expect("terminal");
 +    terminal.draw(|frame| app.draw(frame)).expect("draw");
@@ -231,20 +369,103 @@
 +}
 +
 +#[test]
- fn the_header_draws_the_send_button_and_records_where_it_is() {
-     let mut app = app(agent());
-     app.add_block_annotation(0, Kind::Comment, "x".to_owned()).expect("annotation");
++fn configured_annotation_backgrounds_override_selection_without_changing_text_color() {
++    use ratatui::style::Color;
++    for (kind, expected) in
++        [(Kind::Comment, Color::Rgb(255, 240, 194)), (Kind::LooksGood, Color::Rgb(226, 242, 223))]
++    {
++        let mut app = app(Box::new(Discard));
++        app.set_theme(Config::parse("[theme]\nselection_background = \"#e5e5e5\"\ncomment_background = \"#fff0c2\"\nlooks_good_background = \"#e2f2df\"\n").expect("theme").theme);
++        app.add_quote_annotation("Plan", kind, "review".to_owned()).expect("annotation");
++        let mut terminal = Terminal::new(TestBackend::new(80, 20)).expect("terminal");
++        terminal.draw(|frame| app.draw(frame)).expect("draw");
++        let cell = terminal
++            .backend()
++            .buffer()
++            .cell((app.geometry.doc.x, app.geometry.doc.y))
++            .expect("annotation cell");
++        assert_eq!(cell.symbol(), "P");
++        assert_eq!(cell.bg, expected);
++        assert_eq!(cell.fg, Color::Cyan, "heading color is preserved");
++        let rest = terminal
++            .backend()
++            .buffer()
++            .cell((app.geometry.doc.x + 5, app.geometry.doc.y))
++            .expect("selection cell");
++        assert_eq!(rest.bg, Color::Rgb(229, 229, 229));
++    }
++}
++
++fn assert_code_foreground(app: &mut App, color: ratatui::style::Color) {
++    let mut terminal = Terminal::new(TestBackend::new(140, 20)).expect("terminal");
++    terminal.draw(|frame| app.draw(frame)).expect("draw");
++    let buffer = terminal.backend().buffer();
++    let doc = app.geometry.doc;
++    let y = (doc.y..doc.bottom())
++        .find(|&y| buffer.cell((doc.x, y)).is_some_and(|cell| cell.symbol() == "c"))
++        .expect("visible code row, after the fence for a code block");
++    for (offset, symbol) in ["c", "o", "d", "e"].into_iter().enumerate() {
++        let cell = buffer.cell((doc.x + offset as u16, y)).expect("code cell");
++        assert_eq!(cell.symbol(), symbol);
++        assert_eq!(cell.fg, color);
++    }
++}
++
++#[test]
++fn configured_code_color_survives_file_switch_and_reload() {
++    let root = scratch_data_dir();
++    for name in ["a.md", "b.md"] {
++        std::fs::write(root.join(name), "`code`\n").expect("fixture");
++    }
++    let mut app = App::open_folder(&root, 100, Box::new(Discard)).expect("folder");
++    app.data_dir = scratch_data_dir();
++    assert_code_foreground(&mut app, ratatui::style::Color::LightYellow);
++    let theme = Config::parse("[theme]\nmarkdown_code_foreground = \"#8a5b00\"\n").expect("theme").theme;
++    app.set_theme(theme);
++    assert_code_foreground(&mut app, theme.markdown_code_foreground());
++    app.tree_cursor = app.tree.as_ref().expect("tree").position(&root.join("b.md")).expect("second file");
++    app.open_tree_selection().expect("switch");
++    assert_code_foreground(&mut app, theme.markdown_code_foreground());
++    std::fs::write(root.join("b.md"), "```\ncode reloaded\n```\n").expect("update fixture");
++    app.reload().expect("reload");
++    assert_code_foreground(&mut app, theme.markdown_code_foreground());
++}
++
++#[test]
++fn configured_code_color_survives_message_preview_and_cached_return() {
++    let mut messages = candidates();
++    for message in &mut messages {
++        message.text = "`code`\n".to_owned();
++    }
++    let mut app = App::open_message("claude", "/tmp/transcript.jsonl", None, messages, 60, Box::new(Discard))
++        .expect("messages");
++    app.data_dir = scratch_data_dir();
++    let theme = Config::parse("[theme]\nmarkdown_code_foreground = \"#8a5b00\"\n").expect("theme").theme;
++    app.set_theme(theme);
++    for key in [
++        KeyCode::Enter,
++        KeyCode::Char('p'),
++        KeyCode::Down,
++        KeyCode::Enter,
++        KeyCode::Char('p'),
++        KeyCode::Up,
++        KeyCode::Enter,
++    ] {
++        app.handle_event(&Event::Key(KeyEvent::from(key))).expect("navigate");
++        if app.mode == Mode::Browse {
++            assert_code_foreground(&mut app, theme.markdown_code_foreground());
++        }
++    }
+ }
+
+ #[test]
 --- a/crates/plannotator-tui/src/cli.rs
 +++ b/crates/plannotator-tui/src/cli.rs
-@@ -67,12 +67,19 @@
+@@ -67,12 +67,15 @@
  }
- 
+
  fn open_app(path: &PathBuf, width: usize, interactive: bool) -> Result<App> {
-+    let selection_background = if interactive {
-+        Config::load()?.theme.selection_background()
-+    } else {
-+        Config::default().theme.selection_background()
-+    };
++    let theme = if interactive { Config::load()?.theme } else { Config::default().theme };
      let delivery = delivery(interactive);
 -    if path.is_dir() {
 +    let mut app = if path.is_dir() {
@@ -253,11 +474,20 @@
          App::open(open_file(path)?, width, delivery)
 -    }
 +    }?;
-+    app.set_selection_background(selection_background);
++    app.set_theme(theme);
 +    Ok(app)
  }
- 
+
  fn parse_kind(s: Option<&str>) -> Kind {
+@@ -307,7 +310,7 @@
+     let parse_ms = t.elapsed().as_secs_f64() * 1000.0;
+
+     let t = Instant::now();
+-    let mut layout = DocLayout::build(&doc, 100);
++    let mut layout = DocLayout::build(&doc, 100, Config::default().theme.markdown_code_foreground());
+     let build_ms = t.elapsed().as_secs_f64() * 1000.0;
+
+     let reflow: Vec<String> = [60usize, 140, 80, 120]
 --- a/crates/plannotator-tui/src/last/mod.rs
 +++ b/crates/plannotator-tui/src/last/mod.rs
 @@ -21,6 +21,7 @@
@@ -265,7 +495,7 @@
  use crate::app::App;
  use crate::cli;
 +use crate::config::Config;
- 
+
  /// What `last` was asked to open. Every field optional; detection fills the gaps.
  #[derive(Debug, Clone, Default, PartialEq, Eq)]
 @@ -50,7 +51,12 @@
@@ -273,10 +503,10 @@
          }
          let source = DocumentSource::new(text, "stdin · message", true, Provenance::Stdin);
 -        return cli::run_ui(|width| App::open(source, width, cli::delivery(true)));
-+        let selection_background = Config::load()?.theme.selection_background();
++        let theme = Config::load()?.theme;
 +        return cli::run_ui(|width| {
 +            let mut app = App::open(source, width, cli::delivery(true))?;
-+            app.set_selection_background(selection_background);
++            app.set_theme(theme);
 +            Ok(app)
 +        });
      }
@@ -286,10 +516,10 @@
                  return Err(err);
              };
              let note = format!("{err:#} — showing the pane's recent output instead");
-+            let selection_background = Config::load()?.theme.selection_background();
++            let theme = Config::load()?.theme;
              return cli::run_ui(|width| {
                  let mut app = App::open(screen, width, cli::delivery(true))?;
-+                app.set_selection_background(selection_background);
++                app.set_theme(theme);
                  app.set_status(note.clone());
                  Ok(app)
              });
@@ -297,7 +527,7 @@
      let session_id = located.session_id;
      let messages = located.messages;
      let note = discovery_note(located.discovery, crate::herdr::context::HerdrEnv::from_env().in_herdr);
-+    let selection_background = Config::load()?.theme.selection_background();
++    let theme = Config::load()?.theme;
      cli::run_ui(|width| {
          let mut app = App::open_message(
              label,
@@ -305,7 +535,154 @@
              width,
              cli::delivery(true),
          )?;
-+        app.set_selection_background(selection_background);
++        app.set_theme(theme);
          if let Some(note) = note {
              app.set_status(note);
          }
+--- a/crates/plannotator-tui/src/app/feedback/tests.rs
++++ b/crates/plannotator-tui/src/app/feedback/tests.rs
+@@ -207,7 +207,8 @@
+             message_id: Some("message-1".into()),
+         },
+     );
+-    app.open = Open::new(source, 80, &app.data_dir, &app.project).expect("reply");
++    app.open = Open::new(source, 80, &app.data_dir, &app.project, app.theme.markdown_code_foreground())
++        .expect("reply");
+     app.add_quote_annotation("one", Kind::Comment, "A".into()).expect("A");
+     press(&mut app, 'E');
+     app.add_quote_annotation("two", Kind::Comment, "B".into()).expect("B");
+--- a/crates/plannotator-tui/src/app/menu/tests.rs
++++ b/crates/plannotator-tui/src/app/menu/tests.rs
+@@ -181,7 +181,8 @@
+             message_id: Some("message-1".into()),
+         },
+     );
+-    app.open = Open::new(source, 80, &app.data_dir, &app.project).expect("reply");
++    app.open = Open::new(source, 80, &app.data_dir, &app.project, app.theme.markdown_code_foreground())
++        .expect("reply");
+     let screen = draw(&mut app, 100, 24);
+     assert!(!screen.contains("Review \u{25be}"), "{screen}");
+     assert!(app.geometry.review_button.is_none());
+--- a/crates/plannotator-tui/src/app/pick.rs
++++ b/crates/plannotator-tui/src/app/pick.rs
+@@ -57,7 +57,13 @@
+         } else {
+             let Some(message) = self.candidates.get(index) else { return Ok(()) };
+             let source = message_source(&self.message_host, self.message_session.as_deref(), message);
+-            Open::new(source, self.open.layout.width, &self.data_dir, &self.project)?
++            Open::new(
++                source,
++                self.open.layout.width,
++                &self.data_dir,
++                &self.project,
++                self.theme.markdown_code_foreground(),
++            )?
+         };
+         let leaving = std::mem::replace(&mut self.open, next);
+         self.pick_cache.insert(self.pick_open, leaving);
+--- a/crates/plannotator-tui/src/app/review_test_support.rs
++++ b/crates/plannotator-tui/src/app/review_test_support.rs
+@@ -69,7 +69,14 @@
+     let mut app = App::open(source, 100, Box::new(delivery.clone())).expect("app");
+     app.data_dir = root.join("data");
+     app.project = "review-tests".into();
+-    app.open = Open::new(read_file(&path).expect("file"), 100, &app.data_dir, &app.project).expect("open");
++    app.open = Open::new(
++        read_file(&path).expect("file"),
++        100,
++        &app.data_dir,
++        &app.project,
++        app.theme.markdown_code_foreground(),
++    )
++    .expect("open");
+     (root, app, delivery)
+ }
+
+@@ -111,7 +118,14 @@
+
+ pub(super) fn reopen(app: &mut App) {
+     let Provenance::File { path } = &app.open.source.provenance else { return };
+-    app.open = Open::new(read_file(path).expect("read"), 100, &app.data_dir, &app.project).expect("reopen");
++    app.open = Open::new(
++        read_file(path).expect("read"),
++        100,
++        &app.data_dir,
++        &app.project,
++        app.theme.markdown_code_foreground(),
++    )
++    .expect("reopen");
+     app.refresh_review_counts();
+     app.derive_send_state();
+ }
+--- a/crates/plannotator-tui/src/app/send/tests.rs
++++ b/crates/plannotator-tui/src/app/send/tests.rs
+@@ -117,7 +117,9 @@
+                     message_id: Some("message-1".into()),
+                 },
+             );
+-            app.open = Open::new(source, 80, &app.data_dir, &app.project).expect("reply");
++            app.open =
++                Open::new(source, 80, &app.data_dir, &app.project, app.theme.markdown_code_foreground())
++                    .expect("reply");
+         }
+         app.add_quote_annotation("one", Kind::Comment, "A".into()).expect("A");
+         app.add_quote_annotation("two", Kind::Comment, "B".into()).expect("B");
+--- a/crates/plannotator-tui/src/layout.rs
++++ b/crates/plannotator-tui/src/layout.rs
+@@ -20,7 +20,9 @@
+ /// House style: no `#` markers, headings carry weight through bold/underline rather than
+ /// background color, so the palette stays available for selection and annotations.
+ #[derive(Debug, Clone)]
+-struct Styles;
++struct Styles {
++    code_foreground: Color,
++}
+
+ impl StyleSheet for Styles {
+     fn heading(&self, level: u8) -> Style {
+@@ -34,7 +36,7 @@
+         ""
+     }
+     fn code(&self) -> Style {
+-        Style::new().fg(Color::LightYellow)
++        Style::new().fg(self.code_foreground)
+     }
+     fn link(&self) -> Style {
+         Style::new().fg(Color::Blue).add_modifier(Modifier::UNDERLINED)
+@@ -64,9 +66,9 @@
+     pub(crate) total_rows: usize,
+ }
+
+-fn render_block(doc: &Document, index: usize) -> (Text<'static>, Vec<LineOffsets>) {
++fn render_block(doc: &Document, index: usize, code_foreground: Color) -> (Text<'static>, Vec<LineOffsets>) {
+     let source = doc.block_text(index);
+-    let text = own(tui_markdown::from_str_with_options(source, &Options::new(Styles)));
++    let text = own(tui_markdown::from_str_with_options(source, &Options::new(Styles { code_foreground })));
+     let plain: Vec<String> = text.lines.iter().map(ToString::to_string).collect();
+     let base = doc.blocks.get(index).map_or(0, |b| b.range.start);
+     let offsets = align(&plain, source, base);
+@@ -88,13 +90,13 @@
+
+ impl DocLayout {
+     /// Render every block once (the expensive part) and lay out for `width`.
+-    pub(crate) fn build(doc: &Document, width: usize) -> Self {
++    pub(crate) fn build(doc: &Document, width: usize, code_foreground: Color) -> Self {
+         let blocks = doc
+             .blocks
+             .iter()
+             .enumerate()
+             .map(|(i, block)| {
+-                let (text, offsets) = render_block(doc, i);
++                let (text, offsets) = render_block(doc, i, code_foreground);
+                 RenderedBlock { text, offsets, kind: block.kind, rows: Vec::new(), first_row: 0 }
+             })
+             .collect();
+@@ -184,7 +186,7 @@
+     #[test]
+     fn rendered_text_strips_markup_and_joins_blocks_without_separator() {
+         let doc = Document::parse("Ship the **login page**\nby Friday.\n\nNext para.\n".to_owned());
+-        let layout = DocLayout::build(&doc, 80);
++        let layout = DocLayout::build(&doc, 80, Color::LightYellow);
+         let whole = 0..doc.source.len();
+         assert_eq!(layout.rendered_in_range(&doc.source, &whole), "Ship the login page by Friday.Next para.");
+         let bold = doc.source.find("**login").expect("present");

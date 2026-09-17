@@ -23,7 +23,7 @@ rustPlatform.buildRustPackage {
   '';
 
   meta = {
-    description = "Markdown review TUI with configurable selection backgrounds";
+    description = "Markdown review TUI with configurable review colors";
     homepage = "https://github.com/plannotator/plannotator-tui";
     license = lib.licenses.mit;
     mainProgram = "plannotator-tui";
