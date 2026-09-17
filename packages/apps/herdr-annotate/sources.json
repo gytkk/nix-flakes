@@ -1,0 +1,23 @@
+{
+  "revision": "7c8f5a177b8285dc56efc471ef04f7ab44a2b4b6",
+  "revisionDate": "2026-09-10",
+  "sourceHash": "sha256-f+/2mDs8d5JICqbwzC7/tIYdLlb8NPJuV00Odp4CMSU=",
+  "herdrAnnotate": {
+    "version": "0.1.0",
+    "hashes": {
+      "aarch64-apple-darwin": "sha256-IjQ5Khzt9LCwVhtMpU2nWqUTnfKW29Tlk3HPf6IB+rc=",
+      "x86_64-apple-darwin": "sha256-kcrRYkRacpGdthjRZCrJwAX0ZRPtxJeGYrhmfIz1UHw=",
+      "x86_64-unknown-linux-gnu": "sha256-P1cRHCOtcGIWP2FkxWQrdJMJ08xZdDC+He8I3A2r1xI=",
+      "aarch64-unknown-linux-gnu": "sha256-qh3xiNQ+/XaJPKpfjDuJtZv/57HcPCHLkJcjiHk4IuY="
+    }
+  },
+  "plannotatorTui": {
+    "version": "0.8.0",
+    "hashes": {
+      "aarch64-apple-darwin": "sha256-fQV/Oho6ojywpEhD/tPwTUmKHaUhl83sAhLG+OFhjLI=",
+      "x86_64-apple-darwin": "sha256-a2CE0W7YqgmRWJL5B+WBhqbsacVgdSz/nQQr3Ltigg8=",
+      "x86_64-unknown-linux-gnu": "sha256-+qZROtGkdXooYelVcBaPLIEY8hm36NalF1oAj+I0/gs=",
+      "aarch64-unknown-linux-gnu": "sha256-I/keWx5dBKGsQfHY9Q6/TCDwRhFBlShilypjDvaQ4Y4="
+    }
+  }
+}

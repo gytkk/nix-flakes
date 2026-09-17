@@ -21,5 +21,11 @@ in
     home.packages = [ pkgs.herdr ];
 
     xdg.configFile."herdr/config.toml".source = mkSymlink "files/config.toml";
+    xdg.configFile."plannotator-tui/config.toml".source = mkSymlink "files/plannotator-tui.toml";
+
+    home.activation.linkHerdrAnnotate = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+      run ${pkgs.herdr}/bin/herdr plugin link \
+        ${pkgs.herdr-annotate}/share/herdr/plugins/annotate --enabled
+    '';
   };
 }

@@ -260,12 +260,15 @@ Resources should supplement the tools instead of expanding the tool count:
 
 - Herdr is managed through `modules/herdr/default.nix` and enabled by default.
 - Home Manager links `~/.config/herdr/config.toml` to `modules/herdr/files/config.toml` as an out-of-store symlink, so changes made through Herdr settings update the checked-in source file directly.
-- The configured prefix is `Ctrl+a`. Press `Ctrl+a` twice to send a literal `Ctrl+a` to a shell or application inside a pane. If tmux is ever nested inside Herdr, press `Ctrl+a` twice before the tmux command key.
-- `Ctrl+a`, then `Shift+n`, opens a popup that selects a previously visited directory with `zoxide` and `fzf`, then creates and focuses a workspace there.
-- `Ctrl+Shift+Tab` or `Ctrl+Tab` focuses the previous or next workspace. `Cmd+1..9` focuses a workspace by index in Ghostty on macOS, and `Alt+1..9` does the same in Windows Terminal on WSL. `Ctrl+a`, then `Shift+1..9` focuses the corresponding visible agent. The terminal configs forward the direct workspace shortcuts as distinct Kitty keyboard sequences so Herdr receives every modifier.
+- The configured prefix is `Ctrl+Space`.
+- `Ctrl+Space`, then `Shift+n`, opens a popup that selects a previously visited directory with `zoxide` and `fzf`, then creates and focuses a workspace there.
+- `Ctrl+Shift+Tab` or `Ctrl+Tab` focuses the previous or next workspace. `Cmd+1..9` focuses a workspace by index in Ghostty on macOS, and `Alt+1..9` does the same in Windows Terminal on WSL. `Ctrl+Space`, then `Shift+1..9` focuses the corresponding visible agent. The terminal configs forward the direct workspace shortcuts as distinct Kitty keyboard sequences so Herdr receives every modifier.
 - On WSL, the `windows-terminal` module merges the corresponding `sendInput` actions into the existing Windows Terminal `settings.json` during Home Manager activation. Existing profiles, themes, and unrelated keybindings are preserved; the first managed update creates a `settings.json.home-manager.bak` backup.
 - Herdr uses the native terminal cursor so pane applications such as Neovim can preserve mode-specific cursor shapes. On Windows or WSL, this may expose ConPTY cursor flicker that Herdr's default drawn cursor avoids.
 - Reload a running server after editing the config with `herdr server reload-config`.
+- Home Manager registers the full [Herdr Annotate plugin](https://github.com/plannotator/herdr-annotate) from `packages/apps/herdr-annotate` in the Nix store. Its source commit and both release binaries are pinned by hash. The existing `Update App Versions` workflow checks for updates every three hours; pull those commits and apply Home Manager to install them. Reapplying an older Home Manager generation registers that generation's plugin version while preserving annotation data.
+- After `Ctrl+Space`, press `a` to annotate selected text, `Shift+y` to copy annotations, `Ctrl+a` to copy and archive, `m` to manage annotations, `o` to review documents, or `Shift+o` to review the agent's last reply. `Shift+a` remains the agent picker.
+- Home Manager links `~/.config/plannotator-tui/config.toml` to `modules/herdr/files/plannotator-tui.toml`; reviews open in an overlay by default. On Linux, the global copy shortcuts require a working `wl-clipboard`, `xclip`, or `xsel` setup. Copying inside the annotation manager also supports OSC 52 through the viewing terminal.
 
 ## tmux config
 

@@ -11,6 +11,7 @@ Self-contained non-nixpkgs app packages used by the parent `nix-flakes` reposito
 ├── codex/
 ├── codexbar/
 ├── herdr/
+├── herdr-annotate/
 ├── opencode/
 ├── pi/
 ├── default.nix
@@ -31,6 +32,7 @@ Self-contained non-nixpkgs app packages used by the parent `nix-flakes` reposito
 | codex | 0.154.0 |
 | codexbar | 0.60.4 |
 | herdr | 0.9.1 |
+| herdr-annotate | 0.4.0 |
 | opencode | 1.18.31 |
 | pi | 0.85.1 |
 
@@ -58,5 +60,6 @@ The package catalog in `default.nix` is the single source of truth for exported 
 
 - Run `packages/apps/scripts/update-all.sh` from the parent repository to update every enabled package manually.
 - `Update App Versions` checks for updates every three hours, verifies changed packages, and commits successful updates to `main`.
+- `herdr-annotate` tracks the plugin's `main` commit and the binary versions declared by that commit. Its updater records the source and release checksums in `herdr-annotate/sources.json`, so changes are detected even when the manifest version stays the same.
 - `App Packages CI` evaluates the nested flake, builds changed packages, and checks Codex release-bundle drift.
 - The parent configuration overlay intentionally keeps nixpkgs `opencode`; the local package remains available through the nested and parent package outputs.

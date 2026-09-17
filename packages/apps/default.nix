@@ -6,6 +6,7 @@
   codex = pkgs.callPackage ./codex/package.nix { };
   codexbar = pkgs.callPackage ./codexbar/package.nix { };
   herdr = pkgs.callPackage ./herdr/package.nix { };
+  herdr-annotate = pkgs.callPackage ./herdr-annotate/package.nix { };
   opencode = pkgs.callPackage ./opencode/package.nix { };
   pi = pkgs.callPackage ./pi/package.nix { };
 }
