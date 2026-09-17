@@ -1,6 +1,44 @@
+--- a/README.md
++++ b/README.md
+@@ -95,13 +95,15 @@
+ placement = "overlay"   # overlay (full tab, default) | split | popup
+
+ [theme]
++background = "#fafafa" # base review background
++foreground = "#383a42" # base review text
+ selection_background = "#e5e5e5" # selected paragraph and file-tree row
+ comment_background = "#fff0c2" # comment highlight in the document
+ looks_good_background = "#e2f2df" # approval highlight in the document
+ markdown_code_foreground = "#8a5b00" # inline and fenced code text
+ ```
+
+-Theme colors accept `#RRGGBB`. Omitted settings keep the defaults: indexed colors 236, 58, and 22 for the three backgrounds, and bright yellow for code text. Colors are loaded when an interactive review opens; headless commands retain the defaults.
++Theme colors accept `#RRGGBB`. Inside Herdr, interactive reviews inherit the launch-time `HERDR_PLUGIN_THEME_JSON` snapshot: `panel_bg` and `text` supply base colors, while `selection_bg`, `surface0`, `surface1`, and `accent` supply selection, comment, approval, and code colors. Explicit settings override inherited colors per field. Reopen the pane after changing Herdr's theme. Without a snapshot, omitted settings keep terminal defaults for base colors, indexed colors 236, 58, and 22 for highlight backgrounds, and bright yellow for code text. Headless commands retain the defaults.
+
+ `plannotator-tui config` prints the file's path and the values in effect. The `herdr/`
+ directory in this repo is the development manifest; users should install Herdr Annotate.
 --- a/crates/plannotator-tui/src/config.rs
 +++ b/crates/plannotator-tui/src/config.rs
-@@ -50,6 +50,43 @@
+@@ -28,6 +28,18 @@
+         deserialize_with = "deserialize_rgb_color",
+         serialize_with = "serialize_rgb_color"
+     )]
++    background: Option<Color>,
++    #[serde(
++        skip_serializing_if = "Option::is_none",
++        deserialize_with = "deserialize_rgb_color",
++        serialize_with = "serialize_rgb_color"
++    )]
++    foreground: Option<Color>,
++    #[serde(
++        skip_serializing_if = "Option::is_none",
++        deserialize_with = "deserialize_rgb_color",
++        serialize_with = "serialize_rgb_color"
++    )]
+     selection_background: Option<Color>,
+     #[serde(
+         skip_serializing_if = "Option::is_none",
+@@ -50,8 +62,68 @@
  }
 
  impl ThemeConfig {
@@ -15,10 +53,12 @@
 +        }
 +    }
 +
-+    fn inherit_herdr(self, json: &str) -> Result<Self> {
++    pub(crate) fn inherit_herdr(self, json: &str) -> Result<Self> {
 +        #[derive(Deserialize)]
 +        struct Snapshot {
 +            version: u32,
++            panel_bg: Option<String>,
++            text: Option<String>,
 +            selection_bg: String,
 +            surface0: String,
 +            surface1: String,
@@ -30,6 +70,16 @@
 +            value.parse::<Color>().with_context(|| format!("invalid Herdr theme color {key}: {value:?}"))
 +        };
 +        Ok(Self {
++            background: self.background.or(palette
++                .panel_bg
++                .as_deref()
++                .map(|value| color("panel_bg", value))
++                .transpose()?),
++            foreground: self.foreground.or(palette
++                .text
++                .as_deref()
++                .map(|value| color("text", value))
++                .transpose()?),
 +            selection_background: self
 +                .selection_background
 +                .or(Some(color("selection_bg", &palette.selection_bg)?)),
@@ -43,13 +93,24 @@
 +
      pub(crate) fn selection_background(&self) -> Color {
          self.selection_background.unwrap_or(Color::Indexed(236))
-     }
-@@ -231,6 +268,34 @@
- #[allow(clippy::expect_used, reason = "tests assert by panicking")]
- mod tests {
-     use super::*;
++    }
 +
-+    #[test]
++    pub(crate) fn base_style(&self) -> ratatui::style::Style {
++        let mut style = ratatui::style::Style::new();
++        if let Some(background) = self.background {
++            style = style.bg(background);
++        }
++        if let Some(foreground) = self.foreground {
++            style = style.fg(foreground);
++        }
++        style
+     }
+
+     pub(crate) fn comment_background(&self) -> Color {
+@@ -233,6 +305,60 @@
+     use super::*;
+
+     #[test]
 +    fn inherited_herdr_colors_preserve_terminal_color_types_and_local_overrides() {
 +        let json = r##"{"version":1,"selection_bg":"#cddbf8","surface0":"Reset","surface1":"238","accent":"Blue","future_role":"ignored"}"##;
 +        let inherited = ThemeConfig::default().inherit_herdr(json).expect("snapshot");
@@ -76,9 +137,37 @@
 +            assert!(ThemeConfig::default().inherit_herdr(json).is_err(), "{json}");
 +        }
 +    }
-
-     #[test]
++
++    #[test]
++    fn inherited_base_colors_allow_local_overrides_and_older_snapshots() {
++        let json = r##"{"version":1,"panel_bg":"#fafafa","text":"#383a42","selection_bg":"#cddbf8","surface0":"#f0f0f1","surface1":"#e5e5e6","accent":"#4078f2"}"##;
++        let inherited = ThemeConfig::default().inherit_herdr(json).expect("snapshot");
++        assert_eq!(inherited.base_style().bg, Some(Color::Rgb(250, 250, 250)));
++        assert_eq!(inherited.base_style().fg, Some(Color::Rgb(56, 58, 66)));
++        let config =
++            Config::parse("[theme]\nbackground = \"#010203\"\nforeground = \"#040506\"\n").expect("config");
++        assert_eq!(Config::parse(&config.to_toml().expect("serializes")).expect("parses"), config);
++        let overridden = config.theme.inherit_herdr(json).expect("snapshot");
++        assert_eq!(overridden.base_style().bg, Some(Color::Rgb(1, 2, 3)));
++        assert_eq!(overridden.base_style().fg, Some(Color::Rgb(4, 5, 6)));
++        assert_eq!(overridden.selection_background(), inherited.selection_background());
++        let older =
++            r#"{"version":1,"selection_bg":"Reset","surface0":"Reset","surface1":"238","accent":"Blue"}"#;
++        assert_eq!(
++            ThemeConfig::default().inherit_herdr(older).expect("older snapshot").base_style(),
++            ratatui::style::Style::new()
++        );
++        for key in ["panel_bg", "text"] {
++            let mut invalid: serde_json::Value = serde_json::from_str(json).expect("json");
++            *invalid.get_mut(key).expect("base color key") = "invalid".into();
++            assert!(ThemeConfig::default().inherit_herdr(&invalid.to_string()).is_err());
++        }
++    }
++
++    #[test]
      fn empty_file_is_the_default_config() {
+         assert_eq!(Config::parse("").expect("parses"), Config::default());
+         assert_eq!(Config::parse("[theme]\n").expect("parses"), Config::default());
 --- a/crates/plannotator-tui/src/cli.rs
 +++ b/crates/plannotator-tui/src/cli.rs
 @@ -67,7 +67,7 @@
@@ -119,3 +208,55 @@
      cli::run_ui(|width| {
          let mut app = App::open_message(
              label,
+--- a/crates/plannotator-tui/src/app/draw.rs
++++ b/crates/plannotator-tui/src/app/draw.rs
+@@ -45,6 +45,7 @@
+ impl App {
+     pub(crate) fn draw(&mut self, frame: &mut Frame) {
+         let area = frame.area();
++        frame.buffer_mut().set_style(area, self.theme.base_style());
+         let [header, body, footer] = Layout::vertical([
+             Constraint::Length(self.header_height(area.width)),
+             Constraint::Min(1),
+--- a/crates/plannotator-tui/src/app/tests.rs
++++ b/crates/plannotator-tui/src/app/tests.rs
+@@ -115,6 +115,39 @@
+         .cell((app.geometry.doc.x, app.geometry.doc.y))
+         .expect("selected document cell");
+     assert_eq!(cell.bg, color);
++}
++
++#[test]
++fn inherited_one_light_colors_cover_the_document_and_preserve_highlights() {
++    use ratatui::style::Color;
++    let json = r##"{"version":1,"panel_bg":"#fafafa","text":"#383a42","selection_bg":"#cddbf8","surface0":"#f0f0f1","surface1":"#e5e5e6","accent":"#4078f2"}"##;
++    for kind in [None, Some(Kind::Comment), Some(Kind::LooksGood)] {
++        let mut app = app(Box::new(Discard));
++        app.set_theme(Config::default().theme.inherit_herdr(json).expect("snapshot"));
++        if let Some(kind) = kind {
++            app.add_block_annotation(0, kind, "review".to_owned()).expect("annotation");
++        }
++        let mut terminal = Terminal::new(TestBackend::new(80, 20)).expect("terminal");
++        terminal.draw(|frame| app.draw(frame)).expect("draw");
++        let buffer = terminal.backend().buffer();
++        let doc = app.geometry.doc;
++        let plain = (doc.y..doc.bottom())
++            .flat_map(|y| (doc.x..doc.right()).filter_map(move |x| buffer.cell((x, y))))
++            .find(|cell| cell.symbol() == "f")
++            .expect("first thing");
++        assert_eq!(plain.bg, Color::Rgb(250, 250, 250));
++        assert_eq!(plain.fg, Color::Rgb(56, 58, 66));
++        let padding = buffer.cell((app.geometry.doc.x, app.geometry.doc.bottom() - 1)).expect("padding");
++        assert_eq!(padding.bg, Color::Rgb(250, 250, 250));
++        let selected = buffer.cell((app.geometry.doc.x, app.geometry.doc.y)).expect("selected heading");
++        let expected = match kind {
++            None => Color::Rgb(205, 219, 248),
++            Some(Kind::Comment) => Color::Rgb(240, 240, 241),
++            Some(Kind::LooksGood) => Color::Rgb(229, 229, 230),
++            Some(_) => unreachable!(),
++        };
++        assert_eq!(selected.bg, expected);
++    }
+ }
+
+ #[test]
