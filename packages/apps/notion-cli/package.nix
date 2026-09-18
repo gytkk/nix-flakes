@@ -1,12 +1,14 @@
 {
   lib,
-  fetchurl,
-  stdenvNoCC,
+  mkTarballCli,
 }:
 
 let
   version = "0.22.8";
-
+in
+mkTarballCli {
+  pname = "notion-cli";
+  inherit version;
   platforms = {
     x86_64-linux = {
       target = "x86_64-unknown-linux-musl";
@@ -26,38 +28,18 @@ let
     };
   };
 
-  platform =
-    platforms.${stdenvNoCC.hostPlatform.system}
-      or (throw "Unsupported system for ntn: ${stdenvNoCC.hostPlatform.system}");
+  url = platform: "https://ntn.dev/releases/v${version}/ntn-${platform.target}.tar.gz";
+  sourceRoot = platform: "ntn-${platform.target}";
 
-  src = fetchurl {
-    url = "https://ntn.dev/releases/v${version}/ntn-${platform.target}.tar.gz";
-    inherit (platform) hash;
-  };
-in
-stdenvNoCC.mkDerivation {
-  pname = "notion-cli";
-  inherit version src;
-
-  sourceRoot = "ntn-${platform.target}";
-  dontConfigure = true;
-  dontBuild = true;
-
-  installPhase = ''
-    runHook preInstall
-
-    install -Dm755 ntn "$out/bin/ntn"
+  extraInstall = ''
     install -Dm644 README.md "$out/share/doc/notion-cli/README.md"
     install -Dm644 LICENSE.md "$out/share/licenses/notion-cli/LICENSE.md"
-
-    runHook postInstall
   '';
 
   meta = {
     description = "Official Notion CLI for Workers and public API operations";
     homepage = "https://github.com/makenotion/cli";
     license = lib.licenses.mit;
-    platforms = builtins.attrNames platforms;
     mainProgram = "ntn";
   };
 }

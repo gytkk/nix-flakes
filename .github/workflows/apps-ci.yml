@@ -34,6 +34,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: cachix/install-nix-action@v31
+      - name: Test changed-app detection
+        run: bash packages/apps/tests/detect-changed-apps.sh
       - run: nix flake check ./packages/apps --no-build
 
   detect-app-changes:

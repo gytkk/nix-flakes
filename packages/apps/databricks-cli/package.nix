@@ -1,12 +1,14 @@
 {
   lib,
-  fetchurl,
-  stdenvNoCC,
+  mkTarballCli,
 }:
 
 let
   version = "1.7.0";
-
+in
+mkTarballCli {
+  pname = "databricks-cli";
+  inherit version;
   platforms = {
     x86_64-linux = {
       name = "linux_amd64";
@@ -26,36 +28,14 @@ let
     };
   };
 
-  platform =
-    platforms.${stdenvNoCC.hostPlatform.system}
-      or (throw "Unsupported system for databricks-cli: ${stdenvNoCC.hostPlatform.system}");
-
-  src = fetchurl {
-    url = "https://github.com/databricks/cli/releases/download/v${version}/databricks_cli_${version}_${platform.name}.tar.gz";
-    inherit (platform) hash;
-  };
-in
-stdenvNoCC.mkDerivation {
-  pname = "databricks-cli";
-  inherit version src;
-
-  sourceRoot = ".";
-  dontConfigure = true;
-  dontBuild = true;
-
-  installPhase = ''
-    runHook preInstall
-
-    install -Dm755 databricks "$out/bin/databricks"
-
-    runHook postInstall
-  '';
+  url =
+    platform:
+    "https://github.com/databricks/cli/releases/download/v${version}/databricks_cli_${version}_${platform.name}.tar.gz";
 
   meta = {
     description = "Databricks CLI for the Databricks platform (Go implementation)";
     homepage = "https://github.com/databricks/cli";
     license = lib.licenses.asl20;
-    platforms = builtins.attrNames platforms;
     mainProgram = "databricks";
   };
 }

@@ -1,12 +1,14 @@
 {
   lib,
-  fetchurl,
-  stdenvNoCC,
+  mkTarballCli,
 }:
 
 let
   version = "1.4.0";
-
+in
+mkTarballCli {
+  pname = "pup";
+  inherit version;
   platforms = {
     x86_64-linux = {
       asset = "Linux_x86_64";
@@ -26,38 +28,19 @@ let
     };
   };
 
-  platform =
-    platforms.${stdenvNoCC.hostPlatform.system}
-      or (throw "Unsupported system for pup: ${stdenvNoCC.hostPlatform.system}");
+  url =
+    platform:
+    "https://github.com/DataDog/pup/releases/download/v${version}/pup_${version}_${platform.asset}.tar.gz";
 
-  src = fetchurl {
-    url = "https://github.com/DataDog/pup/releases/download/v${version}/pup_${version}_${platform.asset}.tar.gz";
-    inherit (platform) hash;
-  };
-in
-stdenvNoCC.mkDerivation {
-  pname = "pup";
-  inherit version src;
-
-  sourceRoot = ".";
-  dontConfigure = true;
-  dontBuild = true;
-
-  installPhase = ''
-    runHook preInstall
-
-    install -Dm755 pup "$out/bin/pup"
+  extraInstall = ''
     install -Dm644 README.md "$out/share/doc/pup/README.md"
     install -Dm644 LICENSE "$out/share/licenses/pup/LICENSE"
-
-    runHook postInstall
   '';
 
   meta = {
-    description = "Datadog CLI — a companion with 200+ commands across 33+ Datadog products";
+    description = "Datadog CLI, a companion with 200+ commands across 33+ Datadog products";
     homepage = "https://github.com/DataDog/pup";
     license = lib.licenses.asl20;
-    platforms = builtins.attrNames platforms;
     mainProgram = "pup";
   };
 }

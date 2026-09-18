@@ -30,7 +30,7 @@ rebuild_all=0
 
 while IFS= read -r path; do
   case "$path" in
-    flake.nix | flake.lock | lib/pkgs.nix | .github/workflows/apps-ci.yml | "$APP_ROOT_REL/default.nix" | "$APP_ROOT_REL/flake.nix" | "$APP_ROOT_REL/flake.lock")
+    flake.nix | flake.lock | lib/pkgs.nix | .github/workflows/apps-ci.yml | "$APP_ROOT_REL/default.nix" | "$APP_ROOT_REL/flake.nix" | "$APP_ROOT_REL/flake.lock" | "$APP_ROOT_REL/lib/"*)
       rebuild_all=1
       ;;
     "$APP_ROOT_REL/"*)

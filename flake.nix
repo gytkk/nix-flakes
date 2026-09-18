@@ -251,9 +251,6 @@
         {
           default = mkDefaultCompatPackage system systemPkgs;
           agent-core = systemPkgs.agent-core;
-          notion-cli = systemPkgs.notion-cli;
-          ntn = systemPkgs.ntn;
-          pup = systemPkgs.pup;
         }
         // appPackages.${system}
       ) pkgs;
