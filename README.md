@@ -71,6 +71,8 @@ lib/builders.nix                  # Backward-compatible builder aggregation
 
 Home Manager modules expose `modules.<name>.enable`; `base/default.nix` owns common default enables, and profile files can override them. NixOS input modules that are host-specific, such as Disko, Copyparty, niri, and DankMaterialShell, are imported by the relevant `hosts/<name>/configuration.nix`.
 
+The [architecture review and improvement plan](docs/architecture-review/README.md) records the 2026-09-18 assessment of configuration ownership, extension paths, and verification coverage, with proposed fixes and completion criteria for each issue.
+
 ## Rust toolchain
 
 Home Manager installs rustup, while rustup owns the toolchains and components under `~/.rustup`. Initialize the stable toolchain and the components used by editors and language-server integrations after the first Home Manager activation:
