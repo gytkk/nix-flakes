@@ -18,6 +18,7 @@ This file provides guidance to Codex CLI when working with code in this reposito
 ### Documentation Guidelines
 
 - All documentation belongs in: `AGENTS.md`, `CLAUDE.md`, `README.md`, code comments (sparingly), commit messages
+- When module paths or behavior change, update the module README and its root documentation links. Run `uv run --no-project docs/check-paths.py` to check the current entry-point documents; pass other changed Markdown files explicitly.
 
 ### Build/Test/Lint Commands
 
@@ -53,7 +54,7 @@ nixos-rebuild switch --flake .#<host>
 - **Imports**: Use relative paths, import directories by name (e.g., `../modules/claude`)
 - **Conditionals**: `lib.mkIf`, `lib.mkMerge`, `lib.mkForce`
 - **Host definition**: See `inventory.nix` for required fields (`kind`, `system`, `username`, `homeDirectory`, `profile`)
-- **Secrets**: Use [agenix](https://github.com/ryantm/agenix) — `agenix -e secrets/name.age`, decrypts to `/run/agenix/<secretName>`
+- **Secrets**: Use [agenix](https://github.com/ryantm/agenix). Run `agenix -e secrets/<name>.age` with the secret's filename; NixOS decrypts it to `/run/agenix/<secretName>`.
 
 ### Architecture
 
@@ -118,32 +119,33 @@ modules/<name>/
 └── agents/        # AI agent definitions (for AI tools)
 ```
 
-#### Module Reference
+#### Module reference
+
+This table lists selected modules, with paths relative to the repository root. See each module's `default.nix` for its installation rules.
 
 | Module       | Purpose             | Key Files                                           | Mutable |
 | ------------ | ------------------- | --------------------------------------------------- | ------- |
-| `nixos/`     | NixOS common config | `baseline.nix`, `remote-access.nix`, `user.nix`     | NO      |
-| `claude/`    | Claude Code         | `default.nix`, `files/settings.json`                 | 부분적  |
-| `codex/`     | OpenAI Codex CLI    | `default.nix`, `files/config.toml`                   | YES     |
-| `ghostty/`   | Legacy Ghostty terminal | `files/config`, `themes/exports/ghostty`        | YES     |
-| `git/`       | Git configuration   | `default.nix`                                       | NO      |
-| `k9s/`       | Kubernetes manager  | `default.nix`                                       | NO      |
-| `kitty/`     | Kitty terminal      | `files/kitty.conf`                                  | YES     |
-| `lsp/`       | LSP server packages | `default.nix`                                       | NO      |
-| `terraform/` | Terraform versions  | `default.nix` (direnv lazy-load)                    | NO      |
-| `vim/`       | Neovim              | `files/config/init.lua`, `files/onelight.lua`       | YES     |
-| `vscode/`    | VSCode (DISABLED)   | `default.nix`, `one-half-light-theme/`              | NO      |
-| `zed/`       | Zed editor          | `files/settings.json`, `themes/one-half-light.json` | YES     |
-| `zellij/`    | Zellij multiplexer  | `files/config.darwin.kdl`, `files/config.linux.kdl` | YES     |
-| `zsh/`       | Zsh shell           | `default.nix`, `starship.toml`                      | 부분적  |
+| `modules/nixos/` | NixOS common config | `modules/nixos/baseline.nix`, `modules/nixos/remote-access.nix`, `modules/nixos/user.nix` | NO |
+| `modules/claude/` | Claude Code | `modules/claude/files/settings.json` | 부분적 |
+| `modules/codex/` | OpenAI Codex CLI | `modules/codex/files/config.toml` | 부분적 |
+| `modules/ghostty/` | Ghostty terminal | `modules/ghostty/files/config`, `themes/exports/ghostty` | NO |
+| `modules/git/` | Git configuration | `modules/git/default.nix` | NO |
+| `modules/k9s/` | Kubernetes manager | `modules/k9s/default.nix` | NO |
+| `modules/lsp/` | LSP server packages | `modules/lsp/default.nix` | NO |
+| `modules/terraform/` | Terraform versions | `modules/terraform/default.nix` (direnv lazy-load) | NO |
+| `modules/vim/` | Neovim | `modules/vim/files/config/`, `themes/exports/nvim` | 부분적 |
+| `modules/vscode/` | VSCode (disabled) | `modules/vscode/default.nix`, `modules/vscode/one-half-light-theme/` | NO |
+| `modules/zed/` | Zed editor | `modules/zed/files/settings.json`, `themes/exports/zed` | 부분적 |
+| `modules/zellij/` | Zellij multiplexer | `modules/zellij/files/config.kdl`, `themes/exports/zellij` | 부분적 |
+| `modules/zsh/` | Zsh shell | `modules/zsh/default.nix`, `themes/exports/starship` | 부분적 |
 
-> **Mutable**: `mkOutOfStoreSymlink`로 설정 파일이 repo로 직접 symlink됨. 앱 UI에서 수정 가능, 변경이 즉시 repo에 반영. `nfc` alias로 커밋.
+> **Mutable**: `mkOutOfStoreSymlink`로 설치한 파일은 checkout을 직접 참조한다. 부분적 표시는 생성 파일이나 플랫폼별 복사와 함께 사용하는 경우다. 생성된 테마는 export를 직접 편집하지 않고 canonical 원본에서 수정한다.
 
 ### Editor-Specific Notes
 
 #### Neovim (`modules/vim/`)
 
-`programs.neovim.initLua`가 `require('config')`으로 부트스트랩. 실제 설정은 `files/config/`에 있으며 `~/.config/nvim/lua/config/`로 symlink. Theme artifacts should prefer `themes/exports/nvim/` when generated from the canonical theme pipeline. LSP 서버 추가 시 `files/config/init.lua`의 `servers` 테이블 + `modules/lsp/default.nix`에 바이너리 추가.
+[Neovim README](modules/vim/README.md)에서 설정 구조와 적용 방식을 확인한다. LSP 서버를 추가할 때는 `modules/vim/files/config/lsp.lua`의 `lspServers` 목록과 `modules/lsp/default.nix`의 바이너리를 함께 확인한다.
 
 #### VSCode (`modules/vscode/`) — DISABLED
 
@@ -151,7 +153,11 @@ modules/<name>/
 
 #### Zed (`modules/zed/`)
 
-Settings, keymaps는 `mkOutOfStoreSymlink`로 symlink. Generated themes should be consumed from `themes/exports/zed/`. Extensions는 `default.nix`의 `nixExtensions` 리스트로 관리.
+macOS와 WSL이 아닌 Linux에서는 설정과 keymap을 checkout으로 symlink하며, 테마는 `themes/exports/zed/`에서 가져온다. WSL에서는 activation이 설정, keymap, 생성 테마를 Windows 설정 디렉터리로 복사한다. Extensions는 `modules/zed/default.nix`의 `nixExtensions` 목록으로 관리한다.
+
+#### Zellij (`modules/zellij/`)
+
+설정 원본, 생성 방식, 실행 wrapper는 [Zellij README](modules/zellij/README.md)에서 확인한다.
 
 #### Terraform
 
@@ -165,11 +171,10 @@ AI 코딩 에이전트 설정을 변경할 때 공통 지침, runtime adapter, s
 - Skill은 필요한 capability를 runtime 중립적으로 표현한다. Runtime tool, SDK, metadata, plugin 설정은 대응 module이 소유하며, runtime module에 shared skill 복사본이나 별도 selection logic을 추가하지 않는다.
 - `agent-core render`의 immutable output을 Nix module에서 설치한다. Pi는 operating invariant를 `APPEND_SYSTEM.md`로 분리하고, OpenClaw는 prompt hook으로 `AGENTS.core.md`를 주입한다.
 
-- **Claude Code** (`modules/claude/`): Plugins은 [gytkk/claude-marketplace](https://github.com/gytkk/claude-marketplace)로 관리한다. Command와 agent를 제공하는 `devils-advocate`와 LSP plugin은 marketplace에 남기고 공통 prompt와 shared skill은 agent-core output을 사용한다.
+- **Claude Code** (`modules/claude/`): `gytkk` marketplace의 원본은 `modules/claude/marketplace/`다. 공통 prompt와 shared skill은 agent-core output을 사용한다. Plugin과 marketplace 목록은 [Claude README](modules/claude/README.md)에서 확인한다.
 - **Codex CLI** (`modules/codex/`): 기본 설정은 `files/config.toml`에서 관리하며 최종 instruction과 skill tree는 agent-core output을 사용한다.
 - **Pi** (`modules/pi/`): Settings와 extension은 module에서 관리하며 최종 instruction과 skill tree는 agent-core output을 사용한다.
 - **OpenClaw** (`modules/openclaw/`): Mutable `openclaw.json`, workspace, auth/session state는 Nix가 소유하지 않는다. Agent-core integration은 managed skill tree와 `before_prompt_build` hook만 설치한다.
-- **Codex Skills**: `codex` plugin — `/codex:critic`, `/codex:hephaestus`, `/codex:analyze`
 
 ### Package Management
 

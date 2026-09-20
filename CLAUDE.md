@@ -16,7 +16,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Documentation Guidelines
 
-- All documentation belongs in: CLAUDE.md, README.md, code comments (sparingly), commit messages
+- All documentation belongs in: AGENTS.md, CLAUDE.md, README.md, code comments (sparingly), commit messages
+- When module paths or behavior change, update the module README and its root documentation links. Run `uv run --no-project docs/check-paths.py` to check the current entry-point documents; pass other changed Markdown files explicitly.
 
 ### Build/Test/Lint Commands
 
@@ -25,7 +26,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 nixfmt <file.nix>                  # Format Nix files
 nix flake show                     # Show available flake outputs
-nix flake check --no-build         # Validate syntax without building
+nix flake check --no-build         # Validate flake outputs without building
 nix flake check                    # Full validation (complex changes only)
 nix eval .#homeConfigurations.pylv-denim.config.home.packages --apply 'x: map (p: p.name) x'
 ```
@@ -52,7 +53,7 @@ nixos-rebuild switch --flake .#<host>
 - **Imports**: Use relative paths, import directories by name (e.g., `../modules/claude`)
 - **Conditionals**: `lib.mkIf`, `lib.mkMerge`, `lib.mkForce`
 - **Host definition**: See `inventory.nix` for required fields (`kind`, `system`, `username`, `homeDirectory`, `profile`)
-- **Secrets**: Use [agenix](https://github.com/ryantm/agenix) — `agenix -e secrets/name.age`, decrypts to `/run/agenix/<secretName>`
+- **Secrets**: Use [agenix](https://github.com/ryantm/agenix). Run `agenix -e secrets/<name>.age` with the secret's filename; NixOS decrypts it to `/run/agenix/<secretName>`.
 
 ### Architecture
 
@@ -104,48 +105,13 @@ values are set in `hosts/pylv-onyx/configuration.nix` through
 modules/<name>/
 ├── default.nix    # Main module configuration (ALWAYS exists)
 ├── files/         # Static config files (JSON, TOML, etc.)
-├── themes/        # Custom themes
+├── themes/        # Legacy or app-local themes; generated themes live in themes/exports/
 └── agents/        # AI agent definitions (for AI tools)
 ```
 
-#### Module Reference
+#### Module reference
 
-| Module       | Purpose             | Key Files                                           | Mutable |
-| ------------ | ------------------- | --------------------------------------------------- | ------- |
-| `nixos/`     | NixOS common config | `baseline.nix`, `remote-access.nix`, `user.nix`     | NO      |
-| `claude/`    | Claude Code         | `default.nix`, `files/settings.json`                 | 부분적  |
-| `codex/`     | OpenAI Codex CLI    | `default.nix`, `files/config.toml`                   | YES     |
-| `ghostty/`   | Legacy Ghostty terminal | `files/config`, `themes/exports/ghostty`        | YES     |
-| `git/`       | Git configuration   | `default.nix`                                       | NO      |
-| `k9s/`       | Kubernetes manager  | `default.nix`                                       | NO      |
-| `kitty/`     | Kitty terminal      | `files/kitty.conf`                                  | YES     |
-| `lsp/`       | LSP server packages | `default.nix`                                       | NO      |
-| `terraform/` | Terraform versions  | `default.nix` (direnv lazy-load)                    | NO      |
-| `vim/`       | Neovim              | `files/config/init.lua`, `files/onelight.lua`       | YES     |
-| `vscode/`    | VSCode (DISABLED)   | `default.nix`, `one-half-light-theme/`              | NO      |
-| `zed/`       | Zed editor          | `files/settings.json`, `themes/one-half-light.json` | YES     |
-| `zellij/`    | Zellij multiplexer  | `files/config.darwin.kdl`, `files/config.linux.kdl` | YES     |
-| `zsh/`       | Zsh shell           | `default.nix`, `starship.toml`                      | 부분적  |
-
-> **Mutable**: `mkOutOfStoreSymlink`로 설정 파일이 repo로 직접 symlink됨. 앱 UI에서 수정 가능, 변경이 즉시 repo에 반영. `nfc` alias로 커밋.
-
-### Editor-Specific Notes
-
-#### Neovim (`modules/vim/`)
-
-`programs.neovim.initLua`가 `require('config')`으로 부트스트랩. 실제 설정은 `files/config/`에 있으며 `~/.config/nvim/lua/config/`로 symlink. LSP 서버 추가 시 `files/config/init.lua`의 `servers` 테이블 + `modules/lsp/default.nix`에 바이너리 추가.
-
-#### VSCode (`modules/vscode/`) — DISABLED
-
-현재 비활성화. VSCode 수정 요청 시 모듈 재활성화 여부를 먼저 확인할 것.
-
-#### Zed (`modules/zed/`)
-
-Settings, keymaps, themes는 `mkOutOfStoreSymlink`로 symlink. Zed UI에서 편집 가능. Extensions는 `default.nix`의 `nixExtensions` 리스트로 관리.
-
-#### Terraform
-
-direnv lazy loading 사용. `.envrc`에 `use_terraform` 추가하면 `required_version`을 읽어 자동 로드.
+Before changing an app module, read the shared [module reference](AGENTS.md#module-reference) and [editor-specific notes](AGENTS.md#editor-specific-notes) for its source paths, installation behavior, and activation constraints. Those sections also cover VSCode's disabled status, Terraform's direnv integration, and links to module READMEs.
 
 ### AI Coding Agent Notes
 
@@ -153,8 +119,7 @@ AI 코딩 에이전트 설정을 변경할 때 공통 지침, runtime adapter, s
 
 - `agent-core/rules/`는 공통 지침, `agent-core/adapters/`는 runtime별 지침, `agent-core/skills/`는 shared skill의 canonical catalog다. `agent-core/manifest.toml`이 조합 순서와 runtime별 노출을 정의한다.
 - Skill은 필요한 capability를 runtime 중립적으로 표현한다. Runtime tool, SDK, metadata, plugin 설정은 대응 module이 소유하며, runtime module에 shared skill 복사본이나 별도 selection logic을 추가하지 않는다.
-- **Claude Code** (`modules/claude/`): Plugins은 [gytkk/claude-marketplace](https://github.com/gytkk/claude-marketplace)로 관리한다. Runtime 전용 `devils-advocate`와 LSP plugin은 marketplace에 남기며 LSP plugin은 `modules/lsp/default.nix`의 바이너리가 필요하다.
-- **Codex Skills**: `codex` plugin — `/codex:critic`, `/codex:hephaestus`, `/codex:analyze`
+- **Claude Code** (`modules/claude/`): Plugin과 marketplace 목록은 [Claude README](modules/claude/README.md)에서 확인한다. Runtime 전용 `devils-advocate`와 LSP plugin은 `modules/claude/marketplace/`에 있으며 LSP plugin은 `modules/lsp/default.nix`의 바이너리가 필요하다.
 
 ### Package Management
 

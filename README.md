@@ -251,12 +251,7 @@ Resources should supplement the tools instead of expanding the tool count:
 
 ## Zellij config
 
-- Zellij is managed through `modules/zellij/default.nix`.
-- `home-manager switch` renders `~/.config/zellij/config.kdl` from the platform-specific template in `modules/zellij/files/` and exposes the generated `themes/exports/zellij` directory at `~/.config/zellij/themes`.
-- The checked-in defaults keep the selected shared theme, use Zellij's builtin `default` layout, disable startup tips, and leave `Ctrl+b` unbound so terminal apps like Neovim still receive it instead of entering Zellij's tmux mode.
-- On macOS, the repo-managed Darwin config includes `copy_command "pbcopy"` so explicit Zellij copy actions continue to target the system clipboard.
-- Local interactive shells started from the terminal automatically `exec zellij`.
-- SSH sessions and shells already inside `zellij` or `tmux` are excluded from that auto-start.
+Zellij is managed through `modules/zellij/default.nix`. See the [Zellij module README](modules/zellij/README.md) for configuration sources, theme selection, and wrapper behavior.
 
 ## Herdr config
 
@@ -290,13 +285,6 @@ Resources should supplement the tools instead of expanding the tool count:
 - Claude Code windows likewise use `claude` instead of the Nix wrapper name `.claude-wrapped`, including while tmux copy mode is active.
 - tmux enables CSI-u extended keys so modified keys such as `Shift+Enter` survive through tmux into TUI apps like Codex. Restart tmux fully after changing this setting, because existing clients keep the old key mode.
 - Press `Ctrl+a ?` for the key list, `Ctrl+a w` for the tree, and `Ctrl+a s` for the session tree.
-
-## Kitty config
-
-- Kitty is managed through `modules/kitty/default.nix`.
-- `home-manager switch` installs `~/.config/kitty/kitty.conf` as an out-of-store symlink to `modules/kitty/files/kitty.conf`, so the repo file stays mutable.
-- The checked-in defaults use One Half Light colors, JetBrains Mono with Sarasa Mono CL as the Hangul fallback, a beam cursor, opaque background, and muted split borders.
-- The module only manages config. Install the `kitty` app or binary separately.
 
 ## AeroSpace config
 
@@ -364,6 +352,14 @@ nix build .#nixosConfigurations.pylv-sepia.config.system.build.toplevel
 - Home Manager links the repository-managed `agent-session-record` extension into the OpenClaw extension directory. Mutable OpenClaw configuration still controls whether the plugin is allowed and enabled.
 
 ## Helpers
+
+After changing module paths or configuration behavior, update the corresponding module README and its links in the root guidance. Check local documentation paths without evaluating Nix:
+
+```bash
+uv run --no-project docs/check-paths.py
+```
+
+The checker covers local Markdown link targets and concrete repository paths in inline code and code blocks in this README, AGENTS.md, CLAUDE.md, and the Zellij module README. It skips placeholder and glob paths, installed paths, external URLs, and link anchors. The architecture review preserves historical evidence and is excluded from the default check. Pass additional Markdown files as arguments to check them explicitly.
 
 ```bash
 nix flake show
