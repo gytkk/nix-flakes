@@ -74,7 +74,6 @@ in
         gco = "git checkout";
         gd = "git diff";
         lg = "lazygit";
-        gui = "gitui";
 
         # Neovim
         vim = "nvim";
