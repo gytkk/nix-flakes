@@ -10,6 +10,21 @@ local function sync_search_files()
   vim.cmd("checktime")
 end
 
+local function refresh_search_on_change(picker)
+  local pending = false
+  picker.list.win:on({ "BufWritePost", "FileChangedShellPost", "FocusGained" }, function()
+    if pending then return end
+    pending = true
+    vim.schedule(function()
+      if picker.closed then return end
+      vim.cmd("checktime")
+      pending = false
+      picker:refresh()
+      picker.preview:refresh(picker)
+    end)
+  end)
+end
+
 return {
   "folke/snacks.nvim",
   priority = 1000,
@@ -20,6 +35,9 @@ return {
     picker = {
       enabled = true,
       sources = {
+        grep = { on_show = refresh_search_on_change },
+        grep_word = { on_show = refresh_search_on_change },
+        grep_buffers = { on_show = refresh_search_on_change },
         explorer = {
           layout = { preset = "sidebar" },
           actions = {

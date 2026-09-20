@@ -37,6 +37,16 @@ Run the regression test with the installed plugin:
 nvim --headless -u NONE -i NONE -n -l modules/vim/tests/flash-redraw.lua
 ```
 
+## Search refresh
+
+Open grep pickers rerun the current search after a file is saved, after Neovim reloads an externally changed file, and when Neovim regains focus. The results and preview refresh while preserving the search query and scope. This also applies to a grep picker reopened with `<leader>sr`. External edits do not trigger continuous filesystem polling; they appear when Neovim detects the change or regains focus.
+
+Run the regression test with the installed `snacks.nvim` plugin and `rg`:
+
+```bash
+nvim --headless -u NONE -i NONE -n -l modules/vim/tests/grep-refresh.lua
+```
+
 ## Minuet
 
 - Store the OpenAI API key in `secrets/openai-api-key.age` before launching Neovim.
@@ -59,6 +69,7 @@ EDITOR=vim agx -e openai-api-key.age
 - `<leader>e`: file explorer
 - `<leader>ff`: find files
 - `<leader>sg`: grep (saves the current modified file and reloads external changes first)
+- `<leader>sr`: resume the previous picker with its search query and scope
 - `<leader>gs`: git status picker
 - `<leader>gb`: git branches picker
 - `<leader>gd`: git diff picker
