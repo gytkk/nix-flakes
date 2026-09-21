@@ -31,21 +31,9 @@ This module configures Neovim as the primary editor with a modern Lua-based setu
 
 `flash.nvim` is pinned to the upstream Neovim 0.13 search-state fix. Older versions access removed `search_match_*` globals and can repeatedly report `Flash error during redraw` after a character motion, including when saving MDX files. Run `:Lazy update flash.nvim` after applying this configuration and restart Neovim.
 
-Run the regression test with the installed plugin:
-
-```bash
-nvim --headless -u NONE -i NONE -n -l modules/vim/tests/flash-redraw.lua
-```
-
 ## Search refresh
 
 Open grep pickers rerun the current search after a file is saved, after Neovim reloads an externally changed file, and when Neovim regains focus. The results and preview refresh while preserving the search query and scope. This also applies to a grep picker reopened with `<leader>sr`. External edits do not trigger continuous filesystem polling; they appear when Neovim detects the change or regains focus.
-
-Run the regression test with the installed `snacks.nvim` plugin and `rg`:
-
-```bash
-nvim --headless -u NONE -i NONE -n -l modules/vim/tests/grep-refresh.lua
-```
 
 ## Minuet
 
