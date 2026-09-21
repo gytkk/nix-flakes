@@ -47,7 +47,7 @@ trap 'rm -f "$tmp_file"' EXIT
 cp "$PACKAGE_NIX" "$tmp_file"
 NEW_VERSION="$LATEST" SOURCE_HASH="$source_hash" perl -0pi -e '
   s/version = "[^"]+";/version = "$ENV{NEW_VERSION}";/ == 1 or die "Expected one version\n";
-  s/\bhash = "[^"]+";/hash = "$ENV{SOURCE_HASH}";/ == 1 or die "Expected one source hash\n";
+  s/\bsha256 = "[^"]+";/sha256 = "$ENV{SOURCE_HASH}";/ == 1 or die "Expected one source hash\n";
 ' "$tmp_file"
 mv "$tmp_file" "$PACKAGE_NIX"
 
