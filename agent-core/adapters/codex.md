@@ -29,9 +29,21 @@ behavior.
 
 ## Model routing
 
-- Use native `spawn_agent` calls and select the model explicitly: `gpt-6-astra` for high-stakes or ambiguous end-to-end work, deep debugging, complex design, security-sensitive review, and costly failures; `gpt-5.6-sol` for normal implementation, testing, research, and multi-step analysis; `gpt-5.6-terra` for fast read-heavy exploration, broad scans, log triage, and supporting-document analysis; and `gpt-5.6-luna` for narrow, clear, repeatable, or high-volume tasks.
-- A model override requires `fork_turns = "none"` or a bounded positive turn count. Use a full-history fork only when the inherited context is required, and accept the inherited parent model in that case.
-- If the selected model is unavailable, use the nearest available model for the same task shape and report the fallback.
+- At the start of substantive work, dispatch bounded, independent exploration, research, implementation, or verification as soon as its inputs are available. Look for delegation opportunities before broad codebase reads or implementation, and reassess when new independent work appears. The main agent owns user interaction, requirements, decisions, integration, and final validation while workers handle the delegated units.
+- Keep short answers and one-step low-risk edits in the main agent. Spawn a worker only for a concrete unit that can run alongside useful main-agent work; keep dependent work sequential and give writing workers disjoint file ownership.
+- Use native `spawn_agent` calls with explicit `model` and `reasoning_effort` values selected for the unit in the table below. Treat the table's effort as a starting point, not a requirement to use every model on every task.
+
+| Model | Delegated work | Starting effort |
+| --- | --- | --- |
+| `gpt-5.6-luna` | Narrow, clear, repeatable tasks such as locating symbols, running a known check, or applying a mechanical edit | `low` |
+| `gpt-5.6-terra` | Read-heavy exploration, broad scans, log triage, and supporting-document analysis that return concise evidence | `medium` |
+| `gpt-5.6-sol` | Normal implementation, testing, research synthesis, and multi-step analysis with a defined scope | `medium` |
+| `gpt-6-astra` | Ambiguous work, complex design, deep debugging, security-sensitive review, and decisions with costly failures | `high` |
+
+- Use `low` for direct lookups and deterministic checks, `medium` for ordinary reasoning, and `high` for tracing complex logic, checking assumptions, or analyzing edge cases. Reserve `xhigh` or higher supported efforts for especially difficult unresolved reasoning. A higher effort does not replace selecting a model suited to the task's ambiguity and failure cost.
+- Escalate when a worker reports unresolved assumptions, conflicting evidence, or a failed validation it cannot explain. Route wider evidence gathering to terra, implementation or analysis beyond a narrow task to sol, and unresolved design or correctness questions to astra. Pass the evidence and failed approaches to the next worker so it can continue the investigation.
+- A model or effort override requires `fork_turns = "none"` or a bounded positive turn count. Include the relevant user requirements, constraints, owned paths, and acceptance criteria in the worker task. Use a full-history fork only when the inherited context is required, and accept the inherited parent model and effort in that case.
+- Inspect worker evidence and changed files before integration. Resolve conflicting results and run the relevant checks before reporting completion. If a requested model or effort is unavailable, select a supported alternative suited to the unit and report the fallback.
 
 ## Sandbox awareness
 
