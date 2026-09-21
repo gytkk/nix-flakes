@@ -6,6 +6,7 @@
   autoPatchelfHook,
   makeWrapper,
   nodejs_22,
+  libxcb,
   zlib,
 }:
 
@@ -38,6 +39,7 @@ buildNpmPackage {
 
   buildInputs = lib.optionals stdenv.hostPlatform.isLinux [
     stdenv.cc.cc.lib
+    libxcb
     zlib
   ];
 

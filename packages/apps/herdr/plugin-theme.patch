@@ -67,6 +67,9 @@
 +}
 --- a/src/app/api/plugins/mod.rs
 +++ b/src/app/api/plugins/mod.rs
+@@ -1818 +1818 @@
+-        let root = std::path::PathBuf::from("/var/tmp").join(format!(
++        let root = std::env::temp_dir().join(format!(
 @@ -1848,6 +1848,7 @@
      #[tokio::test]
      async fn plugin_pane_open_uses_plugin_root_title_env_and_target_context() {
