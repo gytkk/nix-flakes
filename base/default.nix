@@ -62,6 +62,8 @@ let
 in
 {
   imports = [
+    ./compat/home-manager.nix
+    ../modules/claude-session-mining
     # 기본 모듈들 (항상 import됨)
     ../modules/agent-session-record
     ../modules/aerospace
@@ -120,46 +122,12 @@ in
     # the home-manager profile, while each switch also adds a generation to the
     # nix-env profile beside it. modules/nix-gc prunes every profile instead.
 
-    # stateVersion 25.11부터 copyApps가 switch마다 TCC 권한을 초기화하므로,
-    # Nix로 .app 번들을 설치하지 않는 이 구성에서는 비활성화한다.
-    targets.darwin.copyApps.enable = false;
-
     # 일회성 agenix 작업이 정상 종료 후 반복 실행되지 않도록 KeepAlive를 제거한다.
     # 세대가 바뀌어도 plist가 유지되도록 ProgramArguments는 고정된 래퍼를 가리킨다.
     launchd.agents.activate-agenix.config = lib.mkIf pkgs.stdenv.isDarwin {
       KeepAlive = lib.mkForce null;
       ProgramArguments = lib.mkIf (agenixMountCommand != null) (lib.mkForce [ agenixLaunchdWrapper ]);
     };
-
-    # 매일 06:00에 Claude Code 기록에서 agent-core 개선 후보를 만들며, 절전 중 놓친 실행은 기상 후 처리한다.
-    # BTM 알림을 피하도록 gytkk-space의 고정된 runner 경로를 사용한다.
-    launchd.agents.claude-session-mining = lib.mkIf pkgs.stdenv.isDarwin {
-      # Home Manager's launchd.agents.<name>.enable defaults to false, so a
-      # config-only definition silently produces no plist at all.
-      enable = true;
-      config = {
-        # Home Manager가 ProgramArguments에 wait4path를 이미 적용하므로
-        # 중복 래퍼 없이 runner를 직접 지정한다.
-        ProgramArguments = [ "${homeDirectory}/workspace/gytkk-space/automation/mine-sessions.sh" ];
-        StartCalendarInterval = [
-          {
-            Hour = 6;
-            Minute = 0;
-          }
-        ];
-        ProcessType = "Background";
-        StandardOutPath = "${homeDirectory}/Library/Logs/claude-mining/launchd.stdout";
-        StandardErrorPath = "${homeDirectory}/Library/Logs/claude-mining/launchd.stderr";
-      };
-    };
-
-    # launchd opens the agent's StandardOut/ErrorPath at spawn time, before the
-    # runner can create the directory itself, so ensure it exists at activation.
-    home.activation.claudeMiningLogDir = lib.mkIf pkgs.stdenv.isDarwin (
-      lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-        run mkdir -p ${lib.escapeShellArg "${homeDirectory}/Library/Logs/claude-mining"}
-      ''
-    );
 
     # Surface introspection failure instead of silently reverting to the
     # notification churn (the freeze above simply stays inactive then).
@@ -337,44 +305,5 @@ in
       };
     };
 
-    home.activation.installPackages = lib.mkForce (
-      lib.hm.dag.entryAfter [ "writeBoundary" ] (
-        if config.submoduleSupport.externalPackageInstall then
-          ''
-            nixProfileRemove home-manager-path
-          ''
-        else
-          ''
-            nixReplaceProfile() {
-              local oldNix="$(command -v nix)"
-
-              nixProfileRemove 'home-manager-path'
-
-              run "$oldNix" profile install "$1"
-            }
-
-            if [[ -e ${config.home.profileDirectory}/manifest.json ]] ; then
-              INSTALL_CMD="nix profile install"
-              INSTALL_CMD_ACTUAL="nixReplaceProfile"
-              LIST_CMD="nix profile list"
-              REMOVE_CMD_SYNTAX='nix profile remove {number | store path}'
-            else
-              INSTALL_CMD="nix-env -i"
-              INSTALL_CMD_ACTUAL="run nix-env -i"
-              LIST_CMD="nix-env -q"
-              REMOVE_CMD_SYNTAX='nix-env -e {package name}'
-            fi
-
-            if ! $INSTALL_CMD_ACTUAL ${config.home.path} ; then
-              echo
-              _iError $'Oops, Nix failed to install your new Home Manager profile!\n\nPerhaps there is a conflict with a package that was installed using\n"%s"? Try running\n\n    %s\n\nand if there is a conflicting package you can remove it with\n\n    %s\n\nThen try activating your Home Manager configuration again.' "$INSTALL_CMD" "$LIST_CMD" "$REMOVE_CMD_SYNTAX"
-              exit 1
-            fi
-
-            unset -f nixReplaceProfile
-            unset INSTALL_CMD INSTALL_CMD_ACTUAL LIST_CMD REMOVE_CMD_SYNTAX
-          ''
-      )
-    );
   };
 }

@@ -71,6 +71,8 @@ lib/builders.nix                  # Backward-compatible builder aggregation
 
 Home Manager modules expose `modules.<name>.enable`; `base/default.nix` owns common default enables, and profile files can override them. NixOS input modules that are host-specific, such as Disko, Copyparty, niri, and DankMaterialShell, are imported by the relevant `hosts/<name>/configuration.nix`.
 
+New Darwin environments leave [Claude session mining](modules/claude-session-mining/README.md) disabled. The two existing Mac entries select `base/devsisters/session-mining.nix` in `inventory.nix`; that fragment requires the external `gytkk-space` runner checkout. [Home Manager installation compatibility](base/compat/README.md) is imported separately from common package and application defaults.
+
 The [architecture review and improvement plan](docs/architecture-review/README.md) records the 2026-09-18 assessment of configuration ownership, extension paths, and verification coverage, with proposed fixes and completion criteria for each issue.
 
 ## Rust toolchain
