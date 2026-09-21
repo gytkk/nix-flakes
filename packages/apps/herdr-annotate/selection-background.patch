@@ -433,22 +433,22 @@
 +
 +#[test]
 +fn configured_code_color_survives_message_preview_and_cached_return() {
-+    let mut messages = candidates();
-+    for message in &mut messages {
++    let mut app = message_app(None, Box::new(Discard));
++    for message in &mut app.candidates {
 +        message.text = "`code`\n".to_owned();
 +    }
-+    let mut app = App::open_message("claude", "/tmp/transcript.jsonl", None, messages, 60, Box::new(Discard))
-+        .expect("messages");
-+    app.data_dir = scratch_data_dir();
++    app.handle_event(&Event::Key(KeyEvent::from(KeyCode::Down))).expect("preview updated message");
++    // Discard the first candidate cached before its fixture text was updated.
++    app.pick_cache.clear();
 +    let theme = Config::parse("[theme]\nmarkdown_code_foreground = \"#8a5b00\"\n").expect("theme").theme;
 +    app.set_theme(theme);
 +    for key in [
 +        KeyCode::Enter,
 +        KeyCode::Char('p'),
-+        KeyCode::Down,
++        KeyCode::Up,
 +        KeyCode::Enter,
 +        KeyCode::Char('p'),
-+        KeyCode::Up,
++        KeyCode::Down,
 +        KeyCode::Enter,
 +    ] {
 +        app.handle_event(&Event::Key(KeyEvent::from(key))).expect("navigate");
@@ -523,17 +523,14 @@
                  app.set_status(note.clone());
                  Ok(app)
              });
-@@ -83,6 +91,7 @@
+@@ -81,5 +89,6 @@
+     let label = located.host.label();
+     let transcript = located.transcript.display().to_string();
++    let theme = Config::load()?.theme;
      let session_id = located.session_id;
      let messages = located.messages;
      let note = discovery_note(located.discovery, crate::herdr::context::HerdrEnv::from_env().in_herdr);
-+    let theme = Config::load()?.theme;
-     cli::run_ui(|width| {
-         let mut app = App::open_message(
-             label,
-@@ -92,6 +101,7 @@
-             width,
-             cli::delivery(true),
+@@ -94,4 +103,5 @@
          )?;
 +        app.set_theme(theme);
          if let Some(note) = note {

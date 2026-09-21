@@ -199,15 +199,14 @@
              return cli::run_ui(|width| {
                  let mut app = App::open(screen, width, cli::delivery(true))?;
                  app.set_theme(theme);
-@@ -91,7 +91,7 @@
+@@ -89,6 +89,6 @@
+     let label = located.host.label();
+     let transcript = located.transcript.display().to_string();
+-    let theme = Config::load()?.theme;
++    let theme = Config::load()?.theme.for_herdr()?;
      let session_id = located.session_id;
      let messages = located.messages;
      let note = discovery_note(located.discovery, crate::herdr::context::HerdrEnv::from_env().in_herdr);
--    let theme = Config::load()?.theme;
-+    let theme = Config::load()?.theme.for_herdr()?;
-     cli::run_ui(|width| {
-         let mut app = App::open_message(
-             label,
 --- a/crates/plannotator-tui/src/app/draw.rs
 +++ b/crates/plannotator-tui/src/app/draw.rs
 @@ -45,6 +45,7 @@
