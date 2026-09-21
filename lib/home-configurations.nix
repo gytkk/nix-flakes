@@ -40,10 +40,9 @@ in
           hasSystemCodexConfig = false;
           hasSystemNiriConfig = false;
         };
-        modules = [
-          inputs.agenix.homeManagerModules.default
-        ]
-        ++ dynamicModules
-        ++ (config.homeModules or [ ]);
+        modules =
+          (import ./home-manager-modules.nix { inherit inputs; })
+          ++ dynamicModules
+          ++ (config.homeModules or [ ]);
       };
 }

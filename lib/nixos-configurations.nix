@@ -29,7 +29,7 @@
 
       homeConfig = ../base + "/${config.profile}/home.nix";
       homeModules = [ homeConfig ] ++ (config.homeModules or [ ]);
-      sharedHomeModules = [ inputs.agenix.homeManagerModules.default ];
+      sharedHomeModules = import ./home-manager-modules.nix { inherit inputs; };
     in
     if missingFields != [ ] then
       throw "Missing required fields for NixOS host ${name}: ${builtins.toString missingFields}"

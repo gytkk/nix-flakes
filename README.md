@@ -73,6 +73,8 @@ Home Manager modules expose `modules.<name>.enable`; `base/default.nix` owns com
 
 New Darwin environments leave [Claude session mining](modules/claude-session-mining/README.md) disabled. The two existing Mac entries select `base/devsisters/session-mining.nix` in `inventory.nix`; that fragment requires the external `gytkk-space` runner checkout. [Home Manager installation compatibility](base/compat/README.md) is imported separately from common package and application defaults.
 
+[Darwin agenix integration](modules/agenix-darwin/README.md) owns the stable login wrapper and activation retries. Both Home Manager builders use `lib/home-manager-modules.nix` for the explicit agenix mount interface and [launchd lifecycle compatibility](lib/launchd/README.md).
+
 The [architecture review and improvement plan](docs/architecture-review/README.md) records the 2026-09-18 assessment of configuration ownership, extension paths, and verification coverage, with proposed fixes and completion criteria for each issue.
 
 ## Rust toolchain

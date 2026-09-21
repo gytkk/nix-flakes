@@ -10,7 +10,7 @@
 | 검토 방식 | 설계, 유지보수성, 숨은 가정에 대한 정적 분석과 범위가 좁은 로컬 검증 |
 | 판단 | `needs_work`. 기본 확장 경로는 있지만 변경 책임과 검증 범위가 불균일하다. |
 | 신뢰도 | 정적 구조 판단 기준 8/10. 실제 활성화와 원격 환경은 미검증이다. |
-| 해결 상태 | 이슈 4와 8은 적용 완료했다. 나머지 해결안은 제안 단계다. |
+| 해결 상태 | 이슈 4와 8은 적용 완료했다. 이슈 3은 구현과 로컬 검증을 마쳤으며 실제 Mac 적용과 로그인 검증이 남아 있다. 나머지 해결안은 제안 단계다. |
 
 파일 링크와 줄 번호는 검토 당시 코드를 근거로 한다. 후속 변경으로 줄 번호가 달라지면 기준 커밋에서 확인한다.
 
@@ -99,7 +99,7 @@
 
 ## 3. 공통 base에 섞인 개별 기능
 
-### 현재 상태와 영향
+### 리뷰 당시 상태와 영향
 
 [base/default.nix:64](../../base/default.nix#L64)는 공통 import와 활성화 기본값을 관리한다. 같은 파일에는 agenix 내부 옵션을 읽는 macOS 우회 처리, GitUI 키 설정, Home Manager의 패키지 설치 단계 대체도 들어 있다.
 
@@ -108,17 +108,32 @@
 ### 해결 방법
 
 1. `base`의 역할을 공통 import, 기본 활성화 정책, 공통 환경 값으로 정리한다.
-2. Agenix의 Darwin 호환 처리와 Home Manager 설치 단계 우회는 목적이 드러나는 내부 모듈로 옮긴다. 최초 이동에서는 동작을 보존하고, 우회 제거 여부는 버전과 재현 근거를 확인하는 별도 변경으로 다룬다.
+2. Agenix의 Darwin 통합은 내부 정의 역추적을 제거하고, 명시적인 mount 명령으로 연결한다. Home Manager의 launchd unload와 reload 실패 처리를 수정하고, agenix만 먼저 내리는 우회를 제거한다. Home Manager 설치 단계 대체는 동작을 보존해 별도 모듈로 이동한다.
 3. 세션 분석 작업은 실행 경로와 활성화 여부를 가진 모듈로 분리한다. 실제 사용하는 profile이나 호스트에서 선택하고, 필요한 스크립트가 없을 때 원인을 확인할 수 있는 오류를 남긴다.
-4. GitUI처럼 특정 앱에 속하는 설정은 대응 모듈로 옮긴다. 작업용 도구 묶음과 최소 공통 환경을 나눌 필요가 있는지는 실제 새 환경의 요구를 기준으로 결정한다.
+4. 사용자 검토에 따라 GitUI 패키지, 키 설정과 `gui` alias를 제거한다. GitUI 모듈은 추가하지 않는다.
 5. 새 환경을 등록할 때 함께 활성화되는 자동화와 외부 경로 의존을 README에서 안내한다.
 
 ### 완료 기준
 
-- [ ] 새 Darwin 환경이 세션 분석 작업을 의도치 않게 활성화하지 않는다.
-- [ ] 세션 분석 작업의 활성화와 실행 경로를 base 구현을 읽지 않고 설정할 수 있다.
-- [ ] 단순 파일 이동 전후의 관련 옵션과 activation 내용이 동일하다.
-- [ ] 동작을 바꾸는 단계는 파일 이동과 구분해 검증하고 커밋한다.
+- [x] 새 Darwin 환경이 세션 분석 작업을 의도치 않게 활성화하지 않는다.
+- [x] 세션 분석 작업의 활성화와 실행 경로를 base 구현을 읽지 않고 설정할 수 있다.
+- [x] Home Manager 설치 호환 처리의 이동 전후 옵션과 activation 내용이 동일하다.
+- [x] 동작을 바꾸는 단계는 파일 이동과 구분해 검증하고 커밋한다.
+- [ ] 실제 두 Mac에서 적용과 로그인 후 secret 사용, launchd 상태와 백그라운드 알림을 확인한다.
+
+### 적용 결과
+
+GitUI 패키지, 키 설정과 `gui` alias를 제거했다. [Home Manager 설치 호환 처리](../../base/compat/README.md)는 base에서 분리했다. [세션 분석 모듈](../../modules/claude-session-mining/README.md)은 기본 비활성화이며, inventory의 기존 두 Mac만 공통 fragment를 선택한다. 기존 06:00 일정, 실행 경로, 로그 경로를 유지하고 runner가 없을 때는 activation을 중단하지 않는 진단을 남긴다.
+
+[Darwin agenix 통합](../../modules/agenix-darwin/README.md)은 읽기 전용 `age.mountingScript` 출력을 사용한다. Standalone과 NixOS Home Manager는 같은 helper에서 패치된 모듈을 선택한다. 고정 wrapper 경로, `RunAtLoad`, `KeepAlive` 제거, identity와 secret 저장 정책을 유지하며, wrapper와 실행 명령을 원자적으로 갱신하고 로그인과 activation을 직렬화한다. 실패 후 같은 세대를 다시 적용하면 재시도하며, 이전 세대를 활성화하면 그 세대의 명령을 선택한다. Raw option definitions 탐색과 agenix 전용 선제 bootout을 제거했다.
+
+[Home Manager launchd 수정](../../lib/launchd/README.md)은 macOS 버전에 맞게 unload하고, 실제 unload 실패 시 plist 교체나 삭제를 중단한다. 교체 실패 시 이전 plist 복구를 시도하고 전체 activation에 실패를 전달한다. Input 버전은 변경하지 않았으며, 패치 대상이 달라지면 평가 단계에서 실패한다.
+
+더미 mount 명령으로 기존 코드가 실패 후 동일 설정 재적용을 건너뛰는 문제를 재현했고 수정본의 재시도를 확인했다. CLI 검사에서 변경 없는 재적용, 로그인 실행, 실패 후 재시도, 실행 권한 복구, secret 디렉터리 복구, 세대 변경과 롤백, 동시 실행을 검증했다. 실제 secret 복호화와 Home Manager switch는 수행하지 않았다. Plist 안정성이나 더미 launchctl 검사만으로 macOS 백그라운드 알림 해소를 완료 처리하지 않는다.
+
+Standalone 환경 5개와 NixOS의 Home Manager 구성 2개에서 activation derivation 평가를 통과했다. MacBook의 생성 예정 agenix plist는 설치된 plist와 byte 단위로 동일하다. MacStudio와 standalone Linux의 이동 전후 평가에서는 설치 단계와 세션 분석 설정을 비교했고, 패키지 경로를 제외한 설치 스크립트와 DAG가 동일하다. NixOS의 외부 패키지 설치 분기도 유지된다. Secret 없는 Darwin과 Linux 구성은 별도 fixture로 검증한다.
+
+Launchd 회귀 검사 8개와 agenix CLI 검사 7개를 통과했다. Launchd 검사는 기존 코드의 unload 실패 무시를 재현하고, 수정본의 교체와 제거 중단, rollback, 최초 설치 실패 후 재시도, macOS 버전 분기, 실패 집계와 dry-run을 확인한다. 변경한 Nix 파일의 nixfmt, Python의 Ruff, 생성된 launchd activation의 Bash 구문 검사와 현행 문서 경로 검사도 통과했다.
 
 <a id="issue-4"></a>
 
