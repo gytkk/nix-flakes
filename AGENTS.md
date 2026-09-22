@@ -12,8 +12,7 @@ This file provides guidance to Codex CLI when working with code in this reposito
 - Follow existing code patterns and module structure in this repository
 - Use `nixfmt` to format all Nix files before committing
 - Prefer narrow, fast checks. Run time-consuming Nix evaluation commands such as `nix eval` and `nix flake check --no-build` only when they are required to validate the requested change or the user explicitly requests them. Skip them for documentation-only changes, simple edits, and checks unrelated to the changed behavior.
-- Skip Nix package build tests by default because they are expensive. Run `nix build`, `nix-build`, or `nix flake check` without `--no-build` only when the user explicitly requests a build or a concrete build-specific concern cannot be checked with formatting, static checks, targeted tests, or evaluation. A package change alone does not justify a build. Before an exceptional build, explain why it is necessary and select the smallest relevant target. Report skipped builds and any remaining verification limits.
-- Do NOT push unless explicitly requested
+- Skip Nix package build tests by default because they are expensive. Run `nix build`, `nix-build`, or `nix flake check` without `--no-build` only when the user explicitly requests a build or a concrete build-specific concern cannot be checked with formatting, static checks, targeted tests, or evaluation. A package change alone does not justify a build.
 - When changing the canonical theme pipeline or generated theme exports, leave a local git commit in a sensible rollbackable unit before finishing the work
 
 ### Documentation Guidelines
