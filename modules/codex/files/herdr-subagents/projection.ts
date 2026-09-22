@@ -13,11 +13,11 @@ export type ChildState = {
 
 const TERMINAL_VISIBLE_MS = 5_000;
 const STATUS = {
-  running: "● 실행 중",
-  completed: "✓ 완료",
-  interrupted: "■ 중단",
-  failed: "× 실패",
-  unknown: "○ 상태 확인 불가",
+  running: "●",
+  completed: "✓",
+  interrupted: "■",
+  failed: "×",
+  unknown: "○",
 };
 
 export function object(value: unknown): Record<string, any> | undefined {
