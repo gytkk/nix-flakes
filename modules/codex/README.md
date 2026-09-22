@@ -16,6 +16,8 @@ Herdr 안에서 실행한 Codex는 Agents 항목 아래에 실행 중인 직계 
 
 활동 문구는 assistant 메시지나 도구 종류를 사용한다. 기록이 아직 없으면 `working`을 표시하며, reasoning, 암호화된 메시지, 원시 명령어는 표시하지 않는다. 이 연동은 Codex CLI 0.155.1과 Herdr 0.9.1을 기준으로 검증했다. Codex의 내부 JSONL 형식은 안정된 API가 아니므로 CLI 업데이트 후 표시가 달라지면 실제 기록 형식과 parser를 확인한다.
 
+감시 프로세스의 상태 파일은 쓰기와 탐색 권한이 있는 기존 `XDG_RUNTIME_DIR` 아래에 저장한다. 값이 없거나 절대 경로가 아니거나 해당 디렉터리를 사용할 수 없으면 시스템 임시 디렉터리를 사용한다. macOS에서 Linux용 `/run/user/<uid>` 값이 남아 있어도 해당 경로를 생성하지 않는다.
+
 ## 적용
 
 Standalone Home Manager는 `/etc/codex/config.toml`을 checkout의 `files/config.toml`에 연결한다. NixOS는 같은 파일을 Nix store에서 설치한다. `~/.codex/config.toml`은 사용자 설정을 보존하며 activation이 덮어쓰지 않는다.
