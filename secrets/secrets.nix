@@ -51,4 +51,7 @@ in
 
   # OpenAI API key for Neovim Minuet
   "openai-api-key.age".publicKeys = allEnvironmentRecipients;
+
+  # Typesafe Jev API key
+  "jev-api-key.age".publicKeys = allEnvironmentRecipients;
 }
