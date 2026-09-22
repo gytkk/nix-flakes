@@ -1,8 +1,9 @@
 import { createHash, randomUUID } from "node:crypto";
 import { execFile, spawn } from "node:child_process";
-import { mkdir, open, readFile, readdir, rename, rm, stat, writeFile } from "node:fs/promises";
+import { constants } from "node:fs";
+import { access, mkdir, open, readFile, readdir, rename, rm, stat, writeFile } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
-import { basename, dirname, join, resolve } from "node:path";
+import { basename, dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import { JsonlTail, findRollout } from "./io";
@@ -148,21 +149,33 @@ function processStartedAt(identity: string): number {
   return Number.isFinite(parsed) ? parsed : Date.now();
 }
 
-function environment(): { pane: string; binary: string; directory: string; sessions: string } | undefined {
+async function environment(): Promise<{ pane: string; binary: string; directory: string; sessions: string } | undefined> {
   const pane = process.env.HERDR_PANE_ID;
   const socket = process.env.HERDR_SOCKET_PATH;
   if (process.env.HERDR_ENV !== "1" || !pane || !socket) return;
+  let runtimeDirectory = tmpdir();
+  const configured = process.env.XDG_RUNTIME_DIR;
+  if (configured && isAbsolute(configured)) {
+    try {
+      if ((await stat(configured)).isDirectory()) {
+        await access(configured, constants.W_OK | constants.X_OK);
+        runtimeDirectory = configured;
+      }
+    } catch (error) {
+      if (!["ENOENT", "ENOTDIR", "EACCES", "EPERM", "EROFS", "ELOOP", "ENAMETOOLONG"].includes(code(error) ?? "")) throw error;
+    }
+  }
   const key = createHash("sha256").update(`${socket}\0${pane}`).digest("hex").slice(0, 24);
   return {
     pane,
     binary: process.env.HERDR_BIN_PATH || "herdr",
-    directory: join(process.env.XDG_RUNTIME_DIR || tmpdir(), `codex-herdr-subagents-${process.getuid?.() ?? "user"}`, key),
+    directory: join(runtimeDirectory, `codex-herdr-subagents-${process.getuid?.() ?? "user"}`, key),
     sessions: join(process.env.CODEX_HOME || join(homedir(), ".codex"), "sessions"),
   };
 }
 
 export async function handleHook(payload: unknown): Promise<void> {
-  const env = environment();
+  const env = await environment();
   const hook = object(payload);
   if (!env || !hook || typeof hook.session_id !== "string" || !ID.test(hook.session_id)) return;
   const inherited = process.env.CODEX_THREAD_ID;
@@ -236,7 +249,7 @@ export async function handleHook(payload: unknown): Promise<void> {
 }
 
 export async function watch(token: string): Promise<void> {
-  const env = environment();
+  const env = await environment();
   if (!env) return;
   const ownerPath = join(env.directory, "owner.json");
   const initial: Owner | undefined = await json(ownerPath);
