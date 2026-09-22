@@ -56,6 +56,12 @@ This module provides a comprehensive Zsh shell configuration with modern feature
 - Home Manager
 - Zsh shell support
 
+## Nix executable priority on macOS
+
+Login shells put `~/.nix-profile/bin` first in `PATH` through the Home Manager-generated `.zprofile`, after macOS runs `path_helper`. This makes commands such as `python3` use the Nix installation. Non-login child shells inherit that order, and activating a virtual environment can still override Python for the current shell.
+
+After applying Home Manager, start a new login shell with `exec zsh -l`. Restart applications such as Codex from that shell so they inherit the updated `PATH`.
+
 ## Configuration Files
 
 - `.p10k.zsh`: Powerlevel10k theme configuration

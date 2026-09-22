@@ -77,6 +77,10 @@ New Darwin environments leave [Claude session mining](modules/claude-session-min
 
 The [architecture review and improvement plan](docs/architecture-review/README.md) records the 2026-09-18 assessment of configuration ownership, extension paths, and verification coverage, with proposed fixes and completion criteria for each issue.
 
+## Zsh config
+
+On macOS, login shells prioritize `~/.nix-profile/bin` after the system PATH setup, so commands such as `python3` use their Nix versions. See the [Zsh module README](modules/zsh/README.md#nix-executable-priority-on-macos) for application steps.
+
 ## Rust toolchain
 
 Home Manager installs rustup, while rustup owns the toolchains and components under `~/.rustup`. Initialize the stable toolchain and the components used by editors and language-server integrations after the first Home Manager activation:

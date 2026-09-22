@@ -37,6 +37,11 @@ in
       # Use XDG config directory for zsh configuration files
       dotDir = "${config.xdg.configHome}/zsh";
 
+      # macOS path_helper runs after Home Manager's session PATH setup.
+      profileExtra = lib.optionalString pkgs.stdenv.isDarwin ''
+        path=("$HOME/.nix-profile/bin" "''${(@)path:#$HOME/.nix-profile/bin}")
+      '';
+
       # Enable features
       autosuggestion.enable = true;
       enableCompletion = true;
