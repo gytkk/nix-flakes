@@ -12,8 +12,8 @@
     }
   },
   "plannotatorTui": {
-    "version": "0.9.0",
-    "sourceHash": "sha256-gR20lLsRb+satSsC0iJbUZ3YB/tLp5+8txWNDRqW7Qg=",
-    "cargoHash": "sha256-bvLe2vKMwJOx6csC900buEwwVZSFi74rS/932AQju1I="
+    "version": "0.9.2",
+    "sourceHash": "sha256-DN3jRovKYUpT6Isu6B1HgKMB+v7KfELX7BRjxG/INRA=",
+    "cargoHash": "sha256-CEExsInt7DmfqEAe5bXFsL++caiaBQoduSr+/X11I6g="
   }
 }

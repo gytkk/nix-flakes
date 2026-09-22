@@ -12,24 +12,36 @@
 +markdown_code_foreground = "#8a5b00" # inline and fenced code text
  ```
 +
-+Theme colors accept `#RRGGBB`. Omitted settings keep the defaults: indexed colors 236, 58, and 22 for the three backgrounds, and bright yellow for code text. Colors are loaded when an interactive review opens; headless commands retain the defaults.
++Theme colors accept `#RRGGBB`. Omitted backgrounds use the active light or dark palette; code text defaults to bright yellow. Colors are loaded when an interactive review opens; headless commands retain the defaults.
 
  `plannotator-tui config` prints the file's path and the values in effect. The `herdr/`
  directory in this repo is the development manifest; users should install Herdr Annotate.
 --- a/crates/plannotator-tui/src/config.rs
 +++ b/crates/plannotator-tui/src/config.rs
-@@ -9,12 +9,96 @@
+@@ -9,24 +9,108 @@
  use std::str::FromStr;
 
  use anyhow::{Context, Result};
 +use ratatui::style::Color;
  use serde::{Deserialize, Serialize};
 
+ use crate::theme::ThemeSetting;
+
  #[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
  #[serde(deny_unknown_fields, default)]
  pub(crate) struct Config {
-     pub(crate) herdr: HerdrConfig,
 +    pub(crate) theme: ThemeConfig,
+     pub(crate) herdr: HerdrConfig,
+     pub(crate) ui: UiConfig,
+ }
+
+ /// How the app looks. One key so far; the colours themselves are not configurable yet.
+ #[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
+ #[serde(deny_unknown_fields, default)]
+ pub(crate) struct UiConfig {
+     /// `auto` asks the terminal for its background colour; `light` and `dark` skip the
+     /// question. `PLANNOTATOR_TUI_THEME` overrides whatever is written here.
+     pub(crate) theme: ThemeSetting,
 +}
 +
 +/// Colors used by the review UI.
@@ -64,15 +76,15 @@
 +
 +impl ThemeConfig {
 +    pub(crate) fn selection_background(&self) -> Color {
-+        self.selection_background.unwrap_or(Color::Indexed(236))
++        self.selection_background.unwrap_or_else(|| crate::theme::palette().block_bg)
 +    }
 +
 +    pub(crate) fn comment_background(&self) -> Color {
-+        self.comment_background.unwrap_or(Color::Indexed(58))
++        self.comment_background.unwrap_or_else(|| crate::theme::palette().comment_bg)
 +    }
 +
 +    pub(crate) fn looks_good_background(&self) -> Color {
-+        self.looks_good_background.unwrap_or(Color::Indexed(22))
++        self.looks_good_background.unwrap_or_else(|| crate::theme::palette().approve_bg)
 +    }
 +
 +    pub(crate) fn markdown_code_foreground(&self) -> Color {
@@ -115,7 +127,7 @@
  }
 
  /// How plannotator-tui opens inside Herdr.
-@@ -151,7 +235,50 @@
+@@ -151,7 +235,74 @@
      #[test]
      fn empty_file_is_the_default_config() {
          assert_eq!(Config::parse("").expect("parses"), Config::default());
@@ -125,6 +137,30 @@
 +        assert_eq!(Config::default().theme.comment_background(), Color::Indexed(58));
 +        assert_eq!(Config::default().theme.looks_good_background(), Color::Indexed(22));
 +        assert_eq!(Config::default().theme.markdown_code_foreground(), Color::LightYellow);
++    }
++
++    #[test]
++    fn theme_overrides_preserve_the_active_light_palette() {
++        // The upstream palette is process-global and cannot be reset between tests.
++        if std::env::var_os("PLANNOTATOR_TEST_LIGHT_PALETTE").is_none() {
++            let status = std::process::Command::new(std::env::current_exe().expect("test binary"))
++                .args(["--exact", "config::tests::theme_overrides_preserve_the_active_light_palette"])
++                .env("PLANNOTATOR_TEST_LIGHT_PALETTE", "1")
++                .status()
++                .expect("light palette test process");
++            assert!(status.success());
++            return;
++        }
++        crate::theme::install(crate::theme::Theme::Light);
++        let config = Config::parse("[ui]\ntheme = \"light\"\n[theme]\n").expect("config");
++        assert_eq!(config.ui.theme, ThemeSetting::Light);
++        assert_eq!(config.theme.selection_background(), crate::theme::LIGHT.block_bg);
++        assert_eq!(config.theme.comment_background(), crate::theme::LIGHT.comment_bg);
++        assert_eq!(config.theme.looks_good_background(), crate::theme::LIGHT.approve_bg);
++        let config = Config::parse("[theme]\nselection_background = \"#e5e5e5\"\n").expect("override");
++        assert_eq!(config.theme.selection_background(), Color::Rgb(229, 229, 229));
++        assert_eq!(config.theme.comment_background(), crate::theme::LIGHT.comment_bg);
++        assert_eq!(config.theme.looks_good_background(), crate::theme::LIGHT.approve_bg);
 +    }
 +
 +    #[test]
@@ -278,21 +314,11 @@
          self.refresh_review_counts();
 --- a/crates/plannotator-tui/src/app/draw.rs
 +++ b/crates/plannotator-tui/src/app/draw.rs
-@@ -22,9 +22,6 @@
- pub(super) const TREE_MIN_TOTAL_WIDTH: u16 = 120;
- const COMPOSE_WIDTH: u16 = 48;
-
--pub(crate) const COMMENT_BG: Color = Color::Indexed(58);
--pub(crate) const APPROVE_BG: Color = Color::Indexed(22);
--const BLOCK_BG: Color = Color::Indexed(236);
- const TOOLBAR_BG: Color = Color::Indexed(238);
- const CURSOR_BG: Color = Color::Indexed(240);
-
 @@ -129,7 +126,7 @@
                  if open_path == Some(row.path.as_path()) {
                      style = style.bold().fg(Color::Cyan);
                  }
--                let row_bg = (focused && i == self.tree_cursor).then_some(BLOCK_BG);
+-                let row_bg = (focused && i == self.tree_cursor).then(|| palette().block_bg);
 +                let row_bg = (focused && i == self.tree_cursor).then_some(self.theme.selection_background());
                  if let Some(bg) = row_bg {
                      style = style.bg(bg);
@@ -301,7 +327,7 @@
              if block == self.selected && !text_selection_active && self.pending.is_none() && doc_focused {
                  buf.set_style(
                      Rect { x: doc.x, y: screen_y, width: doc.width, height: 1 },
--                    Style::new().bg(BLOCK_BG),
+-                    Style::new().bg(palette().block_bg),
 +                    Style::new().bg(self.theme.selection_background()),
                  );
              }
@@ -310,8 +336,8 @@
                  let Some(kind) = kind else { continue };
                  row_has_annotation = true;
                  let style = match kind {
--                    Kind::Comment => Style::new().bg(COMMENT_BG),
--                    Kind::LooksGood => Style::new().bg(APPROVE_BG),
+-                    Kind::Comment => Style::new().bg(palette().comment_bg),
+-                    Kind::LooksGood => Style::new().bg(palette().approve_bg),
 +                    Kind::Comment => Style::new().bg(self.theme.comment_background()),
 +                    Kind::LooksGood => Style::new().bg(self.theme.looks_good_background()),
                      Kind::Delete => {

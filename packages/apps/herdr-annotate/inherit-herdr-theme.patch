@@ -12,8 +12,8 @@
  markdown_code_foreground = "#8a5b00" # inline and fenced code text
  ```
 
--Theme colors accept `#RRGGBB`. Omitted settings keep the defaults: indexed colors 236, 58, and 22 for the three backgrounds, and bright yellow for code text. Colors are loaded when an interactive review opens; headless commands retain the defaults.
-+Theme colors accept `#RRGGBB`. Inside Herdr, interactive reviews inherit the launch-time `HERDR_PLUGIN_THEME_JSON` snapshot: `panel_bg` and `text` supply base colors, while `selection_bg`, `surface0`, `surface1`, and `accent` supply selection, comment, approval, and code colors. Explicit settings override inherited colors per field. Reopen the pane after changing Herdr's theme. Without a snapshot, omitted settings keep terminal defaults for base colors, indexed colors 236, 58, and 22 for highlight backgrounds, and bright yellow for code text. Headless commands retain the defaults.
+-Theme colors accept `#RRGGBB`. Omitted backgrounds use the active light or dark palette; code text defaults to bright yellow. Colors are loaded when an interactive review opens; headless commands retain the defaults.
++Theme colors accept `#RRGGBB`. Inside Herdr, interactive reviews inherit the launch-time `HERDR_PLUGIN_THEME_JSON` snapshot: `panel_bg` and `text` supply base colors, while `selection_bg`, `surface0`, `surface1`, and `accent` supply selection, comment, approval, and code colors. Explicit settings override inherited colors per field. Reopen the pane after changing Herdr's theme. Without a snapshot, omitted settings keep terminal defaults for base colors, the active light or dark palette for highlight backgrounds, and bright yellow for code text. Headless commands retain the defaults.
 
  `plannotator-tui config` prints the file's path and the values in effect. The `herdr/`
  directory in this repo is the development manifest; users should install Herdr Annotate.
@@ -92,7 +92,7 @@
 +    }
 +
      pub(crate) fn selection_background(&self) -> Color {
-         self.selection_background.unwrap_or(Color::Indexed(236))
+         self.selection_background.unwrap_or_else(|| crate::theme::palette().block_bg)
 +    }
 +
 +    pub(crate) fn base_style(&self) -> ratatui::style::Style {
