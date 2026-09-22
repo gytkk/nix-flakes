@@ -1,0 +1,39 @@
+--- a/src/ui/sidebar/tokens.rs
++++ b/src/ui/sidebar/tokens.rs
+@@ -179,6 +179,7 @@
+ 
+ pub(crate) fn separator(previous: &ResolvedToken, current: &ResolvedToken) -> &'static str {
+     if matches!(previous.kind, ResolvedTokenKind::StateIcon)
++        || matches!(previous.kind, ResolvedTokenKind::Custom(ref value) if matches!(value.as_str(), "●" | "✓" | "■" | "×" | "○" | "…"))
+         || matches!(current.kind, ResolvedTokenKind::GitStatus { .. })
+     {
+         " "
+@@ -231,6 +232,28 @@
+     }
+ 
+     #[test]
++    fn separator_custom_status_tokens_use_plain_space() {
++        let label = ResolvedToken::unstyled(ResolvedTokenKind::Custom("worker".into()));
++
++        for status in ["●", "✓", "■", "×", "○", "…"] {
++            let status = ResolvedToken::unstyled(ResolvedTokenKind::Custom(status.into()));
++            assert_eq!(separator(&status, &label), " ");
++        }
++
++        let ordinary = ResolvedToken::unstyled(ResolvedTokenKind::Custom("ordinary".into()));
++        assert_eq!(separator(&ordinary, &label), " · ");
++
++        let state_icon = ResolvedToken::unstyled(ResolvedTokenKind::StateIcon);
++        assert_eq!(separator(&state_icon, &label), " ");
++
++        let git_status = ResolvedToken::unstyled(ResolvedTokenKind::GitStatus {
++            ahead: 1,
++            behind: 0,
++        });
++        assert_eq!(separator(&label, &git_status), " ");
++    }
++
++    #[test]
+     fn conditional_styles_merge_first_match_and_keep_missing_values_absent() {
+         let config: AgentsSidebarConfig = toml::from_str(r##"
+ rows = [["state_icon", { token = "machine", fg = "#fff", bold = true, dim = true, rules = [{ equals = "Local", fg = "#f00", bold = false }, { contains = "Loc", fg = "#0f0", dim = false }] }], [{ token = "$missing", rules = [{ equals = "", bold = true }] }]]

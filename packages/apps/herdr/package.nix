@@ -43,6 +43,7 @@ rustPlatform.buildRustPackage {
   patches = [
     ./plugin-theme.patch
     ./claude-admin-detection.patch
+    ./sidebar-status-separator.patch
   ];
 
   nativeBuildInputs = [
@@ -79,6 +80,7 @@ rustPlatform.buildRustPackage {
   checkFlags = [
     "app::api::plugins"
     "detect::tests::identify_agent"
+    "ui::sidebar::tokens::tests::separator_"
   ];
 
   meta = {
