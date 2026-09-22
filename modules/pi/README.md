@@ -119,7 +119,7 @@ The extension publishes display metadata only from the parent interactive Pi ses
 
 The progress payload and slash events follow `pi-subagents` 0.41.0. Review this integration when updating that package. It does not import the package's internal modules or modify its execution behavior. Herdr failures produce a warning and leave Pi running.
 
-Home Manager installs the extension. After applying the configuration, run `/reload` in Pi and `herdr server reload-config` for the [Herdr sidebar layout](../herdr/README.md#pi-subagents). For a foreground smoke test, run `/run scout List the top-level files without changing anything` inside a Herdr Pi pane and verify that the child appears, updates, and disappears when finished. Run `bun test modules/pi/tests/herdr-subagents.test.ts` for the isolated event and metadata tests.
+Home Manager installs the extension. After applying the configuration, run `/reload` in Pi and `herdr server reload-config` for the [Herdr sidebar layout](../herdr/README.md#subagents). For a foreground smoke test, run `/run scout List the top-level files without changing anything` inside a Herdr Pi pane and verify that the child appears, updates, and disappears when finished. Run `bun test modules/pi/tests/herdr-subagents.test.ts` for the isolated event and metadata tests.
 
 ### Codex fast mode
 

@@ -20,11 +20,13 @@ In Herdr 0.9.1, closing a tab terminates its panes. Closing the last tab also cl
 
 [Windows Terminal's config](../windows-terminal/files/herdr-keybindings.json) forwards `Ctrl+Tab`, `Ctrl+Shift+Tab`, and `Alt+1..9`. Its next/previous tab actions retain their existing `User.herdrNextWorkspace` and `User.herdrPreviousWorkspace` IDs so activation replaces the previously managed actions.
 
-## Pi subagents
+## Subagents
 
-The Pi-specific Agent layout in [files/config.toml](files/config.toml) displays foreground child names, models, and activity using metadata from the [Pi extension](../pi/README.md#herdr-subagent-sidebar). Empty child rows are hidden. The parent row also retains pi-subagents' existing `$summary` for background work. Other agents use Herdr's default layout.
+The Pi and Codex Agent layouts in [files/config.toml](files/config.toml) display active child names, models, and activity. The [Pi extension](../pi/README.md#herdr-subagent-sidebar) reports foreground children; the [Codex hook and watcher](../codex/README.md#herdr-subagent-sidebar) read direct child sessions from local rollout files. Empty child rows are hidden. The Pi parent row also retains pi-subagents' existing `$summary` for background work. Other agents use Herdr's default layout.
 
 The expanded desktop sidebar supports seven children with two lines each. If more children are active, it shows six plus an overflow count. The rows belong to the parent pane and do not create additional terminal panes. Collapsed and mobile layouts remain compact.
+
+Apply Home Manager, run `herdr server reload-config`, and start a new Pi or Codex session inside Herdr to load the integration.
 
 ## Apply changes
 

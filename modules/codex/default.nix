@@ -13,15 +13,18 @@ let
   codex = "${pkgs.codex}/bin/codex";
   agentSessionRecordCommand = "${config.home.homeDirectory}/.local/bin/agent-session-record";
   plannotatorCommand = "${config.home.homeDirectory}/.local/bin/plannotator";
+  herdrSubagentsCommand = "${config.home.homeDirectory}/.local/bin/codex-herdr-subagents";
   codexHooksJson =
     builtins.replaceStrings
       [
         "~/.local/bin/agent-session-record"
         "~/.local/bin/plannotator"
+        "~/.local/bin/codex-herdr-subagents"
       ]
       [
         agentSessionRecordCommand
         plannotatorCommand
+        herdrSubagentsCommand
       ]
       (builtins.readFile ./files/hooks.json);
   codexConfigPath = "${config.home.homeDirectory}/.codex/config.toml";
@@ -170,6 +173,10 @@ in
 
     home.file.".codex/AGENTS.md".source = "${agentCoreOutput}/AGENTS.md";
     home.file.".codex/hooks.json".text = codexHooksJson;
+    home.file.".local/bin/codex-herdr-subagents".source =
+      pkgs.writeShellScript "codex-herdr-subagents" ''
+        exec ${pkgs.bun}/bin/bun ${./files/herdr-subagents}/index.ts "$@"
+      '';
 
     home.activation.codexUserConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       ${ensureSystemCodexConfigFunction}

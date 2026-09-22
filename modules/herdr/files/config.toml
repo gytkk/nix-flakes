@@ -86,6 +86,24 @@ host_cursor = "native"
 prompt_new_tab_name = false
 
 [ui.sidebar.agents.rows_by_agent]
+codex = [
+  ["state_icon", "machine", "workspace", "tab"],
+  ["agent", "$summary"],
+  ["$subagent_1"],
+  ["$subagent_1_activity"],
+  ["$subagent_2"],
+  ["$subagent_2_activity"],
+  ["$subagent_3"],
+  ["$subagent_3_activity"],
+  ["$subagent_4"],
+  ["$subagent_4_activity"],
+  ["$subagent_5"],
+  ["$subagent_5_activity"],
+  ["$subagent_6"],
+  ["$subagent_6_activity"],
+  ["$subagent_7"],
+  ["$subagent_7_activity"],
+]
 pi = [
   ["state_icon", "machine", "workspace", "tab"],
   ["agent", "$summary"],
