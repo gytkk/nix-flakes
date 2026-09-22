@@ -19,6 +19,11 @@ on:
       - ".github/workflows/apps-ci.yml"
       - ".github/workflows/apps-update.yml"
   workflow_dispatch:
+    inputs:
+      base_sha:
+        description: Base commit for an automated update candidate
+        required: false
+        type: string
   workflow_run:
     workflows: ["Update App Versions"]
     types: [completed]
@@ -36,6 +41,11 @@ jobs:
       - uses: cachix/install-nix-action@v31
       - name: Test changed-app detection
         run: bash packages/apps/tests/detect-changed-apps.sh
+      - name: Test update isolation and patch preflight
+        run: |
+          bash packages/apps/tests/update-all.sh
+          bash packages/apps/tests/update-review.sh
+          bash packages/apps/tests/check-nix-patches.sh
       - run: nix flake check ./packages/apps --no-build
 
   detect-app-changes:
@@ -51,11 +61,15 @@ jobs:
       - name: Detect package changes
         id: detect
         shell: bash
+        env:
+          DISPATCH_BASE_SHA: ${{ inputs.base_sha }}
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             base_sha="${{ github.event.pull_request.base.sha }}"
           elif [ "${{ github.event_name }}" = "push" ]; then
             base_sha="${{ github.event.before }}"
+          elif [ -n "$DISPATCH_BASE_SHA" ]; then
+            base_sha="$DISPATCH_BASE_SHA"
           elif git rev-parse "${{ github.sha }}~1" >/dev/null 2>&1; then
             base_sha="${{ github.sha }}~1"
           else

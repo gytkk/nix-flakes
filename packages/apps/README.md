@@ -23,10 +23,16 @@ Self-contained non-nixpkgs app packages used by the parent `nix-flakes` reposito
 ├── default.nix
 ├── flake.nix
 ├── scripts
+│   ├── check-nix-patches.sh
+│   ├── detect-changed-apps.sh
 │   ├── sync-readme-versions.sh
-│   └── update-all.sh
+│   ├── update-all.sh
+│   └── update-review.sh
 ├── tests/
-│   └── detect-changed-apps.sh
+│   ├── check-nix-patches.sh
+│   ├── detect-changed-apps.sh
+│   ├── update-all.sh
+│   └── update-review.sh
 ├── settings.json
 └── README.md
 ```
@@ -64,7 +70,7 @@ To add a new app package:
 4. Add `packages/apps/<app-name>/update.sh` if the package should support aggregate updates.
 5. Add the package to `packages/apps/default.nix` so the nested flake, parent outputs, and overlay expose it.
 
-To disable aggregate updates for an app, add its name to the `update.deny` list in `settings.json`.
+To disable aggregate updates for an app, add its name to the `update.deny` list in `settings.json`. Apps in `update.review` use candidate PRs instead of direct updates to `main`; the deny list applies to both channels.
 
 The package catalog in `default.nix` is the single source of truth for exported apps and aliases. Register each package there once; the parent package outputs, configuration overlay, and nested flake consume the same catalog. App-specific settings still belong in `modules/<app>/`, and enabling a package in a profile remains a separate choice.
 
@@ -87,11 +93,15 @@ The helper selects the host platform, fetches the pinned archive, disables confi
 
 ## Updates and CI
 
-- Run `packages/apps/scripts/update-all.sh` from the parent repository to update every enabled package manually.
-- `Update App Versions` checks for updates every three hours, verifies changed packages, and commits successful updates to `main`.
-- `herdr` tracks stable releases and builds from Rust and Zig sources with patches for plugin palette snapshots and [Claude administrative command detection](../../modules/herdr/README.md#agent-detection). Package checks cover plugin APIs and process identification. Cargo dependencies come from the source's `Cargo.lock`; Zig dependencies use its vendored Nix manifest. The hash-pinned source is fetched during evaluation so `nix flake check --no-build` can read both files without building a source derivation first. The executable replacement test uses the build's temporary directory so it can run inside the Linux Nix sandbox. Older nixpkgs inputs use the pinned Zig 0.16 build tool in `herdr/zig.nix`. Its updater pins the source hash and checks both patches and the Zig requirement before changing the package.
+- Run `packages/apps/scripts/update-all.sh` from the parent repository to update every enabled package manually. Pass `direct` or `review` to select one update channel.
+- `Update App Versions` checks for updates every three hours in two independently serialized jobs. The direct job verifies changed packages and commits successful updates to `main`. The review job groups `herdr`, `herdr-annotate`, and `herdr-auto-title` into one candidate PR. A failure in either job does not stop the other job.
+- Review candidates use unique `automation/app-review-<run>-<attempt>` branches. While a candidate PR is open, the updater leaves that branch and any manual fixes untouched. Merge it after CI succeeds, or close it before requesting a newer candidate. A patch preflight failure stops candidate creation before metadata changes; the workflow log identifies the rejected patch.
+- The review job explicitly dispatches `App Packages CI` on the candidate branch with its base commit. This runs evaluation and changed-package builds even when a bot-created PR event does not start CI automatically. A failed build leaves the PR available for fixes. If dispatch fails, run `App Packages CI` manually on that branch using the `base_sha` printed in the error. CI currently builds `x86_64-linux`; other platforms are not validated by this workflow.
+- Candidate publication uses `GITHUB_TOKEN` with job-scoped `contents: write`, `pull-requests: write`, and `actions: write`. The repository must enable [Allow GitHub Actions to create and approve pull requests](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository#preventing-github-actions-from-creating-or-approving-pull-requests). The workflow does not approve or merge PRs.
+- `herdr` tracks stable releases and builds from Rust and Zig sources with patches for plugin palette snapshots, [Claude administrative command detection](../../modules/herdr/README.md#agent-detection), and sidebar status separators. Package checks cover plugin APIs and process identification. Cargo dependencies come from the source's `Cargo.lock`; Zig dependencies use its vendored Nix manifest. The hash-pinned source is fetched during evaluation so `nix flake check --no-build` can read both files without building a source derivation first. The executable replacement test uses the build's temporary directory so it can run inside the Linux Nix sandbox. Older nixpkgs inputs use the pinned Zig 0.16 build tool in `herdr/zig.nix`. Its updater pins the source hash and checks every declared patch and the Zig requirement before changing the package.
 - `herdr-annotate` tracks the plugin's `main` commit and the versions it declares. Its updater records source hashes, release checksums for `herdr-annotate`, and the source and Cargo dependency hashes for the Rust-built `plannotator-tui` in `herdr-annotate/sources.json`, so changes are detected even when the manifest version stays the same. Local reviewer patches inherit Herdr's palette and retain per-field color overrides.
 - `herdr-auto-title` tracks stable GitHub releases and builds from source. Its updater pins the source and vendored Go dependency hashes using Go from the nested flake's locked nixpkgs input.
+- Herdr and the Annotate reviewer each declare their patch order in `patches.nix`, shared by the Nix build and updater preflight. Preflight applies the complete sequence to a writable temporary source copy, retaining Nix's default fuzz tolerance and rejecting reversed patches. Annotate checks patches before Cargo hash discovery and metadata changes. Run `bash packages/apps/tests/check-nix-patches.sh` to check this behavior, and `bash packages/apps/tests/update-all.sh` and `bash packages/apps/tests/update-review.sh` to check channel isolation and candidate publication with local fixtures.
 - `pi` includes `libxcb` on Linux so `autoPatchelfHook` can resolve the native X11 clipboard module's shared-library dependency.
 - `App Packages CI` evaluates the nested flake, builds changed packages, and checks Codex release-bundle drift.
 - `databricks-cli`, `notion-cli`, and `pup` are manually updated. They have no `update.sh`, so aggregate updates skip them. Moving a package into this catalog does not enable automatic updates.

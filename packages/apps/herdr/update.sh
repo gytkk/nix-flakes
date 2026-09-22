@@ -37,12 +37,7 @@ if ! rg -q '^\s*\.minimum_zig_version\s*=\s*"0\.16\.0"' "$source_path/vendor/lib
   exit 1
 fi
 
-for local_patch in plugin-theme.patch claude-admin-detection.patch; do
-  if ! patch --dry-run --batch --fuzz=0 -p1 -d "$source_path" < "$SCRIPT_DIR/$local_patch"; then
-    echo "ERROR: $local_patch no longer applies to Herdr v$LATEST" >&2
-    exit 1
-  fi
-done
+bash "$SCRIPT_DIR/../scripts/check-nix-patches.sh" "$source_path" "$SCRIPT_DIR/patches.nix"
 
 tmp_file=$(mktemp "$SCRIPT_DIR/package.nix.XXXXXX")
 trap 'rm -f "$tmp_file"' EXIT

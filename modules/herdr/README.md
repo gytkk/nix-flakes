@@ -41,4 +41,6 @@ Apply Home Manager, run `herdr server reload-config`, and start a new Pi or Code
 
 ## Apply changes
 
+Herdr, Annotate, and Auto Title updates are proposed together through the [app package review channel](../../packages/apps/README.md#updates-and-ci). Local patches are checked before source pins change, and candidate PRs run Linux package CI before manual merging. An open candidate is preserved for fixes; other app updates proceed independently. After merging a candidate, pull its changes before applying Home Manager.
+
 Apply Home Manager for the current environment to install the terminal config, for example `home-manager switch --flake .#devsisters-macbook`. Reload Ghostty with `Cmd+Shift+,`, then run `herdr server reload-config` to reload the running Herdr server's bindings. Editing Herdr's linked config alone does not update Ghostty's generated config.

@@ -1,5 +1,6 @@
 {
   "update": {
-    "deny": []
+    "deny": [],
+    "review": ["herdr", "herdr-annotate", "herdr-auto-title"]
   }
 }

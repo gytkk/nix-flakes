@@ -40,11 +40,7 @@ rustPlatform.buildRustPackage {
     lockFile = "${src}/Cargo.lock";
   };
 
-  patches = [
-    ./plugin-theme.patch
-    ./claude-admin-detection.patch
-    ./sidebar-status-separator.patch
-  ];
+  patches = import ./patches.nix;
 
   nativeBuildInputs = [
     git
