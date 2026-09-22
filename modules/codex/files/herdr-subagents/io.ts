@@ -26,12 +26,18 @@ export class JsonlTail {
   readonly #states = new Map<string, TailState>();
   readonly #diagnose: (message: string) => void;
   caughtUp = true;
+  available = false;
+  reset = false;
+  hasGaps = false;
 
   constructor(diagnose: (message: string) => void = console.warn) {
     this.#diagnose = diagnose;
   }
 
   async read(path: string): Promise<unknown[]> {
+    this.available = false;
+    this.reset = false;
+    this.hasGaps = false;
     let file;
     try {
       file = await open(path, "r");
@@ -47,10 +53,12 @@ export class JsonlTail {
     try {
       const stat = await file.stat();
       if (!stat.isFile()) throw new Error("path is not a regular file");
+      this.available = true;
 
       const identity = `${stat.dev}:${stat.ino}`;
       let state = this.#states.get(path);
       if (!state || state.identity !== identity || stat.size < state.offset) {
+        this.reset = true;
         state = { identity, offset: 0, line: Buffer.alloc(0), lineOffset: 0, dropping: false };
         this.#states.set(path, state);
       }
@@ -68,6 +76,7 @@ export class JsonlTail {
       this.caughtUp = state.offset >= stat.size;
       return this.#records(path, state, chunk.subarray(0, bytesRead), chunkOffset);
     } catch (error) {
+      this.available = false;
       throw context(error, `cannot read JSONL file ${path}`);
     } finally {
       await file.close();
@@ -86,6 +95,7 @@ export class JsonlTail {
         if (state.line.length + segment.length > MAX_LINE) {
           state.line = Buffer.alloc(0);
           state.dropping = true;
+          this.hasGaps = true;
           this.#diagnose(`skipping oversized JSONL record in ${path} at byte ${state.lineOffset}`);
         } else if (segment.length > 0) {
           state.line = Buffer.concat([state.line, segment]);
@@ -100,6 +110,7 @@ export class JsonlTail {
           const text = new TextDecoder("utf-8", { fatal: true }).decode(state.line);
           records.push(JSON.parse(text));
         } catch {
+          this.hasGaps = true;
           this.#diagnose(`skipping malformed JSONL record in ${path} at byte ${state.lineOffset}`);
         }
         state.line = Buffer.alloc(0);
