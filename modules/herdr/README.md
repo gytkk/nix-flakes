@@ -20,6 +20,12 @@ In Herdr 0.9.1, closing a tab terminates its panes. Closing the last tab also cl
 
 [Windows Terminal's config](../windows-terminal/files/herdr-keybindings.json) forwards `Ctrl+Tab`, `Ctrl+Shift+Tab`, and `Alt+1..9`. Its next/previous tab actions retain their existing `User.herdrNextWorkspace` and `User.herdrPreviousWorkspace` IDs so activation replaces the previously managed actions.
 
+## Pi subagents
+
+The Pi-specific Agent layout in [files/config.toml](files/config.toml) displays foreground child names, models, and activity using metadata from the [Pi extension](../pi/README.md#herdr-subagent-sidebar). Empty child rows are hidden. The parent row also retains pi-subagents' existing `$summary` for background work. Other agents use Herdr's default layout.
+
+The expanded desktop sidebar supports seven children with two lines each. If more children are active, it shows six plus an overflow count. The rows belong to the parent pane and do not create additional terminal panes. Collapsed and mobile layouts remain compact.
+
 ## Apply changes
 
 Apply Home Manager for the current environment to install the terminal config, for example `home-manager switch --flake .#devsisters-macbook`. Reload Ghostty with `Cmd+Shift+,`, then run `herdr server reload-config` to reload the running Herdr server's bindings. Editing Herdr's linked config alone does not update Ghostty's generated config.
