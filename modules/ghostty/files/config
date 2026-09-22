@@ -28,9 +28,18 @@ window-decoration = none
 
 unfocused-split-opacity = 0.9
 
-# Forward workspace shortcuts distinctly for Herdr workspace navigation.
+# Forward Herdr shortcuts instead of Ghostty tab, split, and close actions.
 keybind = ctrl+tab=text:\x1b[9;5u
 keybind = ctrl+shift+tab=text:\x1b[9;6u
+# Physical keys also forward these shortcuts while an IME is active.
+keybind = super+bracket_left=text:\x1b[91;9u
+keybind = super+[=text:\x1b[91;9u
+keybind = super+bracket_right=text:\x1b[93;9u
+keybind = super+]=text:\x1b[93;9u
+keybind = super+key_t=text:\x1b[116;9u
+keybind = super+t=text:\x1b[116;9u
+keybind = super+key_w=text:\x1b[119;9u
+keybind = super+w=text:\x1b[119;9u
 keybind = super+digit_1=text:\x1b[49;9u
 keybind = super+1=text:\x1b[49;9u
 keybind = super+digit_2=text:\x1b[50;9u

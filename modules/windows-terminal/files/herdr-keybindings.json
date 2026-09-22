@@ -6,7 +6,7 @@
         "input": "\u001b[9;5u"
       },
       "id": "User.herdrNextWorkspace",
-      "name": "Herdr: next workspace"
+      "name": "Herdr: next tab"
     },
     {
       "command": {
@@ -14,7 +14,7 @@
         "input": "\u001b[9;6u"
       },
       "id": "User.herdrPreviousWorkspace",
-      "name": "Herdr: previous workspace"
+      "name": "Herdr: previous tab"
     },
     {
       "command": {

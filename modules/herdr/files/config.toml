@@ -2,12 +2,18 @@ onboarding = false
 [keys]
 prefix = "ctrl+space"
 
+# tab 생성, 닫기와 이동. 기존 prefix 단축키도 유지한다.
+new_tab = ["cmd+t", "prefix+c"]
+close_tab = ["cmd+w", "prefix+shift+x"]
+previous_tab = ["ctrl+shift+tab", "prefix+p"]
+next_tab = ["ctrl+tab", "prefix+n"]
+
 # workspace 생성 popup을 위해 비워둠
 new_workspace = ""
 
 # workspace 간의 이동(즉시)
-previous_workspace = "ctrl+shift+tab"
-next_workspace = "ctrl+tab"
+previous_workspace = "cmd+["
+next_workspace = "cmd+]"
 switch_workspace = ["cmd+1..9", "alt+1..9"]
 
 # workspace 간의 이동(picker)

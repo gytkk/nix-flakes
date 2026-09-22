@@ -261,11 +261,11 @@ Zellij is managed through `modules/zellij/default.nix`. See the [Zellij module R
 
 ## Herdr config
 
-- Herdr is managed through `modules/herdr/default.nix` and enabled by default.
+- Herdr is managed through `modules/herdr/default.nix` and enabled by default. See the [Herdr module README](modules/herdr/README.md) for terminal shortcuts and how to apply them.
 - Home Manager links `~/.config/herdr/config.toml` to `modules/herdr/files/config.toml` as an out-of-store symlink, so changes made through Herdr settings update the checked-in source file directly.
 - The configured prefix is `Ctrl+Space`.
 - `Ctrl+Space`, then `Shift+n`, opens a popup that selects a previously visited directory with `zoxide` and `fzf`, then creates and focuses a workspace there.
-- `Ctrl+Shift+Tab` or `Ctrl+Tab` focuses the previous or next workspace. `Cmd+1..9` focuses a workspace by index in Ghostty on macOS, and `Alt+1..9` does the same in Windows Terminal on WSL. `Ctrl+Space`, then `Shift+1..9` focuses the corresponding visible agent. The terminal configs forward the direct workspace shortcuts as distinct Kitty keyboard sequences so Herdr receives every modifier.
+- `Ctrl+Shift+Tab` or `Ctrl+Tab` focuses the previous or next tab. In Ghostty on macOS, `Cmd+[` or `Cmd+]` focuses the previous or next workspace, `Cmd+t` creates a Herdr tab, and `Cmd+w` closes the current Herdr tab. `Cmd+1..9` focuses a workspace by index in Ghostty on macOS, and `Alt+1..9` does the same in Windows Terminal on WSL. `Ctrl+Space`, then `Shift+1..9` focuses the corresponding visible agent. The terminal configs forward direct shortcuts as distinct Kitty keyboard sequences so Herdr receives every modifier.
 - On WSL, the `windows-terminal` module merges the corresponding `sendInput` actions into the existing Windows Terminal `settings.json` during Home Manager activation. Existing profiles, themes, and unrelated keybindings are preserved; the first managed update creates a `settings.json.home-manager.bak` backup.
 - Herdr uses the native terminal cursor so pane applications such as Neovim can preserve mode-specific cursor shapes. On Windows or WSL, this may expose ConPTY cursor flicker that Herdr's default drawn cursor avoids.
 - Reload a running server after editing the config with `herdr server reload-config`.
