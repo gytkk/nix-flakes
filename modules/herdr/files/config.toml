@@ -22,8 +22,8 @@ navigate_workspace_up = "up"
 navigate_workspace_down = "down"
 
 # agent 간의 이동(즉시)
-previous_agent = "prefix+shift+comma"
-next_agent = "prefix+shift+period"
+previous_agent = ["cmd+shift+[", "prefix+shift+comma"]
+next_agent = ["cmd+shift+]", "prefix+shift+period"]
 focus_agent = "prefix+shift+1..9"
 
 # agent 간의 이동(picker)
