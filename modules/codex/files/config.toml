@@ -1,7 +1,7 @@
 #:schema https://developers.openai.com/codex/config-schema.json
 
 model = "gpt-6-astra"
-model_reasoning_effort = "medium"
+model_reasoning_effort = "high"
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
 suppress_unstable_features_warning = true
@@ -9,7 +9,7 @@ web_search = "live"
 personality = "pragmatic"
 
 [agents]
-default_subagent_model = "gpt-5.6-sol"
+default_subagent_model = "gpt-5.6-terra"
 default_subagent_reasoning_effort = "medium"
 
 [mcp_servers.openaiDeveloperDocs]
