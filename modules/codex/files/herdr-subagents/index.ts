@@ -12,8 +12,8 @@ import { consumeChild, discoveredChild, object, sidebarTokens, type ChildState }
 const exec = promisify(execFile);
 const SCRIPT = fileURLToPath(import.meta.url);
 const SOURCE = "codex:herdr-subagents";
-const TTL_MS = 45_000;
-const REFRESH_MS = 15_000;
+const TTL_MS = 15_000;
+const REFRESH_MS = 5_000;
 const PROBE_MS = 5_000;
 const LOCK_WAIT_MS = 5_000;
 const LOCK_STALE_MS = 10_000;
@@ -255,31 +255,37 @@ export async function watch(token: string): Promise<void> {
   const initial: Owner | undefined = await json(ownerPath);
   if (!initial || initial.token !== token) return;
   const parent = new JsonlTail();
-  const children = new Map<string, { state: ChildState; tail: JsonlTail; path?: string; nextLookup: number; verified: boolean }>();
+  const children = new Map<string, { state: ChildState; tail: JsonlTail; path?: string; nextLookup: number; verified: boolean; reconstructed: boolean }>();
+  const childErrors = new Map<string, string>();
   let published = "";
   let lastPublished = 0;
   let lastError = "";
   let unavailableSince = 0;
   let nextProbe = 0;
   let ownerProcessHealthy = true;
+  let reportUnavailable = false;
   const register = (entry: Registration, updateName = false) => {
     if (!ID.test(entry.id)) return;
     if (!children.has(entry.id)) children.set(entry.id, {
-      state: { id: entry.id, name: entry.name, activity: "starting", active: false },
-      tail: new JsonlTail(), nextLookup: 0, verified: false,
+      state: { id: entry.id, name: entry.name, activity: "작업 중", observed: false },
+      tail: new JsonlTail(), nextLookup: 0, verified: false, reconstructed: false,
     });
     else if (updateName && entry.name !== "subagent") children.get(entry.id)!.state.name = entry.name;
   };
   const report = async (states: ChildState[]) => {
     const tokens = sidebarTokens(states);
     const serialized = JSON.stringify(tokens);
-    if (serialized === published && (states.every((state) => !state.active) || Date.now() - lastPublished < REFRESH_MS)) return;
+    if (serialized === published && (Object.values(tokens).every((value) => value === null) || Date.now() - lastPublished < REFRESH_MS)) return;
     await withOwnerLock(env.directory, async () => {
       if ((await json(ownerPath))?.token !== token) return;
-      const args = ["pane", "report-metadata", env.pane, "--source", SOURCE, "--ttl-ms", String(TTL_MS)];
-      for (const [key, value] of Object.entries(tokens)) args.push(...(value === null ? ["--clear-token", key] : ["--token", `${key}=${value}`]));
-      try { await exec(env.binary, args, { timeout: 2_000 }); }
-      catch { throw new Error("Herdr metadata update failed"); }
+      const entries = Object.entries(tokens);
+      // Herdr accepts 16 keys per request; keep each child's three keys together.
+      for (let offset = 0; offset < entries.length; offset += 16) {
+        const args = ["pane", "report-metadata", env.pane, "--source", SOURCE, "--ttl-ms", String(TTL_MS)];
+        for (const [key, value] of entries.slice(offset, offset + 16)) args.push(...(value === null ? ["--clear-token", key] : ["--token", `${key}=${value}`]));
+        try { await exec(env.binary, args, { timeout: 2_000 }); }
+        catch { throw new Error("Herdr metadata update failed"); }
+      }
       published = serialized;
       lastPublished = Date.now();
     });
@@ -291,11 +297,12 @@ export async function watch(token: string): Promise<void> {
     const nested = object(object(object(payload?.source)?.subagent)?.thread_spawn);
     return payload?.parent_thread_id === initial.sessionId && nested?.parent_thread_id === initial.sessionId;
   };
-  const staleStart = (value: unknown): boolean => {
+  const staleLifecycle = (value: unknown): boolean => {
     const record = object(value);
     const payload = object(record?.payload);
-    return record?.type === "event_msg" && payload?.type === "task_started"
-      && typeof payload.started_at === "number" && payload.started_at * 1_000 < initial.replayAfter;
+    if (record?.type !== "event_msg" || !["task_started", "task_complete", "task_failed", "turn_aborted", "shutdown_complete"].includes(payload?.type)) return false;
+    const startedAt = typeof payload?.started_at === "number" ? payload.started_at * 1_000 : Date.parse(record.timestamp);
+    return Number.isFinite(startedAt) && startedAt < initial.replayAfter;
   };
   try {
     while (true) {
@@ -314,6 +321,7 @@ export async function watch(token: string): Promise<void> {
           const entry = discoveredChild(value);
           if (entry) register(entry, true);
         }
+        if (!parent.available) throw new Error("Parent rollout is unavailable");
         const registrationDirectory = join(env.directory, initial.sessionId);
         for (const file of await readdir(registrationDirectory)) {
           if (!file.endsWith(".json")) continue;
@@ -321,31 +329,63 @@ export async function watch(token: string): Promise<void> {
           if (typeof entry?.id === "string" && typeof entry.name === "string") register(entry);
         }
         for (const child of children.values()) {
-          if (!child.path && Date.now() >= child.nextLookup) {
-            child.path = await findRollout(env.sessions, child.state.id, dirname(initial.transcript));
-            child.nextLookup = Date.now() + 5_000;
-          }
-          if (child.path) for (const value of await child.tail.read(child.path)) {
-            const verified = verifyParent(value);
-            if (verified === false) {
-              child.path = undefined;
-              child.verified = false;
+          try {
+            if (!child.path && Date.now() >= child.nextLookup) {
+              child.path = await findRollout(env.sessions, child.state.id, dirname(initial.transcript));
               child.nextLookup = Date.now() + 5_000;
-              break;
             }
-            if (verified === true) child.verified = true;
-            if (child.verified && !staleStart(value)) consumeChild(child.state, value);
+            child.state.observed = false;
+            if (!child.path) continue;
+            const records = await child.tail.read(child.path);
+            if (child.tail.reset || !child.tail.available) {
+              child.verified = false;
+              child.reconstructed = false;
+            }
+            for (const value of records) {
+              const verified = verifyParent(value);
+              if (verified === false) {
+                child.path = undefined;
+                child.verified = false;
+                child.reconstructed = false;
+                child.nextLookup = Date.now() + 5_000;
+                break;
+              }
+              if (verified === true) child.verified = true;
+              if (child.verified && !staleLifecycle(value) && consumeChild(child.state, value)) child.reconstructed = true;
+            }
+            if (child.tail.hasGaps) child.reconstructed = false;
+            child.state.observed = child.tail.available && child.tail.caughtUp && child.verified && child.reconstructed;
+            childErrors.delete(child.state.id);
+          } catch (error) {
+            child.state.observed = false;
+            const message = error instanceof Error ? error.message : String(error);
+            if (childErrors.get(child.state.id) !== message) console.error(`Codex Herdr sidebar (${child.state.id}): ${message}`);
+            childErrors.set(child.state.id, message);
           }
         }
-        await report([...children.values()].filter((child) => child.verified && child.path && child.tail.caughtUp).map((child) => child.state));
+        await report([...children.values()].map((child) => child.state));
+        reportUnavailable = false;
         lastError = "";
         unavailableSince = 0;
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         if (message !== lastError) console.error(`Codex Herdr sidebar: ${message}`);
         lastError = message;
-        unavailableSince ||= Date.now();
-        if (Date.now() - unavailableSince >= TTL_MS) break;
+        const unknown = [...children.values()].map((child) => {
+          child.state.observed = false;
+          return child.state;
+        });
+        try { await report(unknown); reportUnavailable = false; }
+        catch {
+          if (!reportUnavailable) console.error("Codex Herdr sidebar: cannot report unknown state; existing metadata will expire");
+          reportUnavailable = true;
+        }
+        if (reportUnavailable) {
+          unavailableSince ||= Date.now();
+          if (Date.now() - unavailableSince >= TTL_MS) break;
+        } else {
+          unavailableSince = 0;
+        }
       }
       await Bun.sleep(500);
     }
