@@ -1,0 +1,225 @@
+--- a/src/detect/mod.rs
++++ b/src/detect/mod.rs
+@@ -254,7 +254,7 @@
+     {
+         let candidate = normalized_process_name(process);
+         if let Some(agent) = identify_agent(&candidate) {
+-            if agent != Agent::Letta || is_interactive_letta_process(process) {
++            if is_interactive_agent_process(agent, process) {
+                 return Some((agent, candidate));
+             }
+         }
+@@ -267,7 +267,7 @@
+         let Some(agent) = identify_agent(&candidate) else {
+             continue;
+         };
+-        if agent == Agent::Letta && !is_interactive_letta_process(process) {
++        if !is_interactive_agent_process(agent, process) {
+             continue;
+         }
+         let score = process_priority(process, &candidate);
+@@ -676,6 +676,49 @@
+         }
+     }
+     None
++}
++
++fn claude_entrypoint_index(argv: &[String]) -> Option<usize> {
++    let is_claude =
++        |arg: &str| agent_name_from_path_token(arg).as_deref() == Some(agent_label(Agent::Claude));
++    if argv.first().is_some_and(|arg| is_claude(arg)) {
++        return Some(0);
++    }
++
++    let runtime = argv
++        .first()
++        .map(|arg| normalized_agent_lookup_name(path_basename(arg)))?;
++    if !matches!(runtime.as_str(), "node" | "bun") {
++        return None;
++    }
++    argv.get(1).is_some_and(|arg| is_claude(arg)).then_some(1)
++}
++
++fn is_claude_maintenance_process(process: &crate::platform::ForegroundProcess) -> bool {
++    let Some(argv) = process.argv.as_deref() else {
++        return false;
++    };
++    let Some(entrypoint) = claude_entrypoint_index(argv) else {
++        return false;
++    };
++
++    argv.get(entrypoint + 1).is_some_and(|arg| {
++        matches!(
++            arg.as_str(),
++            "plugin" | "plugins" | "mcp" | "--version" | "-v" | "--help" | "-h"
++        )
++    })
++}
++
++fn is_interactive_agent_process(
++    agent: Agent,
++    process: &crate::platform::ForegroundProcess,
++) -> bool {
++    match agent {
++        Agent::Claude => !is_claude_maintenance_process(process),
++        Agent::Letta => is_interactive_letta_process(process),
++        _ => true,
++    }
+ }
+
+ fn letta_entrypoint_index(argv: &[String]) -> Option<usize> {
+@@ -1436,6 +1479,66 @@
+             processes: vec![
+                 foreground_process(42, "claude", &["claude"]),
+                 foreground_process(43, "node", &["node", "/tmp/mcp/bin/codex"]),
++            ],
++        };
++
++        assert_eq!(
++            identify_agent_in_job(&job),
++            Some((Agent::Claude, "claude".to_string()))
++        );
++    }
++
++    #[test]
++    fn identify_agent_in_job_ignores_claude_maintenance_commands() {
++        for (name, argv) in [
++            ("claude", vec!["claude", "plugin", "list"]),
++            ("claude", vec!["claude", "plugins", "list"]),
++            (
++                ".claude-code-wrapped",
++                vec!["/nix/store/example/bin/claude-code", "mcp", "list"],
++            ),
++            ("claude", vec!["claude", "--version"]),
++            ("claude", vec!["claude", "-v"]),
++            ("claude", vec!["claude", "--help"]),
++            ("claude", vec!["claude", "-h"]),
++            (
++                "node",
++                vec!["node", "/usr/local/bin/claude.js", "plugin", "list"],
++            ),
++            (
++                "bun",
++                vec!["bun", "/usr/local/bin/claude.js", "mcp", "list"],
++            ),
++        ] {
++            let job = crate::platform::ForegroundJob {
++                process_group_id: 123,
++                processes: vec![foreground_process(123, name, &argv)],
++            };
++
++            assert_eq!(identify_agent_in_job(&job), None, "argv: {argv:?}");
++        }
++    }
++
++    #[test]
++    fn identify_agent_in_job_ignores_claude_maintenance_child_of_shell() {
++        let job = crate::platform::ForegroundJob {
++            process_group_id: 42,
++            processes: vec![
++                foreground_process(42, "bash", &["bash"]),
++                foreground_process(43, "claude", &["claude", "plugin", "list"]),
++            ],
++        };
++
++        assert_eq!(identify_agent_in_job(&job), None);
++    }
++
++    #[test]
++    fn identify_agent_in_job_skips_claude_maintenance_leader_for_interactive_member() {
++        let job = crate::platform::ForegroundJob {
++            process_group_id: 42,
++            processes: vec![
++                foreground_process(42, "claude-code", &["claude-code", "mcp", "list"]),
++                foreground_process(43, "claude", &["claude", "--resume", "session-id"]),
+             ],
+         };
+
+@@ -1446,6 +1549,87 @@
+     }
+
+     #[test]
++    fn identify_agent_in_job_skips_claude_maintenance_member_for_interactive_member() {
++        let job = crate::platform::ForegroundJob {
++            process_group_id: 42,
++            processes: vec![
++                foreground_process(42, "bash", &["bash"]),
++                foreground_process(43, "claude-code", &["claude-code", "--help"]),
++                foreground_process(44, "claude", &["claude", "--continue"]),
++            ],
++        };
++
++        assert_eq!(
++            identify_agent_in_job(&job),
++            Some((Agent::Claude, "claude".to_string()))
++        );
++    }
++
++    #[test]
++    fn identify_agent_in_job_preserves_interactive_claude_invocations() {
++        for argv in [
++            vec!["claude"],
++            vec!["claude", "--resume", "session-id"],
++            vec!["claude", "--continue"],
++            vec!["claude", "help me configure plugin and mcp"],
++            vec!["claude", "--plugin-dir", "/tmp/plugin"],
++            vec!["claude", "--future-option"],
++            vec!["claude", "--", "--help"],
++            vec!["/nix/store/example/bin/claude-code", "--resume"],
++        ] {
++            let job = crate::platform::ForegroundJob {
++                process_group_id: 123,
++                processes: vec![foreground_process(123, "claude", &argv)],
++            };
++
++            assert!(
++                matches!(identify_agent_in_job(&job), Some((Agent::Claude, _))),
++                "argv: {argv:?}"
++            );
++        }
++
++        for argv in [
++            None,
++            Some(Vec::new()),
++            Some(vec!["unexpected-record".to_string()]),
++        ] {
++            let process = crate::platform::ForegroundProcess {
++                pid: 123,
++                name: "claude".to_string(),
++                argv0: None,
++                argv,
++                cmdline: None,
++            };
++            let job = crate::platform::ForegroundJob {
++                process_group_id: 123,
++                processes: vec![process],
++            };
++
++            assert!(matches!(
++                identify_agent_in_job(&job),
++                Some((Agent::Claude, _))
++            ));
++        }
++    }
++
++    #[test]
++    fn identify_agent_in_job_detects_claude_node_and_bun_wrappers() {
++        for runtime in ["node", "bun"] {
++            let argv = [runtime, "/usr/local/bin/claude.js", "--continue"];
++            let job = crate::platform::ForegroundJob {
++                process_group_id: 123,
++                processes: vec![foreground_process(123, runtime, &argv)],
++            };
++
++            assert_eq!(
++                identify_agent_in_job(&job),
++                Some((Agent::Claude, "claude".to_string())),
++                "runtime: {runtime}"
++            );
++        }
++    }
++
++    #[test]
+     fn identify_agent_in_job_falls_back_when_process_group_leader_is_unrecognized() {
+         let job = crate::platform::ForegroundJob {
+             process_group_id: 42,

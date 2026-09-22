@@ -265,7 +265,7 @@ Zellij is managed through `modules/zellij/default.nix`. See the [Zellij module R
 
 ## Herdr config
 
-- Herdr is managed through `modules/herdr/default.nix` and enabled by default. See the [Herdr module README](modules/herdr/README.md) for terminal shortcuts and how to apply them.
+- Herdr is managed through `modules/herdr/default.nix` and enabled by default. See the [Herdr module README](modules/herdr/README.md) for terminal shortcuts and how to apply them, and [agent detection](modules/herdr/README.md#agent-detection) for the exclusion of Claude maintenance commands during Home Manager activation.
 - Home Manager links `~/.config/herdr/config.toml` to `modules/herdr/files/config.toml` as an out-of-store symlink, so changes made through Herdr settings update the checked-in source file directly.
 - The configured prefix is `Ctrl+Space`.
 - `Ctrl+Space`, then `Shift+n`, opens a popup that selects a previously visited directory with `zoxide` and `fzf`, then creates and focuses a workspace there.

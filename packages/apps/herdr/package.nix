@@ -40,7 +40,10 @@ rustPlatform.buildRustPackage {
     lockFile = "${src}/Cargo.lock";
   };
 
-  patches = [ ./plugin-theme.patch ];
+  patches = [
+    ./plugin-theme.patch
+    ./claude-admin-detection.patch
+  ];
 
   nativeBuildInputs = [
     git
@@ -72,7 +75,10 @@ rustPlatform.buildRustPackage {
   cargoTestFlags = [
     "--bin"
     "herdr"
+  ];
+  checkFlags = [
     "app::api::plugins"
+    "detect::tests::identify_agent"
   ];
 
   meta = {
