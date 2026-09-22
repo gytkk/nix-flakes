@@ -40,6 +40,7 @@ in
       ".pi/agent/extensions/codex-usage.ts".source = mkSymlink "files/extensions/codex-usage.ts";
       ".pi/agent/extensions/hardware-cursor-only.ts".source =
         mkSymlink "files/extensions/hardware-cursor-only.ts";
+      ".pi/agent/extensions/herdr-subagents.ts".source = mkSymlink "files/extensions/herdr-subagents.ts";
       ".pi/agent/extensions/tool-profiles".source = mkSymlink "files/extensions/tool-profiles";
       ".pi/agent/extensions/subagent/config.json".source =
         mkSymlink "files/extensions/subagent/config.json";
