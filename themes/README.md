@@ -521,6 +521,7 @@ This now checks both:
 Current generators:
 
 - `ghostty` -> `themes/exports/ghostty/*.conf`
+- `orca` -> `themes/exports/orca/*.json`
 - `k9s` -> `themes/exports/k9s/*.yaml`
 - `zed` -> `themes/exports/zed/*.json`
 - `nvim` -> `themes/exports/nvim/*.lua`
@@ -540,6 +541,7 @@ Adapter templates and schema helpers:
     `HighlightStyleContent` entries rather than a fixed syntax-key list
 - `themes/templates/ghostty/official-template.json` -> Ghostty theme template
   derived from the config reference and existing local terminal config
+- `themes/templates/orca/official-template.json` -> Orca custom terminal theme records, verified against the 1.4.206 source contract
 - `themes/templates/k9s/official-template.json` -> K9s skin template derived
   from the official skins format and the existing local module skin definitions
 - `themes/templates/nvim/official-template.json` -> Neovim builtin highlight
@@ -563,6 +565,8 @@ Adapter templates and schema helpers:
   contract fields, section layout, duplicate entries, and declared key coverage
 
 ## Resolution Rules
+
+Orca consumes the same resolved terminal slots as Ghostty, including `themes/overrides/ghostty/` values. Its exports contain a custom theme record with a stable `nix-flakes:<theme-id>` ID, light/dark mode, six UI colors, and all sixteen ANSI colors. The exporter validates this managed subset of Orca's more permissive terminal theme contract. The epoch import date is deterministic and matches Orca's fallback for undated records. [The Orca module](../modules/orca/README.md) selects the common theme and provides an explicit apply command; exports are not standalone files watched by Orca. Starship keeps its existing exporter and configuration.
 
 Starship overrides use the ordered keys `version`, `meta`, `slots`, and `modules`; see `overrides/starship/TEMPLATE.yaml`. Color slots accept hex colors or canonical palette/role references. The `format` slot accepts a Starship format string. Module patches are limited to existing string-valued settings in the Starship template and inherit all other settings. The generator rejects invalid override keys and mismatched theme metadata. One Half Light separates the folder icon on a purple background from the directory name on a blue background with regular-weight bright text. The Git branch, ahead/behind arrows, and commit counts use blue text on gray, while the time uses dark text. Language and environment segments use accent-colored text. Git change indicators, the SSH hostname, and error/Vim mode indicators use canonical palette colors. These accents prioritize palette consistency and do not meet the 4.5:1 contrast target retained for ordinary text.
 
@@ -706,7 +710,7 @@ Rationale:
 
 ## Suggested Nix API Shape
 
-Possible helper API under `themes/lib/`:
+The current export path helper is [lib/themes.nix](../lib/themes.nix). A future helper API could look like:
 
 ```nix
 {

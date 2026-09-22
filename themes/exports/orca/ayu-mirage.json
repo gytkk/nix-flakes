@@ -1,0 +1,31 @@
+{
+  "id": "nix-flakes:ayu-mirage",
+  "name": "Ayu Mirage (nix-flakes)",
+  "source": "ghostty",
+  "mode": "dark",
+  "importedAt": "1970-01-01T00:00:00.000Z",
+  "terminal": {
+    "background": "#1f2430",
+    "foreground": "#cccac2",
+    "cursor": "#ffcc66",
+    "cursorAccent": "#1f2430",
+    "selectionBackground": "#409fff",
+    "selectionForeground": "#1f2430",
+    "black": "#171b24",
+    "red": "#ed8274",
+    "green": "#87d96c",
+    "yellow": "#facc6e",
+    "blue": "#6dcbfa",
+    "magenta": "#dabafa",
+    "cyan": "#90e1c6",
+    "white": "#c7c7c7",
+    "brightBlack": "#686868",
+    "brightRed": "#f28779",
+    "brightGreen": "#d5ff80",
+    "brightYellow": "#ffd173",
+    "brightBlue": "#73d0ff",
+    "brightMagenta": "#dfbfff",
+    "brightCyan": "#95e6cb",
+    "brightWhite": "#ffffff"
+  }
+}
