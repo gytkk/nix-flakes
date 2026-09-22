@@ -23,6 +23,8 @@ This module installs and configures Claude Code, Anthropic's AI coding assistant
 - **Status line**: Working directory, Git branch, context/tokens/line changes, plus the Claude.ai weekly limit, selected model, and effort right-aligned
 - **Language**: English
 
+Inside Herdr, the status line also reports the selected model for the [Agents sidebar](../herdr/README.md#subagents). The model updates whenever Claude invokes the status line and expires after 45 seconds without an update, so it may disappear while Claude is idle. Missing model data clears the value. Reporting failures leave the terminal status line intact.
+
 ### CLAUDE.md
 
 Global development guidelines are rendered from shared rules under `agent-core/rules/` and `agent-core/adapters/claude.md`, then deployed to `~/.claude/CLAUDE.md`.

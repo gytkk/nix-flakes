@@ -78,6 +78,7 @@ export default function (pi: ExtensionAPI): void {
   const binary = process.env.HERDR_BIN_PATH || "herdr";
   const calls = new Map<string, Child[]>();
   let active = false;
+  let parentModel: string | null = null;
   let context: ExtensionContext | undefined;
   let refresh: ReturnType<typeof setInterval> | undefined;
   let scheduled: ReturnType<typeof setTimeout> | undefined;
@@ -87,7 +88,10 @@ export default function (pi: ExtensionAPI): void {
   let warned = false;
   let subscriptions: Array<() => void> = [];
 
-  const tokens = () => sidebarTokens([...calls.values()].flat());
+  const tokens = () => ({
+    ...sidebarTokens([...calls.values()].flat()),
+    pi_model: parentModel,
+  });
 
   const publish = (): Promise<void> => {
     pending = tokens();
@@ -97,7 +101,12 @@ export default function (pi: ExtensionAPI): void {
       while (pending) {
         const snapshot = pending;
         pending = undefined;
-        const args = ["pane", "report-metadata", paneId, "--source", SOURCE, "--ttl-ms", String(TTL_MS)];
+        const args = [
+          "pane", "report-metadata", paneId,
+          "--source", SOURCE,
+          "--agent", "pi",
+          "--ttl-ms", String(TTL_MS),
+        ];
         for (const [key, value] of Object.entries(snapshot)) {
           args.push(...(value === null ? ["--clear-token", key] : ["--token", `${key}=${value}`]));
         }
@@ -139,6 +148,7 @@ export default function (pi: ExtensionAPI): void {
     if (ctx.mode !== "tui") return;
     context = ctx;
     active = true;
+    parentModel = text(ctx.model?.id) || null;
     await clear();
     subscriptions = [
       pi.events.on("subagent:slash:started", (value: unknown) => {
@@ -158,9 +168,15 @@ export default function (pi: ExtensionAPI): void {
       }),
     ];
     refresh = setInterval(() => {
-      if ([...calls.values()].some((children) => children.length > 0)) void publish();
+      if (active) void publish();
     }, REFRESH_MS);
     refresh.unref?.();
+  });
+
+  pi.on("model_select", async (_event, ctx) => {
+    if (!active) return;
+    parentModel = text(ctx.model?.id) || null;
+    await publish();
   });
 
   pi.on("tool_execution_start", (event) => {
@@ -195,6 +211,7 @@ export default function (pi: ExtensionAPI): void {
     subscriptions = [];
     if (refresh) clearInterval(refresh);
     refresh = undefined;
+    parentModel = null;
     await clear();
     context = undefined;
   });

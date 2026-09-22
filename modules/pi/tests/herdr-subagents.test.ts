@@ -89,9 +89,14 @@ function running(index: number, overrides: Record<string, unknown> = {}) {
   };
 }
 
-async function startTui(harness: ReturnType<typeof fakePi>, notifications: string[] = []) {
+async function startTui(
+  harness: ReturnType<typeof fakePi>,
+  notifications: string[] = [],
+  context: Record<string, unknown> = { model: { id: "parent-model" } },
+) {
   await harness.emit("session_start", {}, {
     mode: "tui",
+    ...context,
     ui: {
       notify(message: string) {
         notifications.push(message);
@@ -212,10 +217,12 @@ describe("Herdr extension reporting", () => {
 
     expect(parent.execCalls).toHaveLength(1);
     expect(parent.execCalls[0].binary).toBe("/opt/herdr");
-    expect(parent.execCalls[0].args.slice(0, 7)).toEqual([
+    expect(parent.execCalls[0].args.slice(0, 9)).toEqual([
       "pane", "report-metadata", "pane-42", "--source", "pi:herdr-subagents",
+      "--agent", "pi",
       "--ttl-ms", "45000",
     ]);
+    expect(reportTokens(parent.execCalls[0].args).pi_model).toBe("parent-model");
 
     const headless = fakePi();
     headless.install();
@@ -235,6 +242,39 @@ describe("Herdr extension reporting", () => {
     expect(outsideHerdr.handlers.size).toBe(0);
 
     await parent.emit("session_shutdown");
+  });
+
+  test("reports the session model, follows model changes, and clears it on shutdown", async () => {
+    const harness = fakePi();
+    harness.install();
+    await startTui(harness, [], { model: { id: "initial-model" } });
+
+    expect(reportTokens(harness.execCalls.at(-1)!.args)).toMatchObject({
+      pi_model: "initial-model",
+      subagent_1: null,
+    });
+
+    await harness.emit("model_select", { model: { id: "event-model" } }, {
+      model: { id: "selected-model" },
+    });
+    expect(reportTokens(harness.execCalls.at(-1)!.args).pi_model).toBe("selected-model");
+
+    await harness.emit("session_shutdown");
+    expect(reportTokens(harness.execCalls.at(-1)!.args).pi_model).toBeNull();
+  });
+
+  test("clears missing session and selected models", async () => {
+    const harness = fakePi();
+    harness.install();
+    await startTui(harness, [], {});
+    expect(reportTokens(harness.execCalls.at(-1)!.args).pi_model).toBeNull();
+
+    await harness.emit("model_select", { model: { id: "event-model" } }, {
+      model: undefined,
+    });
+    expect(reportTokens(harness.execCalls.at(-1)!.args).pi_model).toBeNull();
+
+    await harness.emit("session_shutdown");
   });
 
   test("keeps concurrent tool calls separate and removes only the finished call", async () => {

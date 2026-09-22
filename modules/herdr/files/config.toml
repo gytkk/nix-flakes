@@ -85,10 +85,20 @@ auto_switch = false
 host_cursor = "native"
 prompt_new_tab_name = false
 
+[ui.sidebar.agents]
+rows = [
+  ["state_icon", "machine", "workspace", "tab"],
+  ["agent"],
+]
+
 [ui.sidebar.agents.rows_by_agent]
+claude = [
+  ["state_icon", "machine", "workspace", "tab"],
+  ["agent", "$claude_model"],
+]
 codex = [
   ["state_icon", "machine", "workspace", "tab"],
-  ["agent", "$summary", { token = "$subagent_count", dim = true }],
+  ["agent", "$codex_model"],
   [{ token = "$subagent_1_status", fg = "#696c77", rules = [{ starts_with = "●", fg = "#50a14f", bold = true }, { starts_with = "✓", fg = "#0184bc" }, { starts_with = "■", fg = "#c18401" }, { starts_with = "×", fg = "#e45649", bold = true }] }, "$subagent_1"],
   [{ token = "$subagent_1_activity", dim = true }],
   [{ token = "$subagent_2_status", fg = "#696c77", rules = [{ starts_with = "●", fg = "#50a14f", bold = true }, { starts_with = "✓", fg = "#0184bc" }, { starts_with = "■", fg = "#c18401" }, { starts_with = "×", fg = "#e45649", bold = true }] }, "$subagent_2"],
@@ -106,7 +116,7 @@ codex = [
 ]
 pi = [
   ["state_icon", "machine", "workspace", "tab"],
-  ["agent", "$summary"],
+  ["agent", "$pi_model"],
   ["$subagent_1"],
   ["$subagent_1_activity"],
   ["$subagent_2"],

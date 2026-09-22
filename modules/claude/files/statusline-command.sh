@@ -12,6 +12,49 @@ input_tokens=$(echo "$input" | jq -r '.context_window.total_input_tokens // empt
 output_tokens=$(echo "$input" | jq -r '.context_window.total_output_tokens // empty')
 lines_added=$(echo "$input" | jq -r '.cost.total_lines_added // empty')
 lines_removed=$(echo "$input" | jq -r '.cost.total_lines_removed // empty')
+
+report_herdr_model() {
+  [ "${HERDR_ENV:-}" = "1" ] && [ -n "${HERDR_PANE_ID:-}" ] || return 0
+
+  local herdr_model
+  herdr_model=$(echo "$input" | jq -r '
+    (
+      (.model.display_name | select(type == "string" and length > 0 and . != "?"))
+      // (.model.id | select(type == "string" and length > 0 and . != "?"))
+      // ""
+    )
+    | gsub("\u001b\\[[0-?]*[ -/]*[@-~]"; "")
+    | gsub("[[:cntrl:]]"; " ")
+    | gsub("[[:space:]]+"; " ")
+    | sub("^ +"; "")
+    | sub(" +$"; "")
+    | explode
+    | if length > 80 then .[:79] + [8230] else . end
+    | implode
+  ')
+
+  if ! command -v timeout > /dev/null 2>&1; then
+    printf '%s\n' 'Claude statusline: cannot report the model because timeout is unavailable.' >&2
+    return 0
+  fi
+
+  local herdr_bin=${HERDR_BIN_PATH:-herdr}
+  local token_args=(--clear-token claude_model)
+  if [ -n "$herdr_model" ]; then
+    token_args=(--token "claude_model=${herdr_model}")
+  fi
+
+  if ! timeout 1s "$herdr_bin" pane report-metadata "$HERDR_PANE_ID" \
+    --source claude:herdr-model \
+    --agent claude \
+    --ttl-ms 45000 \
+    "${token_args[@]}" > /dev/null 2>&1; then
+    printf '%s\n' 'Claude statusline: failed to report the model to Herdr.' >&2
+  fi
+}
+
+report_herdr_model
+
 IFS=$'\t' read -r weekly_remaining weekly_filled weekly_reset < <(
   echo "$input" | jq -r '
     .rate_limits.seven_day as $weekly

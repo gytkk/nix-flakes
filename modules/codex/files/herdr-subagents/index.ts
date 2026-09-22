@@ -7,7 +7,7 @@ import { basename, dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import { JsonlTail, findRollout } from "./io";
-import { consumeChild, discoveredChild, object, sidebarTokens, type ChildState } from "./projection";
+import { consumeChild, discoveredChild, displayText, object, sidebarTokens, type ChildState } from "./projection";
 
 const exec = promisify(execFile);
 const SCRIPT = fileURLToPath(import.meta.url);
@@ -264,16 +264,17 @@ export async function watch(token: string): Promise<void> {
   let nextProbe = 0;
   let ownerProcessHealthy = true;
   let reportUnavailable = false;
+  let model: string | null = null;
   const register = (entry: Registration, updateName = false) => {
     if (!ID.test(entry.id)) return;
     if (!children.has(entry.id)) children.set(entry.id, {
-      state: { id: entry.id, name: entry.name, activity: "작업 중", observed: false },
+      state: { id: entry.id, name: entry.name, activity: "", observed: false },
       tail: new JsonlTail(), nextLookup: 0, verified: false, reconstructed: false,
     });
     else if (updateName && entry.name !== "subagent") children.get(entry.id)!.state.name = entry.name;
   };
   const report = async (states: ChildState[]) => {
-    const tokens = sidebarTokens(states);
+    const tokens = { codex_model: model, ...sidebarTokens(states) };
     const serialized = JSON.stringify(tokens);
     if (serialized === published && (Object.values(tokens).every((value) => value === null) || Date.now() - lastPublished < REFRESH_MS)) return;
     await withOwnerLock(env.directory, async () => {
@@ -281,7 +282,7 @@ export async function watch(token: string): Promise<void> {
       const entries = Object.entries(tokens);
       // Herdr accepts 16 keys per request; keep each child's three keys together.
       for (let offset = 0; offset < entries.length; offset += 16) {
-        const args = ["pane", "report-metadata", env.pane, "--source", SOURCE, "--ttl-ms", String(TTL_MS)];
+        const args = ["pane", "report-metadata", env.pane, "--source", SOURCE, "--agent", "codex", "--ttl-ms", String(TTL_MS)];
         for (const [key, value] of entries.slice(offset, offset + 16)) args.push(...(value === null ? ["--clear-token", key] : ["--token", `${key}=${value}`]));
         try { await exec(env.binary, args, { timeout: 2_000 }); }
         catch { throw new Error("Herdr metadata update failed"); }
@@ -318,6 +319,8 @@ export async function watch(token: string): Promise<void> {
           nextProbe = Date.now() + PROBE_MS;
         }
         for (const value of await parent.read(initial.transcript)) {
+          const record = object(value);
+          if (record?.type === "turn_context") model = displayText(object(record.payload)?.model) || null;
           const entry = discoveredChild(value);
           if (entry) register(entry, true);
         }
@@ -390,6 +393,7 @@ export async function watch(token: string): Promise<void> {
       await Bun.sleep(500);
     }
   } finally {
+    model = null;
     await report([]);
   }
 }

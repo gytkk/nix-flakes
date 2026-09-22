@@ -113,7 +113,7 @@ Shared skills are canonical under `agent-core/skills/`. Pi's manifest allowlist 
 
 ### Herdr subagent sidebar
 
-`files/extensions/herdr-subagents.ts` displays foreground `pi-subagents` children beneath their parent Pi entry in Herdr's expanded Agents sidebar. Each child uses two lines: its agent name and resolved model, followed by its current tool and path, latest output, or assigned task. Both the `subagent` tool and `/run` foreground execution are supported. Background runs retain pi-subagents' existing summary; this extension does not enumerate their children.
+`files/extensions/herdr-subagents.ts` reports the current parent session model and displays foreground `pi-subagents` children beneath their parent Pi entry in Herdr's expanded Agents sidebar. The parent row shows the agent name and model, updating when the selected model changes. Each child uses two lines: its agent name and resolved model, followed by its current tool and path, latest output, or assigned task. Both the `subagent` tool and `/run` foreground execution are supported. The layout hides pi-subagents' background summary; this extension does not enumerate background children.
 
 The extension publishes display metadata only from the parent interactive Pi session inside Herdr. Completed, failed, interrupted, and detached foreground children disappear from the list. Session shutdown clears its tokens; active metadata expires after 45 seconds without refresh if Pi crashes. At most seven children fit in Herdr's 16-line layout. Larger groups show the first six children and an overflow count. Clicking any child line focuses the parent pane.
 
