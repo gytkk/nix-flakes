@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   pkgs,
   username,
@@ -49,6 +50,7 @@ in
     ../modules/ghostty
     ../modules/git
     ../modules/herdr
+    ../modules/jev
     ../modules/k9s
     ../modules/lsp
     ../modules/nix-gc
@@ -78,6 +80,7 @@ in
       ghostty.enable = lib.mkDefault true;
       git.enable = lib.mkDefault true;
       herdr.enable = lib.mkDefault true;
+      jev.enable = lib.mkDefault (config.modules.codex.enable || config.modules.claude.enable);
       k9s.enable = lib.mkDefault true;
       lsp.enable = lib.mkDefault true;
       # NixOS hosts collect garbage at the system level via modules/nixos/baseline.nix.

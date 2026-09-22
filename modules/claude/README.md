@@ -31,6 +31,8 @@ Global development guidelines are rendered from shared rules under `agent-core/r
 
 ## Skills and plugins
 
+The shared `typesafe-ai` skill provides TypeSafe's official Jev workflow guidance. Invoke it with `/typesafe-ai` and run API clients through `with-jev` to use the agenix key. See the [Jev README](../jev/README.md) for source provenance, authentication, and activation.
+
 Home Manager installs Claude's immutable selection of shared skills from `agent-core/skills/` into `~/.claude/skills/`. The local `devils-advocate` marketplace plugin remains separately owned because it provides a Claude command, agent, and plugin metadata that the shared renderer does not model.
 
 ### Marketplaces

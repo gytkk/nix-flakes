@@ -22,7 +22,7 @@ agent-core/
 └── tests/
 ```
 
-Shared skill은 runtime별 복사본이나 merge input 없이 `agent-core/skills/`에서 한 번 관리하는 skill이다. Shared catalog에 있다는 사실이 모든 runtime에 설치된다는 뜻은 아니다. `manifest.toml`의 allowlist가 각 runtime에 필요한 skill을 선택한다. 현재 공통 14개 skill에 더해 Codex는 `devils-advocate`와 `parallel-research-merge`, Pi는 두 skill과 `pi-agent`를 선택한다.
+Shared skill은 runtime별 복사본이나 merge input 없이 `agent-core/skills/`에서 한 번 관리하는 skill이다. Shared catalog에 있다는 사실이 모든 runtime에 설치된다는 뜻은 아니다. `manifest.toml`의 allowlist가 각 runtime에 필요한 skill을 선택한다. 현재 공통 14개 skill에 더해 Codex는 `devils-advocate`와 `parallel-research-merge`, Pi는 두 skill과 `pi-agent`를 선택한다. Codex와 Claude는 공식 TypeSafe skill인 `typesafe-ai`도 선택하며, API 키 전달과 upstream 갱신 절차는 [Jev 모듈](../modules/jev/README.md)이 관리한다.
 
 ## 책임 경계
 
@@ -77,7 +77,7 @@ modules/claude | modules/codex | modules/pi | modules/openclaw
 
 ```text
 modules/* -> agent-core package와 render interface
-flake packages/apps/checks -> agent-core
+flake packages, apps, checks -> agent-core
 OpenClaw context plugin -> agent-core의 OpenClaw output
 ```
 

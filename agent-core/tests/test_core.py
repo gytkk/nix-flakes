@@ -24,8 +24,8 @@ def test_materialize_is_deterministic_and_marks_documents_and_skills() -> None:
     ("runtime", "additional_skills"),
     [
         ("openclaw", set()),
-        ("claude", set()),
-        ("codex", {"devils-advocate", "parallel-research-merge"}),
+        ("claude", {"typesafe-ai"}),
+        ("codex", {"devils-advocate", "parallel-research-merge", "typesafe-ai"}),
         ("pi", {"devils-advocate", "parallel-research-merge", "pi-agent"}),
     ],
 )

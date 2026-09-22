@@ -28,6 +28,8 @@ Codex의 subagent 기능으로 생성한 자식은 부모가 답변을 마친 �
 
 ## 적용
 
+Jev를 사용하는 기능은 `$typesafe-ai` skill로 설계하고, API client는 `with-jev`로 실행한다. 공식 skill 원본, agenix 인증, 적용 절차는 [Jev README](../jev/README.md)에서 확인한다.
+
 Standalone Home Manager는 `/etc/codex/config.toml`을 checkout의 `files/config.toml`에 연결한다. NixOS는 같은 파일을 Nix store에서 설치한다. `~/.codex/config.toml`은 사용자 설정을 보존하며 activation이 덮어쓰지 않는다.
 
 `~/.codex/AGENTS.md`와 `/etc/codex/skills`는 agent-core의 immutable output을 사용한다. Adapter 변경을 적용하려면 환경에 맞는 `home-manager switch --flake .#<environment>` 또는 `nixos-rebuild switch --flake .#<host>`를 사용자가 실행한 뒤 새 Codex 세션을 시작한다.

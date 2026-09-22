@@ -126,6 +126,8 @@ The official [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc)
 
 See the [Codex module README](modules/codex/README.md) for model delegation, reasoning effort, and activation behavior.
 
+Codex and Claude share the official TypeSafe `typesafe-ai` skill through agent-core. The [Jev module](modules/jev/README.md) supplies `with-jev` to run API clients with the agenix-managed `TYPESAFE_API_KEY`.
+
 - On NixOS hosts, the static Codex base config is installed to the overridable system layer at `/etc/codex/config.toml`.
 - Shared skills selected from `agent-core/skills/` are rendered and exposed at `/etc/codex/skills`.
 - On standalone Home Manager environments, `home-manager switch` ensures `/etc/codex/config.toml` is a symlink to this repo's `modules/codex/files/config.toml`.
