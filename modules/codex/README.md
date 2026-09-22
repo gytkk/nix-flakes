@@ -14,7 +14,7 @@ Herdr 안에서 실행한 Codex는 Agents 항목 아래에 실행 중인 직계 
 
 [files/hooks.json](files/hooks.json)의 `SessionStart`, `SubagentStart`, `SubagentStop`, `SessionEnd` 훅이 Home Manager로 설치한 `~/.local/bin/codex-herdr-subagents`를 호출한다. 훅은 Herdr pane마다 감시 프로세스 하나를 실행하고, 감시 프로세스는 부모와 자식의 로컬 JSONL 기록을 읽어 `codex:herdr-subagents` metadata를 갱신한다. 부모 세션 종료나 Codex 프로세스 종료 시 표시를 지운다. Metadata는 45초 후 만료되므로 비정상 종료로 정리하지 못해도 오래된 표시가 남지 않는다. Herdr 환경 변수가 없는 터미널에서는 실행하지 않는다.
 
-활동 문구는 assistant 메시지나 도구 종류를 사용한다. 기록이 아직 없으면 `working`을 표시하며, reasoning, 암호화된 메시지, 원시 명령어는 표시하지 않는다. 이 연동은 Codex CLI 0.155.1과 Herdr 0.9.1을 기준으로 검증했다. Codex의 내부 JSONL 형식은 안정된 API가 아니므로 CLI 업데이트 후 표시가 달라지면 parser와 fixture를 함께 확인한다. 동작 검증은 `bun test modules/codex/tests`로 실행한다.
+활동 문구는 assistant 메시지나 도구 종류를 사용한다. 기록이 아직 없으면 `working`을 표시하며, reasoning, 암호화된 메시지, 원시 명령어는 표시하지 않는다. 이 연동은 Codex CLI 0.155.1과 Herdr 0.9.1을 기준으로 검증했다. Codex의 내부 JSONL 형식은 안정된 API가 아니므로 CLI 업데이트 후 표시가 달라지면 실제 기록 형식과 parser를 확인한다.
 
 ## 적용
 

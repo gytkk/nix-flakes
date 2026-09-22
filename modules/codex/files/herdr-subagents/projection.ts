@@ -24,7 +24,7 @@ function messageText(content: unknown): string {
     : "";
 }
 
-// Rollout records are internal Codex data; fixtures target CLI 0.155.1.
+// Rollout records are internal Codex data; this parser targets CLI 0.155.1.
 export function consumeChild(state: ChildState, value: unknown): void {
   const record = object(value);
   const payload = object(record?.payload);
