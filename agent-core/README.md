@@ -70,7 +70,7 @@ runtime별 immutable output tree
         ↓ install
 modules/claude | modules/codex | modules/pi | modules/openclaw
         ↓
-~/.claude | ~/.codex | ~/.pi | ~/.openclaw
+~/.claude | ~/.codex and /etc/codex/skills | ~/.pi | ~/.local/share/openclaw
 ```
 
 허용하는 의존성은 다음과 같다.

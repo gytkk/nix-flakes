@@ -416,6 +416,7 @@ home.packages = with pkgs; [
 | --- | --- |
 | `configuration.nix` | NixOS system configuration and host module imports |
 | `ghost.nix` | Ghost container, loopback nginx origin, and local backups |
+| `menu.nix` | Menu static site origin and deployment integration |
 | `disk-config.nix` | Disk partitioning configuration (disko) |
 | `hardware-configuration.nix` | Auto-generated hardware configuration |
 
@@ -424,7 +425,6 @@ home.packages = with pkgs; [
 This configuration uses shared modules from the main flake:
 
 - `modules/git` - Git configuration
-- `modules/zsh` - Zsh with Oh-My-Zsh and Powerlevel10k
+- `modules/zsh` - Zsh with Starship and the generated canonical theme
 - `modules/vim` - Neovim configuration
 - `modules/claude` - Claude Code configuration
-- `modules/terraform` - Terraform version management

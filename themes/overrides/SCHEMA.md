@@ -14,12 +14,14 @@ Do not use overrides to redefine the canonical theme core.
 
 - `themes/overrides/ghostty/TEMPLATE.yaml`
 - `themes/overrides/TEMPLATE.yaml` for Neovim
+- `themes/overrides/starship/TEMPLATE.yaml`
 - `themes/overrides/zellij/TEMPLATE.yaml`
 - `themes/overrides/ghostty/<theme-id>.yaml`
 - `themes/overrides/nvim/<theme-id>.yaml`
+- `themes/overrides/starship/<theme-id>.yaml`
 - `themes/overrides/zellij/<theme-id>.yaml`
-- `python themes/validate_overrides.py`
-- `python themes/check_templates.py` now also checks override template/current override file structure
+- `uv run --no-project themes/validate_overrides.py`
+- `uv run --no-project themes/check_templates.py` also checks override template/current override file structure
 
 ## Resolution order
 
@@ -35,6 +37,8 @@ For Neovim exports, values resolve in this order:
 3. override `links.<group>` replacement
 
 If a link override exists for a group, it replaces the final attrs table for that group.
+
+For Starship exports, `slots` patches replace generator-computed slots before template rendering. `modules.<table>.<key>` patches replace existing string-valued template settings; other settings retain their template values. See the [Starship resolution rules](../README.md#resolution-rules) and `themes/overrides/starship/TEMPLATE.yaml` for supported values and authoring structure.
 
 For Zellij exports, values resolve in this order:
 

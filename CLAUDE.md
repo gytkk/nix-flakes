@@ -11,7 +11,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - DO NOT use git worktree for this repository
 - Follow existing code patterns and module structure in this repository
 - Use `nixfmt` to format all Nix files before committing (delegate to subagent using sonnet model)
-- Run `nix flake check` only for complex changes (multi-module, architecture changes); skip for simple edits unless explicitly requested
+- Prefer narrow, fast checks. Run time-consuming Nix evaluation commands such as `nix eval` and `nix flake check --no-build` only when they are required to validate the requested change or the user explicitly requests them. Skip them for documentation-only changes, simple edits, and checks unrelated to the changed behavior.
+- Skip Nix package build tests by default because they are expensive. Run `nix build`, `nix-build`, or `nix flake check` without `--no-build` only when the user explicitly requests a build or a concrete build-specific concern cannot be checked with formatting, static checks, targeted tests, or evaluation. A package change alone does not justify a build.
+- When changing the canonical theme pipeline or generated theme exports, leave a local git commit in a sensible rollbackable unit before finishing the work
 - Do NOT push unless explicitly requested
 
 ### Documentation Guidelines
@@ -21,13 +23,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Build/Test/Lint Commands
 
-**Agent-safe commands** (Claude Code can run these directly):
+**Agent-safe commands** (run only as needed under the validation rules above):
 
 ```bash
 nixfmt <file.nix>                  # Format Nix files
 nix flake show                     # Show available flake outputs
-nix flake check --no-build         # Validate flake outputs without building
-nix flake check                    # Full validation (complex changes only)
+nix flake check --no-build         # Validate complex or evaluation-sensitive changes
 nix eval .#homeConfigurations.pylv-denim.config.home.packages --apply 'x: map (p: p.name) x'
 ```
 
@@ -57,7 +58,7 @@ nixos-rebuild switch --flake .#<host>
 
 ### Architecture
 
-Nix flakes-based standalone Home Manager and NixOS configuration supporting multiple environments (macOS and Linux) with layered base system.
+Nix flake configuration for standalone Home Manager and NixOS environments on macOS and Linux, plus an independent Nix-on-Droid target for Android.
 
 ```text
 flake.nix                         # Main flake configuration
@@ -68,6 +69,8 @@ agent-core/                       # Canonical agent rules, adapters, skills, and
 modules/<name>/default.nix        # Reusable Home Manager or NixOS module
 modules/nixos/                    # Common NixOS modules and shared secrets
 hosts/<name>/configuration.nix    # NixOS host configuration
+hosts/pylv-termux/default.nix     # Independent Nix-on-Droid configuration
+packages/apps/                    # Non-nixpkgs app packages and manual updaters
 lib/pkgs.nix                      # Overlay and per-system package-set construction
 lib/home-configurations.nix       # Home Manager configuration builder
 lib/nixos-configurations.nix      # NixOS configuration builder
@@ -83,23 +86,22 @@ Defined in `inventory.nix` (single source of truth). `kind` field determines bui
 - **devsisters-macbook / devsisters-macstudio**: ARM64 macOS, devsisters base, home-only
 - **pylv-denim**: x86_64 Linux/WSL, pylv base, home-only
 - **pylv-sepia**: x86_64 Linux/NixOS server, pylv base (with Disko, agenix, copyparty)
-- **pylv-onyx**: x86_64 Linux/NixOS, pylv base (with niri, DankMaterialShell, OpenClaw)
+- **pylv-onyx**: x86_64 Linux/NixOS, pylv base (with niri, DankMaterialShell, user-managed OpenClaw)
+
+`pylv-termux` is an aarch64-linux Nix-on-Droid target declared separately in `flake.nix` under `nixOnDroidConfigurations`. It uses `hosts/pylv-termux/default.nix` without importing the workstation base.
 
 #### Base System
 
 1. **`base/default.nix`**: Common config — core modules, standard dev packages, programs
-2. **`base/devsisters/home.nix`**: saml2aws, vault, kc2aws, scala, ruby, databricks-cli, custom scripts
+2. **`base/devsisters/home.nix`**: saml2aws, vault, kc2aws, wg-cli, scala, ruby, databricks-cli, custom scripts
 3. **`base/pylv/home.nix`**: Minimal (inherits base)
-4. **`base/pylv/sepia.nix`**: pylv-sepia NixOS server specific config
+4. **`base/pylv/sepia.nix`**: Home Manager additions for `pylv-sepia`; system configuration lives in `hosts/pylv-sepia/configuration.nix`
 
 ### Module System
 
 Each module in `modules/` manages a specific tool. **When modifying settings for any tool, look in the corresponding module directory first.** `agent-core/` owns canonical agent instructions and shared skills. Runtime modules consume generated outputs and must not reimplement rendering or selection.
 
-Common NixOS modules live under `modules/nixos`; host-specific NixOS input
-modules and values live in `hosts/<name>/configuration.nix`. OpenClaw host
-values are set in `hosts/pylv-onyx/configuration.nix` through
-`modules.openclaw`.
+Common NixOS modules live under `modules/nixos`; host-specific NixOS input modules and values live in `hosts/<name>/configuration.nix`. `modules/openclaw` keeps the NixOS and Home Manager integration for the user-managed OpenClaw install. It does not own the OpenClaw package, mutable state, or user service.
 
 ```text
 modules/<name>/
@@ -125,5 +127,5 @@ AI 코딩 에이전트 설정을 변경할 때 공통 지침, runtime adapter, s
 
 - **Base packages** (`base/default.nix`): nixfmt, coreutils, findutils, docker, gcc, jq, fd, ripgrep, git, gh, lazygit, nodejs, bun, go, uv, ruff, rustup, kubectl, helm, etc.
 - **LSP servers** (`modules/lsp/`): nixd, gopls, typescript-language-server, terraform-ls, metals, ty, yaml-language-server, marksman (`rust-analyzer` must be installed in the active rustup toolchain)
-- **Devsisters-specific** (`base/devsisters/`): saml2aws, vault, scala, ruby, databricks-cli, kc2aws
+- **Devsisters-specific** (`base/devsisters/`): saml2aws, vault, kc2aws, wg-cli, scala, ruby, databricks-cli. `kc2aws` and `wg-cli` come from the private `keycloak2aws` and `devsisters-wg` flake inputs.
   - `kc2aws` comes from the private `keycloak2aws` flake input (`git+ssh://...`), pinned in `flake.lock`. To pull the latest `main`: `nix flake update keycloak2aws`, then `home-manager switch`. Commit the resulting `flake.lock` change.

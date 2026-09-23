@@ -8,7 +8,7 @@ This module provides comprehensive Git configuration with sensible defaults and 
 - Enables Git LFS (Large File Storage) support
 - Sets up custom configuration for diff, pull, push, and color settings
 - Creates a global `.gitignore` file with common patterns
-- Configures Neovim as the default editor and diff tool
+- Configures Neovim as the default editor and Delta for Git diff output
 
 ## Features
 
@@ -25,14 +25,14 @@ This module provides comprehensive Git configuration with sensible defaults and 
 
 - Nix package manager
 - Home Manager
-- Neovim (for editor and diff tool)
+- Neovim (for the editor)
 
 ## Configuration Details
 
 ### Git Settings
 
 - **Editor**: Neovim (`nvim`)
-- **Diff Tool**: `vimdiff`
+- **Diff display**: Delta with side-by-side output, line numbers, and the `OneHalfLight` syntax theme
 - **Pull Strategy**: Rebase with fast-forward only
 - **Push Strategy**: Current branch with auto-setup of remote
 - **Default Branch**: `main`

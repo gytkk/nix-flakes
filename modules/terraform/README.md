@@ -36,8 +36,8 @@ modules.terraform = {
 ### `enable`
 
 - **타입**: `bool`
-- **기본값**: `true`
-- **설명**: Terraform 모듈 활성화
+- **기본값**: `false`
+- **설명**: Terraform 모듈 활성화. `base/devsisters/home.nix`에서 활성화한다.
 
 ### `defaultVersion`
 
@@ -120,10 +120,7 @@ terraform {
 
 ### 버전이 로드되지 않는 경우
 
-1. nix-direnv가 설치되어 있는지 확인:
-```bash
-# base/default.nix에서 direnv.nix-direnv.enable = true 확인
-```
+1. `base/default.nix`에서 `programs.direnv.nix-direnv.enable = true`인지 확인한다.
 
 2. direnv 캐시 초기화:
 ```bash

@@ -1,6 +1,6 @@
 # Codex
 
-`files/config.toml`은 Codex의 기본 모델과 effort, MCP, 기능 설정을 관리한다. 메인 에이전트는 `gpt-6-astra`와 `medium` effort를 사용하며, worker의 기본값은 `gpt-5.6-sol`과 `medium`이다. 세션이나 사용자 설정에서 이 값을 덮어쓸 수 있다.
+`files/config.toml`은 Codex의 기본 모델과 effort, MCP, 기능 설정을 관리한다. 메인 에이전트는 `gpt-6-astra`와 `high` effort를 사용하며, worker의 기본값은 `gpt-5.6-terra`와 `medium`이다. 세션이나 사용자 설정에서 이 값을 덮어쓸 수 있다.
 
 ## 모델별 위임
 

@@ -1,10 +1,6 @@
-# Theme Schema Draft
+# Canonical themes
 
-This document proposes a canonical theme schema for this repository.
-
-Status: draft
-Goal: keep one reusable source of truth under `themes/` that can later be
-exported to terminal, editor, and UI-specific theme formats.
+`themes/core/` contains the canonical YAML theme definitions. `themes/generate.py` resolves them through app templates and optional overrides, then writes app-ready files under `themes/exports/`. Nix modules consume these exports through `lib/themes.nix`.
 
 ## Design Goals
 
@@ -13,43 +9,28 @@ exported to terminal, editor, and UI-specific theme formats.
 - Keep the core schema small, stable, and app-agnostic
 - Move application-specific logic into adapters and optional overrides
 - Easy to read and edit by hand
-- Easy to consume from Nix
-- Easy to export to VS Code, terminals, Zed, Neovim, and future targets
+- Generated exports that Nix modules can install directly
+- Export to terminals, Zed, Neovim, and other supported apps
 
-## Recommended Directory Layout
+## Directory layout
 
 ```text
 themes/
 ├── README.md                  # this document
 ├── TEMPLATE.yaml              # strict authoring template
-├── core/
-│   ├── <theme-name>.yaml      # canonical theme definitions
-│   └── <theme-name>.yaml
-├── exports/
-│   ├── vscode/
-│   ├── ghostty/
-│   ├── zed/
-│   └── vim/
-├── lib/
-│   ├── schema.nix             # loader and validators
-│   ├── roles.nix              # shared role defaults and fallback rules
-│   └── exporters/
-│       ├── vscode.nix
-│       ├── ghostty.nix
-│       ├── zed.nix
-│       └── vim.nix
-├── overrides/
-│   ├── vscode/
-│   │   └── <theme-name>.nix
-│   └── zed/
-│       └── <theme-name>.nix
-└── examples/
-    └── theme.example.yaml
+├── core/                      # canonical theme definitions
+├── templates/                 # app templates and vendored schemas
+├── overrides/                 # Ghostty, Neovim, Starship, Zellij YAML patches
+├── exports/                   # ghostty, k9s, nvim, pi, starship, tmux, zed, zellij
+├── generate.py                # Python exporters
+├── validate.py                # canonical schema validator and YAML parser
+├── validate_overrides.py      # app override validation
+└── check_templates.py         # template and override consistency checks
 ```
 
 ## Canonical Model
 
-The canonical schema should have 3 layers:
+The canonical schema has 3 layers:
 
 1. `meta`
    - metadata such as name, variant, author, description
@@ -63,7 +44,7 @@ The canonical schema should have 3 layers:
 Application-specific settings should not live in the canonical schema.
 Those belong in exporters and optional override files outside `core/`.
 
-## Draft YAML Shape
+## Example YAML shape
 
 ```yaml
 version: 1
@@ -74,7 +55,7 @@ meta:
   variant: dark        # dark | light
   family: tokyo-night
   author: pylv
-  description: Base24-oriented canonical theme schema draft
+  description: Base24-oriented canonical theme example
 
 palette:
   # Base24-compatible base slots
@@ -489,28 +470,28 @@ authoring shape.
 Validation helper:
 
 ```bash
-python themes/validate.py
-python themes/validate.py themes/core/one-half-light.yaml
+uv run --no-project themes/validate.py
+uv run --no-project themes/validate.py themes/core/one-half-light.yaml
 ```
 
 Override validation helper:
 
 ```bash
-python themes/validate_overrides.py
-python themes/validate_overrides.py themes/overrides/nvim/rose-pine-moon.yaml
+uv run --no-project themes/validate_overrides.py
+uv run --no-project themes/validate_overrides.py themes/overrides/nvim/rose-pine-moon.yaml
 ```
 
 Generation helper:
 
 ```bash
-python themes/generate.py
-python themes/generate.py themes/core/one-half-light.yaml
+uv run --no-project themes/generate.py
+uv run --no-project themes/generate.py themes/core/one-half-light.yaml
 ```
 
 Template consistency helper:
 
 ```bash
-python themes/check_templates.py
+uv run --no-project themes/check_templates.py
 ```
 
 This now checks both:
@@ -648,7 +629,7 @@ A small stable core plus adapters is easier to maintain.
 
 - readable in reviews
 - friendly for hand editing
-- easy to load from Nix
+- parsed by the repository's Python validator and generator
 - easy to transform into JSON outputs
 
 ## Override Strategy
@@ -670,12 +651,13 @@ Current override support:
 - `themes/overrides/SCHEMA.md` -> override-layer format notes
 - `themes/overrides/ghostty/TEMPLATE.yaml` -> Ghostty minimal authoring template
 - `themes/overrides/TEMPLATE.yaml` -> Neovim minimal authoring template
+- `themes/overrides/starship/TEMPLATE.yaml` -> Starship minimal authoring template
 - `themes/overrides/zellij/TEMPLATE.yaml` -> Zellij minimal authoring template
 - `themes/overrides/ghostty/<theme-id>.yaml` -> Ghostty slot overrides
 - `themes/overrides/nvim/<theme-id>.yaml` -> Neovim per-theme override patches
+- `themes/overrides/starship/<theme-id>.yaml` -> Starship slot and module setting overrides
 - `themes/overrides/zellij/<theme-id>.yaml` -> Zellij per-theme override patches
-- `themes/validate_overrides.py` -> override validator for current Ghostty,
-  Neovim, and Zellij override files
+- `themes/validate_overrides.py` -> override validator for Ghostty, Neovim, Starship, and Zellij override files
 
 Current Neovim override precedence:
 
@@ -689,80 +671,10 @@ Use overrides for app-specific exceptions like:
 - correcting interaction colors such as search, selection, or float emphasis
 - nudging exact highlight groups without changing canonical roles
 
-## Export Targets to Support First
+## Nix integration
 
-Suggested first exporters:
+`lib/themes.nix` exposes the generated files to Home Manager through the `themeExports` argument. `dir` and `file` return immutable flake-source paths. `mutableDir` and `mutableFile` return checkout paths; `mutableDirLink` and `mutableFileLink` wrap those paths in out-of-store symlinks.
 
-1. `ghostty`
-2. `zed`
-3. `vscode`
-4. `vim`
+`base/default.nix` defines `modules.commonTheme`, which theme-aware modules use to select an export. App installation behavior belongs to each module. Theme loading, validation, color derivation, and export generation remain in the Python pipeline.
 
-Rationale:
-
-- terminal targets are the easiest validation path for Base24 alignment
-- Zed and VS Code benefit most from semantic roles
-- Vim or Neovim can initially consume generated Lua tables or theme fragments
-
-## Suggested Nix API Shape
-
-Possible helper API under `themes/lib/`:
-
-```nix
-{
-  loadTheme = path: ...;
-  validateTheme = theme: ...;
-  exportTheme = {
-    theme,
-    target,
-    override ? null,
-  }: ...;
-}
-```
-
-Possible flake-facing structure later:
-
-```nix
-{
-  themes = {
-    tokyo-night-ish = import ./themes/core/tokyo-night-ish.yaml;
-  };
-}
-```
-
-Or better, expose generated outputs:
-
-```nix
-{
-  themeExports.vscode.tokyo-night-ish = ...;
-  themeExports.ghostty.tokyo-night-ish = ...;
-}
-```
-
-## Open Questions
-
-- whether aliases like `bg`, `fg`, `red`, `blue` should be required or derived
-- whether references like `{palette.base00}` should be supported literally or
-  resolved by Nix-only logic
-- whether override files should be plain attrsets or functions over the loaded theme
-- whether font, opacity, and spacing hints belong in this schema or a separate
-  appearance schema
-- whether light themes need additional constraints for contrast validation
-- how strict the validator should be about required role leaves in v1
-
-## Current Recommendation
-
-Adopt this approach:
-
-- canonical source of truth: `themes/core/*.yaml`
-- required base palette: Base24-compatible slots
-- required semantic layer: `roles`
-- app-specific behavior lives in exporters and optional override files
-- shared exporter fallback logic in Nix
-
-In short:
-
-- Base24 gives us portability
-- semantic roles give us quality
-- adapters keep the core clean
-- optional overrides keep edge cases manageable
+The current generator emits Ghostty, K9s, Neovim, Pi, Starship, tmux, Zed, and Zellij themes. VSCode's app-local theme is outside this pipeline. Edit canonical definitions, templates, or supported YAML overrides, then regenerate the exports instead of editing generated files directly.

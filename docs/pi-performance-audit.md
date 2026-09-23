@@ -1,7 +1,6 @@
 # Pi Performance Audit and Recommended Actions
 
-현재 저장소가 관리하는 Pi 설정, 글로벌 지침, 스킬, 확장, 패키지와 실제
-세션 메타데이터를 기준으로 수행한 성능 감사 결과다.
+2026-08-08 당시 저장소가 관리하던 Pi 설정, 글로벌 지침, 스킬, 확장, 패키지와 실제 세션 메타데이터를 기준으로 수행한 성능 감사 기록이다. 아래의 설정, 측정값, 적용 상태는 당시 기록이며, 현재 설정과 설치 구조는 [Pi README](../modules/pi/README.md)와 [settings.json](../modules/pi/files/settings.json)에서 확인한다.
 
 - **Date:** 2026-08-08
 - **Pi version:** 0.84.1
@@ -35,7 +34,7 @@
 4. 웹 검색 기본 workflow를 `none`으로 변경
 5. UI 지연이 있을 때 fullscreen과 custom footer를 별도로 개선
 
-## Current configuration snapshot
+## Configuration snapshot at audit time
 
 ### Model and reasoning
 

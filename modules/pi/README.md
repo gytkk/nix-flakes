@@ -5,8 +5,7 @@ It installs Pi and the NixOS MCP server, then exposes tracked configuration
 under `~/.pi/agent/` through generated files and Home Manager out-of-store
 symlinks.
 
-See [`docs/pi-performance-audit.md`](../../docs/pi-performance-audit.md) for the
-current performance findings, measurements, and prioritized action items.
+See [`docs/pi-performance-audit.md`](../../docs/pi-performance-audit.md) for the performance findings, measurements, and proposed actions recorded on 2026-08-08. That audit preserves its original configuration snapshot; this README describes the managed setup.
 
 ## Managed resources
 

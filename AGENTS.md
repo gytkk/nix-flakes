@@ -57,7 +57,7 @@ nixos-rebuild switch --flake .#<host>
 
 ### Architecture
 
-Nix flakes-based standalone Home Manager and NixOS configuration supporting multiple environments (macOS and Linux) with layered base system.
+Nix flake configuration for standalone Home Manager and NixOS environments on macOS and Linux, plus an independent Nix-on-Droid target for Android.
 
 ```text
 flake.nix                         # Main flake configuration
@@ -68,6 +68,7 @@ agent-core/                       # Canonical agent rules, adapters, skills, and
 modules/<name>/default.nix        # Reusable Home Manager or NixOS module
 modules/nixos/                    # Common NixOS modules and shared secrets
 hosts/<name>/configuration.nix    # NixOS host configuration
+hosts/pylv-termux/default.nix     # Independent Nix-on-Droid configuration
 packages/apps/                    # Non-nixpkgs app packages and manual updaters
 lib/pkgs.nix                      # Overlay and per-system package-set construction
 lib/home-configurations.nix       # Home Manager configuration builder
@@ -86,12 +87,14 @@ Defined in `inventory.nix` (single source of truth). `kind` field determines bui
 - **pylv-sepia**: x86_64 Linux/NixOS server, pylv base (with Disko, agenix, copyparty)
 - **pylv-onyx**: x86_64 Linux/NixOS, pylv base (with niri, DankMaterialShell, user-managed OpenClaw)
 
+`pylv-termux` is an aarch64-linux Nix-on-Droid target declared separately in `flake.nix` under `nixOnDroidConfigurations`. It uses `hosts/pylv-termux/default.nix` without importing the workstation base.
+
 #### Base System
 
 1. **`base/default.nix`**: Common config — core modules, standard dev packages, programs
-2. **`base/devsisters/home.nix`**: saml2aws, vault, scala, ruby, databricks-cli, custom scripts
+2. **`base/devsisters/home.nix`**: saml2aws, vault, kc2aws, wg-cli, scala, ruby, databricks-cli, custom scripts
 3. **`base/pylv/home.nix`**: Minimal (inherits base)
-4. **`base/pylv/sepia.nix`**: `pylv-sepia` NixOS server specific config
+4. **`base/pylv/sepia.nix`**: Home Manager additions for `pylv-sepia`; system configuration lives in `hosts/pylv-sepia/configuration.nix`
 
 ### Module System
 
@@ -179,4 +182,4 @@ AI 코딩 에이전트 설정을 변경할 때 공통 지침, runtime adapter, s
 
 - **Base packages** (`base/default.nix`): nixfmt, coreutils, findutils, docker, gcc, jq, fd, ripgrep, git, gh, lazygit, nodejs, bun, go, uv, ruff, rustup, kubectl, helm, etc.
 - **LSP servers** (`modules/lsp/`): nixd, gopls, typescript-language-server, terraform-ls, metals, ty, yaml-language-server, marksman (`rust-analyzer` must be installed in the active rustup toolchain)
-- **Devsisters-specific** (`base/devsisters/`): saml2aws, vault, scala, ruby, databricks-cli
+- **Devsisters-specific** (`base/devsisters/`): saml2aws, vault, kc2aws, wg-cli, scala, ruby, databricks-cli. `kc2aws` and `wg-cli` come from the private `keycloak2aws` and `devsisters-wg` flake inputs.

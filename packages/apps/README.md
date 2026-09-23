@@ -68,11 +68,11 @@ To add a new app package:
 2. Use `callPackage` arguments available from nixpkgs (`stdenvNoCC`, `fetchzip`, etc.).
 3. Ensure the package path creates a `meta.mainProgram` if the package should be run via `nix run`.
 4. Add `packages/apps/<app-name>/update.sh` if the package should support aggregate updates.
-5. Add the package to `packages/apps/default.nix` so the nested flake, parent outputs, and overlay expose it.
+5. Add the package to `packages/apps/default.nix` so the nested flake and parent package outputs expose it. The configuration overlay consumes this catalog with the exception noted below.
 
 To disable aggregate updates for an app, add its name to the `update.deny` list in `settings.json`. Apps in `update.review` use candidate PRs instead of direct updates to `main`; the deny list applies to both channels.
 
-The package catalog in `default.nix` is the single source of truth for exported apps and aliases. Register each package there once; the parent package outputs, configuration overlay, and nested flake consume the same catalog. App-specific settings still belong in `modules/<app>/`, and enabling a package in a profile remains a separate choice.
+The package catalog in `default.nix` is the single source of truth for exported apps and aliases. Register each package there once; the parent package outputs and nested flake expose the full catalog. The configuration overlay in `lib/pkgs.nix` excludes the local `opencode` package, leaving the nixpkgs attribute unchanged. App-specific settings still belong in `modules/<app>/`, and enabling a package in a profile remains a separate choice.
 
 `ntn` is an alias of `notion-cli` in the catalog. Both attributes provide the same derivation and the `ntn` executable. Aliases need no package directory or updater and do not add duplicate rows to the version table.
 
