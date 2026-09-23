@@ -197,6 +197,7 @@ in
 
         # AI / Browser automation
         agent-browser
+        codexbar
 
         # etc
         direnv
