@@ -265,6 +265,10 @@ Resources should supplement the tools instead of expanding the tool count:
 
 Zellij is managed through `modules/zellij/default.nix`. See the [Zellij module README](modules/zellij/README.md) for configuration sources, theme selection, and wrapper behavior.
 
+## Orca config
+
+[The Orca module](modules/orca/README.md) is enabled by default on macOS and uses `modules.commonTheme` with the same terminal colors as Ghostty. Home Manager installs an appearance patch and `orca-apply-settings`; quit Orca and run that command to apply the settings while preserving its projects and sessions. Starship uses the existing shared zsh configuration.
+
 ## Herdr config
 
 - Herdr is managed through `modules/herdr/default.nix` and enabled by default. See the [Herdr module README](modules/herdr/README.md) for terminal shortcuts and how to apply them, and [agent detection](modules/herdr/README.md#agent-detection) for the exclusion of Claude maintenance commands during Home Manager activation.

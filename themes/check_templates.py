@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from generate import ORCA_TERMINAL_KEYS
 from validate import Validator, load_yaml
 from validate_overrides import validate_starship_override
 
@@ -251,6 +252,40 @@ def check_ghostty(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
         expect(contract.get("token_prefix") == "$", f"{path_str}.config_schema.token_prefix must be '$'", errors)
         expect(contract.get("value_type") == "hex-or-palette-entry", f"{path_str}.config_schema.value_type must be 'hex-or-palette-entry'", errors)
     check_ghostty_sections(f"{path_str}.sections", doc.get("sections"), errors)
+
+
+def check_orca(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
+    check_common(path, doc, errors)
+    path_str = str(path)
+    contract = doc.get("theme_schema", {})
+    expect(isinstance(contract, dict), f"{path_str}.theme_schema must be an object", errors)
+    if isinstance(contract, dict):
+        expect(contract.get("token_prefix") == "$", f"{path_str}: token prefix must be '$'", errors)
+        expect(contract.get("value_type") == "hex-color", f"{path_str}: colors must be hex-color", errors)
+        expect(bool(contract.get("notes")), f"{path_str}: document the managed contract subset", errors)
+    check_document_template(path_str, doc.get("document"), errors)
+    sections = doc.get("sections")
+    expect(isinstance(sections, list) and bool(sections), f"{path_str}.sections must be a non-empty list", errors)
+    if not isinstance(sections, list):
+        return
+    check_section_names(path_str, sections, errors)
+    keys: list[str] = []
+    for section in sections:
+        if not isinstance(section, dict):
+            continue
+        entries = section.get("entries")
+        expect(isinstance(entries, list) and bool(entries), f"{path_str}: section entries must be a non-empty list", errors)
+        if not isinstance(entries, list):
+            continue
+        for entry in entries:
+            if not isinstance(entry, dict) or not isinstance(entry.get("key"), str):
+                errors.append(f"{path_str}: entries require string keys")
+                continue
+            keys.append(entry["key"])
+            value = entry.get("value")
+            expect(isinstance(value, str) and value.startswith("$"), f"{path_str}: colors must reference slots", errors)
+    expect(len(keys) == len(set(keys)), f"{path_str}: duplicate terminal color key", errors)
+    expect(set(keys) == ORCA_TERMINAL_KEYS, f"{path_str}: terminal keys must match the managed Orca palette", errors)
 
 
 def check_starship_sections(path: str, sections: Any, errors: list[str]) -> None:
@@ -617,6 +652,7 @@ def check_zellij_override(path: Path, doc: dict[str, Any], errors: list[str]) ->
 JSON_CHECKS = {
     ROOT / "templates" / "k9s" / "official-template.json": check_k9s,
     ROOT / "templates" / "ghostty" / "official-template.json": check_ghostty,
+    ROOT / "templates" / "orca" / "official-template.json": check_orca,
     ROOT / "templates" / "nvim" / "official-template.json": check_nvim,
     ROOT / "templates" / "zed" / "official-template.json": check_zed,
     ROOT / "templates" / "nvim" / "plugins.json": check_nvim_plugin_template,

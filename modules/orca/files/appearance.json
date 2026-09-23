@@ -1,0 +1,13 @@
+{
+  "leftSidebarAppearanceMode": "match-terminal",
+  "terminalFontFamily": "JetBrains Mono\", \"Sarasa Mono CL",
+  "terminalFontSize": 12,
+  "terminalFontWeight": 400,
+  "terminalFontWeightBold": 700,
+  "terminalCursorStyle": "bar",
+  "terminalCursorStyleDefaultedToBlock": true,
+  "terminalBackgroundOpacity": 1,
+  "terminalInactivePaneOpacity": 0.9,
+  "terminalActivePaneOpacity": 1,
+  "terminalMinimumContrastRatio": 1.6
+}

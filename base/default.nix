@@ -54,6 +54,7 @@ in
     ../modules/k9s
     ../modules/lsp
     ../modules/nix-gc
+    ../modules/orca
     ../modules/pi
     ../modules/shared-memory
     ../modules/tmux
@@ -85,6 +86,7 @@ in
       lsp.enable = lib.mkDefault true;
       # NixOS hosts collect garbage at the system level via modules/nixos/baseline.nix.
       nixGc.enable = lib.mkDefault (osConfig == null);
+      orca.enable = lib.mkDefault pkgs.stdenv.isDarwin;
       pi.enable = lib.mkDefault true;
       sharedMemory.enable = lib.mkDefault false;
       tmux.enable = lib.mkDefault true;

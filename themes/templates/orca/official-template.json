@@ -1,0 +1,68 @@
+{
+  "name": "orca-theme-template",
+  "version": 1,
+  "description": "Orca custom terminal theme using the same resolved colors as the Ghostty exporter.",
+  "sources": [
+    {
+      "kind": "official-source",
+      "ref": "Orca v1.4.206 custom terminal theme normalization",
+      "url": "https://github.com/stablyai/orca/blob/v1.4.206/src/shared/terminal-custom-themes.ts"
+    },
+    {
+      "kind": "official-docs",
+      "ref": "Orca terminal themes and Ghostty import",
+      "url": "https://www.onorca.dev/docs/terminal"
+    },
+    {
+      "kind": "local-source",
+      "ref": "Ghostty template and resolved override slots",
+      "path": "themes/templates/ghostty/official-template.json"
+    }
+  ],
+  "theme_schema": {
+    "token_prefix": "$",
+    "value_type": "hex-color",
+    "notes": "This exports one terminalCustomThemes record, not a standalone Orca config file. The managed subset requires six UI colors and sixteen ANSI colors as #RRGGBB. Orca also accepts partial palettes and an optional bold color, which this exporter does not set. The epoch importedAt matches Orca's fallback for generated records without an import date."
+  },
+  "document": {
+    "id": "$theme_id",
+    "name": "$theme_name",
+    "source": "ghostty",
+    "mode": "$theme_variant",
+    "importedAt": "1970-01-01T00:00:00.000Z"
+  },
+  "sections": [
+    {
+      "name": "ui",
+      "entries": [
+        { "key": "background", "value": "$background" },
+        { "key": "foreground", "value": "$foreground" },
+        { "key": "cursor", "value": "$cursor_color" },
+        { "key": "cursorAccent", "value": "$cursor_text" },
+        { "key": "selectionBackground", "value": "$selection_background" },
+        { "key": "selectionForeground", "value": "$selection_foreground" }
+      ]
+    },
+    {
+      "name": "ansi",
+      "entries": [
+        { "key": "black", "value": "$palette_0" },
+        { "key": "red", "value": "$palette_1" },
+        { "key": "green", "value": "$palette_2" },
+        { "key": "yellow", "value": "$palette_3" },
+        { "key": "blue", "value": "$palette_4" },
+        { "key": "magenta", "value": "$palette_5" },
+        { "key": "cyan", "value": "$palette_6" },
+        { "key": "white", "value": "$palette_7" },
+        { "key": "brightBlack", "value": "$palette_8" },
+        { "key": "brightRed", "value": "$palette_9" },
+        { "key": "brightGreen", "value": "$palette_10" },
+        { "key": "brightYellow", "value": "$palette_11" },
+        { "key": "brightBlue", "value": "$palette_12" },
+        { "key": "brightMagenta", "value": "$palette_13" },
+        { "key": "brightCyan", "value": "$palette_14" },
+        { "key": "brightWhite", "value": "$palette_15" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "id": "nix-flakes:rose-pine-moon",
+  "name": "Rosé Pine Moon (nix-flakes)",
+  "source": "ghostty",
+  "mode": "dark",
+  "importedAt": "1970-01-01T00:00:00.000Z",
+  "terminal": {
+    "background": "#232136",
+    "foreground": "#e0def4",
+    "cursor": "#e0def4",
+    "cursorAccent": "#232136",
+    "selectionBackground": "#44415a",
+    "selectionForeground": "#e0def4",
+    "black": "#393552",
+    "red": "#eb6f92",
+    "green": "#3e8fb0",
+    "yellow": "#f6c177",
+    "blue": "#9ccfd8",
+    "magenta": "#c4a7e7",
+    "cyan": "#ea9a97",
+    "white": "#e0def4",
+    "brightBlack": "#6e6a86",
+    "brightRed": "#eb6f92",
+    "brightGreen": "#3e8fb0",
+    "brightYellow": "#f6c177",
+    "brightBlue": "#9ccfd8",
+    "brightMagenta": "#c4a7e7",
+    "brightCyan": "#ea9a97",
+    "brightWhite": "#e0def4"
+  }
+}

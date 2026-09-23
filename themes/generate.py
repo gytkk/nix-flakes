@@ -841,6 +841,53 @@ def ghostty_theme_conf(ctx: dict[str, Any], root: Path) -> str:
     return "\n".join(lines) + "\n"
 
 
+ORCA_TERMINAL_KEYS = {
+    "background", "foreground", "cursor", "cursorAccent",
+    "selectionBackground", "selectionForeground",
+    "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white",
+    "brightBlack", "brightRed", "brightGreen", "brightYellow",
+    "brightBlue", "brightMagenta", "brightCyan", "brightWhite",
+}
+
+
+def validate_orca_theme_doc(doc: dict[str, Any]) -> None:
+    if not re.fullmatch(r"nix-flakes:[a-z0-9_-]+", doc.get("id", "")):
+        raise RuntimeError("Orca theme id must use the nix-flakes namespace")
+    if not isinstance(doc.get("name"), str) or not doc["name"].strip():
+        raise RuntimeError("Orca theme name must be a non-empty string")
+    if doc.get("source") != "ghostty" or doc.get("mode") not in ("light", "dark"):
+        raise RuntimeError("Orca theme must declare its Ghostty source and light/dark mode")
+    terminal = doc.get("terminal")
+    if not isinstance(terminal, dict) or set(terminal) != ORCA_TERMINAL_KEYS:
+        raise RuntimeError("Orca theme must contain the managed UI colors and all 16 ANSI colors")
+    for key, color in terminal.items():
+        if not isinstance(color, str) or not re.fullmatch(r"#[0-9a-fA-F]{6}", color):
+            raise RuntimeError(f"Orca terminal color {key!r} must be #RRGGBB")
+
+
+def orca_theme_doc(ctx: dict[str, Any], root: Path) -> dict[str, Any]:
+    template = load_json(root / "templates" / "orca" / "official-template.json")
+    # Share resolved Ghostty slots so terminal-specific overrides stay identical.
+    slots = apply_ghostty_override_slots(
+        build_ghostty_slots(ctx), load_ghostty_override(root, ctx["meta"]["id"]), ctx
+    )
+    for idx in range(16):
+        slots[f"palette_{idx}"] = slots[f"palette_{idx}_entry"].split("=", 1)[1]
+    slots.update({
+        "theme_id": f"nix-flakes:{ctx['meta']['id']}",
+        "theme_name": f"{ctx['meta']['name']} (nix-flakes)",
+        "theme_variant": ctx["meta"]["variant"],
+    })
+    doc = render_template_value(template["document"], slots)
+    doc["terminal"] = {
+        entry["key"]: render_template_value(entry["value"], slots).lower()
+        for section in template["sections"]
+        for entry in section["entries"]
+    }
+    validate_orca_theme_doc(doc)
+    return doc
+
+
 def build_starship_slots(ctx: dict[str, Any]) -> dict[str, Any]:
     p = ctx["palette"]
     r = ctx["roles"]
@@ -1518,6 +1565,7 @@ def generate_theme(theme_path: Path, template: dict[str, Any], root: Path) -> li
     theme_id = ctx["meta"]["id"]
 
     ghostty_path = root / "exports" / "ghostty" / f"{theme_id}.conf"
+    orca_path = root / "exports" / "orca" / f"{theme_id}.json"
     k9s_path = root / "exports" / "k9s" / f"{theme_id}.yaml"
     zed_path = root / "exports" / "zed" / f"{theme_id}.json"
     nvim_path = root / "exports" / "nvim" / f"{theme_id}.lua"
@@ -1527,6 +1575,7 @@ def generate_theme(theme_path: Path, template: dict[str, Any], root: Path) -> li
     pi_path = root / "exports" / "pi" / f"{theme_id}.json"
 
     write_text(ghostty_path, ghostty_theme_conf(ctx, root))
+    write_json(orca_path, orca_theme_doc(ctx, root))
     write_yaml(k9s_path, k9s_theme_doc(ctx, root))
     write_json(zed_path, zed_theme_doc(ctx, root))
     write_text(nvim_path, nvim_lua(ctx, root))
@@ -1534,7 +1583,7 @@ def generate_theme(theme_path: Path, template: dict[str, Any], root: Path) -> li
     write_text(zellij_path, zellij_theme_kdl(ctx, root))
     write_text(tmux_path, tmux_theme_conf(ctx, root))
     write_json(pi_path, pi_theme_doc(ctx, root))
-    return [ghostty_path, k9s_path, zed_path, nvim_path, starship_path, zellij_path, tmux_path, pi_path]
+    return [ghostty_path, orca_path, k9s_path, zed_path, nvim_path, starship_path, zellij_path, tmux_path, pi_path]
 
 
 def discover_default_targets(root: Path) -> list[Path]:
