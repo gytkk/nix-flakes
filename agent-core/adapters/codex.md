@@ -35,7 +35,7 @@ behavior.
 
 | Model | Delegated work | Starting effort |
 | --- | --- | --- |
-| `gpt-5.6-luna` | Narrow, clear, repeatable tasks such as locating symbols, running a known check, or applying a mechanical edit | `low` |
+| `gpt-6-luna` | Narrow, clear, repeatable tasks such as locating symbols, running a known check, or applying a mechanical edit | `low` |
 | `gpt-5.6-terra` | Read-heavy exploration, broad scans, log triage, and supporting-document analysis that return concise evidence | `medium` |
 | `gpt-5.6-sol` | Normal implementation, testing, research synthesis, and multi-step analysis with a defined scope | `medium` |
 | `gpt-6-astra` | Ambiguous work, complex design, deep debugging, security-sensitive review, and decisions with costly failures | `high` |

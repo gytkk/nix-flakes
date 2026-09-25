@@ -47,7 +47,7 @@ M.minuet = {
       },
       provider_options = {
         openai = {
-          model = "gpt-5.6-luna",
+          model = "gpt-6-luna",
           api_key = ai.getOpenAIKey,
           optional = {
             max_completion_tokens = 128,

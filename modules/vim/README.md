@@ -18,7 +18,7 @@ This module configures Neovim as the primary editor with a modern Lua-based setu
 - `snacks.nvim` GitHub integration for issues and pull requests via the `gh` CLI
 - `persistence.nvim` for directory and branch-aware session saving and restore on bare `nvim` startup
 - `blink.cmp` completion with LSP, snippets, path, buffer, and on-demand Minuet AI suggestions
-- `minuet-ai.nvim` inline suggestions backed by OpenAI `gpt-5.6-luna`
+- `minuet-ai.nvim` inline suggestions backed by OpenAI `gpt-6-luna`
 - Built-in Neovim LSP configuration for Nix, Go, Rust, TypeScript, HTML, CSS, JSON, Lua, shell, Terraform, YAML, Markdown and MDX, TOML, and Python via `ty`
 - Neovim watches Rust files for rust-analyzer to avoid a macOS server watcher startup stall
 - `nvim-treesitter` syntax parsing for the main languages used in this repository
