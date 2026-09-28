@@ -72,5 +72,10 @@
   "skipWorkflowUsageWarning": true,
   "theme": "light",
   "teammateMode": "auto",
-  "skipAutoPermissionPrompt": true
+  "skipAutoPermissionPrompt": true,
+  "modelSettings": {
+    "claude-opus-5-5": {
+      "effortLevel": "high"
+    }
+  }
 }
