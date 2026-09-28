@@ -43,14 +43,14 @@ Self-contained non-nixpkgs app packages used by the parent `nix-flakes` reposito
 |-----|---------|
 | agent-browser | 0.38.1 |
 | claude-code | 2.1.283 |
-| codex | 0.157.1 |
+| codex | 0.158.0 |
 | codexbar | 0.68.0 |
 | databricks-cli | 1.7.0 |
 | herdr | 0.9.1 |
 | herdr-annotate | 0.5.0 |
 | herdr-auto-title | 0.8.0 |
 | notion-cli | 0.22.8 |
-| opencode | 1.18.32 |
+| opencode | 1.18.33 |
 | pi | 0.87.1 |
 | pup | 1.4.0 |
 
