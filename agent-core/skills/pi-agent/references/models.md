@@ -87,7 +87,7 @@ If `models` is included, built-in models are kept and custom models are upserted
 Example — opt a direct OpenAI GPT-5.6 model into the 1.05M context window (they default to `272000` to stay in the short-context pricing tier):
 
 ```json
-{ "providers": { "openai": { "modelOverrides": { "gpt-5.6-sol": { "contextWindow": 1050000 } } } } }
+{ "providers": { "openai": { "modelOverrides": { "gpt-6-sol": { "contextWindow": 1050000 } } } } }
 ```
 
 ## Anthropic Messages Compatibility Flags
