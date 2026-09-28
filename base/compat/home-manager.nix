@@ -2,7 +2,7 @@
 
 {
   # stateVersion 25.11부터 copyApps가 switch마다 TCC 권한을 초기화하므로,
-  # Nix로 .app 번들을 설치하지 않는 이 구성에서는 비활성화한다.
+  # 비활성화하고 필요한 앱은 개별 모듈에서 링크한다.
   targets.darwin.copyApps.enable = false;
 
   home.activation.installPackages = lib.mkForce (

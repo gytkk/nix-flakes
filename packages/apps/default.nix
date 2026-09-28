@@ -1,4 +1,7 @@
-{ pkgs }:
+{
+  pkgs,
+  isDarwin ? pkgs.stdenv.isDarwin,
+}:
 let
   callPackage = pkgs.lib.callPackageWith (
     pkgs
@@ -22,3 +25,4 @@ rec {
   pi = callPackage ./pi/package.nix { };
   pup = callPackage ./pup/package.nix { };
 }
+// (if isDarwin then { gksdud = callPackage ./gksdud/package.nix { }; } else { })

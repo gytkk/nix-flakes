@@ -256,6 +256,10 @@ Resources should supplement the tools instead of expanding the tool count:
 - No write-capable refactors by default.
 - No attempt to replace broad semantic search or indexing tools across the whole repository.
 
+## macOS input switching
+
+[gksdud](modules/gksdud/README.md) manages Right Command Korean/English switching and starts at login on macOS. The module and package are excluded on Linux. See the module README for initial permissions and keyboard setup.
+
 ## Zed config
 
 - Zed is managed through `modules/zed/default.nix`.

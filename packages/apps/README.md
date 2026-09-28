@@ -11,6 +11,7 @@ Self-contained non-nixpkgs app packages used by the parent `nix-flakes` reposito
 ├── codex/
 ├── codexbar/
 ├── databricks-cli/
+├── gksdud/
 ├── herdr/
 ├── herdr-annotate/
 ├── herdr-auto-title/
@@ -46,6 +47,7 @@ Self-contained non-nixpkgs app packages used by the parent `nix-flakes` reposito
 | codex | 0.158.0 |
 | codexbar | 0.69.0 |
 | databricks-cli | 1.7.0 |
+| gksdud | 1.3.2 |
 | herdr | 0.9.1 |
 | herdr-annotate | 0.5.0 |
 | herdr-auto-title | 0.8.0 |
@@ -59,6 +61,8 @@ Self-contained non-nixpkgs app packages used by the parent `nix-flakes` reposito
 - `nix build ./packages/apps#packages.<system>.opencode`
 - `nix build ./packages/apps#packages.<system>.default` (same as first app)
 - `nix run ./packages/apps#apps.<system>.opencode`
+
+`gksdud` is exposed only on Darwin. Its signed universal app bundle supports Apple Silicon and Intel Macs running macOS 13 or later. Home Manager installs and starts it through the [gksdud module](../../modules/gksdud/README.md).
 
 ## Adding new apps
 
@@ -104,6 +108,7 @@ The helper selects the host platform, fetches the pinned archive, disables confi
 - Herdr and the Annotate reviewer each declare their patch order in `patches.nix`, shared by the Nix build and updater preflight. Preflight applies the complete sequence to a writable temporary source copy, retaining Nix's default fuzz tolerance and rejecting reversed patches. Annotate checks patches before Cargo hash discovery and metadata changes. Run `bash packages/apps/tests/check-nix-patches.sh` to check this behavior, and `bash packages/apps/tests/update-all.sh` and `bash packages/apps/tests/update-review.sh` to check channel isolation and candidate publication with local fixtures.
 - `pi` includes `libxcb` on Linux so `autoPatchelfHook` can resolve the native X11 clipboard module's shared-library dependency.
 - `App Packages CI` evaluates the nested flake, builds changed packages, and checks Codex release-bundle drift.
-- `databricks-cli`, `notion-cli`, and `pup` are manually updated. They have no `update.sh`, so aggregate updates skip them. Moving a package into this catalog does not enable automatic updates.
+- `databricks-cli`, `gksdud`, `notion-cli`, and `pup` are manually updated. They have no `update.sh`, so aggregate updates skip them. Moving a package into this catalog does not enable automatic updates.
+- Package outputs follow each platform's catalog. The Linux build job skips apps absent from the Linux catalog, including `gksdud`; it does not validate their macOS runtime behavior.
 - Changes under `lib/` rebuild all catalog package directories. A package-local change rebuilds that package. The changed-app detector is checked with `bash packages/apps/tests/detect-changed-apps.sh`.
 - The parent configuration overlay intentionally keeps nixpkgs `opencode`; the local package remains available through the nested and parent package outputs.

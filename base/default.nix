@@ -49,6 +49,7 @@ in
     ../modules/codex
     ../modules/ghostty
     ../modules/git
+    ../modules/gksdud
     ../modules/herdr
     ../modules/jev
     ../modules/k9s
@@ -79,6 +80,7 @@ in
       codex.enable = lib.mkDefault true;
       ghostty.enable = lib.mkDefault true;
       git.enable = lib.mkDefault true;
+      gksdud.enable = lib.mkDefault pkgs.stdenv.isDarwin;
       herdr.enable = lib.mkDefault true;
       jev.enable = lib.mkDefault (config.modules.codex.enable || config.modules.claude.enable);
       k9s.enable = lib.mkDefault true;

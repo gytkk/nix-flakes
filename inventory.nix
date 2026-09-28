@@ -33,10 +33,7 @@
     username = "gyutak";
     homeDirectory = "/Users/gyutak";
     profile = "devsisters";
-    homeModules = [
-      ./base/devsisters/macbook.nix
-      ./base/devsisters/session-mining.nix
-    ];
+    homeModules = [ ./base/devsisters/session-mining.nix ];
   };
 
   "devsisters-macstudio" = {

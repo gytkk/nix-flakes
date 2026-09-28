@@ -96,7 +96,15 @@ jobs:
       - uses: actions/checkout@v6
       - uses: cachix/install-nix-action@v31
       - name: Build package
-        run: nix build ./packages/apps#packages.x86_64-linux.${{ matrix.app }} --no-link
+        env:
+          APP: ${{ matrix.app }}
+        run: |
+          packages=$(nix eval ./packages/apps#packages.x86_64-linux --apply builtins.attrNames --json)
+          if jq -e --arg app "$APP" 'index($app) != null' <<<"$packages" >/dev/null; then
+            nix build "./packages/apps#packages.x86_64-linux.$APP" --no-link
+          else
+            echo "Skipping $APP: not available for x86_64-linux"
+          fi
 
   codex-drift:
     name: Check codex-package drift

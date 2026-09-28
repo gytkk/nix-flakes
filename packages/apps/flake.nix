@@ -24,12 +24,15 @@
 
       packagesFor = system: import ./. { pkgs = pkgsFor system; };
 
-      appNames = builtins.attrNames (packagesFor "x86_64-linux");
+      appNamesFor = system: builtins.attrNames (packagesFor system);
 
       packageFor = system: name: (packagesFor system).${name};
 
       mkPackages =
         system:
+        let
+          appNames = appNamesFor system;
+        in
         if appNames == [ ] then
           { }
         else
@@ -56,7 +59,7 @@
             map (name: {
               name = "${name}-build";
               value = packageFor system name;
-            }) appNames
+            }) (appNamesFor system)
           );
         in
         buildChecks;
@@ -80,7 +83,7 @@
                 program = "${pkg}/bin/${pkg.meta.mainProgram or name}";
               };
             }
-          ) appNames
+          ) (appNamesFor system)
         );
     in
     {
@@ -89,7 +92,12 @@
       checks = forEachSystem mkChecks;
       apps = forEachSystem mkApps;
 
-      overlays.default = final: _prev: import ./. { pkgs = final; };
+      overlays.default =
+        final: prev:
+        import ./. {
+          pkgs = final;
+          inherit (prev.stdenv) isDarwin;
+        };
 
       legacyPackages = forEachSystem (
         system:
@@ -100,7 +108,7 @@
           map (name: {
             name = name;
             value = packages.${name};
-          }) appNames
+          }) (appNamesFor system)
         )
       );
     };
