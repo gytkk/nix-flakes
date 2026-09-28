@@ -105,23 +105,3 @@ jobs:
           else
             echo "Skipping $APP: not available for x86_64-linux"
           fi
-
-  codex-drift:
-    name: Check codex-package drift
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - name: Install ripgrep
-        run: sudo apt-get update && sudo apt-get install -y ripgrep
-      - name: Check drift
-        shell: bash
-        run: |
-          packages/apps/codex/check-drift.sh 2>&1 | tee drift.log
-          rc=${PIPESTATUS[0]}
-          {
-            echo '```'
-            sed -n '1,240p' drift.log
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
-          exit "$rc"

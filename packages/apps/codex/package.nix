@@ -4,8 +4,9 @@
   stdenvNoCC,
   fetchurl,
   autoPatchelfHook,
-  makeWrapper,
+  jq,
   libcap,
+  ncurses,
   openssl,
   zlib,
 }:
@@ -16,26 +17,22 @@ let
   platformMap = {
     "aarch64-darwin" = {
       target = "aarch64-apple-darwin";
-      codexHash = "sha256-NBxKCPnOGTWzAHN23Co9UKCokRKTDppHSuYTZyGPboo=";
-      codeModeHostHash = "sha256-GTY5GNp19dK4Bbb/+v2E6jyJduA+dRGSwErqW9cNSrQ=";
+      hash = "sha256-CfKp/eMY+804TxW0hQwbkJMGePSAVke2ve0ZbM8y9ZA=";
     };
 
     "x86_64-darwin" = {
       target = "x86_64-apple-darwin";
-      codexHash = "sha256-uzmD1F9TyuFQx3mJk3SL51zdl3TGDR8oTAndKKkZ4Gk=";
-      codeModeHostHash = "sha256-tKfs2YCPC8tnPz+3AmFSjGRv2wruH4l5hVDKj36jG0g=";
+      hash = "sha256-RqaHpNUuLpNcI+OsrxACohzP5La+kY9AeJhDi1/SSxc=";
     };
 
     "x86_64-linux" = {
       target = "x86_64-unknown-linux-musl";
-      codexHash = "sha256-r59apuZmKsz51wfO8NnKCDiAoXOpwrbCKUftt4MOV3g=";
-      codeModeHostHash = "sha256-VFXGS+S6NxREcQiVr/bXTWU5haO/xFSot/5C1ubRHj0=";
+      hash = "sha256-szzUJsmsq5s0xakyALpP6DyOYUwYzl71KyvzZAi44Yw=";
     };
 
     "aarch64-linux" = {
       target = "aarch64-unknown-linux-musl";
-      codexHash = "sha256-keP6/l/4Raj2haBdBJGRRvsw/ckkWvGkKi9/I5lZ6Qw=";
-      codeModeHostHash = "sha256-VBvr7IR2WtDSGjWRvtGOJR3BzxZM7yA+BQAvsEWrHOw=";
+      hash = "sha256-vFW5iMLgxUrGptQ3xOY3geZxsml1KsJlkmdbuen5mQI=";
     };
   };
 
@@ -43,29 +40,23 @@ let
     platformMap.${stdenvNoCC.hostPlatform.system}
       or (throw "Unsupported system: ${stdenvNoCC.hostPlatform.system}");
 
-  mkSrc =
-    name: hash:
-    fetchurl {
-      url = "https://github.com/openai/codex/releases/download/rust-v${version}/${name}-${platform.target}.tar.gz";
-      inherit hash;
-    };
-
-  codexSrc = mkSrc "codex" platform.codexHash;
-  codeModeHostSrc = mkSrc "codex-code-mode-host" platform.codeModeHostHash;
 in
 stdenvNoCC.mkDerivation {
   pname = "codex";
   inherit version;
 
+  src = fetchurl {
+    url = "https://github.com/openai/codex/releases/download/rust-v${version}/codex-package-${platform.target}.tar.gz";
+    inherit (platform) hash;
+  };
+
   dontUnpack = true;
 
-  nativeBuildInputs = [
-    makeWrapper
-  ]
-  ++ lib.optionals stdenvNoCC.hostPlatform.isLinux [ autoPatchelfHook ];
+  nativeBuildInputs = lib.optionals stdenvNoCC.hostPlatform.isLinux [ autoPatchelfHook ];
 
   buildInputs = lib.optionals stdenvNoCC.hostPlatform.isLinux [
     libcap
+    ncurses
     openssl
     zlib
     stdenv.cc.cc.lib
@@ -75,12 +66,21 @@ stdenvNoCC.mkDerivation {
 
   installPhase = ''
     runHook preInstall
-    mkdir -p $out/bin
-    tar xzf ${codexSrc} -C $out/bin
-    mv $out/bin/codex-${platform.target} $out/bin/codex
-    tar xzf ${codeModeHostSrc} -C $out/bin
-    mv $out/bin/codex-code-mode-host-${platform.target} $out/bin/codex-code-mode-host
+    mkdir -p "$out"
+    tar xzf "$src" -C "$out"
     runHook postInstall
+  '';
+
+  preFixup = lib.optionalString stdenvNoCC.hostPlatform.isLinux ''
+    addAutoPatchelfSearchPath "$out/codex-resources/voice/lib"
+  '';
+
+  doInstallCheck = true;
+  nativeInstallCheckInputs = [ jq ];
+  installCheckPhase = ''
+    runHook preInstallCheck
+    bash ${./check-package.sh} "$out" "$src" "${version}" "${platform.target}"
+    runHook postInstallCheck
   '';
 
   meta = {

@@ -2,6 +2,8 @@
 
 `files/config.toml`은 Codex의 기본 모델과 effort, MCP, 기능 설정을 관리한다. 메인 에이전트는 `gpt-6-astra`와 `high` effort를 사용하며, worker의 기본값은 `gpt-5.6-terra`와 `medium`이다. 세션이나 사용자 설정에서 이 값을 덮어쓸 수 있다.
 
+[Codex 패키지](../../packages/apps/codex/package.nix)는 공식 `codex-package` 번들 전체를 설치한다. 백그라운드 서버가 패키지를 인식하도록 `codex-package.json`, `codex-path`, `codex-resources`를 실행 파일과 함께 유지한다. 패키지 변경은 환경에 맞는 Home Manager 또는 NixOS switch 후 새 Codex 세션에 적용된다.
+
 ## 모델별 위임
 
 [Codex adapter](../../agent-core/adapters/codex.md)는 독립적인 작업을 일찍 위임하고, worker를 생성할 때 작업 성격에 맞는 모델과 effort를 명시하도록 지시한다. 메인 에이전트는 사용자와의 대화, 요구사항 해석, 의사결정, 결과 통합과 최종 검증을 담당한다. 모델별 작업 범위와 재위임 기준은 adapter에서 관리한다.

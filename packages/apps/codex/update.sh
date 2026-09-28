@@ -29,42 +29,33 @@ declare -A PLATFORM_TARGET=(
   ["aarch64-linux"]="aarch64-unknown-linux-musl"
 )
 
-# field name in package.nix -> release asset prefix
-declare -A ASSET_PREFIX=(
-  ["codexHash"]="codex"
-  ["codeModeHostHash"]="codex-code-mode-host"
-)
-
 declare -A HASHES
+declare -A OLD_HASHES
 for system in aarch64-darwin x86_64-darwin x86_64-linux aarch64-linux; do
   target="${PLATFORM_TARGET[$system]}"
 
-  echo "Reading hashes for $system..."
-  for field in codexHash codeModeHostHash; do
-    asset="${ASSET_PREFIX[$field]}-${target}.tar.gz"
+  echo "Reading bundle hash for $system..."
+  asset="codex-package-${target}.tar.gz"
 
-    digest=$(jq -er --arg asset "$asset" '.assets[] | select(.name == $asset) | .digest' <<< "$RELEASE_JSON") || {
-      echo "ERROR: No release asset digest found for $asset"
-      exit 1
-    }
+  digest=$(jq -er --arg asset "$asset" '.assets[] | select(.name == $asset) | .digest' <<< "$RELEASE_JSON") || {
+    echo "ERROR: No release asset digest found for $asset" >&2
+    exit 1
+  }
 
-    sri_hash=$(nix hash convert --to sri "$digest")
+  HASHES["$system"]=$(nix hash convert --to sri "$digest")
+  echo "  $system: ${HASHES[$system]}"
 
-    HASHES["$system:$field"]="$sri_hash"
-    echo "  $system $field: $sri_hash"
-  done
+  if ! old_hash=$(rg -A3 "\"$system\"" "$PACKAGE_NIX" | rg 'hash = ' | sed 's/.*"\(.*\)".*/\1/'); then
+    echo "ERROR: No package hash found for $system" >&2
+    exit 1
+  fi
+  OLD_HASHES["$system"]="$old_hash"
 done
 
 sed -i "s/version = \"$CURRENT\"/version = \"$LATEST\"/" "$PACKAGE_NIX"
 
 for system in aarch64-darwin x86_64-darwin x86_64-linux aarch64-linux; do
-  for field in codexHash codeModeHostHash; do
-    old_hash=$(rg -A4 "\"$system\"" "$PACKAGE_NIX" | rg "$field = " | sed 's/.*"\(.*\)".*/\1/')
-    new_hash="${HASHES["$system:$field"]}"
-    if [ -n "$old_hash" ] && [ -n "$new_hash" ]; then
-      sed -i "s|$old_hash|$new_hash|" "$PACKAGE_NIX"
-    fi
-  done
+  sed -i "s|${OLD_HASHES[$system]}|${HASHES[$system]}|" "$PACKAGE_NIX"
 done
 
 echo "Updated package.nix to version $LATEST"
