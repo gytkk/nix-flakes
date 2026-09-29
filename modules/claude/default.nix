@@ -97,6 +97,9 @@ in
         source = ./files/statusline-command.sh;
         executable = true;
       };
+      ".local/bin/claude-herdr-subagents".source = pkgs.writeShellScript "claude-herdr-subagents" ''
+        exec ${pkgs.bun}/bin/bun ${./files/herdr-subagents}/index.ts "$@"
+      '';
     };
     # Install marketplaces, plugins, and MCP servers
     home.activation.setupClaudeCode = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
