@@ -53,7 +53,7 @@ Self-contained non-nixpkgs app packages used by the parent `nix-flakes` reposito
 | herdr-auto-title | 0.8.0 |
 | notion-cli | 0.22.8 |
 | opencode | 1.18.33 |
-| pi | 0.87.1 |
+| pi | 0.99.0 |
 | pup | 1.4.0 |
 
 ## Build entrypoints
