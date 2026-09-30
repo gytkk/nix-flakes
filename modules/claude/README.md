@@ -83,6 +83,8 @@ Home Manager installs Claude's immutable selection of shared skills from `agent-
 Use the `ntn` CLI for Notion pages, data sources, and API actions. The Notion MCP
 server is intentionally removed during activation.
 
+Cloudflare operations use the `cf` CLI installed by the common Home Manager profile. Activation removes the legacy user-scope `cloudflare` MCP registration. See [Cloudflare CLI setup](../../README.md#cloudflare-cli) for authentication and command discovery.
+
 ## Usage
 
 ```bash

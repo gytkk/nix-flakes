@@ -7,6 +7,7 @@ Self-contained non-nixpkgs app packages used by the parent `nix-flakes` reposito
 ```
 .
 ├── agent-browser/
+├── cf/
 ├── claude-code/
 ├── codex/
 ├── codexbar/
@@ -43,6 +44,7 @@ Self-contained non-nixpkgs app packages used by the parent `nix-flakes` reposito
 | App | Version |
 |-----|---------|
 | agent-browser | 0.38.1 |
+| cf | 1.0.0-beta.5 |
 | claude-code | 2.1.285 |
 | codex | 0.159.2 |
 | codexbar | 0.69.0 |
@@ -109,7 +111,8 @@ The helper selects the host platform, fetches the pinned archive, disables confi
 - `pi` includes `libxcb` on Linux so `autoPatchelfHook` can resolve the native X11 clipboard module's shared-library dependency.
 - `codex` installs the complete official `codex-package` bundle, including its manifest, helpers, and runtime resources. Its updater tracks bundle hashes for all four platforms. The package's install check validates the manifest and confirms that every archive member is present in the installed output.
 - `App Packages CI` evaluates the nested flake and builds changed packages, including their install checks.
-- `databricks-cli`, `gksdud`, `notion-cli`, and `pup` are manually updated. They have no `update.sh`, so aggregate updates skip them. Moving a package into this catalog does not enable automatic updates.
+- `cf` packages the official npm bundle with Node.js 24 and a pinned production dependency lockfile. It provides both `cf` and `cloudflare`. The published development dependencies reference unpublished local archives, so packaging removes them before installing the locked runtime dependencies. Linux builds patch the bundled `workerd` and `sharp` binaries. For a manual update, refresh the source version/hash, generate `package-lock.json` from the npm tarball after removing `devDependencies`, and refresh `npmDepsHash` with `prefetch-npm-deps`. See [Cloudflare CLI setup](../../README.md#cloudflare-cli) for authentication.
+- `cf`, `databricks-cli`, `gksdud`, `notion-cli`, and `pup` are manually updated. They have no `update.sh`, so aggregate updates skip them. Moving a package into this catalog does not enable automatic updates.
 - Package outputs follow each platform's catalog. The Linux build job skips apps absent from the Linux catalog, including `gksdud`; it does not validate their macOS runtime behavior.
 - Changes under `lib/` rebuild all catalog package directories. A package-local change rebuilds that package. The changed-app detector is checked with `bash packages/apps/tests/detect-changed-apps.sh`.
 - The parent configuration overlay intentionally keeps nixpkgs `opencode`; the local package remains available through the nested and parent package outputs.

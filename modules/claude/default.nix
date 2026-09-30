@@ -65,6 +65,7 @@ let
     }
   ];
   removedMcpServers = [
+    "cloudflare"
     "notion"
   ];
 in

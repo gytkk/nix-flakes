@@ -140,9 +140,26 @@ Codex and Claude share the official TypeSafe `typesafe-ai` skill through agent-c
 - If `/etc/codex/config.toml` or the legacy `/etc/codex/managed_config.toml` already exists as a regular file, activation stops instead of overwriting it.
 - `~/.codex/config.toml` stays writable and is not rewritten by activation, preserving user-local state such as project trust, hook trust, notices, and TUI state.
 - Add or update repository-managed skills only under `agent-core/skills/`, then update `agent-core/manifest.toml` and its golden hashes.
-- The Cloudflare API MCP uses OAuth at `https://mcp.cloudflare.com/mcp`; run `codex mcp login cloudflare` once per Codex host. Write-capable tools require approval by default.
+- Cloudflare operations use the shared [`cf` CLI](#cloudflare-cli).
 - `home-manager switch` ensures `superpowers@openai-curated` is installed and enabled for Codex CLI; restart Codex after switching so plugin skills are rediscovered.
 - If the bundled Codex marketplace has not synced yet, activation falls back to the upstream Codex install path by cloning `obra/superpowers` under `~/.codex/superpowers` and linking its skills into `~/.agents/skills`.
+
+### Cloudflare CLI
+
+The common Home Manager profile installs Cloudflare's [`cf` CLI](https://developers.cloudflare.com/cf/get-started/) from the pinned [app package](packages/apps/README.md). It provides `cf` and `cloudflare` with a Nix-managed Node.js runtime. Wrangler and the Codex/Pi Cloudflare MCP registrations are replaced by this CLI; Claude activation removes the legacy user-scope `cloudflare` MCP registration. Restart the agents after applying the configuration.
+
+`cf` is currently in beta. Existing Wrangler projects need the [documented migration](https://developers.cloudflare.com/cf/wrangler/) before using `cf dev`, `cf build`, or `cf deploy`.
+
+Apply the configuration with `home-manager switch --flake .#<environment>` or `sudo nixos-rebuild switch --flake .#<host>`, then sign in once per machine. `cf` keeps separate credentials and does not reuse a Wrangler login:
+
+```bash
+cf --version
+cf auth login
+cf auth whoami
+cf cli search "list DNS records"
+```
+
+For a remote machine, use `cf auth login --no-browser`. Automation can supply `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`; the token takes precedence over saved profiles. The existing agenix-managed `cloudflare-access-api-token.age` remains available for token-based use. The Sepia `cloudflared` tunnel service and its separate tunnel credential remain required for server connectivity.
 
 ### Agent Session Record Hooks
 

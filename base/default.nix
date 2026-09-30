@@ -29,13 +29,6 @@ let
     exec ${agenixPackage}/bin/agenix "$@" -i "$identity"
   '';
 
-  # Avoid exposing Wrangler's bundled node_modules, which conflicts with pkgs.typescript.
-  wranglerBin = pkgs.buildEnv {
-    name = "wrangler-bin-${pkgs.wrangler.version}";
-    paths = [ pkgs.wrangler ];
-    pathsToLink = [ "/bin" ];
-  };
-
 in
 {
   imports = [
@@ -143,7 +136,7 @@ in
 
         # Dev tools
         awscli2
-        wranglerBin
+        cf
         jq
         sqlite
         yq-go # yq 패키지는 더 이상 관리되지 않음
