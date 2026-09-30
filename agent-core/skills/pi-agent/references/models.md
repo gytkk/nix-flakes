@@ -84,10 +84,10 @@ If `models` is included, built-in models are kept and custom models are upserted
 
 `modelOverrides` customizes built-in and matching extension-registered models without replacing the provider list. Supported per-model fields: `name`, `reasoning`, `thinkingLevelMap`, `input`, `cost` (partial), `contextWindow`, `maxTokens`, `headers`, `compat`. Unknown model IDs are ignored; provider-level `baseUrl`/`headers` can be combined with it. If `models` is also defined, custom models merge after built-in overrides.
 
-Example — opt a direct OpenAI GPT-5.6 model into the 1.05M context window (they default to `272000` to stay in the short-context pricing tier):
+Example: override the context window for `gpt-6.1-sol`:
 
 ```json
-{ "providers": { "openai": { "modelOverrides": { "gpt-6-sol": { "contextWindow": 1050000 } } } } }
+{ "providers": { "openai": { "modelOverrides": { "gpt-6.1-sol": { "contextWindow": 1050000 } } } } }
 ```
 
 ## Anthropic Messages Compatibility Flags

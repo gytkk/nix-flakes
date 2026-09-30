@@ -84,6 +84,8 @@ under the parent Pi session, allows eight child launches per parent session,
 and blocks nested delegation at child depth. Automatic missions, schedules,
 and the generic `delegate` agent are disabled.
 
+Sol selections use `openai-codex/gpt-6.1-sol` in the model allowlist and the `planner` and `oracle` overrides.
+
 The packaged `planner`, `worker`, and `oracle` fork defaults are overridden to
 fresh context. Use an explicit `context: "fork"` only when the child genuinely
 needs the parent transcript; otherwise pass a compact task contract. The
