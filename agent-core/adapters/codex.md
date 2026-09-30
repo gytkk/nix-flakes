@@ -36,7 +36,7 @@ behavior.
 | Model | Delegated work | Starting effort |
 | --- | --- | --- |
 | `gpt-6-luna` | Narrow, clear, repeatable tasks such as locating symbols, running a known check, or applying a mechanical edit | `low` |
-| `gpt-6-sol` | Normal implementation, testing, research synthesis, and multi-step analysis with a defined scope | `medium` |
+| `gpt-6.1-sol` | Normal implementation, testing, research synthesis, and multi-step analysis with a defined scope | `medium` |
 | `gpt-6-astra` | Ambiguous work, complex design, deep debugging, security-sensitive review, and decisions with costly failures | `high` |
 
 - Use `low` for direct lookups and deterministic checks, `medium` for ordinary reasoning, and `high` for tracing complex logic, checking assumptions, or analyzing edge cases. Reserve `xhigh` or higher supported efforts for especially difficult unresolved reasoning. A higher effort does not replace selecting a model suited to the task's ambiguity and failure cost.
