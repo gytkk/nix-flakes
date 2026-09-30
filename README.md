@@ -129,6 +129,8 @@ The official [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc)
 
 See the [Codex module README](modules/codex/README.md) for official bundle packaging, model delegation, reasoning effort, and activation behavior.
 
+The imported [`publish-artifact-to-sites` skill](agent-core/skills/publish-artifact-to-sites/SKILL.md) publishes validated Data Analytics report and dashboard snapshots through ChatGPT Sites. It requires the Data Analytics tools and Sites building and hosting skills described in the [Codex module README](modules/codex/README.md#적용); importing the skill alone does not provide them.
+
 Codex and Claude share the official TypeSafe `typesafe-ai` skill through agent-core. The [Jev module](modules/jev/README.md) supplies `with-jev` to run API clients with the agenix-managed `TYPESAFE_API_KEY`.
 
 - On NixOS hosts, the static Codex base config is installed to the overridable system layer at `/etc/codex/config.toml`.

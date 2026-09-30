@@ -34,6 +34,8 @@ Codex의 subagent 기능으로 생성한 자식은 부모가 답변을 마친 �
 
 ## 적용
 
+`$publish-artifact-to-sites`는 OpenAI Data Analytics 플러그인의 원본 [배포 스킬](../../agent-core/skills/publish-artifact-to-sites/SKILL.md)이다. 검증된 분석 보고서나 대시보드 snapshot을 ChatGPT Sites에 배포한다. 실행에는 Data Analytics의 `validate_artifact`, `export_artifact_package` 도구와 `sites-building`, `sites-hosting` 스킬이 필요하다. Agent-core는 원본 스킬만 설치하며, 이 의존성이나 Sites 계정 권한을 추가하지 않는다. 일반 HTML을 만드는 독립 스킬로 사용할 수 없고, 필요한 기능을 제공하는 환경에서 호출해야 한다. 원본 버전과 의존성은 [shared skill catalog](../../agent-core/skills/README.md)에 기록한다.
+
 Jev를 사용하는 기능은 `$typesafe-ai` skill로 설계하고, API client는 `with-jev`로 실행한다. 공식 skill 원본, agenix 인증, 적용 절차는 [Jev README](../jev/README.md)에서 확인한다.
 
 Standalone Home Manager는 `/etc/codex/config.toml`을 checkout의 `files/config.toml`에 연결한다. NixOS는 같은 파일을 Nix store에서 설치한다. `~/.codex/config.toml`은 사용자 설정을 보존하며 activation이 덮어쓰지 않는다.
