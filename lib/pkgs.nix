@@ -3,10 +3,10 @@ let
   repoOverlays = import ../overlays { inherit inputs; };
   localAppsOverlay =
     final: prev:
-    builtins.removeAttrs (import ../packages/apps {
+    import ../packages/apps {
       pkgs = final;
       inherit (prev.stdenv) isDarwin;
-    }) [ "opencode" ];
+    };
 
   commonOverlays = [
     inputs.copyparty.overlays.default

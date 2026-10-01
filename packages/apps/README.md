@@ -17,7 +17,6 @@ Self-contained non-nixpkgs app packages used by the parent `nix-flakes` reposito
 ├── herdr-annotate/
 ├── herdr-auto-title/
 ├── notion-cli/
-├── opencode/
 ├── pi/
 ├── pup/
 ├── lib/
@@ -54,15 +53,14 @@ Self-contained non-nixpkgs app packages used by the parent `nix-flakes` reposito
 | herdr-annotate | 0.5.0 |
 | herdr-auto-title | 0.8.0 |
 | notion-cli | 0.23.13 |
-| opencode | 1.18.34 |
 | pi | 0.99.2 |
 | pup | 1.4.0 |
 
 ## Build entrypoints
 
-- `nix build ./packages/apps#packages.<system>.opencode`
+- `nix build ./packages/apps#packages.<system>.ntn`
 - `nix build ./packages/apps#packages.<system>.default` (same as first app)
-- `nix run ./packages/apps#apps.<system>.opencode`
+- `nix run ./packages/apps#apps.<system>.ntn`
 
 `gksdud` is exposed only on Darwin. Its signed universal app bundle supports Apple Silicon and Intel Macs running macOS 13 or later. Home Manager installs and starts it through the [gksdud module](../../modules/gksdud/README.md).
 
@@ -74,11 +72,11 @@ To add a new app package:
 2. Use `callPackage` arguments available from nixpkgs (`stdenvNoCC`, `fetchzip`, etc.).
 3. Ensure the package path creates a `meta.mainProgram` if the package should be run via `nix run`.
 4. Add `packages/apps/<app-name>/update.sh` if the package should support aggregate updates.
-5. Add the package to `packages/apps/default.nix` so the nested flake and parent package outputs expose it. The configuration overlay consumes this catalog with the exception noted below.
+5. Add the package to `packages/apps/default.nix` so the nested flake and parent package outputs expose it. The configuration overlay consumes this catalog.
 
 To disable aggregate updates for an app, add its name to the `update.deny` list in `settings.json`. Apps in `update.review` use candidate PRs instead of direct updates to `main`; the deny list applies to both channels.
 
-The package catalog in `default.nix` is the single source of truth for exported apps and aliases. Register each package there once; the parent package outputs and nested flake expose the full catalog. The configuration overlay in `lib/pkgs.nix` excludes the local `opencode` package, leaving the nixpkgs attribute unchanged. App-specific settings still belong in `modules/<app>/`, and enabling a package in a profile remains a separate choice.
+The package catalog in `default.nix` is the single source of truth for exported apps and aliases. Register each package there once; the parent package outputs, nested flake, and configuration overlay in `lib/pkgs.nix` expose the full catalog. App-specific settings still belong in `modules/<app>/`, and enabling a package in a profile remains a separate choice.
 
 `ntn` is an alias of `notion-cli` in the catalog. Both attributes provide the same derivation and the `ntn` executable. Aliases need no package directory or updater and do not add duplicate rows to the version table.
 
@@ -116,4 +114,3 @@ The helper selects the host platform, fetches the pinned archive, disables confi
 - `cf`, `databricks-cli`, `gksdud`, and `pup` are manually updated. They have no `update.sh`, so aggregate updates skip them. Moving a package into this catalog does not enable automatic updates.
 - Package outputs follow each platform's catalog. The Linux build job skips apps absent from the Linux catalog, including `gksdud`; it does not validate their macOS runtime behavior.
 - Changes under `lib/` rebuild all catalog package directories. A package-local change rebuilds that package. The changed-app detector is checked with `bash packages/apps/tests/detect-changed-apps.sh`.
-- The parent configuration overlay intentionally keeps nixpkgs `opencode`; the local package remains available through the nested and parent package outputs.
