@@ -2,7 +2,49 @@ import { expect, test } from "bun:test";
 import { appendFile, mkdir, mkdtemp, rename, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { childTranscripts, JsonlTail } from "../files/herdr-subagents/io";
+import { childTranscripts, JsonlTail, teammateRemoved } from "../files/herdr-subagents/io";
+
+test("team removal requires native child metadata and a matching leader session", async () => {
+  const root = await mkdtemp(join(tmpdir(), "claude-herdr-team-"));
+  const transcript = join(root, "agent-child.jsonl");
+  const metadata = join(root, "agent-child.meta.json");
+  const teams = join(root, "teams");
+  const config = join(teams, "team-test", "config.json");
+  const team = { name: "team-test", leadSessionId: "parent", members: [{ agentId: "team-lead@team-test" }] };
+  try {
+    expect(await teammateRemoved(transcript, teams, "parent")).toBeFalse();
+    await writeFile(metadata, JSON.stringify({ name: "reviewer", teamName: "team-test" }));
+    expect(await teammateRemoved(transcript, teams, "parent")).toBeFalse();
+    await mkdir(join(teams, "team-test"), { recursive: true });
+    await writeFile(config, JSON.stringify(team));
+    expect(await teammateRemoved(transcript, teams, "parent")).toBeTrue();
+    expect(await teammateRemoved(transcript, teams, "another-session")).toBeFalse();
+    await writeFile(config, JSON.stringify({ ...team, members: [...team.members, { agentId: "reviewer@team-test" }] }));
+    expect(await teammateRemoved(transcript, teams, "parent")).toBeFalse();
+    await writeFile(config, JSON.stringify({ ...team, name: "another-team" }));
+    expect(await teammateRemoved(transcript, teams, "parent")).toBeFalse();
+    await writeFile(metadata, JSON.stringify({ name: "reviewer", teamName: "../outside" }));
+    expect(await teammateRemoved(transcript, teams, "parent")).toBeFalse();
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test("invalid team files are diagnosed rather than interpreted as removal", async () => {
+  const root = await mkdtemp(join(tmpdir(), "claude-herdr-team-invalid-"));
+  const transcript = join(root, "agent-child.jsonl");
+  const teams = join(root, "teams");
+  const config = join(teams, "team-test", "config.json");
+  try {
+    await writeFile(join(root, "agent-child.meta.json"), JSON.stringify({ name: "reviewer", teamName: "team-test" }));
+    await mkdir(join(teams, "team-test"), { recursive: true });
+    await writeFile(config, "private malformed content");
+    await expect(teammateRemoved(transcript, teams, "parent")).rejects.toThrow("cannot read teammate membership");
+    await writeFile(config, JSON.stringify({ name: "team-test", leadSessionId: "parent", members: [{}] }));
+    await expect(teammateRemoved(transcript, teams, "parent")).rejects.toThrow("invalid team member list");
+    await rm(config);
+    await mkdir(config);
+    await expect(teammateRemoved(transcript, teams, "parent")).rejects.toThrow("cannot read teammate membership");
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
 
 test("JSONL tail handles partial Unicode, append, replacement, truncation and missing files", async () => {
   const root = await mkdtemp(join(tmpdir(), "claude-herdr-jsonl-"));

@@ -37,7 +37,7 @@ Codex shows a colored status icon, name, and model on each child's first line, w
 
 The expanded desktop sidebar supports seven children with two lines each. If more children are visible, it shows six plus an overflow count. Codex prioritizes running and unknown children before recent terminal states. The rows belong to the parent pane and do not create additional terminal panes. Collapsed and mobile layouts remain compact.
 
-Claude uses the same two-line layout and status colors. Its `SubagentStop` hook is tentative: `○` remains until a parent result or task notification confirms completion, failure, or interruption. Task descriptions replace agent types when an Agent result arrives, and messages update from child transcripts. Confirmed terminal states remain visible for five seconds, and stale metadata expires within 15 seconds.
+Claude uses the same two-line layout and status colors. Its `SubagentStop` hook is tentative: `○` remains until a parent result or task notification confirms completion, failure, or interruption. For Agent Teams, removal from a valid team configuration led by the current session also confirms interruption. Task descriptions replace agent types when an Agent result arrives, and messages update from child transcripts. Confirmed terminal states remain visible for five seconds, and stale metadata expires within 15 seconds. Sidebar cleanup preserves worktrees.
 
 Apply Home Manager, run `herdr server reload-config`, and start a new Claude, Pi, or Codex session inside Herdr to load the integration.
 

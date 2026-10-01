@@ -2,11 +2,11 @@ import { createHash, randomUUID } from "node:crypto";
 import { execFile, spawn } from "node:child_process";
 import { constants } from "node:fs";
 import { access, appendFile, mkdir, open, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
-import { childTranscripts, JsonlTail } from "./io";
+import { childTranscripts, JsonlTail, teammateRemoved } from "./io";
 import { applyEvent, consumeChild, consumeParent, hookEvent, object, sidebarTokens, validId, type Child, type Event } from "./projection";
 
 const exec = promisify(execFile);
@@ -228,6 +228,7 @@ export async function watch(token: string): Promise<void> {
   const tails = new Map<string, { reader: JsonlTail; verified: boolean; tainted: boolean; startedAt: number }>();
   const tasks = new Map<string, string>();
   const childRoot = join(dirname(initial.transcript), initial.sessionId, "subagents");
+  const teamsRoot = join(resolve(process.env.CLAUDE_CONFIG_DIR || join(homedir(), ".claude")), "teams");
   let paths = new Map<string, string>();
   const errors = new Map<string, string>();
   let published = "";
@@ -292,6 +293,10 @@ export async function watch(token: string): Promise<void> {
             }
             state.tainted ||= tail.hasGaps;
             child.unavailable = !state.verified || state.tainted || !tail.available || !tail.caughtUp || !parent.available || !parent.caughtUp;
+            // A team member can be removed without a terminal Agent result.
+            if (child.phase === "stopping" && !child.unavailable && await teammateRemoved(path, teamsRoot, initial.sessionId)) {
+              applyEvent(children, { kind: "result", id: child.id, at: Date.now(), phase: "interrupted" });
+            }
             errors.delete(child.id);
           } catch (error) { child.unavailable = true; diagnose(child.id, error); }
         }

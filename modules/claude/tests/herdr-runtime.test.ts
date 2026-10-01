@@ -22,6 +22,7 @@ async function bounded<T>(promise: Promise<T>): Promise<T> {
 async function fixture() {
   const temporary = await mkdtemp(join(tmpdir(), "claude-herdr-runtime-"));
   const runtime = join(temporary, "runtime");
+  const claudeConfig = join(temporary, "claude-config");
   const transcript = join(temporary, "session-test.jsonl");
   const sessionId = "session-test";
   const pane = "pane-test";
@@ -58,6 +59,7 @@ async function fixture() {
       fileURLToPath(new URL("../files/herdr-subagents/index.ts", import.meta.url)), "watch", token], {
       env: { ...process.env, HERDR_ENV: "1", HERDR_SOCKET_PATH: socket, HERDR_PANE_ID: pane,
         HERDR_BIN_PATH: fakeHerdr, HERDR_TEST_LOG: log, XDG_RUNTIME_DIR: runtime,
+        CLAUDE_CONFIG_DIR: claudeConfig,
         PATH: `${temporary}:${process.env.PATH ?? ""}` },
       stdin: "ignore", stdout: "ignore", stderr: "inherit",
     });
@@ -69,8 +71,8 @@ async function fixture() {
   async function reports(): Promise<string[][]> {
     return (await readFile(log, "utf8")).split("\n").filter(Boolean).map(line => JSON.parse(line));
   }
-  async function waitFor(value: string): Promise<string[][]> {
-    const deadline = Date.now() + 4_000;
+  async function waitFor(value: string, timeout = 4_000): Promise<string[][]> {
+    const deadline = Date.now() + timeout;
     while (Date.now() < deadline) {
       const result = await reports();
       if (result.some(args => args.includes(value))) return result;
@@ -78,7 +80,7 @@ async function fixture() {
     }
     throw new Error(`Timed out waiting for ${value}; reports: ${JSON.stringify(await reports())}`);
   }
-  return { transcript, sessionId, childPath, events, ownerPath, owner, watcher: watcher!, reports, waitFor,
+  return { transcript, sessionId, childPath, claudeConfig, events, ownerPath, owner, watcher: watcher!, reports, waitFor,
     async cleanup() {
       await atomicJson(ownerPath, { ...owner, stopped: true });
       try { await bounded(watcher!.exited); }
@@ -121,6 +123,34 @@ test("watcher follows child progress, waits for confirmed completion, and clears
     }
   } finally { await f.cleanup(); }
 }, 15_000);
+
+test("watcher clears a stopped teammate only after removal from its owning team", async () => {
+  const f = await fixture();
+  try {
+    const configPath = join(f.claudeConfig, "teams", "team-test", "config.json");
+    await mkdir(join(f.claudeConfig, "teams", "team-test"), { recursive: true });
+    await atomicJson(f.childPath.replace(/\.jsonl$/, ".meta.json"), { name: "reviewer", teamName: "team-test" });
+    const team = { name: "team-test", leadSessionId: f.sessionId,
+      members: [{ agentId: "team-lead@team-test" }, { agentId: "reviewer@team-test" }] };
+    await atomicJson(configPath, team);
+    await f.waitFor("subagent_1_status=●");
+    await appendFile(f.events, JSON.stringify({ kind: "stop", id: "child-test", at: Date.now(),
+      activity: "Shutdown accepted" }) + "\n");
+    await f.waitFor("subagent_1_status=○");
+    await Bun.sleep(750);
+    const present = await f.reports();
+    expect(present.some(args => args.includes("subagent_1_status=■"))).toBeFalse();
+    expect(present.some(args => args.includes("subagent_1"))).toBeFalse();
+
+    await atomicJson(configPath, { ...team, members: team.members.slice(0, 1) });
+    await f.waitFor("subagent_1_status=■");
+    const cleared = await f.waitFor("subagent_1", 7_000);
+    const latestChildReport = cleared.findLast(args => args.some(arg => arg === "subagent_1" || arg.startsWith("subagent_1=")))!;
+    expect(latestChildReport).toContain("--clear-token");
+    expect(latestChildReport).toContain("subagent_1");
+    expect(latestChildReport.some(arg => arg.startsWith("subagent_1="))).toBeFalse();
+  } finally { await f.cleanup(); }
+}, 20_000);
 
 test("a replaced owner's watcher exits without clearing replacement metadata", async () => {
   const f = await fixture();

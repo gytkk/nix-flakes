@@ -37,6 +37,8 @@ Inside Herdr, Claude's Agents entry displays native subagents with a status icon
 
 Running uses a green `●`, confirmed completion a blue `✓`, interruption a yellow `■`, and failure a red `×`. `SubagentStop` alone shows `○` while the watcher waits for a parent result or Claude's task notification, because another stop hook can request more work. These states describe a run, not permanent termination of the agent. Completed, interrupted, and failed rows remain visible for five seconds. Missing or unreadable transcripts show `○` and retain the last message. If the watcher stops reporting, metadata expires within 15 seconds. The parent model remains independently reported by the status line.
 
+For Agent Teams, the watcher reads each stopped child's native `.meta.json` and the team's `config.json` under `CLAUDE_CONFIG_DIR` (default: `~/.claude`). Removal from a team led by the current session confirms interruption, so the row disappears after five seconds. Registered teammates remain visible. Missing, unreadable, or invalid team files do not confirm termination. Worktrees remain unchanged.
+
 The parser targets the pinned Claude Code 2.1.284 transcript format. Stop-only events from internal agents do not create rows. Independently launched Claude processes are not linked as children. Display limits are documented in [Herdr's subagent settings](../herdr/README.md#subagents).
 
 Apply Home Manager for the current environment, run `herdr server reload-config`, and start a new Claude session inside Herdr. Verification uses isolated fixture transcripts and fake Herdr commands:
