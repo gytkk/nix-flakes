@@ -48,6 +48,7 @@ jobs:
           bash packages/apps/tests/update-all.sh
           bash packages/apps/tests/update-review.sh
           bash packages/apps/tests/check-nix-patches.sh
+          bash packages/apps/tests/notion-cli-update.sh
       - run: nix flake check ./packages/apps --no-build
 
   detect-app-changes:
