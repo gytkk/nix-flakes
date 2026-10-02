@@ -42,18 +42,18 @@ Self-contained non-nixpkgs app packages used by the parent `nix-flakes` reposito
 
 | App | Version |
 |-----|---------|
-| agent-browser | 0.38.1 |
+| agent-browser | 0.38.2 |
 | cf | 1.0.0-beta.5 |
 | claude-code | 2.1.287 |
-| codex | 0.159.3 |
+| codex | 0.160.0 |
 | codexbar | 0.70.0 |
 | databricks-cli | 1.7.0 |
 | gksdud | 1.3.2 |
 | herdr | 0.9.3 |
 | herdr-annotate | 0.5.0 |
 | herdr-auto-title | 0.8.0 |
-| notion-cli | 0.23.14 |
-| pi | 0.99.2 |
+| notion-cli | 0.23.15 |
+| pi | 1.0.0 |
 | pup | 1.4.0 |
 
 ## Build entrypoints
