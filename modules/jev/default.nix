@@ -13,6 +13,9 @@ let
       osConfig.age.secrets.jev-api-key.path
     else
       config.age.secrets.jev-api-key.path;
+  shellSecretPath = lib.concatMapStringsSep ''"''${XDG_RUNTIME_DIR}"'' lib.escapeShellArg (
+    lib.splitString "\${XDG_RUNTIME_DIR}" secretPath
+  );
 in
 {
   options.modules.jev.enable = lib.mkEnableOption "Jev API access with the agenix key";
@@ -29,7 +32,7 @@ in
       (pkgs.writeShellApplication {
         name = "with-jev";
         runtimeInputs = [ pkgs.coreutils ];
-        text = builtins.replaceStrings [ "@secretPath@" ] [ (lib.escapeShellArg secretPath) ] (
+        text = builtins.replaceStrings [ "@secretPath@" ] [ shellSecretPath ] (
           builtins.readFile ./with-jev.sh
         );
       })

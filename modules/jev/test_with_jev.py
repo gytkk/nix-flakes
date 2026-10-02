@@ -1,3 +1,4 @@
+import json
 import os
 from pathlib import Path
 import shlex
@@ -19,9 +20,11 @@ class WithJevTest(unittest.TestCase):
             source.replace("@secretPath@", shlex.quote(str(self.key_file)))
         )
 
-    def run_wrapper(self, *args, trace=False):
+    def run_wrapper(self, *args, trace=False, runtime_directory=None):
         environment = os.environ.copy()
         environment["TYPESAFE_API_KEY"] = "stale-inherited-key"
+        if runtime_directory is not None:
+            environment["XDG_RUNTIME_DIR"] = str(runtime_directory)
         return subprocess.run(
             ["bash", *(["-x"] if trace else []), str(self.script), *args],
             env=environment,
@@ -53,6 +56,43 @@ class WithJevTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1)
         self.assertEqual(result.stdout, "")
         self.assertIn("activate agenix", result.stderr)
+
+    def test_nix_rendered_runtime_secret_path(self):
+        repository = Path(__file__).resolve().parents[2]
+        expression = r"""
+          let
+            flake = builtins.getFlake @repository@;
+            module = import (flake.outPath + "/modules/jev/default.nix") {
+              lib = flake.inputs.nixpkgs.lib;
+              config = {
+                modules.jev.enable = true;
+                age.secrets.jev-api-key.path = "\${XDG_RUNTIME_DIR}/agenix/jev-api-key";
+              };
+              pkgs = {
+                coreutils = null;
+                writeShellApplication = args: args;
+              };
+            };
+          in (builtins.head module.config.content.home.packages).text
+        """.replace("@repository@", json.dumps(str(repository)))
+        rendered = subprocess.run(
+            ["nix", "eval", "--offline", "--impure", "--raw", "--expr", expression],
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(rendered.returncode, 0, rendered.stderr)
+        self.script.write_text(rendered.stdout)
+        runtime_directory = Path(self.directory.name) / "runtime with spaces"
+        self.key_file = runtime_directory / "agenix" / "jev-api-key"
+        self.key_file.parent.mkdir(parents=True)
+        self.key_file.write_text("synthetic-runtime-key\n")
+        result = self.run_wrapper(
+            "bash",
+            "-c",
+            'test "$TYPESAFE_API_KEY" = synthetic-runtime-key',
+            runtime_directory=runtime_directory,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_invalid_secret_stops_without_disclosing_value(self):
         for value in (

@@ -36,7 +36,7 @@ Home Manager의 identity는 `~/.ssh/id_ed25519`다. 특히 별도 recipient가 �
 
 ## 검증
 
-키 전달, 오류 처리, 인자와 종료 상태 보존은 실제 키나 네트워크 없이 검사한다.
+키 전달, 오류 처리, 인자와 종료 상태 보존, Nix가 생성한 경로의 `XDG_RUNTIME_DIR` 확장은 실제 키나 네트워크 없이 검사한다. 경로 생성 테스트에는 Nix와 로컬에 캐시된 flake input이 필요하다.
 
 ```bash
 uv run --no-project modules/jev/test_with_jev.py
