@@ -141,8 +141,7 @@ Codex and Claude share the official TypeSafe `typesafe-ai` skill through agent-c
 - `~/.codex/config.toml` stays writable and is not rewritten by activation, preserving user-local state such as project trust, hook trust, notices, and TUI state.
 - Add or update repository-managed skills only under `agent-core/skills/`, then update `agent-core/manifest.toml` and its golden hashes.
 - Cloudflare operations use the shared [`cf` CLI](#cloudflare-cli).
-- `home-manager switch` ensures `superpowers@openai-curated` is installed and enabled for Codex CLI; restart Codex after switching so plugin skills are rediscovered.
-- If the bundled Codex marketplace has not synced yet, activation falls back to the upstream Codex install path by cloning `obra/superpowers` under `~/.codex/superpowers` and linking its skills into `~/.agents/skills`.
+- `home-manager switch` installs and enables `superpowers@openai-curated` from the official Codex marketplace and removes the legacy `~/.agents/skills/superpowers` link when it points to `~/.codex/superpowers/skills`. Installation failures stop activation and are recorded in `~/.codex/nix-setup.log`. See the [Codex module README](modules/codex/README.md#적용) for installation and restart instructions.
 
 ### Cloudflare CLI
 

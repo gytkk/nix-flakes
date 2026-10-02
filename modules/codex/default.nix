@@ -189,54 +189,29 @@ in
 
       ${coreutils}/bin/mkdir -p "$HOME/.codex"
       SETUP_LOG="$HOME/.codex/nix-setup.log"
-      SUPERPOWERS_REPO="$HOME/.codex/superpowers"
-      SUPERPOWERS_SKILLS_DIR="$HOME/.agents/skills"
-      SUPERPOWERS_SKILL_LINK="$SUPERPOWERS_SKILLS_DIR/superpowers"
+      LEGACY_SUPERPOWERS_SKILLS="$HOME/.codex/superpowers/skills"
+      SUPERPOWERS_SKILL_LINK="$HOME/.agents/skills/superpowers"
 
       log() { echo "[$(${coreutils}/bin/date '+%H:%M:%S')] $*" >> "$SETUP_LOG"; }
 
-      cleanup_fallback_link() {
+      cleanup_legacy_skill_link() {
         if [ -L "$SUPERPOWERS_SKILL_LINK" ]; then
-          current_target="$(${coreutils}/bin/readlink "$SUPERPOWERS_SKILL_LINK" || true)"
-          if [ "$current_target" = "$SUPERPOWERS_REPO/skills" ]; then
-            ${coreutils}/bin/rm -f "$SUPERPOWERS_SKILL_LINK"
+          current_target="$(${coreutils}/bin/readlink "$SUPERPOWERS_SKILL_LINK")"
+          if [ "$current_target" = "$LEGACY_SUPERPOWERS_SKILLS" ]; then
+            run ${coreutils}/bin/rm -f "$SUPERPOWERS_SKILL_LINK"
           fi
         fi
       }
 
-      install_fallback_skills() {
-        log "Falling back to upstream Codex skill discovery install"
-        if [ -d "$SUPERPOWERS_REPO/.git" ]; then
-          git -C "$SUPERPOWERS_REPO" pull --ff-only >> "$SETUP_LOG" 2>&1 || return 1
-        elif [ -e "$SUPERPOWERS_REPO" ]; then
-          log "  -> FAILED: $SUPERPOWERS_REPO exists but is not a git checkout"
-          return 1
-        else
-          git clone https://github.com/obra/superpowers.git "$SUPERPOWERS_REPO" >> "$SETUP_LOG" 2>&1 || return 1
-        fi
-
-        if [ ! -d "$SUPERPOWERS_REPO/skills" ]; then
-          log "  -> FAILED: $SUPERPOWERS_REPO/skills is missing"
-          return 1
-        fi
-        if [ -e "$SUPERPOWERS_SKILL_LINK" ] && [ ! -L "$SUPERPOWERS_SKILL_LINK" ]; then
-          log "  -> FAILED: $SUPERPOWERS_SKILL_LINK exists and is not a symlink"
-          return 1
-        fi
-
-        ${coreutils}/bin/mkdir -p "$SUPERPOWERS_SKILLS_DIR"
-        ${coreutils}/bin/ln -sfn "$SUPERPOWERS_REPO/skills" "$SUPERPOWERS_SKILL_LINK"
-        log "  -> OK: linked $SUPERPOWERS_SKILL_LINK"
-      }
-
       log "=== Codex plugin setup started ==="
       log "Installing plugin: superpowers@openai-curated"
-      if ${codex} plugin add superpowers@openai-curated < /dev/null >> "$SETUP_LOG" 2>&1; then
-        cleanup_fallback_link
+      if run ${codex} plugin add superpowers@openai-curated < /dev/null >> "$SETUP_LOG" 2>&1; then
+        cleanup_legacy_skill_link
         log "  -> OK"
       else
         log "  -> FAILED (exit $?)"
-        install_fallback_skills || log "  -> fallback FAILED"
+        errorEcho "Could not install superpowers@openai-curated. See $SETUP_LOG and retry home-manager switch."
+        exit 1
       fi
       log "=== Codex plugin setup finished ==="
     '';
