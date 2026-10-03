@@ -392,7 +392,7 @@ nix build .#nixosConfigurations.pylv-sepia.config.system.build.toplevel
 After changing module paths or configuration behavior, update the corresponding module README and its links in the root guidance. Check local documentation paths without evaluating Nix:
 
 ```bash
-uv run --no-project docs/check-paths.py
+uv run --no-project scripts/check-paths.py
 ```
 
 The checker covers local Markdown link targets and concrete repository paths in inline code and code blocks in this README, AGENTS.md, CLAUDE.md, and the Zellij module README. It skips placeholder and glob paths, installed paths, external URLs, and link anchors. The architecture review preserves historical evidence and is excluded from the default check. Pass additional Markdown files as arguments to check them explicitly.

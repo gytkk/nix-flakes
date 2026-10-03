@@ -23,7 +23,7 @@ DEFAULT_DOCUMENTS = (
     ROOT / "modules/zellij/README.md",
 )
 REPOSITORY_DIRS = (
-    "agent-core|base|docs|hosts|lib|modules|overlays|packages|secrets|themes"
+    "agent-core|base|docs|hosts|lib|modules|overlays|packages|scripts|secrets|themes"
 )
 INLINE_LINK = re.compile(r"(?<!!)\[[^]]*\]\(([^)]+)\)")
 INLINE_CODE = re.compile(r"`([^`]+)`")

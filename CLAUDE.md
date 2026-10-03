@@ -19,7 +19,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Documentation Guidelines
 
 - All documentation belongs in: AGENTS.md, CLAUDE.md, README.md, code comments (sparingly), commit messages
-- When module paths or behavior change, update the module README and its root documentation links. Run `uv run --no-project docs/check-paths.py` to check the current entry-point documents; pass other changed Markdown files explicitly.
+- When module paths or behavior change, update the module README and its root documentation links. Run `uv run --no-project scripts/check-paths.py` to check the current entry-point documents; pass other changed Markdown files explicitly.
 
 ### Build/Test/Lint Commands
 
