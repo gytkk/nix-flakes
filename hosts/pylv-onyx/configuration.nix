@@ -69,6 +69,9 @@
     };
   };
 
+  # Internal JavaScript task runners spawn node by name.
+  systemd.services.n8n.path = [ pkgs.nodejs ];
+
   services.nginx = {
     enable = true;
     recommendedProxySettings = true;
