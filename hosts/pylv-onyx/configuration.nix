@@ -49,6 +49,7 @@
 
   users.users.gytkk.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPSLJRqb27foz3LyICtfk8A+VyyjXdkjQOp6rG+MX28E u0_a391@localhost"
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIWR6uTz4NEgOW8T/pI7Czk3WGpXIyobVqNkf4YrGUOd gytkk-windows"
   ];
 
   # Keep direct `nixos-rebuild switch` from attempting the dbus -> broker live migration.
