@@ -2,7 +2,6 @@
   config,
   lib,
   pkgs,
-  username,
   homeDirectory,
   ...
 }:
@@ -66,16 +65,10 @@ in
       }
     ];
 
-    age.secrets.discord-bot-token = {
-      file = ../../secrets/discord-bot-token.age;
-      owner = username;
-      group = "users";
-      mode = "0400";
-    };
-
     environment.systemPackages = with pkgs; [
       chromium
       libcap
+      openssl
     ];
 
     environment.sessionVariables = {

@@ -6,7 +6,7 @@ updates, and systemd user service.
 
 This directory contains only declarative host integration:
 
-- `default.nix` provides NixOS dependencies, the agenix Discord token, runtime
+- `default.nix` provides NixOS dependencies, runtime
   environment variables, and proxy authentication.
 - `nginx-proxy.nix` provides the LAN and public-origin reverse proxies and the
   LAN firewall rule.
@@ -14,6 +14,12 @@ This directory contains only declarative host integration:
 
 The modules do not install an OpenClaw package, generate `openclaw.json`, set
 `OPENCLAW_NIX_MODE`, or own `openclaw-gateway.service`.
+
+Automation credentials belong to OpenClaw's local Secret Store. Discord uses a native `store` SecretRef named `DISCORD_BOT_TOKEN`; Nix does not provision its runtime token. The encrypted agenix source remains available for recovery. The Notion to Google Calendar automation uses protected `NOTION_CALENDAR_*` entries through OpenClaw's enabled secret egress proxy, restricted to the corresponding API hosts. Its model-free script job calls Gateway `exec` to receive the proxy context. Plain command jobs do not receive that context. The workspace automation README owns the runner configuration and key names.
+
+The Secret Store protects disclosure through OpenClaw, but its local SQLite database is not encrypted at rest. Protect and back up OpenClaw's private state directory. Existing Brave and Gateway credentials remain native SecretRefs; GitHub CLI continues to own its OAuth login and Git credential helper.
+
+The secret egress proxy requires OpenSSL in a trusted system directory. `default.nix` supplies it through `environment.systemPackages`, because OpenClaw's certificate generator does not search the user profile or `PATH`. After applying this module with `nixos-rebuild switch`, confirm `/run/current-system/sw/bin/openssl` exists and remove any temporary `/usr/bin/openssl` migration symlink.
 
 ## Agent-core integration
 
