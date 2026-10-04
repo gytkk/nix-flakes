@@ -54,49 +54,6 @@
   # Keep direct `nixos-rebuild switch` from attempting the dbus -> broker live migration.
   services.dbus.implementation = "dbus";
 
-  # n8n is reachable only through the Tailscale-facing nginx origin. The
-  # Cloudflare Tunnel connector runs on pylv-sepia and targets this listener.
-  services.n8n = {
-    enable = true;
-    environment = {
-      N8N_HOST = "n8n.pylv.dev";
-      N8N_PROTOCOL = "https";
-      N8N_EDITOR_BASE_URL = "https://n8n.pylv.dev";
-      WEBHOOK_URL = "https://n8n.pylv.dev/";
-      N8N_PROXY_HOPS = 1;
-      N8N_SECURE_COOKIE = true;
-      N8N_LISTEN_ADDRESS = "127.0.0.1";
-    };
-  };
-
-  # Internal JavaScript task runners spawn node by name.
-  systemd.services.n8n.path = [ pkgs.nodejs ];
-
-  services.nginx = {
-    enable = true;
-    recommendedProxySettings = true;
-    virtualHosts."n8n-tailscale-origin" = {
-      serverName = "_";
-      listen = [
-        {
-          addr = "0.0.0.0";
-          port = 12370;
-        }
-      ];
-      locations."/" = {
-        proxyPass = "http://127.0.0.1:5678";
-        proxyWebsockets = true;
-        extraConfig = ''
-          proxy_set_header Host $host;
-          proxy_set_header X-Forwarded-Host $host;
-          proxy_set_header X-Forwarded-Proto https;
-        '';
-      };
-    };
-  };
-
-  networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ 12370 ];
-
   # niri compositor
   programs.niri.enable = true;
 
