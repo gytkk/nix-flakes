@@ -11,9 +11,12 @@
 | `Cmd+Shift+[` / `Cmd+Shift+]` | Focus the previous / next agent in sidebar order in Ghostty on macOS, wrapping at either end. |
 | `Cmd+t` | Create a Herdr tab without a naming prompt in Ghostty on macOS. |
 | `Cmd+w` | Close the current Herdr tab in Ghostty on macOS. |
+| `Alt+t` / `Alt+w` | Create / close a Herdr tab using Herdr's own bindings, including in Windows Terminal on WSL. |
 | `Cmd+1..9` / `Alt+1..9` | Focus a workspace by index in Ghostty on macOS / Windows Terminal on WSL. |
 
 The prefix shortcuts remain available: `c` creates a tab, `Shift+x` closes a tab, `p` / `n` focuses the previous / next tab, and `Shift+,` / `Shift+.` focuses the previous / next agent. `Ctrl+Space`, then `Shift+s`, opens the workspace picker.
+
+`Alt+t` and `Alt+w` are handled by Herdr without Windows Terminal overrides. Outside Herdr, these keys retain their shell or application behavior.
 
 In Herdr 0.9.1, closing a tab terminates its panes. Closing the last tab also closes its workspace, normally without confirmation. With the default `confirm_close = true`, closing the last tab prompts when it would close a linked worktree group. Direct shortcuts apply in terminal mode; popups and overlays handle their own input.
 

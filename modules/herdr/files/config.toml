@@ -3,8 +3,8 @@ onboarding = false
 prefix = "ctrl+space"
 
 # tab 생성, 닫기와 이동. 기존 prefix 단축키도 유지한다.
-new_tab = ["cmd+t", "prefix+c"]
-close_tab = ["cmd+w", "prefix+shift+x"]
+new_tab = ["cmd+t", "alt+t", "prefix+c"]
+close_tab = ["cmd+w", "alt+w", "prefix+shift+x"]
 previous_tab = ["ctrl+shift+tab", "prefix+p"]
 next_tab = ["ctrl+tab", "prefix+n"]
 
