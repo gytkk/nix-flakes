@@ -35,6 +35,9 @@
     # Databricks CLI (Go 구현체, GitHub 릴리스 바이너리)
     databricks-cli
 
+    # Pantry CLI (teamdev.ai 배포 도구, main 최신 빌드 바이너리)
+    pantry
+
     # Custom scripts
     (pkgs.writeShellScriptBin "sign" (builtins.readFile ./scripts/sign))
     (pkgs.writeShellScriptBin "dlg" (builtins.readFile ./scripts/login))
