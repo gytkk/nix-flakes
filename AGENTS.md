@@ -93,7 +93,7 @@ Defined in `inventory.nix` (single source of truth). `kind` field determines bui
 #### Base System
 
 1. **`base/default.nix`**: Common config — core modules, standard dev packages, programs
-2. **`base/devsisters/home.nix`**: saml2aws, vault, kc2aws, wg-cli, scala, ruby, databricks-cli, custom scripts
+2. **`base/devsisters/home.nix`**: saml2aws, vault, kc2aws, wg-cli, scala, ruby, databricks-cli, pantry, custom scripts
 3. **`base/pylv/home.nix`**: Minimal (inherits base)
 4. **`base/pylv/sepia.nix`**: Home Manager additions for `pylv-sepia`; system configuration lives in `hosts/pylv-sepia/configuration.nix`
 
@@ -178,4 +178,4 @@ AI 코딩 에이전트 설정을 변경할 때 공통 지침, runtime adapter, s
 
 - **Base packages** (`base/default.nix`): nixfmt, coreutils, findutils, docker, gcc, jq, fd, ripgrep, git, gh, lazygit, nodejs, bun, go, uv, ruff, rustup, kubectl, helm, etc.
 - **LSP servers** (`modules/lsp/`): nixd, gopls, typescript-language-server, terraform-ls, metals, ty, yaml-language-server, marksman (`rust-analyzer` must be installed in the active rustup toolchain)
-- **Devsisters-specific** (`base/devsisters/`): saml2aws, vault, kc2aws, wg-cli, scala, ruby, databricks-cli. `kc2aws` and `wg-cli` come from the private `keycloak2aws` and `devsisters-wg` flake inputs.
+- **Devsisters-specific** (`base/devsisters/`): saml2aws, vault, kc2aws, wg-cli, scala, ruby, databricks-cli, pantry. `kc2aws` and `wg-cli` come from the private `keycloak2aws` and `devsisters-wg` flake inputs.
