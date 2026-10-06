@@ -4,7 +4,7 @@ This module installs and configures Claude Code, Anthropic's AI coding assistant
 
 ## What it does
 
-- Installs `claude-code` from the repository's [app package catalog](../../packages/apps/README.md), exposed through the configuration overlay
+- Installs `claude-code` from the repository's [app package catalog](../../packages/README.md), exposed through the configuration overlay
 - Configures Claude Code settings (`~/.claude/settings.json`)
 - Installs global development guidelines (`~/.claude/CLAUDE.md`)
 - Installs plugin marketplaces, plugins, and MCP servers via activation scripts

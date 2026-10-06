@@ -6,8 +6,9 @@ TEST_ROOT="$(cd "$(mktemp -d)" && pwd -P)"
 trap 'rm -rf "$TEST_ROOT"' EXIT
 
 REPO="$TEST_ROOT/repo"
-APP_ROOT="$REPO/packages/apps"
-DETECT="$APP_ROOT/scripts/detect-changed-apps.sh"
+PACKAGES_ROOT="$REPO/packages"
+APP_ROOT="$PACKAGES_ROOT/apps"
+DETECT="$PACKAGES_ROOT/scripts/detect-changed-apps.sh"
 
 commit() {
   git -C "$REPO" add -A
@@ -35,15 +36,15 @@ assert_apps() {
   printf 'PASS: %s\n' "$description"
 }
 
-mkdir -p "$APP_ROOT"/{alpha,beta,lib,scripts}
+mkdir -p "$APP_ROOT"/{alpha,beta} "$PACKAGES_ROOT"/{lib,scripts}
 cp "$SOURCE_ROOT/scripts/detect-changed-apps.sh" "$DETECT"
 chmod +x "$DETECT"
 printf '{ }\n' > "$APP_ROOT/alpha/package.nix"
 printf '{ }\n' > "$APP_ROOT/beta/package.nix"
-printf '{ }\n' > "$APP_ROOT/default.nix"
-printf '{ }\n' > "$APP_ROOT/flake.nix"
-printf '# fixtures\n' > "$APP_ROOT/README.md"
-printf '{ value = 1; }\n' > "$APP_ROOT/lib/helper.nix"
+printf '{ }\n' > "$PACKAGES_ROOT/default.nix"
+printf '{ }\n' > "$PACKAGES_ROOT/flake.nix"
+printf '# fixtures\n' > "$PACKAGES_ROOT/README.md"
+printf '{ value = 1; }\n' > "$PACKAGES_ROOT/lib/helper.nix"
 
 git -C "$REPO" init -q
 initial_sha="$(commit 'initial fixtures')"
@@ -52,17 +53,25 @@ printf '{ changed = true; }\n' > "$APP_ROOT/alpha/package.nix"
 alpha_sha="$(commit 'change alpha')"
 assert_apps "one app change selects that app" '["alpha"]' "$initial_sha" "$alpha_sha"
 
-printf '{ value = 2; }\n' > "$APP_ROOT/lib/helper.nix"
+printf '{ value = 2; }\n' > "$PACKAGES_ROOT/lib/helper.nix"
 lib_sha="$(commit 'change shared helper')"
 assert_apps "shared helper change rebuilds every app" '["alpha","beta"]' "$alpha_sha" "$lib_sha"
 
-printf '{ catalog = true; }\n' > "$APP_ROOT/default.nix"
+printf '{ catalog = true; }\n' > "$PACKAGES_ROOT/default.nix"
 catalog_sha="$(commit 'change catalog')"
 assert_apps "catalog change rebuilds every app" '["alpha","beta"]' "$lib_sha" "$catalog_sha"
 
-printf '# documentation only\n' >> "$APP_ROOT/README.md"
+printf '{ changed = true; }\n' > "$PACKAGES_ROOT/flake.nix"
+flake_sha="$(commit 'change nested flake')"
+assert_apps "nested flake change rebuilds every app" '["alpha","beta"]' "$catalog_sha" "$flake_sha"
+
+printf '{ }\n' > "$PACKAGES_ROOT/flake.lock"
+lock_sha="$(commit 'change nested lockfile')"
+assert_apps "nested lockfile change rebuilds every app" '["alpha","beta"]' "$flake_sha" "$lock_sha"
+
+printf '# documentation only\n' >> "$PACKAGES_ROOT/README.md"
 readme_sha="$(commit 'change readme')"
-assert_apps "README-only change selects no apps" '[]' "$catalog_sha" "$readme_sha"
+assert_apps "README-only change selects no apps" '[]' "$lock_sha" "$readme_sha"
 
 assert_apps "missing baseline rebuilds every app" '["alpha","beta"]' ""
 assert_apps "invalid baseline rebuilds every app" '["alpha","beta"]' "not-a-commit"

@@ -6,7 +6,7 @@ TEST_ROOT=$(mktemp -d)
 trap 'rm -rf "$TEST_ROOT"' EXIT
 APP_DIR="$TEST_ROOT/notion-cli"
 mkdir -p "$APP_DIR" "$TEST_ROOT/bin" "$TEST_ROOT/tmp"
-cp "$SOURCE_ROOT/notion-cli/update.sh" "$APP_DIR/update.sh"
+cp "$SOURCE_ROOT/apps/notion-cli/update.sh" "$APP_DIR/update.sh"
 export FIXTURE_LOG="$TEST_ROOT/requests"
 export FIXTURE_LATEST="v99.1.2"
 export FIXTURE_FAILURE=""
@@ -77,7 +77,7 @@ chmod +x "$TEST_ROOT/bin/curl" "$TEST_ROOT/bin/nix-prefetch-url"
 export PATH="$TEST_ROOT/bin:$PATH"
 
 reset_package() {
-  cp "$SOURCE_ROOT/notion-cli/package.nix" "$APP_DIR/package.nix"
+  cp "$SOURCE_ROOT/apps/notion-cli/package.nix" "$APP_DIR/package.nix"
   cp "$APP_DIR/package.nix" "$TEST_ROOT/original.nix"
   : > "$FIXTURE_LOG"
 }

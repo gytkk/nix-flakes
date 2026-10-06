@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 README="$ROOT_DIR/README.md"
-APPS_DIR="$ROOT_DIR"
+APPS_DIR="$ROOT_DIR/apps"
 
 if [ ! -f "$README" ]; then
   exit 0

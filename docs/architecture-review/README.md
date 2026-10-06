@@ -141,7 +141,7 @@ Launchd 회귀 검사 8개와 agenix CLI 검사 7개를 통과했다. Launchd �
 
 ### 리뷰 당시 상태와 영향
 
-[packages/apps/default.nix:3](../../packages/apps/default.nix#L3)는 패키지 등록, export, 업데이트 자동화가 연결되는 진입점이다. 반면 `databricks-cli`, `notion-cli`, `pup`은 별도 디렉터리에 있고 [overlays/default.nix:35](../../overlays/default.nix#L35)에서 등록된다. 이들은 앱 CI의 경로 필터에도 포함되지 않는다.
+[packages/apps/default.nix:3](../../packages/default.nix#L3)는 패키지 등록, export, 업데이트 자동화가 연결되는 진입점이다. 반면 `databricks-cli`, `notion-cli`, `pup`은 별도 디렉터리에 있고 [overlays/default.nix:35](../../overlays/default.nix#L35)에서 등록된다. 이들은 앱 CI의 경로 필터에도 포함되지 않는다.
 
 새 CLI를 추가하는 사람이 어느 패턴을 따라야 하는지 판단하기 어렵고, 위치에 따라 검증 범위가 달라진다.
 
@@ -162,7 +162,7 @@ Launchd 회귀 검사 8개와 agenix CLI 검사 7개를 통과했다. Launchd �
 
 ### 적용 결과
 
-`databricks-cli`, `notion-cli`, `pup`은 `packages/apps`에 있으며, 등록과 `ntn` 별칭은 `packages/apps/default.nix`에서 관리한다. 루트 flake와 구성 overlay의 중복 등록은 제거했다. 세 패키지는 `lib/mk-tarball-cli.nix`로 플랫폼 선택, 다운로드, CLI 설치를 공유하며, 버전과 소스 정보는 앱별 파일에 남긴다. 별도 updater는 추가하지 않아 수동 업데이트 정책을 유지한다. 앱 추가 방법과 helper의 입력은 [앱 패키지 README](../../packages/apps/README.md)에 기록한다.
+`databricks-cli`, `notion-cli`, `pup`은 `packages/apps`에 있으며, 등록과 `ntn` 별칭은 `packages/default.nix`에서 관리한다. 루트 flake와 구성 overlay의 중복 등록은 제거했다. 세 패키지는 `packages/lib/mk-tarball-cli.nix`로 플랫폼 선택, 다운로드, CLI 설치를 공유하며, 버전과 소스 정보는 앱별 파일에 남긴다. 별도 updater는 추가하지 않아 수동 업데이트 정책을 유지한다. 앱 추가 방법과 helper의 입력은 [앱 패키지 README](../../packages/README.md)에 기록한다.
 
 루트 nixpkgs의 2개 플랫폼과 독립 앱 flake의 4개 플랫폼에서 세 패키지의 변경 전후 derivation 경로, 소스, 버전, 설치 명령, 지원 플랫폼, 실행 파일 이름을 비교했다. 총 18개 조합이 동일하다. 루트와 중첩 flake의 기존 패키지 이름 및 `ntn` 별칭도 평가했다. 공통 helper 변경 시 전체 앱을 검사하는 변경 감지 테스트 7개가 통과했다.
 

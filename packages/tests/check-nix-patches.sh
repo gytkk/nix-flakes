@@ -147,10 +147,10 @@ assert_same "default patch fuzz leaves the fetched source unchanged" \
 ANNOTATE_ROOT="$TEST_ROOT/annotate-updater"
 MOCK_BIN="$ANNOTATE_ROOT/mock-bin"
 ANNOTATE_APP="$ANNOTATE_ROOT/apps/herdr-annotate"
-mkdir -p "$MOCK_BIN" "$ANNOTATE_ROOT/apps/scripts" "$ANNOTATE_APP" "$ANNOTATE_ROOT/plannotator-source"
-cp "$SOURCE_ROOT/scripts/check-nix-patches.sh" "$ANNOTATE_ROOT/apps/scripts/check-nix-patches.sh"
+mkdir -p "$MOCK_BIN" "$ANNOTATE_ROOT/scripts" "$ANNOTATE_APP" "$ANNOTATE_ROOT/plannotator-source"
+cp "$SOURCE_ROOT/scripts/check-nix-patches.sh" "$ANNOTATE_ROOT/scripts/check-nix-patches.sh"
 for file in update.sh package.nix sources.json patches.nix selection-background.patch inherit-herdr-theme.patch; do
-  cp "$SOURCE_ROOT/herdr-annotate/$file" "$ANNOTATE_APP/$file"
+  cp "$SOURCE_ROOT/apps/herdr-annotate/$file" "$ANNOTATE_APP/$file"
 done
 cp "$ANNOTATE_APP/package.nix" "$ANNOTATE_ROOT/original-package.nix"
 cp "$ANNOTATE_APP/sources.json" "$ANNOTATE_ROOT/original-sources.json"

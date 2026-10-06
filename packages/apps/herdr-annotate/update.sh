@@ -2,7 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-APP_ROOT="$(dirname "$SCRIPT_DIR")"
+PACKAGES_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 PACKAGE_NIX="$SCRIPT_DIR/package.nix"
 SOURCES_JSON="$SCRIPT_DIR/sources.json"
 PLANNOTATOR_TUI_NIX="$SCRIPT_DIR/plannotator-tui.nix"
@@ -47,7 +47,7 @@ source_hash=$(nix hash convert --hash-algo sha256 --to sri "$source_hash_base32"
 plannotator_source=$(nix store prefetch-file --unpack --json "https://github.com/$PLANNOTATOR_REPOSITORY/archive/refs/tags/v$plannotator_tui_version.tar.gz")
 plannotator_source_hash=$(jq -er '.hash' <<<"$plannotator_source")
 plannotator_source_path=$(jq -er '.storePath' <<<"$plannotator_source")
-bash "$APP_ROOT/scripts/check-nix-patches.sh" "$plannotator_source_path" "$SCRIPT_DIR/patches.nix"
+bash "$PACKAGES_ROOT/scripts/check-nix-patches.sh" "$plannotator_source_path" "$SCRIPT_DIR/patches.nix"
 
 current_plannotator_version=$(jq -er '.plannotatorTui.version' "$SOURCES_JSON")
 current_plannotator_source_hash=$(jq -er '.plannotatorTui.sourceHash' "$SOURCES_JSON")
@@ -70,7 +70,7 @@ else
   set +e
   cargo_output=$(nix build --no-link --impure --expr "
     let
-      flake = builtins.getFlake \"path:$APP_ROOT\";
+      flake = builtins.getFlake \"path:$PACKAGES_ROOT\";
       pkgs = import flake.inputs.nixpkgs { system = builtins.currentSystem; };
       sources = builtins.fromJSON (builtins.readFile \"$tmp_dir/cargo-sources.json\");
     in

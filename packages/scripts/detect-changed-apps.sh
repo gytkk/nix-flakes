@@ -2,8 +2,10 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-APP_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-REPO_ROOT="$(git -C "$APP_ROOT" rev-parse --show-toplevel)"
+PACKAGES_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+APP_ROOT="$PACKAGES_ROOT/apps"
+REPO_ROOT="$(git -C "$PACKAGES_ROOT" rev-parse --show-toplevel)"
+PACKAGES_ROOT_REL="${PACKAGES_ROOT#"$REPO_ROOT"/}"
 APP_ROOT_REL="${APP_ROOT#"$REPO_ROOT"/}"
 BASE_SHA="${1:-}"
 HEAD_SHA="${2:-HEAD}"
@@ -30,7 +32,7 @@ rebuild_all=0
 
 while IFS= read -r path; do
   case "$path" in
-    flake.nix | flake.lock | lib/pkgs.nix | .github/workflows/apps-ci.yml | "$APP_ROOT_REL/default.nix" | "$APP_ROOT_REL/flake.nix" | "$APP_ROOT_REL/flake.lock" | "$APP_ROOT_REL/lib/"*)
+    flake.nix | flake.lock | lib/pkgs.nix | .github/workflows/apps-ci.yml | "$PACKAGES_ROOT_REL/default.nix" | "$PACKAGES_ROOT_REL/flake.nix" | "$PACKAGES_ROOT_REL/flake.lock" | "$PACKAGES_ROOT_REL/lib/"*)
       rebuild_all=1
       ;;
     "$APP_ROOT_REL/"*)

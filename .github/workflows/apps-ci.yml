@@ -3,7 +3,7 @@ name: App Packages CI
 on:
   pull_request:
     paths:
-      - "packages/apps/**"
+      - "packages/**"
       - "lib/pkgs.nix"
       - "flake.nix"
       - "flake.lock"
@@ -12,7 +12,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "packages/apps/**"
+      - "packages/**"
       - "lib/pkgs.nix"
       - "flake.nix"
       - "flake.lock"
@@ -42,14 +42,14 @@ jobs:
       - name: Install ripgrep
         run: sudo apt-get update && sudo apt-get install -y ripgrep
       - name: Test changed-app detection
-        run: bash packages/apps/tests/detect-changed-apps.sh
+        run: bash packages/tests/detect-changed-apps.sh
       - name: Test update isolation and patch preflight
         run: |
-          bash packages/apps/tests/update-all.sh
-          bash packages/apps/tests/update-review.sh
-          bash packages/apps/tests/check-nix-patches.sh
-          bash packages/apps/tests/notion-cli-update.sh
-      - run: nix flake check ./packages/apps --no-build
+          bash packages/tests/update-all.sh
+          bash packages/tests/update-review.sh
+          bash packages/tests/check-nix-patches.sh
+          bash packages/tests/notion-cli-update.sh
+      - run: nix flake check ./packages --no-build
 
   detect-app-changes:
     name: Detect changed app packages
@@ -79,7 +79,7 @@ jobs:
             base_sha=""
           fi
 
-          apps=$(packages/apps/scripts/detect-changed-apps.sh "$base_sha" "${{ github.sha }}")
+          apps=$(packages/scripts/detect-changed-apps.sh "$base_sha" "${{ github.sha }}")
           echo "apps=$apps" >> "$GITHUB_OUTPUT"
 
   build-changed-apps:
@@ -100,9 +100,9 @@ jobs:
         env:
           APP: ${{ matrix.app }}
         run: |
-          packages=$(nix eval ./packages/apps#packages.x86_64-linux --apply builtins.attrNames --json)
+          packages=$(nix eval ./packages#packages.x86_64-linux --apply builtins.attrNames --json)
           if jq -e --arg app "$APP" 'index($app) != null' <<<"$packages" >/dev/null; then
-            nix build "./packages/apps#packages.x86_64-linux.$APP" --no-link
+            nix build "./packages#packages.x86_64-linux.$APP" --no-link
           else
             echo "Skipping $APP: not available for x86_64-linux"
           fi

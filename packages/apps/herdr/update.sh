@@ -37,7 +37,7 @@ if ! rg -q '^\s*\.minimum_zig_version\s*=\s*"0\.16\.0"' "$source_path/vendor/lib
   exit 1
 fi
 
-bash "$SCRIPT_DIR/../scripts/check-nix-patches.sh" "$source_path" "$SCRIPT_DIR/patches.nix"
+bash "$SCRIPT_DIR/../../scripts/check-nix-patches.sh" "$source_path" "$SCRIPT_DIR/patches.nix"
 
 tmp_file=$(mktemp "$SCRIPT_DIR/package.nix.XXXXXX")
 trap 'rm -f "$tmp_file"' EXIT

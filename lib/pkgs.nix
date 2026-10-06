@@ -3,7 +3,7 @@ let
   repoOverlays = import ../overlays { inherit inputs; };
   localAppsOverlay =
     final: prev:
-    import ../packages/apps {
+    import ../packages {
       pkgs = final;
       inherit (prev.stdenv) isDarwin;
     };

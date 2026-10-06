@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-APPS_DIR="$ROOT_DIR"
+APPS_DIR="$ROOT_DIR/apps"
 SETTINGS="$ROOT_DIR/settings.json"
 CHANNEL="${1:-all}"
 

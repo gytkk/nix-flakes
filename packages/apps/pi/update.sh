@@ -2,7 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+PACKAGES_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 PACKAGE_NIX="$SCRIPT_DIR/package.nix"
 LOCKFILE="$SCRIPT_DIR/npm-shrinkwrap.json"
 PACKAGE_NAME="@earendil-works/pi-coding-agent"
@@ -102,7 +102,7 @@ if [ -n "$missing_integrity" ]; then
   exit 1
 fi
 
-NEW_NPM_HASH=$(nix shell --inputs-from "$REPO_ROOT" nixpkgs#prefetch-npm-deps -c prefetch-npm-deps "$LOCKFILE")
+NEW_NPM_HASH=$(nix shell --inputs-from "$PACKAGES_ROOT" nixpkgs#prefetch-npm-deps -c prefetch-npm-deps "$LOCKFILE")
 
 echo "Updating $CURRENT -> $LATEST"
 CURRENT="$CURRENT" \

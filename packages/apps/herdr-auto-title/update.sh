@@ -2,7 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-APP_ROOT="$(dirname "$SCRIPT_DIR")"
+PACKAGES_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 PACKAGE_NIX="$SCRIPT_DIR/package.nix"
 REPOSITORY="kryptamine/herdr-auto-title"
 
@@ -41,7 +41,7 @@ fi
 cp -R "$source_path" "$tmp_dir/source"
 chmod -R u+w "$tmp_dir/source"
 GOENV=off GOWORK=off GOFLAGS= GOTOOLCHAIN=local \
-  nix shell --inputs-from "$APP_ROOT" nixpkgs#go \
+  nix shell --inputs-from "$PACKAGES_ROOT" nixpkgs#go \
   --command go -C "$tmp_dir/source" mod vendor
 vendor_hash=$(nix hash path "$tmp_dir/source/vendor")
 

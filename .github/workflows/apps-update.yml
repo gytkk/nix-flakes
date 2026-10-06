@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "packages/apps/**"
+      - "packages/**"
       - ".github/workflows/apps-update.yml"
   schedule:
     - cron: "15 */3 * * *"
@@ -34,7 +34,7 @@ jobs:
           sudo apt-get install -y ripgrep
 
       - name: Run app update scripts
-        run: packages/apps/scripts/update-all.sh direct
+        run: packages/scripts/update-all.sh direct
 
       - name: Record changed app packages
         shell: bash
@@ -52,22 +52,22 @@ jobs:
               done > "$changed_apps_file"
 
       - name: Evaluate app package flake
-        run: nix flake check ./packages/apps --no-build
+        run: nix flake check ./packages --no-build
 
       - name: Build changed app packages
         shell: bash
         run: |
           while IFS= read -r app; do
-            nix build "./packages/apps#packages.x86_64-linux.$app" --no-link
+            nix build "./packages#packages.x86_64-linux.$app" --no-link
           done < "$RUNNER_TEMP/changed-apps"
 
       - name: Sync README version table
-        run: packages/apps/scripts/sync-readme-versions.sh
+        run: packages/scripts/sync-readme-versions.sh
 
       - name: Commit and push updates
         shell: bash
         run: |
-          git add packages/apps
+          git add packages
           if git diff --cached --quiet; then
             echo "No package changes after updates"
             exit 0
@@ -114,4 +114,4 @@ jobs:
       - name: Create candidate PR and dispatch CI
         env:
           GH_TOKEN: ${{ github.token }}
-        run: bash packages/apps/scripts/update-review.sh
+        run: bash packages/scripts/update-review.sh

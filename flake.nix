@@ -166,7 +166,7 @@
         };
       agentCoreOutputs = builtins.mapAttrs (_: systemPkgs: mkAgentCoreOutputs systemPkgs false) pkgs;
       agentCoreGoldenOutputs = builtins.mapAttrs (_: systemPkgs: mkAgentCoreOutputs systemPkgs true) pkgs;
-      appPackages = builtins.mapAttrs (_: systemPkgs: import ./packages/apps { pkgs = systemPkgs; }) pkgs;
+      appPackages = builtins.mapAttrs (_: systemPkgs: import ./packages { pkgs = systemPkgs; }) pkgs;
 
       agentCoreSourcesMatch =
         system:

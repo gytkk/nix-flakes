@@ -10,10 +10,10 @@ export TEST_LOG="$TEST_ROOT/calls"
 export FAIL_APP=""
 
 for app in alpha beta herdr manual; do
-  mkdir -p "$TEST_ROOT/$app"
-  printf '{ }\n' > "$TEST_ROOT/$app/package.nix"
+  mkdir -p "$TEST_ROOT/apps/$app"
+  printf '{ }\n' > "$TEST_ROOT/apps/$app/package.nix"
   [ "$app" != manual ] || continue
-  cat > "$TEST_ROOT/$app/update.sh" <<'EOF'
+  cat > "$TEST_ROOT/apps/$app/update.sh" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
 app=$(basename "$(dirname "$0")")
@@ -22,7 +22,7 @@ if [ "$app" = "$FAIL_APP" ]; then
   exit 17
 fi
 EOF
-  chmod +x "$TEST_ROOT/$app/update.sh"
+  chmod +x "$TEST_ROOT/apps/$app/update.sh"
 done
 
 printf '{"update":{"deny":[],"review":["herdr"]}}\n' > "$TEST_ROOT/settings.json"

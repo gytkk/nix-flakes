@@ -6,24 +6,25 @@ Self-contained non-nixpkgs app packages used by the parent `nix-flakes` reposito
 
 ```
 .
-├── agent-browser/
-├── cf/
-├── claude-code/
-├── codex/
-├── codexbar/
-├── databricks-cli/
-├── gksdud/
-├── herdr/
-├── herdr-annotate/
-├── herdr-auto-title/
-├── notion-cli/
-├── pi/
-├── pup/
+├── apps/
+│   ├── agent-browser/
+│   ├── cf/
+│   ├── claude-code/
+│   ├── codex/
+│   ├── codexbar/
+│   ├── databricks-cli/
+│   ├── gksdud/
+│   ├── herdr/
+│   ├── herdr-annotate/
+│   ├── herdr-auto-title/
+│   ├── notion-cli/
+│   ├── pi/
+│   └── pup/
 ├── lib/
 │   └── mk-tarball-cli.nix
 ├── default.nix
 ├── flake.nix
-├── scripts
+├── scripts/
 │   ├── check-nix-patches.sh
 │   ├── detect-changed-apps.sh
 │   ├── sync-readme-versions.sh
@@ -32,6 +33,7 @@ Self-contained non-nixpkgs app packages used by the parent `nix-flakes` reposito
 ├── tests/
 │   ├── check-nix-patches.sh
 │   ├── detect-changed-apps.sh
+│   ├── notion-cli-update.sh
 │   ├── update-all.sh
 │   └── update-review.sh
 ├── settings.json
@@ -58,11 +60,11 @@ Self-contained non-nixpkgs app packages used by the parent `nix-flakes` reposito
 
 ## Build entrypoints
 
-- `nix build ./packages/apps#packages.<system>.ntn`
-- `nix build ./packages/apps#packages.<system>.default` (same as first app)
-- `nix run ./packages/apps#apps.<system>.ntn`
+- `nix build ./packages#packages.<system>.ntn`
+- `nix build ./packages#packages.<system>.default` (same as first app)
+- `nix run ./packages#apps.<system>.ntn`
 
-`gksdud` is exposed only on Darwin. Its signed universal app bundle supports Apple Silicon and Intel Macs running macOS 13 or later. Home Manager installs and starts it through the [gksdud module](../../modules/gksdud/README.md).
+`gksdud` is exposed only on Darwin. Its signed universal app bundle supports Apple Silicon and Intel Macs running macOS 13 or later. Home Manager installs and starts it through the [gksdud module](../modules/gksdud/README.md).
 
 ## Adding new apps
 
@@ -72,7 +74,7 @@ To add a new app package:
 2. Use `callPackage` arguments available from nixpkgs (`stdenvNoCC`, `fetchzip`, etc.).
 3. Ensure the package path creates a `meta.mainProgram` if the package should be run via `nix run`.
 4. Add `packages/apps/<app-name>/update.sh` if the package should support aggregate updates.
-5. Add the package to `packages/apps/default.nix` so the nested flake and parent package outputs expose it. The configuration overlay consumes this catalog.
+5. Add the package to `packages/default.nix` so the nested flake and parent package outputs expose it. The configuration overlay consumes this catalog.
 
 To disable aggregate updates for an app, add its name to the `update.deny` list in `settings.json`. Apps in `update.review` use candidate PRs instead of direct updates to `main`; the deny list applies to both channels.
 
@@ -82,7 +84,7 @@ The package catalog in `default.nix` is the single source of truth for exported 
 
 ## Reusing the tarball CLI builder
 
-The catalog supplies `mkTarballCli` to package functions that request it. Use it for a release tarball containing one executable with optional documentation files. [Databricks CLI](databricks-cli/package.nix) shows the basic case; [Notion CLI](notion-cli/package.nix) shows a nested archive directory and additional installed files.
+The catalog supplies `mkTarballCli` to package functions that request it. Use it for a release tarball containing one executable with optional documentation files. [Databricks CLI](apps/databricks-cli/package.nix) shows the basic case; [Notion CLI](apps/notion-cli/package.nix) shows a nested archive directory and additional installed files.
 
 | Argument | Meaning |
 | --- | --- |
@@ -97,20 +99,20 @@ The helper selects the host platform, fetches the pinned archive, disables confi
 
 ## Updates and CI
 
-- Run `packages/apps/scripts/update-all.sh` from the parent repository to update every enabled package manually. Pass `direct` or `review` to select one update channel.
+- Run `packages/scripts/update-all.sh` from the parent repository to update every enabled package manually. Pass `direct` or `review` to select one update channel.
 - `Update App Versions` checks for updates every three hours in two independently serialized jobs. The direct job verifies changed packages and commits successful updates to `main`. The review job groups `herdr`, `herdr-annotate`, and `herdr-auto-title` into one candidate PR. A failure in either job does not stop the other job.
 - Review candidates use unique `automation/app-review-<run>-<attempt>` branches. While a candidate PR is open, the updater leaves that branch and any manual fixes untouched. Merge it after CI succeeds, or close it before requesting a newer candidate. A patch preflight failure stops candidate creation before metadata changes; the workflow log identifies the rejected patch.
 - The review job explicitly dispatches `App Packages CI` on the candidate branch with its base commit. This runs evaluation and changed-package builds even when a bot-created PR event does not start CI automatically. A failed build leaves the PR available for fixes. If dispatch fails, run `App Packages CI` manually on that branch using the `base_sha` printed in the error. CI currently builds `x86_64-linux`; other platforms are not validated by this workflow.
 - Candidate publication uses `GITHUB_TOKEN` with job-scoped `contents: write`, `pull-requests: write`, and `actions: write`. The repository must enable [Allow GitHub Actions to create and approve pull requests](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository#preventing-github-actions-from-creating-or-approving-pull-requests). The workflow does not approve or merge PRs.
-- `herdr` tracks stable releases and builds from Rust and Zig sources with patches for plugin palette snapshots, [Claude administrative command detection](../../modules/herdr/README.md#agent-detection), and sidebar status separators. Package checks cover plugin APIs and process identification. Cargo dependencies come from the source's `Cargo.lock`; Zig dependencies use its vendored Nix manifest. The hash-pinned source is fetched during evaluation so `nix flake check --no-build` can read both files without building a source derivation first. The executable replacement test uses the build's temporary directory so it can run inside the Linux Nix sandbox. Older nixpkgs inputs use the pinned Zig 0.16 build tool in `herdr/zig.nix`. Its updater pins the source hash and checks every declared patch and the Zig requirement before changing the package.
-- `herdr-annotate` tracks the plugin's `main` commit and the versions it declares. Its updater records source hashes, release checksums for `herdr-annotate`, and the source and Cargo dependency hashes for the Rust-built `plannotator-tui` in `herdr-annotate/sources.json`, so changes are detected even when the manifest version stays the same. Local reviewer patches inherit Herdr's palette and retain per-field color overrides.
+- `herdr` tracks stable releases and builds from Rust and Zig sources with patches for plugin palette snapshots, [Claude administrative command detection](../modules/herdr/README.md#agent-detection), and sidebar status separators. Package checks cover plugin APIs and process identification. Cargo dependencies come from the source's `Cargo.lock`; Zig dependencies use its vendored Nix manifest. The hash-pinned source is fetched during evaluation so `nix flake check --no-build` can read both files without building a source derivation first. The executable replacement test uses the build's temporary directory so it can run inside the Linux Nix sandbox. Older nixpkgs inputs use the pinned Zig 0.16 build tool in `apps/herdr/zig.nix`. Its updater pins the source hash and checks every declared patch and the Zig requirement before changing the package.
+- `herdr-annotate` tracks the plugin's `main` commit and the versions it declares. Its updater records source hashes, release checksums for `herdr-annotate`, and the source and Cargo dependency hashes for the Rust-built `plannotator-tui` in `apps/herdr-annotate/sources.json`, so changes are detected even when the manifest version stays the same. Local reviewer patches inherit Herdr's palette and retain per-field color overrides.
 - `herdr-auto-title` tracks stable GitHub releases and builds from source. Its updater pins the source and vendored Go dependency hashes using Go from the nested flake's locked nixpkgs input.
-- Herdr and the Annotate reviewer each declare their patch order in `patches.nix`, shared by the Nix build and updater preflight. Preflight applies the complete sequence to a writable temporary source copy, retaining Nix's default fuzz tolerance and rejecting reversed patches. Annotate checks patches before Cargo hash discovery and metadata changes. Run `bash packages/apps/tests/check-nix-patches.sh` to check this behavior, and `bash packages/apps/tests/update-all.sh` and `bash packages/apps/tests/update-review.sh` to check channel isolation and candidate publication with local fixtures.
+- Herdr and the Annotate reviewer each declare their patch order in `patches.nix`, shared by the Nix build and updater preflight. Preflight applies the complete sequence to a writable temporary source copy, retaining Nix's default fuzz tolerance and rejecting reversed patches. Annotate checks patches before Cargo hash discovery and metadata changes. Run `bash packages/tests/check-nix-patches.sh` to check this behavior, and `bash packages/tests/update-all.sh` and `bash packages/tests/update-review.sh` to check channel isolation and candidate publication with local fixtures.
 - `pi` includes `libxcb` on Linux so `autoPatchelfHook` can resolve the native X11 clipboard module's shared-library dependency.
 - `codex` installs the complete official `codex-package` bundle, including its manifest, helpers, and runtime resources. Its updater tracks bundle hashes for all four platforms. The package's install check validates the manifest and confirms that every archive member is present in the installed output.
 - `App Packages CI` evaluates the nested flake and builds changed packages, including their install checks.
-- `cf` packages the official npm bundle with Node.js 24 and a pinned production dependency lockfile. It provides both `cf` and `cloudflare`. The published development dependencies reference unpublished local archives, so packaging removes them before installing the locked runtime dependencies. Linux builds patch the bundled `workerd` and `sharp` binaries. For a manual update, refresh the source version/hash, generate `package-lock.json` from the npm tarball after removing `devDependencies`, and refresh `npmDepsHash` with `prefetch-npm-deps`. See [Cloudflare CLI setup](../../README.md#cloudflare-cli) for authentication.
+- `cf` packages the official npm bundle with Node.js 24 and a pinned production dependency lockfile. It provides both `cf` and `cloudflare`. The published development dependencies reference unpublished local archives, so packaging removes them before installing the locked runtime dependencies. Linux builds patch the bundled `workerd` and `sharp` binaries. For a manual update, refresh the source version/hash, generate `package-lock.json` from the npm tarball after removing `devDependencies`, and refresh `npmDepsHash` with `prefetch-npm-deps`. See [Cloudflare CLI setup](../README.md#cloudflare-cli) for authentication.
 - `notion-cli` tracks the stable version published at `https://ntn.dev/latest.txt`. Its updater downloads all four platform archives, verifies their official SHA-256 checksums, and updates the version and hashes together after every platform succeeds. The `ntn` alias receives the same updates through the direct channel.
 - `cf`, `databricks-cli`, `gksdud`, and `pup` are manually updated. They have no `update.sh`, so aggregate updates skip them. Moving a package into this catalog does not enable automatic updates.
 - Package outputs follow each platform's catalog. The Linux build job skips apps absent from the Linux catalog, including `gksdud`; it does not validate their macOS runtime behavior.
-- Changes under `lib/` rebuild all catalog package directories. A package-local change rebuilds that package. The changed-app detector is checked with `bash packages/apps/tests/detect-changed-apps.sh`.
+- Changes under `lib/` rebuild all catalog package directories. A package-local change rebuilds that package. The changed-app detector is checked with `bash packages/tests/detect-changed-apps.sh`.

@@ -67,16 +67,16 @@ make_fixture() {
   GH_LOG="$FIXTURE/gh.log"
   UPDATE_LOG="$FIXTURE/update.log"
 
-  mkdir -p "$REPO/packages/apps/scripts" \
+  mkdir -p "$REPO/packages/scripts" \
     "$REPO/packages/apps/review-app" \
     "$REPO/packages/apps/direct-app" \
     "$BIN"
-  cp "$SOURCE_ROOT/scripts/update-review.sh" "$REPO/packages/apps/scripts/update-review.sh"
-  cp "$SOURCE_ROOT/scripts/update-all.sh" "$REPO/packages/apps/scripts/update-all.sh"
-  cp "$SOURCE_ROOT/scripts/sync-readme-versions.sh" "$REPO/packages/apps/scripts/sync-readme-versions.sh"
-  chmod +x "$REPO/packages/apps/scripts/"*.sh
+  cp "$SOURCE_ROOT/scripts/update-review.sh" "$REPO/packages/scripts/update-review.sh"
+  cp "$SOURCE_ROOT/scripts/update-all.sh" "$REPO/packages/scripts/update-all.sh"
+  cp "$SOURCE_ROOT/scripts/sync-readme-versions.sh" "$REPO/packages/scripts/sync-readme-versions.sh"
+  chmod +x "$REPO/packages/scripts/"*.sh
 
-  cat > "$REPO/packages/apps/settings.json" <<'EOF'
+  cat > "$REPO/packages/settings.json" <<'EOF'
 {
   "update": {
     "deny": [],
@@ -86,7 +86,17 @@ make_fixture() {
 EOF
   printf '{ version = "1.0.0"; }\n' > "$REPO/packages/apps/review-app/package.nix"
   printf '{ version = "1.0.0"; }\n' > "$REPO/packages/apps/direct-app/package.nix"
-  printf '# Fixture app catalog\n' > "$REPO/packages/apps/README.md"
+  cat > "$REPO/packages/README.md" <<'EOF'
+# Fixture app catalog
+
+## App versions
+
+| App | Version |
+|-----|---------|
+| direct-app | 1.0.0 |
+| review-app | 1.0.0 |
+
+EOF
 
   for app in review-app direct-app; do
     cat > "$REPO/packages/apps/$app/update.sh" <<'EOF'
@@ -96,7 +106,7 @@ set -euo pipefail
 app_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 printf '%s\n' "$(basename "$app_dir")" >> "$UPDATE_LOG"
 if [ "${FAKE_UPDATE_CHANGES:-1}" = 1 ]; then
-  printf '# updated\n' >> "$app_dir/package.nix"
+  printf '{ version = "2.0.0"; }\n' > "$app_dir/package.nix"
 fi
 EOF
     chmod +x "$REPO/packages/apps/$app/update.sh"
@@ -150,7 +160,7 @@ run_review() {
     GITHUB_RUN_ID="$run_id" \
     GITHUB_RUN_ATTEMPT="$attempt" \
     "$@" \
-    bash "$REPO/packages/apps/scripts/update-review.sh"
+    bash "$REPO/packages/scripts/update-review.sh"
 }
 
 make_fixture pending
@@ -184,9 +194,11 @@ SUCCESS_BRANCH='automation/app-review-300-2'
 run_review 300 2 FAKE_UPDATE_CHANGES=1
 assert_equals "candidate generation invokes only review updaters" \
   'review-app' "$(<"$UPDATE_LOG")"
-assert_equals "the candidate contains only review app changes" \
-  'packages/apps/review-app/package.nix' \
+assert_equals "the candidate contains the review app and synchronized README" \
+  $'packages/README.md\npackages/apps/review-app/package.nix' \
   "$(git --git-dir="$ORIGIN" diff --name-only refs/heads/main "refs/heads/$SUCCESS_BRANCH")"
+assert_file_contains "the candidate README records the reviewed version" \
+  "$REPO/packages/README.md" '^\| review-app \| 2\.0\.0 \|$'
 success_second_call="$(sed -n '2p' "$GH_LOG")"
 success_third_call="$(sed -n '3p' "$GH_LOG")"
 assert_file_contains "the PR is created after its branch is pushed" \

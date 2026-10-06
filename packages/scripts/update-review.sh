@@ -25,14 +25,14 @@ fi
 base_sha=$(git -C "$REPO_ROOT" rev-parse HEAD)
 bash "$SCRIPT_DIR/update-all.sh" review
 bash "$SCRIPT_DIR/sync-readme-versions.sh"
-if git -C "$REPO_ROOT" diff --quiet -- packages/apps; then
+if git -C "$REPO_ROOT" diff --quiet -- packages; then
   echo "No reviewed package updates"
   exit 0
 fi
 
 branch="${BRANCH_PREFIX}${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
 git -C "$REPO_ROOT" switch -c "$branch"
-git -C "$REPO_ROOT" add packages/apps
+git -C "$REPO_ROOT" add packages
 git -C "$REPO_ROOT" \
   -c user.name='github-actions[bot]' \
   -c user.email='github-actions[bot]@users.noreply.github.com' \
@@ -42,7 +42,7 @@ git -C "$REPO_ROOT" push origin "HEAD:refs/heads/$branch"
 body_file=$(mktemp)
 trap 'rm -f "$body_file"' EXIT
 cat > "$body_file" <<EOF
-Update the app packages assigned to review in packages/apps/settings.json.
+Update the app packages assigned to review in packages/settings.json.
 
 All declared local patches passed preflight. App Packages CI is dispatched separately on this candidate branch to evaluate and build the changed packages. Merge only after that run succeeds.
 
