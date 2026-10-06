@@ -22,6 +22,7 @@ rec {
   herdr-auto-title = callPackage ./apps/herdr-auto-title/package.nix { };
   notion-cli = callPackage ./apps/notion-cli/package.nix { };
   ntn = notion-cli;
+  pantry = callPackage ./apps/pantry/package.nix { };
   pi = callPackage ./apps/pi/package.nix { };
   pup = callPackage ./apps/pup/package.nix { };
 }
