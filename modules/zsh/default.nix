@@ -85,9 +85,6 @@ in
         vi = "nvim";
         vimdiff = "nvim -d";
 
-        # Zellij
-        zj = "zellij";
-
         # k8s aliases
         kl = "kubectl";
         kx = "kubectx";

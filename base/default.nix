@@ -54,7 +54,6 @@ in
     ../modules/vim
     ../modules/windows-terminal
     ../modules/zed
-    ../modules/zellij
     ../modules/zsh
   ];
 
@@ -86,7 +85,6 @@ in
       vim.enable = lib.mkDefault true;
       windowsTerminal.enable = lib.mkDefault true;
       zed.enable = lib.mkDefault true;
-      zellij.enable = lib.mkDefault true;
       zsh.enable = lib.mkDefault true;
     };
 

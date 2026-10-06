@@ -285,10 +285,6 @@ Resources should supplement the tools instead of expanding the tool count:
 - On WSL hosts, activation still copies settings, keymaps, and the full set of generated `themes/exports/zed/*.json` files into the Windows Zed config directory on each switch.
 - The checked-in defaults point both light and dark mode at the generated `One Half Light` theme.
 
-## Zellij config
-
-Zellij is managed through `modules/zellij/default.nix`. See the [Zellij module README](modules/zellij/README.md) for configuration sources, theme selection, and wrapper behavior.
-
 ## Herdr config
 
 - Herdr is managed through `modules/herdr/default.nix` and enabled by default. See the [Herdr module README](modules/herdr/README.md) for terminal shortcuts and how to apply them, and [agent detection](modules/herdr/README.md#agent-detection) for the exclusion of Claude maintenance commands during Home Manager activation.
@@ -396,7 +392,7 @@ After changing module paths or configuration behavior, update the corresponding 
 uv run --no-project scripts/check-paths.py
 ```
 
-The checker covers local Markdown link targets and concrete repository paths in inline code and code blocks in this README, AGENTS.md, CLAUDE.md, and the Zellij module README. It skips placeholder and glob paths, installed paths, external URLs, and link anchors. The architecture review preserves historical evidence and is excluded from the default check. Pass additional Markdown files as arguments to check them explicitly.
+The checker covers local Markdown link targets and concrete repository paths in inline code and code blocks in this README, AGENTS.md, and CLAUDE.md. It skips placeholder and glob paths, installed paths, external URLs, and link anchors. The architecture review preserves historical evidence and is excluded from the default check. Pass additional Markdown files as arguments to check them explicitly.
 
 ```bash
 nix flake show

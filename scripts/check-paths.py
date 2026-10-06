@@ -20,7 +20,6 @@ DEFAULT_DOCUMENTS = (
     ROOT / "README.md",
     ROOT / "AGENTS.md",
     ROOT / "CLAUDE.md",
-    ROOT / "modules/zellij/README.md",
 )
 REPOSITORY_DIRS = (
     "agent-core|base|docs|hosts|lib|modules|overlays|packages|scripts|secrets|themes"

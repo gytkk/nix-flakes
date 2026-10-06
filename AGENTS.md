@@ -139,7 +139,6 @@ This table lists selected modules, with paths relative to the repository root. S
 | `modules/vim/` | Neovim | `modules/vim/files/config/`, `themes/exports/nvim` | 부분적 |
 | `modules/vscode/` | VSCode (disabled) | `modules/vscode/default.nix`, `modules/vscode/one-half-light-theme/` | NO |
 | `modules/zed/` | Zed editor | `modules/zed/files/settings.json`, `themes/exports/zed` | 부분적 |
-| `modules/zellij/` | Zellij multiplexer | `modules/zellij/files/config.kdl`, `themes/exports/zellij` | 부분적 |
 | `modules/zsh/` | Zsh shell | `modules/zsh/default.nix`, `themes/exports/starship` | 부분적 |
 
 > **Mutable**: `mkOutOfStoreSymlink`로 설치한 파일은 checkout을 직접 참조한다. 부분적 표시는 생성 파일이나 플랫폼별 복사와 함께 사용하는 경우다. 생성된 테마는 export를 직접 편집하지 않고 canonical 원본에서 수정한다.
@@ -157,10 +156,6 @@ This table lists selected modules, with paths relative to the repository root. S
 #### Zed (`modules/zed/`)
 
 macOS와 WSL이 아닌 Linux에서는 설정과 keymap을 checkout으로 symlink하며, 테마는 `themes/exports/zed/`에서 가져온다. WSL에서는 activation이 설정, keymap, 생성 테마를 Windows 설정 디렉터리로 복사한다. Extensions는 `modules/zed/default.nix`의 `nixExtensions` 목록으로 관리한다.
-
-#### Zellij (`modules/zellij/`)
-
-설정 원본, 생성 방식, 실행 wrapper는 [Zellij README](modules/zellij/README.md)에서 확인한다.
 
 #### Terraform
 
