@@ -35,7 +35,7 @@
     # Databricks CLI (Go 구현체, GitHub 릴리스 바이너리)
     databricks-cli
 
-    # Pantry CLI (teamdev.ai 배포 도구, main 최신 빌드 바이너리)
+    # Pantry CLI (teamdev.ai 배포 도구, main 빌드 바이너리, 수동 업데이트)
     pantry
 
     # Custom scripts
