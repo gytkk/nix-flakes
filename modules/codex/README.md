@@ -10,6 +10,8 @@ Cloudflare 작업은 공통 Home Manager profile이 설치하는 `cf` CLI를 사
 
 [Codex adapter](../../agent-core/adapters/codex.md)는 독립적인 작업을 일찍 위임하고, worker를 생성할 때 작업 성격에 맞는 모델과 effort를 명시하도록 지시한다. 메인 에이전트는 사용자와의 대화, 요구사항 해석, 의사결정, 결과 통합과 최종 검증을 담당한다. 모델별 작업 범위와 재위임 기준은 adapter에서 관리한다.
 
+Worker는 기본적으로 `fork_turns = "none"`으로 생성하고, 필요한 요구사항과 제약, 담당 경로, 완료 기준을 작업 메시지에 포함한다. 부모 대화가 필요한 경우에는 필요한 최소 턴 수를 선택한다. 전체 대화가 필요한 경우에만 `fork_turns = "all"`을 사용하고 작업 메시지에 이유를 명시한다. 전체 대화를 상속하는 worker는 부모의 모델과 effort도 상속한다.
+
 일반적인 작업과 설계는 `gpt-6.1-sol`이 담당한다. `gpt-6-astra`는 여러 제약이 얽힌 아키텍처 설계, 여러 하위 시스템에 걸친 깊은 디버깅 등 아주 복잡한 작업에만 subagent로 사용한다. 이때도 메인 에이전트는 `gpt-6.1-sol`을 유지한다.
 
 이 동작은 에이전트가 따르는 위임 지침이며, 프롬프트의 복잡도를 계산해 모델을 강제로 선택하는 별도 라우터는 없다. Worker의 모델과 effort 선택은 메인 세션의 모델과 effort를 변경하지 않는다. 생성된 지침과 shared skill의 구조는 [Agent core README](../../agent-core/README.md)에서 확인한다.
