@@ -4,7 +4,7 @@
 }:
 
 let
-  version = "1.7.0";
+  version = "1.19.0";
 in
 mkTarballCli {
   pname = "databricks-cli";
@@ -12,19 +12,19 @@ mkTarballCli {
   platforms = {
     x86_64-linux = {
       name = "linux_amd64";
-      hash = "sha256-cffqoN3kaNcQXrtAtvQLoEokHnZw/Tk2Z825tMCG1jY=";
+      hash = "sha256-vd+H3z1ythOE2nJLQPGKtIOpivdCdIJgCXp7uBVLBw4=";
     };
     aarch64-linux = {
       name = "linux_arm64";
-      hash = "sha256-p0e6TsEGvqU/AbKfTB1t9fZ/4o/LGLXysg+pN+XWb80=";
+      hash = "sha256-KZfMvaVwkO5IvZKC1cs6W+94Al22T9FXP718hyaFYIY=";
     };
     x86_64-darwin = {
       name = "darwin_amd64";
-      hash = "sha256-w07txSEG9QbNF/VgSZk9w6BvyaK9y1lCkwv/qaGAbjI=";
+      hash = "sha256-0ppdwep9RNDYkv1L6sBdItqpMpgspr+YoG1SyV9e1M0=";
     };
     aarch64-darwin = {
       name = "darwin_arm64";
-      hash = "sha256-vUfNLye5PxDjc6/rWXFYBbzXZ5CV0IIk7cXguZj/6dk=";
+      hash = "sha256-uExqjGI1eDCKckzdcYG5KwgWwlMVZPFvjedVmyo59R8=";
     };
   };
 
