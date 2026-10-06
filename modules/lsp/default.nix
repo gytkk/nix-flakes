@@ -40,9 +40,6 @@ in
       # Terraform
       terraform-ls
 
-      # Scala
-      metals
-
       # Python
       ty
 
