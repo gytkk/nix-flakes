@@ -43,7 +43,7 @@ Self-contained non-nixpkgs app packages used by the parent `nix-flakes` reposito
 | App | Version |
 |-----|---------|
 | agent-browser | 0.38.2 |
-| cf | 1.0.0-beta.5 |
+| cf | 1.0.0-beta.12 |
 | claude-code | 2.1.289 |
 | codex | 0.160.1 |
 | codexbar | 0.72.0 |

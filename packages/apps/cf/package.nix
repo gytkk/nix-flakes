@@ -11,15 +11,15 @@
 
 buildNpmPackage rec {
   pname = "cf";
-  version = "1.0.0-beta.5";
+  version = "1.0.0-beta.12";
 
   src = fetchurl {
     url = "https://registry.npmjs.org/cf/-/cf-${version}.tgz";
-    hash = "sha512-IKGKDAQNs8hbu7jOt3qSWKxDjmJTS+hcHCJ5B0IkF7gZ3RmEfMTUxZ0Fi7GRftjag04J127u8Nk8uppXx3OBZw==";
+    hash = "sha512-tyQ+Jpnw+4NDwDtl7ZNteXBm7N0TeJ6gYww79kkabpcYoCEXkUUpmt9BlDUKH8ub17tjAeiuyqa9NQzH0vp2Aw==";
   };
 
   sourceRoot = "package";
-  npmDepsHash = "sha256-Fc7Kia/Tppa1BnVoYrHoGLceZITEqq/cXYfggUd3JdY=";
+  npmDepsHash = "sha256-/QexaG3E6VvI8UOsbRqgljwP4dusRFaNNvLsvf/3umA=";
   nodejs = nodejs_24;
   dontNpmBuild = true;
   npmFlags = [ "--ignore-scripts" ];
