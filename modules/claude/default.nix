@@ -68,42 +68,103 @@ let
     "cloudflare"
     "notion"
   ];
-in
-{
-  options.modules.claude.enable = lib.mkOption {
-    type = lib.types.bool;
-    default = false;
-    description = "Enable Claude Code module";
-  };
+  mkMarketplaceRegistration = mp: ''
+    if ! printf '%s\n' "$MARKETPLACE_CACHE" | ${pkgs.ripgrep}/bin/rg -q --fixed-strings -- "${mp}"; then
+      log "Adding marketplace: ${mp}"
+      if ${timeout} 60s ${claude} plugin marketplace add ${mp} < /dev/null >> "$SETUP_LOG" 2>&1; then
+        log "  -> OK"
+      else
+        log "  -> FAILED (exit $?)"
+      fi
+    else
+      log "Marketplace already registered: ${mp}"
+    fi'';
 
-  config = lib.mkIf cfg.enable {
-    home.packages = [
-      pkgs.claude-code
-    ];
+  mkLocalMarketplaceRegistration = mp: ''
+    LOCAL_MP_NAME=${lib.escapeShellArg mp.name}
+    LOCAL_MP_PATH=${lib.escapeShellArg mp.path}
+    EXISTING_SOURCE=""
+    EXISTING_PATH=""
+    if [ -f "$KNOWN_MARKETPLACES" ]; then
+      EXISTING_SOURCE=$(${pkgs.jq}/bin/jq -r --arg n "$LOCAL_MP_NAME" '.[$n].source.source // ""' "$KNOWN_MARKETPLACES" 2>/dev/null || echo "")
+      EXISTING_PATH=$(${pkgs.jq}/bin/jq -r --arg n "$LOCAL_MP_NAME" '.[$n].source.path // ""' "$KNOWN_MARKETPLACES" 2>/dev/null || echo "")
+    fi
+    if [ "$EXISTING_SOURCE" = "github" ]; then
+      log "Removing stale github marketplace: $LOCAL_MP_NAME"
+      ${timeout} 30s ${claude} plugin marketplace remove "$LOCAL_MP_NAME" < /dev/null >> "$SETUP_LOG" 2>&1 || log "  -> remove FAILED (exit $?)"
+      EXISTING_SOURCE=""
+      EXISTING_PATH=""
+    fi
+    if [ "$EXISTING_PATH" != "$LOCAL_MP_PATH" ]; then
+      log "Adding local marketplace: $LOCAL_MP_NAME -> $LOCAL_MP_PATH"
+      if ${timeout} 60s ${claude} plugin marketplace add "$LOCAL_MP_PATH" < /dev/null >> "$SETUP_LOG" 2>&1; then
+        log "  -> OK"
+      else
+        log "  -> FAILED (exit $?)"
+      fi
+    else
+      log "Local marketplace already registered: $LOCAL_MP_NAME"
+    fi'';
 
-    # Add ~/.local/bin to PATH (plannotator install.sh installs here)
-    home.sessionPath = [
-      "${config.home.homeDirectory}/.local/bin"
-    ];
+  mkPluginSetup = plugin: ''
+    HAS_USER_SCOPE=0
+    if [ -f "$INSTALLED_PLUGINS" ]; then
+      if [ "$(${pkgs.jq}/bin/jq -r --arg p "${plugin}" '
+            (.plugins[$p] // []) | map(select(.scope == "user")) | length
+          ' "$INSTALLED_PLUGINS" 2>/dev/null)" != "0" ]; then
+        HAS_USER_SCOPE=1
+      fi
+    fi
+    if [ "$HAS_USER_SCOPE" = "0" ]; then
+      log "Installing plugin (user scope): ${plugin}"
+      if ${timeout} 60s ${claude} plugin install -s user ${plugin} < /dev/null >> "$SETUP_LOG" 2>&1; then
+        log "  -> OK"
+      else
+        log "  -> FAILED (exit $?)"
+      fi
+    else
+      log "Updating plugin (user scope): ${plugin}"
+      if ${timeout} 60s ${claude} plugin update -s user ${plugin} < /dev/null >> "$SETUP_LOG" 2>&1; then
+        log "  -> OK"
+      else
+        log "  -> FAILED (exit $?)"
+      fi
+    fi'';
 
-    home.file = {
-      # Claude plugin operations may temporarily leave this as a regular file.
-      ".claude/settings.json" = {
-        source = mkSymlink "files/settings.json";
-        force = true;
-      };
-      ".claude/CLAUDE.md".source = "${agentCoreOutput}/CLAUDE.md";
-      ".claude/skills".source = "${agentCoreOutput}/skills";
-      ".claude/statusline-command.sh" = {
-        source = ./files/statusline-command.sh;
-        executable = true;
-      };
-      ".local/bin/claude-herdr-subagents".source = pkgs.writeShellScript "claude-herdr-subagents" ''
-        exec ${pkgs.bun}/bin/bun ${./files/herdr-subagents}/index.ts "$@"
-      '';
-    };
-    # Install marketplaces, plugins, and MCP servers
-    home.activation.setupClaudeCode = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  mkMcpRemoval = name: ''
+    if printf '%s\n' "$MCP_CACHE" | ${pkgs.ripgrep}/bin/rg -q --fixed-strings -- "${name}"; then
+      log "Removing MCP server: ${name}"
+      if ${timeout} 30s ${claude} mcp remove -s user ${name} < /dev/null >> "$SETUP_LOG" 2>&1; then
+        log "  -> OK"
+        MCP_CACHE=$(${timeout} 15s ${claude} mcp list < /dev/null 2>/dev/null || echo "")
+      else
+        log "  -> FAILED (exit $?)"
+      fi
+    fi'';
+
+  mkMcpRegistration =
+    { name, cmd }:
+    ''
+      if ! printf '%s\n' "$MCP_CACHE" | ${pkgs.ripgrep}/bin/rg -q --fixed-strings -- "${name}"; then
+        log "Adding MCP server: ${name}"
+        if ${timeout} 30s ${claude} ${cmd} < /dev/null >> "$SETUP_LOG" 2>&1; then
+          log "  -> OK"
+        else
+          log "  -> FAILED (exit $?)"
+        fi
+      else
+        log "MCP server already registered: ${name}"
+      fi'';
+
+  mkClaudeCodeSetup =
+    {
+      marketplaces,
+      localMarketplaces,
+      plugins,
+      mcpCommands,
+      removedMcpServers,
+    }:
+    ''
       # Ensure git, ssh, and which are available for plugin marketplace operations
       # (activation PATH only includes bash, coreutils, jq, etc.)
       export PATH="${
@@ -134,46 +195,12 @@ in
       else
 
       # Register marketplaces (failures are non-fatal)
-      ${lib.concatMapStringsSep "\n    " (mp: ''
-        if ! printf '%s\n' "$MARKETPLACE_CACHE" | ${pkgs.ripgrep}/bin/rg -q --fixed-strings -- "${mp}"; then
-          log "Adding marketplace: ${mp}"
-          if ${timeout} 60s ${claude} plugin marketplace add ${mp} < /dev/null >> "$SETUP_LOG" 2>&1; then
-            log "  -> OK"
-          else
-            log "  -> FAILED (exit $?)"
-          fi
-        else
-          log "Marketplace already registered: ${mp}"
-        fi'') marketplaces}
+      ${lib.concatMapStringsSep "\n    " mkMarketplaceRegistration marketplaces}
 
       # 같은 이름의 GitHub marketplace를 먼저 제거해
       # 로컬 marketplace 경로가 충돌 없이 우선하도록 한다.
       KNOWN_MARKETPLACES="$HOME/.claude/plugins/known_marketplaces.json"
-      ${lib.concatMapStringsSep "\n    " (mp: ''
-        LOCAL_MP_NAME=${lib.escapeShellArg mp.name}
-        LOCAL_MP_PATH=${lib.escapeShellArg mp.path}
-        EXISTING_SOURCE=""
-        EXISTING_PATH=""
-        if [ -f "$KNOWN_MARKETPLACES" ]; then
-          EXISTING_SOURCE=$(${pkgs.jq}/bin/jq -r --arg n "$LOCAL_MP_NAME" '.[$n].source.source // ""' "$KNOWN_MARKETPLACES" 2>/dev/null || echo "")
-          EXISTING_PATH=$(${pkgs.jq}/bin/jq -r --arg n "$LOCAL_MP_NAME" '.[$n].source.path // ""' "$KNOWN_MARKETPLACES" 2>/dev/null || echo "")
-        fi
-        if [ "$EXISTING_SOURCE" = "github" ]; then
-          log "Removing stale github marketplace: $LOCAL_MP_NAME"
-          ${timeout} 30s ${claude} plugin marketplace remove "$LOCAL_MP_NAME" < /dev/null >> "$SETUP_LOG" 2>&1 || log "  -> remove FAILED (exit $?)"
-          EXISTING_SOURCE=""
-          EXISTING_PATH=""
-        fi
-        if [ "$EXISTING_PATH" != "$LOCAL_MP_PATH" ]; then
-          log "Adding local marketplace: $LOCAL_MP_NAME -> $LOCAL_MP_PATH"
-          if ${timeout} 60s ${claude} plugin marketplace add "$LOCAL_MP_PATH" < /dev/null >> "$SETUP_LOG" 2>&1; then
-            log "  -> OK"
-          else
-            log "  -> FAILED (exit $?)"
-          fi
-        else
-          log "Local marketplace already registered: $LOCAL_MP_NAME"
-        fi'') localMarketplaces}
+      ${lib.concatMapStringsSep "\n    " mkLocalMarketplaceRegistration localMarketplaces}
 
       # Refresh marketplace index after adding new ones
       log "Updating marketplace index..."
@@ -191,30 +218,7 @@ in
 
       # 다른 프로젝트에서 설치를 다시 묻지 않도록 플러그인은 항상 user scope에 설치한다.
       # installed_plugins.json에서는 scope를 직접 확인해 project 항목과 구분한다.
-      ${lib.concatMapStringsSep "\n    " (plugin: ''
-        HAS_USER_SCOPE=0
-        if [ -f "$INSTALLED_PLUGINS" ]; then
-          if [ "$(${pkgs.jq}/bin/jq -r --arg p "${plugin}" '
-                (.plugins[$p] // []) | map(select(.scope == "user")) | length
-              ' "$INSTALLED_PLUGINS" 2>/dev/null)" != "0" ]; then
-            HAS_USER_SCOPE=1
-          fi
-        fi
-        if [ "$HAS_USER_SCOPE" = "0" ]; then
-          log "Installing plugin (user scope): ${plugin}"
-          if ${timeout} 60s ${claude} plugin install -s user ${plugin} < /dev/null >> "$SETUP_LOG" 2>&1; then
-            log "  -> OK"
-          else
-            log "  -> FAILED (exit $?)"
-          fi
-        else
-          log "Updating plugin (user scope): ${plugin}"
-          if ${timeout} 60s ${claude} plugin update -s user ${plugin} < /dev/null >> "$SETUP_LOG" 2>&1; then
-            log "  -> OK"
-          else
-            log "  -> FAILED (exit $?)"
-          fi
-        fi'') plugins}
+      ${lib.concatMapStringsSep "\n    " mkPluginSetup plugins}
 
       # Restore settings.json symlink
       if [ -n "$SETTINGS_LINK_TARGET" ]; then
@@ -226,36 +230,10 @@ in
       MCP_CACHE=$(${timeout} 15s ${claude} mcp list < /dev/null 2>/dev/null || echo "")
 
       # Remove MCP servers that are no longer managed here.
-      ${lib.concatMapStringsSep "\n    " (name: ''
-        if printf '%s\n' "$MCP_CACHE" | ${pkgs.ripgrep}/bin/rg -q --fixed-strings -- "${name}"; then
-          log "Removing MCP server: ${name}"
-          if ${timeout} 30s ${claude} mcp remove -s user ${name} < /dev/null >> "$SETUP_LOG" 2>&1; then
-            log "  -> OK"
-            MCP_CACHE=$(${timeout} 15s ${claude} mcp list < /dev/null 2>/dev/null || echo "")
-          else
-            log "  -> FAILED (exit $?)"
-          fi
-        fi'') removedMcpServers}
+      ${lib.concatMapStringsSep "\n    " mkMcpRemoval removedMcpServers}
 
       # Register MCP servers (skip if already registered)
-      ${lib.concatMapStringsSep "\n    " (
-        mp:
-        let
-          name = mp.name;
-          cmd = mp.cmd;
-        in
-        ''
-          if ! printf '%s\n' "$MCP_CACHE" | ${pkgs.ripgrep}/bin/rg -q --fixed-strings -- "${name}"; then
-            log "Adding MCP server: ${name}"
-            if ${timeout} 30s ${claude} ${cmd} < /dev/null >> "$SETUP_LOG" 2>&1; then
-              log "  -> OK"
-            else
-              log "  -> FAILED (exit $?)"
-            fi
-          else
-            log "MCP server already registered: ${name}"
-          fi''
-      ) mcpCommands}
+      ${lib.concatMapStringsSep "\n    " mkMcpRegistration mcpCommands}
 
       fi # end auth check
 
@@ -270,9 +248,11 @@ in
       log "=== Claude Code setup finished ==="
     '';
 
-    # plannotator의 install.sh가 INSTALL_DIR을 무시하고 ~/.local/bin에 설치하므로
-    # GitHub 릴리스 바이너리를 해당 경로에서 직접 사용한다.
-    home.activation.installPlannotator = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  # plannotator의 install.sh가 INSTALL_DIR을 무시하고 ~/.local/bin에 설치하므로
+  # GitHub 릴리스 바이너리를 해당 경로에서 직접 사용한다.
+  mkPlannotatorInstall =
+    { dataHome }:
+    ''
       PLANNOTATOR_BIN="$HOME/.local/bin/plannotator"
       PLANNOTATOR_VERSION_FILE="$HOME/.local/bin/.plannotator-version"
       SETUP_LOG="$HOME/.claude/nix-setup.log"
@@ -335,11 +315,60 @@ in
 
       # One-shot migration: remove legacy XDG-bin copy from the pre-cleanup
       # layout. No-op once cleaned up.
-      LEGACY_BIN="${config.xdg.dataHome}/bin/plannotator"
+      LEGACY_BIN="${dataHome}/bin/plannotator"
       if [ -e "$LEGACY_BIN" ]; then
-        ${pkgs.coreutils}/bin/rm -f "$LEGACY_BIN" "${config.xdg.dataHome}/bin/.plannotator-version"
+        ${pkgs.coreutils}/bin/rm -f "$LEGACY_BIN" "${dataHome}/bin/.plannotator-version"
         echo "[$(date '+%H:%M:%S')] Removed legacy $LEGACY_BIN" >> "$SETUP_LOG"
       fi
     '';
+in
+{
+  options.modules.claude.enable = lib.mkOption {
+    type = lib.types.bool;
+    default = false;
+    description = "Enable Claude Code module";
+  };
+
+  config = lib.mkIf cfg.enable {
+    home.packages = [
+      pkgs.claude-code
+    ];
+
+    # Add ~/.local/bin to PATH (plannotator install.sh installs here)
+    home.sessionPath = [
+      "${config.home.homeDirectory}/.local/bin"
+    ];
+
+    home.file = {
+      # Claude plugin operations may temporarily leave this as a regular file.
+      ".claude/settings.json" = {
+        source = mkSymlink "files/settings.json";
+        force = true;
+      };
+      ".claude/CLAUDE.md".source = "${agentCoreOutput}/CLAUDE.md";
+      ".claude/skills".source = "${agentCoreOutput}/skills";
+      ".claude/statusline-command.sh" = {
+        source = ./files/statusline-command.sh;
+        executable = true;
+      };
+      ".local/bin/claude-herdr-subagents".source = pkgs.writeShellScript "claude-herdr-subagents" ''
+        exec ${pkgs.bun}/bin/bun ${./files/herdr-subagents}/index.ts "$@"
+      '';
+    };
+
+    home.activation.setupClaudeCode = lib.hm.dag.entryAfter [ "writeBoundary" ] (mkClaudeCodeSetup {
+      inherit
+        marketplaces
+        localMarketplaces
+        plugins
+        mcpCommands
+        removedMcpServers
+        ;
+    });
+    home.activation.installPlannotator =
+      lib.hm.dag.entryAfter [ "writeBoundary" ]
+        (mkPlannotatorInstall {
+          dataHome = config.xdg.dataHome;
+        });
   };
 }
