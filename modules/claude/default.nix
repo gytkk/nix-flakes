@@ -248,13 +248,11 @@ let
       log "=== Claude Code setup finished ==="
     '';
 
-  # plannotator의 install.sh가 INSTALL_DIR을 무시하고 ~/.local/bin에 설치하므로
-  # GitHub 릴리스 바이너리를 해당 경로에서 직접 사용한다.
+  # Plugin integration is managed separately, so install only the CLI binary.
   mkPlannotatorInstall =
     { dataHome }:
     ''
       PLANNOTATOR_BIN="$HOME/.local/bin/plannotator"
-      PLANNOTATOR_VERSION_FILE="$HOME/.local/bin/.plannotator-version"
       SETUP_LOG="$HOME/.claude/nix-setup.log"
       export PATH="${
         lib.makeBinPath (
@@ -270,47 +268,15 @@ let
       }:$PATH"
       ${pkgs.coreutils}/bin/mkdir -p "$HOME/.claude" "$HOME/.local/bin"
 
-      fetchLatestPlannotatorTag() {
-        ${pkgs.curl}/bin/curl -fsSL "https://api.github.com/repos/backnotprop/plannotator/releases/latest" 2>/dev/null \
-          | ${pkgs.gnugrep}/bin/grep '"tag_name"' \
-          | ${pkgs.coreutils}/bin/cut -d'"' -f4 \
-          || true
-      }
-
-      LATEST_TAG=""
-      NEEDS_INSTALL=0
-      if [ ! -x "$PLANNOTATOR_BIN" ]; then
-        NEEDS_INSTALL=1
+      echo "[$(date '+%H:%M:%S')] Installing plannotator CLI..." >> "$SETUP_LOG"
+      if (
+        set -o pipefail
+        ${pkgs.curl}/bin/curl -fsSL https://plannotator.ai/install.sh | ${pkgs.bash}/bin/bash -s -- --minimal
+      ) >> "$SETUP_LOG" 2>&1; then
+        echo "[$(date '+%H:%M:%S')] plannotator installed to $PLANNOTATOR_BIN" >> "$SETUP_LOG"
       else
-        # Check latest version from GitHub
-        LATEST_TAG="$(fetchLatestPlannotatorTag)"
-        LOCAL_VERSION=""
-        if [ -f "$PLANNOTATOR_VERSION_FILE" ]; then
-          LOCAL_VERSION="$(${pkgs.coreutils}/bin/cat "$PLANNOTATOR_VERSION_FILE" 2>/dev/null || true)"
-        fi
-        if [ -n "$LATEST_TAG" ] && [ "$LATEST_TAG" != "$LOCAL_VERSION" ]; then
-          NEEDS_INSTALL=1
-          echo "[$(date '+%H:%M:%S')] plannotator update available: $LOCAL_VERSION -> $LATEST_TAG" >> "$SETUP_LOG"
-        fi
-      fi
-
-      if [ "$NEEDS_INSTALL" = "1" ]; then
-        echo "[$(date '+%H:%M:%S')] Installing plannotator CLI..." >> "$SETUP_LOG"
-        if ${pkgs.curl}/bin/curl -fsSL https://plannotator.ai/install.sh | ${pkgs.bash}/bin/bash >> "$SETUP_LOG" 2>&1; then
-          # Record installed version
-          if [ -n "$LATEST_TAG" ]; then
-            echo "$LATEST_TAG" > "$PLANNOTATOR_VERSION_FILE"
-            echo "[$(date '+%H:%M:%S')] plannotator installed ($LATEST_TAG) to $PLANNOTATOR_BIN" >> "$SETUP_LOG"
-          else
-            INSTALLED_TAG="$(fetchLatestPlannotatorTag)"
-            if [ -n "$INSTALLED_TAG" ]; then
-              echo "$INSTALLED_TAG" > "$PLANNOTATOR_VERSION_FILE"
-            fi
-            echo "[$(date '+%H:%M:%S')] plannotator installed ($INSTALLED_TAG) to $PLANNOTATOR_BIN" >> "$SETUP_LOG"
-          fi
-        else
-          echo "[$(date '+%H:%M:%S')] plannotator installation FAILED (exit $?)" >> "$SETUP_LOG"
-        fi
+        PLANNOTATOR_INSTALL_EXIT_CODE=$?
+        echo "[$(date '+%H:%M:%S')] plannotator installation FAILED (exit $PLANNOTATOR_INSTALL_EXIT_CODE)" >> "$SETUP_LOG"
       fi
 
       # One-shot migration: remove legacy XDG-bin copy from the pre-cleanup
