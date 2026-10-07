@@ -21,6 +21,7 @@ font-family = "JetBrains Mono"
 font-family = "Sarasa Mono CL"
 
 window-padding-balance = true
+maximize = true
 window-save-state = always
 window-inherit-working-directory = true
 

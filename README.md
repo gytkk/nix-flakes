@@ -277,6 +277,10 @@ Resources should supplement the tools instead of expanding the tool count:
 
 [gksdud](modules/gksdud/README.md) manages Right Command Korean/English switching and starts at login on macOS. The module and package are excluded on Linux. See the module README for initial permissions and keyboard setup.
 
+## Ghostty config
+
+Ghostty opens new windows maximized to the current monitor's available area. On macOS, it also preserves saved windows, tabs, and splits. See the [Ghostty module README](modules/ghostty/README.md) for applying the configuration and resizing restored windows.
+
 ## Zed config
 
 - Zed is managed through `modules/zed/default.nix`.
