@@ -41,6 +41,8 @@ def test_every_runtime_materializes_its_selected_shared_skills(
     common_skills = {
         "codebase-design",
         "code-review",
+        "data-analysis",
+        "data-visualization",
         "diagnosing-bugs",
         "domain-modeling",
         "grilling",
