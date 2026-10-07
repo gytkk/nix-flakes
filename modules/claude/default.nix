@@ -68,14 +68,18 @@ let
     "cloudflare"
     "notion"
   ];
+
+  mkClaudeCommand = duration: command: ''
+    if ${timeout} ${duration} ${claude} ${command} < /dev/null >> "$SETUP_LOG" 2>&1; then
+      log "  -> OK"
+    else
+      log "  -> FAILED (exit $?)"
+    fi'';
+
   mkMarketplaceRegistration = mp: ''
     if ! printf '%s\n' "$MARKETPLACE_CACHE" | ${pkgs.ripgrep}/bin/rg -q --fixed-strings -- "${mp}"; then
       log "Adding marketplace: ${mp}"
-      if ${timeout} 60s ${claude} plugin marketplace add ${mp} < /dev/null >> "$SETUP_LOG" 2>&1; then
-        log "  -> OK"
-      else
-        log "  -> FAILED (exit $?)"
-      fi
+      ${mkClaudeCommand "60s" "plugin marketplace add ${mp}"}
     else
       log "Marketplace already registered: ${mp}"
     fi'';
@@ -97,11 +101,7 @@ let
     fi
     if [ "$EXISTING_PATH" != "$LOCAL_MP_PATH" ]; then
       log "Adding local marketplace: $LOCAL_MP_NAME -> $LOCAL_MP_PATH"
-      if ${timeout} 60s ${claude} plugin marketplace add "$LOCAL_MP_PATH" < /dev/null >> "$SETUP_LOG" 2>&1; then
-        log "  -> OK"
-      else
-        log "  -> FAILED (exit $?)"
-      fi
+      ${mkClaudeCommand "60s" ''plugin marketplace add "$LOCAL_MP_PATH"''}
     else
       log "Local marketplace already registered: $LOCAL_MP_NAME"
     fi'';
@@ -116,20 +116,13 @@ let
       fi
     fi
     if [ "$HAS_USER_SCOPE" = "0" ]; then
+      PLUGIN_ACTION="install"
       log "Installing plugin (user scope): ${plugin}"
-      if ${timeout} 60s ${claude} plugin install -s user ${plugin} < /dev/null >> "$SETUP_LOG" 2>&1; then
-        log "  -> OK"
-      else
-        log "  -> FAILED (exit $?)"
-      fi
     else
+      PLUGIN_ACTION="update"
       log "Updating plugin (user scope): ${plugin}"
-      if ${timeout} 60s ${claude} plugin update -s user ${plugin} < /dev/null >> "$SETUP_LOG" 2>&1; then
-        log "  -> OK"
-      else
-        log "  -> FAILED (exit $?)"
-      fi
-    fi'';
+    fi
+    ${mkClaudeCommand "60s" ''plugin "$PLUGIN_ACTION" -s user ${plugin}''}'';
 
   mkMcpRemoval = name: ''
     if printf '%s\n' "$MCP_CACHE" | ${pkgs.ripgrep}/bin/rg -q --fixed-strings -- "${name}"; then
@@ -147,14 +140,58 @@ let
     ''
       if ! printf '%s\n' "$MCP_CACHE" | ${pkgs.ripgrep}/bin/rg -q --fixed-strings -- "${name}"; then
         log "Adding MCP server: ${name}"
-        if ${timeout} 30s ${claude} ${cmd} < /dev/null >> "$SETUP_LOG" 2>&1; then
-          log "  -> OK"
-        else
-          log "  -> FAILED (exit $?)"
-        fi
+        ${mkClaudeCommand "30s" cmd}
       else
         log "MCP server already registered: ${name}"
       fi'';
+
+  mkMarketplacesSetup =
+    { marketplaces, localMarketplaces }:
+    ''
+      # Register marketplaces (failures are non-fatal)
+      ${lib.concatMapStringsSep "\n    " mkMarketplaceRegistration marketplaces}
+
+      # 같은 이름의 GitHub marketplace를 먼저 제거해
+      # 로컬 marketplace 경로가 충돌 없이 우선하도록 한다.
+      KNOWN_MARKETPLACES="$HOME/.claude/plugins/known_marketplaces.json"
+      ${lib.concatMapStringsSep "\n    " mkLocalMarketplaceRegistration localMarketplaces}
+
+      log "Updating marketplace index..."
+      ${timeout} 30s ${claude} plugin marketplace update < /dev/null >> "$SETUP_LOG" 2>&1 || log "Marketplace update failed"
+    '';
+
+  mkPluginsSetup = plugins: ''
+    INSTALLED_PLUGINS="$HOME/.claude/plugins/installed_plugins.json"
+
+    # Temporarily run plugin install/update against a copy so activation
+    # does not mutate the repository-backed settings symlink.
+    SETTINGS_FILE="$HOME/.claude/settings.json"
+    SETTINGS_LINK_TARGET=""
+    if [ -L "$SETTINGS_FILE" ]; then
+      SETTINGS_LINK_TARGET=$(${pkgs.coreutils}/bin/readlink -f "$SETTINGS_FILE")
+      ${pkgs.coreutils}/bin/cp --remove-destination "$SETTINGS_LINK_TARGET" "$SETTINGS_FILE"
+      log "Temporarily made settings.json writable for plugin operations"
+    fi
+
+    # 다른 프로젝트에서 설치를 다시 묻지 않도록 플러그인은 항상 user scope에 설치한다.
+    # installed_plugins.json에서는 scope를 직접 확인해 project 항목과 구분한다.
+    ${lib.concatMapStringsSep "\n    " mkPluginSetup plugins}
+
+    if [ -n "$SETTINGS_LINK_TARGET" ]; then
+      ${pkgs.coreutils}/bin/ln -sf "$SETTINGS_LINK_TARGET" "$SETTINGS_FILE"
+      log "Restored settings.json symlink"
+    fi
+  '';
+
+  mkMcpSetup =
+    { mcpCommands, removedMcpServers }:
+    ''
+      # Cache MCP server list once to avoid repeated calls
+      MCP_CACHE=$(${timeout} 15s ${claude} mcp list < /dev/null 2>/dev/null || echo "")
+
+      ${lib.concatMapStringsSep "\n    " mkMcpRemoval removedMcpServers}
+      ${lib.concatMapStringsSep "\n    " mkMcpRegistration mcpCommands}
+    '';
 
   mkClaudeCodeSetup =
     {
@@ -184,8 +221,6 @@ let
       log() { echo "[$(date '+%H:%M:%S')] $*" >> "$SETUP_LOG"; }
       log "=== Claude Code setup started ==="
 
-      INSTALLED_PLUGINS="$HOME/.claude/plugins/installed_plugins.json"
-
       # marketplace 조회로 인증을 확인하며, 자식 git이 /dev/tty를 열 때 SIGTTIN이 발생하지 않도록
       # timeout이 새 프로세스 그룹을 만들지 않는 foreground 모드로 실행한다.
       if ! MARKETPLACE_CACHE=$(${timeout} 15s ${claude} plugin marketplace list < /dev/null 2>/dev/null); then
@@ -194,46 +229,9 @@ let
         log "  Run 'claude auth login' to re-authenticate, then retry 'home-manager switch'."
       else
 
-      # Register marketplaces (failures are non-fatal)
-      ${lib.concatMapStringsSep "\n    " mkMarketplaceRegistration marketplaces}
-
-      # 같은 이름의 GitHub marketplace를 먼저 제거해
-      # 로컬 marketplace 경로가 충돌 없이 우선하도록 한다.
-      KNOWN_MARKETPLACES="$HOME/.claude/plugins/known_marketplaces.json"
-      ${lib.concatMapStringsSep "\n    " mkLocalMarketplaceRegistration localMarketplaces}
-
-      # Refresh marketplace index after adding new ones
-      log "Updating marketplace index..."
-      ${timeout} 30s ${claude} plugin marketplace update < /dev/null >> "$SETUP_LOG" 2>&1 || log "Marketplace update failed"
-
-      # Temporarily run plugin install/update against a copy so activation
-      # does not mutate the repository-backed settings symlink.
-      SETTINGS_FILE="$HOME/.claude/settings.json"
-      SETTINGS_LINK_TARGET=""
-      if [ -L "$SETTINGS_FILE" ]; then
-        SETTINGS_LINK_TARGET=$(${pkgs.coreutils}/bin/readlink -f "$SETTINGS_FILE")
-        ${pkgs.coreutils}/bin/cp --remove-destination "$SETTINGS_LINK_TARGET" "$SETTINGS_FILE"
-        log "Temporarily made settings.json writable for plugin operations"
-      fi
-
-      # 다른 프로젝트에서 설치를 다시 묻지 않도록 플러그인은 항상 user scope에 설치한다.
-      # installed_plugins.json에서는 scope를 직접 확인해 project 항목과 구분한다.
-      ${lib.concatMapStringsSep "\n    " mkPluginSetup plugins}
-
-      # Restore settings.json symlink
-      if [ -n "$SETTINGS_LINK_TARGET" ]; then
-        ${pkgs.coreutils}/bin/ln -sf "$SETTINGS_LINK_TARGET" "$SETTINGS_FILE"
-        log "Restored settings.json symlink"
-      fi
-
-      # Cache MCP server list once to avoid repeated calls
-      MCP_CACHE=$(${timeout} 15s ${claude} mcp list < /dev/null 2>/dev/null || echo "")
-
-      # Remove MCP servers that are no longer managed here.
-      ${lib.concatMapStringsSep "\n    " mkMcpRemoval removedMcpServers}
-
-      # Register MCP servers (skip if already registered)
-      ${lib.concatMapStringsSep "\n    " mkMcpRegistration mcpCommands}
+      ${mkMarketplacesSetup { inherit marketplaces localMarketplaces; }}
+      ${mkPluginsSetup plugins}
+      ${mkMcpSetup { inherit mcpCommands removedMcpServers; }}
 
       fi # end auth check
 
