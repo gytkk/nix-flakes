@@ -52,7 +52,9 @@ codex plugin add sites@openai-curated-remote
 
 Jev를 사용하는 기능은 `$typesafe-ai` skill로 설계하고, API client는 `with-jev`로 실행한다. 공식 skill 원본, agenix 인증, 적용 절차는 [Jev README](../jev/README.md)에서 확인한다.
 
-Standalone Home Manager는 `/etc/codex/config.toml`을 checkout의 `files/config.toml`에 연결한다. NixOS는 같은 파일을 Nix store에서 설치한다. `~/.codex/config.toml`은 사용자 설정을 보존하며 activation이 덮어쓰지 않는다.
+[default.nix](default.nix)은 Home Manager의 사용자 파일과 activation을 구성한다. Standalone Home Manager는 [system-activation.nix](system-activation.nix)에서 생성한 스크립트로 `/etc/codex/config.toml`을 checkout의 `files/config.toml`에 연결하고, `/etc/codex/skills`를 agent-core output에 연결한다. 스크립트는 관리할 경로를 모두 검사한 뒤 필요한 sudo 작업을 실행하며, 일반 파일은 덮어쓰지 않는다.
+
+NixOS는 [system.nix](system.nix)의 `environment.etc`로 시스템 설정과 skills를 설치하고 Home Manager의 시스템 activation을 생략한다. `~/.codex/config.toml`은 사용자 설정을 보존하며 activation이 덮어쓰지 않는다.
 
 `~/.codex/AGENTS.md`와 `/etc/codex/skills`는 agent-core의 immutable output을 사용한다. Adapter 변경을 적용하려면 환경에 맞는 `home-manager switch --flake .#<environment>` 또는 `nixos-rebuild switch --flake .#<host>`를 사용자가 실행한 뒤 새 Codex 세션을 시작한다.
 
