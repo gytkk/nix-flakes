@@ -38,7 +38,7 @@ Open grep pickers rerun the current search after a file is saved, after Neovim r
 ## Minuet
 
 - Store the OpenAI API key in `secrets/openai-api-key.age` before launching Neovim.
-- NixOS hosts decrypt the secret with system agenix under `/run/agenix/openai-api-key`; home-only environments decrypt it with Home Manager agenix.
+- NixOS hosts decrypt the secret with system agenix under `/run/agenix/openai-api-key`; home-only environments declare it through the [OpenAI API module](../openai-api/README.md) and decrypt it with Home Manager agenix.
 - The vim module wires the decrypted agenix path into Neovim as `vim.g.openai_api_key_path` on every environment.
 - Inline suggestions use Minuet's virtual text frontend to avoid duplicate OpenAI API requests from the completion menu.
 - Minuet requests OpenAI Fast mode for lower latency at the Fast mode token rate.

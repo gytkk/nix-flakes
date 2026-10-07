@@ -130,7 +130,7 @@ The official [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc)
 
 See the [Codex module README](modules/codex/README.md) for official bundle packaging, model delegation, reasoning effort, configuration ownership, and activation behavior.
 
-Codex and Claude share the official TypeSafe `typesafe-ai` skill through agent-core. The [Jev module](modules/jev/README.md) supplies `with-jev` to run API clients with the agenix-managed `TYPESAFE_API_KEY`.
+Codex and Claude share the `openai-decisions` skill through agent-core for `gpt-6-luna` Decisions API judgments. The [OpenAI API module](modules/openai-api/README.md) supplies `with-openai` to run API clients with the existing agenix-managed `OPENAI_API_KEY`.
 
 - On NixOS hosts, the static Codex base config is installed to the overridable system layer at `/etc/codex/config.toml`.
 - Shared skills selected from `agent-core/skills/` are rendered and exposed at `/etc/codex/skills`.

@@ -51,7 +51,7 @@ bun test modules/claude/tests
 
 ## Skills and plugins
 
-The shared `typesafe-ai` skill provides TypeSafe's official Jev workflow guidance. Invoke it with `/typesafe-ai` and run API clients through `with-jev` to use the agenix key. See the [Jev README](../jev/README.md) for source provenance, authentication, and activation.
+The shared `openai-decisions` skill guides typed judgments with the `gpt-6-luna` Decisions API. Invoke it with `/openai-decisions` and run API clients through `with-openai` to use the existing agenix OpenAI key. See the [OpenAI API README](../openai-api/README.md) for authentication and activation.
 
 Home Manager installs Claude's immutable selection of shared skills from `agent-core/skills/` into `~/.claude/skills/`. The local `devils-advocate` marketplace plugin remains separately owned because it provides a Claude command, agent, and plugin metadata that the shared renderer does not model.
 

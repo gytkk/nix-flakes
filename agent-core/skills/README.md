@@ -10,6 +10,6 @@ The skills imported from [mattpocock/skills](https://github.com/mattpocock/skill
 
 The imported selection excludes user-invoked wrappers and setup workflows. Each retained directory contains its `SKILL.md` and any file that it directly references. Plugin manifests and runtime-specific UI metadata are excluded; required discovery metadata remains in `SKILL.md` frontmatter. `code-review` discovers repository configuration without the removed setup skill. The upstream MIT license is included in `LICENSE` and applies to the imported skills.
 
-`pi-agent` and `typesafe-ai` are separate imports with their own [Pi skill license](pi-agent/LICENSE.md) and [TypeSafe skill license](typesafe-ai/LICENSE). The other skills are maintained locally.
+`pi-agent` is a separate import with its own [Pi skill license](pi-agent/LICENSE.md). The other skills are maintained locally.
 
 Shared skills describe required capabilities instead of naming one agent runtime. Runtime modules own packages, settings, plugins, and installation behavior, while the renderer selects skill sources only from this catalog.

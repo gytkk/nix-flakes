@@ -44,10 +44,10 @@ in
     ../modules/git
     ../modules/gksdud
     ../modules/herdr
-    ../modules/jev
     ../modules/k9s
     ../modules/lsp
     ../modules/nix-gc
+    ../modules/openai-api
     ../modules/pi
     ../modules/shared-memory
     ../modules/tmux
@@ -74,7 +74,9 @@ in
       git.enable = lib.mkDefault true;
       gksdud.enable = lib.mkDefault pkgs.stdenv.isDarwin;
       herdr.enable = lib.mkDefault true;
-      jev.enable = lib.mkDefault (config.modules.codex.enable || config.modules.claude.enable);
+      openaiApi.enable = lib.mkDefault (
+        config.modules.vim.enable || config.modules.codex.enable || config.modules.claude.enable
+      );
       k9s.enable = lib.mkDefault true;
       lsp.enable = lib.mkDefault true;
       # NixOS hosts collect garbage at the system level via modules/nixos/baseline.nix.

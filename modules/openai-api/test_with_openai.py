@@ -8,21 +8,21 @@ import tempfile
 import unittest
 
 
-class WithJevTest(unittest.TestCase):
+class WithOpenAITest(unittest.TestCase):
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
         self.addCleanup(self.directory.cleanup)
         root = Path(self.directory.name)
         self.key_file = root / "key with spaces"
-        self.script = root / "with-jev.sh"
-        source = Path(__file__).with_name("with-jev.sh").read_text()
+        self.script = root / "with-openai.sh"
+        source = Path(__file__).with_name("with-openai.sh").read_text()
         self.script.write_text(
             source.replace("@secretPath@", shlex.quote(str(self.key_file)))
         )
 
     def run_wrapper(self, *args, trace=False, runtime_directory=None):
         environment = os.environ.copy()
-        environment["TYPESAFE_API_KEY"] = "stale-inherited-key"
+        environment["OPENAI_API_KEY"] = "stale-inherited-key"
         if runtime_directory is not None:
             environment["XDG_RUNTIME_DIR"] = str(runtime_directory)
         return subprocess.run(
@@ -39,7 +39,7 @@ class WithJevTest(unittest.TestCase):
             sys.executable,
             "-c",
             "import os,sys; from pathlib import Path; "
-            "assert os.environ['TYPESAFE_API_KEY'] == Path(sys.argv[1]).read_text().rstrip('\\n'); "
+            "assert os.environ['OPENAI_API_KEY'] == Path(sys.argv[1]).read_text().rstrip('\\n'); "
             "assert sys.argv[2:] == ['two words', '*', '']; print('ok')",
             str(self.key_file),
             "two words",
@@ -62,11 +62,11 @@ class WithJevTest(unittest.TestCase):
         expression = r"""
           let
             flake = builtins.getFlake @repository@;
-            module = import (flake.outPath + "/modules/jev/default.nix") {
+            module = import (builtins.toPath (@repository@ + "/modules/openai-api/default.nix")) {
               lib = flake.inputs.nixpkgs.lib;
               config = {
-                modules.jev.enable = true;
-                age.secrets.jev-api-key.path = "\${XDG_RUNTIME_DIR}/agenix/jev-api-key";
+                modules.openaiApi.enable = true;
+                age.secrets.openai-api-key.path = "\${XDG_RUNTIME_DIR}/agenix/openai-api-key";
               };
               pkgs = {
                 coreutils = null;
@@ -83,13 +83,13 @@ class WithJevTest(unittest.TestCase):
         self.assertEqual(rendered.returncode, 0, rendered.stderr)
         self.script.write_text(rendered.stdout)
         runtime_directory = Path(self.directory.name) / "runtime with spaces"
-        self.key_file = runtime_directory / "agenix" / "jev-api-key"
+        self.key_file = runtime_directory / "agenix" / "openai-api-key"
         self.key_file.parent.mkdir(parents=True)
         self.key_file.write_text("synthetic-runtime-key\n")
         result = self.run_wrapper(
             "bash",
             "-c",
-            'test "$TYPESAFE_API_KEY" = synthetic-runtime-key',
+            'test "$OPENAI_API_KEY" = synthetic-runtime-key',
             runtime_directory=runtime_directory,
         )
         self.assertEqual(result.returncode, 0, result.stderr)

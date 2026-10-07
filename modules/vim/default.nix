@@ -14,7 +14,6 @@ let
   mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/vim/${path}";
   nvimThemeExports = config.lib.file.mkOutOfStoreSymlink (themeExports.mutableDir "nvim");
   openAIKeySecretName = "openai-api-key";
-  openAIKeySecretFile = ../../secrets/openai-api-key.age;
   usesSystemAgenix = osConfig != null;
   openAIKeySecretPath =
     if usesSystemAgenix then
@@ -30,10 +29,6 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    age.secrets = lib.mkIf (!usesSystemAgenix) {
-      "${openAIKeySecretName}".file = builtins.toPath openAIKeySecretFile;
-    };
-
     xdg.configFile."nvim/lua/config".source = mkSymlink "files/config";
     xdg.configFile."nvim/themes".source = nvimThemeExports;
 

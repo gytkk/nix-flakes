@@ -50,7 +50,7 @@ codex plugin add superpowers@openai-curated
 codex plugin add sites@openai-curated-remote
 ```
 
-Jev를 사용하는 기능은 `$typesafe-ai` skill로 설계하고, API client는 `with-jev`로 실행한다. 공식 skill 원본, agenix 인증, 적용 절차는 [Jev README](../jev/README.md)에서 확인한다.
+Decisions API를 사용하는 기능은 `$openai-decisions` skill로 설계하고, API client는 `with-openai`로 실행한다. 모델과 API 사용법, agenix 인증, 적용 절차는 [OpenAI API README](../openai-api/README.md)에서 확인한다.
 
 [default.nix](default.nix)은 Home Manager의 사용자 파일과 activation을 구성한다. Standalone Home Manager는 [system-activation.nix](system-activation.nix)에서 생성한 스크립트로 `/etc/codex/config.toml`을 checkout의 `files/config.toml`에 연결하고, `/etc/codex/skills`를 agent-core output에 연결한다. 스크립트는 관리할 경로를 모두 검사한 뒤 필요한 sudo 작업을 실행하며, 일반 파일은 덮어쓰지 않는다.
 
