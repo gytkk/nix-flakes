@@ -1,7 +1,4 @@
 {
-  "settings": {
-    "showStatusIcon": false
-  },
   "mcpServers": {
     "nixos": {
       "command": "mcp-nixos"

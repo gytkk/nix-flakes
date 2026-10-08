@@ -25,7 +25,7 @@ function text(value: unknown): string {
     : "";
 }
 
-// pi-subagents 0.41.0 projects child progress through the parent tool result.
+// pi-subagents projects child progress through the parent tool result.
 export function foregroundChildren(details: unknown): Child[] | undefined {
   const progress = record(details)?.progress;
   if (!Array.isArray(progress)) return undefined;

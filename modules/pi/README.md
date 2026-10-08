@@ -14,7 +14,7 @@ See [`docs/pi-performance-audit.md`](../../docs/pi-performance-audit.md) for the
 | `files/settings.json` | `~/.pi/agent/settings.json` | Pi defaults and pinned packages |
 | `files/web-search.json` | `~/.pi/web-search.json` | Web Access defaults |
 | `files/lsp.json` | `~/.pi/agent/lsp.json` | LSP server routes and diagnostics settings |
-| `files/mcp.json` | `~/.pi/agent/mcp.json` | MCP adapter and server configuration |
+| `files/mcp.json` | `~/.pi/agent/mcp.json` | Native MCP server configuration |
 | `agent-core/rules/` and `agent-core/adapters/pi.md` | `~/.pi/agent/AGENTS.md` | Generated shared and Pi-specific instructions |
 | `agent-core/rules/OPERATING.md` | `~/.pi/agent/APPEND_SYSTEM.md` | Operating invariants added to Pi's system prompt |
 | `files/extensions/` | `~/.pi/agent/extensions/` | Local Pi extensions |
@@ -50,11 +50,10 @@ The package list is intentionally version-pinned:
 
 | Package | Version | Purpose |
 | --- | --- | --- |
-| `@juicesharp/rpiv-ask-user-question` | `2.4.0` | Structured user questions |
+| `@juicesharp/rpiv-ask-user-question` | `2.12.0` | Structured user questions |
 | `pi-lsp` | `0.1.7` | Lazy language-server diagnostics and navigation |
-| `pi-web-access` | `0.18.0` | Web search, source checks, and content fetching |
-| `pi-mcp-adapter` | `2.20.1` | Token-efficient MCP discovery and calls |
-| `pi-subagents` | `0.41.0` | Foreground-first delegated Pi sessions |
+| `pi-web-access` | `0.32.0` | Web search, source checks, and content fetching |
+| `pi-subagents` | `0.72.0` | Foreground-first delegated Pi sessions |
 
 Versioned npm packages are skipped by `pi update --extensions`. Update pins
 through a reviewed repository change, and review package source and release
@@ -83,10 +82,7 @@ Only `worker` retains normal implementation tools. `scout`, `researcher`,
 `context-builder`, and `reviewer` have no `edit` or `write` tool. Their `bash`
 access is for inspection and verification and is not a security boundary; Pi
 packages and child processes still run with the current user's permissions.
-For the initial rollout, use one direct foreground child at a time and do not
-request `workflowScript`, background runs, or worktrees. The configured global
-concurrency limit protects legacy multi-child paths but does not cap
-`workflowScript` `runs.all()` fanout in pi-subagents 0.41.0.
+For the initial rollout, use one direct foreground child at a time and do not request `workflowScript`, background runs, or worktrees. The configured global concurrency limit applies to both legacy multi-child paths and `workflowScript` children in pi-subagents 0.72.0.
 
 ## Global prompts and skills
 
@@ -102,7 +98,7 @@ Shared skills are canonical under `agent-core/skills/`. Pi's manifest allowlist 
 
 The extension publishes display metadata only from the parent interactive Pi session inside Herdr. Completed, failed, interrupted, and detached foreground children disappear from the list. Session shutdown clears its tokens; active metadata expires after 45 seconds without refresh if Pi crashes. At most seven children fit in Herdr's 16-line layout. Larger groups show the first six children and an overflow count. Clicking any child line focuses the parent pane.
 
-The progress payload and slash events follow `pi-subagents` 0.41.0. Review this integration when updating that package. It does not import the package's internal modules or modify its execution behavior. Herdr failures produce a warning and leave Pi running.
+The progress payload and slash events follow `pi-subagents` 0.72.0. Review this integration when updating that package. It does not import the package's internal modules or modify its execution behavior. Herdr failures produce a warning and leave Pi running.
 
 Home Manager installs the extension. After applying the configuration, run `/reload` in Pi and `herdr server reload-config` for the [Herdr sidebar layout](../herdr/README.md#subagents). For a foreground smoke test, run `/run scout List the top-level files without changing anything` inside a Herdr Pi pane and verify that the child appears, updates, and disappears when finished. Run `bun test modules/pi/tests/herdr-subagents.test.ts` for the isolated event and metadata tests.
 
@@ -156,31 +152,11 @@ paired with `showHardwareCursor: true` in `settings.json`.
 This extension depends on Pi 0.83's editor rendering behavior. Review it when
 updating Pi if cursor rendering or IME positioning changes.
 
-### Tool profiles
+## On-demand tools
 
-`files/extensions/tool-profiles/` starts each new session with the `lite`
-profile. Web Access, MCP, and subagent tools stay registered but inactive, so
-their schemas are omitted from ordinary model requests while package commands
-such as `/run` remain available.
+Fresh sessions use the packages' own `web_enable` and `subagents_enable` tools to activate the full web and delegation tools when needed. Package commands such as `/run` remain available. Native MCP uses Pi's `codemode` tool without declaring every server tool to the model. The module does not install a custom `enable_tools` tool or `/tool-profile` command.
 
-The default-active `enable_tools` tool adds optional groups without removing the
-current tools. Pi 0.84.4 can defer the newly enabled schemas on supported models,
-including GPT 5.4 and newer. The user-facing command can also replace the active
-optional set exactly:
-
-```text
-/tool-profile status
-/tool-profile lite
-/tool-profile research
-/tool-profile delegation
-/tool-profile full
-```
-
-`research` enables Web Access and MCP, `delegation` enables the subagent suite,
-and `full` enables both. The selected profile and the optional tools that were
-available at startup are stored in the session so resume and reload preserve
-the selection. CLI tool exclusions remain authoritative because the extension
-only manages optional tools that were initially active.
+When migrating an existing installation, apply Home Manager to remove its managed `~/.pi/agent/extensions/tool-profiles` symlink, then restart Pi. New sessions use the default activation state; resumed sessions may retain tools already activated in their transcript.
 
 ## LSP diagnostics
 
@@ -213,15 +189,12 @@ after reviewing the new source and release notes.
 
 ## MCP integration
 
-`files/mcp.json` configures `pi-mcp-adapter` with:
+`files/mcp.json` configures Pi's built-in MCP extension with:
 
 - `nixos`, provided by the installed `mcp-nixos` executable
 - `context7`, using its remote MCP endpoint
 
-The servers are declared explicitly because this repository does not rely on
-the adapter importing another agent's MCP configuration. The adapter status
-icon is disabled so the footer uses plain `MCP: ...` status text, rendered in
-bright green by the custom footer.
+Pi connects these servers in the background at session startup. Their default `codemode` exposure enables the built-in `codemode` tool, whose scripts discover and call server tools without loading every schema into the prompt. Use `/mcp` for connection status and `pi mcp list` for a standalone connection check. The module does not install `pi-mcp-adapter`, its `mcp`/`mcpScript` tools, or its footer status.
 
 Cloudflare operations use the `cf` CLI installed by the common Home Manager profile. See [Cloudflare CLI setup](../../README.md#cloudflare-cli) for authentication and command discovery. Restart Pi after changing its MCP configuration.
 
@@ -256,8 +229,7 @@ After changing this module:
    that file.
 7. Verify `/fast status`, MCP discovery, structured questions, and the
    web-access tools relevant to the change.
-8. Verify `/tool-profile status`, then enable `research` and `delegation` and
-   confirm that the corresponding tools appear without restarting Pi.
+8. In a fresh session, verify `web_enable` and `subagents_enable`, then activate each and confirm that the corresponding tools appear. Verify `/mcp`, `pi mcp list`, and a read-only MCP call through `codemode`, with no extension-loading warnings.
 
 For the subagent rollout, also run `/subagents-doctor` and
 `/subagents-models`, then verify one foreground `scout`, one `researcher`, and

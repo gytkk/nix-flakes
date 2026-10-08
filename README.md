@@ -142,6 +142,10 @@ Codex and Claude share the `openai-decisions` skill through agent-core for `gpt-
 - Cloudflare operations use the shared [`cf` CLI](#cloudflare-cli).
 - `home-manager switch` installs and enables `superpowers@openai-curated` from the official Codex marketplace and removes the legacy `~/.agents/skills/superpowers` link when it points to `~/.codex/superpowers/skills`. Installation failures stop activation and are recorded in `~/.codex/nix-setup.log`. See the [Codex module README](modules/codex/README.md#적용) for installation and restart instructions.
 
+### Pi coding agent
+
+See the [Pi module README](modules/pi/README.md) for native MCP integration, on-demand web and subagent tools, pinned extensions, and verification steps.
+
 ### Cloudflare CLI
 
 The common Home Manager profile installs Cloudflare's [`cf` CLI](https://developers.cloudflare.com/cf/get-started/) from the pinned [app package](packages/README.md). It provides `cf` and `cloudflare` with a Nix-managed Node.js runtime. Wrangler and the Codex/Pi Cloudflare MCP registrations are replaced by this CLI; Claude activation removes the legacy user-scope `cloudflare` MCP registration. Restart the agents after applying the configuration.
