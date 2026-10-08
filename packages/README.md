@@ -35,6 +35,7 @@ Self-contained non-nixpkgs app packages used by the parent `nix-flakes` reposito
 │   ├── check-nix-patches.sh
 │   ├── detect-changed-apps.sh
 │   ├── notion-cli-update.sh
+│   ├── pi-update.sh
 │   ├── update-all.sh
 │   └── update-review.sh
 ├── settings.json
@@ -110,7 +111,7 @@ The helper selects the host platform, fetches the pinned archive, disables confi
 - `herdr-annotate` tracks the plugin's `main` commit and the versions it declares. Its updater records source hashes, release checksums for `herdr-annotate`, and the source and Cargo dependency hashes for the Rust-built `plannotator-tui` in `apps/herdr-annotate/sources.json`, so changes are detected even when the manifest version stays the same. Local reviewer patches inherit Herdr's palette and retain per-field color overrides.
 - `herdr-auto-title` tracks stable GitHub releases and builds from source. Its updater pins the source and vendored Go dependency hashes using Go from the nested flake's locked nixpkgs input.
 - Herdr and the Annotate reviewer each declare their patch order in `patches.nix`, shared by the Nix build and updater preflight. Preflight applies the complete sequence to a writable temporary source copy, retaining Nix's default fuzz tolerance and rejecting reversed patches. Annotate checks patches before Cargo hash discovery and metadata changes. Run `bash packages/tests/check-nix-patches.sh` to check this behavior, and `bash packages/tests/update-all.sh` and `bash packages/tests/update-review.sh` to check channel isolation and candidate publication with local fixtures.
-- `pi` includes `libxcb` on Linux so `autoPatchelfHook` can resolve the native X11 clipboard module's shared-library dependency.
+- `pi` pins a stable upstream source archive and calls the official flake's `nix/package.nix` with this catalog's nixpkgs. Upstream owns the workspace build, install lock, model catalog pin, platform dependencies, and install checks; this repository does not maintain a separate npm lockfile. The updater validates the release version and required packaging files before changing the source pin. Run `bash packages/tests/pi-update.sh` for its failure and no-op checks. The source is fetched during evaluation so upstream lockfiles and metadata are readable without import-from-derivation.
 - `codex` installs the complete official `codex-package` bundle, including its manifest, helpers, and runtime resources. Its updater tracks bundle hashes for all four platforms. The package's install check validates the manifest and confirms that every archive member is present in the installed output.
 - `App Packages CI` evaluates the nested flake and builds changed packages, including their install checks.
 - `cf` packages the official npm bundle with Node.js 24 and a pinned production dependency lockfile. It provides both `cf` and `cloudflare`. The published development dependencies reference unpublished local archives, so packaging removes them before installing the locked runtime dependencies. Linux builds patch the bundled `workerd` and `sharp` binaries. For a manual update, refresh the source version/hash, generate `package-lock.json` from the npm tarball after removing `devDependencies`, and refresh `npmDepsHash` with `prefetch-npm-deps`. See [Cloudflare CLI setup](../README.md#cloudflare-cli) for authentication.
