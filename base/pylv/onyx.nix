@@ -19,7 +19,6 @@
     agentCore.enable = true;
     agentSessionRecordPlugin.enable = true;
   };
-  modules.sharedMemory.enable = true;
   modules.agentSessionRecord.agents.openclaw.enable = true;
 
   # DankMaterialShell

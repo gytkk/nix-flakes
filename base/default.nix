@@ -49,7 +49,6 @@ in
     ../modules/nix-gc
     ../modules/openai-api
     ../modules/pi
-    ../modules/shared-memory
     ../modules/tmux
     ../modules/vim
     ../modules/windows-terminal
@@ -82,7 +81,6 @@ in
       # NixOS hosts collect garbage at the system level via modules/nixos/baseline.nix.
       nixGc.enable = lib.mkDefault (osConfig == null);
       pi.enable = lib.mkDefault true;
-      sharedMemory.enable = lib.mkDefault false;
       tmux.enable = lib.mkDefault true;
       vim.enable = lib.mkDefault true;
       windowsTerminal.enable = lib.mkDefault true;

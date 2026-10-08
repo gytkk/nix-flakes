@@ -98,8 +98,6 @@ Projects can use `rust-toolchain.toml` to select a different channel or componen
 
 OpenClaw on `pylv-onyx` is installed under `~/.openclaw` with the official rootless installer. OpenClaw owns its CLI, plugins, mutable configuration, and systemd user service. `modules/openclaw` provides the declarative NixOS and Home Manager integration.
 
-`modules/shared-memory` installs a read-only local MCP server on `pylv-onyx`. Codex and Pi use it to search OpenClaw's built-in SQLite index for the canonical `USER.md`, `MEMORY.md`, and `memory/**/*.md` files in `~/development/ws`. The adapter calls the OpenClaw CLI instead of reading its private database schema, and memory updates remain explicit file edits by the active agent.
-
 Install or recover the user-owned stable release without onboarding:
 
 ```bash
