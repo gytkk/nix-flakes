@@ -11,6 +11,18 @@ let
   cfg = config.modules.pi;
   agentCoreOutput = import ../../agent-core/nix/render.nix { inherit pkgs; } { runtime = "pi"; };
   mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/pi/${path}";
+  syncSettings = pkgs.writeShellScript "pi-sync-settings" ''
+    export PATH=${
+      lib.makeBinPath (
+        with pkgs;
+        [
+          coreutils
+          jq
+        ]
+      )
+    }:$PATH
+    exec ${pkgs.bash}/bin/bash ${./files/sync-settings.sh} "$@"
+  '';
 in
 {
   options.modules.pi.enable = lib.mkOption {
@@ -28,10 +40,8 @@ in
     home.file = {
       ".pi/agent/AGENTS.md".source = "${agentCoreOutput}/AGENTS.md";
       ".pi/agent/APPEND_SYSTEM.md".source = "${agentCoreOutput}/APPEND_SYSTEM.md";
-      ".pi/agent/keybindings.json".source = mkSymlink "files/keybindings.json";
       ".pi/agent/lsp.json".source = mkSymlink "files/lsp.json";
       ".pi/agent/mcp.json".source = mkSymlink "files/mcp.json";
-      ".pi/agent/settings.json".source = mkSymlink "files/settings.json";
       ".pi/web-search.json".source = mkSymlink "files/web-search.json";
       ".pi/agent/themes/claude-like.json".source = mkSymlink "files/themes/claude-like.json";
       ".pi/agent/themes/one-half-light.json".source = themeExports.file "pi" "one-half-light.json";
@@ -44,5 +54,10 @@ in
         mkSymlink "files/extensions/subagent/config.json";
       ".pi/agent/skills".source = "${agentCoreOutput}/skills";
     };
+
+    # Preserve installation-local metadata before Home Manager removes the old symlink.
+    home.activation.piSettings = lib.hm.dag.entryBetween [ "linkGeneration" ] [ "writeBoundary" ] ''
+      run ${syncSettings} ${./files/settings.json} "$HOME/.pi/agent/settings.json"
+    '';
   };
 }

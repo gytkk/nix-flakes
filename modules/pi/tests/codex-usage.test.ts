@@ -1,5 +1,5 @@
-import { describe, expect, test } from "bun:test";
-import {
+import { describe, expect, mock, test } from "bun:test";
+import codexUsage, {
   formatResetTime,
   formatUsageSummary,
   formatWeeklyStatus,
@@ -88,4 +88,43 @@ describe("Codex usage parsing", () => {
 
 test("reset times use a compact local date and time", () => {
   expect(formatResetTime(1_800_000_000)).toMatch(/^\d{2}\/\d{2} \d{2}:\d{2}$/);
+});
+
+describe("ChatGPT provider migration", () => {
+  function fixture() {
+    const handlers = new Map<string, Function>();
+    const commands = new Map<string, { handler: Function }>();
+    const getProviderAuth = mock(async () => undefined);
+    const ctx = {
+      model: { provider: "openai" },
+      modelRegistry: { getProviderAuth },
+      ui: { setStatus: mock(() => {}), notify: mock(() => {}) },
+    };
+    codexUsage({
+      on: (event: string, handler: Function) => handlers.set(event, handler),
+      registerCommand: (name: string, command: { handler: Function }) => commands.set(name, command),
+    } as never);
+    return { handlers, commands, getProviderAuth, ctx };
+  }
+
+  test("does not automatically query Codex limits for the new OpenAI provider", () => {
+    const { handlers, ctx, getProviderAuth } = fixture();
+    for (const event of ["session_start", "model_select", "agent_settled"]) {
+      handlers.get(event)!({}, ctx);
+    }
+    expect(getProviderAuth).not.toHaveBeenCalled();
+    expect(ctx.ui.setStatus).toHaveBeenCalledWith("codex-usage", undefined);
+  });
+
+  test("explicit usage commands resolve only the legacy credential", async () => {
+    const { handlers, commands, ctx, getProviderAuth } = fixture();
+    handlers.get("session_start")!({}, ctx);
+    await commands.get("codex-usage")!.handler("", ctx);
+    expect(getProviderAuth).toHaveBeenCalledTimes(1);
+    expect(getProviderAuth).toHaveBeenCalledWith("openai-codex");
+    expect(ctx.ui.notify).toHaveBeenCalledWith(
+      "Codex usage: OpenAI Codex is not authenticated. Run /login first.",
+      "error",
+    );
+  });
 });

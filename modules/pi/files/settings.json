@@ -1,8 +1,8 @@
 {
-  "lastChangelogVersion": "0.85.1",
-  "theme": "one-half-light",
-  "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-6-astra",
+  "theme": "system",
+  "defaultProvider": "openai",
+  "quietStartup": "header",
+  "defaultModel": "gpt-6.1-sol",
   "defaultThinkingLevel": "high",
   "packages": [
     "npm:@juicesharp/rpiv-ask-user-question@2.12.0",
@@ -15,18 +15,19 @@
     }
   ],
   "subagents": {
-    "defaultModel": "openai-codex/gpt-6-luna",
+    "defaultModel": "openai/gpt-6.1-sol",
     "defaultThinking": "medium",
     "modelScope": {
       "enforce": true,
       "allow": [
-        "openai-codex/gpt-6-luna",
-        "openai-codex/gpt-6.1-sol"
+        "openai/gpt-6-luna",
+        "openai/gpt-6.1-sol",
+        "openai/gpt-6-astra"
       ]
     },
     "agentOverrides": {
       "scout": {
-        "model": "openai-codex/gpt-6-luna",
+        "model": "openai/gpt-6-luna",
         "tools": [
           "read",
           "grep",
@@ -37,7 +38,7 @@
         ]
       },
       "researcher": {
-        "model": "openai-codex/gpt-6-luna",
+        "model": "openai/gpt-6-luna",
         "thinking": "low",
         "inheritProjectContext": false,
         "tools": [
@@ -53,7 +54,7 @@
         "defaultContext": "fresh"
       },
       "reviewer": {
-        "thinking": "medium",
+        "thinking": "high",
         "acceptanceRole": "read-only",
         "tools": [
           "read",
@@ -76,11 +77,11 @@
         ]
       },
       "planner": {
-        "model": "openai-codex/gpt-6.1-sol",
+        "model": "openai/gpt-6.1-sol",
         "defaultContext": "fresh"
       },
       "oracle": {
-        "model": "openai-codex/gpt-6.1-sol",
+        "model": "openai/gpt-6-astra",
         "defaultContext": "fresh"
       },
       "delegate": {
@@ -89,7 +90,5 @@
     }
   },
   "editorPaddingX": 1,
-  "outputPad": 1,
-  "showHardwareCursor": true,
-  "tuiMode": "fullscreen"
+  "showHardwareCursor": true
 }

@@ -20,7 +20,6 @@ const CLAUDE_ANSI = {
   cyan: "\x1b[36m",
   dim: "\x1b[2m",
   boldBlue: "\x1b[1;34m",
-  brightGreen: "\x1b[1;92m",
   brightOrange: "\x1b[1;33m",
 } as const;
 
@@ -47,7 +46,10 @@ function isSubagentProcess(): boolean {
 }
 
 function supportsFastMode(ctx: ExtensionContext): boolean {
-  return ctx.model?.provider === "openai-codex" && !isSubagentProcess();
+  return (
+    (ctx.model?.provider === "openai" || ctx.model?.provider === "openai-codex") &&
+    !isSubagentProcess()
+  );
 }
 
 function addUsage(totals: TokenTotals, usage: Usage): void {
@@ -55,25 +57,49 @@ function addUsage(totals: TokenTotals, usage: Usage): void {
   totals.output += usage.output;
 }
 
-function getTokenTotals(ctx: ExtensionContext): TokenTotals {
-  const totals: TokenTotals = { input: 0, output: 0 };
+export function createTokenTotalsReader(): (ctx: ExtensionContext) => TokenTotals {
+  let cached: {
+    manager: ExtensionContext["sessionManager"];
+    sessionId: string;
+    leafId: string | null;
+    totals: TokenTotals;
+  } | undefined;
 
-  for (const entry of ctx.sessionManager.getEntries()) {
-    if (entry.type === "message") {
-      if (entry.message.role === "assistant") {
-        addUsage(totals, entry.message.usage);
-      } else if (entry.message.role === "toolResult" && entry.message.usage) {
-        addUsage(totals, entry.message.usage);
-      }
-    } else if (
-      (entry.type === "branch_summary" || entry.type === "compaction") &&
-      entry.usage
+  return (ctx) => {
+    const manager = ctx.sessionManager;
+    const sessionId = manager.getSessionId();
+    const leafId = manager.getLeafId();
+    // Entries are append-only and every append moves the leaf.
+    if (
+      cached &&
+      cached.manager === manager &&
+      cached.sessionId === sessionId &&
+      cached.leafId === leafId
     ) {
-      addUsage(totals, entry.usage);
+      return cached.totals;
     }
-  }
 
-  return totals;
+    const totals: TokenTotals = { input: 0, output: 0 };
+    for (const entry of manager.getEntries()) {
+      if (entry.type === "usage") {
+        addUsage(totals, entry.usage);
+      } else if (entry.type === "message") {
+        if (entry.message.role === "assistant") {
+          addUsage(totals, entry.message.usage);
+        } else if (entry.message.role === "toolResult" && entry.message.usage) {
+          addUsage(totals, entry.message.usage);
+        }
+      } else if (
+        (entry.type === "branch_summary" || entry.type === "compaction") &&
+        entry.usage
+      ) {
+        addUsage(totals, entry.usage);
+      }
+    }
+
+    cached = { manager, sessionId, leafId, totals };
+    return totals;
+  };
 }
 
 function formatTokens(count: number): string {
@@ -107,15 +133,6 @@ function styleStatus(text: string, ansi: string): string {
   return `${ansi}${text}${ANSI_RESET}`;
 }
 
-function styleExtensionStatus(status: string): string {
-  const sanitized = sanitizeStatusText(status);
-  const unstyled = sanitized.replace(/\x1b\[[0-9;]*m/g, "");
-  if (/^MCP(?::|\s)/.test(unstyled)) {
-    return styleStatus(unstyled, CLAUDE_ANSI.brightGreen);
-  }
-  return sanitized;
-}
-
 function styleCodexUsageStatus(status: string): string {
   const sanitized = sanitizeStatusText(status);
   const resetStart = sanitized.indexOf("⏳");
@@ -134,6 +151,7 @@ export default function (pi: ExtensionAPI) {
   const installFooter = (ctx: ExtensionContext): void => {
     if (ctx.mode !== "tui") return;
 
+    const getTokenTotals = createTokenTotalsReader();
     ctx.ui.setFooter((tui, _theme, footerData) => {
       requestRender = () => tui.requestRender();
       const unsubscribe = footerData.onBranchChange(() => tui.requestRender());
@@ -219,7 +237,7 @@ export default function (pi: ExtensionAPI) {
 
           for (const [key, status] of extensionStatuses) {
             if (key === CODEX_USAGE_STATUS_KEY) continue;
-            const styled = styleExtensionStatus(status);
+            const styled = sanitizeStatusText(status);
             if (styled) sections.push(styled);
           }
 
@@ -285,12 +303,12 @@ export default function (pi: ExtensionAPI) {
   });
 
   pi.registerCommand("fast", {
-    description: "Toggle OpenAI Codex fast mode (on, off, or status)",
+    description: "Toggle OpenAI fast mode (on, off, or status)",
     handler: async (args, ctx) => {
       const action = args.trim().toLowerCase();
 
       if (action === "status") {
-        ctx.ui.notify(`Codex fast mode is ${enabled ? "on" : "off"}.`, "info");
+        ctx.ui.notify(`OpenAI fast mode is ${enabled ? "on" : "off"}.`, "info");
         return;
       }
 
@@ -305,7 +323,7 @@ export default function (pi: ExtensionAPI) {
         return;
       }
 
-      ctx.ui.notify(`Codex fast mode ${enabled ? "enabled" : "disabled"}.`, "info");
+      ctx.ui.notify(`OpenAI fast mode ${enabled ? "enabled" : "disabled"}.`, "info");
     },
   });
 }

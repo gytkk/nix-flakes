@@ -11,7 +11,7 @@ See [`docs/pi-performance-audit.md`](../../docs/pi-performance-audit.md) for the
 
 | Repository path | Runtime path | Purpose |
 | --- | --- | --- |
-| `files/settings.json` | `~/.pi/agent/settings.json` | Pi defaults and pinned packages |
+| `files/settings.json` | `~/.pi/agent/settings.json` | Common settings merged into a device-local writable file |
 | `files/web-search.json` | `~/.pi/web-search.json` | Web Access defaults |
 | `files/lsp.json` | `~/.pi/agent/lsp.json` | LSP server routes and diagnostics settings |
 | `files/mcp.json` | `~/.pi/agent/mcp.json` | Native MCP server configuration |
@@ -27,19 +27,33 @@ The module also installs:
 - `pkgs.pi`
 - `pkgs.mcp-nixos`
 
-Mutable configuration uses out-of-store symlinks, so commands such as
-`/settings` can modify tracked source files directly. Generated instruction
-files change only after applying the Home Manager configuration. Review
-`git diff` after changing Pi configuration interactively.
+`settings.json` is a private, writable regular file on each machine, not a checkout symlink. Home Manager merges the common settings from `files/settings.json` into it before linking the new generation; common top-level keys take precedence, while other local keys are preserved. Pi creates `deviceId` on first ChatGPT login and keeps it, `trackingId`, and `lastChangelogVersion` local. The sync rejects these fields in common settings. Existing symlink installations are migrated without writing their local state back to the checkout.
+
+`/settings` and package commands modify only the local settings file. Changes to keys managed by the common file last until the next Home Manager application; edit the repository file to make them common defaults. Close Pi before applying Home Manager to avoid concurrent settings writes. Other mutable configuration still uses out-of-store symlinks. Generated instructions and common settings change only after applying Home Manager.
 
 ## Main settings
 
 `files/settings.json` currently selects:
 
-- `openai-codex/gpt-6-astra` with `high` thinking
-- the generated `one-half-light` theme
-- one-cell editor and output padding
+- `openai/gpt-6.1-sol` with `high` thinking
+- the built-in `system` theme, derived from the terminal palette
+- a startup header without the loaded-resource listing
+- one-cell editor padding and default output padding
 - the hardware terminal cursor for IME positioning
+
+Pi uses the default fullscreen mode and built-in keybindings: `Home` and `Ctrl+A` move to the input line's start, while `Ctrl+Home` moves to the top of the fullscreen conversation. The module does not install a keybinding override.
+
+### ChatGPT authentication
+
+Run `/login openai` in Pi and choose `Sign in with ChatGPT`, then approve the browser login. Pi stores the new OAuth credential under `openai` in `~/.pi/agent/auth.json`; an existing `openai-codex` credential is independent and remains available for `/codex-usage`. Verify without printing credentials:
+
+```bash
+pi auth check --provider openai --json --no-refresh
+```
+
+The parent and delegated chat models use `openai`. In Pi 1.1, its GPT-6 Luna classifier is a separate model type and requires an API key; ChatGPT OAuth supports the chat model but not the Decisions API classifier. Use the existing `with-openai` wrapper in a separate process for API-key clients rather than replacing the subscription credential. See the [OpenAI API module](../openai-api/README.md).
+
+`pkgs.pi` calls the official upstream Nix package definition from a pinned source release. [App package maintenance](../../packages/README.md#updates-and-ci) owns that source pin. Apply Home Manager to install the pinned Pi version and synchronize common settings.
 
 `files/web-search.json` sets the default Web Access workflow to `none`, so
 ordinary searches return directly without opening the curator. Requests that
@@ -59,15 +73,9 @@ Versioned npm packages are skipped by `pi update --extensions`. Update pins
 through a reviewed repository change, and review package source and release
 notes because Pi packages execute with the permissions of the Pi process.
 
-`pi-subagents` loads only its extension; its bundled skills and prompt
-templates are filtered out so they cannot opt into background workflows or
-wide fanout. The initial rollout uses packaged agents with explicit
-Luna/Terra/Sol routing. Delegation defaults to foreground, stores artifacts
-under the parent Pi session, allows eight child launches per parent session,
-and blocks nested delegation at child depth. Automatic missions, schedules,
-and the generic `delegate` agent are disabled.
+`pi-subagents` loads only its extension; its bundled skills and prompt templates are filtered out so they cannot opt into background workflows or wide fanout. The initial rollout uses packaged agents with explicit Luna/Sol/Astra routing. Delegation defaults to foreground, stores artifacts under the parent Pi session, allows eight child launches per parent session, and blocks nested delegation at child depth. Automatic missions, schedules, and the generic `delegate` agent are disabled.
 
-Sol selections use `openai-codex/gpt-6.1-sol` in the model allowlist and the `planner` and `oracle` overrides.
+Delegation defaults to `openai/gpt-6.1-sol`; `scout` and `researcher` use `openai/gpt-6-luna`, `planner` uses Sol, and `oracle` uses `openai/gpt-6-astra`. All three models are in the allowlist. The `reviewer` uses `high` thinking.
 
 The packaged `planner`, `worker`, and `oracle` fork defaults are overridden to
 fresh context. Use an explicit `context: "fork"` only when the child genuinely
@@ -102,18 +110,16 @@ The progress payload and slash events follow `pi-subagents` 0.72.0. Review this 
 
 Home Manager installs the extension. After applying the configuration, run `/reload` in Pi and `herdr server reload-config` for the [Herdr sidebar layout](../herdr/README.md#subagents). For a foreground smoke test, run `/run scout List the top-level files without changing anything` inside a Herdr Pi pane and verify that the child appears, updates, and disappears when finished. Run `bun test modules/pi/tests/herdr-subagents.test.ts` for the isolated event and metadata tests.
 
-### Codex fast mode
+### OpenAI fast mode
 
 `files/extensions/codex-fast-mode.ts` provides:
 
 - `/fast [on|off|status]`
-- `service_tier: "priority"` for `openai-codex` requests while enabled
+- `service_tier: "priority"` for `openai` and legacy `openai-codex` requests while enabled
 - a one-line footer with working directory, Git branch, model, thinking level,
   fast-mode state, context usage, and cumulative input/output tokens
 
-Fast mode starts enabled in each new session. Toggle changes are stored in the
-session so resumed branches recover their previous state. The extension is the
-sole owner of the custom footer and priority-mode request field.
+Fast mode starts enabled in each new session. Toggle changes are stored in the session so resumed branches recover their previous state. The extension is the sole owner of the custom footer and priority-mode request field. Token totals include assistant, tool, summary, compaction, and standalone usage entries; the footer caches totals until the session or its leaf changes.
 
 Subagent child processes are detected through `PI_SUBAGENT_CHILD=1` and do
 not receive the priority service tier. `PI_SUBAGENT_PARENT_SESSION` is also set
@@ -122,10 +128,7 @@ the child-process signal. Parent Pi sessions continue to use fast mode normally.
 
 ### Codex usage
 
-`files/extensions/codex-usage.ts` provides `/codex-usage`, which fetches the
-current account-level Codex rate-limit windows with Pi's existing
-`openai-codex` OAuth credential. It reports remaining capacity rather than
-consumed capacity and formats reset timestamps in the local timezone.
+`files/extensions/codex-usage.ts` provides `/codex-usage`, which fetches the current account-level Codex rate-limit windows with Pi's existing `openai-codex` OAuth credential. It reports remaining capacity rather than consumed capacity and formats reset timestamps in the local timezone. The new `openai` ChatGPT credential is scoped to `api.openai.com` and is never sent to this internal Codex endpoint. Sessions using the default `openai` provider have no automatic weekly-usage segment; `/codex-usage` still uses the separate legacy credential.
 
 For parent sessions using an `openai-codex` model, the extension refreshes after
 the agent settles and publishes a compact weekly remaining percentage and
@@ -149,8 +152,7 @@ reporting or authentication.
 cursor while preserving the terminal cursor used for IME positioning. It is
 paired with `showHardwareCursor: true` in `settings.json`.
 
-This extension depends on Pi 0.83's editor rendering behavior. Review it when
-updating Pi if cursor rendering or IME positioning changes.
+Pi 1.1 still renders a reverse-video software cursor, so `showHardwareCursor` alone does not replace this extension. Review it when updating Pi if cursor rendering or IME positioning changes.
 
 ## On-demand tools
 
@@ -200,7 +202,7 @@ Cloudflare operations use the `cf` CLI installed by the common Home Manager prof
 
 ## Theme
 
-Pi selects `themes/exports/pi/one-half-light.json`, which the canonical theme pipeline generates from `themes/core/one-half-light.yaml`. It covers messages, tool blocks, Markdown, diffs, syntax highlighting, and editor borders. The existing `claude-like` theme remains installed as an alternate dark theme.
+Pi selects its built-in `system` theme, which derives colors from the terminal's background and ANSI palette and tracks supported light/dark changes. The module keeps the generated `themes/exports/pi/one-half-light.json` and existing `claude-like` theme installed as explicit alternatives. Select either in `/settings` if the terminal-derived colors are unsuitable.
 
 The custom footer uses standard ANSI colors, so its accents follow the active terminal palette.
 
@@ -209,7 +211,7 @@ The custom footer uses standard ANSI colors, so its accents follow the active te
 After changing this module:
 
 1. Validate edited JSON files with `jq -e . <file>`.
-2. Run `nixfmt modules/pi/default.nix` when the Nix module changes.
+2. Run `bun test modules/pi/tests` and `bash modules/pi/tests/sync-settings.sh` for extension and device-local settings checks. Run `nixfmt modules/pi/default.nix` when the Nix module changes.
 3. Run `nix flake check --no-build` when module wiring changes.
 4. Apply the Home Manager configuration manually:
 
