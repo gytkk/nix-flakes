@@ -45,7 +45,7 @@ Pi uses the default fullscreen mode and built-in keybindings: `Home` and `Ctrl+A
 
 ### ChatGPT authentication
 
-Run `/login openai` in Pi and choose `Sign in with ChatGPT`, then approve the browser login. Pi stores the new OAuth credential under `openai` in `~/.pi/agent/auth.json`; an existing `openai-codex` credential is independent and remains available for `/codex-usage`. Verify without printing credentials:
+Run `/login openai` in Pi and choose `Sign in with ChatGPT`, then approve the browser login. Pi stores the OAuth credential under `openai` in `~/.pi/agent/auth.json`. Verify without printing credentials:
 
 ```bash
 pi auth check --provider openai --json --no-refresh
@@ -115,7 +115,7 @@ Home Manager installs the extension. After applying the configuration, run `/rel
 `files/extensions/codex-fast-mode.ts` provides:
 
 - `/fast [on|off|status]`
-- `service_tier: "priority"` for `openai` and legacy `openai-codex` requests while enabled
+- `service_tier: "priority"` for `openai` requests while enabled
 - a one-line footer with working directory, Git branch, model, thinking level,
   fast-mode state, context usage, and cumulative input/output tokens
 
@@ -126,25 +126,7 @@ not receive the priority service tier. `PI_SUBAGENT_PARENT_SESSION` is also set
 in the parent UI session for permission forwarding, so it must not be used as
 the child-process signal. Parent Pi sessions continue to use fast mode normally.
 
-### Codex usage
-
-`files/extensions/codex-usage.ts` provides `/codex-usage`, which fetches the current account-level Codex rate-limit windows with Pi's existing `openai-codex` OAuth credential. It reports remaining capacity rather than consumed capacity and formats reset timestamps in the local timezone. The new `openai` ChatGPT credential is scoped to `api.openai.com` and is never sent to this internal Codex endpoint. Sessions using the default `openai` provider have no automatic weekly-usage segment; `/codex-usage` still uses the separate legacy credential.
-
-For parent sessions using an `openai-codex` model, the extension refreshes after
-the agent settles and publishes a compact weekly remaining percentage and
-reset time (`#########- 97% ⏳ 08/18 09:29`) to the custom footer immediately
-left of the model. The footer keeps a single rendered line and hides the usage
-segment when the terminal is too narrow to preserve the existing left-side
-status content.
-The status is also hidden for other providers and for subagent child processes.
-Automatic refresh failures are silent and do not interrupt Pi; an explicit
-`/codex-usage` reports errors.
-OAuth tokens are used only for the request and are never persisted or logged by
-the extension.
-
-The usage request targets ChatGPT's internal Codex usage endpoint. Its schema is
-not a public API, so review this extension if OpenAI changes Codex usage
-reporting or authentication.
+The module does not install `/codex-usage` or query ChatGPT's internal Codex usage endpoint. Existing legacy credentials and historical sessions are preserved. Apply Home Manager and restart Pi to remove the previously managed usage extension.
 
 ### Hardware cursor rendering
 

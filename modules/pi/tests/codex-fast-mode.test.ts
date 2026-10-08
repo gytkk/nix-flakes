@@ -81,12 +81,10 @@ describe("OpenAI fast mode", () => {
     } as never);
   });
 
-  test("applies priority to both OpenAI providers without mutating the original payload", () => {
+  test("applies priority to OpenAI without mutating the original payload", () => {
     const payload = { model: "test" };
-    for (const provider of ["openai", "openai-codex"]) {
-      expect(handlers.get("before_provider_request")!({ payload }, { model: { provider } }))
-        .toEqual({ model: "test", service_tier: "priority" });
-    }
+    expect(handlers.get("before_provider_request")!({ payload }, { model: { provider: "openai" } }))
+      .toEqual({ model: "test", service_tier: "priority" });
     expect(payload).toEqual({ model: "test" });
     expect(handlers.get("before_provider_request")!({ payload }, { model: { provider: "anthropic" } }))
       .toBeUndefined();

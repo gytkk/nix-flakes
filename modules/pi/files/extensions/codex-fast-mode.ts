@@ -7,10 +7,8 @@ import { truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
 import { sep } from "node:path";
 
 const STATE_TYPE = "codex-fast-mode";
-const CODEX_USAGE_STATUS_KEY = "codex-usage";
 const DEFAULT_ENABLED = true;
 const HORIZONTAL_PADDING = 1;
-const MIN_LEFT_WIDTH_WITH_USAGE = 48;
 const ANSI_RESET = "\x1b[0m";
 
 const CLAUDE_ANSI = {
@@ -46,10 +44,7 @@ function isSubagentProcess(): boolean {
 }
 
 function supportsFastMode(ctx: ExtensionContext): boolean {
-  return (
-    (ctx.model?.provider === "openai" || ctx.model?.provider === "openai-codex") &&
-    !isSubagentProcess()
-  );
+  return ctx.model?.provider === "openai" && !isSubagentProcess();
 }
 
 function addUsage(totals: TokenTotals, usage: Usage): void {
@@ -133,17 +128,6 @@ function styleStatus(text: string, ansi: string): string {
   return `${ansi}${text}${ANSI_RESET}`;
 }
 
-function styleCodexUsageStatus(status: string): string {
-  const sanitized = sanitizeStatusText(status);
-  const resetStart = sanitized.indexOf("⏳");
-  if (resetStart < 0) return styleStatus(sanitized, CLAUDE_ANSI.green);
-
-  return (
-    styleStatus(sanitized.slice(0, resetStart), CLAUDE_ANSI.green) +
-    styleStatus(sanitized.slice(resetStart), CLAUDE_ANSI.dim)
-  );
-}
-
 export default function (pi: ExtensionAPI) {
   let enabled = DEFAULT_ENABLED;
   let requestRender: (() => void) | undefined;
@@ -174,9 +158,6 @@ export default function (pi: ExtensionAPI) {
           if (branch) sections.push(sanitizeStatusText(branch));
 
           const extensionStatuses = footerData.getExtensionStatuses();
-          const codexUsageStatus = extensionStatuses.get(
-            CODEX_USAGE_STATUS_KEY,
-          );
           const modelParts = [sanitizeStatusText(ctx.model?.id ?? "no-model")];
           if (ctx.model?.reasoning) {
             modelParts.push(
@@ -192,24 +173,7 @@ export default function (pi: ExtensionAPI) {
             );
           }
           const modelSeparator = ` ${styleStatus("·", CLAUDE_ANSI.dim)} `;
-          const modelDetails = modelParts.join(modelSeparator);
-          const modelStatusWithUsage =
-            supportsFastMode(ctx) && codexUsageStatus
-              ? [
-                  styleCodexUsageStatus(codexUsageStatus),
-                  styleStatus("|", CLAUDE_ANSI.dim),
-                  modelDetails,
-                ].join(" ")
-              : modelDetails;
-          const hasRoomForUsage =
-            codexUsageStatus !== undefined &&
-            visibleWidth(modelStatusWithUsage) +
-              MIN_LEFT_WIDTH_WITH_USAGE +
-              2 <=
-              contentWidth;
-          const modelStatus = hasRoomForUsage
-            ? modelStatusWithUsage
-            : modelDetails;
+          const modelStatus = modelParts.join(modelSeparator);
 
           const contextUsage = ctx.getContextUsage();
           const percent = contextUsage?.percent;
@@ -235,8 +199,7 @@ export default function (pi: ExtensionAPI) {
             `${styleStatus("tokens", CLAUDE_ANSI.dim)} ${styleStatus(`↓${formatTokens(totals.input)}`, CLAUDE_ANSI.boldBlue)} ${styleStatus(`↑${formatTokens(totals.output)}`, CLAUDE_ANSI.brightOrange)}`,
           );
 
-          for (const [key, status] of extensionStatuses) {
-            if (key === CODEX_USAGE_STATUS_KEY) continue;
+          for (const status of extensionStatuses.values()) {
             const styled = sanitizeStatusText(status);
             if (styled) sections.push(styled);
           }
