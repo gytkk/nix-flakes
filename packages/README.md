@@ -46,10 +46,10 @@ Self-contained non-nixpkgs app packages used by the parent `nix-flakes` reposito
 
 | App | Version |
 |-----|---------|
-| agent-browser | 0.38.2 |
+| agent-browser | 0.39.0 |
 | cf | 1.0.0-beta.12 |
-| claude-code | 2.1.295 |
-| codex | 0.162.0 |
+| claude-code | 2.1.296 |
+| codex | 0.162.1 |
 | codexbar | 0.73.0 |
 | databricks-cli | 1.19.0 |
 | gksdud | 1.6.0 |
