@@ -233,11 +233,11 @@ uv run --project agent-core scripts/install-agent-skills.py restore \
 
 ## 전환 상태
 
-격리 CLI 검증, source 선언, 설치 연결 명령과 shared activation 코드는 구현되어 있다. 이번 작업에서 실제 host switch나 사용자 경로의 skill 설치는 수행하지 않았으며 native discovery도 확인하지 않았다. 로컬 Claude probe에서는 선택한 17개의 격리 설치가 통과했다. 다섯 host의 Codex/Pi/Claude와 pylv-onyx OpenClaw 전환을 확인한 뒤에만 기존 vendored 9개와 skill renderer를 정리한다. `resolving-merge-conflicts`도 이 fallback 정리 시 제거한다.
+격리 CLI 검증, source 선언, 설치 연결 명령과 shared activation 코드는 구현되어 있다. `devsisters-macbook`에서는 backup과 소유권 인계 후 Home Manager switch로 Codex/Pi 공유 skill 20개와 Claude skill 17개를 설치했다. 설치 파일 fingerprint, 소유권 기록과 lock의 일치를 확인했으며 native discovery는 아직 확인하지 않았다. 다섯 host의 Codex/Pi/Claude와 pylv-onyx OpenClaw 전환을 확인한 뒤에만 기존 vendored 9개와 skill renderer를 정리한다. `resolving-merge-conflicts`도 이 fallback 정리 시 제거한다.
 
 | Host | 적용 대상 | 확인 상태와 남은 작업 |
 | --- | --- | --- |
-| `devsisters-macbook` | Codex/Pi, Claude | Home Manager generation 306과 legacy Codex 링크, 소유권 기록이 없는 `find-skills`를 확인했다. Pi의 legacy 링크는 제거되어 있다. Claude skill root는 일반 디렉터리지만 repo 대상 17개와 소유권 기록은 없다. 충돌 인계, backup, switch와 discovery가 남아 있다. |
+| `devsisters-macbook` | Codex/Pi, Claude | Home Manager generation 307의 switch가 완료됐다. Legacy Codex 링크와 기존 `find-skills`는 백업으로 이동했으며 Codex/Pi의 legacy 경로는 없다. 공유 skill 20개와 Claude skill 17개의 설치 파일, 소유권 기록과 lock을 검증했다. Claude의 기존 `synced` 디렉터리와 바로 아래 항목의 메타데이터도 유지됐다. 각 runtime의 native discovery가 남아 있다. |
 | `devsisters-macstudio` | Codex/Pi, Claude | 실제 상태 확인, backup과 인계, switch와 discovery가 남아 있다. |
 | `pylv-denim` | Codex/Pi, Claude | 실제 상태 확인, backup과 인계, switch와 discovery가 남아 있다. |
 | `pylv-sepia` | Codex/Pi, Claude | 실제 상태 확인, backup과 인계, switch와 discovery가 남아 있다. |
