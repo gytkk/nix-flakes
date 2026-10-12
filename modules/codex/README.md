@@ -26,6 +26,8 @@ Codex의 subagent 기능으로 생성한 자식은 부모가 답변을 마친 �
 
 [files/hooks.json](files/hooks.json)의 `SessionStart`, `SubagentStart`, `SubagentStop`, `SessionEnd` 훅이 Home Manager로 설치한 `~/.local/bin/codex-herdr-subagents`를 호출한다. 훅은 Herdr pane마다 감시 프로세스 하나를 실행하고, 감시 프로세스는 부모와 자식의 로컬 JSONL 기록을 읽어 `codex:herdr-subagents` metadata를 갱신한다. 부모 세션 종료나 Codex 프로세스 종료 시 표시를 지운다. Herdr 환경 변수가 없는 터미널에서는 실행하지 않는다.
 
+`SessionEnd` 훅의 timeout은 Codex가 허용하는 최대값인 3초로 설정한다. 3초를 초과하면 Codex가 시작 시 경고를 표시하고 실제 제한을 3초로 낮춘다.
+
 실행 중인 자식의 기록을 읽지 못하거나 기록이 손상되면 회색 `○`와 마지막 메시지를 표시한다. 기록을 다시 읽어 작업 상태를 확인하면 정상 표시로 돌아간다. 감시 프로세스 자체가 종료되거나 Herdr에 전송할 수 없으면 새로운 상태를 표시할 수 없으므로 마지막 metadata가 15초 뒤 만료된다.
 
 활동 줄은 최근 assistant 메시지의 공백과 제어 문자를 정리한 한 줄 발췌문이다. 별도의 모델 호출 없이 80자 이내로 표시하고, 길면 말줄임표를 붙인다. 도구 이벤트는 메시지를 덮어쓰지 않으며, 작업 완료 시 `last_agent_message`가 있으면 마지막 응답으로 갱신한다. 새 작업이 시작되면 이전 메시지를 지우고, 메시지가 없으면 활동 줄을 숨긴다. 고정 안내 문구는 영어이며 메시지는 원문 언어를 유지한다. Reasoning, 암호화된 메시지, 원시 명령어는 표시하지 않는다. 이 연동은 Codex CLI 0.155.1과 Herdr 0.9.1을 기준으로 검증했다. Codex의 내부 JSONL 형식은 안정된 API가 아니므로 CLI 업데이트 후 표시가 달라지면 실제 기록 형식과 parser를 확인한다.
