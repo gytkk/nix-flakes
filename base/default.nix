@@ -36,6 +36,7 @@ in
     ../modules/agenix-darwin
     ../modules/claude-session-mining
     # 기본 모듈들 (항상 import됨)
+    ../modules/agent-skills
     ../modules/agent-session-record
     ../modules/aerospace
     ../modules/claude

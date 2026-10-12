@@ -1,0 +1,7 @@
+# Agent skills activation
+
+The common Home Manager profile imports [default.nix](default.nix) to install or update skills for every enabled agent during each switch. Codex or Pi enables the shared target once, Claude enables its global copy target, and OpenClaw enables its project copy target when both `modules.openclaw.enable` and `modules.openclaw.agentCore.enable` are true.
+
+One invocation of [the installation adapter](../../scripts/install-agent-skills.py) handles all selected targets after `linkGeneration` and, when Codex is enabled, `codexUserConfig`. Each external source resolves to one latest full SHA for that invocation, shared by every target. The module provides Node/npm, Git, and Python with the packaged canonical agent-core resources. Nix evaluation and builds do not fetch external skills; activation requires network access. Home Manager's `run` wrapper honors dry-run mode. Installation errors fail the switch and retain the adapter's backup and recovery safeguards.
+
+Before the first switch on an existing host, inspect and back up legacy skill links, files, CLI locks, and ownership records. Hand off conflicting legacy trees and unowned same-name skills explicitly; activation does not delete or adopt them automatically. A normal successful switch needs no separate installation command. Direct adapter commands remain available for isolated probes, recovery, and explicit SHA replay. See [Agent core installation and recovery](../../agent-core/README.md#skill-설치와-복구) for the procedure and pending host verification.

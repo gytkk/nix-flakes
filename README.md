@@ -108,7 +108,7 @@ openclaw gateway install --force --wrapper ~/.openclaw/bin/openclaw
 
 Use `openclaw update` for verified core and plugin updates. The mutable config may enable OpenClaw's stable auto updater. Nix does not pin or replace the OpenClaw executable.
 
-`agent-core/` owns shared coding-agent rules, runtime adapters, local skills, and external skill source declarations. Nix installs generated instructions and extensions. Explicit skill installation uses pinned `skills@1.7.2`: Codex/Pi share the native pool, Claude uses global copies, and OpenClaw uses external project copies. See [Agent core](agent-core/README.md#skill-설치와-복구) for pre-switch validation, installation, recovery, and pending host migration gates. Run `nix run .#agent-core -- check` to validate canonical resources offline.
+`agent-core/` owns shared coding-agent rules, runtime adapters, local skills, and external skill source declarations. Nix installs generated instructions and extensions. [Agent skills activation](modules/agent-skills/README.md) installs or updates skills for all enabled agents on each Home Manager switch with pinned `skills@1.7.2`: Codex/Pi share the native pool, Claude uses global copies, and OpenClaw uses external project copies. Activation resolves the latest external source SHAs once for all targets and requires network access; Nix evaluation and builds remain offline for skill acquisition. See [Agent core](agent-core/README.md#skill-설치와-복구) for the one-time ownership handoff, recovery, and pending host migration gates. Run `nix run .#agent-core -- check` to validate canonical resources offline.
 
 ## Codex Plugin for Claude Code
 
@@ -131,7 +131,7 @@ See the [Codex module README](modules/codex/README.md) for official bundle packa
 Codex and Claude share the `openai-decisions` skill through agent-core for `gpt-6-luna` Decisions API judgments. The [OpenAI API module](modules/openai-api/README.md) supplies `with-openai` to run API clients with the existing agenix-managed `OPENAI_API_KEY`.
 
 - On NixOS hosts, the static Codex base config is installed to the overridable system layer at `/etc/codex/config.toml`.
-- Repository-managed skill sources and selections are declared in `agent-core/manifest.toml` and installed explicitly into the Codex/Pi native pool at `~/.agents/skills`.
+- Repository-managed skill sources and selections are declared in `agent-core/manifest.toml` and installed or updated during Home Manager activation into the Codex/Pi native pool at `~/.agents/skills`.
 - On standalone Home Manager environments, `home-manager switch` ensures `/etc/codex/config.toml` is a symlink to this repo's `modules/codex/files/config.toml`.
 - Existing standalone `/etc/codex/skills` links require an ownership check and backup during migration; activation no longer manages them.
 - Standalone activation only prompts for `sudo` when `/etc/codex` needs to be created or repaired, or when removing the legacy `/etc/codex/managed_config.toml` symlink.

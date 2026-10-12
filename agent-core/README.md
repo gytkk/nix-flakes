@@ -4,7 +4,7 @@
 
 `agent-core/`는 coding-agent 공통 규칙과 runtime adapter, 로컬 skill, 외부 skill source 선언을 관리한다. Stdlib-only Python renderer는 지침 문서를 생성하고, `skill-plan`은 설치 대상과 source를 JSON으로 출력한다. 실제 skill 취득과 배치는 버전을 고정한 `skills@1.7.2` CLI가 담당한다.
 
-Runtime module은 생성 지침과 extension을 설치한다. [설치 연결 명령](../scripts/install-agent-skills.py)은 manifest의 선택 목록을 CLI에 전달하고 설치 경로별 소유권, 충돌, 백업과 복구를 관리한다. Nix build와 activation은 외부 skill을 다운로드하지 않는다.
+Runtime module은 생성 지침과 extension을 설치한다. [Agent skills module](../modules/agent-skills/README.md)은 Home Manager switch마다 활성 agent 전체의 skill을 설치하거나 갱신한다. [설치 연결 명령](../scripts/install-agent-skills.py)은 manifest의 선택 목록을 pinned CLI에 전달하고 설치 경로별 소유권, 충돌, 백업과 복구를 관리한다. Nix build와 evaluation은 외부 skill을 다운로드하지 않으며, activation에는 network 접근이 필요하다.
 
 ## 구조
 
@@ -66,6 +66,8 @@ agent-core/
 - Runtime이 설치 결과를 발견하는지 확인하는 smoke test
 
 Runtime module은 공통 원문, shared skill 원문, 독자적인 render 또는 merge 알고리즘을 소유하지 않는다. Renderer는 manifest에 선언한 source만 선택한다.
+
+공통 `modules/agent-skills`는 활성 agent에 맞춰 한 번의 설치 작업을 구성한다. Codex 또는 Pi가 활성화되면 shared target을 한 번 선택하고, Claude가 활성화되면 Claude target을, OpenClaw와 그 agent-core integration이 모두 활성화되면 OpenClaw target을 선택한다. `linkGeneration`과 필요한 `codexUserConfig` 이후에 실행하며 Node/npm, Git, packaged canonical resource를 포함한 Python을 제공한다. Home Manager의 `run`으로 dry-run을 존중하고 설치 오류가 나면 switch를 실패시킨다.
 
 ## 의존성 방향
 
@@ -196,16 +198,19 @@ Runtime module은 `render.nix`가 만든 immutable tree에서 필요한 파일�
 
 ## Skill 설치와 복구
 
-저장소 root에서 연결 명령을 실행한다. Node, npm, Git와 network 접근이 필요하다. 다음 `probe`는 임시 HOME에서 설치를 검증하고, 기존 host의 skill이나 credential을 변경하지 않는다. 영수증 파일은 새 경로여야 한다.
+정상 운영에서는 사용자가 Home Manager/NixOS switch를 실행하면 활성 agent 전체의 skill이 함께 설치되거나 갱신된다. 각 외부 source의 최신 full SHA는 한 작업에서 한 번 결정하여 모든 target에 공통으로 사용한다. 성공한 switch 뒤에 별도 설치 명령은 필요하지 않다. 직접 연결 명령을 실행하는 방식은 격리 probe, 복구와 명시적 SHA 재현에 사용한다. 이 명령에는 Node, npm, Git와 network 접근이 필요하다. Activation은 `XDG_STATE_HOME`을 Home Manager의 `xdg.stateHome`으로 설정하므로 직접 설치와 복구에도 같은 값을 사용한다. 아래 예시는 기본값이며 `xdg.stateHome`을 변경했다면 그 경로를 지정한다. 다음 `probe`는 임시 HOME에서 설치를 검증하고, 기존 host의 skill이나 credential을 변경하지 않는다. 영수증 파일은 새 경로여야 한다.
 
 ```bash
+export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
 uv run --project agent-core scripts/install-agent-skills.py probe \
   --target shared --target claude --output /tmp/agent-skills-probe.json
 ```
 
 Switch 전에 이전 Nix generation과 `/etc/codex/skills`, `~/.claude/skills`, `~/.pi/agent/skills`의 대상과 파일을 백업한다. pylv-onyx는 `--target openclaw`도 probe에 포함하고 external managed tree를 별도로 백업한다. OpenClaw state archive에는 이 tree가 포함되지 않는다. Inventory의 다섯 host 모두 Codex/Pi/Claude 대상이며 OpenClaw는 pylv-onyx만 대상이다.
 
-Home Manager/NixOS switch는 사용자가 실행한다. Switch 후 Claude와 Pi의 기존 Home Manager symlink가 제거되었는지 확인한다. Standalone `/etc/codex/skills`는 자동 삭제되지 않으므로 repo-managed 링크임을 확인한 뒤 백업 위치로 옮긴다. OpenClaw의 기존 read-only managed tree도 백업 위치로 옮겨 같은 경로를 비운다. 기존 pool의 동명 개인 skill이나 다른 source는 자동으로 인계하지 않는다. 현재 맥북의 기존 `find-skills`도 충돌 검토 대상이다.
+최초 switch 전에 legacy 경로의 소유권을 확인하고 필요한 backup과 인계를 완료한다. Standalone `/etc/codex/skills`는 자동 삭제되지 않으므로 repo-managed 링크임을 확인하고 승인한 뒤 백업 위치로 옮긴다. OpenClaw의 기존 read-only managed tree도 백업 위치로 옮겨 같은 경로를 비운다. Claude와 Pi의 기존 Home Manager symlink는 새 generation에서 제거되지만 다른 legacy 링크나 동명 개인 skill, 다른 source는 자동으로 삭제하거나 인계하지 않는다. 현재 맥북의 legacy Codex 링크와 소유권 기록이 없는 `~/.agents/skills/find-skills`는 shared target의 사전 검사를 막으므로 switch 전에 별도 검토와 인계가 필요하다. Switch 후에는 legacy 경로와 중복 discovery가 없는지 확인한다.
+
+다음은 직접 계획을 확인하고 probe의 exact SHA로 설치를 재현하는 명령이다. 일반 switch는 replay 영수증을 사용하지 않고 최신 SHA를 새로 결정한다.
 
 ```bash
 uv run --project agent-core scripts/install-agent-skills.py plan --target shared --target claude
@@ -213,7 +218,7 @@ uv run --project agent-core scripts/install-agent-skills.py install \
   --target shared --target claude --replay /tmp/agent-skills-probe.json --apply
 ```
 
-OpenClaw를 함께 probe했다면 설치 명령에도 `--target openclaw`를 포함한다. `--replay` 없이 설치하면 외부 latest를 새로 결정한다. `--revision matt=<full-sha> --revision vercel=<full-sha>`로 명시적 revision을 지정할 수도 있다. 설치는 먼저 격리된 경로에서 모든 source를 검증한 뒤 실제 target에 CLI를 실행하고 파일 bytes를 대조한다. 최신 source에 선택한 이름이나 license가 없으면 기존 설치를 변경하지 않는다.
+OpenClaw를 함께 probe했다면 직접 재현 명령에도 `--target openclaw`를 포함한다. `--replay` 없이 직접 설치해도 외부 latest를 새로 결정한다. `--revision matt=<full-sha> --revision vercel=<full-sha>`로 명시적 revision을 지정할 수도 있다. 설치는 먼저 격리된 경로에서 모든 source를 검증한 뒤 실제 target에 CLI를 실행하고 파일 bytes를 대조한다. 최신 source에 선택한 이름이나 license가 없으면 기존 설치를 변경하지 않는다.
 
 소유권은 설치 경로와 이름별로 `$XDG_STATE_HOME/agent-core/skills` 또는 `~/.local/state/agent-core/skills`에 기록한다. 원본 SHA 또는 local content, 설치 파일의 hash와 mode, 추가한 `AGENT-CORE-SOURCE-LICENSE`를 구분해 기록한다. CLI의 이름별 global lock을 target별 소유권으로 간주하지 않는다. 사용자 수정, 동명 타 source, 선택 목록에서 빠진 기존 관리 항목은 검토 전까지 중단한다. 포괄적인 `skills update`와 자동 삭제는 사용하지 않는다.
 
@@ -228,15 +233,15 @@ uv run --project agent-core scripts/install-agent-skills.py restore \
 
 ## 전환 상태
 
-격리 CLI 검증, source 선언, 설치 연결 명령과 module 소유권 전환 코드는 구현되어 있다. 실제 host switch와 native discovery는 아직 수행하지 않았다. 다섯 host의 Codex/Pi/Claude와 pylv-onyx OpenClaw 전환을 확인한 뒤에만 기존 vendored 9개와 skill renderer를 정리한다. `resolving-merge-conflicts`도 이 fallback 정리 시 제거한다.
+격리 CLI 검증, source 선언, 설치 연결 명령과 shared activation 코드는 구현되어 있다. 이번 작업에서 실제 host switch나 사용자 경로의 skill 설치는 수행하지 않았으며 native discovery도 확인하지 않았다. 로컬 Claude probe에서는 선택한 17개의 격리 설치가 통과했다. 다섯 host의 Codex/Pi/Claude와 pylv-onyx OpenClaw 전환을 확인한 뒤에만 기존 vendored 9개와 skill renderer를 정리한다. `resolving-merge-conflicts`도 이 fallback 정리 시 제거한다.
 
 | Host | 적용 대상 | 확인 상태와 남은 작업 |
 | --- | --- | --- |
-| `devsisters-macbook` | Codex/Pi, Claude | 로컬 legacy Nix 링크와 기존 pool의 동명 `find-skills`를 확인했다. 충돌 검토, backup, switch, 설치와 discovery가 남아 있다. |
-| `devsisters-macstudio` | Codex/Pi, Claude | 실제 상태 확인, backup, switch, 설치와 discovery가 남아 있다. |
-| `pylv-denim` | Codex/Pi, Claude | 실제 상태 확인, backup, switch, 설치와 discovery가 남아 있다. |
-| `pylv-sepia` | Codex/Pi, Claude | 실제 상태 확인, backup, switch, 설치와 discovery가 남아 있다. |
-| `pylv-onyx` | Codex/Pi, Claude, OpenClaw | `gytkk@pylv-onyx`에서 호스트, 실행 파일과 Nix generation 경로를 확인했다. 후속 SSH 연결은 시간 초과되어 runtime 점검, backup, switch, 설치와 discovery가 남아 있다. |
+| `devsisters-macbook` | Codex/Pi, Claude | Home Manager generation 306과 legacy Codex 링크, 소유권 기록이 없는 `find-skills`를 확인했다. Pi의 legacy 링크는 제거되어 있다. Claude skill root는 일반 디렉터리지만 repo 대상 17개와 소유권 기록은 없다. 충돌 인계, backup, switch와 discovery가 남아 있다. |
+| `devsisters-macstudio` | Codex/Pi, Claude | 실제 상태 확인, backup과 인계, switch와 discovery가 남아 있다. |
+| `pylv-denim` | Codex/Pi, Claude | 실제 상태 확인, backup과 인계, switch와 discovery가 남아 있다. |
+| `pylv-sepia` | Codex/Pi, Claude | 실제 상태 확인, backup과 인계, switch와 discovery가 남아 있다. |
+| `pylv-onyx` | Codex/Pi, Claude, OpenClaw | `gytkk@pylv-onyx`에서 호스트, 실행 파일과 Nix generation 경로를 확인했다. 후속 SSH 연결은 시간 초과되어 runtime 점검, backup과 인계, switch와 discovery가 남아 있다. |
 
 OpenClaw에서는 [runtime smoke](../modules/openclaw/tests/runtime-smoke.sh)와 [deployed resource test](../modules/openclaw/tests/deployed-skills.test.sh)를 모두 실행한다. 기대 이름은 manifest에서 가져오며 파일, 모든 agent의 discovery 경로, workspace override, prompt hook과 recorder, service drop-in을 검사한다. 실제 prompt 내용과 모델의 skill 선택 행동을 검증한 것으로 보고하지 않는다.
 

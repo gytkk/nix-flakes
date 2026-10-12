@@ -174,6 +174,7 @@
           output = agentCoreOutputs.${system};
           homeName = if system == "aarch64-darwin" then "devsisters-macbook" else "pylv-denim";
           homeFiles = homeConfigurations.${homeName}.config.home.file;
+          skillActivation = homeConfigurations.${homeName}.config.home.activation.installAgentSkills;
           commonMatches = [
             (toString homeFiles.".claude/CLAUDE.md".source == "${output.claude}/CLAUDE.md")
             (!(builtins.hasAttr ".claude/skills" homeFiles))
@@ -181,6 +182,11 @@
             (toString homeFiles.".pi/agent/AGENTS.md".source == "${output.pi}/AGENTS.md")
             (toString homeFiles.".pi/agent/APPEND_SYSTEM.md".source == "${output.pi}/APPEND_SYSTEM.md")
             (!(builtins.hasAttr ".pi/agent/skills" homeFiles))
+            (!(builtins.hasAttr ".agents/skills" homeFiles))
+            (nixpkgs.lib.hasInfix "install --apply --target shared --target claude" skillActivation.data)
+            (!(nixpkgs.lib.hasInfix "--target openclaw" skillActivation.data))
+            (builtins.elem "linkGeneration" skillActivation.after)
+            (builtins.elem "codexUserConfig" skillActivation.after)
             (
               !(nixpkgs.lib.hasInfix "/etc/codex/skills"
                 homeConfigurations.${homeName}.config.home.activation.codexUserConfig.data
@@ -189,11 +195,18 @@
           ];
           onyx = nixosConfigurations.pylv-onyx.config;
           onyxHomeFiles = onyx.home-manager.users.gytkk.home.file;
+          onyxSkillActivation = onyx.home-manager.users.gytkk.home.activation.installAgentSkills;
           onyxOpenClawSystemdDropInMaterialization =
             onyx.home-manager.users.gytkk.home.activation.materializeOpenClawSystemdDropIn.data;
           onyxOpenClawRuntimeMaterialization =
             onyx.home-manager.users.gytkk.home.activation.materializeOpenClawRuntimeTrees.data;
           linuxMatches = [
+            (nixpkgs.lib.hasInfix "install --apply --target shared --target claude --target openclaw" onyxSkillActivation.data)
+            (builtins.elem "linkGeneration" onyxSkillActivation.after)
+            (builtins.elem "codexUserConfig" onyxSkillActivation.after)
+            (!(builtins.hasAttr ".agents/skills" onyxHomeFiles))
+            (!(builtins.hasAttr ".claude/skills" onyxHomeFiles))
+            (!(builtins.hasAttr ".pi/agent/skills" onyxHomeFiles))
             (
               toString onyxHomeFiles.".local/share/openclaw/agent-core/AGENTS.core.md".source
               == "${output.openclaw}/AGENTS.core.md"
@@ -293,6 +306,17 @@
               node --test ${./modules/openclaw}/tests/agent-core-context.test.js
               bash ${./modules/openclaw}/tests/materialize-runtime-tree.test.sh
               bash ${./modules/openclaw}/tests/runtime-smoke.test.sh
+              bash ${./modules/agent-skills}/tests/activation.test.sh ${
+                systemPkgs.writeText "agent-skills-activation.sh" (
+                  builtins.unsafeDiscardStringContext
+                    homeConfigurations.${
+                      if system == "aarch64-darwin" then "devsisters-macbook" else "pylv-denim"
+                    }.config.home.activation.installAgentSkills.data
+                )
+              } shared claude
+              ${nixpkgs.lib.optionalString (system == "x86_64-linux") ''
+                bash ${./modules/agent-skills}/tests/activation.test.sh ${systemPkgs.writeText "openclaw-agent-skills-activation.sh" (builtins.unsafeDiscardStringContext nixosConfigurations.pylv-onyx.config.home-manager.users.gytkk.home.activation.installAgentSkills.data)} shared claude openclaw
+              ''}
               test -d ${agentCoreGoldenOutputs.${system}.openclaw}/skills
               test -d ${agentCoreGoldenOutputs.${system}.claude}/skills
               test -d ${agentCoreGoldenOutputs.${system}.codex}/skills/devils-advocate

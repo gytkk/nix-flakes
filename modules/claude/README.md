@@ -54,7 +54,7 @@ bun test modules/claude/tests
 
 The shared `openai-decisions` skill guides typed judgments with the `gpt-6-luna` Decisions API. Invoke it with `/openai-decisions` and run API clients through `with-openai` to use the existing agenix OpenAI key. See the [OpenAI API README](../openai-api/README.md) for authentication and activation.
 
-The [Agent core installation command](../../agent-core/README.md) installs Claude's selected shared skills with pinned `skills@1.7.2`, using `--copy --global` into `~/.claude/skills/`. Home Manager owns generated instructions and runtime settings; skill installation is an explicit user operation outside activation. Before switching an existing host, back up its skill files and CLI lock, then switch, install, and verify discovery. The local `devils-advocate` marketplace plugin remains separately owned because it provides a Claude command, agent, and plugin metadata.
+The shared [Agent skills activation](../agent-skills/README.md) installs or updates Claude's selected skills with pinned `skills@1.7.2`, using `--copy --global` into `~/.claude/skills/` on each Home Manager switch. Before the first switch on an existing host, back up its skill files and CLI lock and resolve legacy ownership conflicts as described in [Agent core](../../agent-core/README.md#skill-설치와-복구). Verify discovery after switching; a successful switch needs no separate installation command. The local `devils-advocate` marketplace plugin remains separately owned because it provides a Claude command, agent, and plugin metadata.
 
 ### Marketplaces
 

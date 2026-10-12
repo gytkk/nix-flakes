@@ -10,6 +10,8 @@ OpenClaw의 pylv-onyx 전환과 실제 discovery 검증까지 필수 범위에 �
 
 이 문서는 Plannotator 피드백과 코드 리뷰를 반영한 원래 계획과 조사 결과다. 구현과 호스트별 전환 상태는 [Agent core README](README.md#전환-상태)에 기록한다. 아래 조사 결과와 수량은 계획 작성 당시를 기준으로 한다.
 
+후속 사용자 지시에 따라 설치 실행 경계를 변경했다. 현재 [Agent skills module](../modules/agent-skills/README.md)은 Home Manager switch마다 활성 agent 전체의 skill을 설치하거나 갱신하며, 한 작업에서 결정한 최신 외부 source SHA를 모든 target에 사용한다. 따라서 아래 원래 계획의 activation 외부 수동 설치 전제는 현재 동작에 적용하지 않는다. Nix build와 evaluation은 계속 외부 skill을 취득하지 않는다. 최초 switch 전에 legacy 소유권 충돌을 명시적으로 인계하고 backup하며, 정상 switch 뒤에는 별도 설치 없이 discovery를 확인한다. 직접 설치 명령은 probe, 복구와 exact SHA 재현에 남겨 둔다. 실제 host 전환과 pylv-onyx discovery 완료 조건은 유지한다.
+
 실행 중 최신 Matt upstream에서 삭제된 `resolving-merge-conflicts`를 사용자 승인에 따라 새 설치 목록에서 제외했다. 따라서 현재 대상은 Matt 8개, Vercel 1개, 로컬 11개이며, Codex/Pi 공통 20개, Claude 17개, OpenClaw 16개다. 현재 선택 목록은 [manifest](manifest.toml)를 따른다. 기존 vendored source의 삭제는 원래 계획대로 모든 호스트 전환 후에 진행한다.
 
 ## 피드백 반영
