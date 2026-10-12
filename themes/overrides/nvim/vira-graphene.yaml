@@ -6,13 +6,270 @@ meta:
   variant: dark
 
 groups:
+  # Graphene source: https://open-vsx.org/api/vira/vsc-vira-theme/2026.9.4
+  NormalNC:
+    fg: "{palette.fg}"
+  FloatBorder:
+    fg: "#2E2E2E"
+  FloatTitle:
+    fg: "#80CBC4"
+  CursorLine:
+    bg: NONE
+  CursorColumn:
+    bg: NONE
+  CursorLineSign:
+    bg: NONE
+  CursorLineFold:
+    bg: NONE
+  ColorColumn:
+    bg: "#424242"
+  LineNr:
+    fg: "#424242"
+  LineNrAbove:
+    fg: "#424242"
+  LineNrBelow:
+    fg: "#424242"
+  FoldColumn:
+    fg: "#424242"
+  CursorLineNr:
+    fg: "#676767"
+    bold: false
+  StatusLine:
+    fg: "#616161"
+  StatusLineNC:
+    fg: "#616161"
+    bg: "{palette.bg}"
+  StatusLineTerm:
+    fg: "#616161"
+  StatusLineTermNC:
+    fg: "#616161"
+    bg: "{palette.bg}"
+  TabLine:
+    fg: "#676767"
+    bg: "{palette.bg}"
+  TabLineFill:
+    bg: "{palette.bg}"
+  TabLineSel:
+    fg: "#FFFFFF"
+    bold: false
+  WinBarNC:
+    fg: "#676767"
+    bg: "{palette.bg}"
+  PmenuSel:
+    bg: "#2E2E2E"
+  PmenuKindSel:
+    bg: "#2E2E2E"
+  PmenuExtraSel:
+    bg: "#2E2E2E"
+  PmenuMatch:
+    fg: "#80CBC4"
+  PmenuMatchSel:
+    fg: "#80CBC4"
+    bg: "#2E2E2E"
+  BlinkCmpMenuBorder:
+    fg: "#2E2E2E"
+  BlinkCmpMenuSelection:
+    bg: "#2E2E2E"
+  BlinkCmpLabelMatch:
+    fg: "#80CBC4"
+  # Visual cannot blend its background. Composite #47474780 over #212121.
+  Visual:
+    fg: "{palette.fg}"
+    bg: "#343434"
+  VisualNOS:
+    fg: "{palette.fg}"
+    bg: "#343434"
+  Search:
+    bg: "#3C3C3C"
+  CurSearch:
+    bg: "#3C3C3C"
+    sp: "#80CBC4"
+    underline: true
+    bold: false
+  IncSearch:
+    bg: "#3C3C3C"
+    sp: "#80CBC4"
+    underline: true
   Comment:
-    fg: "{palette.lineNumber}"
+    fg: "{palette.comment}"
   SpecialComment:
-    fg: "{palette.lineNumber}"
+    fg: "{palette.comment}"
+  Constant:
+    fg: "{palette.fg}"
+  Boolean:
+    fg: "#ff9cac"
+  Statement:
+    fg: "{palette.cyan}"
+  Conditional:
+    fg: "{palette.cyan}"
+    italic: true
+  Repeat:
+    fg: "{palette.cyan}"
+    italic: true
+  Keyword:
+    fg: "{palette.cyan}"
+  Exception:
+    fg: "{palette.cyan}"
+    italic: true
+  PreProc:
+    fg: "{palette.cyan}"
+  Include:
+    fg: "{palette.cyan}"
+    italic: true
+  Define:
+    fg: "{palette.cyan}"
+  PreCondit:
+    fg: "{palette.cyan}"
+    italic: true
+  SpecialChar:
+    fg: "{palette.fg}"
+  Delimiter:
+    fg: "{palette.cyan}"
+  @variable.builtin:
+    fg: "{palette.fg}"
+  @variable.parameter:
+    italic: true
+  @variable.parameter.builtin:
+    fg: "{palette.fg}"
+    italic: true
+  @variable.member:
+    fg: "{palette.fg}"
+  @constant:
+    fg: "{palette.fg}"
+  @constant.builtin:
+    fg: "{palette.cyan}"
+  @module:
+    fg: "{palette.yellow}"
+  @module.builtin:
+    fg: "{palette.yellow}"
+  @string.escape:
+    fg: "{palette.fg}"
+  @string.special:
+    fg: "{palette.fg}"
+  @string.special.symbol:
+    fg: "{palette.cyan}"
+  @character.special:
+    fg: "{palette.fg}"
+  @boolean:
+    fg: "#ff9cac"
+  @type.builtin:
+    fg: "{palette.yellow}"
+  @property:
+    fg: "{palette.fg}"
+  @function.builtin:
+    fg: "{palette.blue}"
+  @constructor:
+    fg: "{palette.blue}"
+  @keyword:
+    fg: "{palette.cyan}"
+  @keyword.coroutine:
+    fg: "{palette.cyan}"
+    italic: true
+  @keyword.operator:
+    fg: "{palette.cyan}"
+  @keyword.import:
+    fg: "{palette.cyan}"
+    italic: true
+  @keyword.repeat:
+    fg: "{palette.cyan}"
+    italic: true
+  @keyword.return:
+    fg: "{palette.cyan}"
+    italic: true
+  @keyword.debug:
+    fg: "{palette.cyan}"
+    italic: true
+  @keyword.exception:
+    fg: "{palette.cyan}"
+    italic: true
+  @keyword.conditional:
+    fg: "{palette.cyan}"
+    italic: true
+  @keyword.conditional.ternary:
+    fg: "{palette.cyan}"
+    italic: true
+  @keyword.directive:
+    fg: "{palette.cyan}"
+  @keyword.directive.define:
+    fg: "{palette.cyan}"
+  @punctuation.delimiter:
+    fg: "{palette.cyan}"
+  @punctuation.bracket:
+    fg: "{palette.cyan}"
+  @punctuation.special:
+    fg: "{palette.cyan}"
   @comment:
-    fg: "{palette.lineNumber}"
+    fg: "{palette.comment}"
   @comment.documentation:
-    fg: "{palette.lineNumber}"
+    fg: "{palette.comment}"
+  @lsp.type.class:
+    fg: "{palette.blue}"
+  @lsp.type.enumMember:
+    fg: "{palette.fg}"
+  @lsp.type.property:
+    fg: "{palette.fg}"
+  @lsp.type.keyword:
+    fg: "{palette.cyan}"
+  @lsp.type.namespace:
+    fg: "{palette.yellow}"
+  @lsp.type.type:
+    fg: "{palette.yellow}"
+  @lsp.type.typeParameter:
+    fg: "{palette.orange}"
+  @lsp.type.comment:
+    fg: "{palette.comment}"
+    italic: true
+  @lsp.typemod.property.readonly:
+    fg: "#B2CCD6"
+  @lsp.type.selfParameter:
+    fg: "#B2CCD6"
+  @tag.attribute:
+    fg: "{palette.magenta}"
+  @tag.delimiter:
+    fg: "{palette.cyan}"
+  @markup.strong:
+    fg: "{palette.red}"
+  @markup.italic:
+    fg: "{palette.red}"
+  @markup.heading:
+    fg: "{palette.cyan}"
+  @markup.heading.1:
+    fg: "{palette.cyan}"
+  @markup.heading.2:
+    fg: "{palette.cyan}"
+  @markup.heading.3:
+    fg: "{palette.cyan}"
+  @markup.heading.4:
+    fg: "{palette.cyan}"
+  @markup.heading.5:
+    fg: "{palette.cyan}"
+  @markup.heading.6:
+    fg: "{palette.cyan}"
+  @markup.quote:
+    fg: "{palette.cyan}"
+  @markup.link.label:
+    fg: "{palette.red}"
+  @markup.list:
+    fg: "{palette.cyan}"
+  SnacksPickerDir:
+    fg: "#676767"
+  SnacksPickerPathIgnored:
+    fg: "#676767"
+  SnacksPickerPathHidden:
+    fg: "#676767"
+  SnacksPickerDimmed:
+    fg: "#676767"
+  SnacksPickerMatch:
+    fg: "#80CBC4"
+  SnacksPickerPrompt:
+    fg: "#80CBC4"
+  SnacksIndent:
+    fg: "#383838"
+  SnacksIndentScope:
+    fg: "#424242"
+  IblIndent:
+    fg: "#383838"
+  IblScope:
+    fg: "#424242"
 
 links:

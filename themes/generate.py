@@ -499,6 +499,24 @@ def zed_theme_doc(ctx: dict[str, Any], root: Path) -> dict[str, Any]:
 
     players = [render_template_value(player, slots) for player in template["players"]]
 
+    override_path = root / "overrides" / "zed" / f"{meta['id']}.yaml"
+    if override_path.exists():
+        from validate_overrides import validate_zed_override
+
+        validator = Validator()
+        validate_zed_override(validator, override_path)
+        if validator.errors:
+            raise RuntimeError("\n".join(validator.errors))
+        override = load_yaml(override_path)
+        if (override["meta"]["theme"], override["meta"]["variant"]) != (meta["id"], appearance):
+            raise RuntimeError(f"{override_path}: metadata does not match the canonical theme")
+        patch = resolve_context_value(override, ctx)
+        style.update(patch["style"])
+        for capture, attrs in patch["syntax"].items():
+            syntax[capture] = {**syntax.get(capture, {}), **attrs}
+        for player, attrs in patch["players"].items():
+            players[int(player.removeprefix("player_")) - 1].update(attrs)
+
     doc = {
         "$schema": template["theme_family_schema"]["schema_url"],
         "name": meta["name"],

@@ -20,7 +20,7 @@ themes/
 ├── TEMPLATE.yaml              # strict authoring template
 ├── core/                      # canonical theme definitions
 ├── templates/                 # app templates and vendored schemas
-├── overrides/                 # Ghostty, Neovim, Starship, Zellij YAML patches
+├── overrides/                 # Ghostty, Neovim, Starship, Zed, Zellij YAML patches
 ├── exports/                   # ghostty, k9s, nvim, pi, starship, tmux, zed, zellij
 ├── generate.py                # Python exporters
 ├── validate.py                # canonical schema validator and YAML parser
@@ -538,12 +538,17 @@ Adapter templates and schema helpers:
 - `themes/overrides/ghostty/*.yaml` -> optional Ghostty slot overrides applied
   after generator defaults
 - `themes/overrides/starship/*.yaml` -> optional Starship palette/format slots and string-valued module settings applied after generator defaults
+- `themes/overrides/zed/*.yaml` -> optional Zed style, syntax, and player patches applied before export schema validation
 - `themes/overrides/zellij/*.yaml` -> optional Zellij-specific
   component/player overrides applied after generator defaults
 - `themes/check_templates.py` -> consistency check for app template metadata,
   contract fields, section layout, duplicate entries, and declared key coverage
 
 ## Resolution Rules
+
+Zed overrides patch native `style` colors, merge `syntax` highlight attributes, and merge indexed `players.player_n` colors. Colors accept six-digit hex, eight-digit hex with alpha, or canonical palette/role references. See `overrides/zed/TEMPLATE.yaml` for the authoring shape. The generator validates keys, values, and theme metadata before applying patches, then validates the complete export against the vendored Zed schema.
+
+Vira Graphene's Neovim and Zed overrides follow the Graphene definition in the [official Vira Theme 2026.9.4 package](https://open-vsx.org/api/vira/vsc-vira-theme/2026.9.4). They preserve the original cyan keywords and punctuation, pink booleans, teal UI accents, and subdued comments and line numbers where the apps expose corresponding highlights. Zed uses the original translucent gray selection, `#47474780`. Neovim's Visual highlight cannot blend its background, so it uses `#343434`, the composite of that selection over `#212121`. Language-specific scope differences remain between VS Code, Neovim, and Zed.
 
 Starship overrides use the ordered keys `version`, `meta`, `slots`, and `modules`; see `overrides/starship/TEMPLATE.yaml`. Color slots accept hex colors or canonical palette/role references. The `format` slot accepts a Starship format string. Module patches are limited to existing string-valued settings in the Starship template and inherit all other settings. The generator rejects invalid override keys and mismatched theme metadata. One Half Light separates the folder icon on a purple background from the directory name on a blue background with regular-weight bright text. The Git branch, ahead/behind arrows, and commit counts use blue text on gray, while the time uses dark text. Language and environment segments use accent-colored text. Git change indicators, the SSH hostname, and error/Vim mode indicators use canonical palette colors. These accents prioritize palette consistency and do not meet the 4.5:1 contrast target retained for ordinary text.
 
@@ -652,12 +657,14 @@ Current override support:
 - `themes/overrides/ghostty/TEMPLATE.yaml` -> Ghostty minimal authoring template
 - `themes/overrides/TEMPLATE.yaml` -> Neovim minimal authoring template
 - `themes/overrides/starship/TEMPLATE.yaml` -> Starship minimal authoring template
+- `themes/overrides/zed/TEMPLATE.yaml` -> Zed minimal authoring template
 - `themes/overrides/zellij/TEMPLATE.yaml` -> Zellij minimal authoring template
 - `themes/overrides/ghostty/<theme-id>.yaml` -> Ghostty slot overrides
 - `themes/overrides/nvim/<theme-id>.yaml` -> Neovim per-theme override patches
 - `themes/overrides/starship/<theme-id>.yaml` -> Starship slot and module setting overrides
+- `themes/overrides/zed/<theme-id>.yaml` -> Zed style, syntax, and player overrides
 - `themes/overrides/zellij/<theme-id>.yaml` -> Zellij per-theme override patches
-- `themes/validate_overrides.py` -> override validator for Ghostty, Neovim, Starship, and Zellij override files
+- `themes/validate_overrides.py` -> override validator for Ghostty, Neovim, Starship, Zed, and Zellij override files
 
 Current Neovim override precedence:
 

@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from validate import Validator, load_yaml
-from validate_overrides import validate_starship_override
+from validate_overrides import validate_starship_override, validate_zed_override
 
 ROOT = Path(__file__).resolve().parent
 
@@ -647,6 +647,12 @@ def main() -> int:
         validate_starship_override(validator, path)
         errors.extend(validator.errors)
 
+    zed_overrides = sorted((ROOT / "overrides" / "zed").glob("*.yaml"))
+    for path in zed_overrides:
+        validator = Validator()
+        validate_zed_override(validator, path)
+        errors.extend(validator.errors)
+
     for path in sorted((ROOT / "overrides" / "ghostty").glob("*.yaml")):
         if path.name == "TEMPLATE.yaml":
             continue
@@ -668,6 +674,7 @@ def main() -> int:
         len(JSON_CHECKS)
         + len(YAML_CHECKS)
         + len(starship_overrides)
+        + len(zed_overrides)
         + len([p for p in (ROOT / "overrides" / "ghostty").glob("*.yaml") if p.name != "TEMPLATE.yaml"])
         + len(list((ROOT / "overrides" / "nvim").glob("*.yaml")))
         + len([p for p in (ROOT / "overrides" / "zellij").glob("*.yaml") if p.name != "TEMPLATE.yaml"])

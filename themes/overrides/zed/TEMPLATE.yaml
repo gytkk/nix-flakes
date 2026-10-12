@@ -1,0 +1,18 @@
+version: 1
+
+meta:
+  app: zed
+  theme: example-theme
+  variant: dark
+
+style:
+  text.accent: "{palette.cyan}"
+
+syntax:
+  keyword:
+    color: "{palette.cyan}"
+
+players:
+  player_1:
+    cursor: "{roles.ui.cursor}"
+    selection: "#47474780"

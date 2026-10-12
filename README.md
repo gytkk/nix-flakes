@@ -281,7 +281,7 @@ Resources should supplement the tools instead of expanding the tool count:
 
 ## Ghostty config
 
-The shared `modules.commonTheme` default is `vira-graphene` for Ghostty, K9s, Neovim, Starship, and tmux. Zed and Pi select the same generated theme in their own settings. See the [canonical themes documentation](themes/README.md#nix-integration) for export and installation behavior.
+The shared `modules.commonTheme` default is `vira-graphene` for Ghostty, K9s, Neovim, Starship, and tmux. Zed and Pi select the same generated theme in their own settings. Neovim and Zed use [Vira Graphene editor overrides](themes/README.md#resolution-rules) to follow the original syntax and UI colors, including gray selections. See the [canonical themes documentation](themes/README.md#nix-integration) for export and installation behavior.
 
 [Herdr](modules/herdr/README.md), [Claude Code](modules/claude/README.md), and [Git Delta](modules/git/README.md) use terminal palette themes. [Codex](modules/codex/README.md) uses its built-in `one-half-dark` syntax theme because the canonical pipeline has no Codex export.
 

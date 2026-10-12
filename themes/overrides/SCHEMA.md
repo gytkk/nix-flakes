@@ -15,10 +15,12 @@ Do not use overrides to redefine the canonical theme core.
 - `themes/overrides/ghostty/TEMPLATE.yaml`
 - `themes/overrides/TEMPLATE.yaml` for Neovim
 - `themes/overrides/starship/TEMPLATE.yaml`
+- `themes/overrides/zed/TEMPLATE.yaml`
 - `themes/overrides/zellij/TEMPLATE.yaml`
 - `themes/overrides/ghostty/<theme-id>.yaml`
 - `themes/overrides/nvim/<theme-id>.yaml`
 - `themes/overrides/starship/<theme-id>.yaml`
+- `themes/overrides/zed/<theme-id>.yaml`
 - `themes/overrides/zellij/<theme-id>.yaml`
 - `uv run --no-project themes/validate_overrides.py`
 - `uv run --no-project themes/check_templates.py` also checks override template/current override file structure
@@ -39,6 +41,8 @@ For Neovim exports, values resolve in this order:
 If a link override exists for a group, it replaces the final attrs table for that group.
 
 For Starship exports, `slots` patches replace generator-computed slots before template rendering. `modules.<table>.<key>` patches replace existing string-valued template settings; other settings retain their template values. See the [Starship resolution rules](../README.md#resolution-rules) and `themes/overrides/starship/TEMPLATE.yaml` for supported values and authoring structure.
+
+For Zed exports, `style` patches replace native style colors, `syntax.<capture>` patches merge highlight attributes, and `players.player_n` patches merge colors into an existing player entry. Unpatched attributes and players inherit template defaults. See [Zed resolution rules](../README.md#resolution-rules) and `themes/overrides/zed/TEMPLATE.yaml`. Style and player colors accept `#RRGGBB`, `#RRGGBBAA`, and canonical references. Syntax accepts the official `color`, `background_color`, `font_style`, and `font_weight` fields, including `null` to clear an inherited attribute.
 
 For Zellij exports, values resolve in this order:
 

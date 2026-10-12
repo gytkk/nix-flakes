@@ -32,6 +32,8 @@ ROOT = Path(__file__).resolve().parent
 NVIM_TEMPLATE_PATH = ROOT / "templates" / "nvim" / "official-template.json"
 ZELLIJ_TEMPLATE_PATH = ROOT / "templates" / "zellij" / "official-template.json"
 STARSHIP_TEMPLATE_PATH = ROOT / "templates" / "starship" / "official-template.json"
+ZED_TEMPLATE_PATH = ROOT / "templates" / "zed" / "official-template.json"
+ZED_HEX_RE = re.compile(r"^#[0-9a-fA-F]{6}(?:[0-9a-fA-F]{2})?$")
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -303,12 +305,73 @@ def validate_starship_override(v: Validator, path: Path) -> None:
         v.error(path, "override must define at least one slot or module override")
 
 
+def validate_zed_override(v: Validator, path: Path) -> None:
+    try:
+        data = load_yaml(path)
+    except ParseError as e:
+        v.error(path, str(e))
+        return
+
+    compare_keys(v, path, "override", data, ["version", "meta", "style", "syntax", "players"])
+    if data.get("version") != 1:
+        v.error(path, "version must be 1")
+    meta = ensure_mapping(v, path, data.get("meta"), "meta")
+    if meta is not None:
+        validate_meta(v, path, meta, app="zed")
+
+    template = load_json(ZED_TEMPLATE_PATH)
+    allowed_style = set(template["style_keys"]) - {"syntax", "players"}
+
+    def valid_color(value: Any) -> bool:
+        return isinstance(value, str) and bool(
+            ZED_HEX_RE.fullmatch(value) or PALETTE_REF_RE.fullmatch(value) or ROLE_REF_RE.fullmatch(value)
+        )
+
+    style = ensure_mapping(v, path, data.get("style"), "style")
+    if style is not None:
+        for key, value in style.items():
+            if key not in allowed_style or not valid_color(value):
+                v.error(path, f"style.{key} must be a supported Zed color key with a color or reference")
+
+    syntax = ensure_mapping(v, path, data.get("syntax"), "syntax")
+    if syntax is not None:
+        for capture, attrs in syntax.items():
+            if not capture or not isinstance(attrs, dict) or not attrs:
+                v.error(path, f"syntax.{capture} must be a non-empty highlight mapping")
+                continue
+            for key, value in attrs.items():
+                if key in {"color", "background_color"}:
+                    valid = value in (None, "null") or valid_color(value)
+                elif key == "font_style":
+                    valid = value in (None, "null", "normal", "italic", "oblique")
+                elif key == "font_weight":
+                    valid = value in (None, "null") or (type(value) is int and value in range(100, 901, 100))
+                else:
+                    valid = False
+                if not valid:
+                    v.error(path, f"syntax.{capture}.{key} is not a supported highlight value")
+
+    players = ensure_mapping(v, path, data.get("players"), "players")
+    if players is not None:
+        for player, attrs in players.items():
+            if player not in {f"player_{i}" for i in range(1, len(template["players"]) + 1)}:
+                v.error(path, f"players.{player} is not a supported player")
+            if not isinstance(attrs, dict) or not attrs:
+                v.error(path, f"players.{player} must be a non-empty color mapping")
+                continue
+            for key, value in attrs.items():
+                if key not in {"cursor", "background", "selection"} or not valid_color(value):
+                    v.error(path, f"players.{player}.{key} must be a supported player color")
+    if not style and not syntax and not players:
+        v.error(path, "override must define at least one style, syntax, or player override")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Validate theme override schema files.")
     parser.add_argument(
         "paths",
         nargs="*",
-        help="Override YAML files to validate. Defaults to themes/overrides/{ghostty,nvim,starship,zellij}/*.yaml",
+        help="Override YAML files to validate. Defaults to themes/overrides/{ghostty,nvim,starship,zed,zellij}/*.yaml",
     )
     args = parser.parse_args()
 
@@ -326,6 +389,7 @@ def main() -> int:
             *[p.resolve() for p in sorted((ROOT / "overrides" / "ghostty").glob("*.yaml")) if p.name != "TEMPLATE.yaml"],
             *[p.resolve() for p in sorted((ROOT / "overrides" / "nvim").glob("*.yaml"))],
             *[p.resolve() for p in sorted((ROOT / "overrides" / "starship").glob("*.yaml")) if p.name != "TEMPLATE.yaml"],
+            *[p.resolve() for p in sorted((ROOT / "overrides" / "zed").glob("*.yaml")) if p.name != "TEMPLATE.yaml"],
             *[p.resolve() for p in sorted((ROOT / "overrides" / "zellij").glob("*.yaml")) if p.name != "TEMPLATE.yaml"],
         ]
     if not targets:
@@ -340,6 +404,8 @@ def main() -> int:
             validate_nvim_override(v, target, nvim_allowed_attrs)
         elif target.parent.name == "starship":
             validate_starship_override(v, target)
+        elif target.parent.name == "zed":
+            validate_zed_override(v, target)
         elif target.parent.name == "zellij":
             validate_zellij_override(v, target, zellij_allowed_components, zellij_allowed_attrs)
         else:

@@ -1,0 +1,96 @@
+version: 1
+
+# Graphene source: https://open-vsx.org/api/vira/vsc-vira-theme/2026.9.4
+meta:
+  app: zed
+  theme: vira-graphene
+  variant: dark
+
+style:
+  border: "#21212199"
+  border.variant: "#21212199"
+  border.focused: "#FFFFFF00"
+  border.selected: "#80CBC4"
+  border.disabled: "#21212199"
+  background: "{palette.bg}"
+  element.hover: "{palette.bg}"
+  element.active: "#D9D9D926"
+  element.selected: "#D9D9D91a"
+  drop_target.background: "#D9D9D91a"
+  ghost_element.hover: "#D9D9D91a"
+  ghost_element.active: "#80CBC426"
+  ghost_element.selected: "#D9D9D91a"
+  text.muted: "#676767"
+  text.placeholder: "#D9D9D966"
+  text.disabled: "{palette.comment}"
+  text.accent: "#80CBC4"
+  icon: "#D9D9D9b3"
+  icon.muted: "#676767b3"
+  icon.disabled: "{palette.comment}"
+  icon.accent: "#80CBC4"
+  link_text.hover: "{palette.fg}"
+  tab_bar.background: "{palette.bg}"
+  tab.inactive_background: "{palette.bg}"
+  search.match_background: "#D9D9D926"
+  panel.focused_border: "#80CBC4"
+  panel.indent_guide: "#424242"
+  panel.indent_guide_active: "#424242"
+  pane.focused_border: "#80CBC4"
+  pane_group.border: "#D9D9D90f"
+  scrollbar.thumb.background: "#EEFFFF21"
+  scrollbar.thumb.hover_background: "#EEFFFF0f"
+  editor.active_line.background: "#36363600"
+  editor.line_number: "#424242ff"
+  editor.active_line_number: "#676767"
+  editor.invisible: "#424242ff"
+  editor.wrap_guide: "#424242"
+  editor.active_wrap_guide: "#424242"
+  editor.indent_guide: "#424242b3"
+  editor.indent_guide_active: "#424242"
+  editor.document_highlight.bracket_background: "{palette.bg}"
+  editor.document_highlight.read_background: "#ff9cac4d"
+  editor.document_highlight.write_background: "#C3E88D4d"
+  terminal.ansi.black: "#000000"
+  terminal.ansi.white: "#ffffff"
+
+syntax:
+  attribute:
+    color: "{palette.magenta}"
+  boolean:
+    color: "#ff9cac"
+  constant:
+    color: "{palette.fg}"
+  keyword:
+    color: "{palette.cyan}"
+    font_style: italic
+  link_text:
+    color: "{palette.red}"
+  namespace:
+    color: "{palette.yellow}"
+  property:
+    color: "{palette.fg}"
+  punctuation:
+    color: "{palette.cyan}"
+  punctuation.bracket:
+    color: "{palette.cyan}"
+  punctuation.delimiter:
+    color: "{palette.cyan}"
+  string.escape:
+    color: "{palette.fg}"
+  string.regex:
+    color: "{palette.green}"
+  string.special:
+    color: "{palette.green}"
+  string.special.symbol:
+    color: "{palette.cyan}"
+  title:
+    color: "{palette.cyan}"
+    font_weight: null
+  variable.special:
+    color: "{palette.fg}"
+
+players:
+  player_1:
+    cursor: "{roles.ui.cursor}"
+    background: "{roles.ui.cursor}"
+    selection: "#47474780"
