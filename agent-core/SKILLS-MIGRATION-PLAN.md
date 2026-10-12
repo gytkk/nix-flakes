@@ -4,7 +4,7 @@
 
 Skill source 취득과 파일 배치는 버전을 고정한 `skills` CLI에 맡긴다. Agent-core는 지침 문서 생성과 skill source 선언 및 검증을 담당하고, runtime integration은 설치 경로별 소유권, 충돌 검사와 복구를 담당한다. Codex와 Pi는 `~/.agents/skills`를 함께 사용한다. Claude는 `--copy -g`로 독립적인 설치본을 두며, OpenClaw는 기존 external managed 경로에 project copy로 설치한다.
 
-외부 dependency로 우선 전환할 skill은 `mattpocock/skills`의 9개다. 실제 workflow가 다른 `code-review`, `writing-for-agents`와 로컬 수정이 확인된 `pi-agent`, 로컬에서 관리하는 8개는 이 repo를 source로 설치한다. 첫 전환에서는 외부 버전을 올리지 않고, 현재 import의 기준 commit을 사용한다.
+외부 dependency로 우선 전환할 skill은 `mattpocock/skills`의 9개다. Skill 탐색을 돕는 `vercel-labs/skills`의 `find-skills`도 모든 runtime의 기본 설치 대상으로 추가한다. 실제 workflow가 다른 `code-review`, `writing-for-agents`와 로컬 수정이 확인된 `pi-agent`, 로컬에서 관리하는 8개는 이 repo를 source로 설치한다. 기존 skill은 현재 import의 기준 commit을 유지하고, 신규 `find-skills`는 별도의 고정 revision으로 선언한다.
 
 OpenClaw의 pylv-onyx 전환과 실제 discovery 검증까지 필수 범위에 포함한다. 모든 적용 대상 host의 전환을 확인한 뒤 기존 skill renderer와 vendored source를 제거한다. Host 접근이나 검증이 불가능하면 해당 작업과 최종 정리를 미완료로 남기며, OpenClaw를 범위에서 제외해 전체 전환을 완료 처리하지 않는다.
 
@@ -14,11 +14,12 @@ OpenClaw의 pylv-onyx 전환과 실제 discovery 검증까지 필수 범위에 �
 
 | 피드백 | 수정한 계획 |
 | --- | --- |
-| Codex와 Pi의 공통 경로를 분리하지 않는다. | 같은 설치 pool을 사용한다. 이전 계획의 native 제외 설정과 runtime별 격리 검증을 제거한다. 두 runtime에 현재 목록의 합집합 20개가 노출되는 구조로 정리한다. |
-| Claude는 `--copy -g`로 설치한다. | Claude의 기존 선택 목록 17개를 `~/.claude/skills`에 복사한다. 공유 pool에 대한 symlink는 만들지 않는다. |
+| Codex와 Pi의 공통 경로를 분리하지 않는다. | 같은 설치 pool을 사용한다. 이전 계획의 native 제외 설정과 runtime별 격리 검증을 제거한다. 기존 합집합 20개에 `find-skills`를 더한 21개를 두 runtime에 노출한다. |
+| Claude는 `--copy -g`로 설치한다. | 기존 17개에 `find-skills`를 더한 18개를 `~/.claude/skills`에 복사한다. 공유 pool에 대한 symlink는 만들지 않는다. |
 | 원본 그대로 사용할 수 있는 외부 skill은 dependency로 직접 참조한다. | 모든 skill을 이 repo에 vendoring하는 전제를 제거한다. 외부 source와 immutable revision을 선언하고, 로컬 수정본 및 로컬 작성 skill과 구분한다. |
 | CLI 동작을 먼저 검증하고 전환 계약을 구체화한다. | 격리 실험 후 schema와 연결 명령을 구현한다. 설치 경로별 ownership 기록, 부분 실패 판정, 복구 순서와 단계별 검증을 명시한다. |
-| OpenClaw 전환도 완료 범위에 포함한다. | pylv-onyx에서 16개 skill의 설치와 discovery, workspace override 및 prompt hook을 확인한다. 확인 전에는 최종 정리를 진행하지 않는다. |
+| OpenClaw 전환도 완료 범위에 포함한다. | pylv-onyx에서 `find-skills`를 포함한 17개 skill의 설치와 discovery, workspace override 및 prompt hook을 확인한다. 확인 전에는 최종 정리를 진행하지 않는다. |
+| Skill 탐색을 위한 `find-skills`를 기본 설치한다. | `vercel-labs/skills`를 두 번째 external source로 선언하고 Codex, Pi, Claude, OpenClaw의 기본 선택 목록에 포함한다. |
 
 Codex/Pi의 공유 pool은 filesystem과 discovery 위치를 공유하는 선택이다. 보안 격리를 제공하지 않으며, 기존 runtime별 목록을 그대로 유지하는 방식도 아니다. Codex에서 `pi-agent`, Pi에서 `openai-decisions`도 발견할 수 있게 된다. Skill 설치가 관련 package나 credential을 준비해 주지는 않는다.
 
@@ -52,6 +53,14 @@ Codex/Pi의 공유 pool은 filesystem과 discovery 위치를 공유하는 선택
 
 첫 dependency source는 [mattpocock/skills의 고정 snapshot](https://github.com/mattpocock/skills/tree/6654f6b60cd9d5be8b54c6fafe44346dabeb3b76)이다. `--skill`로 위 9개만 선택한다. Setup skill, user-invoked wrapper와 그 밖의 upstream skill을 함께 설치하지 않는다.
 
+### 기본 설치에 추가할 find-skills
+
+두 번째 external source는 `https://github.com/vercel-labs/skills.git`이다. `skills/find-skills` 경로의 [find-skills](https://github.com/vercel-labs/skills/blob/671e8c320810d36fed80fac5f1a2c1bf7e82d812/skills/find-skills/SKILL.md)를 commit `671e8c320810d36fed80fac5f1a2c1bf7e82d812`로 고정하고 `--skill find-skills`로 선택한다. 검토한 CLI의 gitHead와 같은 snapshot에서 skill 본문과 root license를 확인했다. CLI package 버전과 skill source revision은 별도 dependency로 기록하며, 이후에도 함께 갱신해야 한다고 가정하지 않는다.
+
+사용자가 특정 작업에 맞는 skill을 찾거나 agent 기능 확장을 원할 때 검색과 후보 제시를 돕도록 Codex/Pi 공통 pool, Claude copy, OpenClaw project copy에 모두 포함한다. 기존 vendored skill의 외부화와 구분되는 신규 기능 추가이며, CLI의 추가 설치 제안에 의존하지 않고 manifest에 기본 대상으로 선언한다. Local vendored 디렉터리는 만들지 않는다.
+
+탐색에 사용하는 CLI도 `DISABLE_TELEMETRY=1 npx --yes skills@1.7.2 find <query>`로 버전을 고정한다. Upstream 본문의 `npx skills` 및 `update` 예시는 이 repo의 source 고정과 설치 소유권 정책을 대체하지 않는다. 검색한 후보를 repo-managed 목록에 추가할 때는 source와 revision을 검토해 manifest 및 연결 명령으로 설치한다. `find-skills` 본문은 로컬 patch 없이 사용한다.
+
 ### 로컬 수정본으로 유지할 3개
 
 | Skill | 확인한 차이 | 계획 |
@@ -76,7 +85,7 @@ Codex/Pi의 공유 pool은 filesystem과 discovery 위치를 공유하는 선택
 
 Quokka에서 참고한 분석/검증 workflow는 독립적으로 작성한 지침이다. Private Quokka skill dependency로 전환하지 않는다. `openai-decisions`가 사용하는 외부 API와 이 skill 문서의 source도 서로 다른 dependency다.
 
-초기 전환 결과는 외부 9개, 로컬 11개다. 기존 20개 skill의 workflow를 유지하되, 위에서 명시한 주석과 UI metadata 차이는 허용한다.
+초기 전환 결과는 외부 10개(Matt 9개와 `find-skills` 1개), 로컬 11개로 총 21개다. 기존 20개 skill의 workflow를 유지하되 위에서 명시한 주석과 UI metadata 차이는 허용하고, `find-skills`의 탐색 workflow를 추가한다.
 
 ## Dependency를 참조하는 방식
 
@@ -98,7 +107,15 @@ DISABLE_TELEMETRY=1 npx --yes skills@1.7.2 add \
   --agent codex pi --global --yes --json
 ```
 
-Claude에는 같은 source와 9개 목록을 `--agent claude-code --copy --global`로 설치한다. Local source는 이 repo checkout의 `agent-core/skills/` 절대 경로다. 상대 source 경로를 OpenClaw의 별도 작업 디렉터리에 잘못 적용하지 않는다.
+`find-skills`는 별도 source 호출로 설치한다. 아래도 아직 실행하지 않은 계획 예시다.
+
+```bash
+DISABLE_TELEMETRY=1 npx --yes skills@1.7.2 add \
+  https://github.com/vercel-labs/skills/tree/671e8c320810d36fed80fac5f1a2c1bf7e82d812 \
+  --skill find-skills --agent codex pi --global --yes --json
+```
+
+Claude에는 Matt의 9개와 `find-skills`를 각 source별로 `--agent claude-code --copy --global --yes --json`을 사용해 설치한다. OpenClaw에는 각 source의 선택 목록을 기존 external managed 작업 디렉터리에서 `--agent openclaw --copy --yes --json`으로 project 설치한다. Local source는 이 repo checkout의 `agent-core/skills/` 절대 경로다. 상대 source 경로를 OpenClaw의 별도 작업 디렉터리에 잘못 적용하지 않는다.
 
 첫 npx 실행에는 npm 접근이, 외부 Git source 취득에는 GitHub 접근이 필요할 수 있다. Nix 빌드와 Home Manager activation 안에서는 npm 설치나 외부 skill 다운로드를 수행하지 않는다. 설치는 명시적인 사용자 실행 작업이며, network 실패를 성공으로 처리하지 않는다.
 
@@ -106,13 +123,15 @@ Claude에는 같은 source와 9개 목록을 `--agent claude-code --copy --globa
 
 기존 [manifest](manifest.toml)에 skill 이름과 source의 대응을 선언한다. Local source와 external source를 구분하고, external에는 repo URL, 40자리 commit SHA, 선택할 이름과 upstream 경로를 기록한다. Runtime별 설치 대상도 같은 manifest에서 정한다. Module마다 skill 목록을 복제하거나 CLI가 manifest를 직접 해석한다고 가정하지 않는다.
 
-초기 선언은 external source 하나에 위 9개, local source에 나머지 11개다. Codex/Pi는 합집합 20개를 하나의 pool로 설치하고, Claude는 기존 17개, OpenClaw는 기존 16개를 선택한다. Local source에서 external source로 옮긴 이름이 동시에 두 source에 선언되면 오류로 처리한다.
+초기 선언은 external source 두 개에 Matt의 9개와 Vercel의 `find-skills` 1개를 각각 배정하고, local source에 나머지 11개를 둔다. Codex/Pi는 기존 합집합에 `find-skills`를 더한 21개를 하나의 pool로 설치하고, Claude는 기존 17개에 1개를 더한 18개, OpenClaw는 기존 16개에 1개를 더한 17개를 선택한다. Source 사이에 같은 이름이 중복 선언되면 오류로 처리한다.
 
 `package.json`의 `skills` field와 `experimental_sync`도 조사했다. 검토한 배포본에는 Git source 선언과 설치 처리가 있지만, local directory를 해당 field에 넣으면 `is not a git source` 오류가 된다. 또한 remote 설치 경로에는 copy 설정 전달을 별도로 확인해야 한다. 이 experimental 기능을 기반으로 새 npm project나 `node_modules` 관리 구조를 추가하지 않는다. 작은 연결 명령이 manifest의 source별 선택 목록을 CLI의 안정적인 `add` 명령에 전달하는 방식을 사용한다.
 
 CLI의 global lock과 project lock `skills-lock.json`은 CLI의 설치 기록으로 취급한다. Global lock은 `XDG_STATE_HOME`이 설정되면 그 아래 `skills/.skill-lock.json`, 아니면 `~/.agents/.skill-lock.json`에 있다. 이를 전체 source 선언이나 frozen dependency resolver로 간주하지 않는다. Hash 기록만으로 원본 revision이 고정되지는 않는다. Source commit을 manifest에 고정하고, 재설치는 그 선언에서 수행한다. CLI의 `update`가 임의로 최신 upstream을 선택하도록 자동 실행하지 않는다.
 
 MIT notice는 보존한다. Matt의 현재 `skills/LICENSE`는 고정 upstream의 root `LICENSE`와 동일하다. CLI가 root license를 skill 디렉터리에 자동으로 포함한다고 가정하지 않으며, 설치 결과에 notice가 없으면 같은 revision의 license를 설치본에 포함하는 최소한의 metadata 단계를 둔다. License 보완 파일은 content 검증과 ownership 기록에서 명시적으로 구분한다. Skill 본문에 로컬 patch를 다시 적용하는 방식으로 외부 dependency를 유지하지 않는다.
+
+`find-skills`에는 해당 Vercel snapshot의 [root LICENSE](https://github.com/vercel-labs/skills/blob/671e8c320810d36fed80fac5f1a2c1bf7e82d812/LICENSE)를 같은 방식으로 보존한다. 두 source의 notice를 혼동하거나 Matt의 license로 대신하지 않는다.
 
 ### 설치 상태와 실패 처리
 
@@ -128,9 +147,9 @@ Global lock은 `skills[skillName]`으로 기록하며 설치 경로별 상태를
 
 | Runtime | Repo-managed skill 수 | 설치 위치와 방식 |
 | --- | --- | --- |
-| Codex/Pi | 공통 20개 | `~/.agents/skills`에 공통 pool로 global 설치한다. 두 runtime을 분리하는 경로나 native 제외 설정을 추가하지 않는다. |
-| Claude | 17개 | `~/.claude/skills`에 `--copy --global`로 설치한다. Marketplace plugin skill은 그대로 유지한다. |
-| OpenClaw | 16개 | `~/.local/share/openclaw/agent-core`에서 project `--copy`를 실행해 그 아래 `skills`에 설치한다. Mutable OpenClaw state로 옮기지 않는다. |
+| Codex/Pi | 공통 21개 | `find-skills`를 포함해 `~/.agents/skills`에 공통 pool로 global 설치한다. 두 runtime을 분리하는 경로나 native 제외 설정을 추가하지 않는다. |
+| Claude | 18개 | `find-skills`를 포함해 `~/.claude/skills`에 `--copy --global`로 설치한다. Marketplace plugin skill은 그대로 유지한다. |
+| OpenClaw | 17개 | `find-skills`를 포함해 `~/.local/share/openclaw/agent-core`에서 project `--copy`를 실행해 그 아래 `skills`에 설치한다. Mutable OpenClaw state로 옮기지 않는다. |
 
 Shared global pool은 Claude와 별개로 갱신한다. 원본 수정이 checkout에서 설치본으로 실시간 반영되는 것은 아니다. 외부 source의 SHA 변경과 local source 수정 모두 해당 CLI 설치 명령의 재실행이 필요하다.
 
@@ -141,7 +160,7 @@ OpenClaw의 기존 `skills.load.extraDirs`, prompt hook, extension materializati
 ### 1. 격리 실험과 CLI 채택 조건 확인
 
 1. 기존 manifest와 skill renderer를 유지한 상태에서 임시 HOME, XDG 경로, npm cache와 작업 디렉터리로 pinned CLI를 검증한다. User credential을 상속하거나 runtime 설정을 복사하지 않고, skill에 포함된 보조 script는 실행하지 않는다.
-2. External 9개와 local 선택 목록을 설치하고 source SHA, 정확한 이름 집합, 전체 파일 목록과 bytes, 보조 문서 및 script, UI metadata와 license를 확인한다. `--skill`이 의도한 항목만 선택하는지 확인한다.
+2. 두 external source의 10개와 local 선택 목록을 설치하고 source SHA, 정확한 이름 집합, 전체 파일 목록과 bytes, 보조 문서 및 script, UI metadata와 source별 license를 확인한다. `--skill`이 의도한 항목만 선택하고 `find-skills`가 모든 runtime 대상에 포함되는지 확인한다.
 3. Codex/Pi shared pool, Claude global copy, OpenClaw project copy를 모두 검증한다. OpenClaw copy에 symlink나 hardlink가 없는지 확인하고, root checkout에 `.agents/`나 설치 lock이 생기지 않게 한다.
 4. 재설치, source 파일 삭제 반영, 충돌과 사용자 수정, 부분 실패를 재현한다. 종료 코드와 JSON, 파일 및 lock의 실제 변화를 대조하고 backup에서 복구하는 절차를 검증한다.
 5. 실제 CLI 취득 및 설치 테스트는 기본 pytest와 분리된 명시적 실행 대상으로 둔다. 필요한 Node/npm/Git와 network 조건을 해당 테스트 실행 방법에 기록한다.
@@ -152,7 +171,7 @@ OpenClaw의 기존 `skills.load.extraDirs`, prompt hook, extension materializati
 
 1. Runtime별 기존 지침 파일 bytes를 비교 기준으로 고정한다. Manifest schema에 mixed source 선언을 추가하고 이름 중복, full SHA, 안전한 경로, local source 존재와 external 선택 목록을 검증한다. Dependency 선언 변경은 구현 승인 후 수행한다.
 2. Agent-core에 source별 선택 목록을 읽기 전용으로 출력하는 작은 interface를 마련한다. Pure renderer는 홈 디렉터리나 네트워크를 읽지 않는다. Local skill에는 기존 구조 검증을 적용하고 external source에는 선언 검증을 적용하며, external 파일의 구조와 bytes는 취득 후 검증한다.
-3. 전환 기간에는 기존 vendored 9개와 skill render output을 유지한다. 새 source 선언은 CLI 설치 계획에 적용하고, 기존 renderer는 4단계까지 로컬 tree를 사용하는 임시 배포 경로로 남긴다. 새 manifest를 읽을 수 있도록 parser를 수정하되 기존 runtime 선택 목록과 render bytes는 보존한다.
+3. 전환 기간에는 기존 vendored 9개와 skill render output을 유지한다. 새 source 선언은 CLI 설치 계획에 적용하고, 기존 renderer는 4단계까지 로컬 tree를 사용하는 임시 배포 경로로 남긴다. 새 manifest를 읽을 수 있도록 parser를 수정하되 legacy render의 선택 목록과 bytes는 보존한다. 신규 `find-skills`는 CLI 설치 선택에만 추가하며 legacy renderer가 로컬 source를 요구하지 않도록 구분한다.
 4. Host 경로와 CLI 실행은 runtime integration이 담당한다. 실행 전 변경 계획을 출력하고, 동명 타 source 설치나 설치본의 사용자 수정이 있으면 중단한다. 기존 Nix 관리 항목의 최초 소유권 인계는 3단계에서 별도로 검증한다.
 5. 설치 경로별 ownership 기록, `--json` 및 실제 파일 검증, 영향받는 항목의 backup과 복구를 구현한다. Shared pool과 Claude copy를 서로 다른 revision으로 설치한 경우에도 각각의 상태와 사용자 수정을 구분하는지 검사한다.
 6. Source 간 이동과 stale skill 정리는 이전 관리 대상과 content를 확인하고 사용자 승인 후 수행한다. Shared pool에서 다른 runtime이 사용하는 항목과 marketplace 또는 개인 skill은 삭제하지 않는다. 실패 시 source, skill, 대상 경로와 실패 단계를 보고한다.
@@ -167,9 +186,9 @@ OpenClaw의 기존 `skills.load.extraDirs`, prompt hook, extension materializati
 4. Host별 switch 전에 pinned CLI와 필요한 source의 취득 가능성을 확인하고 영향받는 파일 및 상태를 backup한다. OpenClaw의 external managed tree는 state archive에 포함되지 않으므로 별도로 backup한다. Npm cache만으로 Git source의 재취득이 보장된다고 가정하지 않는다. 사용자가 Home Manager/NixOS switch를 실행한 뒤 CLI 설치 명령을 실행한다. 설치 실패 시 아래 rollback 순서로 기존 상태를 복구한다.
 5. Standalone Codex의 `/etc/codex/skills`는 선언 제거만으로 남을 수 있으므로 별도로 점검한다. Legacy path는 repo 관리 대상임을 확인하고 승인한 경우에만 제거한다. OpenClaw의 기존 read-only materialized tree는 backup으로 이동한 뒤 동일 경로에 CLI copy를 설치한다. 사용자 파일에 대한 포괄적인 recursive delete는 하지 않는다.
 6. pylv-onyx에서 `~/.local/share/openclaw/agent-core`를 작업 디렉터리로 사용해 `--agent openclaw --copy --yes --json`으로 external/local 선택 목록을 project 설치한다. Absolute local source 경로를 사용하고, 기존 `skills.load.extraDirs`가 같은 `skills` 경로를 가리키는지 확인한다.
-7. 모든 대상 runtime의 실제 이름 집합과 발견 경로, 중복 discovery를 확인한다. OpenClaw는 manifest의 16개 이름과 설치 파일을 대조하고, 각 agent의 discovery 및 workspace override, prompt hook과 extension 진단을 확인한다. Host 접근이나 검증이 불가능하면 해당 작업과 4단계를 미완료로 남긴다.
+7. 모든 대상 runtime의 실제 이름 집합과 발견 경로, 중복 discovery를 확인한다. OpenClaw는 `find-skills`를 포함한 manifest의 17개 이름과 설치 파일을 대조하고, 각 agent의 discovery 및 workspace override, prompt hook과 extension 진단을 확인한다. Host 접근이나 검증이 불가능하면 해당 작업과 4단계를 미완료로 남긴다.
 
-완료 조건: 모든 적용 대상 host에서 설치 경로별 담당자가 하나뿐이며, legacy와 새 설치본이 중복 노출되지 않는다. Codex/Pi 공통 20개, Claude 17개, pylv-onyx OpenClaw 16개가 각 runtime에서 발견된다. 관련 없는 skill과 plugin, OpenClaw의 기존 integration 동작이 보존되어야 한다. OpenClaw 검증은 후속 선택 작업으로 넘기지 않는다.
+완료 조건: 모든 적용 대상 host에서 설치 경로별 담당자가 하나뿐이며, legacy와 새 설치본이 중복 노출되지 않는다. `find-skills`를 포함해 Codex/Pi 공통 21개, Claude 18개, pylv-onyx OpenClaw 17개가 각 runtime에서 발견된다. 관련 없는 skill과 plugin, OpenClaw의 기존 integration 동작이 보존되어야 한다. OpenClaw 검증은 후속 선택 작업으로 넘기지 않는다.
 
 ### 4. Vendoring과 renderer 정리
 
@@ -179,7 +198,7 @@ OpenClaw의 기존 `skills.load.extraDirs`, prompt hook, extension materializati
 4. Runtime별 지침 파일 bytes를 2단계에서 고정한 기준과 직접 비교한다. 일치를 확인하고 의도된 output layout 변경을 검토한 뒤 Python의 [golden hash](schema/golden-hashes.toml)와 [Nix recursive hash](nix/runtime-golden-hashes.nix)를 각각 갱신한다. 전체 hash 갱신만으로 지침 보존을 입증하지 않는다. Skill 설치 검증은 CLI integration과 runtime smoke test로 옮긴다.
 5. Agent-core와 각 runtime의 기존 README, root 문서의 관련 설명을 갱신한다. Content upgrade와 설치 도구 전환, native shared discovery와 copy 설치를 구분해 설명한다.
 
-완료 조건: 외부 9개의 원문 복사본과 별도 배포 구현이 없어지고, 지침 생성 및 로컬 source 검증은 계속 재현 가능하다. External source의 revision과 취득 후 검증 책임이 명확하다.
+완료 조건: Matt skill 9개의 원문 복사본과 별도 배포 구현이 없어지고, 지침 생성 및 로컬 source 검증은 계속 재현 가능하다. 두 external source의 revision과 취득 후 검증 책임이 명확하다.
 
 ## 검증과 rollback
 
@@ -188,6 +207,7 @@ OpenClaw의 기존 `skills.load.extraDirs`, prompt hook, extension materializati
 - 기본 offline suite는 mixed source 선언, 중복 이름, SHA와 경로, target별 선택 목록, ownership 비교와 지침 bytes 보존을 확인한다. [Nix package](nix/package.nix)의 `pytestCheckHook`과 기본 pytest 실행에 npm 설치, network 접근이나 실제 host 상태를 요구하지 않는다.
 - 실제 CLI integration suite는 별도 opt-in 명령으로 실행한다. Exact SHA 설치, local 수정 반영, 재실행, 선택 목록 변경, 동명 충돌, 사용자 수정, 삭제, license 누락, 부분 실패 및 복구와 무관한 skill 보존을 확인한다. 실행하지 못한 경우 통과로 보고하지 않는다.
 - Runtime smoke test의 기대 이름은 manifest에서 가져온다. 현재 설치 디렉터리에서 기대 목록을 역으로 만들지 않고, repo-managed 이름의 정확한 집합과 실제 발견 경로를 비교한다. 관련 없는 skill을 전체 개수 비교로 배제하지 않는다.
+- `find-skills`는 각 runtime의 기본 목록과 실제 loader에서 이름, description 및 source 경로를 확인한다. Network integration에서는 pinned CLI로 검색해 후보 이름과 source를 얻을 수 있는지 확인하되 검색 순위나 개수를 고정하지 않는다. 검색 후보의 추가 설치는 이 검증에 포함하지 않으며, loader 및 검색 성공을 모델의 실제 skill 선택 행동 검증으로 보고하지 않는다.
 - OpenClaw는 [runtime smoke test](../modules/openclaw/tests/runtime-smoke.sh)와 [deployed skill test](../modules/openclaw/tests/deployed-skills.test.sh)를 새 기대값에 맞게 보완하고 pylv-onyx에서 둘 다 실행한다. 설치 파일이 ordinary file이고 hardlink가 아닌지 확인하고, 모든 agent에서 발견되는지 검사한다. Workspace override는 명시적으로 허용하되 override 경로와 managed 설치본을 각각 확인한다. Context hook과 session-record extension의 로드 및 진단, 기존 service drop-in의 보존도 검사한다. Multi-workspace 검사 skip과 실제 prompt 내용 미검증은 결과에 구분해 남긴다.
 - `uv run --project agent-core -m pytest agent-core/tests`, `uv run --project agent-core agent-core check`와 바뀐 범위의 runtime test를 실행한다. CLI integration과 pylv-onyx smoke는 각각 명시적으로 실행하고 결과를 구분한다. 변경 Nix 파일에 `nixfmt`를 적용하고 소유권 전환 커밋마다 필요한 source wiring targeted evaluation을 수행한다. Package build는 기본적으로 하지 않는다.
 - 문서는 `uv run --no-project scripts/check-paths.py`로 검사하고 필요한 변경 Markdown을 명시한다. Model 호출이나 실제 서비스 재시작은 discovery 검사에 불필요하면 하지 않는다.
@@ -207,6 +227,8 @@ CLI 설치 상태는 Nix generation 밖에 있으므로 Nix rollback만으로 �
 
 추가 코드 리뷰에서는 npm 배포본의 이름별 global lock, XDG lock 경로, 일부 성공 항목의 lock 갱신, 일반 출력과 JSON 모드의 실패 종료 처리 차이를 확인했다. 현재 repo의 module 소유권과 flake assertion 의존 관계, Nix의 기본 pytest 실행, OpenClaw smoke의 설치 디렉터리 기반 기대 목록도 대조했다. 이는 코드 읽기로 확인한 동작이며 실제 실패 재현 결과는 아니다.
 
+`find-skills`는 선언할 Vercel snapshot에서 `skills/find-skills/SKILL.md`와 root `LICENSE`를 읽어 경로와 탐색 workflow를 확인했다. 해당 source의 shallow fetch, 실제 설치 및 검색 명령은 아직 실행하지 않았으며 1단계와 network integration의 검증 대상이다.
+
 아직 검증하지 않은 사항은 `skills@1.7.2`의 실제 설치 실행, lock/overwrite/retry와 복구의 end-to-end 동작, runtime에서의 실제 discovery와 copy/metadata 영향, pylv-onyx OpenClaw 전환이다. CLI 동작은 1단계에서, 실제 host 전환과 discovery는 3단계에서 확인한다. 구조나 bytes 비교를 skill 행동 검증으로 보고하지 않는다.
 
 ## 근거
@@ -216,3 +238,4 @@ CLI 설치 상태는 Nix generation 밖에 있으므로 Nix rollback만으로 �
 - [Pi 비교 baseline](https://github.com/K-Dense-AI/scientific-agent-skills/tree/ef1b2d8026bdccccf8a72f22bf3f2ea9eda76df4/skills/pi-agent), [baseline 모델 예제](https://github.com/K-Dense-AI/scientific-agent-skills/blob/ef1b2d8026bdccccf8a72f22bf3f2ea9eda76df4/skills/pi-agent/references/models.md), [baseline license](https://github.com/K-Dense-AI/scientific-agent-skills/blob/ef1b2d8026bdccccf8a72f22bf3f2ea9eda76df4/LICENSE.md), [최신 skill 변경 snapshot](https://github.com/K-Dense-AI/scientific-agent-skills/tree/a92663a0214b3b9fa1ba6b958284ffd919c00a0c/skills/pi-agent).
 - [skills@1.7.2 npm 배포본](https://registry.npmjs.org/skills/-/skills-1.7.2.tgz), [해당 gitHead의 source parser](https://github.com/vercel-labs/skills/blob/671e8c320810d36fed80fac5f1a2c1bf7e82d812/src/source-parser.ts), [Git 취득 코드](https://github.com/vercel-labs/skills/blob/671e8c320810d36fed80fac5f1a2c1bf7e82d812/src/git.ts), [installer](https://github.com/vercel-labs/skills/blob/671e8c320810d36fed80fac5f1a2c1bf7e82d812/src/installer.ts), [CLI README](https://github.com/vercel-labs/skills/blob/671e8c320810d36fed80fac5f1a2c1bf7e82d812/README.md).
 - [Global lock 구현](https://github.com/vercel-labs/skills/blob/671e8c320810d36fed80fac5f1a2c1bf7e82d812/src/skill-lock.ts), [설치 결과와 lock 갱신 및 JSON 처리](https://github.com/vercel-labs/skills/blob/671e8c320810d36fed80fac5f1a2c1bf7e82d812/src/add.ts).
+- [find-skills 고정 source](https://github.com/vercel-labs/skills/tree/671e8c320810d36fed80fac5f1a2c1bf7e82d812/skills/find-skills), [Vercel snapshot license](https://github.com/vercel-labs/skills/blob/671e8c320810d36fed80fac5f1a2c1bf7e82d812/LICENSE).
