@@ -20,7 +20,7 @@ See [`docs/pi-performance-audit.md`](../../docs/pi-performance-audit.md) for the
 | `files/extensions/` | `~/.pi/agent/extensions/` | Local Pi extensions |
 | `themes/exports/pi/vira-graphene.json` | `~/.pi/agent/themes/vira-graphene.json` | Generated Vira Graphene theme |
 | `files/themes/claude-like.json` | `~/.pi/agent/themes/claude-like.json` | Alternate dark theme |
-| `agent-core/skills/` | `~/.pi/agent/skills/` | Pi's selected shared skills |
+| Agent core skill sources | `~/.agents/skills/` | Codex/Pi shared pool, installed explicitly with the Skills CLI |
 
 The module also installs:
 
@@ -96,7 +96,7 @@ For the initial rollout, use one direct foreground child at a time and do not re
 
 `agent-core/rules/OPERATING.md` is rendered as `APPEND_SYSTEM.md`, so it augments Pi's maintained system prompt instead of replacing it. The generated `AGENTS.md` combines shared methodology, prose guidance, and `agent-core/adapters/pi.md` without duplicating the operating invariants.
 
-Shared skills are canonical under `agent-core/skills/`. Pi's manifest allowlist includes `devils-advocate`, `parallel-research-merge`, and `pi-agent`; Home Manager installs the selected immutable output at `~/.pi/agent/skills/`. The module does not own skill copies or merge logic.
+The [Agent core installation command](../../agent-core/README.md) installs the manifest's Codex/Pi shared pool at `~/.agents/skills/` with pinned `skills@1.7.2`. It includes `devils-advocate`, `parallel-research-merge`, `pi-agent`, and `openai-decisions`. Home Manager owns generated instructions and runtime settings; skill installation is an explicit user operation outside activation. Before switching an existing host, back up its skill files and CLI lock, then switch, install, and verify discovery. Confirm that the old `~/.pi/agent/skills/` link is absent to avoid duplicate discovery. The module does not own skill copies or merge logic.
 
 ## Local extensions
 

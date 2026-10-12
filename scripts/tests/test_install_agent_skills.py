@@ -325,3 +325,56 @@ def test_probe_acquires_sources_without_touching_legacy_home(
     assert installer.read_json(output)["local_hashes"]
     assert not installer.location("shared", home).exists()
     assert all(call_home != home for _, call_home in calls)
+
+
+def test_latest_resolves_once_per_operation_and_replay_avoids_latest(
+    fixture, monkeypatch
+):
+    plan, home, state, _, _ = fixture
+    source = {
+        "id": "external",
+        "kind": "git",
+        "url": "https://github.com/test/skills.git",
+    }
+    plans = [
+        {**plan, "target": target, "sources": [source]}
+        for target in ("shared", "claude", "openclaw")
+    ]
+    calls = []
+
+    def remote_head(*args, **kwargs):
+        calls.append(args)
+        return f"ref: refs/heads/main\tHEAD\n{str(len(calls)) * 40}\tHEAD\n"
+
+    monkeypatch.setattr(installer, "run", remote_head)
+    first = installer.revisions(plans, {}, {})
+    second = installer.revisions(plans, {}, {})
+    assert first == {"external": "1" * 40}
+    assert second == {"external": "2" * 40}
+    assert installer.revisions(plans, first, {}) == first
+    assert len(calls) == 2
+
+
+def test_license_acquisition_failure_preserves_installed_files(fixture, monkeypatch):
+    plan, home, state, calls, _ = fixture
+    installer.install([plan], home, state, {})
+    destination = installer.location("shared", home)
+    before = installer.tree(destination)
+    previous_calls = len(calls)
+    source = {
+        **plan["sources"][0],
+        "kind": "git",
+        "url": "https://github.com/test/skills.git",
+        "license": "LICENSE",
+    }
+
+    def missing(*args, **kwargs):
+        raise installer.ValidationError("missing license")
+
+    monkeypatch.setattr(installer, "license_bytes", missing)
+    with pytest.raises(installer.ValidationError, match="missing license"):
+        installer.install(
+            [{**plan, "sources": [source]}], home, state, {"local": "1" * 40}
+        )
+    assert len(calls) == previous_calls
+    assert installer.tree(destination) == before

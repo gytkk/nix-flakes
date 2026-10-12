@@ -8,7 +8,9 @@ Skill source 취득과 파일 배치는 버전을 고정한 `skills` CLI에 맡�
 
 OpenClaw의 pylv-onyx 전환과 실제 discovery 검증까지 필수 범위에 포함한다. 모든 적용 대상 host의 전환을 확인한 뒤 기존 skill renderer와 vendored source를 제거한다. Host 접근이나 검증이 불가능하면 해당 작업과 최종 정리를 미완료로 남기며, OpenClaw를 범위에서 제외해 전체 전환을 완료 처리하지 않는다.
 
-이 문서는 Plannotator 피드백과 코드 리뷰를 반영한 계획과 조사 결과다. 현재 요청은 계획 문서 갱신이며, 구현, dependency 선언 변경, skill 설치, 사용자 설정 변경과 서비스 재시작은 아직 수행하지 않았다.
+이 문서는 Plannotator 피드백과 코드 리뷰를 반영한 원래 계획과 조사 결과다. 구현과 호스트별 전환 상태는 [Agent core README](README.md#전환-상태)에 기록한다. 아래 조사 결과와 수량은 계획 작성 당시를 기준으로 한다.
+
+실행 중 최신 Matt upstream에서 삭제된 `resolving-merge-conflicts`를 사용자 승인에 따라 새 설치 목록에서 제외했다. 따라서 현재 대상은 Matt 8개, Vercel 1개, 로컬 11개이며, Codex/Pi 공통 20개, Claude 17개, OpenClaw 16개다. 현재 선택 목록은 [manifest](manifest.toml)를 따른다. 기존 vendored source의 삭제는 원래 계획대로 모든 호스트 전환 후에 진행한다.
 
 ## 피드백 반영
 

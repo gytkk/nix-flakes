@@ -2,13 +2,11 @@
   lib,
   coreutils,
   configSource,
-  skillsSource,
 }:
 
 let
   systemCodexConfigDirectory = "/etc/codex";
   systemCodexConfigPath = "${systemCodexConfigDirectory}/config.toml";
-  systemCodexSkillsPath = "${systemCodexConfigDirectory}/skills";
   legacyManagedCodexConfigPath = "${systemCodexConfigDirectory}/managed_config.toml";
   mkSymlinkCheck = destination: target: ''
     if [ -L ${lib.escapeShellArg destination} ]; then
@@ -57,14 +55,12 @@ in
 
   ensure_system_codex_config() {
     local config_target=${lib.escapeShellArg configSource}
-    local skills_target=${lib.escapeShellArg skillsSource}
     local sudo_bin=""
     local needs_update=0
     local current_target=""
     local legacy_managed_target=""
 
     ${mkSymlinkCheck systemCodexConfigPath configSource}
-    ${mkSymlinkCheck systemCodexSkillsPath skillsSource}
 
     if [ -L ${lib.escapeShellArg legacyManagedCodexConfigPath} ]; then
       legacy_managed_target="$(${coreutils}/bin/readlink ${lib.escapeShellArg legacyManagedCodexConfigPath} || true)"
@@ -104,7 +100,6 @@ in
     fi
 
     ensure_system_symlink ${lib.escapeShellArg systemCodexConfigPath} "$config_target"
-    ensure_system_symlink ${lib.escapeShellArg systemCodexSkillsPath} "$skills_target"
   }
 
   ensure_system_codex_config

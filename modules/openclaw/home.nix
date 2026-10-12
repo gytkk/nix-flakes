@@ -43,7 +43,7 @@ in
     agentCore.enable = lib.mkOption {
       type = lib.types.bool;
       default = false;
-      description = "Install shared agent-core instructions, skills, and prompt hook.";
+      description = "Install shared agent-core instructions and prompt hook.";
     };
 
     agentSessionRecordPlugin.enable = lib.mkOption {
@@ -78,9 +78,6 @@ in
         (
           lib.hm.dag.entryAfter [ "linkGeneration" ] ''
             ${lib.optionalString cfg.agentCore.enable ''
-              ${materializeRuntimeTree}/bin/materialize-openclaw-runtime-tree \
-                ${lib.escapeShellArg "${agentCoreOutput}/skills"} \
-                ${lib.escapeShellArg "${homeDirectory}/${agentCoreDir}/skills"}
               ${materializeRuntimeTree}/bin/materialize-openclaw-runtime-tree \
                 ${lib.escapeShellArg (toString ./files/extensions/agent-core-context)} \
                 ${lib.escapeShellArg "${homeDirectory}/${extensionsDir}/agent-core-context"}

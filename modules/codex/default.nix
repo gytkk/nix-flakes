@@ -26,7 +26,6 @@ let
     import ./system-activation.nix {
       inherit lib coreutils;
       configSource = "${flakeDirectory}/modules/codex/files/config.toml";
-      skillsSource = "${agentCoreOutput}/skills";
     }
   );
   codexUserConfigActivation = ''

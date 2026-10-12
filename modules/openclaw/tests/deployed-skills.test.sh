@@ -34,10 +34,15 @@ verify_ordinary_tree() {
   done
 }
 
-verify_ordinary_tree "managed skill directory" "$managed_skills_dir"
-shopt -s nullglob
-skill_documents=("$managed_skills_dir"/*/SKILL.md)
-(( ${#skill_documents[@]} > 0 )) || fail "managed skill directory contains no skills"
+test -d "$managed_skills_dir" || fail "managed skill directory is missing: $managed_skills_dir"
+[[ ! -L "$managed_skills_dir" ]] || fail "managed skill directory must be an ordinary directory, not a symbolic link: $managed_skills_dir"
+expected_names="$(bash "$(dirname "$0")/expected-skill-names.sh")" || fail "could not determine declared skills"
+skill_count=0
+while IFS= read -r skill_name; do
+  [[ -f "$managed_skills_dir/$skill_name/SKILL.md" ]] || fail "declared skill is missing: $skill_name"
+  verify_ordinary_tree "declared skill $skill_name" "$managed_skills_dir/$skill_name"
+  skill_count=$((skill_count + 1))
+done <<<"$expected_names"
 
 for extension_name in agent-core-context agent-session-record; do
   extension_dir="$extensions_dir/$extension_name"
@@ -47,4 +52,4 @@ for extension_name in agent-core-context agent-session-record; do
     fail "managed extension $extension_name has no ordinary plugin manifest: $manifest"
 done
 
-printf 'openclaw deployed resource test passed for %d skill(s) and 2 extension(s)\n' "${#skill_documents[@]}"
+printf 'openclaw deployed resource test passed for %d declared skill(s) and 2 extension(s)\n' "$skill_count"

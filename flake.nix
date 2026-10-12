@@ -176,11 +176,16 @@
           homeFiles = homeConfigurations.${homeName}.config.home.file;
           commonMatches = [
             (toString homeFiles.".claude/CLAUDE.md".source == "${output.claude}/CLAUDE.md")
-            (toString homeFiles.".claude/skills".source == "${output.claude}/skills")
+            (!(builtins.hasAttr ".claude/skills" homeFiles))
             (toString homeFiles.".codex/AGENTS.md".source == "${output.codex}/AGENTS.md")
             (toString homeFiles.".pi/agent/AGENTS.md".source == "${output.pi}/AGENTS.md")
             (toString homeFiles.".pi/agent/APPEND_SYSTEM.md".source == "${output.pi}/APPEND_SYSTEM.md")
-            (toString homeFiles.".pi/agent/skills".source == "${output.pi}/skills")
+            (!(builtins.hasAttr ".pi/agent/skills" homeFiles))
+            (
+              !(nixpkgs.lib.hasInfix "/etc/codex/skills"
+                homeConfigurations.${homeName}.config.home.activation.codexUserConfig.data
+              )
+            )
           ];
           onyx = nixosConfigurations.pylv-onyx.config;
           onyxHomeFiles = onyx.home-manager.users.gytkk.home.file;
@@ -193,8 +198,12 @@
               toString onyxHomeFiles.".local/share/openclaw/agent-core/AGENTS.core.md".source
               == "${output.openclaw}/AGENTS.core.md"
             )
-            (nixpkgs.lib.hasInfix (builtins.unsafeDiscardStringContext "${output.openclaw}/skills") onyxOpenClawRuntimeMaterialization)
-            (nixpkgs.lib.hasInfix "/home/gytkk/.local/share/openclaw/agent-core/skills" onyxOpenClawRuntimeMaterialization)
+            (
+              !(nixpkgs.lib.hasInfix (builtins.unsafeDiscardStringContext "${output.openclaw}/skills") onyxOpenClawRuntimeMaterialization)
+            )
+            (
+              !(nixpkgs.lib.hasInfix "/home/gytkk/.local/share/openclaw/agent-core/skills" onyxOpenClawRuntimeMaterialization)
+            )
             (nixpkgs.lib.hasInfix "/home/gytkk/.local/share/openclaw/extensions/agent-core-context" onyxOpenClawRuntimeMaterialization)
             (nixpkgs.lib.hasInfix "/home/gytkk/.local/share/openclaw/extensions/agent-session-record" onyxOpenClawRuntimeMaterialization)
             (builtins.all (path: !(builtins.hasAttr path onyxHomeFiles)) [
@@ -211,7 +220,7 @@
             )
             (nixpkgs.lib.hasInfix "/home/gytkk/.config/systemd/user/openclaw-gateway.service.d/20-nix-runtime.conf" onyxOpenClawSystemdDropInMaterialization)
             (nixpkgs.lib.hasInfix "install -D -m 0644" onyxOpenClawSystemdDropInMaterialization)
-            (toString onyx.environment.etc."codex/skills".source == "${output.codex}/skills")
+            (!(builtins.hasAttr "codex/skills" onyx.environment.etc))
           ];
         in
         builtins.all (matches: matches) (
@@ -276,6 +285,7 @@
                 agent-core
                 jq
                 nodejs
+                ripgrep
               ];
             }
             ''

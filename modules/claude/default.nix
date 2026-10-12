@@ -310,7 +310,6 @@ in
         force = true;
       };
       ".claude/CLAUDE.md".source = "${agentCoreOutput}/CLAUDE.md";
-      ".claude/skills".source = "${agentCoreOutput}/skills";
       ".claude/statusline-command.sh" = {
         source = ./files/statusline-command.sh;
         executable = true;

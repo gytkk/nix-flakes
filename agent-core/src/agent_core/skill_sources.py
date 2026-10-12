@@ -70,7 +70,9 @@ def validate_sources(manifest: dict) -> None:
             try:
                 parsed = urlsplit(url) if isinstance(url, str) else None
             except ValueError as error:
-                raise ValidationError(f"invalid external source URL: {url!r}") from error
+                raise ValidationError(
+                    f"invalid external source URL: {url!r}"
+                ) from error
             if (
                 parsed is None
                 or parsed.scheme != "https"

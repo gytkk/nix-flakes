@@ -54,7 +54,6 @@ in
       ".pi/agent/extensions/herdr-subagents.ts".source = mkSymlink "files/extensions/herdr-subagents.ts";
       ".pi/agent/extensions/subagent/config.json".source =
         mkSymlink "files/extensions/subagent/config.json";
-      ".pi/agent/skills".source = "${agentCoreOutput}/skills";
     };
 
     # Preserve installation-local metadata before Home Manager removes the old symlink.

@@ -165,14 +165,14 @@ direnv lazy loading 사용. `.envrc`에 `use_terraform` 추가하면 `required_v
 
 AI 코딩 에이전트 설정을 변경할 때 공통 지침, runtime adapter, shared skill은 `agent-core/`에서 수정한다. Runtime 전용 설정은 대응 모듈에서 수정하고, 이 저장소에서만 적용하는 작업 규칙은 루트 `AGENTS.md`에 둔다.
 
-- `agent-core/rules/`는 공통 지침, `agent-core/adapters/`는 runtime별 지침, `agent-core/skills/`는 shared skill의 canonical catalog다. `agent-core/manifest.toml`이 조합 순서와 runtime별 노출을 정의한다.
+- `agent-core/rules/`는 공통 지침, `agent-core/adapters/`는 runtime별 지침, `agent-core/skills/`는 로컬 skill과 전환 중인 legacy source를 관리한다. `agent-core/manifest.toml`이 문서 조합, 로컬 및 외부 skill source와 설치 target을 정의한다.
 - Skill은 필요한 capability를 runtime 중립적으로 표현한다. Runtime tool, SDK, metadata, plugin 설정은 대응 module이 소유하며, runtime module에 shared skill 복사본이나 별도 selection logic을 추가하지 않는다.
-- `agent-core render`의 immutable output을 Nix module에서 설치한다. Pi는 operating invariant를 `APPEND_SYSTEM.md`로 분리하고, OpenClaw는 prompt hook으로 `AGENTS.core.md`를 주입한다.
+- Nix module은 `agent-core render`의 지침 문서와 extension을 설치한다. Skill 취득과 배치는 `scripts/install-agent-skills.py`가 pinned Skills CLI에 맡긴다. [Agent core README](agent-core/README.md)에서 설치, 복구와 host 전환 조건을 확인한다. 모든 host와 pylv-onyx의 실제 discovery 검증 전에는 legacy renderer와 vendored source를 정리하지 않는다.
 
-- **Claude Code** (`modules/claude/`): `gytkk` marketplace의 원본은 `modules/claude/marketplace/`다. 공통 prompt와 shared skill은 agent-core output을 사용한다. Plugin과 marketplace 목록은 [Claude README](modules/claude/README.md)에서 확인한다.
-- **Codex CLI** (`modules/codex/`): 기본 설정은 `files/config.toml`에서 관리하며 최종 instruction과 skill tree는 agent-core output을 사용한다.
-- **Pi** (`modules/pi/`): Settings와 extension은 module에서 관리하며 최종 instruction과 skill tree는 agent-core output을 사용한다.
-- **OpenClaw** (`modules/openclaw/`): Mutable `openclaw.json`, workspace, auth/session state는 Nix가 소유하지 않는다. Agent-core integration은 managed skill tree와 `before_prompt_build` hook만 설치한다.
+- **Claude Code** (`modules/claude/`): `gytkk` marketplace의 원본은 `modules/claude/marketplace/`다. 공통 prompt는 agent-core output을 사용하고 shared skill은 CLI global copy로 설치한다. Plugin과 marketplace 목록은 [Claude README](modules/claude/README.md)에서 확인한다.
+- **Codex CLI** (`modules/codex/`): 기본 설정은 `files/config.toml`에서 관리하고 최종 instruction은 agent-core output을 사용한다. Skill은 Pi와 `~/.agents/skills`를 공유한다.
+- **Pi** (`modules/pi/`): Settings와 extension은 module에서 관리하고 최종 instruction은 agent-core output을 사용한다. Skill은 Codex와 native pool을 공유한다.
+- **OpenClaw** (`modules/openclaw/`): Mutable `openclaw.json`, workspace, auth/session state는 Nix가 소유하지 않는다. Nix는 지침과 hook, extension, service drop-in을 설치하고, skill은 기존 external 경로에 CLI project copy로 설치한다.
 
 ### Package Management
 

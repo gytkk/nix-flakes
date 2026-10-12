@@ -228,7 +228,15 @@ uv run --project agent-core scripts/install-agent-skills.py restore \
 
 ## 전환 상태
 
-격리 CLI 검증, source 선언, 설치 연결 명령과 module 소유권 전환 코드는 구현되어 있다. 실제 host switch와 native discovery는 아직 수행하지 않았다. pylv-onyx는 DNS 조회와 LAN SSH 연결이 실패하여 live 검증이 남아 있다. 다섯 host의 Codex/Pi/Claude와 pylv-onyx OpenClaw 전환을 확인한 뒤에만 기존 vendored 9개와 skill renderer를 정리한다. `resolving-merge-conflicts`도 이 fallback 정리 시 제거한다.
+격리 CLI 검증, source 선언, 설치 연결 명령과 module 소유권 전환 코드는 구현되어 있다. 실제 host switch와 native discovery는 아직 수행하지 않았다. 다섯 host의 Codex/Pi/Claude와 pylv-onyx OpenClaw 전환을 확인한 뒤에만 기존 vendored 9개와 skill renderer를 정리한다. `resolving-merge-conflicts`도 이 fallback 정리 시 제거한다.
+
+| Host | 적용 대상 | 확인 상태와 남은 작업 |
+| --- | --- | --- |
+| `devsisters-macbook` | Codex/Pi, Claude | 로컬 legacy Nix 링크와 기존 pool의 동명 `find-skills`를 확인했다. 충돌 검토, backup, switch, 설치와 discovery가 남아 있다. |
+| `devsisters-macstudio` | Codex/Pi, Claude | 실제 상태 확인, backup, switch, 설치와 discovery가 남아 있다. |
+| `pylv-denim` | Codex/Pi, Claude | 실제 상태 확인, backup, switch, 설치와 discovery가 남아 있다. |
+| `pylv-sepia` | Codex/Pi, Claude | 실제 상태 확인, backup, switch, 설치와 discovery가 남아 있다. |
+| `pylv-onyx` | Codex/Pi, Claude, OpenClaw | `gytkk@pylv-onyx`에서 호스트, 실행 파일과 Nix generation 경로를 확인했다. 후속 SSH 연결은 시간 초과되어 runtime 점검, backup, switch, 설치와 discovery가 남아 있다. |
 
 OpenClaw에서는 [runtime smoke](../modules/openclaw/tests/runtime-smoke.sh)와 [deployed resource test](../modules/openclaw/tests/deployed-skills.test.sh)를 모두 실행한다. 기대 이름은 manifest에서 가져오며 파일, 모든 agent의 discovery 경로, workspace override, prompt hook과 recorder, service drop-in을 검사한다. 실제 prompt 내용과 모델의 skill 선택 행동을 검증한 것으로 보고하지 않는다.
 

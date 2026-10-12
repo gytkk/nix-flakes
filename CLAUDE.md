@@ -120,7 +120,8 @@ Before changing an app module, read the shared [module reference](AGENTS.md#modu
 
 AI 코딩 에이전트 설정을 변경할 때 공통 지침, runtime adapter, shared skill은 `agent-core/`에서 수정한다. Runtime 전용 설정은 대응 모듈에서 수정한다.
 
-- `agent-core/rules/`는 공통 지침, `agent-core/adapters/`는 runtime별 지침, `agent-core/skills/`는 shared skill의 canonical catalog다. `agent-core/manifest.toml`이 조합 순서와 runtime별 노출을 정의한다.
+- `agent-core/rules/`는 공통 지침, `agent-core/adapters/`는 runtime별 지침, `agent-core/skills/`는 로컬 skill과 전환 중인 legacy source를 관리한다. `agent-core/manifest.toml`이 문서 조합, 로컬 및 외부 skill source와 설치 target을 정의한다.
+- Nix는 지침과 extension을 설치하고, skill은 `scripts/install-agent-skills.py`가 pinned Skills CLI로 설치한다. [Agent core README](agent-core/README.md)에서 설치와 복구 절차를 확인한다. 모든 host와 pylv-onyx의 실제 discovery 검증 전에는 legacy renderer와 vendored source를 정리하지 않는다.
 - Skill은 필요한 capability를 runtime 중립적으로 표현한다. Runtime tool, SDK, metadata, plugin 설정은 대응 module이 소유하며, runtime module에 shared skill 복사본이나 별도 selection logic을 추가하지 않는다.
 - **Claude Code** (`modules/claude/`): Plugin과 marketplace 목록은 [Claude README](modules/claude/README.md)에서 확인한다. Runtime 전용 `devils-advocate`와 LSP plugin은 `modules/claude/marketplace/`에 있으며 LSP plugin은 `modules/lsp/default.nix`의 바이너리가 필요하다.
 

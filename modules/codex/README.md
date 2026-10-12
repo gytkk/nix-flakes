@@ -56,10 +56,12 @@ codex plugin add sites@openai-curated-remote
 
 Decisions API를 사용하는 기능은 `$openai-decisions` skill로 설계하고, API client는 `with-openai`로 실행한다. 모델과 API 사용법, agenix 인증, 적용 절차는 [OpenAI API README](../openai-api/README.md)에서 확인한다.
 
-[default.nix](default.nix)은 Home Manager의 사용자 파일과 activation을 구성한다. Standalone Home Manager는 [system-activation.nix](system-activation.nix)에서 생성한 스크립트로 `/etc/codex/config.toml`을 checkout의 `files/config.toml`에 연결하고, `/etc/codex/skills`를 agent-core output에 연결한다. 스크립트는 관리할 경로를 모두 검사한 뒤 필요한 sudo 작업을 실행하며, 일반 파일은 덮어쓰지 않는다.
+[default.nix](default.nix)은 Home Manager의 사용자 파일과 activation을 구성한다. Standalone Home Manager는 [system-activation.nix](system-activation.nix)에서 생성한 스크립트로 `/etc/codex/config.toml`을 checkout의 `files/config.toml`에 연결한다. 스크립트는 관리할 경로를 모두 검사한 뒤 필요한 sudo 작업을 실행하며, 일반 파일은 덮어쓰지 않는다.
 
-NixOS는 [system.nix](system.nix)의 `environment.etc`로 시스템 설정과 skills를 설치하고 Home Manager의 시스템 activation을 생략한다. `~/.codex/config.toml`은 사용자 설정을 보존하며 activation이 덮어쓰지 않는다.
+NixOS는 [system.nix](system.nix)의 `environment.etc`로 시스템 설정을 설치하고 Home Manager의 시스템 activation을 생략한다. `~/.codex/config.toml`은 사용자 설정을 보존하며 activation이 덮어쓰지 않는다.
 
-`~/.codex/AGENTS.md`와 `/etc/codex/skills`는 agent-core의 immutable output을 사용한다. Adapter 변경을 적용하려면 환경에 맞는 `home-manager switch --flake .#<environment>` 또는 `nixos-rebuild switch --flake .#<host>`를 사용자가 실행한 뒤 새 Codex 세션을 시작한다.
+`~/.codex/AGENTS.md`는 agent-core의 immutable output을 사용한다. Shared skill은 [Agent core README](../../agent-core/README.md)의 설치 명령이 `skills@1.7.2`로 Codex/Pi 공통 경로인 `~/.agents/skills`에 설치한다. Nix activation은 skill을 다운로드하지 않는다. 기존 standalone 환경의 `/etc/codex/skills` 링크는 선언을 제거해도 남으므로, 관리 대상과 backup을 확인하고 승인한 뒤 별도로 제거해야 중복 discovery를 피할 수 있다.
+
+Adapter 변경을 적용하려면 환경에 맞는 `home-manager switch --flake .#<environment>` 또는 `nixos-rebuild switch --flake .#<host>`를 사용자가 실행한 뒤 새 Codex 세션을 시작한다. Skill 전환에는 기존 파일과 CLI lock의 backup, switch, CLI 설치 및 discovery 검증이 별도로 필요하다.
 
 Herdr 연동도 같은 switch로 훅과 실행 파일을 설치한 뒤 `herdr server reload-config`를 실행하고 Herdr 안에서 새 Codex 세션을 시작한다. 실행 중인 Codex 세션에는 새 훅 설정이 자동 적용되지 않을 수 있다.
