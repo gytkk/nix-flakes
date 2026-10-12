@@ -51,7 +51,18 @@ def _load_manifest() -> dict:
     except (OSError, tomllib.TOMLDecodeError) as error:
         raise ValidationError(f"invalid manifest: {error}") from error
 
-    _expect_keys(manifest, {"metadata", "documents", "runtimes"}, "manifest")
+    _expect_keys(
+        manifest,
+        {
+            "metadata",
+            "documents",
+            "runtimes",
+            "skill_cli",
+            "skill_sources",
+            "skill_targets",
+        },
+        "manifest",
+    )
     _expect_keys(
         manifest["metadata"],
         {"marker", "version"},
@@ -73,6 +84,9 @@ def _load_manifest() -> dict:
         raise ValidationError("manifest must configure exactly the supported runtimes")
     for runtime, runtime_config in manifest["runtimes"].items():
         _expect_keys(runtime_config, {"skill_output", "skills"}, f"runtime {runtime}")
+    from .skill_sources import validate_sources
+
+    validate_sources(manifest)
     return manifest
 
 

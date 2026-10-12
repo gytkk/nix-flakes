@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -13,6 +14,7 @@ from .core import (
     render,
     resource_root,
 )
+from .skill_sources import TARGET_RUNTIMES, check_document_hashes, installation_plan
 
 
 def _check() -> list[str]:
@@ -45,6 +47,10 @@ def _check() -> list[str]:
             errors.append(
                 f"{runtime}: output hash differs (expected {expected}, got {actual})"
             )
+    try:
+        errors.extend(check_document_hashes())
+    except ValidationError as error:
+        errors.append(str(error))
     return errors
 
 
@@ -70,6 +76,10 @@ def main(argv: list[str] | None = None) -> int:
         required=True,
         title="commands",
     )
+    plan_parser = commands.add_parser(
+        "skill-plan", help="Print a read-only skill installation plan as JSON."
+    )
+    plan_parser.add_argument("--target", choices=TARGET_RUNTIMES, required=True)
     render_parser = commands.add_parser(
         "render",
         help="Create an immutable output tree for one runtime.",
@@ -120,6 +130,9 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
     try:
+        if args.command == "skill-plan":
+            print(json.dumps(installation_plan(args.target), sort_keys=True, indent=2))
+            return 0
         if args.command == "render":
             render(args.runtime, args.output)
             print(f"rendered {args.runtime} to {args.output}")

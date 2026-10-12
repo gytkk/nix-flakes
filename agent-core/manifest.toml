@@ -2,6 +2,63 @@
 marker = ".agent-core-generated"
 version = "1"
 
+[skill_cli]
+version = "1.7.2"
+
+[skill_sources.local]
+kind = "local"
+path = "skills"
+
+[skill_sources.local.skills]
+code-review = "code-review"
+data-analysis = "data-analysis"
+data-visualization = "data-visualization"
+devils-advocate = "devils-advocate"
+openai-decisions = "openai-decisions"
+parallel-research-merge = "parallel-research-merge"
+pi-agent = "pi-agent"
+repeated-work-analyzer = "repeated-work-analyzer"
+theme-template-authoring = "theme-template-authoring"
+user-friction-review = "user-friction-review"
+writing-for-agents = "writing-for-agents"
+
+[skill_sources.matt]
+kind = "git"
+url = "https://github.com/mattpocock/skills.git"
+update = "latest-default-branch"
+license = "LICENSE"
+
+[skill_sources.matt.skills]
+codebase-design = "skills/engineering/codebase-design"
+diagnosing-bugs = "skills/engineering/diagnosing-bugs"
+domain-modeling = "skills/engineering/domain-modeling"
+grilling = "skills/productivity/grilling"
+prototype = "skills/engineering/prototype"
+research = "skills/engineering/research"
+tdd = "skills/engineering/tdd"
+wizard = "skills/engineering/wizard"
+
+[skill_sources.vercel]
+kind = "git"
+url = "https://github.com/vercel-labs/skills.git"
+update = "latest-default-branch"
+license = "LICENSE"
+
+[skill_sources.vercel.skills]
+find-skills = "skills/find-skills"
+
+[skill_targets.shared]
+runtimes = ["codex", "pi"]
+skills = ["codebase-design", "code-review", "data-analysis", "data-visualization", "devils-advocate", "diagnosing-bugs", "domain-modeling", "find-skills", "grilling", "openai-decisions", "parallel-research-merge", "pi-agent", "prototype", "repeated-work-analyzer", "research", "tdd", "theme-template-authoring", "user-friction-review", "wizard", "writing-for-agents"]
+
+[skill_targets.claude]
+runtimes = ["claude"]
+skills = ["codebase-design", "code-review", "data-analysis", "data-visualization", "diagnosing-bugs", "domain-modeling", "find-skills", "grilling", "openai-decisions", "prototype", "repeated-work-analyzer", "research", "tdd", "theme-template-authoring", "user-friction-review", "wizard", "writing-for-agents"]
+
+[skill_targets.openclaw]
+runtimes = ["openclaw"]
+skills = ["codebase-design", "code-review", "data-analysis", "data-visualization", "diagnosing-bugs", "domain-modeling", "find-skills", "grilling", "prototype", "repeated-work-analyzer", "research", "tdd", "theme-template-authoring", "user-friction-review", "wizard", "writing-for-agents"]
+
 [[documents]]
 runtime = "openclaw"
 output = "AGENTS.core.md"
