@@ -2,9 +2,9 @@
 
 ## 목적
 
-`agent-core/`는 이 저장소에서 관리하는 coding-agent 공통 규칙, runtime adapter, shared skill의 canonical source다. 하나의 stdlib-only Python renderer가 manifest를 해석하고 Claude Code, Codex, Pi, OpenClaw용 immutable output tree를 생성한다.
+`agent-core/`는 coding-agent 공통 규칙과 runtime adapter, 로컬 skill, 외부 skill source 선언을 관리한다. Stdlib-only Python renderer는 지침 문서를 생성하고, `skill-plan`은 설치 대상과 source를 JSON으로 출력한다. 실제 skill 취득과 배치는 버전을 고정한 `skills@1.7.2` CLI가 담당한다.
 
-Runtime module은 생성 결과를 설치한다. 공통 문서 조합, skill 선택, 검증 로직을 Nix나 runtime별 module에서 다시 구현하지 않는다.
+Runtime module은 생성 지침과 extension을 설치한다. [설치 연결 명령](../scripts/install-agent-skills.py)은 manifest의 선택 목록을 CLI에 전달하고 설치 경로별 소유권, 충돌, 백업과 복구를 관리한다. Nix build와 activation은 외부 skill을 다운로드하지 않는다.
 
 ## 구조
 
@@ -22,7 +22,11 @@ agent-core/
 └── tests/
 ```
 
-Shared skill은 runtime별 복사본이나 merge input 없이 `agent-core/skills/`에서 한 번 관리하는 skill이다. Shared catalog에 있다는 사실이 모든 runtime에 설치된다는 뜻은 아니다. `manifest.toml`의 allowlist가 각 runtime에 필요한 skill을 선택한다. 현재 공통 16개 skill에 더해 Codex는 `devils-advocate`와 `parallel-research-merge`, Pi는 두 skill과 `pi-agent`를 선택한다. Codex와 Claude는 `openai-decisions`도 선택하며, [OpenAI API 모듈](../modules/openai-api/README.md)이 agenix 키를 실행하는 API client에 전달한다.
+`manifest.toml`의 `skill_sources`는 로컬 11개, Matt upstream 8개, Vercel의 `find-skills`를 선언한다. 두 외부 source는 설치 작업마다 기본 branch의 최신 full SHA를 한 번 결정하며, 같은 작업의 모든 target에 같은 SHA를 사용한다. `resolving-merge-conflicts`는 최신 upstream에서 삭제되어 사용자 결정에 따라 새 설치 목록에서 제외한다. 최신 upstream의 workflow와 UI metadata 변경도 첫 전환에 포함된다.
+
+`skill_targets`는 Codex/Pi 공통 pool 20개, Claude copy 17개, OpenClaw project copy 16개를 선택한다. Codex와 Pi는 `~/.agents/skills`를 공유하므로 Pi에서도 `openai-decisions`를, Codex에서도 `pi-agent`를 발견할 수 있다. [OpenAI API 모듈](../modules/openai-api/README.md)은 API client에 agenix 키를 전달하며, skill 설치 자체가 package나 credential을 준비하지는 않는다.
+
+`runtimes.*.skills`와 기존 vendored tree는 이전 Nix generation의 복구와 최종 renderer 정리를 위해 남아 있다. 현재 module은 이 skill output을 설치하지 않는다. 모든 host 전환과 pylv-onyx의 실제 discovery 검증이 끝나기 전에는 이 fallback과 golden hash를 제거하거나 변경하지 않는다.
 
 공통 [data-analysis](skills/data-analysis/SKILL.md)는 지표 정의, 집계 단위, 조인과 코호트 검증을 다루고, [data-visualization](skills/data-visualization/SKILL.md)은 데이터에서 차트를 만들고 렌더링 결과를 확인하는 절차를 다룬다. [writing-for-agents](skills/writing-for-agents/SKILL.md)는 skill 호출 조건과 로드 여부, 실행 결과를 구분해 검증한다. 선별 근거와 원본 버전은 [shared skill catalog](skills/README.md)에 기록한다.
 
@@ -35,8 +39,8 @@ Shared skill은 runtime별 복사본이나 merge input 없이 `agent-core/skills
 - 공통 운영 규칙과 prose 규칙
 - 공통 위임 계약과 runtime별 모델 라우팅 지침
 - Runtime adapter 원문
-- Shared skill 원문과 보조 파일
-- Runtime별 문서 조합 순서와 skill allowlist
+- 로컬 skill 원문과 보조 파일, 외부 source 선언
+- Runtime별 문서 조합 순서와 CLI target별 선택 목록
 - Deterministic materialization과 generated marker
 - Source validation, golden hash, tree comparison
 - Python package, CLI, 단위 테스트, Nix package
@@ -56,7 +60,7 @@ Shared skill은 runtime별 복사본이나 merge input 없이 `agent-core/skills
 `modules/claude`, `modules/codex`, `modules/pi`, `modules/openclaw`은 다음을 소유한다.
 
 - Runtime package 또는 user-managed runtime의 host integration
-- Renderer output을 실제 runtime 경로에 설치하는 선언
+- Renderer의 지침 문서를 실제 runtime 경로에 설치하는 선언
 - Runtime settings, plugin, extension, hook, MCP 설정
 - Mutable state의 안전한 경계와 activation 순서
 - Runtime이 설치 결과를 발견하는지 확인하는 smoke test
@@ -72,7 +76,7 @@ runtime별 immutable output tree
         ↓ install
 modules/claude | modules/codex | modules/pi | modules/openclaw
         ↓
-~/.claude | ~/.codex and /etc/codex/skills | ~/.pi | ~/.local/share/openclaw
+~/.claude | ~/.codex | ~/.pi | ~/.local/share/openclaw
 ```
 
 허용하는 의존성은 다음과 같다.
@@ -94,17 +98,19 @@ runtime A -> runtime B의 session 또는 credentials
 
 ## Python interface
 
-CLI는 다음 세 command를 제공한다.
+Pure CLI는 다음 command를 제공한다.
 
 ```bash
 agent-core render --runtime <name> --output <empty-dir>
 agent-core check
 agent-core verify-install --expected <dir> --actual <dir>
+agent-core skill-plan --target shared
 ```
 
 - `render`는 manifest와 canonical resource를 읽고 runtime별 shared skill allowlist에 맞는 output tree를 생성한다. Output 경로는 없거나 비어 있는 실제 디렉터리여야 한다.
 - `check`는 manifest, rule, adapter, skill, generated marker, golden hash를 검증한다. 홈 디렉터리와 module 경로는 읽지 않는다.
 - `verify-install`은 명시적으로 전달한 두 tree의 파일 내용, symlink 대상, 누락 경로, 추가 경로를 비교한다. Runtime 이름이나 기본 홈 경로를 추론하지 않는다.
+- `skill-plan`은 `shared`, `claude`, `openclaw` target의 source별 이름과 경로, 갱신 정책, CLI 버전을 JSON으로 출력한다. 네트워크나 홈 디렉터리를 읽지 않는다.
 
 핵심 API는 경로별 bytes map을 반환한다.
 
@@ -123,8 +129,10 @@ materialize(runtime: str) -> Mapping[PurePosixPath, bytes]
 - Runtime별 output 문서 경로와 source 순서
 - Runtime별 shared skill allowlist
 - Runtime별 skill output root
+- Local/Git source와 GitHub URL, latest 정책, upstream skill 경로와 license 경로
+- CLI 버전과 target별 설치 선택 목록
 
-Credentials, 절대 홈 경로, host 값, module 경로는 manifest에 넣지 않는다. Unknown key, unknown runtime, unsafe path, 중복 output, 존재하지 않는 source나 skill은 오류다.
+Credentials, 절대 홈 경로, host 값, module 경로는 manifest에 넣지 않는다. Unknown key, unknown runtime, unsafe path, source 사이의 중복 이름, 미선언 선택과 존재하지 않는 로컬 source는 오류다. 외부 파일의 존재와 bytes는 별도 network suite와 실제 CLI 설치 후에 검증한다.
 
 Skill 검증은 각 디렉터리의 `SKILL.md` frontmatter에서 `name`과 `description`을 요구한다. `name`은 디렉터리 이름과 같아야 한다. Symlink와 output tree를 벗어나는 경로는 거부한다.
 
@@ -139,7 +147,7 @@ CLAUDE.md
 skills/
 ```
 
-`CLAUDE.md`는 공통 operating rule, 공통 agent rule, prose rule, Claude adapter 순서로 생성한다. Home Manager는 문서와 선택된 shared skill tree를 `~/.claude/`에 설치한다. `devils-advocate` command와 agent는 local marketplace plugin이 별도로 소유하므로 Claude allowlist에는 넣지 않는다.
+`CLAUDE.md`는 공통 operating rule, 공통 agent rule, prose rule, Claude adapter 순서로 생성한다. Home Manager는 문서를 설치한다. Skill은 CLI의 `--copy --global --agent claude-code`로 `~/.claude/skills`에 설치한다. `devils-advocate` command와 agent는 local marketplace plugin이 별도로 소유한다.
 
 ### Codex
 
@@ -148,7 +156,7 @@ AGENTS.md
 skills/
 ```
 
-`AGENTS.md`는 공통 operating rule, 공통 agent rule, prose rule, 공통 위임 계약, Codex adapter 순서로 생성한다. Codex adapter는 native subagent의 명시적 모델 라우팅을 정의한다. Codex allowlist는 shared catalog의 `devils-advocate`와 `parallel-research-merge`를 포함한다. NixOS는 최종 skill tree를 `/etc/codex/skills`에 설치하고 Standalone Home Manager 환경도 같은 output을 system 경로에 연결한다.
+`AGENTS.md`는 공통 operating rule, 공통 agent rule, prose rule, 공통 위임 계약, Codex adapter 순서로 생성한다. Codex adapter는 native subagent의 명시적 모델 라우팅을 정의한다. Skill은 `--global --agent codex pi`로 `~/.agents/skills`에 설치한다. Nix는 `/etc/codex/config.toml`을 계속 관리하며 `/etc/codex/skills`를 관리하지 않는다.
 
 ### Pi
 
@@ -158,7 +166,7 @@ APPEND_SYSTEM.md
 skills/
 ```
 
-Pi는 operating invariant를 `APPEND_SYSTEM.md`로 분리한다. `AGENTS.md`에는 공통 agent rule, prose rule, Pi adapter만 포함한다. Pi allowlist는 shared catalog의 `devils-advocate`, `parallel-research-merge`, `pi-agent`를 포함한다.
+Pi는 operating invariant를 `APPEND_SYSTEM.md`로 분리한다. `AGENTS.md`에는 공통 agent rule, prose rule, Pi adapter만 포함한다. Skill은 Codex와 같은 native shared pool을 사용하며 `~/.pi/agent/skills`에 별도 복사본을 설치하지 않는다.
 
 ### OpenClaw
 
@@ -167,7 +175,7 @@ AGENTS.core.md
 skills/
 ```
 
-`AGENTS.core.md`는 세 공통 rule, 공통 위임 계약, OpenClaw adapter 순서로 생성한다. OpenClaw adapter는 mutable config에 등록된 `astra`와 `sol` agent ID의 선택 기준을 정의한다. Home Manager는 instruction과 선택된 shared skill tree를 `~/.local/share/openclaw/agent-core/`에 설치한다. Mutable OpenClaw config는 agent와 model, skill 경로를 계속 소유하고, systemd drop-in은 instruction 경로를 `AGENT_CORE_OPENCLAW_INSTRUCTIONS`로 전달한다.
+`AGENTS.core.md`는 세 공통 rule, 공통 위임 계약, OpenClaw adapter 순서로 생성한다. Home Manager는 instruction과 extension, service drop-in을 관리한다. CLI는 `~/.local/share/openclaw/agent-core`에서 `--copy --agent openclaw`로 project skill을 설치한다. Mutable OpenClaw config의 `skills.load.extraDirs`는 같은 `skills` 경로를 유지하고, systemd drop-in은 instruction 경로를 `AGENT_CORE_OPENCLAW_INSTRUCTIONS`로 전달한다.
 
 `modules/openclaw`의 `agent-core-context` plugin은 `before_prompt_build` hook에서 `prependSystemContext`를 반환한다. Plugin은 OpenClaw system prompt를 교체하지 않고 workspace `AGENTS.md`를 생성하거나 수정하지 않는다. Mutable `openclaw.json`은 plugin enable, allowlist, conversation access를 계속 소유한다.
 
@@ -186,11 +194,43 @@ checks.<system>.agent-core-renders
 
 Runtime module은 `render.nix`가 만든 immutable tree에서 필요한 파일을 설치한다. `checks.<system>.agent-core-renders`는 네 final output의 recursive golden hash와 Home Manager/NixOS source wiring을 검증한다. Nix evaluation과 renderer는 홈 디렉터리, checkout 밖의 mutable state, runtime state를 읽지 않는다.
 
-## Immutable output과 직접 설치
+## Skill 설치와 복구
 
-현재 구현은 Nix derivation의 비어 있는 output 디렉터리에 deterministic tree를 생성하고 Home Manager가 설치하는 방식만 지원한다. 일반 홈 디렉터리에 직접 쓰는 `sync` command는 제공하지 않는다.
+저장소 root에서 연결 명령을 실행한다. Node, npm, Git와 network 접근이 필요하다. 다음 `probe`는 임시 HOME에서 설치를 검증하고, 기존 host의 skill이나 credential을 변경하지 않는다. 영수증 파일은 새 경로여야 한다.
 
-직접 설치에는 사용자 수정 감지, stale file 정리, 삭제 안전성, rollback 정책이 추가로 필요하다. 실제 요구가 생기면 `render`와 분리된 interface로 설계한다. 현재는 source와 golden output drift를 `check`, 명시적인 설치 tree 차이를 `verify-install`, 실제 runtime discovery를 module smoke test가 담당한다.
+```bash
+uv run --project agent-core scripts/install-agent-skills.py probe \
+  --target shared --target claude --output /tmp/agent-skills-probe.json
+```
+
+Switch 전에 이전 Nix generation과 `/etc/codex/skills`, `~/.claude/skills`, `~/.pi/agent/skills`의 대상과 파일을 백업한다. pylv-onyx는 `--target openclaw`도 probe에 포함하고 external managed tree를 별도로 백업한다. OpenClaw state archive에는 이 tree가 포함되지 않는다. Inventory의 다섯 host 모두 Codex/Pi/Claude 대상이며 OpenClaw는 pylv-onyx만 대상이다.
+
+Home Manager/NixOS switch는 사용자가 실행한다. Switch 후 Claude와 Pi의 기존 Home Manager symlink가 제거되었는지 확인한다. Standalone `/etc/codex/skills`는 자동 삭제되지 않으므로 repo-managed 링크임을 확인한 뒤 백업 위치로 옮긴다. OpenClaw의 기존 read-only managed tree도 백업 위치로 옮겨 같은 경로를 비운다. 기존 pool의 동명 개인 skill이나 다른 source는 자동으로 인계하지 않는다. 현재 맥북의 기존 `find-skills`도 충돌 검토 대상이다.
+
+```bash
+uv run --project agent-core scripts/install-agent-skills.py plan --target shared --target claude
+uv run --project agent-core scripts/install-agent-skills.py install \
+  --target shared --target claude --replay /tmp/agent-skills-probe.json --apply
+```
+
+OpenClaw를 함께 probe했다면 설치 명령에도 `--target openclaw`를 포함한다. `--replay` 없이 설치하면 외부 latest를 새로 결정한다. `--revision matt=<full-sha> --revision vercel=<full-sha>`로 명시적 revision을 지정할 수도 있다. 설치는 먼저 격리된 경로에서 모든 source를 검증한 뒤 실제 target에 CLI를 실행하고 파일 bytes를 대조한다. 최신 source에 선택한 이름이나 license가 없으면 기존 설치를 변경하지 않는다.
+
+소유권은 설치 경로와 이름별로 `$XDG_STATE_HOME/agent-core/skills` 또는 `~/.local/state/agent-core/skills`에 기록한다. 원본 SHA 또는 local content, 설치 파일의 hash와 mode, 추가한 `AGENT-CORE-SOURCE-LICENSE`를 구분해 기록한다. CLI의 이름별 global lock을 target별 소유권으로 간주하지 않는다. 사용자 수정, 동명 타 source, 선택 목록에서 빠진 기존 관리 항목은 검토 전까지 중단한다. 포괄적인 `skills update`와 자동 삭제는 사용하지 않는다.
+
+실제 설치 오류는 backup 경로를 출력한다. 다른 skill의 lock 항목을 보존하며 선택한 항목만 복구한다. Backup 이후 같은 이름의 lock이나 설치 파일, 소유권이 변경되었다면 복구를 중단한다. Symlink나 특수 파일을 남긴 비정상 실패는 기존 backup을 유지하고 수동 보존이 필요하다고 보고한다.
+
+```bash
+uv run --project agent-core scripts/install-agent-skills.py restore \
+  --backup <reported-backup-directory> --apply
+```
+
+소유권 전환 자체를 되돌릴 때는 새 CLI 설치본을 먼저 백업 위치로 옮기고 이전 repo commit과 Nix generation을 복원한 뒤, 해당 파일과 lock 항목을 복구한다. Nix rollback만으로 CLI 상태가 복구되지는 않는다. Claude의 ordinary directory가 이전 Home Manager symlink 복원을 막지 않도록 한다. 복구 후에는 discovery와 관련 없는 사용자 skill 보존을 다시 검사한다.
+
+## 전환 상태
+
+격리 CLI 검증, source 선언, 설치 연결 명령과 module 소유권 전환 코드는 구현되어 있다. 실제 host switch와 native discovery는 아직 수행하지 않았다. pylv-onyx는 DNS 조회와 LAN SSH 연결이 실패하여 live 검증이 남아 있다. 다섯 host의 Codex/Pi/Claude와 pylv-onyx OpenClaw 전환을 확인한 뒤에만 기존 vendored 9개와 skill renderer를 정리한다. `resolving-merge-conflicts`도 이 fallback 정리 시 제거한다.
+
+OpenClaw에서는 [runtime smoke](../modules/openclaw/tests/runtime-smoke.sh)와 [deployed resource test](../modules/openclaw/tests/deployed-skills.test.sh)를 모두 실행한다. 기대 이름은 manifest에서 가져오며 파일, 모든 agent의 discovery 경로, workspace override, prompt hook과 recorder, service drop-in을 검사한다. 실제 prompt 내용과 모델의 skill 선택 행동을 검증한 것으로 보고하지 않는다.
 
 ## 개발과 검증
 
@@ -198,9 +238,9 @@ Runtime module은 `render.nix`가 만든 immutable tree에서 필요한 파일�
 
 ```bash
 uv run --project agent-core -m pytest agent-core/tests
+uv run --project agent-core -m pytest scripts/tests
 uv run --project agent-core agent-core check
-nix build .#agent-core
-nix flake check --no-build
+AGENT_SKILLS_NETWORK=1 uv run --project agent-core -m pytest scripts/tests/test_skills_cli_network.py
 ```
 
 Wheel에 canonical resource가 포함되는지도 확인한다.
@@ -218,10 +258,10 @@ Golden hash는 intentional output 변경을 검토한 뒤에만 갱신한다. Ha
 
 ## 완료 조건
 
-- 공통 rule, adapter, shared skill의 canonical source가 `agent-core/` 한 곳에 있다.
+- 공통 rule, adapter, 로컬 skill과 외부 source 선언의 canonical source가 `agent-core/` 한 곳에 있다.
 - Python renderer 하나가 manifest에서 네 runtime output을 생성한다.
 - Runtime module에 독자적인 merge logic이나 shared skill 복사본이 없다.
 - Pi의 system append 분리와 OpenClaw의 workspace ownership 경계가 유지된다.
-- Nix package와 module은 immutable render output만 설치한다.
+- Nix module은 지침과 extension을 설치하며 CLI가 skill 배치를 소유한다.
 - Credentials, session, cache, 개인 memory가 materialized output에 포함되지 않는다.
-- Python test, package resource test, Nix package, flake check가 통과한다.
+- Offline test, CLI integration, package resource와 필요한 Nix 평가가 통과하며 모든 host의 실제 discovery가 확인된다.

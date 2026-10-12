@@ -1,6 +1,8 @@
 # Shared skills
 
-This directory is the canonical catalog for repository-managed shared skills. `agent-core/manifest.toml` controls which skills each runtime receives, so a skill can have one source without being installed for every runtime.
+This directory owns local shared skills and retains legacy vendored files during host migration. `agent-core/manifest.toml` declares local and external sources and CLI target selections. See [installation and migration status](../README.md) before removing legacy sources.
+
+New installations acquire eight Matt skills and Vercel's `find-skills` directly from the latest default-branch SHA resolved once per operation. `resolving-merge-conflicts` was removed upstream and is excluded from new installations with user approval. The imported directories below remain only for legacy rendering and recovery until all host gates pass. Local `code-review`, `writing-for-agents`, `pi-agent`, and the other eight locally maintained skills remain canonical here. Each external installation preserves its own revision's root license separately; the legacy license below does not replace those notices.
 
 The skills imported from [mattpocock/skills](https://github.com/mattpocock/skills) are `code-review`, `codebase-design`, `diagnosing-bugs`, `domain-modeling`, `grilling`, `prototype`, `research`, `resolving-merge-conflicts`, `tdd`, `wizard`, and `writing-for-agents`.
 
@@ -23,8 +25,8 @@ The following guidance is independently rewritten from workflow ideas reviewed i
 | `agent_context/skills/data-visualization/SKILL.md` | [data-visualization](data-visualization/SKILL.md): plot from source data, check scales and units, and inspect fonts and final rendering. Fixed palettes, sandbox paths, and automatic replacement of requested chart types are excluded. |
 | `.agents/skills/quokka-skill-author/references/trigger-eval.md`, `.agents/skills/quokka-eval-creator/SKILL.md` | [writing-for-agents validation](writing-for-agents/BEHAVIOR-VALIDATION.md): positive and near-miss cases, successful load evidence, setup failures, and impact on existing cases. The Quokka CLI harness and live-query side effects are excluded. |
 
-All three selections are exposed to OpenClaw, Codex, Claude, and Pi through the existing manifest and renderer. They add no always-loaded operating rules, runtime dependencies, credentials, or mutable workspace configuration.
+All three selections are exposed to OpenClaw, Codex, Claude, and Pi through the manifest and explicit CLI installation. They add no always-loaded operating rules, runtime dependencies, credentials, or mutable workspace configuration.
 
 The selection excludes game and company data skills, Quokka administration and deployment skills, and library-specific frontend skills because their tools and schemas do not apply generally. PR and commit workflows overlap existing operating rules. Usage-report analysis overlaps `user-friction-review` and requires Quokka's thread APIs. Mandatory designer interviews and fixed report sections are not adopted because they would impose unnecessary steps on unrelated work.
 
-Shared skills describe required capabilities instead of naming one agent runtime. Runtime modules own packages, settings, plugins, and installation behavior, while the renderer selects skill sources only from this catalog.
+Shared skills describe required capabilities instead of naming one agent runtime. Runtime modules own packages, settings, plugins, and installation behavior. Agent-core validates source declarations and the pinned CLI acquires and places skill files.
