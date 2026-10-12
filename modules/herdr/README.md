@@ -26,6 +26,8 @@ In Herdr 0.9.1, closing a tab terminates its panes. Closing the last tab also cl
 
 ## Agent detection
 
+When both Pi and Herdr modules are enabled, the [Pi parent status integration](../pi/README.md#herdr-parent-status) reports working, idle, and blocked states through Herdr's bundled extension. Home Manager installs the version matched to the pinned Herdr package. Pi's model and subagent display metadata does not set the parent lifecycle state.
+
 The packaged Herdr excludes direct `claude plugin ...`, `claude mcp ...`, `claude --version` / `-v`, and `claude --help` / `-h` invocations from process-based agent detection. Home Manager runs plugin and MCP management commands during `setupClaudeCode`; they do not represent an interactive Claude session. Normal Claude sessions, including resume and continue, remain detectable. Unrecognized argument layouts retain upstream detection behavior.
 
 This behavior comes from [the local detection patch](../../packages/apps/herdr/claude-admin-detection.patch). After applying Home Manager, restart the Herdr server when its running tasks can be interrupted to load the patched binary. `herdr server reload-config` only reloads configuration.
