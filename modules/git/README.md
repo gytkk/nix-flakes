@@ -32,7 +32,7 @@ This module provides comprehensive Git configuration with sensible defaults and 
 ### Git Settings
 
 - **Editor**: Neovim (`nvim`)
-- **Diff display**: Delta with side-by-side output, line numbers, and the `OneHalfLight` syntax theme
+- **Diff display**: Delta with side-by-side output, line numbers, the `ansi` syntax theme using the terminal palette, and dark diff backgrounds. Git's own diff colors use terminal red and green.
 - **Pull Strategy**: Rebase with fast-forward only
 - **Push Strategy**: Current branch with auto-setup of remote
 - **Default Branch**: `main`

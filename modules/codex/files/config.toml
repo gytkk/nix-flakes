@@ -42,7 +42,7 @@ status_line = [
   "model-with-reasoning",
 ]
 status_line_use_colors = true
-theme = "one-half-light"
+theme = "one-half-dark"
 
 [tui.keymap.editor]
 insert_newline = ["ctrl-j", "shift-enter"]

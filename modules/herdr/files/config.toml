@@ -78,7 +78,7 @@ command = "annotate.last"
 description = "Review the agent's last reply"
 
 [theme]
-name = "one-light"
+name = "terminal"
 auto_switch = false
 
 [ui]

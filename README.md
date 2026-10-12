@@ -144,7 +144,7 @@ Codex and Claude share the `openai-decisions` skill through agent-core for `gpt-
 
 ### Pi coding agent
 
-Pi uses the official upstream Nix package definition, the terminal-derived `system` theme, and the `openai` provider's ChatGPT login. Home Manager synchronizes common settings into a device-local writable file, keeping installation IDs out of the checkout. The module does not install the legacy Codex usage extension. See the [Pi module README](modules/pi/README.md) for authentication, native MCP integration, on-demand web and subagent tools, pinned extensions, and verification steps.
+Pi uses the official upstream Nix package definition, the generated `vira-graphene` theme, and the `openai` provider's ChatGPT login. Home Manager synchronizes common settings into a device-local writable file, keeping installation IDs out of the checkout. The module does not install the legacy Codex usage extension. See the [Pi module README](modules/pi/README.md) for authentication, native MCP integration, on-demand web and subagent tools, pinned extensions, and verification steps.
 
 ### Cloudflare CLI
 
@@ -281,6 +281,10 @@ Resources should supplement the tools instead of expanding the tool count:
 
 ## Ghostty config
 
+The shared `modules.commonTheme` default is `vira-graphene` for Ghostty, K9s, Neovim, Starship, and tmux. Zed and Pi select the same generated theme in their own settings. See the [canonical themes documentation](themes/README.md#nix-integration) for export and installation behavior.
+
+[Herdr](modules/herdr/README.md), [Claude Code](modules/claude/README.md), and [Git Delta](modules/git/README.md) use terminal palette themes. [Codex](modules/codex/README.md) uses its built-in `one-half-dark` syntax theme because the canonical pipeline has no Codex export.
+
 Ghostty opens new windows maximized to the current monitor's available area. On macOS, it also preserves saved windows, tabs, and splits. See the [Ghostty module README](modules/ghostty/README.md) for applying the configuration and resizing restored windows.
 
 ## Zed config
@@ -289,7 +293,7 @@ Ghostty opens new windows maximized to the current monitor's available area. On 
 - On macOS and non-WSL Linux, `home-manager switch` installs `~/.config/zed/settings.json` and `keymap.json` as out-of-store symlinks to the repo, and exposes the entire `themes/exports/zed` directory at `~/.config/zed/themes`.
 - That means mutable settings can switch between generated theme names without requiring another switch just to materialize a newly referenced theme file.
 - On WSL hosts, activation still copies settings, keymaps, and the full set of generated `themes/exports/zed/*.json` files into the Windows Zed config directory on each switch.
-- The checked-in defaults point both light and dark mode at the generated `One Half Light` theme.
+- The checked-in defaults point both light and dark mode at the generated `Vira Graphene` theme.
 
 ## Herdr config
 

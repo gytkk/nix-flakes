@@ -2,6 +2,8 @@
 
 [default.nix](default.nix) installs Herdr and links [files/config.toml](files/config.toml) to `~/.config/herdr/config.toml`. The prefix is `Ctrl+Space`.
 
+The `terminal` theme follows the terminal palette, including Ghostty's shared `vira-graphene` theme. Automatic theme switching is disabled.
+
 ## Terminal shortcuts
 
 | Shortcut | Action |

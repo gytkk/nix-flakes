@@ -18,7 +18,7 @@ See [`docs/pi-performance-audit.md`](../../docs/pi-performance-audit.md) for the
 | `agent-core/rules/` and `agent-core/adapters/pi.md` | `~/.pi/agent/AGENTS.md` | Generated shared and Pi-specific instructions |
 | `agent-core/rules/OPERATING.md` | `~/.pi/agent/APPEND_SYSTEM.md` | Operating invariants added to Pi's system prompt |
 | `files/extensions/` | `~/.pi/agent/extensions/` | Local Pi extensions |
-| `themes/exports/pi/one-half-light.json` | `~/.pi/agent/themes/one-half-light.json` | Generated One Half Light theme |
+| `themes/exports/pi/vira-graphene.json` | `~/.pi/agent/themes/vira-graphene.json` | Generated Vira Graphene theme |
 | `files/themes/claude-like.json` | `~/.pi/agent/themes/claude-like.json` | Alternate dark theme |
 | `agent-core/skills/` | `~/.pi/agent/skills/` | Pi's selected shared skills |
 
@@ -36,7 +36,7 @@ The module also installs:
 `files/settings.json` currently selects:
 
 - `openai/gpt-6.1-sol` with `high` thinking
-- the built-in `system` theme, derived from the terminal palette
+- the generated `vira-graphene` theme
 - a startup header without the loaded-resource listing
 - one-cell editor padding and default output padding
 - the hardware terminal cursor for IME positioning
@@ -190,7 +190,7 @@ Cloudflare operations use the `cf` CLI installed by the common Home Manager prof
 
 ## Theme
 
-Pi selects its built-in `system` theme, which derives colors from the terminal's background and ANSI palette and tracks supported light/dark changes. The module keeps the generated `themes/exports/pi/one-half-light.json` and existing `claude-like` theme installed as explicit alternatives. Select either in `/settings` if the terminal-derived colors are unsuitable.
+Pi selects the generated `vira-graphene` theme from `themes/exports/pi/vira-graphene.json`. The module also installs `claude-like` as an alternative. The built-in `system` theme remains available in `/settings` to derive colors from the terminal's background and ANSI palette.
 
 The custom footer uses standard ANSI colors, so its accents follow the active terminal palette.
 

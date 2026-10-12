@@ -4,6 +4,8 @@
 
 Cloudflare 작업은 공통 Home Manager profile이 설치하는 `cf` CLI를 사용한다. 인증과 명령 검색은 [Cloudflare CLI 설정](../../README.md#cloudflare-cli)을 참고한다. MCP 설정 변경 후에는 Codex 세션을 다시 시작한다.
 
+TUI 구문 강조는 어두운 터미널 배경에 맞춰 기본 제공 `one-half-dark`를 사용한다. 공통 `vira-graphene` 테마의 Codex용 export는 없다. [공식 CLI 테마 문서](https://learn.chatgpt.com/docs/cli-customization)에서 설명하는 사용자 지정 테마는 별도의 `.tmTheme` 파일이 필요하다.
+
 [Codex 패키지](../../packages/apps/codex/package.nix)는 공식 `codex-package` 번들 전체를 설치한다. 백그라운드 서버가 패키지를 인식하도록 `codex-package.json`, `codex-path`, `codex-resources`를 실행 파일과 함께 유지한다. 패키지 변경은 환경에 맞는 Home Manager 또는 NixOS switch 후 새 Codex 세션에 적용된다.
 
 ## 모델별 위임
