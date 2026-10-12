@@ -72,13 +72,13 @@ groups:
     bg: "#2E2E2E"
   BlinkCmpLabelMatch:
     fg: "#80CBC4"
-  # Visual cannot blend its background. Composite #47474780 over #212121.
+  # Visual cannot blend its background. Use a brighter gray for visibility.
   Visual:
     fg: "{palette.fg}"
-    bg: "#343434"
+    bg: "{palette.base04}"
   VisualNOS:
     fg: "{palette.fg}"
-    bg: "#343434"
+    bg: "{palette.base04}"
   Search:
     bg: "#3C3C3C"
   CurSearch:

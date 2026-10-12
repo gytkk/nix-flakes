@@ -10,7 +10,7 @@ This module configures Neovim as the primary editor with a modern Lua-based setu
 - Exposes every generated colorscheme from `themes/exports/nvim/`
 - Loads the selected shared theme and falls back to `one-half-light` if its generated export is missing
 
-Vira Graphene follows the original editor's syntax and UI colors through a theme override. Its gray selection uses the composited color `#343434` because Neovim cannot alpha-blend a Visual highlight background. See the [canonical theme resolution rules](../../themes/README.md#resolution-rules) for the source and Zed selection behavior.
+Vira Graphene follows the original editor's syntax and UI colors through a theme override. Its selection uses the brighter gray `#545454` to stay visible against the editor background. Neovim cannot alpha-blend a Visual highlight background. See the [canonical theme resolution rules](../../themes/README.md#resolution-rules) for the source and Zed selection behavior.
 
 ## Included Features
 
