@@ -127,6 +127,7 @@
   "theme": "dark-ansi",
   "teammateMode": "auto",
   "skipAutoPermissionPrompt": true,
+  "subagentPromptCacheTtl": "1h",
   "modelSettings": {
     "claude-opus-5-5": {
       "effortLevel": "high"
