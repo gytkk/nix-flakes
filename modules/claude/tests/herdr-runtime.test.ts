@@ -124,7 +124,7 @@ test("watcher follows child progress, waits for confirmed completion, and clears
   } finally { await f.cleanup(); }
 }, 15_000);
 
-test("watcher clears a stopped teammate only after removal from its owning team", async () => {
+test("watcher confirms a stopped teammate's interruption after removal from its owning team", async () => {
   const f = await fixture();
   try {
     const configPath = join(f.claudeConfig, "teams", "team-test", "config.json");
@@ -144,11 +144,31 @@ test("watcher clears a stopped teammate only after removal from its owning team"
 
     await atomicJson(configPath, { ...team, members: team.members.slice(0, 1) });
     await f.waitFor("subagent_1_status=■");
-    const cleared = await f.waitFor("subagent_1", 7_000);
+    const cleared = await f.waitFor("subagent_1", 12_000);
     const latestChildReport = cleared.findLast(args => args.some(arg => arg === "subagent_1" || arg.startsWith("subagent_1=")))!;
     expect(latestChildReport).toContain("--clear-token");
     expect(latestChildReport).toContain("subagent_1");
     expect(latestChildReport.some(arg => arg.startsWith("subagent_1="))).toBeFalse();
+  } finally { await f.cleanup(); }
+}, 20_000);
+
+test("watcher clears stop-only children after ten seconds without new events and shows resumed activity", async () => {
+  const f = await fixture();
+  try {
+    await f.waitFor("subagent_1_status=●");
+    const stoppedAt = Date.now();
+    await appendFile(f.events, JSON.stringify({ kind: "stop", id: "child-test", at: stoppedAt }) + "\n");
+    await f.waitFor("subagent_1_status=○");
+    const cleared = await f.waitFor("subagent_1", 12_000);
+    expect(Date.now() - stoppedAt).toBeGreaterThanOrEqual(10_000);
+    const clearedRow = cleared.findLast(args => args.includes("subagent_1"));
+    expect(clearedRow).toContain("--clear-token");
+    expect(clearedRow).toContain("subagent_1_activity");
+    await appendFile(f.childPath, JSON.stringify({ sessionId: f.sessionId, agentId: "child-test", isSidechain: true,
+      type: "assistant", timestamp: new Date().toISOString(),
+      message: { model: "claude-test-model", content: [{ type: "text", text: "Resumed progress" }] } }) + "\n");
+    const resumed = await f.waitFor("subagent_1_activity=|  Resumed progress");
+    expect(resumed.findLast(args => args.includes("subagent_1_activity=|  Resumed progress"))).toContain("subagent_1_status=●");
   } finally { await f.cleanup(); }
 }, 20_000);
 

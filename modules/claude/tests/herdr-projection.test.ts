@@ -61,8 +61,28 @@ describe("Claude child projection", () => {
     expect(child).toMatchObject({ name: "Review hooks", phase: "completed", model: "final-model", activity: "Done", endedAt: 2000 });
     consumeChild(child, assistant(1500, [{ type: "text", text: "Old progress" }]), sessionId);
     expect(child.activity).toBe("Done");
-    expect(sidebarTokens([child], 6999).subagent_1_status).toBe("✓");
-    expect(sidebarTokens([child], 7000).subagent_1).toBeNull();
+    expect(sidebarTokens([child], 11999).subagent_1_status).toBe("✓");
+    expect(sidebarTokens([child], 12000).subagent_1).toBeNull();
+  });
+
+  test("hides stop-only children after ten seconds and shows resumed activity again", () => {
+    const { children, child } = running();
+    applyEvent(children, hookEvent({ hook_event_name: "SubagentStop", agent_id: "child" }, 2000)!);
+    expect(sidebarTokens([child], 11999).subagent_1_status).toBe("○");
+    expect(sidebarTokens([child], 12000)).toMatchObject({ subagent_1: null, subagent_1_status: null, subagent_1_activity: null });
+    expect(child.phase).toBe("stopping");
+    consumeChild(child, assistant(13000, [{ type: "text", text: "More work" }]), sessionId);
+    expect(sidebarTokens([child], 13000)).toMatchObject({ subagent_1_status: "●", subagent_1_activity: "|  More work" });
+  });
+
+  test("expired stops do not crowd out running children or count toward overflow", () => {
+    const children = Array.from({ length: 8 }, (_, index) => ({ ...running().child,
+      id: String(index), phase: "stopping" as const, stoppedAt: 2000 }));
+    const active = running().child;
+    active.unavailable = true;
+    expect(sidebarTokens([...children, active], 12000)).toMatchObject({
+      subagent_1: "Explore (child) / model unknown", subagent_2: null, subagent_7: null,
+    });
   });
 
   test("background launches stay active and handback reports use their text field", () => {

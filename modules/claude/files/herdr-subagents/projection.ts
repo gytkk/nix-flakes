@@ -160,8 +160,9 @@ export function consumeParent(children: Map<string, Child>, value: unknown, sess
 }
 
 export function sidebarTokens(children: Child[], now = Date.now()): Record<string, string | null> {
-  const active = children.filter((child) => child.endedAt === undefined);
-  const ended = children.filter((child) => child.endedAt !== undefined && now >= child.endedAt && now - child.endedAt < 5_000)
+  const active = children.filter((child) => child.endedAt === undefined
+    && (child.stoppedAt === undefined || now - child.stoppedAt < 10_000));
+  const ended = children.filter((child) => child.endedAt !== undefined && now >= child.endedAt && now - child.endedAt < 10_000)
     .sort((a, b) => b.endedAt! - a.endedAt!);
   const candidates = [...active, ...ended];
   const visible = candidates.length > 7 ? candidates.slice(0, 6) : candidates;
