@@ -67,16 +67,17 @@
     OTEL_EXPORTER_OTLP_PROTOCOL = "http/protobuf";
     OTEL_METRICS_EXPORTER = "otlp";
     OTEL_EXPORTER_OTLP_METRICS_PROTOCOL = "http/protobuf";
-    OTEL_EXPORTER_OTLP_METRICS_ENDPOINT = "https://devsisters-dsusw2.cloud.databricks.com/api/2.0/otel/v1/metrics";
+    OTEL_EXPORTER_OTLP_METRICS_ENDPOINT = "https://devsisters-seusw2.cloud.databricks.com/api/2.0/otel/v1/metrics";
     OTEL_METRIC_EXPORT_INTERVAL = "10000";
     OTEL_LOGS_EXPORTER = "otlp";
     OTEL_EXPORTER_OTLP_LOGS_PROTOCOL = "http/protobuf";
-    OTEL_EXPORTER_OTLP_LOGS_ENDPOINT = "https://devsisters-dsusw2.cloud.databricks.com/api/2.0/otel/v1/logs";
+    OTEL_EXPORTER_OTLP_LOGS_ENDPOINT = "https://devsisters-seusw2.cloud.databricks.com/api/2.0/otel/v1/logs";
     OTEL_LOGS_EXPORT_INTERVAL = "5000";
     OTEL_LOG_USER_PROMPTS = "1";
   };
 
-  # Databricks OTEL token (decrypted by agenix)
+  # Databricks OTEL token for the seusw2 telemetry workspace (decrypted by agenix).
+  # Same destination as the org's Claude Code remote managed settings.
   age.secrets.databricks-token = {
     file = ../../secrets/databricks-token.age;
   };
@@ -85,8 +86,8 @@
   programs.zsh.initContent = lib.mkAfter ''
     if [ -f "${config.age.secrets.databricks-token.path}" ]; then
       _dbx_token=$(cat "${config.age.secrets.databricks-token.path}")
-      export OTEL_EXPORTER_OTLP_METRICS_HEADERS="content-type=application/x-protobuf,Authorization=Bearer $_dbx_token,X-Databricks-UC-Table-Name=ml.ai_observability.cc_otel_metrics"
-      export OTEL_EXPORTER_OTLP_LOGS_HEADERS="content-type=application/x-protobuf,Authorization=Bearer $_dbx_token,X-Databricks-UC-Table-Name=ml.ai_observability.cc_otel_logs"
+      export OTEL_EXPORTER_OTLP_METRICS_HEADERS="content-type=application/x-protobuf,Authorization=Bearer $_dbx_token,X-Databricks-UC-Table-Name=telemetry.ai_observability.agent_otel_metrics"
+      export OTEL_EXPORTER_OTLP_LOGS_HEADERS="content-type=application/x-protobuf,Authorization=Bearer $_dbx_token,X-Databricks-UC-Table-Name=telemetry.ai_observability.agent_otel_logs"
       unset _dbx_token
     fi
   '';
