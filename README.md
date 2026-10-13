@@ -126,7 +126,7 @@ The official [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc)
 
 ### Codex CLI Config
 
-See the [Codex module README](modules/codex/README.md) for official bundle packaging, model delegation, reasoning effort, opening pages in the system default browser, configuration ownership, and activation behavior.
+See the [Codex module README](modules/codex/README.md) for official bundle packaging, model delegation, reasoning effort, opening pages in the system default browser, configuration ownership, and activation behavior. The [Herdr integration](modules/codex/README.md#herdr-subagent-sidebar) runs Codex without the shared daemon inside Herdr so each pane retains its own session and subagent metadata.
 
 Codex and Claude share the `openai-decisions` skill through agent-core for `gpt-6-luna` Decisions API judgments. The [OpenAI API module](modules/openai-api/README.md) supplies `with-openai` to run API clients with the existing agenix-managed `OPENAI_API_KEY`.
 

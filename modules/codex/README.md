@@ -30,6 +30,8 @@ Codex의 subagent 기능으로 생성한 자식은 부모가 답변을 마친 �
 
 [files/hooks.json](files/hooks.json)의 `SessionStart`, `SubagentStart`, `SubagentStop`, `SessionEnd` 훅이 Home Manager로 설치한 `~/.local/bin/codex-herdr-subagents`를 호출한다. 훅은 Herdr pane마다 감시 프로세스 하나를 실행하고, 감시 프로세스는 부모와 자식의 로컬 JSONL 기록을 읽어 `codex:herdr-subagents` metadata를 갱신한다. 부모 세션 종료나 Codex 프로세스 종료 시 표시를 지운다. Herdr 환경 변수가 없는 터미널에서는 실행하지 않는다.
 
+[Codex launcher](files/codex-launcher.sh)는 `HERDR_ENV=1`일 때 `--no-daemon`을 추가한다. Codex 0.162.1의 공유 daemon은 처음 실행된 pane의 환경 변수를 다른 세션에도 사용하므로, pane별 훅은 각 Codex 프로세스에서 실행해야 한다. Launcher는 Home Manager profile에서 원본 `codex`보다 높은 우선순위로 설치되며, Herdr 밖에서는 인자를 그대로 전달한다. 공유 daemon에서 실행된 훅은 pane 소유자를 변경하지 않고 `--no-daemon`으로 재시작하라는 오류를 기록한다. 패키지의 실행 파일을 절대 경로로 호출하여 launcher를 우회하는 경우에도 Herdr 안에서는 `--no-daemon`이 필요하다.
+
 `SessionEnd` 훅의 timeout은 Codex가 허용하는 최대값인 3초로 설정한다. 3초를 초과하면 Codex가 시작 시 경고를 표시하고 실제 제한을 3초로 낮춘다.
 
 실행 중인 자식의 기록을 읽지 못하거나 기록이 손상되면 회색 `○`와 마지막 메시지를 표시한다. 기록을 다시 읽어 작업 상태를 확인하면 정상 표시로 돌아간다. 감시 프로세스 자체가 종료되거나 Herdr에 전송할 수 없으면 새로운 상태를 표시할 수 없으므로 마지막 metadata가 15초 뒤 만료된다.
@@ -66,4 +68,4 @@ NixOS는 [system.nix](system.nix)의 `environment.etc`로 시스템 설정을 �
 
 Adapter 변경을 적용하려면 환경에 맞는 `home-manager switch --flake .#<environment>` 또는 `nixos-rebuild switch --flake .#<host>`를 사용자가 실행한 뒤 새 Codex 세션을 시작한다. 최초 skill 전환에는 [Agent core README](../../agent-core/README.md#skill-설치와-복구)의 backup과 소유권 인계가 필요하다. Switch가 성공하면 별도 CLI 설치 없이 discovery를 검증한다.
 
-Herdr 연동도 같은 switch로 훅과 실행 파일을 설치한 뒤 `herdr server reload-config`를 실행하고 Herdr 안에서 새 Codex 세션을 시작한다. 실행 중인 Codex 세션에는 새 훅 설정이 자동 적용되지 않을 수 있다.
+Herdr 연동도 같은 switch로 훅과 launcher를 설치한 뒤 새 셸에서 Codex를 시작한다. 기존 세션을 이어가려면 해당 pane의 Codex를 종료한 뒤 `codex resume <session-id>`를 실행한다. Switch 전에도 `codex --no-daemon resume <session-id>`로 pane별 실행을 선택할 수 있다. 실행 중인 세션의 daemon 연결과 훅 설정은 자동으로 변경되지 않는다. Herdr 표시 설정을 변경했으면 `herdr server reload-config`도 실행한다.

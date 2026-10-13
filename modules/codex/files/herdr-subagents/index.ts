@@ -119,6 +119,11 @@ async function codexAncestor(): Promise<{ pid: number; identity: string }> {
     const match = stdout.trim().match(/^(\d+)\s+(.+)$/);
     if (!match) break;
     if (/^\.?codex(?:-.*)?$/.test(basename(match[2]))) {
+      const { stdout: args } = await exec("ps", ["-p", String(pid), "-o", "args="], { timeout: 1_000 });
+      const appServer = [match[2], basename(match[2])].some((executable) => args.trim().startsWith(`${executable} app-server `));
+      if (appServer && /(?:^|\s)--managed-daemon(?:\s|$)/.test(args)) {
+        throw new Error("Shared Codex daemon has no pane-local owner; restart Codex with --no-daemon");
+      }
       const identity = await processIdentity(pid);
       if (identity) return { pid, identity };
       break;
@@ -181,6 +186,7 @@ export async function handleHook(payload: unknown): Promise<void> {
   const inherited = process.env.CODEX_THREAD_ID;
   if (inherited && inherited !== hook.session_id) return;
   if (!["SessionStart", "SessionEnd", "SubagentStart", "SubagentStop"].includes(hook.hook_event_name)) return;
+  const codex = await codexAncestor();
   await mkdir(env.directory, { recursive: true, mode: 0o700 });
   const ownerPath = join(env.directory, "owner.json");
   await withOwnerLock(env.directory, async () => {
@@ -201,10 +207,8 @@ export async function handleHook(payload: unknown): Promise<void> {
       && await sameProcess(owner.workerPid, owner.workerIdentity);
     if (owner?.sessionId !== hook.session_id && hook.hook_event_name !== "SessionStart" && existingWorkerHealthy) return;
     const workerHealthy = owner?.sessionId === hook.session_id && existingWorkerHealthy;
-    const sessionCodex = hook.hook_event_name === "SessionStart" ? await codexAncestor() : undefined;
-    const codexChanged = sessionCodex && (owner?.codexPid !== sessionCodex.pid || owner?.codexIdentity !== sessionCodex.identity);
+    const codexChanged = owner?.codexPid !== codex.pid || owner?.codexIdentity !== codex.identity;
     if (!workerHealthy || codexChanged) {
-      const codex = sessionCodex ?? await codexAncestor();
       const replayAfter = owner?.sessionId === hook.session_id && owner.codexIdentity === codex.identity
         ? owner.replayAfter
         : processStartedAt(codex.identity) - 1_000;

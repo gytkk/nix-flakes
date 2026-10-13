@@ -11,6 +11,11 @@ let
   cfg = config.modules.codex;
   agentCoreOutput = import ../../agent-core/nix/render.nix { inherit pkgs; } { runtime = "codex"; };
   codex = "${pkgs.codex}/bin/codex";
+  codexLauncher = pkgs.writeShellScriptBin "codex" (
+    builtins.replaceStrings [ "@codex@" ] [ (lib.escapeShellArg codex) ] (
+      builtins.readFile ./files/codex-launcher.sh
+    )
+  );
   hookCommandNames = [
     "agent-session-record"
     "plannotator"
@@ -48,6 +53,7 @@ in
 
   config = lib.mkIf cfg.enable {
     home.packages = [
+      (lib.hiPrio codexLauncher)
       pkgs.codex
       pkgs.mcp-nixos
     ];
