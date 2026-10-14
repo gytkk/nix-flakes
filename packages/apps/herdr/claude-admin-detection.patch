@@ -1,14 +1,8 @@
 --- a/src/detect/mod.rs
 +++ b/src/detect/mod.rs
-@@ -254,7 +254,7 @@
-     {
-         let candidate = normalized_process_name(process);
-         if let Some(agent) = identify_agent(&candidate) {
+@@ -257,1 +257,1 @@
 -            if agent != Agent::Letta || is_interactive_letta_process(process) {
 +            if is_interactive_agent_process(agent, process) {
-                 return Some((agent, candidate));
-             }
-         }
 @@ -267,7 +267,7 @@
          let Some(agent) = identify_agent(&candidate) else {
              continue;
