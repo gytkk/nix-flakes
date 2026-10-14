@@ -1,11 +1,11 @@
 { callPackage, lib }:
 
 let
-  version = "1.1.0";
+  version = "1.2.0";
   # The upstream package reads lockfiles and the model catalog during evaluation.
   source = builtins.fetchTarball {
     url = "https://github.com/earendil-works/pi/archive/refs/tags/v${version}.tar.gz";
-    sha256 = "sha256-lwjspkMGrW+8Fl/yBEDEFsHZJA57OKOhmVQmi6zfej4=";
+    sha256 = "sha256-IjNJvVxjzRur2foQDWPA5iM9sa3ThBoZU1/LT5pU6jc=";
   };
 in
 (callPackage "${source}/nix/package.nix" { inherit source; }).overrideAttrs (old: {
