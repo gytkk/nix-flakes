@@ -1,19 +1,19 @@
 {
-  "revision": "d02b0b42cf1955a3b206959659f1833622f213b8",
-  "revisionDate": "2026-09-21",
-  "sourceHash": "sha256-ra+iX1QrsaPe0lmbJ+FOxMp2YWP1YsvPUHPoB3HgOqY=",
+  "revision": "ceab050b77bea07bbeabdfda5c138be8c9c5c517",
+  "revisionDate": "2026-10-12",
+  "sourceHash": "sha256-Q/HgVn1gEAMMavWDQp8Rmz7R7qK5u0QweLkcpYL+otE=",
   "herdrAnnotate": {
-    "version": "0.1.0",
+    "version": "0.2.0",
     "hashes": {
-      "aarch64-apple-darwin": "sha256-IjQ5Khzt9LCwVhtMpU2nWqUTnfKW29Tlk3HPf6IB+rc=",
-      "x86_64-apple-darwin": "sha256-kcrRYkRacpGdthjRZCrJwAX0ZRPtxJeGYrhmfIz1UHw=",
-      "x86_64-unknown-linux-gnu": "sha256-P1cRHCOtcGIWP2FkxWQrdJMJ08xZdDC+He8I3A2r1xI=",
-      "aarch64-unknown-linux-gnu": "sha256-qh3xiNQ+/XaJPKpfjDuJtZv/57HcPCHLkJcjiHk4IuY="
+      "aarch64-apple-darwin": "sha256-WpxT03fNh+ZN4BueQ8hJBFP2q4GhExHTQKS/8HDqQwg=",
+      "x86_64-apple-darwin": "sha256-GUMf4vGkC98SL7b9wipo/1/5VcxOjJw7iz3qJONA/+0=",
+      "x86_64-unknown-linux-gnu": "sha256-o+9OcnhLuoz3nlgtYCHKNPDWAPFw2jCVvMYKh7G8uUI=",
+      "aarch64-unknown-linux-gnu": "sha256-xNOA7VpwzXtDZCgsPXApCkgal5NQYrvlxnJXmRxpH28="
     }
   },
   "plannotatorTui": {
-    "version": "0.9.2",
-    "sourceHash": "sha256-DN3jRovKYUpT6Isu6B1HgKMB+v7KfELX7BRjxG/INRA=",
-    "cargoHash": "sha256-CEExsInt7DmfqEAe5bXFsL++caiaBQoduSr+/X11I6g="
+    "version": "0.9.4",
+    "sourceHash": "sha256-oJ+AMl2G9m/hxFJLwiN6CQ9urhyhK0w6VEcbnpUgQv0=",
+    "cargoHash": "sha256-EK3iCT+VJQ/1Sjhdt06nc1pUdo0B6tPBjbjSV9jsRKY="
   }
 }

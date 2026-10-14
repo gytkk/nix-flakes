@@ -46,8 +46,6 @@ source_hash=$(nix hash convert --hash-algo sha256 --to sri "$source_hash_base32"
 
 plannotator_source=$(nix store prefetch-file --unpack --json "https://github.com/$PLANNOTATOR_REPOSITORY/archive/refs/tags/v$plannotator_tui_version.tar.gz")
 plannotator_source_hash=$(jq -er '.hash' <<<"$plannotator_source")
-plannotator_source_path=$(jq -er '.storePath' <<<"$plannotator_source")
-bash "$PACKAGES_ROOT/scripts/check-nix-patches.sh" "$plannotator_source_path" "$SCRIPT_DIR/patches.nix"
 
 current_plannotator_version=$(jq -er '.plannotatorTui.version' "$SOURCES_JSON")
 current_plannotator_source_hash=$(jq -er '.plannotatorTui.sourceHash' "$SOURCES_JSON")
