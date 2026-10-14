@@ -198,8 +198,6 @@ in
             bindkey -M vicmd "^[OH" beginning-of-line
             bindkey -M vicmd "^[OF" end-of-line
 
-            source ${./files/terminal-input.zsh}
-
             # Enable colors
             autoload -U colors && colors
 
