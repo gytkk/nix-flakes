@@ -12,11 +12,11 @@
 }:
 
 let
-  version = "0.9.3";
+  version = "0.9.4";
   # Cargo.lock and the Zig manifest must be readable during evaluation without IFD.
   src = builtins.fetchTarball {
     url = "https://github.com/herdrdev/herdr/archive/refs/tags/v${version}.tar.gz";
-    sha256 = "sha256-uu452Xe23pSvFk7w7fKPjiaqY5QenUIljao2SFAxpc0=";
+    sha256 = "sha256-tbOVXxQCA/suZ+My71B5laNZhEpK46YLYUs7H8tdysY=";
   };
   zigDeps = callPackage "${src}/vendor/libghostty-vt/build.zig.zon.nix" {
     name = "herdr-libghostty-vt-zig-cache";
