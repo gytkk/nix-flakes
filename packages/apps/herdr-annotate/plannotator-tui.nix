@@ -18,6 +18,9 @@ rustPlatform.buildRustPackage {
 
   preCheck = ''
     export PLANNOTATOR_DATA_DIR="$TMPDIR/plannotator-test-data"
+    # Nix's cc/ld response files misquote the terminal tests' Unicode fixture paths.
+    export NIX_CC_USE_RESPONSE_FILE=0
+    export NIX_LD_USE_RESPONSE_FILE=0
   '';
 
   meta = {
