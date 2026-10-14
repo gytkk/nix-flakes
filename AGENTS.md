@@ -19,6 +19,7 @@ This file provides guidance to Codex CLI when working with code in this reposito
 
 - All documentation belongs in: `AGENTS.md`, `CLAUDE.md`, `README.md`, code comments (sparingly), commit messages
 - When module paths or behavior change, update the module README and its root documentation links. Run `uv run --no-project scripts/check-paths.py` to check the current entry-point documents; pass other changed Markdown files explicitly.
+- PR descriptions should focus on the change and its purpose, omitting routine validation sections (`검증`, `Validation`, or `Testing`) and checklists for human reviewers to manage. Include validation guidance only when a breaking change requires explicit attention. This affects PR descriptions only; required checks still run.
 
 ### Build/Test/Lint Commands
 
