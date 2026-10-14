@@ -59,6 +59,18 @@ After applying Home Manager, start a new login shell with `exec zsh -l`. Restart
 - `~/.config/starship.toml`: Link to the generated canonical theme export
 - `~/.zsh_history`: Command history storage
 
+## Terminal input after TUI exit
+
+Zsh consumes unbound numeric CSI sequences and OSC replies that arrive after a terminal application exits. This prevents late key-release events or color replies from opening the vi `execute:` prompt or appearing in the command line. Existing bindings for arrows, Delete, bracketed paste, and the vi `:` command remain available. The guard is defined in [files/terminal-input.zsh](files/terminal-input.zsh).
+
+Apply the module with Home Manager and start a new shell. To load only this guard into an existing shell before switching, run this from the repository root:
+
+```zsh
+source modules/zsh/files/terminal-input.zsh
+```
+
+Run the PTY regression checks with `uv run --no-project -m unittest discover -s modules/zsh/tests -v`.
+
 ## Usage
 
 After applying this module, restart your shell or run:
