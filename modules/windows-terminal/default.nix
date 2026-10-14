@@ -29,7 +29,7 @@ in
         backup="$settings.home-manager.bak"
         tmp="$settings.home-manager.tmp"
 
-        if ! ${pkgs.jq}/bin/jq --slurpfile managed ${lib.escapeShellArg (toString managedKeybindings)} '
+        if ! ${pkgs.jq}/bin/jq --slurpfile managed ${lib.escapeShellArg "${managedKeybindings}"} '
           .actions = (
             (.actions // [] | map(select(
               .id != "User.herdrNextWorkspace"
