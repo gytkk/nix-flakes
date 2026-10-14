@@ -34,14 +34,6 @@ assert_fails() {
   printf 'PASS: %s\n' "$description"
 }
 
-assert_missing() {
-  local description="$1"
-  local path="$2"
-
-  [ ! -e "$path" ] || fail "$description"
-  printf 'PASS: %s\n' "$description"
-}
-
 write_manifest() {
   local path="$1"
   shift
@@ -143,89 +135,3 @@ write_manifest "$FIXTURES/fuzzy-patches.nix" "$FIXTURES/fuzzy.patch"
 check_patches "$FIXTURES/fuzzy-source" "$FIXTURES/fuzzy-patches.nix"
 assert_same "default patch fuzz leaves the fetched source unchanged" \
   "$FIXTURES/fuzzy-source/fuzzy.txt" "$FIXTURES/original-fuzzy.txt"
-
-ANNOTATE_ROOT="$TEST_ROOT/annotate-updater"
-MOCK_BIN="$ANNOTATE_ROOT/mock-bin"
-ANNOTATE_APP="$ANNOTATE_ROOT/apps/herdr-annotate"
-mkdir -p "$MOCK_BIN" "$ANNOTATE_ROOT/scripts" "$ANNOTATE_APP" "$ANNOTATE_ROOT/plannotator-source"
-cp "$SOURCE_ROOT/scripts/check-nix-patches.sh" "$ANNOTATE_ROOT/scripts/check-nix-patches.sh"
-for file in update.sh package.nix sources.json patches.nix selection-background.patch inherit-herdr-theme.patch; do
-  cp "$SOURCE_ROOT/apps/herdr-annotate/$file" "$ANNOTATE_APP/$file"
-done
-cp "$ANNOTATE_APP/package.nix" "$ANNOTATE_ROOT/original-package.nix"
-cp "$ANNOTATE_APP/sources.json" "$ANNOTATE_ROOT/original-sources.json"
-
-cat > "$MOCK_BIN/curl" <<'EOF'
-#!/usr/bin/env bash
-set -euo pipefail
-
-url="${!#}"
-case "$url" in
-  */commits/main)
-    printf '%s\n' '{"sha":"fixture-revision","commit":{"committer":{"date":"2026-09-22T00:00:00Z"}}}'
-    ;;
-  */herdr-plugin.toml)
-    printf '%s\n' 'version = "9.9.9"'
-    ;;
-  */herdr-annotate.version)
-    printf '%s\n' '9.9.9'
-    ;;
-  */plannotator-tui.version)
-    printf '%s\n' '9.9.9'
-    ;;
-  *)
-    printf 'unexpected curl URL: %s\n' "$url" >&2
-    exit 1
-    ;;
-esac
-EOF
-
-cat > "$MOCK_BIN/nix-prefetch-url" <<'EOF'
-#!/usr/bin/env bash
-set -euo pipefail
-
-printf '%s\n' '0fixturehash'
-EOF
-
-cat > "$MOCK_BIN/nix" <<'EOF'
-#!/usr/bin/env bash
-set -euo pipefail
-
-case "$1 $2" in
-  "hash convert")
-    printf '%s\n' 'sha256-fixture-source'
-    ;;
-  "store prefetch-file")
-    jq -n --arg path "$MOCK_FIXTURE_SOURCE" '{ hash: "sha256-fixture-plannotator", storePath: $path }'
-    ;;
-  "build "*)
-    : > "$MOCK_NIX_BUILD_MARKER"
-    printf 'Cargo hash build must not run after patch preflight failure\n' >&2
-    exit 1
-    ;;
-  *)
-    printf 'unexpected nix arguments: %s\n' "$*" >&2
-    exit 1
-    ;;
-esac
-EOF
-chmod +x "$MOCK_BIN/curl" "$MOCK_BIN/nix-prefetch-url" "$MOCK_BIN/nix"
-
-run_annotate_update() {
-  env \
-    PATH="$MOCK_BIN:$PATH" \
-    MOCK_FIXTURE_SOURCE="$ANNOTATE_ROOT/plannotator-source" \
-    MOCK_NIX_BUILD_MARKER="$ANNOTATE_ROOT/cargo-build-called" \
-    bash "$ANNOTATE_APP/update.sh" > "$ANNOTATE_ROOT/update.log" 2>&1
-}
-
-assert_fails "Annotate updater stops at patch preflight failure" \
-  run_annotate_update
-rg -q 'ERROR: .*selection-background.patch does not apply' "$ANNOTATE_ROOT/update.log" \
-  || fail "Annotate must fail at the actual patch preflight"
-assert_same "Annotate preflight failure leaves package metadata unchanged" \
-  "$ANNOTATE_APP/package.nix" "$ANNOTATE_ROOT/original-package.nix"
-assert_same "Annotate preflight failure leaves source metadata unchanged" \
-  "$ANNOTATE_APP/sources.json" "$ANNOTATE_ROOT/original-sources.json"
-assert_missing "Annotate preflight failure skips Cargo hash discovery" \
-  "$ANNOTATE_ROOT/cargo-build-called"

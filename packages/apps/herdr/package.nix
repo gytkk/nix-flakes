@@ -80,7 +80,7 @@ rustPlatform.buildRustPackage {
   ];
 
   meta = {
-    description = "Terminal workspace manager with plugin theme inheritance";
+    description = "Terminal workspace manager";
     homepage = "https://herdr.dev";
     license = lib.licenses.asl20;
     platforms = [

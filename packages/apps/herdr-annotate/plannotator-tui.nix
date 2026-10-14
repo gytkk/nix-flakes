@@ -16,14 +16,12 @@ rustPlatform.buildRustPackage {
 
   cargoHash = sources.plannotatorTui.cargoHash;
 
-  patches = import ./patches.nix;
-
   preCheck = ''
     export PLANNOTATOR_DATA_DIR="$TMPDIR/plannotator-test-data"
   '';
 
   meta = {
-    description = "Markdown review TUI with configurable review colors";
+    description = "Markdown review TUI";
     homepage = "https://github.com/plannotator/plannotator-tui";
     license = lib.licenses.mit;
     mainProgram = "plannotator-tui";
