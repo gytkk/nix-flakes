@@ -3,7 +3,19 @@
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "CLAUDE_CODE_ENABLE_TELEMETRY": "1",
     "ENABLE_CLAUDEAI_MCP_SERVERS": "false",
-    "OTEL_LOG_USER_PROMPTS": "1"
+    "OTEL_LOG_USER_PROMPTS": "1",
+    "OTEL_METRICS_EXPORTER": "otlp",
+    "OTEL_EXPORTER_OTLP_METRICS_PROTOCOL": "http/protobuf",
+    "OTEL_EXPORTER_OTLP_METRICS_ENDPOINT": "https://devsisters-seusw2.cloud.databricks.com/api/2.0/otel/v1/metrics",
+    "OTEL_EXPORTER_OTLP_METRICS_HEADERS": "content-type=application/x-protobuf,X-Databricks-UC-Table-Name=telemetry.ai_observability.agent_otel_metrics",
+    "OTEL_METRIC_EXPORT_INTERVAL": "10000",
+    "OTEL_METRICS_INCLUDE_RESOURCE_ATTRIBUTES": "true",
+    "OTEL_LOGS_EXPORTER": "otlp",
+    "OTEL_EXPORTER_OTLP_LOGS_PROTOCOL": "http/protobuf",
+    "OTEL_EXPORTER_OTLP_LOGS_ENDPOINT": "https://devsisters-seusw2.cloud.databricks.com/api/2.0/otel/v1/logs",
+    "OTEL_EXPORTER_OTLP_LOGS_HEADERS": "content-type=application/x-protobuf,X-Databricks-UC-Table-Name=telemetry.ai_observability.agent_otel_logs",
+    "OTEL_LOGS_EXPORT_INTERVAL": "5000",
+    "OTEL_RESOURCE_ATTRIBUTES": "team.name=individual"
   },
   "includeCoAuthoredBy": false,
   "permissions": {
@@ -133,6 +145,7 @@
   "autoDreamEnabled": true,
   "skipWorkflowUsageWarning": true,
   "theme": "dark-ansi",
+  "editorMode": "normal",
   "teammateMode": "auto",
   "skipAutoPermissionPrompt": true
 }
