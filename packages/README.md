@@ -53,7 +53,7 @@ Self-contained non-nixpkgs app packages used by the parent `nix-flakes` reposito
 | codexbar | 0.75.0 |
 | databricks-cli | 1.19.0 |
 | gksdud | 1.6.0 |
-| herdr | 0.9.4 |
+| herdr | 0.9.5 |
 | herdr-annotate | 0.9.1 |
 | herdr-auto-title | 0.13.2 |
 | notion-cli | 0.23.20 |
