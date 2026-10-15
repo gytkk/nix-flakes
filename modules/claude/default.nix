@@ -293,6 +293,15 @@ in
     description = "Enable Claude Code module";
   };
 
+  options.modules.claude.otelTokenFile = lib.mkOption {
+    type = lib.types.nullOr lib.types.str;
+    default = null;
+    description = ''
+      File holding the bearer token that `claude-otel-headers` returns as the
+      OTLP `Authorization` header. Null makes the helper return no headers.
+    '';
+  };
+
   config = lib.mkIf cfg.enable {
     home.packages = [
       pkgs.claude-code
@@ -316,6 +325,22 @@ in
       };
       ".local/bin/claude-herdr-subagents".source = pkgs.writeShellScript "claude-herdr-subagents" ''
         exec ${pkgs.bun}/bin/bun ${./files/herdr-subagents}/index.ts "$@"
+      '';
+      # settings.json names this as otelHeadersHelper, so the token never
+      # appears in the tracked settings file.
+      ".local/bin/claude-otel-headers".source = pkgs.writeShellScript "claude-otel-headers" ''
+        set -eu
+        token_file=${lib.escapeShellArg (toString cfg.otelTokenFile)}
+        if [ -z "$token_file" ]; then
+          echo '{}'
+          exit 0
+        fi
+        if [ ! -r "$token_file" ]; then
+          echo "claude-otel-headers: token file is not readable: $token_file" >&2
+          exit 1
+        fi
+        exec ${pkgs.jq}/bin/jq -n --rawfile token "$token_file" \
+          '{ Authorization: ("Bearer " + ($token | rtrimstr("\n"))) }'
       '';
     };
 

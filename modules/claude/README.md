@@ -25,6 +25,9 @@ Each Home Manager activation runs the official plannotator installer with `--min
 - **Memory** (experimental): `autoMemoryEnabled` + `autoDreamEnabled` — native background insight extraction and 24h consolidation
 - **Status line**: Working directory, Git branch, context/tokens/line changes, plus the Claude.ai weekly limit, selected model, and effort right-aligned
 - **Language**: English
+- **Telemetry**: OTLP metrics and logs go to the Devsisters Databricks workspace; endpoints and the per-signal `X-Databricks-UC-Table-Name` headers are static `env` values
+
+The Databricks bearer token is never stored in `settings.json`. `otelHeadersHelper` points at `~/.local/bin/claude-otel-headers`, which Claude Code runs at startup and every 29 minutes. The script returns `{"Authorization": "Bearer ..."}` read from `modules.claude.otelTokenFile`, and the Devsisters profile sets that option to the agenix-decrypted `databricks-token` secret. Claude Code merges the helper output over the static per-signal headers. When the option is null the helper returns `{}`; when the token file is unreadable it exits non-zero, which Claude Code reports in `/status`.
 
 Inside Herdr, the status line also reports the selected model for the [Agents sidebar](../herdr/README.md#subagents). The model updates whenever Claude invokes the status line and expires after 45 seconds without an update, so it may disappear while Claude is idle. Missing model data clears the value. Reporting failures leave the terminal status line intact.
 

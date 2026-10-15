@@ -17,6 +17,7 @@
     "OTEL_LOGS_EXPORT_INTERVAL": "5000",
     "OTEL_RESOURCE_ATTRIBUTES": "team.name=individual"
   },
+  "otelHeadersHelper": "~/.local/bin/claude-otel-headers",
   "includeCoAuthoredBy": false,
   "permissions": {
     "allow": [

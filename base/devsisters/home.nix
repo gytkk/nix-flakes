@@ -82,7 +82,11 @@
     file = ../../secrets/databricks-token.age;
   };
 
-  # Construct OTEL headers at runtime using the decrypted token
+  # Claude Code reads the token through otelHeadersHelper, so sessions started
+  # outside an interactive shell still authenticate.
+  modules.claude.otelTokenFile = config.age.secrets.databricks-token.path;
+
+  # Construct OTEL headers at runtime using the decrypted token (shells and Codex)
   programs.zsh.initContent = lib.mkAfter ''
     if [ -f "${config.age.secrets.databricks-token.path}" ]; then
       _dbx_token=$(cat "${config.age.secrets.databricks-token.path}")
