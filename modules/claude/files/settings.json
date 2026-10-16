@@ -17,7 +17,6 @@
     "OTEL_LOGS_EXPORT_INTERVAL": "5000",
     "OTEL_RESOURCE_ATTRIBUTES": "team.name=individual"
   },
-  "otelHeadersHelper": "~/.local/bin/claude-otel-headers",
   "includeCoAuthoredBy": false,
   "permissions": {
     "allow": [
@@ -31,7 +30,7 @@
     ],
     "defaultMode": "acceptEdits"
   },
-  "model": "claude-fable-5-1",
+  "model": "fable",
   "enableAllProjectMcpServers": true,
   "hooks": {
     "SessionStart": [
@@ -132,6 +131,7 @@
       }
     }
   },
+  "otelHeadersHelper": "~/.local/bin/claude-otel-headers",
   "language": "english",
   "spinnerTipsEnabled": false,
   "subagentPromptCacheTtl": "1h",
@@ -149,5 +149,6 @@
   "theme": "dark-ansi",
   "editorMode": "normal",
   "teammateMode": "auto",
-  "skipAutoPermissionPrompt": true
+  "skipAutoPermissionPrompt": true,
+  "feedbackDrafts": "off"
 }
