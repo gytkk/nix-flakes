@@ -75,6 +75,7 @@ The shared [Agent skills activation](../agent-skills/README.md) installs or upda
 - LSP plugins: `gopls-lsp`, `rust-analyzer-lsp`, `typescript-lsp`, `metals-lsp`, `ty-lsp`, `terraform-ls`, `nixd-lsp`
 - `plannotator` (visual plan annotation and review)
 - `codex` (official OpenAI Codex plugin — provides `/codex:review`, `/codex:rescue`, etc.)
+- `cc-plugin-you-should-know@builtin` (bundled side agent that flags easily missed information above the prompt). Built-in plugins ship inside Claude Code, so they are enabled only through `enabledPlugins` in `files/settings.json`, not through the `plugins` install list in `default.nix`.
 
 ## MCP Servers
 
