@@ -91,9 +91,9 @@ groups:
     sp: "#80CBC4"
     underline: true
   Comment:
-    fg: "{palette.comment}"
+    fg: "#676767"
   SpecialComment:
-    fg: "{palette.comment}"
+    fg: "#676767"
   Constant:
     fg: "{palette.fg}"
   Boolean:
@@ -199,9 +199,9 @@ groups:
   @punctuation.special:
     fg: "{palette.cyan}"
   @comment:
-    fg: "{palette.comment}"
+    fg: "#676767"
   @comment.documentation:
-    fg: "{palette.comment}"
+    fg: "#676767"
   @lsp.type.class:
     fg: "{palette.blue}"
   @lsp.type.enumMember:
@@ -217,7 +217,7 @@ groups:
   @lsp.type.typeParameter:
     fg: "{palette.orange}"
   @lsp.type.comment:
-    fg: "{palette.comment}"
+    fg: "#676767"
     italic: true
   @lsp.typemod.property.readonly:
     fg: "#B2CCD6"
