@@ -1,7 +1,7 @@
 {
-  "revision": "ceab050b77bea07bbeabdfda5c138be8c9c5c517",
-  "revisionDate": "2026-10-12",
-  "sourceHash": "sha256-Q/HgVn1gEAMMavWDQp8Rmz7R7qK5u0QweLkcpYL+otE=",
+  "revision": "c5e565e9bdbb52d152ad15169f38ed8bae31b610",
+  "revisionDate": "2026-10-15",
+  "sourceHash": "sha256-qh6vQ4e4ehIuY8bIV6H0uScO6AQySCLDYwHkI24csFQ=",
   "herdrAnnotate": {
     "version": "0.2.0",
     "hashes": {
