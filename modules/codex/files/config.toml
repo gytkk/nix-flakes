@@ -40,6 +40,7 @@ status_line = [
   "context-used",
   "weekly-limit",
   "model-with-reasoning",
+  "task-progress",
 ]
 status_line_use_colors = true
 theme = "one-half-dark"
