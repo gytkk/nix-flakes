@@ -2,6 +2,8 @@
 
 Self-contained non-nixpkgs app packages used by the parent `nix-flakes` repository. The nested flake keeps package CI independent from the parent flake's private inputs.
 
+The [trading-agent repository](https://github.com/gytkk/trading-agent) owns its Rust and web package build and exports `nixosModules.default` for its supervisor and web services. Host configurations consume a verified, pinned product revision and supply host settings and runtime credential paths. This catalog does not duplicate the product package or service definitions.
+
 ## Layout
 
 ```
