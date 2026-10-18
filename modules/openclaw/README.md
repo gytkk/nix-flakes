@@ -21,6 +21,33 @@ The Secret Store protects disclosure through OpenClaw, but its local SQLite data
 
 The secret egress proxy requires OpenSSL in a trusted system directory. `default.nix` supplies it through `environment.systemPackages`, because OpenClaw's certificate generator does not search the user profile or `PATH`. After applying this module with `nixos-rebuild switch`, confirm `/run/current-system/sw/bin/openssl` exists and remove any temporary `/usr/bin/openssl` migration symlink.
 
+## Public Control UI
+
+The public URL is `https://claw.pylv.dev`. The Onyx Cloudflare Tunnel forwards this hostname directly to the loopback Gateway at `http://127.0.0.1:18789`. Cloudflare Access protects the hostname with the existing owner-email policy; OpenClaw separately requires its Gateway password and browser device pairing. The public route does not use the nginx bearer-token injection configured for the legacy proxy listeners.
+
+The user-owned `openclaw-cloudflared.service` runs the connector independently of Nix and the Gateway service. Its private runtime directory is `~/.local/share/openclaw-cloudflared/`; `tunnel-token` is mode `0600`, and `package` is an indirect Nix GC root for its cloudflared runtime. User lingering keeps the service running after logout. Check it with `systemctl --user status openclaw-cloudflared.service` on Onyx. Update the runtime root explicitly when maintaining cloudflared; it is not upgraded by a Home Manager switch.
+
+Mutable Gateway configuration keeps `gateway.bind` set to `loopback`, sets `gateway.publicOrigin` to `https://claw.pylv.dev`, and includes that exact HTTPS origin in `gateway.controlUi.allowedOrigins`. Preserve other allowed origins when editing the list. `gateway.trustedProxies` includes the loopback connector addresses so the Gateway can attribute Cloudflare's forwarded client IP. Keep password authentication and device checks enabled.
+
+Use the authenticated `cf` CLI on `pylv-onyx` to inspect the remotely managed DNS and tunnel configuration:
+
+```bash
+cf dns records list --zone pylv.dev --name claw.pylv.dev --per-page 5
+cf tunnels list --is-deleted false
+cf tunnels config get d5120ed4-e5e0-4d21-9255-973d2b37c57c
+cf zero-trust access applications list --domain '*.pylv.dev' --exact
+```
+
+Tunnel configuration updates replace the complete configuration. Preserve the existing Hermes ingress, origin options, and final catchall when changing the Claw route. Keep tunnel credentials outside the repository and the Nix store. An unauthenticated request to the public URL must reach Cloudflare Access; verify the UI and WebSocket connection after signing in as well.
+
+## ChatGPT MCP relay
+
+The [bundled MCP Relay plugin](https://docs.openclaw.ai/plugins/mcp-relay) connects outbound to OpenClaw's relay. It requires a release that includes `mcp-relay`; the published `2026.10.10-beta.1` package includes it, while `2026.10.5` stable does not. Application updates and relay configuration remain user-owned. Use a verified backup and an explicitly selected release when updating for this feature.
+
+If `plugins.allow` is configured, append `mcp-relay` without removing existing entries before running `openclaw plugins enable mcp-relay`. Restart the Gateway and inspect the connection with `openclaw mcp-relay status --json`. Enabling the plugin does not authorize a ChatGPT account by itself.
+
+Connect ChatGPT to `https://mcp.openclaw.ai/mcp`, then use the Gateway sign-in flow with `https://claw.pylv.dev` and approve the requested access in OpenClaw. Do not paste the Gateway password or token into ChatGPT. The relay connection uses TLS, but the relay service can read the relayed traffic. The public Control UI route and the outbound relay connection are separate.
+
 ## Agent-core integration
 
 When `modules.openclaw.agentCore.enable` is true, Home Manager installs OpenClaw's generated instructions under `~/.local/share/openclaw/agent-core/` and materializes the `agent-core-context` extension under `~/.local/share/openclaw/extensions/`. The separate `modules.openclaw.agentSessionRecordPlugin.enable` option installs the `agent-session-record` extension there. Both options require the Home Manager integration's `modules.openclaw.enable`; `base/pylv/onyx.nix` enables all three. OpenClaw rejects Nix store hardlinks for externally loaded skills and plugin manifests, so activation copies extension trees instead of linking them into the store. The shared [Agent skills activation](../agent-skills/README.md) installs or updates skills as project copies with pinned `skills@1.7.2` on each switch, using `~/.local/share/openclaw/agent-core` as its working directory. Keeping managed resources outside mutable OpenClaw state prevents them from entering state archives. The `agent-core-context` extension uses `before_prompt_build` to return `prependSystemContext`. Workspace instructions remain independently owned and are loaded through OpenClaw's normal bootstrap path.

@@ -98,15 +98,15 @@ Projects can use `rust-toolchain.toml` to select a different channel or componen
 
 OpenClaw on `pylv-onyx` is installed under `~/.openclaw` with the official rootless installer. OpenClaw owns its CLI, plugins, mutable configuration, and systemd user service. `modules/openclaw` provides the declarative NixOS and Home Manager integration.
 
-Install or recover the user-owned stable release without onboarding:
+Onyx uses the beta channel for the bundled [ChatGPT MCP relay](modules/openclaw/README.md#chatgpt-mcp-relay). Install or recover the user-owned beta release without onboarding:
 
 ```bash
 curl -fsSL --proto '=https' --tlsv1.2 https://openclaw.ai/install-cli.sh | \
-  bash -s -- --prefix ~/.openclaw --version latest --no-onboard
+  bash -s -- --prefix ~/.openclaw --version beta --no-onboard
 openclaw gateway install --force --wrapper ~/.openclaw/bin/openclaw
 ```
 
-Use `openclaw update` for verified core and plugin updates. The mutable config may enable OpenClaw's stable auto updater. Nix does not pin or replace the OpenClaw executable.
+Use `openclaw update` for verified core and plugin updates. The mutable config owns the update channel and automatic updates. Nix does not pin or replace the OpenClaw executable.
 
 `agent-core/` owns shared coding-agent rules, runtime adapters, local skills, and external skill source declarations. Nix installs generated instructions and extensions. [Agent skills activation](modules/agent-skills/README.md) installs or updates skills for all enabled agents on each Home Manager switch with pinned `skills@1.7.2`: Codex/Pi share the native pool, Claude uses global copies, and OpenClaw uses external project copies. Activation resolves the latest external source SHAs once for all targets and requires network access; Nix evaluation and builds remain offline for skill acquisition. See [Agent core](agent-core/README.md#skill-설치와-복구) for the one-time ownership handoff, recovery, and pending host migration gates. Run `nix run .#agent-core -- check` to validate canonical resources offline.
 
@@ -383,13 +383,12 @@ nix build .#nixosConfigurations.pylv-sepia.config.system.build.toplevel
 
 - Local network: `http://pylv-onyx:18790` when LAN DNS/mDNS resolves, otherwise use the current Wi-Fi address `http://192.168.0.10:18790`
 - The LAN path is an `nginx` reverse proxy on `wlo1` only; the real gateway stays loopback-only on `127.0.0.1:18789`
-- Any LAN client that reaches `18790` is intentionally treated as an admin/operator because the local `nginx` proxy injects the loopback gateway bearer token
-- No token or email/password is required on the LAN URL
-- For Cloudflare Tunnel / Access exposure, use the separate loopback-only origin `http://127.0.0.1:18791` instead of reusing the LAN listener
-- Suggested public hostname target: map your Cloudflare public hostname to `http://127.0.0.1:18791`, then protect it with a Cloudflare Access self-hosted app
-- `openclaw dashboard --no-open` on the host now prints the bare local URL `http://127.0.0.1:18789/`; for a remote LAN browser, just open `http://pylv-onyx:18790` or `http://192.168.0.10:18790`
+- Public URL: `https://claw.pylv.dev`, protected by the existing Cloudflare Access owner-email policy and OpenClaw's Gateway password and browser device pairing
+- The Onyx Cloudflare Tunnel connects directly to `http://127.0.0.1:18789`. DNS and ingress are managed with `cf`; see [public Control UI operations](modules/openclaw/README.md#public-control-ui).
+- The nginx listeners on `18790` and `18791` retain legacy bearer-token injection. It does not replace authentication while the Gateway uses password mode.
+- `openclaw dashboard --no-open` prints the local dashboard URL. Use the public HTTPS URL for remote browser access.
 - Declarative integration lives in [`modules/openclaw`](./modules/openclaw). Nix supplies runtime dependencies, proxy authentication, the firewall rule, and the user service runtime paths. OpenClaw's Secret Store owns the Discord and Notion/Google automation credentials; see the [module README](modules/openclaw/README.md).
-- Mutable state, configuration, and the executable live under `~/.openclaw`. Repository-managed extensions live separately under `~/.local/share/openclaw/extensions/`. The official CLI owns the systemd user service and updates itself on the stable channel.
+- Mutable state, configuration, and the executable live under `~/.openclaw`. Repository-managed extensions live separately under `~/.local/share/openclaw/extensions/`. The official CLI owns the systemd user service; Onyx follows the beta update channel for MCP Relay.
 - Home Manager adds the user-owned CLI directory to the shell `PATH` and materializes a systemd environment drop-in for `libcap` and the agent-core instruction path. The OpenClaw installer owns the service executable and Node runtime. Nix does not set `OPENCLAW_NIX_MODE` or install an OpenClaw package.
 - Home Manager materializes the repository-managed `agent-session-record` extension under `~/.local/share/openclaw/extensions/agent-session-record`. Mutable OpenClaw configuration controls its load path, allowlist, and enabled state; see the [OpenClaw module README](modules/openclaw/README.md#agent-core-integration).
 
