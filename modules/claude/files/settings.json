@@ -121,20 +121,13 @@
     "ty-lsp@gytkk": true,
     "terraform-ls@gytkk": true,
     "nixd-lsp@gytkk": true,
-    "cc-plugin-you-should-know@builtin": true,
-    "mumu@mumu": true
+    "cc-plugin-you-should-know@builtin": true
   },
   "extraKnownMarketplaces": {
     "openai-codex": {
       "source": {
         "source": "github",
         "repo": "openai/codex-plugin-cc"
-      }
-    },
-    "mumu": {
-      "source": {
-        "source": "github",
-        "repo": "devsisters/mumu"
       }
     }
   },

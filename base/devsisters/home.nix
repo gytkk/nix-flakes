@@ -85,6 +85,7 @@
   # Claude Code reads the token through otelHeadersHelper, so sessions started
   # outside an interactive shell still authenticate.
   modules.claude.otelTokenFile = config.age.secrets.databricks-token.path;
+  modules.claude.mumu.enable = true;
 
   # Construct OTEL headers at runtime using the decrypted token (shells and Codex)
   programs.zsh.initContent = lib.mkAfter ''

@@ -18,7 +18,8 @@ let
     "anthropics/claude-plugins-official"
     "backnotprop/plannotator"
     "openai/codex-plugin-cc"
-  ];
+  ]
+  ++ lib.optional cfg.mumu.enable "devsisters/mumu";
 
   # Local marketplaces sourced from the flake working tree.
   # Each entry is registered via `claude plugin marketplace add <path>`.
@@ -56,7 +57,24 @@ let
     "ty-lsp@gytkk"
     "terraform-ls@gytkk"
     "nixd-lsp@gytkk"
-  ];
+  ]
+  ++ lib.optional cfg.mumu.enable "mumu@mumu";
+
+  settingsFile =
+    if cfg.mumu.enable then
+      pkgs.writeText "claude-settings.json" (
+        builtins.toJSON (
+          lib.recursiveUpdate (builtins.fromJSON (builtins.readFile ./files/settings.json)) {
+            enabledPlugins."mumu@mumu" = true;
+            extraKnownMarketplaces.mumu.source = {
+              source = "github";
+              repo = "devsisters/mumu";
+            };
+          }
+        )
+      )
+    else
+      mkSymlink "files/settings.json";
 
   mcpCommands = [
     {
@@ -170,6 +188,7 @@ let
     if [ -L "$SETTINGS_FILE" ]; then
       SETTINGS_LINK_TARGET=$(${pkgs.coreutils}/bin/readlink -f "$SETTINGS_FILE")
       ${pkgs.coreutils}/bin/cp --remove-destination "$SETTINGS_LINK_TARGET" "$SETTINGS_FILE"
+      ${pkgs.coreutils}/bin/chmod u+w "$SETTINGS_FILE"
       log "Temporarily made settings.json writable for plugin operations"
     fi
 
@@ -293,6 +312,9 @@ in
     description = "Enable Claude Code module";
   };
 
+  options.modules.claude.mumu.enable =
+    lib.mkEnableOption "the Devsisters mumu marketplace and plugin";
+
   options.modules.claude.otelTokenFile = lib.mkOption {
     type = lib.types.nullOr lib.types.str;
     default = null;
@@ -315,7 +337,7 @@ in
     home.file = {
       # Claude plugin operations may temporarily leave this as a regular file.
       ".claude/settings.json" = {
-        source = mkSymlink "files/settings.json";
+        source = settingsFile;
         force = true;
       };
       ".claude/CLAUDE.md".source = "${agentCoreOutput}/CLAUDE.md";

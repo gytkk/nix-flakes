@@ -114,6 +114,8 @@ Use `openclaw update` for verified core and plugin updates. The mutable config o
 
 The official [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc) plugin is installed, enabling Codex integration from within Claude Code. Superpowers is also installed for both Codex CLI and Claude Code from their official plugin marketplaces.
 
+The `devsisters` base profile also installs the `devsisters/mumu` marketplace and `mumu@mumu` plugin. See the [Claude module README](modules/claude/README.md#marketplaces) for profile-specific settings behavior.
+
 ### Available Commands
 
 - `/codex:review` — Code review of current changes or branch

@@ -61,10 +61,13 @@ The shared [Agent skills activation](../agent-skills/README.md) installs or upda
 
 ### Marketplaces
 
+The `devsisters` base profile enables `modules.claude.mumu.enable`, which registers `devsisters/mumu` and installs and enables `mumu@mumu`. Other profiles leave this option disabled. With mumu enabled, Home Manager generates `settings.json` from the shared settings plus the mumu entries; changes to the shared settings take effect after `home-manager switch`. Other profiles use the existing checkout symlink. Disabling the option stops managing mumu installation but does not uninstall an existing plugin or remove its cached marketplace.
+
 - `anthropics/skills`, `anthropics/claude-code`, `anthropics/claude-plugins-official`
 - `gytkk` (local marketplace — `modules/claude/marketplace`)
 - `backnotprop/plannotator`
 - `openai/codex-plugin-cc`
+- `devsisters/mumu` (Devsisters profile only)
 
 ### Installed Plugins
 
@@ -74,6 +77,7 @@ The shared [Agent skills activation](../agent-skills/README.md) installs or upda
 - `slack` (Slack's hosted MCP server plus Slack developer skills)
 - LSP plugins: `gopls-lsp`, `rust-analyzer-lsp`, `typescript-lsp`, `metals-lsp`, `ty-lsp`, `terraform-ls`, `nixd-lsp`
 - `plannotator` (visual plan annotation and review)
+- `mumu@mumu` (Devsisters profile only)
 - `codex` (official OpenAI Codex plugin — provides `/codex:review`, `/codex:rescue`, etc.)
 - `cc-plugin-you-should-know@builtin` (bundled side agent that flags easily missed information above the prompt). Built-in plugins ship inside Claude Code, so they are enabled only through `enabledPlugins` in `files/settings.json`, not through the `plugins` install list in `default.nix`.
 
