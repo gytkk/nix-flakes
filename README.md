@@ -216,7 +216,6 @@ This section is a design plan only. The bridge and skills below are not implemen
 - `typescript` and `javascript` via `typescript-language-server`, rooted by `package.json`, `tsconfig.json`, or `jsconfig.json`
 - `python` via `ty server` first, with room for a fallback profile later
 - `terraform` via `terraform-ls serve`
-- `scala` via `metals`, rooted by `build.sbt` or `project/build.properties`
 - `yaml` via `yaml-language-server --stdio`
 - `markdown` via `marksman server`
 - one extra slot reserved for a future default such as `clangd` or `bash-language-server`
@@ -292,6 +291,7 @@ Ghostty opens new windows maximized to the current monitor's available area. On 
 ## Zed config
 
 - Zed is managed through `modules/zed/default.nix`.
+- Scala syntax support remains installed, with its language server disabled.
 - On macOS and non-WSL Linux, `home-manager switch` installs `~/.config/zed/settings.json` and `keymap.json` as out-of-store symlinks to the repo, and exposes the entire `themes/exports/zed` directory at `~/.config/zed/themes`.
 - That means mutable settings can switch between generated theme names without requiring another switch just to materialize a newly referenced theme file.
 - On WSL hosts, activation still copies settings, keymaps, and the full set of generated `themes/exports/zed/*.json` files into the Windows Zed config directory on each switch.

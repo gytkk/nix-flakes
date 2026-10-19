@@ -18,29 +18,6 @@
       "category": "productivity"
     },
     {
-      "name": "metals-lsp",
-      "description": "Scala language server (Metals) for code intelligence, refactoring, and analysis",
-      "version": "1.0.0",
-      "author": {
-        "name": "gytkk"
-      },
-      "source": "./lsp/metals-lsp",
-      "category": "development",
-      "strict": false,
-      "lspServers": {
-        "metals": {
-          "command": "metals",
-          "extensionToLanguage": {
-            ".scala": "scala",
-            ".sc": "scala",
-            ".sbt": "sbt",
-            ".worksheet.sc": "scala"
-          },
-          "startupTimeout": 120000
-        }
-      }
-    },
-    {
       "name": "ty-lsp",
       "description": "Python type checker and language server (ty by Astral) for code intelligence",
       "version": "1.0.0",

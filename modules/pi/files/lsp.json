@@ -160,23 +160,6 @@
       "diagnosticsWaitMs": 1500
     },
     {
-      "id": "metals",
-      "enabled": true,
-      "include": ["**/*.scala", "**/*.sc", "**/*.sbt"],
-      "exclude": ["**/.bloop/**", "**/.git/**", "**/.metals/**", "**/target/**"],
-      "rootMarkers": ["build.sbt", "build.sc", ".git"],
-      "bin": "metals",
-      "args": [],
-      "cwd": "{root}",
-      "languageIdByExtension": {
-        ".scala": "scala",
-        ".sc": "scala",
-        ".sbt": "sbt"
-      },
-      "startupTimeoutMs": 120000,
-      "diagnosticsWaitMs": 3000
-    },
-    {
       "id": "ty",
       "enabled": true,
       "include": ["**/*.py", "**/*.pyi"],

@@ -76,7 +76,6 @@ let
 
     # Scala
     scala-lang.scala
-    scalameta.metals
 
     # Terraform
     hashicorp.terraform

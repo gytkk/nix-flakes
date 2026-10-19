@@ -163,7 +163,7 @@ and `lsp_symbols` tools.
 - `nixd`, `gopls`, and `typescript-language-server`
 - the JSON, CSS, and HTML servers from `vscode-langservers-extracted`
 - `lua-language-server`, `bash-language-server`, and `terraform-ls`
-- `metals`, `ty`, `yaml-language-server`, `marksman`, and `taplo`
+- `ty`, `yaml-language-server`, `marksman`, and `taplo`
 - `rust-analyzer`
 
 Server processes are scoped by configured project root markers and stop when

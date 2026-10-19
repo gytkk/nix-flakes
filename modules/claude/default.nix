@@ -53,7 +53,6 @@ let
 
     # local gytkk marketplace (modules/claude/marketplace) - runtime-specific skill and LSP plugins
     "devils-advocate@gytkk"
-    "metals-lsp@gytkk"
     "ty-lsp@gytkk"
     "terraform-ls@gytkk"
     "nixd-lsp@gytkk"

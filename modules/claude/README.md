@@ -77,7 +77,7 @@ The `devsisters` base profile enables `modules.claude.mumu.enable`, which regist
 - `devils-advocate` (runtime-specific multi-pass review command and agent)
 - `ralph-loop`, `superpowers`
 - `slack` (Slack's hosted MCP server plus Slack developer skills)
-- LSP plugins: `gopls-lsp`, `rust-analyzer-lsp`, `typescript-lsp`, `metals-lsp`, `ty-lsp`, `terraform-ls`, `nixd-lsp`
+- LSP plugins: `gopls-lsp`, `rust-analyzer-lsp`, `typescript-lsp`, `ty-lsp`, `terraform-ls`, `nixd-lsp`
 - `plannotator` (visual plan annotation and review)
 - `mumu@mumu` (Devsisters profile only)
 - `codex` (official OpenAI Codex plugin — provides `/codex:review`, `/codex:rescue`, etc.)

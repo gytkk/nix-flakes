@@ -44,6 +44,8 @@ modules/vscode/
 `mutableExtensionsDir = true` 설정으로, Nix 관리 확장 외에 VSCode에서
 수동으로 추가 확장을 설치할 수도 있음.
 
+Scala는 구문 강조 확장만 설치하며 언어 서버는 설치하지 않는다.
+
 ### 로컬 커스텀 테마
 
 `one-half-light-theme/` 디렉터리에 로컬 VSCode 테마 확장이 포함되어 있음.

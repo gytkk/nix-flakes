@@ -58,8 +58,7 @@
       "language_servers": ["ty"],
     },
     "Scala": {
-      "formatter": "language_server",
-      "format_on_save": "on",
+      "enable_language_server": false,
     },
     "Terraform": {
       "formatter": "language_server",
@@ -83,14 +82,6 @@
         "nixpkgs": {
           "expr": "import <nixpkgs> {}",
         },
-      },
-    },
-    "metals": {
-      "binary": {
-        "path": "metals",
-      },
-      "initialization_options": {
-        "isHttpEnabled": true,
       },
     },
   },
