@@ -136,7 +136,7 @@ This table lists selected modules, with paths relative to the repository root. S
 | `modules/git/` | Git configuration | `modules/git/default.nix` | NO |
 | `modules/k9s/` | Kubernetes manager | `modules/k9s/default.nix` | NO |
 | `modules/lsp/` | LSP server packages | `modules/lsp/default.nix` | NO |
-| `modules/terraform/` | Terraform versions | `modules/terraform/default.nix` (direnv lazy-load) | NO |
+| `modules/terraform/` | Terraform versions | `modules/terraform/default.nix` (tenv) | NO |
 | `modules/vim/` | Neovim | `modules/vim/files/config/`, `themes/exports/nvim` | 부분적 |
 | `modules/vscode/` | VSCode (disabled) | `modules/vscode/default.nix`, `modules/vscode/one-half-light-theme/` | NO |
 | `modules/zed/` | Zed editor | `modules/zed/files/settings.json`, `themes/exports/zed` | 부분적 |
@@ -160,7 +160,7 @@ macOS와 WSL이 아닌 Linux에서는 설정과 keymap을 checkout으로 symlink
 
 #### Terraform
 
-direnv lazy loading 사용. `.envrc`에 `use_terraform` 추가하면 `required_version`을 읽어 자동 로드.
+[Terraform README](modules/terraform/README.md)에서 tenv의 버전 선택과 자동 설치 방식을 확인한다. 기존 `.envrc`의 `use_terraform` 호출은 tenv proxy를 PATH 앞에 추가한다.
 
 ### AI Coding Agent Notes
 

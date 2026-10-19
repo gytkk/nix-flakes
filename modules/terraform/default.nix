@@ -2,36 +2,18 @@
   config,
   lib,
   pkgs,
-  inputs,
   ...
 }:
 
 let
   cfg = config.modules.terraform;
-  system = pkgs.stdenv.hostPlatform.system;
-  terraformPkgs = inputs.nixpkgs-terraform.packages.${system};
-  availableVersions = lib.sort lib.versionOlder (
-    lib.concatMap (
-      n:
-      let
-        m = builtins.match "terraform-([0-9]+\\.[0-9]+\\.[0-9]+)" n;
-      in
-      if m == null then [ ] else m
-    ) (builtins.attrNames terraformPkgs)
-  );
 in
 {
   options.modules.terraform = {
     enable = lib.mkOption {
       type = lib.types.bool;
       default = false;
-      description = "Enable Terraform version management with nixpkgs-terraform";
-    };
-
-    defaultVersion = lib.mkOption {
-      type = lib.types.str;
-      default = "latest";
-      description = "Default terraform version to use";
+      description = "Enable Terraform version management with tenv";
     };
 
     runEnv = lib.mkOption {
@@ -46,21 +28,14 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    # Only install default terraform version
-    # Other versions are loaded lazily via direnv + nix-direnv
-    home.packages = [
-      (
-        if cfg.defaultVersion == "latest" then
-          pkgs.terraform
-        else
-          terraformPkgs.${"terraform-${cfg.defaultVersion}"}
-      )
-    ];
+    home.packages = with pkgs; [ tenv ];
 
-    # Configure nixpkgs to allow unfree for terraform
-    nixpkgs.config.allowUnfree = true;
+    home.sessionVariables = {
+      TENV_AUTO_INSTALL = "true";
+      # Project version files take precedence over this constraint-aware fallback.
+      TFENV_TERRAFORM_DEFAULT_VERSION = "latest-allowed";
+    };
 
-    # Add tf alias that uses the terraform binary from PATH (respects direnv)
     home.shellAliases = {
       tf =
         let
@@ -71,21 +46,8 @@ in
         "${envPrefix}terraform";
     };
 
-    # Add use_terraform function to direnv stdlib (preserves nix-direnv setup)
-    programs.direnv.stdlib =
-      builtins.replaceStrings
-        [
-          "@DEFAULT_VERSION@"
-          "@AVAILABLE_VERSIONS@"
-          "@FLAKE_REF@"
-          "@NIXPKGS_REF@"
-        ]
-        [
-          (if cfg.defaultVersion == "latest" then pkgs.terraform.version else cfg.defaultVersion)
-          (lib.concatStringsSep " " availableVersions)
-          "github:stackbuilders/nixpkgs-terraform/${inputs.nixpkgs-terraform.rev}"
-          "github:nixos/nixpkgs/${inputs.nixpkgs.rev}"
-        ]
-        (builtins.readFile ./direnvrc);
+    programs.direnv.stdlib = builtins.replaceStrings [ "@TENV_BIN@" ] [ "${pkgs.tenv}/bin" ] (
+      builtins.readFile ./direnvrc
+    );
   };
 }

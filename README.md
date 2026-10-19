@@ -77,7 +77,7 @@ New Darwin environments leave [Claude session mining](modules/claude-session-min
 
 [Darwin agenix integration](modules/agenix-darwin/README.md) owns the stable login wrapper and activation retries. Both Home Manager builders use `lib/home-manager-modules.nix` for the explicit agenix mount interface and [launchd plist rollback compatibility](lib/launchd/README.md).
 
-[Terraform version management](modules/terraform/README.md) uses the pinned nixpkgs Terraform package by default on Devsisters environments and compares its actual version with direnv project constraints.
+[Terraform version management](modules/terraform/README.md) uses tenv on Devsisters environments to select Terraform from project version files or `required_version` constraints and install missing versions on demand.
 
 The [architecture review and improvement plan](docs/architecture-review/README.md) records the 2026-09-18 assessment of configuration ownership, extension paths, and verification coverage, with proposed fixes and completion criteria for each issue.
 

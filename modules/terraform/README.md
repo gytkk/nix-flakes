@@ -1,142 +1,48 @@
 # Terraform 모듈
 
-[stackbuilders/nixpkgs-terraform](https://github.com/stackbuilders/nixpkgs-terraform)를 사용한 Terraform 버전 관리 모듈입니다.
+[tenv](https://github.com/tofuutils/tenv)를 설치하고 프로젝트에 맞는 Terraform 버전을 실행한다. Devsisters 환경에서 활성화하며, Terraform 바이너리는 Nix로 빌드하지 않고 처음 실행할 때 tenv가 다운로드한다.
 
-## Lazy Loading 방식
-
-이 모듈은 **lazy loading** 방식을 사용합니다:
-
-- **기본 버전**만 `home-manager switch` 시 설치
-- **다른 버전**은 프로젝트 디렉토리 진입 시 **on-demand로 로드**
-- 한 번 로드된 버전은 `/nix/store`에 캐시되어 **기기 전체에서 재사용**
-
-### 장점
-
-- `home-manager switch`가 빠름 (기본 버전만 빌드)
-- 실제 사용하는 버전만 빌드됨
-- Nix의 재현성 유지
-
-## 설정 방법
-
-### 기본 사용법
+## 설정
 
 ```nix
 modules.terraform = {
   enable = true;
-  defaultVersion = "latest";
+  runEnv = {
+    AWS_PROFILE = "saml";
+  };
 };
 ```
 
-사용 가능한 버전 목록은 별도 설정 없이 `nixpkgs-terraform` flake input이 제공하는
-전체 버전(1.0.0 이상)에서 자동으로 파생됩니다. 새 버전이 필요하면
-`nix flake update nixpkgs-terraform` 후 `home-manager switch`를 실행하세요.
+`enable`의 기본값은 `false`이고, `runEnv`의 기본값은 `{}`이다. `runEnv`는 `tf` alias에만 적용한다. 위 설정에서 `tf plan`은 `AWS_PROFILE=saml terraform plan`으로 실행된다.
 
-## 설정 옵션
+## 버전 선택
 
-### `enable`
-
-- **타입**: `bool`
-- **기본값**: `false`
-- **설명**: Terraform 모듈 활성화. `base/devsisters/home.nix`에서 활성화한다.
-
-### `defaultVersion`
-
-- **타입**: `string`
-- **기본값**: `"latest"`
-- **설명**: 기본으로 사용할 Terraform 버전 (즉시 설치됨). `latest`는 저장소의 nixpkgs에 고정된 `pkgs.terraform`을 사용하며, direnv는 해당 패키지의 실제 버전으로 프로젝트 제약 조건을 비교한다. Devsisters 환경은 `latest`를 사용한다.
-
-숫자 버전은 `nixpkgs-terraform`에서 가져온다. 현재 고정된 input은 Terraform 1.9 이상을 만들 때 `mkTerraform`을 호출하지만, 연결된 nixpkgs에는 이 함수가 없어 평가가 실패한다. 기본값이 `latest`여도 프로젝트의 제약 조건이 기본 패키지 버전과 맞지 않아 다른 버전을 불러오면 이 제한이 적용된다.
-
-### `runEnv`
-
-- **타입**: `attrs of strings`
-- **기본값**: `{}`
-- **설명**: `tf` alias 실행 시 설정할 환경 변수
-
----
-
-## Direnv 통합
-
-디렉토리 내 `.tf` 파일의 `required_version`을 자동으로 감지하여 해당 버전의 Terraform을 로드합니다.
-
-### 작동 방식
-
-1. 프로젝트 디렉토리에 `.envrc` 파일 생성
-2. `use_terraform` 함수 호출
-3. 디렉토리의 모든 `*.tf` 파일에서 `required_version` 파싱 (첫 번째 발견된 스펙 사용)
-4. 제약 조건을 만족하는 버전 선택:
-   - 기본 버전이 조건을 만족하면 기본 버전 사용 (추가 로드 없음)
-   - 아니면 조건을 만족하는 **가장 높은 버전**을 nix-direnv로 lazy load
-   - 만족하는 버전이 없거나 스펙을 파싱할 수 없으면 경고 후 기본 버전 사용
-5. `/nix/store`에 캐시되어 이후 즉시 로드
-
-### 사용법
-
-프로젝트 디렉토리에 `.envrc` 파일 생성:
-
-```bash
-# .envrc
-use_terraform
-```
-
-그리고 direnv 허용:
-
-```bash
-direnv allow
-```
-
-### 지원되는 버전 형식
+`terraform`은 tenv proxy를 통해 실행된다. `.terraform-version` 같은 프로젝트 버전 파일이 있으면 해당 설정을 사용한다. 버전 파일이 없으면 `TFENV_TERRAFORM_DEFAULT_VERSION=latest-allowed`에 따라 현재 디렉터리의 `.tf` 및 `.tf.json` 파일에 있는 `required_version` 조건을 만족하는 버전을 선택한다. 이 기본 전략은 `tenv tf use`로 저장한 전역 기본값보다 우선하며, 명시적인 `TFENV_TERRAFORM_VERSION` 환경 변수는 프로젝트 버전 파일보다 우선한다.
 
 ```hcl
 terraform {
-  # 정확한 버전
-  required_version = "= 1.10.5"
-
-  # 비교 연산자 (>=, <=, >, <)
-  required_version = ">= 1.10.5"
-
-  # Pessimistic 연산자 (Terraform 의미론 준수)
-  required_version = "~> 1.10"    # >= 1.10.0, < 2.0.0
-  required_version = "~> 1.10.2"  # >= 1.10.2, < 1.11.0
-
-  # 버전만 지정
-  required_version = "1.10.5"
-
-  # 쉼표로 구분된 복합 조건 (AND)
-  required_version = ">= 1.10.0, < 2.0.0"
+  required_version = ">= 1.10.0, < 1.11.0, != 1.10.1"
 }
 ```
 
-`!=` 등 지원하지 않는 연산자가 포함된 스펙은 경고를 출력하고 기본 버전으로 동작합니다.
+tenv는 먼저 설치된 버전 중 조건을 만족하는 가장 높은 버전을 사용한다. 설치된 버전으로 조건을 만족하지 못하면 원격 목록에서 버전을 선택하며, `TENV_AUTO_INSTALL=true`에 따라 필요한 바이너리를 자동으로 설치한다. 처음 다운로드할 때는 네트워크가 필요하다. 프로젝트에 버전 파일과 제약 조건이 모두 없으면 같은 방식으로 최신 안정 버전을 선택한다.
 
-## 캐시 동작
+정확한 버전을 고정하려면 프로젝트에 `.terraform-version`을 저장한다.
 
-| 상황 | 동작 |
-|------|------|
-| 첫 번째 프로젝트에서 1.10.5 사용 | 빌드 (1회) |
-| 두 번째 프로젝트에서 1.10.5 사용 | 캐시에서 즉시 로드 |
-| `nix flake update` 후 (nixpkgs-terraform 고정) | 캐시 유지 |
-| `nix flake update` 후 (nixpkgs-terraform 변경) | 재빌드 |
-
-## 트러블슈팅
-
-### 버전이 로드되지 않는 경우
-
-1. `base/default.nix`에서 `programs.direnv.nix-direnv.enable = true`인지 확인한다.
-
-2. direnv 캐시 초기화:
-```bash
-rm -rf .direnv
-direnv allow
+```text
+1.10.5
 ```
 
-3. 수동으로 버전 확인:
+명시한 버전과 `required_version` 조건이 충돌하면 Terraform 자체의 제약 조건 검사가 실패하므로 두 설정을 함께 관리한다. Terraform 버전과 tenv 상태는 기본적으로 `~/.tenv`에 저장된다. `TENV_ROOT`를 설정하면 저장 위치를 바꿀 수 있다.
+
+## 기존 direnv 설정 전환
+
+버전 선택은 각 `terraform` 실행 시 tenv가 처리하므로 새 프로젝트에는 Terraform 전용 `.envrc`가 필요하지 않다. 기존 `.envrc`는 그대로 사용할 수 있다.
+
 ```bash
-nix shell github:stackbuilders/nixpkgs-terraform#terraform-1.10.5 --command terraform version
+use_terraform
 ```
 
-### 빌드가 오래 걸리는 경우
+이 함수는 tenv의 실행 파일 디렉터리를 PATH 앞에 추가한다. 이전 모듈이 생성한 `.direnv/bin/terraform`이 있어도 tenv proxy를 먼저 사용하며, 프로젝트 파일을 삭제하거나 임시 Nix flake를 생성하지 않는다. `home-manager switch` 후 기존 셸을 다시 시작하고, 이미 허용한 `.envrc`는 `direnv reload`로 다시 불러온다.
 
-첫 번째 로드 시에만 빌드가 필요합니다. 이후에는 `/nix/store` 캐시를 사용합니다.
-
-binary cache에서 다운로드되지 않는 경우 로컬 빌드가 필요할 수 있습니다 (특히 aarch64-darwin).
+이전 `modules.terraform.defaultVersion` 옵션은 제거했다. 해당 설정이 있으면 삭제하고, 프로젝트 버전은 `.terraform-version`이나 `required_version`으로 지정한다. 버전 목록을 갱신하기 위한 별도 Terraform flake input도 필요하지 않다.

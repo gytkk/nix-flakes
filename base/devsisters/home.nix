@@ -46,7 +46,6 @@
   # Terraform 모듈 설정
   modules.terraform = {
     enable = true;
-    defaultVersion = "latest";
     runEnv = {
       AWS_PROFILE = "saml";
     };

@@ -28,12 +28,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # nixpkgs-terraform - for Terraform version management
-    nixpkgs-terraform = {
-      url = "github:stackbuilders/nixpkgs-terraform";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     # nix-vscode-extensions - for VSCode extension management
     nix-vscode-extensions = {
       url = "github:nix-community/nix-vscode-extensions";
