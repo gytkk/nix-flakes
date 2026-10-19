@@ -23,7 +23,7 @@
 ```nix
 modules.terraform = {
   enable = true;
-  defaultVersion = "1.12.2";
+  defaultVersion = "latest";
 };
 ```
 
@@ -43,7 +43,9 @@ modules.terraform = {
 
 - **타입**: `string`
 - **기본값**: `"latest"`
-- **설명**: 기본으로 사용할 Terraform 버전 (즉시 설치됨)
+- **설명**: 기본으로 사용할 Terraform 버전 (즉시 설치됨). `latest`는 저장소의 nixpkgs에 고정된 `pkgs.terraform`을 사용하며, direnv는 해당 패키지의 실제 버전으로 프로젝트 제약 조건을 비교한다. Devsisters 환경은 `latest`를 사용한다.
+
+숫자 버전은 `nixpkgs-terraform`에서 가져온다. 현재 고정된 input은 Terraform 1.9 이상을 만들 때 `mkTerraform`을 호출하지만, 연결된 nixpkgs에는 이 함수가 없어 평가가 실패한다. 기본값이 `latest`여도 프로젝트의 제약 조건이 기본 패키지 버전과 맞지 않아 다른 버전을 불러오면 이 제한이 적용된다.
 
 ### `runEnv`
 

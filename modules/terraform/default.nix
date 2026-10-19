@@ -81,7 +81,7 @@ in
           "@NIXPKGS_REF@"
         ]
         [
-          cfg.defaultVersion
+          (if cfg.defaultVersion == "latest" then pkgs.terraform.version else cfg.defaultVersion)
           (lib.concatStringsSep " " availableVersions)
           "github:stackbuilders/nixpkgs-terraform/${inputs.nixpkgs-terraform.rev}"
           "github:nixos/nixpkgs/${inputs.nixpkgs.rev}"
