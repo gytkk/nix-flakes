@@ -40,7 +40,7 @@ def write_json(path, value):
     temporary.replace(path)
 
 
-def tree(path):
+def tree(path, *, allow_hardlinks=False):
     """Fingerprint ordinary installation files, including modes and directories."""
     if path.is_symlink():
         raise ValidationError(f"symlink requires ownership handoff: {path}")
@@ -55,7 +55,7 @@ def tree(path):
             raise ValidationError(f"unexpected symlink: {entry}")
         if entry.is_dir():
             result[relative] = "directory"
-        elif entry.is_file() and entry.stat().st_nlink == 1:
+        elif entry.is_file() and (allow_hardlinks or entry.stat().st_nlink == 1):
             digest = hashlib.sha256(entry.read_bytes()).hexdigest()
             result[relative] = f"{entry.stat().st_mode & 0o777:o}:{digest}"
         else:
@@ -505,7 +505,10 @@ def prepare(plans, staging, overrides, replay=None):
     for source in sources.values():
         if source["kind"] == "local":
             for name, relative in source["skills"].items():
-                local_hashes[name] = tree(Path(source["path"]) / relative)
+                # Nix store optimisation hardlinks sources; we only read them.
+                local_hashes[name] = tree(
+                    Path(source["path"]) / relative, allow_hardlinks=True
+                )
     for plan in plans:
         stage_home = staging / plan["target"]
         for source in plan["sources"]:
@@ -525,7 +528,10 @@ def prepare(plans, staging, overrides, replay=None):
     for source in sources.values():
         if source["kind"] == "local":
             for name, relative in source["skills"].items():
-                if tree(Path(source["path"]) / relative) != local_hashes[name]:
+                if (
+                    tree(Path(source["path"]) / relative, allow_hardlinks=True)
+                    != local_hashes[name]
+                ):
                     raise ValidationError(
                         f"local source changed during preparation: {name}"
                     )

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 from pathlib import Path
 import shutil
 
@@ -77,6 +78,77 @@ def test_install_reinstall_user_change_and_independent_targets(fixture):
     assert len(calls) == before
     # Claude ownership is independent from the shared pool's changed content.
     installer.install([claude], home, state, {})
+
+
+def test_hardlinked_local_source_installs_and_replays(fixture, tmp_path):
+    plan, home, state, _, _ = fixture
+    source = Path(plan["sources"][0]["path"]) / "one/SKILL.md"
+    alias = tmp_path / "store-link"
+    alias.hardlink_to(source)
+    source.chmod(0o444)
+    original = source.read_bytes()
+    assert source.stat().st_nlink == 2
+
+    backup = installer.install([plan], home, state, {})
+    receipt = installer.read_json(backup / "operation.json")
+    installer.install([plan], home, state, {}, replay=receipt)
+
+    installed = installer.location("shared", home) / "one/SKILL.md"
+    assert installed.read_bytes() == original
+    assert installed.stat().st_nlink == 1
+    assert not installed.samefile(source)
+    assert source.read_bytes() == original
+    assert source.stat().st_mode & 0o777 == 0o444
+
+
+def test_hardlinked_destination_is_rejected_before_cli(fixture, tmp_path):
+    plan, home, state, calls, _ = fixture
+    installer.install([plan], home, state, {})
+    installed = installer.location("shared", home) / "one/SKILL.md"
+    (tmp_path / "other-file").hardlink_to(installed)
+    before = len(calls)
+    with pytest.raises(installer.ValidationError, match="not an ordinary unlinked file"):
+        installer.install([plan], home, state, {})
+    assert len(calls) == before
+
+
+@pytest.mark.parametrize("kind", ["symlink", "fifo"])
+def test_unsafe_local_source_is_rejected_before_cli(fixture, tmp_path, kind):
+    plan, home, state, calls, _ = fixture
+    source = Path(plan["sources"][0]["path"]) / "one/reference.md"
+    source.unlink()
+    if kind == "symlink":
+        other = tmp_path / "other-file"
+        other.write_text("outside source")
+        source.symlink_to(other)
+        message = "unexpected symlink"
+    else:
+        os.mkfifo(source)
+        message = "not an ordinary unlinked file"
+    with pytest.raises(installer.ValidationError, match=message):
+        installer.install([plan], home, state, {})
+    assert not calls
+
+
+def test_hardlinked_source_change_during_preparation_is_rejected(
+    fixture, tmp_path, monkeypatch
+):
+    plan, home, state, calls, fake_cli = fixture
+    source = Path(plan["sources"][0]["path"]) / "one/reference.md"
+    alias = tmp_path / "store-link"
+    alias.hardlink_to(source)
+
+    def changing_cli(*args, **kwargs):
+        fake_cli(*args, **kwargs)
+        alias.write_text("changed source")
+
+    monkeypatch.setattr(installer, "cli_add", changing_cli)
+    with pytest.raises(
+        installer.ValidationError, match="local source changed during preparation"
+    ):
+        installer.install([plan], home, state, {})
+    assert all(call_home != home for _, call_home in calls)
+    assert not installer.location("shared", home).exists()
 
 
 def test_unowned_collision_and_symlink_parent_are_rejected_before_cli(fixture):
