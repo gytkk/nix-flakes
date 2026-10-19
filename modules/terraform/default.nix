@@ -45,9 +45,5 @@ in
         in
         "${envPrefix}terraform";
     };
-
-    programs.direnv.stdlib = builtins.replaceStrings [ "@TENV_BIN@" ] [ "${pkgs.tenv}/bin" ] (
-      builtins.readFile ./direnvrc
-    );
   };
 }

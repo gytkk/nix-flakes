@@ -160,7 +160,7 @@ macOS와 WSL이 아닌 Linux에서는 설정과 keymap을 checkout으로 symlink
 
 #### Terraform
 
-[Terraform README](modules/terraform/README.md)에서 tenv의 버전 선택과 자동 설치 방식을 확인한다. 기존 `.envrc`의 `use_terraform` 호출은 tenv proxy를 PATH 앞에 추가한다.
+[Terraform README](modules/terraform/README.md)에서 `required_version`을 사용하는 tenv의 버전 선택과 자동 설치 방식을 확인한다. Terraform 전용 direnv hook은 필요하지 않으며, 기존 `.envrc`의 `use_terraform` 호출은 삭제한다.
 
 ### AI Coding Agent Notes
 

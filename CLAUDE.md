@@ -114,7 +114,7 @@ modules/<name>/
 
 #### Module reference
 
-Before changing an app module, read the shared [module reference](AGENTS.md#module-reference) and [editor-specific notes](AGENTS.md#editor-specific-notes) for its source paths, installation behavior, and activation constraints. Those sections also cover VSCode's disabled status, Terraform's direnv integration, and links to module READMEs.
+Before changing an app module, read the shared [module reference](AGENTS.md#module-reference) and [editor-specific notes](AGENTS.md#editor-specific-notes) for its source paths, installation behavior, and activation constraints. Those sections also cover VSCode's disabled status, Terraform's version management, and links to module READMEs.
 
 ### AI Coding Agent Notes
 

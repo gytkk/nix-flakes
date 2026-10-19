@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-
-use_terraform() {
-  # Keep existing .envrc calls working and supersede old .direnv/bin wrappers.
-  PATH_add "@TENV_BIN@"
-}
