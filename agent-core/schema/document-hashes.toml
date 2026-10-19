@@ -1,12 +1,12 @@
 [hashes.openclaw]
-"AGENTS.core.md" = "6f9a81032b31ab04f09222ab55efdd5ea5a60fbeeecfbe59ae350369d411b461"
+"AGENTS.core.md" = "61febc917f30b3f908999d26f6dccf4e0f0bb084e4d0827b5984289bb50cd275"
 
 [hashes.claude]
-"CLAUDE.md" = "09ca8a8768588ee0480b3d15f6dbe6abcced789d21fb19eae6e16701b65a2df4"
+"CLAUDE.md" = "1cb81b15a026d76a8d7b3e72cbe30430e52731dab6deccf7c7cd22cfd399a834"
 
 [hashes.codex]
-"AGENTS.md" = "8c90ba9ecf43821138fee3ce2b489c48df7377548ec61822c0edf588f4683b0d"
+"AGENTS.md" = "4d306806aab55469b5914b89b2a4e8579e9b1d2b91832f997af17d3181fa1f60"
 
 [hashes.pi]
-"AGENTS.md" = "3de594aa0b13648c0dadc661349f18657089c37c3d24b04ad6d6a8ec21cfdf9b"
+"AGENTS.md" = "ffb18e8bc78f5dce82648ee2456ba4f2f2e120de9b8ec4269ca065a5fe2cb397"
 "APPEND_SYSTEM.md" = "2113194d3181bbdda44c76c865704fe1026c538b7847851286ceb1bba5523f16"
