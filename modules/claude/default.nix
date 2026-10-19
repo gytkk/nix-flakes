@@ -66,9 +66,12 @@ let
         builtins.toJSON (
           lib.recursiveUpdate (builtins.fromJSON (builtins.readFile ./files/settings.json)) {
             enabledPlugins."mumu@mumu" = true;
-            extraKnownMarketplaces.mumu.source = {
-              source = "github";
-              repo = "devsisters/mumu";
+            extraKnownMarketplaces.mumu = {
+              source = {
+                source = "github";
+                repo = "devsisters/mumu";
+              };
+              autoUpdate = true;
             };
           }
         )
