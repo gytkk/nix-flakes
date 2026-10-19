@@ -121,7 +121,8 @@
     "ty-lsp@gytkk": true,
     "terraform-ls@gytkk": true,
     "nixd-lsp@gytkk": true,
-    "cc-plugin-you-should-know@builtin": true
+    "cc-plugin-you-should-know@builtin": true,
+    "mumu@mumu": true
   },
   "extraKnownMarketplaces": {
     "openai-codex": {
@@ -129,10 +130,17 @@
         "source": "github",
         "repo": "openai/codex-plugin-cc"
       }
+    },
+    "mumu": {
+      "source": {
+        "source": "github",
+        "repo": "devsisters/mumu"
+      }
     }
   },
   "otelHeadersHelper": "~/.local/bin/claude-otel-headers",
   "language": "english",
+  "feedbackDrafts": "off",
   "spinnerTipsEnabled": false,
   "subagentPromptCacheTtl": "1h",
   "alwaysThinkingEnabled": true,
@@ -149,6 +157,5 @@
   "theme": "dark-ansi",
   "editorMode": "normal",
   "teammateMode": "auto",
-  "skipAutoPermissionPrompt": true,
-  "feedbackDrafts": "off"
+  "skipAutoPermissionPrompt": true
 }
