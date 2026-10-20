@@ -4,7 +4,7 @@
 }:
 
 let
-  version = "0.23.20";
+  version = "0.23.21";
 in
 mkTarballCli {
   pname = "notion-cli";
@@ -12,19 +12,19 @@ mkTarballCli {
   platforms = {
     x86_64-linux = {
       target = "x86_64-unknown-linux-musl";
-      hash = "sha256-/sGW5JHUps1w7D1DiFUmzERE1capeApTrlNvgwRCUPo=";
+      hash = "sha256-hMpNCKtKopVi97LhrdyVTs9DRy+QUJGFTDxKwl7xUFU=";
     };
     aarch64-linux = {
       target = "aarch64-unknown-linux-musl";
-      hash = "sha256-uGQkskEScOky4F8UAyKSPoJQ9wh359OrJH6mBPsdUpM=";
+      hash = "sha256-9pSV4HkfLinlC1om3sqHJ9WNq1/KGsybcNb+BXN3ORQ=";
     };
     x86_64-darwin = {
       target = "x86_64-apple-darwin";
-      hash = "sha256-XKXTGNXbYZ61y6RY6yHOWHdhE41IL56wsJ/F7ZBr2Nw=";
+      hash = "sha256-kxYbUrnR8yaBqxzuuC9TXt/zNvlazTl4vZTeToB1f8Y=";
     };
     aarch64-darwin = {
       target = "aarch64-apple-darwin";
-      hash = "sha256-sbIkxUPC+746ThsYn92snmXYvsGyW5vwKSAL3BS8ZOg=";
+      hash = "sha256-QJHPQvEBTdhNKgLtM1L79t07qyLAjPJIfVweDkPjoz8=";
     };
   };
 
