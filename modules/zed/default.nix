@@ -59,7 +59,7 @@ let
   zedConfigPath = ".config/zed";
 
   zedDataPath =
-    if pkgs.stdenv.isDarwin then "Library/Application Support/Zed" else ".local/share/zed";
+    if pkgs.stdenv.hostPlatform.isDarwin then "Library/Application Support/Zed" else ".local/share/zed";
 
   # WSL: Windows Zed 경로
   windowsZedConfigPath = "/mnt/c/Users/${username}/AppData/Roaming/Zed";

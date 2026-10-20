@@ -24,7 +24,7 @@ in
     {
       assertions = [
         {
-          assertion = !cfg.enable || pkgs.stdenv.isDarwin;
+          assertion = !cfg.enable || pkgs.stdenv.hostPlatform.isDarwin;
           message = "modules.claudeSessionMining only supports Darwin hosts.";
         }
         {
@@ -34,7 +34,7 @@ in
       ];
     }
 
-    (lib.mkIf (cfg.enable && pkgs.stdenv.isDarwin) {
+    (lib.mkIf (cfg.enable && pkgs.stdenv.hostPlatform.isDarwin) {
       launchd.agents.claude-session-mining = {
         enable = true;
         config = {

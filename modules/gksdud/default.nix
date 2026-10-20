@@ -12,7 +12,7 @@ in
 {
   options.modules.gksdud.enable = lib.mkEnableOption "gksdud Korean and English input switching";
 
-  config = lib.mkIf (cfg.enable && pkgs.stdenv.isDarwin) {
+  config = lib.mkIf (cfg.enable && pkgs.stdenv.hostPlatform.isDarwin) {
     home.packages = [ pkgs.gksdud ];
     home.file."Applications/gksdud.app".source = "${pkgs.gksdud}/Applications/gksdud.app";
 

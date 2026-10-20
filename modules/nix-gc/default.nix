@@ -58,7 +58,7 @@ in
 
   config = lib.mkIf cfg.enable (
     lib.mkMerge [
-      (lib.mkIf pkgs.stdenv.isDarwin {
+      (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
         launchd.agents.nix-gc = {
           # Home Manager's launchd.agents.<name>.enable defaults to false, so a
           # config-only definition silently produces no plist at all.

@@ -20,7 +20,7 @@ in
     description = "Enable AeroSpace module";
   };
 
-  config = lib.mkIf (cfg.enable && pkgs.stdenv.isDarwin) {
+  config = lib.mkIf (cfg.enable && pkgs.stdenv.hostPlatform.isDarwin) {
     xdg.configFile."aerospace/aerospace.toml".source = mkSymlink "files/aerospace.toml";
 
     home.activation.aerospaceLegacyConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''

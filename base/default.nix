@@ -67,12 +67,12 @@ in
   config = {
     modules = {
       agentSessionRecord.enable = lib.mkDefault true;
-      aerospace.enable = lib.mkDefault pkgs.stdenv.isDarwin;
+      aerospace.enable = lib.mkDefault pkgs.stdenv.hostPlatform.isDarwin;
       claude.enable = lib.mkDefault true;
       codex.enable = lib.mkDefault true;
       ghostty.enable = lib.mkDefault true;
       git.enable = lib.mkDefault true;
-      gksdud.enable = lib.mkDefault pkgs.stdenv.isDarwin;
+      gksdud.enable = lib.mkDefault pkgs.stdenv.hostPlatform.isDarwin;
       herdr.enable = lib.mkDefault true;
       openaiApi.enable = lib.mkDefault (
         config.modules.vim.enable || config.modules.codex.enable || config.modules.claude.enable

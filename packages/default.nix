@@ -1,6 +1,6 @@
 {
   pkgs,
-  isDarwin ? pkgs.stdenv.isDarwin,
+  isDarwin ? pkgs.stdenv.hostPlatform.isDarwin,
 }:
 let
   callPackage = pkgs.lib.callPackageWith (

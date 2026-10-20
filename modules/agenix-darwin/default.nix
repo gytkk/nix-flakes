@@ -14,7 +14,7 @@ let
   '';
 in
 {
-  config = lib.mkIf pkgs.stdenv.isDarwin (
+  config = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin (
     lib.mkMerge [
       {
         # Long-lived consumers must not lose secrets when macOS clears temporary files.

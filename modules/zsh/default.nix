@@ -38,7 +38,7 @@ in
       dotDir = "${config.xdg.configHome}/zsh";
 
       # macOS path_helper runs after Home Manager's session PATH setup.
-      profileExtra = lib.optionalString pkgs.stdenv.isDarwin ''
+      profileExtra = lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
         path=("$HOME/.nix-profile/bin" "''${(@)path:#$HOME/.nix-profile/bin}")
       '';
 
@@ -90,7 +90,7 @@ in
         kx = "kubectx";
         kn = "kubens";
       }
-      // lib.optionalAttrs (!pkgs.stdenv.isDarwin) {
+      // lib.optionalAttrs (!pkgs.stdenv.hostPlatform.isDarwin) {
         zed = if isWSL then "zed.exe" else "zeditor";
       };
 
