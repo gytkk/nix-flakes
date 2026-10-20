@@ -78,7 +78,7 @@ in
         };
       })
 
-      (lib.mkIf pkgs.stdenv.isLinux {
+      (lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
         systemd.user.services.nix-gc = {
           Unit.Description = "Prune Nix generations and collect garbage";
           Service = {
