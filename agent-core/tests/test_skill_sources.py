@@ -13,7 +13,7 @@ from agent_core.cli import main
 
 
 @pytest.mark.parametrize(
-    ("target", "count"), [("shared", 20), ("claude", 17), ("openclaw", 16)]
+    ("target", "count"), [("shared", 21), ("claude", 18), ("openclaw", 17)]
 )
 def test_plan_selections_apply_approved_addition_and_removal(
     target: str, count: int
@@ -26,7 +26,9 @@ def test_plan_selections_apply_approved_addition_and_removal(
         for runtime in plan["runtimes"]
         for name in manifest["runtimes"][runtime]["skills"]
     }
-    assert selected == (legacy | {"find-skills"}) - {"resolving-merge-conflicts"}
+    assert selected == (legacy | {"find-skills", "korean"}) - {
+        "resolving-merge-conflicts"
+    }
     assert len(selected) == count
     assert plan["cli_version"] == "1.7.2"
     assert plan["target"] == target

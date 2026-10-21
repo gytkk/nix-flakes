@@ -14,6 +14,7 @@ code-review = "code-review"
 data-analysis = "data-analysis"
 data-visualization = "data-visualization"
 devils-advocate = "devils-advocate"
+korean = "korean"
 openai-decisions = "openai-decisions"
 parallel-research-merge = "parallel-research-merge"
 pi-agent = "pi-agent"
@@ -49,15 +50,15 @@ find-skills = "skills/find-skills"
 
 [skill_targets.shared]
 runtimes = ["codex", "pi"]
-skills = ["codebase-design", "code-review", "data-analysis", "data-visualization", "devils-advocate", "diagnosing-bugs", "domain-modeling", "find-skills", "grilling", "openai-decisions", "parallel-research-merge", "pi-agent", "prototype", "repeated-work-analyzer", "research", "tdd", "theme-template-authoring", "user-friction-review", "wizard", "writing-for-agents"]
+skills = ["codebase-design", "code-review", "data-analysis", "data-visualization", "devils-advocate", "diagnosing-bugs", "domain-modeling", "find-skills", "grilling", "korean", "openai-decisions", "parallel-research-merge", "pi-agent", "prototype", "repeated-work-analyzer", "research", "tdd", "theme-template-authoring", "user-friction-review", "wizard", "writing-for-agents"]
 
 [skill_targets.claude]
 runtimes = ["claude"]
-skills = ["codebase-design", "code-review", "data-analysis", "data-visualization", "diagnosing-bugs", "domain-modeling", "find-skills", "grilling", "openai-decisions", "prototype", "repeated-work-analyzer", "research", "tdd", "theme-template-authoring", "user-friction-review", "wizard", "writing-for-agents"]
+skills = ["codebase-design", "code-review", "data-analysis", "data-visualization", "diagnosing-bugs", "domain-modeling", "find-skills", "grilling", "korean", "openai-decisions", "prototype", "repeated-work-analyzer", "research", "tdd", "theme-template-authoring", "user-friction-review", "wizard", "writing-for-agents"]
 
 [skill_targets.openclaw]
 runtimes = ["openclaw"]
-skills = ["codebase-design", "code-review", "data-analysis", "data-visualization", "diagnosing-bugs", "domain-modeling", "find-skills", "grilling", "prototype", "repeated-work-analyzer", "research", "tdd", "theme-template-authoring", "user-friction-review", "wizard", "writing-for-agents"]
+skills = ["codebase-design", "code-review", "data-analysis", "data-visualization", "diagnosing-bugs", "domain-modeling", "find-skills", "grilling", "korean", "prototype", "repeated-work-analyzer", "research", "tdd", "theme-template-authoring", "user-friction-review", "wizard", "writing-for-agents"]
 
 [[documents]]
 runtime = "openclaw"
