@@ -1,0 +1,14 @@
+--- a/vendor/libghostty-vt/src/build/GhosttyLibVt.zig
++++ b/vendor/libghostty-vt/src/build/GhosttyLibVt.zig
+@@ -239,7 +239,6 @@
+     if (kind == .static) {
+-        // These must be bundled since we're compiling into a static lib.
+-        // Otherwise, you get undefined symbol errors. This could cause
+-        // problems if you're linking multiple static Zig libraries but
+-        // we'll cross that bridge when we get to it.
+-        lib.bundle_compiler_rt = true;
++        // Herdr's Rust toolchain supplies the compiler runtime on Linux.
++        // Zig 0.16's bundled runtime has invalid unwind relocations that
++        // GNU ld rejects as overlapping FDEs.
++        lib.bundle_compiler_rt = target.result.os.tag != .linux;
+         lib.bundle_ubsan_rt = true;
