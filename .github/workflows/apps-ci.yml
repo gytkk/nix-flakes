@@ -21,7 +21,7 @@ on:
   workflow_dispatch:
     inputs:
       base_sha:
-        description: Base commit for an automated update candidate
+        description: Base commit for detecting changed app packages
         required: false
         type: string
   workflow_run:
@@ -43,10 +43,9 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y ripgrep
       - name: Test changed-app detection
         run: bash packages/tests/detect-changed-apps.sh
-      - name: Test update isolation and patch preflight
+      - name: Test app updaters and patch preflight
         run: |
           bash packages/tests/update-all.sh
-          bash packages/tests/update-review.sh
           bash packages/tests/check-nix-patches.sh
           bash packages/tests/notion-cli-update.sh
           bash packages/tests/pi-update.sh

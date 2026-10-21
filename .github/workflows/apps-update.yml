@@ -12,9 +12,9 @@ on:
 
 jobs:
   update:
-    name: Update direct app packages
+    name: Update app packages
     concurrency:
-      group: app-package-direct-updates
+      group: app-package-updates
       cancel-in-progress: false
     runs-on: ubuntu-latest
     permissions:
@@ -34,7 +34,7 @@ jobs:
           sudo apt-get install -y ripgrep
 
       - name: Run app update scripts
-        run: packages/scripts/update-all.sh direct
+        run: packages/scripts/update-all.sh
 
       - name: Record changed app packages
         shell: bash
@@ -89,29 +89,4 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git commit -m "$message"
-          git push
-
-  review:
-    name: Propose reviewed app updates
-    concurrency:
-      group: app-package-review-updates
-      cancel-in-progress: false
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-      actions: write
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          ref: main
-      - uses: cachix/install-nix-action@v31
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
-      - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y ripgrep
-      - name: Create candidate PR and dispatch CI
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: bash packages/scripts/update-review.sh
+          git push origin HEAD:main

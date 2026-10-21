@@ -4,18 +4,14 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APPS_DIR="$ROOT_DIR/apps"
 SETTINGS="$ROOT_DIR/settings.json"
-CHANNEL="${1:-all}"
-
-if [ "$#" -gt 1 ] || [[ ! "$CHANNEL" =~ ^(all|direct|review)$ ]]; then
-  echo "Usage: $0 [all|direct|review]" >&2
+if [ "$#" -ne 0 ]; then
+  echo "Usage: $0" >&2
   exit 2
 fi
 
 DENY_LIST=""
-REVIEW_LIST=""
 if [ -f "$SETTINGS" ]; then
   DENY_LIST=$(jq -r '.update.deny // [] | .[]' "$SETTINGS")
-  REVIEW_LIST=$(jq -r '.update.review // [] | .[]' "$SETTINGS")
 fi
 
 for app_dir in "$APPS_DIR"/*; do
@@ -33,12 +29,6 @@ for app_dir in "$APPS_DIR"/*; do
   if printf '%s\n' "$DENY_LIST" | rg -qx "$app_name"; then
     echo "Skipping $app_name: denied in settings.json"
     continue
-  fi
-
-  if printf '%s\n' "$REVIEW_LIST" | rg -Fxq "$app_name"; then
-    [ "$CHANNEL" != direct ] || continue
-  else
-    [ "$CHANNEL" != review ] || continue
   fi
 
   echo "Running $app_name update"
