@@ -36,6 +36,7 @@ M.noice = {
     },
   },
   keys = {
+    { "<Esc>", "<cmd>nohlsearch<cr>", desc = "Clear Search Highlight" },
     { "<leader>sn",  "",                                             desc = "+noice" },
     { "<leader>snl", function() require("noice").cmd("last") end,    desc = "Noice Last Message" },
     { "<leader>snh", function() require("noice").cmd("history") end, desc = "Noice History" },

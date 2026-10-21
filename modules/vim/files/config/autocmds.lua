@@ -30,6 +30,14 @@ local function refreshReloadedBuffer(buf)
 end
 
 function M.setup()
+  vim.api.nvim_create_autocmd({ "InsertEnter", "TextChanged", "BufLeave", "FileChangedShellPost" }, {
+    desc = "Clear completed search highlights and the Noice search count",
+    callback = function()
+      -- Neovim restores search highlighting after an autocmd, so clear it afterward.
+      vim.schedule(function() vim.cmd.nohlsearch() end)
+    end,
+  })
+
   vim.api.nvim_create_autocmd("BufEnter", {
     callback = function()
       vim.schedule(function()

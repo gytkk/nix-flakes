@@ -35,6 +35,8 @@ Vira Graphene follows the original editor's syntax and UI colors through a theme
 
 ## Search refresh
 
+For `/` and `?` searches, entering insert mode, changing buffer text, leaving a buffer, or reloading an externally changed file clears search highlights and Noice's inline search count. Press `<Esc>` in normal mode to clear them manually. The search pattern remains available, and `n` or `N` resumes the search with highlights and the count.
+
 Open grep pickers rerun the current search after a file is saved, after Neovim reloads an externally changed file, and when Neovim regains focus. The results and preview refresh while preserving the search query and scope. This also applies to a grep picker reopened with `<leader>sr`. External edits do not trigger continuous filesystem polling; they appear when Neovim detects the change or regains focus.
 
 ## Minuet
