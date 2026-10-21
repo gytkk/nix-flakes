@@ -66,7 +66,7 @@ Self-contained non-nixpkgs app packages used by the parent `nix-flakes` reposito
 - `nix build ./packages#packages.<system>.default` (same as first app)
 - `nix run ./packages#apps.<system>.ntn`
 
-`gksdud` is exposed only on Darwin. Its signed universal app bundle supports Apple Silicon and Intel Macs running macOS 13 or later. Home Manager installs and starts it through the [gksdud module](../modules/gksdud/README.md).
+`gksdud` is exposed only on Darwin. Its signed universal app bundle supports Apple Silicon and Intel Macs running macOS 13 or later. Home Manager installs it through the [gksdud module](../modules/gksdud/README.md). Automatic startup is controlled by the app's own login-item option.
 
 ## Adding new apps
 

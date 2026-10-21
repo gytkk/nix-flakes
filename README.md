@@ -282,7 +282,7 @@ Resources should supplement the tools instead of expanding the tool count:
 
 ## macOS input switching
 
-[gksdud](modules/gksdud/README.md) manages Right Command Korean/English switching and starts at login on macOS. The module and package are excluded on Linux. See the module README for initial permissions and keyboard setup.
+[gksdud](modules/gksdud/README.md) manages Right Command Korean/English switching on macOS. Automatic startup is controlled by the app's own login-item option. The module and package are excluded on Linux. See the module README for initial permissions and keyboard setup.
 
 ## Ghostty config
 

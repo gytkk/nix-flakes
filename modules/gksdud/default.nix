@@ -7,7 +7,6 @@
 
 let
   cfg = config.modules.gksdud;
-  appPath = "${config.home.homeDirectory}/Applications/gksdud.app";
 in
 {
   options.modules.gksdud.enable = lib.mkEnableOption "gksdud Korean and English input switching";
@@ -18,8 +17,7 @@ in
 
     # Write individual keys to preserve gksdud's keyboard records and restoration data.
     home.activation.gksdudSettings =
-      lib.hm.dag.entryBetween
-        [ "setupLaunchAgents" ]
+      lib.hm.dag.entryAfter
         [
           "writeBoundary"
           "linkGeneration"
@@ -30,18 +28,5 @@ in
           run /usr/bin/defaults write io.gksdud.inputswitch active -bool true
           run /usr/bin/defaults write io.gksdud.inputswitch switchOnKeyDown -bool true
         '';
-
-    launchd.agents.gksdud = {
-      enable = true;
-      config = {
-        ProgramArguments = [
-          "/usr/bin/open"
-          "-a"
-          appPath
-        ];
-        RunAtLoad = true;
-        ProcessType = "Interactive";
-      };
-    };
   };
 }
