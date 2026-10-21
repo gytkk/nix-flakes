@@ -73,6 +73,8 @@ lib/builders.nix                  # Backward-compatible builder aggregation
 
 Home Manager modules expose `modules.<name>.enable`; `base/default.nix` owns common default enables, and profile files can override them. NixOS input modules that are host-specific, such as Disko, Copyparty, niri, and DankMaterialShell, are imported by the relevant `hosts/<name>/configuration.nix`.
 
+On `pylv-onyx`, DankMaterialShell comes from the `dms` input, while the login screen uses nixpkgs' `services.displayManager.dms-greeter` module with niri in [the host configuration](hosts/pylv-onyx/configuration.nix). The niri package uses the `niri` input's own pinned package set to keep its library dependencies compatible.
+
 New Darwin environments leave [Claude session mining](modules/claude-session-mining/README.md) disabled. The two existing Mac entries select `base/devsisters/session-mining.nix` in `inventory.nix`; that fragment requires the external `gytkk-space` runner checkout. [Home Manager installation compatibility](base/compat/README.md) is imported separately from common package and application defaults.
 
 [Darwin agenix integration](modules/agenix-darwin/README.md) owns the stable login wrapper and activation retries. Both Home Manager builders use `lib/home-manager-modules.nix` for the explicit agenix mount interface and [launchd plist rollback compatibility](lib/launchd/README.md).

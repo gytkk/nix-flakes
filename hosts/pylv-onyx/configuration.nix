@@ -9,7 +9,6 @@
     inputs.disko.nixosModules.disko
     inputs.niri.nixosModules.niri
     inputs.dms.nixosModules.dank-material-shell
-    inputs.dms.nixosModules.greeter
     ./hardware-configuration.nix
     ../../modules/openclaw
     ../../modules/nixos
@@ -57,14 +56,15 @@
 
   # niri compositor
   programs.niri.enable = true;
+  # Use niri-flake's pinned package set for its required libdisplay-info version.
+  programs.niri.package = inputs.niri.packages.${pkgs.stdenv.hostPlatform.system}.niri-stable;
 
   # DankMaterialShell
-  programs.dank-material-shell = {
+  programs.dank-material-shell.enable = true;
+
+  services.displayManager.dms-greeter = {
     enable = true;
-    greeter = {
-      enable = true;
-      compositor.name = "niri";
-    };
+    compositor.name = "niri";
   };
 
   services.libinput = {
