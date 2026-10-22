@@ -114,7 +114,7 @@ vim filename.txt
 vi filename.txt
 ```
 
-Marksman starts for Markdown files opened directly, including standalone files outside a Git repository or a directory with `.marksman.toml`. LSP setup also runs on `VimEnter` so startup filetype plugins cannot leave the initial buffer without LSP support.
+Markdown files opened directly receive both in-buffer rendering and Marksman support, including standalone files outside a Git repository or a directory with `.marksman.toml`. Filetype and syntax activation runs after plugin loading handlers are registered so plugins can handle the initial file's events.
 
 ## Files
 
