@@ -47,7 +47,7 @@ The [trading-agent repository](https://github.com/gytkk/trading-agent) owns its 
 
 | App | Version |
 |-----|---------|
-| agent-browser | 0.39.1 |
+| agent-browser | 0.39.2 |
 | cf | 1.0.0-beta.12 |
 | claude-code | 2.1.308 |
 | codex | 0.163.0 |
