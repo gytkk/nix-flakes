@@ -1,6 +1,7 @@
 {
   pkgs,
   isDarwin ? pkgs.stdenv.hostPlatform.isDarwin,
+  system ? pkgs.stdenv.hostPlatform.system,
 }:
 let
   callPackage = pkgs.lib.callPackageWith (
@@ -27,3 +28,17 @@ rec {
   pup = callPackage ./apps/pup/package.nix { };
 }
 // (if isDarwin then { gksdud = callPackage ./apps/gksdud/package.nix { }; } else { })
+// (
+  if
+    builtins.elem system [
+      "aarch64-darwin"
+      "x86_64-darwin"
+      "x86_64-linux"
+    ]
+  then
+    {
+      lspi = callPackage ./apps/lspi/package.nix { };
+    }
+  else
+    { }
+)

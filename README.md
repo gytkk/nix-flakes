@@ -120,6 +120,8 @@ The official [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc)
 
 The `devsisters` base profile also installs the `devsisters/mumu` marketplace and `mumu@mumu` plugin. Remote marketplaces enable automatic plugin updates. See the [Claude module README](modules/claude/README.md#marketplaces) for update settings and profile-specific behavior.
 
+The [LSP module](modules/lsp/default.nix) installs Pyright alongside ty. Claude uses the official `pyright-lsp` plugin for Python, with `ty-lsp` disabled to avoid competing for the same file extensions. Codex uses a read-only lspi MCP bridge for Python definitions, references, hover, symbols, and diagnostics. See [Claude's plugin settings](modules/claude/README.md#installed-plugins) and [Codex's Python integration](modules/codex/README.md#python-코드-탐색) for activation and workspace behavior.
+
 ### Available Commands
 
 - `/codex:review` — Code review of current changes or branch
@@ -181,6 +183,8 @@ For a remote machine, use `cf auth login --no-browser`. Automation can supply `C
 ### Codex LSP MCP Implementation Plan
 
 This section is a design plan only. The bridge and skills below are not implemented yet.
+
+The current Python integration uses upstream lspi with Pyright as described in [the Codex module](modules/codex/README.md#python-코드-탐색). The custom multi-language bridge below remains a proposal.
 
 #### Goals
 

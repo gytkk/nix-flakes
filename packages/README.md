@@ -19,6 +19,7 @@ The [trading-agent repository](https://github.com/gytkk/trading-agent) owns its 
 │   ├── herdr/
 │   ├── herdr-annotate/
 │   ├── herdr-auto-title/
+│   ├── lspi/
 │   ├── notion-cli/
 │   ├── pantry/
 │   ├── pi/
@@ -57,6 +58,7 @@ The [trading-agent repository](https://github.com/gytkk/trading-agent) owns its 
 | herdr | 0.9.5 |
 | herdr-annotate | 0.9.1 |
 | herdr-auto-title | 0.14.0 |
+| lspi | 0.2.0 |
 | notion-cli | 0.23.25 |
 | pantry | main-69de978b5555 |
 | pi | 1.4.0 |
@@ -69,6 +71,8 @@ The [trading-agent repository](https://github.com/gytkk/trading-agent) owns its 
 - `nix run ./packages#apps.<system>.ntn`
 
 `gksdud` is exposed only on Darwin. Its signed universal app bundle supports Apple Silicon and Intel Macs running macOS 13 or later. Home Manager installs it through the [gksdud module](../modules/gksdud/README.md). Automatic startup is controlled by the app's own login-item option.
+
+`lspi` packages the upstream MCP-to-LSP bridge for [Codex's Python integration](../modules/codex/README.md#python-코드-탐색). Upstream provides release binaries for both macOS architectures and x86_64 Linux; the catalog omits it on aarch64 Linux. Linux installation patches the ELF interpreter and runtime library paths for Nix.
 
 ## Adding new apps
 
@@ -117,6 +121,6 @@ The helper selects the host platform, fetches the pinned archive, disables confi
 - `cf` packages the official npm bundle with Node.js 24 and a pinned production dependency lockfile. It provides both `cf` and `cloudflare`. The published development dependencies reference unpublished local archives, so packaging removes them before installing the locked runtime dependencies. Linux builds patch the bundled `workerd` and `sharp` binaries. For a manual update, refresh the source version/hash, generate `package-lock.json` from the npm tarball after removing `devDependencies`, and refresh `npmDepsHash` with `prefetch-npm-deps`. See [Cloudflare CLI setup](../README.md#cloudflare-cli) for authentication.
 - `notion-cli` tracks the stable version published at `https://ntn.dev/latest.txt`. Its updater downloads all four platform archives, verifies their official SHA-256 checksums, and updates the version and hashes together after every platform succeeds. The `ntn` alias receives the same updates through the direct channel.
 - `pantry` packages a `main` build of the Devsisters teamdev.ai CLI, versioned as `main-<12-character commit>` with no releases or tags. It is listed in `update.deny`, so aggregate updates skip it. To bump it manually, run `bash packages/apps/pantry/update.sh`, which pins the build named by the per-platform `latest/<os>-<arch>.json` manifests after confirming all four agree and each binary matches its manifest SHA-256.
-- `cf`, `databricks-cli`, `gksdud`, and `pup` are manually updated. They have no `update.sh`, so aggregate updates skip them. Moving a package into this catalog does not enable automatic updates.
+- `cf`, `databricks-cli`, `gksdud`, `lspi`, and `pup` are manually updated. They have no `update.sh`, so aggregate updates skip them. Moving a package into this catalog does not enable automatic updates.
 - Package outputs follow each platform's catalog. The Linux build job skips apps absent from the Linux catalog, including `gksdud`; it does not validate their macOS runtime behavior.
 - Changes under `lib/` rebuild all catalog package directories. A package-local change rebuilds that package. The changed-app detector is checked with `bash packages/tests/detect-changed-apps.sh`.

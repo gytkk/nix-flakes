@@ -44,6 +44,7 @@ let
     "gopls-lsp@claude-plugins-official"
     "rust-analyzer-lsp@claude-plugins-official"
     "typescript-lsp@claude-plugins-official"
+    "pyright-lsp@claude-plugins-official"
 
     # backnotprop/plannotator — visual plan annotation and review
     "plannotator@plannotator"
@@ -53,7 +54,6 @@ let
 
     # local gytkk marketplace (modules/claude/marketplace) - runtime-specific skill and LSP plugins
     "devils-advocate@gytkk"
-    "ty-lsp@gytkk"
     "terraform-ls@gytkk"
     "nixd-lsp@gytkk"
   ]

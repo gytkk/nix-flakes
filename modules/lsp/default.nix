@@ -42,6 +42,7 @@ in
 
       # Python
       ty
+      pyright
 
       # YAML
       yaml-language-server

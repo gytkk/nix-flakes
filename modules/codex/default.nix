@@ -16,6 +16,13 @@ let
       builtins.readFile ./files/codex-launcher.sh
     )
   );
+  pyrightMcp = pkgs.writeShellScriptBin "codex-pyright-mcp" ''
+    export PATH="${lib.makeBinPath [ pkgs.pyright ]}:$PATH"
+    exec ${pkgs.lspi}/bin/lspi mcp \
+      --workspace-root "$PWD" \
+      --config ${./files/lspi.toml} \
+      --read-only "$@"
+  '';
   hookCommandNames = [
     "agent-session-record"
     "plannotator"
@@ -56,6 +63,8 @@ in
       (lib.hiPrio codexLauncher)
       pkgs.codex
       pkgs.mcp-nixos
+      pkgs.lspi
+      pyrightMcp
     ];
 
     home.file.".codex/AGENTS.md".source = "${agentCoreOutput}/AGENTS.md";

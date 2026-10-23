@@ -10,6 +10,14 @@ TUI 구문 강조는 밝은 터미널 배경에 맞춰 기본 제공 `one-half-l
 
 [Codex 패키지](../../packages/apps/codex/package.nix)는 공식 `codex-package` 번들 전체를 설치한다. 백그라운드 서버가 패키지를 인식하도록 `codex-package.json`, `codex-path`, `codex-resources`를 실행 파일과 함께 유지한다. 패키지 변경은 환경에 맞는 Home Manager 또는 NixOS switch 후 새 Codex 세션에 적용된다.
 
+## Python 코드 탐색
+
+`pyright` MCP 서버는 [lspi](https://github.com/Latias94/lspi)를 통해 Pyright의 정의, 참조, hover, 문서 심볼과 진단을 제공한다. [LSP 모듈](../lsp/default.nix)은 `pyright` CLI와 `pyright-langserver`를 설치하며, Codex 모듈의 `codex-pyright-mcp` 실행 스크립트는 Nix가 관리하는 Pyright를 사용한다.
+
+[files/lspi.toml](files/lspi.toml)은 `.py`와 `.pyi`를 Pyright로 연결한다. MCP 프로세스의 작업 디렉터리를 workspace root로 사용하므로 Python 프로젝트 루트에서 Codex를 시작한다. 명시적인 설정 파일을 사용하므로 프로젝트의 별도 lspi 설정은 읽지 않는다. 읽기 전용 모드에서는 rename과 서버 제어 도구를 제공하지 않는다. 도구의 행과 열 번호는 1부터 시작한다.
+
+환경에 맞는 Home Manager 또는 NixOS switch를 실행한 뒤 새 Codex 세션의 `/mcp`에서 `pyright` 연결을 확인한다. 실행 파일을 설치하기 전에는 MCP 서버가 시작되지 않는다.
+
 ## 모델별 위임
 
 [Codex adapter](../../agent-core/adapters/codex.md)는 독립적인 작업을 일찍 위임하고, worker를 생성할 때 작업 성격에 맞는 모델과 effort를 명시하도록 지시한다. 메인 에이전트는 사용자와의 대화, 요구사항 해석, 의사결정, 결과 통합과 최종 검증을 담당한다. 모델별 작업 범위와 재위임 기준은 adapter에서 관리한다.

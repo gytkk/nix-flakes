@@ -1,0 +1,8 @@
+[[servers]]
+id = "pyright"
+# Pyright rejects lspi 0.2.0's version probes; use the generic LSP transport.
+kind = "generic"
+extensions = ["py", "pyi"]
+language_id = "python"
+command = "pyright-langserver"
+args = ["--stdio"]
