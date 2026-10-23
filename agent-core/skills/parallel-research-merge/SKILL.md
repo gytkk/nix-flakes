@@ -1,43 +1,31 @@
 ---
 name: parallel-research-merge
-description: Coordinate bounded research using available worker tools, reconcile conflicting findings, and implement one verified result for complex code changes.
+description: Reconcile independent investigations when their evidence can change a design, diagnosis, or recommendation and the main agent has useful work to do concurrently. Use for explicit parallel research requests; skip routine edits and dependent lookups.
 ---
 
-# Parallel Research Merge
+# Parallel research merge
 
-## When to Use
+## Decide whether to delegate
 
-Use this skill when a code task benefits from multiple bounded investigation axes before one agent produces the final implementation.
+Identify the unresolved decision, the independent question a worker can answer, and the useful work the main agent will do while waiting. Delegate when that answer could change the decision or its verification and the expected benefit justifies dispatch, context gathering, and review.
 
-Typical triggers:
-- the user explicitly asks for subagents, delegation, parallel research, or worker agents
-- the task has 2 or more independent research axes, options, or risk surfaces
-- the main agent can keep final design and implementation ownership while delegating sidecar investigation
+The main agent plus one worker is sufficient. Add another worker only for a separate unresolved question with disjoint evidence or file ownership. A task's size, multiple files, or a request mentioning agents does not by itself justify parallel research.
 
-Do not use this skill for simple single-file edits, purely sequential blockers, or tasks where research scopes cannot be separated cleanly.
+Keep routine edits, dependent lookups, and work whose answer is already known in the main thread. When the user explicitly requests parallel research, honor that scope where separable work exists; explain a sequential dependency when it prevents useful parallelism. If worker tools are unavailable, investigate only the necessary questions sequentially without reproducing worker reports.
 
-## Core Rules
+## Investigate and reconcile
 
-1. Keep one owner. The main agent owns scope, sequencing, merge decisions, implementation, verification, and the final commit.
-2. Check capabilities first. Use parallel workers only when a worker or subagent mechanism exists; otherwise execute the same bounded scopes sequentially.
-3. Delegate only separable work. Split by question, subsystem, or risk area. Do not send multiple workers to do the same broad task unless the goal is explicit adversarial comparison.
-4. Bound every worker or sequential pass. Give each worker a narrow objective, owned paths, forbidden paths, expected output shape, and a verification target when relevant.
-5. Prefer research over edits first. Workers should usually gather evidence and recommend a path before the main agent changes files.
-6. Reconcile before coding. Compare worker findings, discard unsupported claims, and choose the smallest viable implementation before editing.
-7. Verify claims locally. Treat worker output as input, not truth. Re-read referenced files, inspect diffs, and run checks before accepting recommendations.
-8. Keep the final diff coherent. The main agent should merge or reimplement results into one intentional change set instead of stitching together unreviewed worker output.
+1. Keep scope and final decisions with the main agent. Before dispatch, read [the worker contract](references/contracts.md) and specify the decision served, evidence scope, edit ownership, investigation bound, and expected result size. Default workers to read-only investigation.
+2. Dispatch only independent questions and continue the main agent's work. Share new constraints promptly. Reuse a worker for a related follow-up instead of starting overlapping investigations.
+3. Verify decision-changing claims against cited sources or checks. Resolve conflicting evidence before making dependent changes; agreement alone is not verification. Stop an investigation when it answers its question, reaches its bound, or becomes irrelevant. Close or cancel every dispatched unit before finishing.
+4. Record a compact contribution note in the working summary: evidence accepted or rejected, the reason, and the resulting decision or verification change. If a worker added no useful evidence, record that instead of inventing a benefit. Use the note to avoid redundant follow-ups.
 
-## Workflow
+## Finish within the requested scope
 
-1. Decide whether the task benefits from multiple independent research axes.
-2. Check whether a worker or subagent mechanism is available.
-3. Define 2 to 3 disjoint scopes using `references/contracts.md`.
-4. Dispatch the scopes in parallel when the mechanism exists; otherwise execute them sequentially in the main thread.
-5. Collect findings and compare evidence, not confidence.
-6. Choose one implementation direction and explain rejected alternatives.
-7. Implement the final change in the main thread.
-8. Run relevant verification and only then commit.
+- For analysis, review, or planning, finish with the supported conclusion, recommendation, and remaining uncertainty. Implementation and commits require an implementation request.
+- For authorized implementation, make one coherent change, inspect worker edits before accepting them, and run proportionate checks. Follow the repository's commit workflow.
+- Include material contributions and unresolved risks in the final answer without repeating every worker report. Successful skill loading or worker completion establishes execution, not a speed or quality improvement.
 
-## Quick Reference
+## Evaluate changes to this skill
 
-- Parallel-worker, sequential-pass, and main-agent contracts: `references/contracts.md`
+When tuning discovery or assessing effectiveness, use [the evaluation cases and comparison protocol](references/evaluation.md). This is a maintenance workflow, not an extra step for ordinary tasks.

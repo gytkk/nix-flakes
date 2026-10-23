@@ -25,17 +25,14 @@ behavior.
   settings, plugins, and optional UI metadata in `modules/codex/`.
 - Trim unused scaffold files, keep the skill focused, and align it with
   repository conventions before committing.
-- Use the repository-managed `parallel-research-merge` skill when a task needs
-  bounded parallel investigation before one main agent produces the final
-  implementation.
-- Do not rely on always-loaded instructions alone for multi-worker
-  orchestration. When delegation matters, use a skill with an explicit worker
-  contract and merge checklist.
+- Use `parallel-research-merge` when independent evidence can change a decision
+  and the main agent has useful concurrent work. Routine delegation does not
+  require loading a research workflow.
 
 ## Model routing
 
 - Use `gpt-6.1-sol` as the main/default agent for general work. Keep it responsible for coordination and final decisions when delegating difficult work. Reserve `gpt-6-astra` for subagents handling exceptionally complex tasks, such as architecture design with interacting constraints, deep debugging across multiple subsystems, or unresolved correctness questions that require deeper reasoning than Sol can provide.
-- At the start of substantive work, dispatch bounded, independent exploration, research, implementation, or verification as soon as its inputs are available. Look for delegation opportunities before broad codebase reads or implementation, and reassess when new independent work appears. The main agent owns user interaction, requirements, decisions, integration, and final validation while workers handle the delegated units.
+- Apply the shared delegation criteria before dispatching. The main agent owns user interaction, requirements, decisions, integration, and final validation; workers handle the bounded units that pass those criteria.
 - Keep short answers and one-step low-risk edits in the main agent. Spawn a worker only for a concrete unit that can run alongside useful main-agent work; keep dependent work sequential and give writing workers disjoint file ownership.
 - Use native `spawn_agent` calls with explicit `model` and `reasoning_effort` values selected for the unit in the table below. Treat the table's effort as a starting point, not a requirement to use every model on every task.
 

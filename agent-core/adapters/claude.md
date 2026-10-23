@@ -49,6 +49,9 @@ behavior.
 
 ## Subagent delegation
 
+- Use `parallel-research-merge` when independent evidence can change a decision
+  and the main agent has useful concurrent work. Routine delegation does not
+  require loading a research workflow.
 - Delegate independent subtasks and continue useful work while they run. Prefer
   asynchronous or background subagents over spawn-and-block workflows.
 - Intervene when a subagent goes off track or lacks relevant context.

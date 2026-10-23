@@ -5,8 +5,9 @@ behavior.
 
 ## Skill routing
 
-- Use `parallel-research-merge` for bounded multi-axis investigation when the
-  task benefits from independent research scopes.
+- Use `parallel-research-merge` when independent evidence can change a decision
+  and the main agent has useful concurrent work. Routine delegation does not
+  require loading a research workflow.
 - Use parallel workers only when the session exposes an executable worker or
   subagent tool. Otherwise, run the same scopes sequentially.
 

@@ -24,11 +24,13 @@ agent-core/
 
 `manifest.toml`의 `skill_sources`는 로컬 12개, Matt upstream 8개, Vercel의 `find-skills`를 선언한다. 두 외부 source는 설치 작업마다 기본 branch의 최신 full SHA를 한 번 결정하며, 같은 작업의 모든 target에 같은 SHA를 사용한다. `resolving-merge-conflicts`는 최신 upstream에서 삭제되어 사용자 결정에 따라 새 설치 목록에서 제외한다. 최신 upstream의 workflow와 UI metadata 변경도 첫 전환에 포함된다.
 
-`skill_targets`는 Codex/Pi 공통 pool 21개와 Claude copy 18개를 선택한다. Codex와 Pi는 `~/.agents/skills`를 공유하므로 Pi에서도 `openai-decisions`를, Codex에서도 `pi-agent`를 발견할 수 있다. [OpenAI API 모듈](../modules/openai-api/README.md)은 API client에 agenix 키를 전달하며, skill 설치 자체가 package나 credential을 준비하지는 않는다.
+`skill_targets`는 Codex/Pi 공통 pool과 Claude copy에 설치할 skill을 선택한다. Codex와 Pi는 `~/.agents/skills`를 공유하므로 Pi에서도 `openai-decisions`를, Codex에서도 `pi-agent`를 발견할 수 있다. [OpenAI API 모듈](../modules/openai-api/README.md)은 API client에 agenix 키를 전달하며, skill 설치 자체가 package나 credential을 준비하지는 않는다.
 
 `runtimes.*.skills`와 기존 vendored tree는 이전 Nix generation의 복구와 최종 renderer 정리를 위해 남아 있다. 현재 module은 이 skill output을 설치하지 않는다. 모든 host의 Codex/Claude/Pi 전환과 실제 discovery 검증이 끝나기 전에는 이 fallback과 golden hash를 제거하거나 변경하지 않는다.
 
 공통 [data-analysis](skills/data-analysis/SKILL.md)는 지표 정의, 집계 단위, 조인과 코호트 검증을 다루고, [data-visualization](skills/data-visualization/SKILL.md)은 데이터에서 차트를 만들고 렌더링 결과를 확인하는 절차를 다룬다. [writing-for-agents](skills/writing-for-agents/SKILL.md)는 skill 호출 조건과 로드 여부, 실행 결과를 구분해 검증한다. [korean](skills/korean/SKILL.md)은 직전 답변을 의미와 불확실성을 유지하면서 자연스러운 한국어로 정리한다. 선별 근거와 원본 버전은 [shared skill catalog](skills/README.md)에 기록한다.
+
+[parallel-research-merge](skills/parallel-research-merge/SKILL.md)는 Codex, Claude, Pi에 같은 원본으로 설치한다. 독립적인 조사 결과가 판단이나 검증을 바꿀 수 있고 메인이 동시에 진행할 일이 있을 때 사용한다. Worker 하나부터 필요한 범위만 위임하고, 채택하거나 기각한 근거가 결과에 미친 영향을 기록한다. 분석 요청은 구현이나 커밋 없이 끝낸다. 호출 조건과 효과는 [평가 사례와 비교 절차](skills/parallel-research-merge/references/evaluation.md)로 별도 검증한다.
 
 ## 책임 경계
 

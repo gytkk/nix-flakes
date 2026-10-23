@@ -24,8 +24,8 @@ def test_materialize_is_deterministic_and_marks_documents_and_skills() -> None:
     ("runtime", "additional_skills"),
     [
         ("claude", {"openai-decisions"}),
-        ("codex", {"devils-advocate", "parallel-research-merge", "openai-decisions"}),
-        ("pi", {"devils-advocate", "parallel-research-merge", "pi-agent"}),
+        ("codex", {"devils-advocate", "openai-decisions"}),
+        ("pi", {"devils-advocate", "pi-agent"}),
     ],
 )
 def test_every_runtime_materializes_its_selected_shared_skills(
@@ -45,6 +45,7 @@ def test_every_runtime_materializes_its_selected_shared_skills(
         "diagnosing-bugs",
         "domain-modeling",
         "grilling",
+        "parallel-research-merge",
         "prototype",
         "repeated-work-analyzer",
         "research",

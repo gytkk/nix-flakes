@@ -1,99 +1,40 @@
-# Contracts for `parallel-research-merge`
+# Worker contract and integration
 
-## Research Scope Selection Rules
+## Before dispatch
 
-Use 2 scopes by default. Use 3 only when the task clearly has three disjoint concerns. Run them as parallel workers only when the current session exposes a worker or subagent tool; otherwise, execute the scopes sequentially in the main thread.
+Split by evidence that can be investigated independently, such as runtime installation state versus session usage, or backend behavior versus a separately specified client contract. Keep dependent questions sequential. The main agent retains a useful task and final decision ownership; a second worker is optional.
 
-Good splits:
-- codebase survey vs implementation option comparison
-- backend behavior trace vs frontend impact trace
-- root-cause investigation vs test and verification design
-- current config audit vs migration plan
-
-Bad splits:
-- three workers all exploring the full repo
-- workers editing the same files without explicit ownership
-- delegating the critical path while the main agent waits passively
-
-## Worker or Sequential-Pass Template
-
-Use this structure and fill every field. For a sequential pass, treat it as a checklist and record the same deliverable before moving to the next scope.
+Give each worker this compact contract, adapting the form to the task:
 
 ```text
-You are a research worker supporting a main coding agent.
-
-Objective:
-- <one narrow question to answer>
-
-Scope:
-- Read focus: <directories/files>
-- Allowed edits: <usually none, or an explicit bounded set>
-- Forbidden paths: <paths owned by main or other workers>
-
-Deliverable:
-Return exactly these sections:
-Summary:
-Evidence:
-- path:line -> finding
-Recommendation:
-Changed files:
-Verification:
-Risks / uncertainty:
-
-Rules:
-- Do not broaden scope beyond the objective.
-- Do not revert or rewrite unrelated work.
-- If evidence is weak or conflicting, say so plainly.
-- Prefer concrete file evidence over speculation.
+Question and decision served: <what to establish and what its answer enables>
+Evidence scope: <files, subsystem, dataset, or primary sources>
+Allowed edits: <none by default, otherwise exclusive owned paths>
+Constraints: <relevant user requirements and other workers' boundaries>
+Investigation bound: <a finite source set, sample, check, or time limit>
+Stop when: <question answered, bound reached, or blocking evidence identified>
+Return: <a short conclusion, decisive path:line/source evidence, checks and uncertainty>
+Result budget: <length appropriate to the question; link large artifacts only if requested>
 ```
 
-## When Workers May Edit
+Choose a concrete bound that can be checked. For example, inspect the two named runtime adapters and installed skill manifests, or sample the last 14 complete days from the named repository's root sessions. On a blocker, return the missing evidence and the smallest useful next step. Expand the scope only after the main agent decides the unanswered question still matters.
 
-Default to read-only investigation first.
+Workers report what they verified and separate evidence from inference. Include changed files only when edits were allowed. Workers do not delegate further or commit unless the main agent explicitly assigns that responsibility.
 
-Allow worker edits only when all of these are true:
-- the owned files are disjoint from other workers
-- the expected change is mechanically local
-- the main agent still plans to re-read and integrate the result before final verification
+## Editing and interruption
 
-When allowing edits, add these lines to the worker prompt:
+Permit worker edits only for a bounded change with exclusive file ownership and checks the main agent can review. Otherwise request findings and let the main agent implement. Reassign shared files sequentially when dependencies emerge.
 
-```text
-Allowed edits are limited to: <owned paths>
-Do not touch any other file.
-Do not commit.
-```
+Cancel or redirect work that duplicates verified findings, depends on unavailable upstream results, or no longer affects the decision. Reconcile any partial edits and worker status before finishing; a timeout is an unresolved result, not evidence that nothing was found.
 
-## Main-Agent Merge Checklist
+## Integrating evidence
 
-Before implementing:
-- verify every important claim against the cited file paths
-- identify conflicts between workers explicitly
-- choose one path and record why the alternatives were rejected
-- collapse overlapping recommendations into one small design decision
+Verify claims that affect the conclusion, scope, or implementation. When workers disagree, compare the referenced versions, conditions, and checks; run the smallest discriminating check before choosing an answer. If the conflict cannot be resolved, preserve the uncertainty in the result.
 
-During implementation:
-- keep the final diff authored or re-reviewed by the main agent
-- prefer reimplementation over blind copy-paste from workers
-- preserve repo rules, file ownership boundaries, and existing patterns
+Keep a short contribution note, using prose or a table as appropriate:
 
-Before finishing:
-- inspect the final diff end to end
-- run the relevant checks for the chosen implementation path
-- mention unresolved risk if a check could not run
+| Evidence | Disposition and reason | Effect on the task |
+| --- | --- | --- |
+| Source or check supporting a worker finding | Accepted, rejected, or unresolved, with the verification basis | Decision changed, check added, risk retained, or no additional value |
 
-## Escalation Rules
-
-Stop using this pattern and return to single-agent work when:
-- the task turns out to be sequential after all
-- worker findings converge on the same answer with no extra value from more delegation
-- conflicting edits or hidden dependencies make ownership unclear
-- the remaining work is just local implementation and verification
-
-## Example Split
-
-Task: add a new coding-agent behavior rule without bloating always-on guidance.
-
-- Scope A: inspect the current skill layout and repo-managed deployment path
-- Scope B: inspect existing agent instruction files and identify what should stay global versus move into a skill
-- Main agent: choose final skill structure, author files, wire discovery guidance, validate, and commit
+The note belongs in the existing working summary or final response, not a new repository report. Merge overlapping findings once. Inspect the final diff for authorized implementation, complete relevant checks, and account for every worker as completed, blocked, or cancelled.

@@ -1,5 +1,5 @@
 {
-  claude = "sha256-selWCSv0KX7PnN6QRe9hTdpnqG8GLHUuvy+BsATI080=";
-  codex = "sha256-XsOWrnrjxeVvr1V4qyymas0r1GlCRQWpGySmctbs07E=";
-  pi = "sha256-i2dXoGuJ2t+fA9EtmZJ5YQwpnIB5pbklC8DAytEcwpY=";
+  codex = "sha256-FlmXpbwlyzCwC6FrsMU1rh5rFFZl1N235dRZhCih2CU=";
+  claude = "sha256-HyMnsy1yCVYDu1XE7gqlBeXVj2y0VWGlKfnTXgE85UI=";
+  pi = "sha256-tpSHhEI6fBp3QKV7DWoXDSkrCCXw9/9Xa+Gd1cK65uk=";
 }
