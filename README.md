@@ -81,8 +81,6 @@ New Darwin environments leave [Claude session mining](modules/claude-session-min
 
 [Terraform version management](modules/terraform/README.md) uses tenv on Devsisters environments to select Terraform from project version files or `required_version` constraints and install missing versions on demand.
 
-The [architecture review and improvement plan](docs/architecture-review/README.md) records the 2026-09-18 assessment of configuration ownership, extension paths, and verification coverage, with proposed fixes and completion criteria for each issue.
-
 ## Zsh config
 
 On macOS, login shells prioritize `~/.nix-profile/bin` after the system PATH setup, so commands such as `python3` use their Nix versions. See the [Zsh module README](modules/zsh/README.md#nix-executable-priority-on-macos) for application steps.
@@ -135,6 +133,8 @@ The [LSP module](modules/lsp/default.nix) installs Pyright alongside ty. Claude 
 ### Codex CLI Config
 
 See the [Codex module README](modules/codex/README.md) for official bundle packaging, model delegation, reasoning effort, opening pages in the system default browser, configuration ownership, and activation behavior. The [Herdr integration](modules/codex/README.md#herdr-subagent-sidebar) runs Codex without the shared daemon inside Herdr so each pane retains its own session and subagent metadata.
+
+The Codex and Claude Herdr watchers share the [JSONL reader](modules/herdr/README.md#shared-jsonl-reader), which handles incremental reads, file replacement, and malformed records.
 
 Codex and Claude share the `openai-decisions` skill through agent-core for `gpt-6-luna` Decisions API judgments. The [OpenAI API module](modules/openai-api/README.md) supplies `with-openai` to run API clients with the existing agenix-managed `OPENAI_API_KEY`.
 

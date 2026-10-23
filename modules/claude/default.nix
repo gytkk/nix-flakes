@@ -9,6 +9,13 @@
 let
   cfg = config.modules.claude;
   agentCoreOutput = import ../../agent-core/nix/render.nix { inherit pkgs; } { runtime = "claude"; };
+  herdrSubagentsSource = lib.fileset.toSource {
+    root = ../..;
+    fileset = lib.fileset.unions [
+      ./files/herdr-subagents
+      ../herdr/files/jsonl-tail.ts
+    ];
+  };
   claude = "${pkgs.claude-code}/bin/claude";
   timeout = "${pkgs.coreutils}/bin/timeout --foreground";
   mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${flakeDirectory}/modules/claude/${path}";
@@ -348,7 +355,7 @@ in
         executable = true;
       };
       ".local/bin/claude-herdr-subagents".source = pkgs.writeShellScript "claude-herdr-subagents" ''
-        exec ${pkgs.bun}/bin/bun ${./files/herdr-subagents}/index.ts "$@"
+        exec ${pkgs.bun}/bin/bun ${herdrSubagentsSource}/modules/claude/files/herdr-subagents/index.ts "$@"
       '';
       # settings.json names this as otelHeadersHelper, so the token never
       # appears in the tracked settings file.

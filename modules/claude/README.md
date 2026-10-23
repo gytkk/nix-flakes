@@ -41,6 +41,8 @@ Inside Herdr, Claude's Agents entry displays native subagents with a status icon
 
 [settings.json](files/settings.json) connects `SessionStart`, `SubagentStart`, `SubagentStop`, `PostToolUse` for `Agent`, and `SessionEnd` to `~/.local/bin/claude-herdr-subagents`. The [helper](files/herdr-subagents/index.ts) runs one watcher per Herdr pane and reads the current session's parent and child JSONL records. Background children continue to be watched after the parent finishes responding. Agent results supply task descriptions; until a result is available, the name is the agent type and a short ID. Resuming the same child updates its existing row.
 
+JSONL reads use the [shared reader](../herdr/README.md#shared-jsonl-reader) also used by the Codex watcher. Nix packages the watcher and shared file together; transcript discovery and state projection remain in the Claude module.
+
 Running uses a green `●`, confirmed completion a blue `✓`, interruption a yellow `■`, and failure a red `×`. `SubagentStop` alone shows `○` while the watcher waits for a parent result or Claude's task notification, because another stop hook can request more work. These states describe a run, not permanent termination of the agent. Completed, interrupted, and failed rows remain visible for ten seconds. Rows waiting for confirmation are also hidden ten seconds after `SubagentStop`; this does not mark them completed, and new activity makes them visible again. Hidden rows do not count toward the display limit. Missing or unreadable transcripts show `○` and retain the last message while the row is visible. If the watcher stops reporting, metadata expires within 15 seconds. The parent model remains independently reported by the status line.
 
 For Agent Teams, the watcher reads each stopped child's native `.meta.json` and the team's `config.json` under `CLAUDE_CONFIG_DIR` (default: `~/.claude`). Removal from a team led by the current session confirms interruption, so the row disappears ten seconds after confirmation. Registered teammates follow the same ten-second hiding rule after `SubagentStop`. Missing, unreadable, or invalid team files do not confirm termination. Worktrees remain unchanged.
@@ -50,7 +52,7 @@ The parser targets the pinned Claude Code 2.1.284 transcript format. Stop-only e
 Apply Home Manager for the current environment, run `herdr server reload-config`, and start a new Claude session inside Herdr. Verification uses isolated fixture transcripts and fake Herdr commands:
 
 ```bash
-bun test modules/claude/tests
+bun test modules/herdr/tests modules/claude/tests
 ```
 
 ## Skills and plugins

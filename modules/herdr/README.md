@@ -50,6 +50,16 @@ Claude uses the same two-line layout and status colors. Its `SubagentStop` hook 
 
 Apply Home Manager, run `herdr server reload-config`, and start a new Claude, Pi, or Codex session inside Herdr to load the integration.
 
+## Shared JSONL reader
+
+The Codex and Claude watchers use [files/jsonl-tail.ts](files/jsonl-tail.ts) for incremental JSONL reads. The reader buffers incomplete UTF-8 records, resets offsets after file replacement or truncation, and diagnoses malformed or oversized records without logging their contents. Each runtime module packages its watcher and this shared file with their repository-relative paths intact; the reader does not require the Herdr module to be enabled.
+
+Run the shared reader and runtime regression tests with:
+
+```bash
+bun test modules/herdr/tests modules/codex/tests modules/claude/tests
+```
+
 ## Apply changes
 
 Herdr, Annotate, and Auto Title updates are proposed together through the [app package review channel](../../packages/README.md#updates-and-ci). Herdr's local patches are checked before its source pin changes; Annotate uses unpatched upstream sources. Candidate PRs run Linux package CI before manual merging. An open candidate is preserved for fixes; other app updates proceed independently. After merging a candidate, pull its changes before applying Home Manager.

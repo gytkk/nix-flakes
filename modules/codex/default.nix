@@ -10,6 +10,13 @@
 let
   cfg = config.modules.codex;
   agentCoreOutput = import ../../agent-core/nix/render.nix { inherit pkgs; } { runtime = "codex"; };
+  herdrSubagentsSource = lib.fileset.toSource {
+    root = ../..;
+    fileset = lib.fileset.unions [
+      ./files/herdr-subagents
+      ../herdr/files/jsonl-tail.ts
+    ];
+  };
   codex = "${pkgs.codex}/bin/codex";
   codexLauncher = pkgs.writeShellScriptBin "codex" (
     builtins.replaceStrings [ "@codex@" ] [ (lib.escapeShellArg codex) ] (
@@ -71,7 +78,7 @@ in
     home.file.".codex/hooks.json".text = codexHooksJson;
     home.file.".local/bin/codex-herdr-subagents".source =
       pkgs.writeShellScript "codex-herdr-subagents" ''
-        exec ${pkgs.bun}/bin/bun ${./files/herdr-subagents}/index.ts "$@"
+        exec ${pkgs.bun}/bin/bun ${herdrSubagentsSource}/modules/codex/files/herdr-subagents/index.ts "$@"
       '';
 
     home.activation.codexUserConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''

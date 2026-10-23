@@ -38,6 +38,8 @@ Codex의 subagent 기능으로 생성한 자식은 부모가 답변을 마친 �
 
 [files/hooks.json](files/hooks.json)의 `SessionStart`, `SubagentStart`, `SubagentStop`, `SessionEnd` 훅이 Home Manager로 설치한 `~/.local/bin/codex-herdr-subagents`를 호출한다. 훅은 Herdr pane마다 감시 프로세스 하나를 실행하고, 감시 프로세스는 부모와 자식의 로컬 JSONL 기록을 읽어 `codex:herdr-subagents` metadata를 갱신한다. 부모 세션 종료나 Codex 프로세스 종료 시 표시를 지운다. Herdr 환경 변수가 없는 터미널에서는 실행하지 않는다.
 
+JSONL 파일 읽기는 Claude watcher와 같은 [공통 reader](../herdr/README.md#shared-jsonl-reader)를 사용한다. Nix는 watcher와 공통 파일을 함께 패키징하고, 기록 탐색과 상태 해석은 Codex 모듈에서 처리한다.
+
 [Codex launcher](files/codex-launcher.sh)는 `HERDR_ENV=1`일 때 `--no-daemon`을 추가한다. Codex 0.162.1의 공유 daemon은 처음 실행된 pane의 환경 변수를 다른 세션에도 사용하므로, pane별 훅은 각 Codex 프로세스에서 실행해야 한다. Launcher는 Home Manager profile에서 원본 `codex`보다 높은 우선순위로 설치되며, Herdr 밖에서는 인자를 그대로 전달한다. 공유 daemon에서 실행된 훅은 pane 소유자를 변경하지 않고 `--no-daemon`으로 재시작하라는 오류를 기록한다. 패키지의 실행 파일을 절대 경로로 호출하여 launcher를 우회하는 경우에도 Herdr 안에서는 `--no-daemon`이 필요하다.
 
 `SessionEnd` 훅의 timeout은 Codex가 허용하는 최대값인 3초로 설정한다. 3초를 초과하면 Codex가 시작 시 경고를 표시하고 실제 제한을 3초로 낮춘다.

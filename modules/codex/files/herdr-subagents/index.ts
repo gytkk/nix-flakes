@@ -6,7 +6,8 @@ import { homedir, tmpdir } from "node:os";
 import { basename, dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
-import { JsonlTail, findRollout } from "./io";
+import { JsonlTail } from "../../../herdr/files/jsonl-tail";
+import { findRollout } from "./io";
 import { consumeChild, discoveredChild, displayText, object, sidebarTokens, type ChildState } from "./projection";
 
 const exec = promisify(execFile);
