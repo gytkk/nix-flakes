@@ -144,9 +144,9 @@ in
             }
 
             # Remove the worktree holding a branch, then switch to it here.
-            gws() {
+            gsww() {
               if [[ $# -ne 1 ]]; then
-                echo "Usage: gws <branch>" >&2
+                echo "Usage: gsww <branch>" >&2
                 return 2
               fi
 
@@ -155,7 +155,7 @@ in
               local current_path worktree_path candidate record
 
               current_path="$(git rev-parse --show-toplevel 2>/dev/null)" || {
-                echo "gws: not inside a Git worktree" >&2
+                echo "gsww: not inside a Git worktree" >&2
                 return 1
               }
 

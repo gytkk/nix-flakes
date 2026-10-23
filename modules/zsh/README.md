@@ -32,6 +32,8 @@ This module configures Zsh, a Starship prompt, shell aliases, and tool integrati
 - **Home Manager**: `hm`, `hmb`, and `hms` run Home Manager, build, and switch
 - **Git**: Common aliases such as `gst`, `gsw`, and `gd`
 
+`gsww <branch>` removes another worktree holding the branch, then switches the current worktree to that branch. If removal fails, it stops without switching.
+
 The [Terraform module](../terraform/README.md) owns the optional `tf` alias and its `runEnv` variables.
 
 ### Tool integration
