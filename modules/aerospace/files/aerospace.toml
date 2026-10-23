@@ -1,5 +1,6 @@
 # Omitted scalar values fall back to AeroSpace's built-in defaults.
 config-version = 2
+start-at-login = true
 
 # Keep the mouse stationary when monitor/workspace focus changes.
 on-focused-monitor-changed = []
@@ -48,6 +49,30 @@ run = 'layout floating'
 [[on-window-detected]]
 if.app-name-regex-substring = 'KakaoTalk|카카오톡'
 run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'com.brave.Browser'
+run = 'move-node-to-workspace 1'
+
+[[on-window-detected]]
+if.app-id = 'com.mitchellh.ghostty'
+run = 'move-node-to-workspace 2'
+
+[[on-window-detected]]
+if.app-id = 'com.tinyspeck.slackmacgap'
+run = 'move-node-to-workspace 3'
+
+[[on-window-detected]]
+if.app-id = 'notion.id'
+run = 'move-node-to-workspace 4'
+
+[[on-window-detected]]
+if.app-id = 'com.brave.Browser.beta'
+run = 'move-node-to-workspace A'
+
+[[on-window-detected]]
+if.app-id = 'com.hnc.Discord'
+run = 'move-node-to-workspace S'
 
 [workspace-to-monitor-force-assignment]
 1 = 2

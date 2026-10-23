@@ -344,6 +344,8 @@ Ghostty opens new windows maximized to the current monitor's available area. On 
 - `home-manager switch` installs `~/.config/aerospace/aerospace.toml` as an out-of-store symlink to `modules/aerospace/files/aerospace.toml`, so the repo file stays mutable.
 - The activation step treats `~/.aerospace.toml` as a legacy path: if it exists, Home Manager backs it up to `~/.aerospace.toml.pre-xdg-backup` and removes the original to avoid path ambiguity.
 - The checked-in config keeps `config-version = 2` plus AeroSpace's default `main` and `service` keybindings.
+- AeroSpace starts automatically at macOS login. Newly detected windows go to their default workspaces: Brave Browser to `1`, Ghostty to `2`, Slack to `3`, Notion to `4`, Brave Browser Beta to `A`, and Discord to `S`.
+- After editing the config, reload it with `Alt+Shift+;`, then `Esc`. Workspace rules apply when windows are detected; reloading does not move existing windows.
 - Omitted scalar options still fall back to AeroSpace's built-in defaults, but keyboard bindings do not inherit from the built-in config and must be declared explicitly in the repo file.
 
 ## Standalone Home Manager
