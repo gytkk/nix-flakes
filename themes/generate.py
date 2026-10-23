@@ -967,7 +967,7 @@ def lua_literal(value: Any, indent: int = 0) -> str:
     raise TypeError(f"unsupported Lua literal value: {value!r}")
 
 
-def write_yaml(path: Path, data: dict[str, Any]) -> None:
+def render_yaml(data: dict[str, Any]) -> str:
     def yaml_scalar(value: Any) -> str:
         if isinstance(value, bool):
             return "true" if value else "false"
@@ -999,8 +999,7 @@ def write_yaml(path: Path, data: dict[str, Any]) -> None:
             return lines
         return [f"{prefix}{yaml_scalar(value)}"]
 
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("\n".join(yaml_lines(data)) + "\n")
+    return "\n".join(yaml_lines(data)) + "\n"
 
 
 def starship_theme_toml(ctx: dict[str, Any], root: Path) -> str:
@@ -1576,9 +1575,8 @@ def zellij_theme_kdl(ctx: dict[str, Any], root: Path) -> str:
     return "\n".join(lines) + "\n"
 
 
-def write_json(path: Path, data: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
+def render_json(data: dict[str, Any]) -> str:
+    return json.dumps(data, indent=2, ensure_ascii=False) + "\n"
 
 
 def write_text(path: Path, data: str) -> None:
@@ -1586,7 +1584,7 @@ def write_text(path: Path, data: str) -> None:
     path.write_text(data)
 
 
-def generate_theme(theme_path: Path, template: dict[str, Any], root: Path) -> list[Path]:
+def generate_theme(theme_path: Path, template: dict[str, Any], root: Path) -> dict[Path, str]:
     theme = load_and_validate_theme(theme_path, template)
     ctx = theme_context(theme)
     theme_id = ctx["meta"]["id"]
@@ -1601,16 +1599,17 @@ def generate_theme(theme_path: Path, template: dict[str, Any], root: Path) -> li
     pi_path = root / "exports" / "pi" / f"{theme_id}.json"
     herdr_path = root / "exports" / "herdr" / f"{theme_id}.toml"
 
-    write_text(ghostty_path, ghostty_theme_conf(ctx, root))
-    write_yaml(k9s_path, k9s_theme_doc(ctx, root))
-    write_json(zed_path, zed_theme_doc(ctx, root))
-    write_text(nvim_path, nvim_lua(ctx, root))
-    write_text(starship_path, starship_theme_toml(ctx, root))
-    write_text(zellij_path, zellij_theme_kdl(ctx, root))
-    write_text(tmux_path, tmux_theme_conf(ctx, root))
-    write_json(pi_path, pi_theme_doc(ctx, root))
-    write_text(herdr_path, herdr_theme_toml(ctx, root))
-    return [ghostty_path, k9s_path, zed_path, nvim_path, starship_path, zellij_path, tmux_path, pi_path, herdr_path]
+    return {
+        ghostty_path: ghostty_theme_conf(ctx, root),
+        k9s_path: render_yaml(k9s_theme_doc(ctx, root)),
+        zed_path: render_json(zed_theme_doc(ctx, root)),
+        nvim_path: nvim_lua(ctx, root),
+        starship_path: starship_theme_toml(ctx, root),
+        zellij_path: zellij_theme_kdl(ctx, root),
+        tmux_path: tmux_theme_conf(ctx, root),
+        pi_path: render_json(pi_theme_doc(ctx, root)),
+        herdr_path: herdr_theme_toml(ctx, root),
+    }
 
 
 def discover_default_targets(root: Path) -> list[Path]:
@@ -1637,15 +1636,22 @@ def main() -> int:
         print("No theme files found to generate.", file=sys.stderr)
         return 2
 
-    generated: list[Path] = []
+    generated: list[tuple[Path, str]] = []
     for target in targets:
         try:
-            generated.extend(generate_theme(target, template, root))
+            generated.extend(generate_theme(target, template, root).items())
         except Exception as e:  # noqa: BLE001
             print(f"error: failed to generate {target}: {e}", file=sys.stderr)
             return 1
 
-    for path in generated:
+    for path, content in generated:
+        try:
+            write_text(path, content)
+        except OSError as e:
+            print(f"error: failed to write {path}: {e}", file=sys.stderr)
+            return 1
+
+    for path, _ in generated:
         print(path.relative_to(root.parent))
     return 0
 

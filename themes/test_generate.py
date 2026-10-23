@@ -1,0 +1,118 @@
+from __future__ import annotations
+
+import json
+import shutil
+import subprocess
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parent
+
+
+class GenerateTest(unittest.TestCase):
+    def setUp(self) -> None:
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.root = Path(directory.name).resolve() / "themes"
+        shutil.copytree(ROOT, self.root, ignore=shutil.ignore_patterns("__pycache__"))
+
+    def run_generator(self, *themes: str) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            [
+                sys.executable,
+                str(self.root / "generate.py"),
+                *(str(self.root / "core" / f"{theme}.yaml") for theme in themes),
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+    def export_snapshot(self) -> dict[Path, bytes]:
+        return {
+            path.relative_to(self.root / "exports"): path.read_bytes()
+            for path in (self.root / "exports").rglob("*")
+            if path.is_file()
+        }
+
+    def seed_old_exports(self) -> dict[Path, bytes]:
+        for path in (self.root / "exports").rglob("*"):
+            if path.is_file():
+                path.write_text(f"old export: {path.name}\n")
+        (self.root / "exports" / "unrelated.txt").write_text("preserve this file\n")
+        return self.export_snapshot()
+
+    def break_pi_template(self) -> None:
+        path = self.root / "templates" / "pi" / "official-template.json"
+        template = json.loads(path.read_text())
+        template["document"]["colors"]["text"] = "$missing_test_slot"
+        path.write_text(json.dumps(template))
+
+    def test_late_app_failure_preserves_existing_exports(self) -> None:
+        before = self.seed_old_exports()
+        self.break_pi_template()
+
+        result = self.run_generator("one-half-light")
+
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("missing template slot: missing_test_slot", result.stderr)
+        self.assertEqual(result.stdout, "")
+        self.assertEqual(self.export_snapshot(), before)
+
+    def test_late_app_failure_does_not_create_exports(self) -> None:
+        shutil.rmtree(self.root / "exports")
+        self.break_pi_template()
+
+        result = self.run_generator("one-half-light")
+
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("missing template slot: missing_test_slot", result.stderr)
+        self.assertFalse((self.root / "exports").exists())
+
+    def test_later_theme_validation_failure_preserves_all_exports(self) -> None:
+        before = self.seed_old_exports()
+        path = self.root / "core" / "ayu-mirage.yaml"
+        path.write_text(path.read_text().replace("variant: dark", "variant: invalid"))
+
+        result = self.run_generator("one-half-light", "ayu-mirage")
+
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn(f"failed to generate {path}", result.stderr)
+        self.assertIn("variant", result.stderr)
+        self.assertEqual(result.stdout, "")
+        self.assertEqual(self.export_snapshot(), before)
+
+    def test_later_theme_render_failure_preserves_all_exports(self) -> None:
+        before = self.seed_old_exports()
+        path = self.root / "overrides" / "zed" / "ayu-mirage.yaml"
+        path.write_text("invalid override without mapping\n")
+
+        result = self.run_generator("one-half-light", "ayu-mirage")
+
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("failed to generate", result.stderr)
+        self.assertIn("ayu-mirage.yaml", result.stderr)
+        self.assertIn("expected mapping entry", result.stderr)
+        self.assertEqual(result.stdout, "")
+        self.assertEqual(self.export_snapshot(), before)
+
+    def test_default_generation_preserves_export_bytes_and_prints_paths(self) -> None:
+        expected = self.export_snapshot()
+        shutil.rmtree(self.root / "exports")
+
+        result = self.run_generator()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stderr, "")
+        self.assertEqual(self.export_snapshot(), expected)
+        self.assertCountEqual(
+            result.stdout.splitlines(),
+            [str(Path("themes/exports") / path) for path in expected],
+        )
+
+
+if __name__ == "__main__":
+    unittest.main()

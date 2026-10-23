@@ -488,6 +488,14 @@ uv run --no-project themes/generate.py
 uv run --no-project themes/generate.py themes/core/one-half-light.yaml
 ```
 
+The generator renders, validates, and serializes every app export for all requested themes before writing any files. A generation or validation error in any app or theme leaves existing exports unchanged and creates no export files. Filesystem errors during the subsequent write phase can still leave partially updated exports.
+
+Generator regression tests:
+
+```bash
+uv run --no-project -m unittest discover -s themes -p 'test_*.py'
+```
+
 Template consistency helper:
 
 ```bash
