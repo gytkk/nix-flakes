@@ -684,4 +684,6 @@ Use overrides for app-specific exceptions like:
 
 `base/default.nix` defines `modules.commonTheme`, which theme-aware modules use to select an export. App installation behavior belongs to each module. Theme loading, validation, color derivation, and export generation remain in the Python pipeline.
 
+The default `one-half-light` theme uses a cool white background (`#fafbfc`) and cool gray panels and borders (`#f3f5f7`, `#edf0f3`, `#e2e6ea`) to avoid a yellow cast. Ghostty inherits the canonical background. Syntax, diagnostic, and search accents retain their semantic colors.
+
 The current generator emits Ghostty, K9s, Neovim, Pi, Starship, tmux, Zed, and Zellij themes. VSCode's app-local theme is outside this pipeline. Edit canonical definitions, templates, or supported YAML overrides, then regenerate the exports instead of editing generated files directly.

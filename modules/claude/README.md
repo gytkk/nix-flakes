@@ -17,7 +17,7 @@ Each Home Manager activation runs the official plannotator installer with `--min
 ### settings.json
 
 - **Model**: Inherits the Claude Code default (no `model` pin)
-- **Theme**: `dark-ansi` uses the terminal's ANSI palette on a dark background
+- **Theme**: `light-ansi` uses the terminal's ANSI palette on a light background
 - **Agent Teams**: Enabled (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`)
 - **MCP**: Enables all project MCP servers and Context7; Notion uses the `ntn` CLI
 - **Permissions**: Pre-approved tools (Bash, Read, Edit, Write, WebFetch, WebSearch, Context7)

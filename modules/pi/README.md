@@ -18,7 +18,7 @@ See [`docs/pi-performance-audit.md`](../../docs/pi-performance-audit.md) for the
 | `agent-core/rules/` and `agent-core/adapters/pi.md` | `~/.pi/agent/AGENTS.md` | Generated shared and Pi-specific instructions |
 | `agent-core/rules/OPERATING.md` | `~/.pi/agent/APPEND_SYSTEM.md` | Operating invariants added to Pi's system prompt |
 | `files/extensions/` | `~/.pi/agent/extensions/` | Local Pi extensions |
-| `themes/exports/pi/vira-graphene.json` | `~/.pi/agent/themes/vira-graphene.json` | Generated Vira Graphene theme |
+| `themes/exports/pi/one-half-light.json` | `~/.pi/agent/themes/one-half-light.json` | Generated One Half Light theme |
 | `files/themes/claude-like.json` | `~/.pi/agent/themes/claude-like.json` | Alternate dark theme |
 | Agent core skill sources | `~/.agents/skills/` | Codex/Pi shared pool, installed or updated by shared activation |
 
@@ -36,7 +36,7 @@ The module also installs:
 `files/settings.json` currently selects:
 
 - `openai/gpt-6.1-sol` with `high` thinking
-- the generated `vira-graphene` theme
+- the generated `one-half-light` theme
 - a startup header without the loaded-resource listing
 - one-cell editor padding and default output padding
 - the hardware terminal cursor for IME positioning
@@ -190,7 +190,7 @@ Cloudflare operations use the `cf` CLI installed by the common Home Manager prof
 
 ## Theme
 
-Pi selects the generated `vira-graphene` theme from `themes/exports/pi/vira-graphene.json`. The module also installs `claude-like` as an alternative. The built-in `system` theme remains available in `/settings` to derive colors from the terminal's background and ANSI palette.
+Pi selects the generated `one-half-light` theme from `themes/exports/pi/one-half-light.json`. The module also installs `claude-like` as an alternative. The built-in `system` theme remains available in `/settings` to derive colors from the terminal's background and ANSI palette.
 
 The custom footer uses standard ANSI colors, so its accents follow the active terminal palette.
 

@@ -1,15 +1,15 @@
 k9s:
   body:
     fgColor: "#383a42"
-    bgColor: "#fdfdfd"
+    bgColor: "#fafbfc"
     logoColor: "#0184bc"
   prompt:
     fgColor: "#383a42"
-    bgColor: "#fdfdfd"
+    bgColor: "#fafbfc"
     suggestColor: "#0184bc"
   help:
     fgColor: "#383a42"
-    bgColor: "#fdfdfd"
+    bgColor: "#fafbfc"
     sectionColor: "#50a14f"
     keyColor: "#0184bc"
     numKeyColor: "#e45649"
@@ -18,7 +18,7 @@ k9s:
     sectionColor: "#383a42"
   dialog:
     fgColor: "#383a42"
-    bgColor: "#eeeeee"
+    bgColor: "#ebeef1"
     buttonFgColor: "#ffffff"
     buttonBgColor: "#0184bc"
     buttonFocusFgColor: "#ffffff"
@@ -27,7 +27,7 @@ k9s:
     fieldFgColor: "#383a42"
   frame:
     border:
-      fgColor: "#e5e5e5"
+      fgColor: "#e2e6ea"
       focusColor: "#0184bc"
     menu:
       fgColor: "#383a42"
@@ -35,7 +35,7 @@ k9s:
       numKeyColor: "#d65d0e"
     crumbs:
       fgColor: "#383a42"
-      bgColor: "#f0f0f0"
+      bgColor: "#edf0f3"
       activeColor: "#bfceff"
     status:
       newColor: "#0184bc"
@@ -48,31 +48,31 @@ k9s:
       completedColor: "#9d9d9f"
     title:
       fgColor: "#383a42"
-      bgColor: "#f0f0f0"
+      bgColor: "#edf0f3"
       highlightColor: "#c18401"
       counterColor: "#0184bc"
       filterColor: "#d65d0e"
   views:
     table:
       fgColor: "#383a42"
-      bgColor: "#fdfdfd"
+      bgColor: "#fafbfc"
       cursorFgColor: "#383a42"
       cursorBgColor: "#bfceff"
       markColor: "#c18401"
       header:
         fgColor: "#383a42"
-        bgColor: "#fdfdfd"
+        bgColor: "#fafbfc"
         sorterColor: "#0184bc"
     xray:
       fgColor: "#383a42"
-      bgColor: "#fdfdfd"
+      bgColor: "#fafbfc"
       cursorColor: "#bfceff"
       cursorTextColor: "#383a42"
       graphicColor: "#0184bc"
     charts:
-      bgColor: "#fdfdfd"
-      chartBgColor: "#fdfdfd"
-      dialBgColor: "#fdfdfd"
+      bgColor: "#fafbfc"
+      chartBgColor: "#fafbfc"
+      dialBgColor: "#fafbfc"
       defaultDialColors:
         - "#50a14f"
         - "#e45649"
@@ -92,7 +92,7 @@ k9s:
       valueColor: "#383a42"
     logs:
       fgColor: "#383a42"
-      bgColor: "#fdfdfd"
+      bgColor: "#fafbfc"
       indicator:
         fgColor: "#ffffff"
         bgColor: "#0184bc"

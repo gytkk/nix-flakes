@@ -6,7 +6,6 @@ meta:
   variant: light
 
 slots:
-  background: "#fafafa"
   cursor_color: "#a5b4e5"
   cursor_text: "#383a42"
   palette_6_entry: "6=#0997b3"

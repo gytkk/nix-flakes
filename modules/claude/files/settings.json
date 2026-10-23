@@ -170,7 +170,7 @@
   "autoMemoryEnabled": true,
   "autoDreamEnabled": true,
   "skipWorkflowUsageWarning": true,
-  "theme": "dark-ansi",
+  "theme": "light-ansi",
   "editorMode": "normal",
   "teammateMode": "auto",
   "skipAutoPermissionPrompt": true,

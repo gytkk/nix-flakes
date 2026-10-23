@@ -21,7 +21,7 @@ class PiGeneratorTest(unittest.TestCase):
         self.assertEqual("#0184bc", doc["colors"]["syntaxFunction"])
         self.assertEqual("#50a14f", doc["colors"]["syntaxString"])
         self.assertEqual("#e45649", doc["colors"]["toolDiffRemoved"])
-        self.assertEqual("#fdfdfd", doc["export"]["pageBg"])
+        self.assertEqual("#fafbfc", doc["export"]["pageBg"])
 
 
 if __name__ == "__main__":

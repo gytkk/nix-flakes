@@ -19,7 +19,7 @@ in
         navigate = true;
         side-by-side = true;
         line-numbers = true;
-        dark = true;
+        light = true;
       };
     };
 
