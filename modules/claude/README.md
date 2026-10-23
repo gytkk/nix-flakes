@@ -37,7 +37,7 @@ Global development guidelines are rendered from shared rules under `agent-core/r
 
 ## Herdr subagent sidebar
 
-Inside Herdr, Claude's Agents entry displays native subagents with a status icon, name, and actual model, followed by a dimmed excerpt of the latest assistant message. Before a message is available, the activity can show the tool name. Thinking blocks, tool arguments, and tool results are not displayed. Children share the parent's pane; this integration does not create terminal panes.
+Inside Herdr, Claude's Agents entry displays native subagents with a status icon, name, and actual model, followed by an excerpt of the latest assistant message in the generated Herdr theme's secondary text color. Before a message is available, the activity can show the tool name. Thinking blocks, tool arguments, and tool results are not displayed. Children share the parent's pane; this integration does not create terminal panes.
 
 [settings.json](files/settings.json) connects `SessionStart`, `SubagentStart`, `SubagentStop`, `PostToolUse` for `Agent`, and `SessionEnd` to `~/.local/bin/claude-herdr-subagents`. The [helper](files/herdr-subagents/index.ts) runs one watcher per Herdr pane and reads the current session's parent and child JSONL records. Background children continue to be watched after the parent finishes responding. Agent results supply task descriptions; until a result is available, the name is the agent type and a short ID. Resuming the same child updates its existing row.
 

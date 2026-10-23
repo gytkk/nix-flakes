@@ -26,6 +26,7 @@ GHOSTTY_SLOT_KEYS = {
     "selection_foreground",
     "cursor_color",
     "cursor_text",
+    "faint_opacity",
     *{f"palette_{idx}_entry" for idx in range(16)},
 }
 ROOT = Path(__file__).resolve().parent
@@ -181,6 +182,8 @@ def validate_nvim_override(v: Validator, path: Path, allowed_attrs: set[str]) ->
 def valid_ghostty_slot_value(key: str, value: Any) -> bool:
     if not isinstance(value, str) or not value:
         return False
+    if key == "faint_opacity":
+        return re.fullmatch(r"(?:0(?:\.\d+)?|1(?:\.0+)?)", value) is not None
     if key.startswith("palette_"):
         return bool(GHOSTTY_PALETTE_ENTRY_RE.match(value))
     return valid_color_value(value)
@@ -220,7 +223,7 @@ def validate_ghostty_override(v: Validator, path: Path) -> None:
                 v.error(path, f"slots.{key} is not a supported ghostty slot")
                 continue
             if not valid_ghostty_slot_value(key, value):
-                v.error(path, f"slots.{key} must be a ghostty color or indexed palette entry")
+                v.error(path, f"slots.{key} must be a color, indexed palette entry, or opacity from 0 to 1 for faint_opacity")
 
 
 def validate_zellij_override(v: Validator, path: Path, allowed_components: set[str], allowed_attrs: set[str]) -> None:

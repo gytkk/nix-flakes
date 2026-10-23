@@ -121,6 +121,7 @@ Ghostty override values may be:
 - indexed palette entries like `"0=#393552"`
 - palette refs like `"{palette.selection}"`
 - role refs like `"{roles.ui.cursor}"`
+- a quoted decimal from `"0"` to `"1"` for `faint_opacity`, such as `"0.85"`
 
 Neovim override values may be:
 

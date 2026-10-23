@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from validate import Validator, load_yaml
-from validate_overrides import validate_starship_override, validate_zed_override
+from validate_overrides import validate_ghostty_override, validate_starship_override, validate_zed_override
 
 ROOT = Path(__file__).resolve().parent
 
@@ -249,7 +249,7 @@ def check_ghostty(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
     if isinstance(contract, dict):
         require_keys(contract, ["token_prefix", "value_type"], f"{path_str}.config_schema", errors)
         expect(contract.get("token_prefix") == "$", f"{path_str}.config_schema.token_prefix must be '$'", errors)
-        expect(contract.get("value_type") == "hex-or-palette-entry", f"{path_str}.config_schema.value_type must be 'hex-or-palette-entry'", errors)
+        expect(contract.get("value_type") == "hex-or-palette-entry-or-opacity", f"{path_str}.config_schema.value_type must be 'hex-or-palette-entry-or-opacity'", errors)
     check_ghostty_sections(f"{path_str}.sections", doc.get("sections"), errors)
 
 
@@ -392,6 +392,45 @@ def check_k9s(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
         expect(contract.get("token_prefix") == "$", f"{path_str}.skin_schema.token_prefix must be '$'", errors)
         expect(isinstance(contract.get("value_types"), list) and len(contract["value_types"]) > 0, f"{path_str}.skin_schema.value_types must be a non-empty list", errors)
     check_document_template(path_str, doc.get("document"), errors)
+
+
+def check_herdr(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
+    check_common(path, doc, errors)
+    path_str = str(path)
+    contract = doc.get("config_schema", {})
+    expect(contract == {"format": "toml", "token_prefix": "$", "value_type": "hex-color"},
+           f"{path_str}.config_schema must describe TOML hex colors with '$' tokens", errors)
+    sections = doc.get("sections")
+    if not isinstance(sections, list) or len(sections) != 2:
+        errors.append(f"{path_str}.sections must contain theme and theme.custom tables")
+        return
+    check_section_names(path_str, sections, errors)
+    color_keys = {
+        "accent", "panel_bg", "sidebar_bg", "active_row_bg", "selection_bg",
+        "surface0", "surface1", "surface_dim", "overlay0", "overlay1", "text",
+        "subtext0", "mauve", "green", "yellow", "red", "blue", "teal", "peach",
+    }
+    for section, table, keys in zip(sections, ("theme", "theme.custom"), ({"name", "auto_switch"}, color_keys)):
+        if not isinstance(section, dict):
+            errors.append(f"{path_str}: section must be an object")
+            continue
+        expect(section.get("table") == table, f"{path_str}: expected table {table}", errors)
+        entries = section.get("entries")
+        if not isinstance(entries, list) or not all(isinstance(entry, dict) for entry in entries):
+            errors.append(f"{path_str}.{table}: entries must be objects")
+            continue
+        actual_keys = [entry.get("key") for entry in entries]
+        expect(len(actual_keys) == len(keys) and all(key in actual_keys for key in keys),
+               f"{path_str}.{table}: keys must match the supported Herdr fields", errors)
+        for entry in entries:
+            value = entry.get("value")
+            if table == "theme.custom":
+                expect(isinstance(value, str) and value.startswith("$"),
+                       f"{path_str}.{table}.{entry.get('key')}: expected a color slot", errors)
+            elif entry.get("key") == "name":
+                expect(value == "terminal", f"{path_str}: base theme must be terminal", errors)
+            elif entry.get("key") == "auto_switch":
+                expect(value is False, f"{path_str}: automatic theme switching must be disabled", errors)
 
 
 def check_pi(path: Path, doc: dict[str, Any], errors: list[str]) -> None:
@@ -624,6 +663,7 @@ JSON_CHECKS = {
     ROOT / "templates" / "zellij" / "official-template.json": check_zellij,
     ROOT / "templates" / "tmux" / "official-template.json": check_tmux,
     ROOT / "templates" / "pi" / "official-template.json": check_pi,
+    ROOT / "templates" / "herdr" / "official-template.json": check_herdr,
 }
 
 YAML_CHECKS = {
@@ -657,6 +697,9 @@ def main() -> int:
         if path.name == "TEMPLATE.yaml":
             continue
         check_ghostty_override(path.relative_to(ROOT), load_yaml_doc(path), errors)
+        validator = Validator()
+        validate_ghostty_override(validator, path)
+        errors.extend(validator.errors)
     for path in sorted((ROOT / "overrides" / "nvim").glob("*.yaml")):
         check_nvim_override(path.relative_to(ROOT), load_yaml_doc(path), errors)
     for path in sorted((ROOT / "overrides" / "zellij").glob("*.yaml")):

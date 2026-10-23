@@ -1,6 +1,6 @@
 {
   "name": "ghostty-theme-template",
-  "version": 1,
+  "version": 2,
   "description": "Ghostty theme template derived from the Ghostty config reference and the existing local terminal config.",
   "sources": [
     {
@@ -16,7 +16,8 @@
   ],
   "config_schema": {
     "token_prefix": "$",
-    "value_type": "hex-or-palette-entry"
+    "value_type": "hex-or-palette-entry-or-opacity",
+    "faint_opacity": "Decimal string from 0 to 1; supported since Ghostty 1.2.0."
   },
   "sections": [
     {
@@ -27,7 +28,8 @@
         { "key": "selection-background", "value": "$selection_background" },
         { "key": "selection-foreground", "value": "$selection_foreground" },
         { "key": "cursor-color", "value": "$cursor_color" },
-        { "key": "cursor-text", "value": "$cursor_text" }
+        { "key": "cursor-text", "value": "$cursor_text" },
+        { "key": "faint-opacity", "value": "$faint_opacity" }
       ]
     },
     {

@@ -1,0 +1,57 @@
+{
+  "name": "herdr-theme-template",
+  "version": 1,
+  "description": "Herdr 0.9.5 inline theme configuration with canonical colors for every custom color field.",
+  "sources": [
+    {
+      "kind": "official-source",
+      "ref": "Herdr v0.9.5 ThemeConfig and CustomThemeColors",
+      "url": "https://github.com/herdrdev/herdr/blob/v0.9.5/src/config/theme.rs"
+    },
+    {
+      "kind": "official-source",
+      "ref": "Herdr v0.9.5 palette definitions and color overrides",
+      "url": "https://github.com/herdrdev/herdr/blob/v0.9.5/src/app/state.rs"
+    }
+  ],
+  "config_schema": {
+    "format": "toml",
+    "token_prefix": "$",
+    "value_type": "hex-color"
+  },
+  "sections": [
+    {
+      "name": "selection",
+      "table": "theme",
+      "entries": [
+        { "key": "name", "value": "terminal" },
+        { "key": "auto_switch", "value": false }
+      ]
+    },
+    {
+      "name": "colors",
+      "table": "theme.custom",
+      "entries": [
+        { "key": "accent", "value": "$accent" },
+        { "key": "panel_bg", "value": "$ui_panelBg" },
+        { "key": "sidebar_bg", "value": "$ui_sidebarBg" },
+        { "key": "active_row_bg", "value": "$ui_bgAlt" },
+        { "key": "selection_bg", "value": "$ui_selection" },
+        { "key": "surface0", "value": "$ui_bgElevated" },
+        { "key": "surface1", "value": "$ui_bgAlt" },
+        { "key": "surface_dim", "value": "$ui_border" },
+        { "key": "overlay0", "value": "$muted_text" },
+        { "key": "overlay1", "value": "$ui_fg" },
+        { "key": "text", "value": "$ui_fg" },
+        { "key": "subtext0", "value": "$muted_text" },
+        { "key": "mauve", "value": "$palette_magenta" },
+        { "key": "green", "value": "$palette_green" },
+        { "key": "yellow", "value": "$palette_yellow" },
+        { "key": "red", "value": "$palette_red" },
+        { "key": "blue", "value": "$palette_blue" },
+        { "key": "teal", "value": "$palette_cyan" },
+        { "key": "peach", "value": "$palette_orange" }
+      ]
+    }
+  ]
+}

@@ -592,9 +592,15 @@ def load_nvim_override(root: Path, theme_id: str) -> dict[str, Any] | None:
 
 
 def load_ghostty_override(root: Path, theme_id: str) -> dict[str, Any] | None:
+    from validate_overrides import validate_ghostty_override
+
     path = root / "overrides" / "ghostty" / f"{theme_id}.yaml"
     if not path.exists():
         return None
+    validator = Validator()
+    validate_ghostty_override(validator, path)
+    if validator.errors:
+        raise RuntimeError("\n".join(validator.errors))
     return load_yaml(path)
 
 
@@ -817,6 +823,7 @@ def build_ghostty_slots(ctx: dict[str, Any]) -> dict[str, str]:
         "selection_foreground": best_contrast(r["ui"]["selection"], p["white"], r["ui"]["bg"], r["ui"]["fg"]),
         "cursor_color": r["ui"]["cursor"],
         "cursor_text": cursor_text,
+        "faint_opacity": "0.5",
     }
     for idx, color in palette.items():
         slots[f"palette_{idx}_entry"] = f"{idx}={color}"
@@ -845,6 +852,8 @@ def apply_ghostty_override_slots(
 def ghostty_theme_conf(ctx: dict[str, Any], root: Path) -> str:
     template = load_ghostty_template(root)
     override = load_ghostty_override(root, ctx["meta"]["id"])
+    if override and (override["meta"]["theme"], override["meta"]["variant"]) != (ctx["meta"]["id"], ctx["meta"]["variant"]):
+        raise RuntimeError("Ghostty override metadata does not match the canonical theme")
     slots = apply_ghostty_override_slots(build_ghostty_slots(ctx), override, ctx)
     lines = [
         f"# Auto-generated from themes/core/{ctx['meta']['id']}.yaml",
@@ -1203,6 +1212,40 @@ def pi_theme_doc(ctx: dict[str, Any], root: Path) -> dict[str, Any]:
     return render_template_value(template["document"], build_pi_slots(ctx))
 
 
+def herdr_theme_toml(ctx: dict[str, Any], root: Path) -> str:
+    template = load_json(root / "templates" / "herdr" / "official-template.json")
+    slots = {
+        f"{group}_{name}": value
+        for group, roles in ctx["roles"].items()
+        for name, value in roles.items()
+    }
+    slots.update({f"palette_{name}": value for name, value in ctx["palette"].items()})
+    ui = ctx["roles"]["ui"]
+    backgrounds = [ui[key] for key in ("bg", "panelBg", "sidebarBg", "bgAlt")]
+    # Herdr uses panel_bg as selected tab text and accent as its background.
+    for slot, foreground, surfaces in (
+        ("muted_text", ui["fgInactive"], backgrounds),
+        ("accent", ui["borderActive"], [ui["panelBg"]]),
+    ):
+        for step in range(101):
+            candidate = mix(foreground, ui["fg"], step / 100)
+            if all(contrast_ratio(candidate, bg) >= 4.5 for bg in surfaces):
+                slots[slot] = candidate
+                break
+        else:
+            raise RuntimeError(f"{ctx['meta']['id']}: Herdr {slot} cannot reach 4.5:1 contrast")
+    lines = [
+        f"# Auto-generated from themes/core/{ctx['meta']['id']}.yaml",
+        f"# Template: {template['name']} v{template['version']}",
+    ]
+    for section in template["sections"]:
+        lines.extend(["", f"[{section['table']}]"])
+        for entry in section["entries"]:
+            value = render_template_value(entry["value"], slots)
+            lines.append(f"{entry['key']} = {toml_literal(value)}")
+    return "\n".join(lines) + "\n"
+
+
 def tmux_style(*, fg: str, bg: str | None = None, bold: bool = False) -> str:
     parts = [f"#[fg={fg}]"]
     if bg is not None:
@@ -1543,6 +1586,7 @@ def generate_theme(theme_path: Path, template: dict[str, Any], root: Path) -> li
     zellij_path = root / "exports" / "zellij" / f"{theme_id}.kdl"
     tmux_path = root / "exports" / "tmux" / f"{theme_id}.conf"
     pi_path = root / "exports" / "pi" / f"{theme_id}.json"
+    herdr_path = root / "exports" / "herdr" / f"{theme_id}.toml"
 
     write_text(ghostty_path, ghostty_theme_conf(ctx, root))
     write_yaml(k9s_path, k9s_theme_doc(ctx, root))
@@ -1552,7 +1596,8 @@ def generate_theme(theme_path: Path, template: dict[str, Any], root: Path) -> li
     write_text(zellij_path, zellij_theme_kdl(ctx, root))
     write_text(tmux_path, tmux_theme_conf(ctx, root))
     write_json(pi_path, pi_theme_doc(ctx, root))
-    return [ghostty_path, k9s_path, zed_path, nvim_path, starship_path, zellij_path, tmux_path, pi_path]
+    write_text(herdr_path, herdr_theme_toml(ctx, root))
+    return [ghostty_path, k9s_path, zed_path, nvim_path, starship_path, zellij_path, tmux_path, pi_path, herdr_path]
 
 
 def discover_default_targets(root: Path) -> list[Path]:

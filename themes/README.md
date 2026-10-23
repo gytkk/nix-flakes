@@ -21,7 +21,7 @@ themes/
 ├── core/                      # canonical theme definitions
 ├── templates/                 # app templates and vendored schemas
 ├── overrides/                 # Ghostty, Neovim, Starship, Zed, Zellij YAML patches
-├── exports/                   # ghostty, k9s, nvim, pi, starship, tmux, zed, zellij
+├── exports/                   # ghostty, herdr, k9s, nvim, pi, starship, tmux, zed, zellij
 ├── generate.py                # Python exporters
 ├── validate.py                # canonical schema validator and YAML parser
 ├── validate_overrides.py      # app override validation
@@ -502,6 +502,7 @@ This now checks both:
 Current generators:
 
 - `ghostty` -> `themes/exports/ghostty/*.conf`
+- `herdr` -> `themes/exports/herdr/*.toml`
 - `k9s` -> `themes/exports/k9s/*.yaml`
 - `zed` -> `themes/exports/zed/*.json`
 - `nvim` -> `themes/exports/nvim/*.lua`
@@ -521,6 +522,7 @@ Adapter templates and schema helpers:
     `HighlightStyleContent` entries rather than a fixed syntax-key list
 - `themes/templates/ghostty/official-template.json` -> Ghostty theme template
   derived from the config reference and existing local terminal config
+- `themes/templates/herdr/official-template.json` -> Herdr inline theme template derived from the v0.9.5 configuration structs and palette definitions; all scalar custom color fields are mapped to canonical roles or derived colors
 - `themes/templates/k9s/official-template.json` -> K9s skin template derived
   from the official skins format and the existing local module skin definitions
 - `themes/templates/nvim/official-template.json` -> Neovim builtin highlight
@@ -686,4 +688,8 @@ Use overrides for app-specific exceptions like:
 
 The default `one-half-light` theme uses a cool white background (`#fafbfc`) and cool gray panels and borders (`#f3f5f7`, `#edf0f3`, `#e2e6ea`) to avoid a yellow cast. Ghostty inherits the canonical background. Syntax, diagnostic, and search accents retain their semantic colors.
 
-The current generator emits Ghostty, K9s, Neovim, Pi, Starship, tmux, Zed, and Zellij themes. VSCode's app-local theme is outside this pipeline. Edit canonical definitions, templates, or supported YAML overrides, then regenerate the exports instead of editing generated files directly.
+Ghostty exports include `faint-opacity`, which defaults to `0.5`. A Ghostty override can set `slots.faint_opacity` to a quoted decimal from `0` to `1`; One Half Light uses `0.85` to keep faint secondary text readable. The validator rejects values outside this range. ANSI colors remain unchanged.
+
+Herdr exports contain `[theme]` and `[theme.custom]` tables. The module combines the selected export with its base configuration into a read-only Home Manager file. Secondary text starts from `roles.ui.fgInactive` and moves toward `roles.ui.fg` only as needed to reach 4.5:1 contrast against the main, panel, sidebar, and active-row backgrounds. Herdr draws selected tab labels with the panel color on its accent color, so the exported accent is similarly adjusted from `roles.ui.borderActive` to reach 4.5:1 against the panel. Generation fails if these foregrounds cannot meet their targets. Subagent activity rows use the secondary color without an additional dim modifier. Other accent colors retain their canonical mappings and are not covered by these contrast targets.
+
+The current generator emits Ghostty, Herdr, K9s, Neovim, Pi, Starship, tmux, Zed, and Zellij themes. VSCode's app-local theme is outside this pipeline. Edit canonical definitions, templates, or supported YAML overrides, then regenerate the exports instead of editing generated files directly.
