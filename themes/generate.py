@@ -1221,10 +1221,23 @@ def herdr_theme_toml(ctx: dict[str, Any], root: Path) -> str:
     }
     slots.update({f"palette_{name}": value for name, value in ctx["palette"].items()})
     ui = ctx["roles"]["ui"]
+    # Current spaces and agents share this background, including outside sidebar navigation.
+    for step in range(101):
+        candidate = mix(ui["sidebarBg"], ui["borderActive"], step / 100)
+        if (
+            contrast_ratio(candidate, ui["sidebarBg"]) >= 1.8
+            and contrast_ratio(ui["fg"], candidate) >= 4.5
+        ):
+            slots["active_row_bg"] = candidate
+            break
+    else:
+        raise RuntimeError(f"{ctx['meta']['id']}: Herdr active row cannot meet visibility and text contrast targets")
     backgrounds = [ui[key] for key in ("bg", "panelBg", "sidebarBg", "bgAlt")]
+    backgrounds.append(slots["active_row_bg"])
     # Herdr uses panel_bg as selected tab text and accent as its background.
     for slot, foreground, surfaces in (
         ("muted_text", ui["fgInactive"], backgrounds),
+        ("focused_space_text", ctx["palette"]["magenta"], backgrounds),
         ("accent", ui["borderActive"], [ui["panelBg"]]),
     ):
         for step in range(101):

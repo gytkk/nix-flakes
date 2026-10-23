@@ -62,11 +62,12 @@ class HerdrGeneratorTest(unittest.TestCase):
     def test_muted_text_remains_readable_on_light_and_dark_row_backgrounds(
         self,
     ) -> None:
-        for theme_id in ("one-half-light", "vira-graphene"):
+        for theme_path in sorted((ROOT / "core").glob("*.yaml")):
+            theme_id = theme_path.stem
             with self.subTest(theme=theme_id):
                 ctx = self.context(theme_id)
                 colors = self.colors(ctx)
-                for key in ("overlay0", "subtext0"):
+                for key in ("overlay0", "subtext0", "mauve"):
                     for background in (
                         ctx["roles"]["ui"]["bg"],
                         colors["panel_bg"],
@@ -80,18 +81,29 @@ class HerdrGeneratorTest(unittest.TestCase):
         ctx = self.context("one-half-light")
         original = self.colors(ctx)
         self.assertEqual(ctx["roles"]["ui"]["panelBg"], original["panel_bg"])
-        self.assertEqual(ctx["roles"]["ui"]["bgAlt"], original["active_row_bg"])
         self.assertEqual(ctx["roles"]["ui"]["sidebarBg"], original["sidebar_bg"])
 
         changed = copy.deepcopy(ctx)
         changed["roles"]["ui"].update(panelBg="#eeeeee", bgAlt="#dddddd", fg="#202020")
         colors = self.colors(changed)
         self.assertEqual("#eeeeee", colors["panel_bg"])
-        self.assertEqual("#dddddd", colors["active_row_bg"])
         self.assertEqual("#dddddd", colors["surface1"])
         self.assertEqual("#202020", colors["text"])
         self.assertEqual("#202020", colors["overlay1"])
         self.assertNotEqual(original["panel_bg"], colors["panel_bg"])
+
+    def test_current_space_and_agent_backgrounds_stand_out_with_readable_text(self) -> None:
+        for theme_path in sorted((ROOT / "core").glob("*.yaml")):
+            with self.subTest(theme=theme_path.stem):
+                ctx = theme_context(load_yaml(theme_path))
+                colors = self.colors(ctx)
+                self.assertGreaterEqual(
+                    contrast_ratio(colors["active_row_bg"], colors["sidebar_bg"]), 1.8
+                )
+                self.assertGreaterEqual(
+                    contrast_ratio(colors["text"], colors["active_row_bg"]), 4.5
+                )
+                self.assertEqual(ctx["roles"]["ui"]["selection"], colors["selection_bg"])
 
     def test_selected_tabs_and_accent_text_have_readable_contrast(self) -> None:
         for theme_path in sorted((ROOT / "core").glob("*.yaml")):

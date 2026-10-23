@@ -4,7 +4,7 @@
 
 The custom palette follows `modules.commonTheme`, including its secondary text colors. Automatic theme switching is disabled. Home Manager owns the generated config, so Herdr's UI cannot persist theme, sound, toast, or status settings. Edit the source configuration and apply Home Manager to change these settings.
 
-The generator keeps secondary text readable on normal and focused rows and adjusts the selected-tab accent to provide at least 4.5:1 contrast with its label color. One Half Light uses light labels on a darker blue selected tab. The source colors and contrast rules live in the [canonical theme pipeline](../../themes/README.md#nix-integration).
+The current space and agent use an accent-tinted row background with at least 1.8:1 contrast against the sidebar. One Half Light uses a blue row background; the keyboard navigation cursor retains its separate selection color. The generator keeps normal and secondary text readable on focused rows and adjusts the selected-tab accent to provide at least 4.5:1 contrast with its label color. One Half Light uses light labels on a darker blue selected tab. The source colors and contrast rules live in the [canonical theme pipeline](../../themes/README.md#nix-integration).
 
 ## Terminal shortcuts
 
