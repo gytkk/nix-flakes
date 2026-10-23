@@ -97,14 +97,9 @@ class Probe:
         agents = {
             "shared": ["codex", "pi"],
             "claude": ["claude-code"],
-            "openclaw": ["openclaw"],
         }[target]
         flags = [] if target == "shared" else ["--copy"]
-        if target == "openclaw":
-            cwd = self.home / ".local/share/openclaw/agent-core"
-            cwd.mkdir(parents=True, exist_ok=True)
-        else:
-            flags.append("--global")
+        flags.append("--global")
         command = [
             "node",
             str(self.cli),
@@ -127,7 +122,6 @@ class Probe:
             / {
                 "shared": ".agents/skills",
                 "claude": ".claude/skills",
-                "openclaw": ".local/share/openclaw/agent-core/skills",
             }[target]
         )
 
@@ -157,13 +151,12 @@ def rows(result, names, target, destination, revision):
     expected_agents = {
         "shared": ["Codex", "Pi"],
         "claude": ["Claude Code"],
-        "openclaw": ["OpenClaw"],
     }[target]
     for row in value:
         assert row["status"] == "installed", row
         assert row["agents"] == expected_agents, row
         assert row["mode"] == "copy", row
-        assert row["scope"] == ("project" if target == "openclaw" else "global"), row
+        assert row["scope"] == "global", row
         assert Path(row["path"]).resolve() == (destination / row["name"]).resolve(), row
         assert row["ref"] == revision, row
         assert re.fullmatch(r"[0-9a-f]{64}", row["hash"]), row
@@ -197,7 +190,7 @@ def cli_probe(tmp_path_factory):
 def source_snapshots(cli_probe):
     probe = cli_probe
     plans = {
-        target: installation_plan(target) for target in ["shared", "claude", "openclaw"]
+        target: installation_plan(target) for target in ["shared", "claude"]
     }
     assert all(plan["cli_version"] == "1.7.2" for plan in plans.values())
     sources = {
@@ -313,10 +306,7 @@ def test_selected_sources_and_runtime_matrix(cli_probe, source_snapshots):
     assert not (probe.workspace / ".agents").exists()
     assert not (probe.workspace / "skills-lock.json").exists()
     global_lock = json.loads(probe.lock.read_text())
-    project_lock = json.loads(
-        (probe.destination("openclaw").parent / "skills-lock.json").read_text()
-    )
-    assert global_lock["version"] == 3 and project_lock["version"] == 1
+    assert global_lock["version"] == 3
     for source in sources.values():
         if source["kind"] == "git":
             for name in source["skills"]:
@@ -423,10 +413,6 @@ def test_installer_real_cli_licenses_ownership_and_restore(
         "dismissed": {},
     }
     adapter.write_json(probe.lock, global_lock)
-    project_path = probe.destination("openclaw").parent / "skills-lock.json"
-    adapter.write_json(
-        project_path, {"version": 1, "skills": {"personal-fixture": foreign}}
-    )
     first_backup = adapter.install(bounded, probe.home, state, fixed)
     notice = (roots[external["id"]] / external["license"]).read_bytes()
     before = {}
@@ -450,9 +436,7 @@ def test_installer_real_cli_licenses_ownership_and_restore(
             assert record["files"] == adapter.tree(destination / name)
         before[target] = files(destination)
         owners[target] = owner
-    before_locks = {
-        path: adapter.read_json(path) for path in [probe.lock, project_path]
-    }
+    before_locks = {probe.lock: adapter.read_json(probe.lock)}
     with (local_root / local_name / "SKILL.md").open("a") as handle:
         handle.write("\nIsolated integration fixture update.\n")
     second_backup = adapter.install(bounded, probe.home, state, fixed)

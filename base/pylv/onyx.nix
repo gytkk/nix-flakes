@@ -14,12 +14,7 @@
     ../../modules/openclaw/home.nix
   ];
 
-  modules.openclaw = {
-    enable = true;
-    agentCore.enable = true;
-    agentSessionRecordPlugin.enable = true;
-  };
-  modules.agentSessionRecord.agents.openclaw.enable = true;
+  modules.openclaw.enable = true;
 
   # DankMaterialShell
   programs.dank-material-shell = {

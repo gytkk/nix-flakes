@@ -173,12 +173,11 @@ For a remote machine, use `cf auth login --no-browser`. Automation can supply `C
 
 ### Agent Session Record Hooks
 
-- `modules/agent-session-record`는 `agent-session-record` CLI 하나를 설치한다. Claude의 `SessionEnd`, Codex의 `SessionStart`와 `Stop`, OpenClaw의 `session_end` hook은 `agent-session-record hook`을 사용한다. 전체 기록을 다시 처리할 때는 `agent-session-record replay <claude|codex|openclaw>`를 실행한다. Home Manager가 실행 설정을 `~/.config/agent-session-record/config.json`에 생성한다.
-- Home Manager는 OpenClaw recorder plugin을 `~/.local/share/openclaw/extensions/agent-session-record`에 일반 파일로 복사한다. Mutable config의 `plugins.load.paths`에 이 경로를 추가하고, `plugins.allow`를 지정했다면 `agent-session-record`도 포함해야 한다. 설정 예시는 [OpenClaw README](modules/openclaw/README.md#agent-core-integration)에서 확인한다. 이 plugin은 OpenClaw 2.0의 session identity API로 transcript를 읽는다. `session_end`는 새 세션 생성, reset, idle 또는 daily rotation, compaction, deletion, shutdown, restart 때 실행되며 매 turn마다 실행되는 hook은 아니다.
+- `modules/agent-session-record`는 `agent-session-record` CLI 하나를 설치한다. Claude의 `SessionEnd`, Codex의 `SessionStart`와 `Stop` hook은 `agent-session-record hook`을 사용한다. 전체 기록을 다시 처리할 때는 `agent-session-record replay <claude|codex>`를 실행한다. Home Manager가 실행 설정을 `~/.config/agent-session-record/config.json`에 생성한다.
 - 직접 실행한 세션과 신원을 확인할 수 있는 subagent 세션에는 내용을 드러내지 않는 `run_id`를 부여한다. snapshot은 전송 전에 secret과 개인 정보를 가리고 로컬 private queue에 저장한다. 검사에 실패하거나 내용이 빈 snapshot도 보관하되 파생 지식에서는 제외한다.
 - 전송에 성공하면 `/home/gytkk/agent-sessions/<scope>/<provider>/<YYYY>/<MM>/<DD>/<run_id>.*`에 archive를 남기고, manifest와 receipt를 로컬 ledger에 기록한다. 상태 디렉터리는 권한 `0700`, queue와 archive 파일은 권한 `0600`을 사용한다.
 - 기본 scope는 `personal`이다. devsisters profile에서는 capture를 끄고, `pylv-denim`은 업로드 대상 `pylv-onyx`에 로컬 주소 `192.168.0.10`으로 접속한다.
-- hook과 전송 실패는 각각 `warnings.log`와 `debug.log`에 기록하며 Claude, Codex 또는 OpenClaw의 실행을 막지 않는다.
+- hook과 전송 실패는 각각 `warnings.log`와 `debug.log`에 기록하며 Claude와 Codex의 실행을 막지 않는다.
 
 ### Codex LSP MCP Implementation Plan
 
@@ -400,9 +399,9 @@ nix build .#nixosConfigurations.pylv-sepia.config.system.build.toplevel
 - The nginx listeners on `18790` and `18791` retain legacy bearer-token injection. It does not replace authentication while the Gateway uses password mode.
 - `openclaw dashboard --no-open` prints the local dashboard URL. Use the public HTTPS URL for remote browser access.
 - Declarative integration lives in [`modules/openclaw`](./modules/openclaw). Nix supplies runtime dependencies, proxy authentication, the firewall rule, and the user service runtime paths. OpenClaw's Secret Store owns the Discord and Notion/Google automation credentials; see the [module README](modules/openclaw/README.md).
-- Mutable state, configuration, and the executable live under `~/.openclaw`. Repository-managed extensions live separately under `~/.local/share/openclaw/extensions/`. The official CLI owns the systemd user service; Onyx follows the beta update channel for MCP Relay.
-- Home Manager adds the user-owned CLI directory to the shell `PATH` and materializes a systemd environment drop-in for `libcap` and the agent-core instruction path. The OpenClaw installer owns the service executable and Node runtime. Nix does not set `OPENCLAW_NIX_MODE` or install an OpenClaw package.
-- Home Manager materializes the repository-managed `agent-session-record` extension under `~/.local/share/openclaw/extensions/agent-session-record`. Mutable OpenClaw configuration controls its load path, allowlist, and enabled state; see the [OpenClaw module README](modules/openclaw/README.md#agent-core-integration).
+- Mutable state, configuration, and the executable live under `~/.openclaw`. The official CLI owns the systemd user service; Onyx follows the beta update channel for MCP Relay.
+- Home Manager adds the user-owned CLI directory to the shell `PATH` and materializes a systemd environment drop-in for `libcap`. The OpenClaw installer owns the service executable and Node runtime. Nix does not set `OPENCLAW_NIX_MODE` or install an OpenClaw package.
+- OpenClaw instructions, skills, plugins, and session recording are managed independently of the coding agents. Existing hosts must remove the old shared skill and plugin references before switching; see [removing the shared agent integration](modules/openclaw/README.md#removing-the-shared-agent-integration).
 
 ## Helpers
 

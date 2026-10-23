@@ -56,15 +56,6 @@ skills = ["codebase-design", "code-review", "data-analysis", "data-visualization
 runtimes = ["claude"]
 skills = ["codebase-design", "code-review", "data-analysis", "data-visualization", "diagnosing-bugs", "domain-modeling", "find-skills", "grilling", "korean", "openai-decisions", "prototype", "repeated-work-analyzer", "research", "tdd", "theme-template-authoring", "user-friction-review", "wizard", "writing-for-agents"]
 
-[skill_targets.openclaw]
-runtimes = ["openclaw"]
-skills = ["codebase-design", "code-review", "data-analysis", "data-visualization", "diagnosing-bugs", "domain-modeling", "find-skills", "grilling", "korean", "prototype", "repeated-work-analyzer", "research", "tdd", "theme-template-authoring", "user-friction-review", "wizard", "writing-for-agents"]
-
-[[documents]]
-runtime = "openclaw"
-output = "AGENTS.core.md"
-sources = ["rules/OPERATING.md", "rules/AGENTS.md", "rules/PROSE.md", "rules/DELEGATION.md", "adapters/openclaw.md"]
-
 [[documents]]
 runtime = "claude"
 output = "CLAUDE.md"
@@ -84,10 +75,6 @@ sources = ["rules/AGENTS.md", "rules/PROSE.md", "adapters/pi.md"]
 runtime = "pi"
 output = "APPEND_SYSTEM.md"
 sources = ["rules/OPERATING.md"]
-
-[runtimes.openclaw]
-skills = ["codebase-design", "code-review", "data-analysis", "data-visualization", "diagnosing-bugs", "domain-modeling", "grilling", "prototype", "repeated-work-analyzer", "research", "resolving-merge-conflicts", "tdd", "theme-template-authoring", "user-friction-review", "wizard", "writing-for-agents"]
-skill_output = "skills"
 
 [runtimes.codex]
 skills = ["codebase-design", "code-review", "data-analysis", "data-visualization", "devils-advocate", "diagnosing-bugs", "domain-modeling", "grilling", "parallel-research-merge", "prototype", "repeated-work-analyzer", "research", "resolving-merge-conflicts", "tdd", "theme-template-authoring", "openai-decisions", "user-friction-review", "wizard", "writing-for-agents"]

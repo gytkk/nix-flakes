@@ -8,14 +8,7 @@ let
   enabled = path: lib.attrByPath ([ "modules" ] ++ path ++ [ "enable" ]) false config;
   targets =
     lib.optional (enabled [ "codex" ] || enabled [ "pi" ]) "shared"
-    ++ lib.optional (enabled [ "claude" ]) "claude"
-    ++ lib.optional (
-      enabled [ "openclaw" ]
-      && enabled [
-        "openclaw"
-        "agentCore"
-      ]
-    ) "openclaw";
+    ++ lib.optional (enabled [ "claude" ]) "claude";
   python = pkgs.python3.withPackages (ps: [ (ps.toPythonModule pkgs.agent-core) ]);
   installer = pkgs.writeShellScript "install-agent-skills" ''
     export PATH="${

@@ -8,7 +8,7 @@ from pathlib import Path, PurePosixPath
 
 import tomllib
 
-RUNTIMES = ("openclaw", "codex", "claude", "pi")
+RUNTIMES = ("codex", "claude", "pi")
 _SOURCE_ROOT = Path(__file__).resolve().parents[2]
 _PACKAGED_ROOT = Path(__file__).resolve().parent / "resources"
 _FRONTMATTER = re.compile(r"\A---\r?\n(.*?)\r?\n---\r?\n", re.DOTALL)

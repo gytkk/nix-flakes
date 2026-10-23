@@ -19,7 +19,6 @@ from .core import (
 TARGET_RUNTIMES = {
     "shared": ["codex", "pi"],
     "claude": ["claude"],
-    "openclaw": ["openclaw"],
 }
 
 

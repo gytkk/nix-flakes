@@ -103,7 +103,7 @@ def location(target, home):
         return home / ".agents/skills"
     if target == "claude":
         return home / ".claude/skills"
-    return home / ".local/share/openclaw/agent-core/skills"
+    raise ValidationError(f"unsupported installation target: {target}")
 
 
 def checked_parent(path):
@@ -123,7 +123,7 @@ def selected(plan):
 
 def cli_add(plan, source, revision, home, state, *, isolated=False):
     destination = location(plan["target"], home)
-    working = destination.parent if plan["target"] == "openclaw" else home
+    working = home
     working.mkdir(parents=True, exist_ok=True)
     origin = (
         source["path"]
@@ -143,12 +143,11 @@ def cli_add(plan, source, revision, home, state, *, isolated=False):
     command += (
         ["codex", "pi"]
         if plan["target"] == "shared"
-        else ["claude-code" if plan["target"] == "claude" else "openclaw"]
+        else ["claude-code"]
     )
     if plan["target"] != "shared":
         command += ["--copy"]
-    if plan["target"] != "openclaw":
-        command += ["--global"]
+    command += ["--global"]
     command += ["--yes", "--json"]
     env = environment(home, state)
     if not isolated and "XDG_STATE_HOME" not in os.environ:
@@ -168,7 +167,7 @@ def cli_add(plan, source, revision, home, state, *, isolated=False):
     agents = (
         ["Codex", "Pi"]
         if plan["target"] == "shared"
-        else ["Claude Code" if plan["target"] == "claude" else "OpenClaw"]
+        else ["Claude Code"]
     )
     if any(not isinstance(row, dict) for row in rows):
         raise ValidationError(
@@ -195,13 +194,9 @@ def cli_add(plan, source, revision, home, state, *, isolated=False):
         tree(path)
     if source["kind"] == "git":
         source_lock = (
-            destination.parent / "skills-lock.json"
-            if plan["target"] == "openclaw"
-            else (
-                state / "skills/.skill-lock.json"
-                if "XDG_STATE_HOME" in env
-                else home / ".agents/.skill-lock.json"
-            )
+            state / "skills/.skill-lock.json"
+            if "XDG_STATE_HOME" in env
+            else home / ".agents/.skill-lock.json"
         )
         entries = lock_entries(source_lock, source["skills"])
         for name, relative in source["skills"].items():
@@ -273,14 +268,12 @@ def add_licenses(plan, destination, notices):
     return supplements
 
 
-def lock_paths(plans, home, state):
+def lock_paths(home, state):
     paths = {
         state / "skills/.skill-lock.json"
         if "XDG_STATE_HOME" in os.environ
         else home / ".agents/.skill-lock.json"
     }
-    if any(plan["target"] == "openclaw" for plan in plans):
-        paths.add(location("openclaw", home).parent / "skills-lock.json")
     return sorted(paths)
 
 
@@ -379,7 +372,7 @@ def validate_receipt(receipt, home, state):
     for item in targets:
         if (
             not isinstance(item, dict)
-            or item.get("target") not in ("shared", "claude", "openclaw")
+            or item.get("target") not in ("shared", "claude")
             or item["target"] in seen
         ):
             raise ValidationError("backup has invalid or duplicate targets")
@@ -416,7 +409,7 @@ def validate_receipt(receipt, home, state):
             ):
                 raise ValidationError("invalid previous ownership SHA in backup")
     locks = receipt.get("locks")
-    expected_locks = {str(path) for path in lock_paths(targets, home, state)}
+    expected_locks = {str(path) for path in lock_paths(home, state)}
     if not isinstance(locks, dict) or set(locks) != expected_locks:
         raise ValidationError("backup CLI lock paths do not match current installation")
     for snapshot in locks.values():
@@ -562,7 +555,7 @@ def install(plans, home, state, overrides, replay=None):
                 "after": {},
                 "existed": path.exists(),
             }
-            for path in lock_paths(plans, home, state)
+            for path in lock_paths(home, state)
         }
         backup_root = state / "agent-core/skills/backups"
         backup_root.mkdir(parents=True, exist_ok=True)
@@ -639,7 +632,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("command", choices=["plan", "probe", "install", "restore"])
     parser.add_argument(
-        "--target", action="append", choices=["shared", "claude", "openclaw"]
+        "--target", action="append", choices=["shared", "claude"]
     )
     parser.add_argument(
         "--apply",

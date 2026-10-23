@@ -23,7 +23,6 @@ def test_materialize_is_deterministic_and_marks_documents_and_skills() -> None:
 @pytest.mark.parametrize(
     ("runtime", "additional_skills"),
     [
-        ("openclaw", set()),
         ("claude", {"openai-decisions"}),
         ("codex", {"devils-advocate", "parallel-research-merge", "openai-decisions"}),
         ("pi", {"devils-advocate", "parallel-research-merge", "pi-agent"}),
@@ -66,23 +65,12 @@ def test_runtime_document_layouts() -> None:
     assert b"# Operating invariants" not in pi[PurePosixPath("AGENTS.md")]
     assert b"# Operating invariants" in pi[PurePosixPath("APPEND_SYSTEM.md")]
 
-    openclaw = core.materialize("openclaw")
-    assert PurePosixPath("AGENTS.core.md") in openclaw
-    assert PurePosixPath("AGENTS.md") not in openclaw
 
-
-def test_codex_and_openclaw_include_runtime_model_routing() -> None:
+def test_codex_includes_runtime_model_routing() -> None:
     codex_instructions = core.materialize("codex")[PurePosixPath("AGENTS.md")]
     assert b"# Delegated execution" in codex_instructions
     assert b"`gpt-6-astra`" in codex_instructions
     assert b"native `spawn_agent`" in codex_instructions
-
-    openclaw_instructions = core.materialize("openclaw")[
-        PurePosixPath("AGENTS.core.md")
-    ]
-    assert b"# Delegated execution" in openclaw_instructions
-    assert b"configured `astra` subagent" in openclaw_instructions
-    assert b"OpenClaw agent IDs" in openclaw_instructions
 
 
 @pytest.mark.parametrize(
@@ -118,9 +106,10 @@ def test_render_requires_missing_or_empty_directory(tmp_path: Path) -> None:
         core.render("pi", linked_output)
 
 
-def test_unknown_runtime_is_rejected() -> None:
+@pytest.mark.parametrize("runtime", ["unknown", "openclaw"])
+def test_unsupported_runtime_is_rejected(runtime: str) -> None:
     with pytest.raises(core.ValidationError, match="unknown runtime"):
-        core.materialize("unknown")
+        core.materialize(runtime)
 
 
 def test_cli_help_describes_commands_and_render_arguments(
@@ -172,6 +161,6 @@ def test_cli_check_uses_golden_drift_fixture(
     assert main(["check"]) == 0
     schema = tmp_path / "schema"
     schema.mkdir()
-    (schema / "golden-hashes.toml").write_text("[hashes]\nopenclaw = 'drift'\n")
+    (schema / "golden-hashes.toml").write_text("[hashes]\ncodex = 'drift'\n")
     monkeypatch.setattr(cli, "resource_root", lambda: tmp_path)
     assert main(["check"]) == 1

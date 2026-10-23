@@ -5,7 +5,6 @@
 }:
 
 assert builtins.elem runtime [
-  "openclaw"
   "codex"
   "claude"
   "pi"

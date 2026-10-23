@@ -27,7 +27,7 @@ The following guidance is independently rewritten from workflow ideas reviewed i
 | `agent_context/skills/data-visualization/SKILL.md` | [data-visualization](data-visualization/SKILL.md): plot from source data, check scales and units, and inspect fonts and final rendering. Fixed palettes, sandbox paths, and automatic replacement of requested chart types are excluded. |
 | `.agents/skills/quokka-skill-author/references/trigger-eval.md`, `.agents/skills/quokka-eval-creator/SKILL.md` | [writing-for-agents validation](writing-for-agents/BEHAVIOR-VALIDATION.md): positive and near-miss cases, successful load evidence, setup failures, and impact on existing cases. The Quokka CLI harness and live-query side effects are excluded. |
 
-All three selections are exposed to OpenClaw, Codex, Claude, and Pi through the manifest and explicit CLI installation. They add no always-loaded operating rules, runtime dependencies, credentials, or mutable workspace configuration.
+All three selections are exposed to Codex, Claude, and Pi through the manifest and CLI installation. They add no always-loaded operating rules, runtime dependencies, credentials, or mutable workspace configuration.
 
 The selection excludes game and company data skills, Quokka administration and deployment skills, and library-specific frontend skills because their tools and schemas do not apply generally. PR and commit workflows overlap existing operating rules. Usage-report analysis overlaps `user-friction-review` and requires Quokka's thread APIs. Mandatory designer interviews and fixed report sections are not adopted because they would impose unnecessary steps on unrelated work.
 

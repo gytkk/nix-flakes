@@ -13,7 +13,7 @@ from agent_core.cli import main
 
 
 @pytest.mark.parametrize(
-    ("target", "count"), [("shared", 21), ("claude", 18), ("openclaw", 17)]
+    ("target", "count"), [("shared", 21), ("claude", 18)]
 )
 def test_plan_selections_apply_approved_addition_and_removal(
     target: str, count: int

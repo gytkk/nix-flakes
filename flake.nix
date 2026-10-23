@@ -141,10 +141,6 @@
           hashFor = runtime: if golden then runtimeGoldenHashes.${runtime} else null;
         in
         {
-          openclaw = render {
-            outputHash = hashFor "openclaw";
-            runtime = "openclaw";
-          };
           claude = render {
             outputHash = hashFor "claude";
             runtime = "claude";
@@ -192,28 +188,19 @@
           onyxSkillActivation = onyx.home-manager.users.gytkk.home.activation.installAgentSkills;
           onyxOpenClawSystemdDropInMaterialization =
             onyx.home-manager.users.gytkk.home.activation.materializeOpenClawSystemdDropIn.data;
-          onyxOpenClawRuntimeMaterialization =
-            onyx.home-manager.users.gytkk.home.activation.materializeOpenClawRuntimeTrees.data;
           linuxMatches = [
-            (nixpkgs.lib.hasInfix "install --apply --target shared --target claude --target openclaw" onyxSkillActivation.data)
+            (nixpkgs.lib.hasInfix "install --apply --target shared --target claude" onyxSkillActivation.data)
+            (!(nixpkgs.lib.hasInfix "--target openclaw" onyxSkillActivation.data))
             (builtins.elem "linkGeneration" onyxSkillActivation.after)
             (builtins.elem "codexUserConfig" onyxSkillActivation.after)
             (!(builtins.hasAttr ".agents/skills" onyxHomeFiles))
             (!(builtins.hasAttr ".claude/skills" onyxHomeFiles))
             (!(builtins.hasAttr ".pi/agent/skills" onyxHomeFiles))
             (
-              toString onyxHomeFiles.".local/share/openclaw/agent-core/AGENTS.core.md".source
-              == "${output.openclaw}/AGENTS.core.md"
+              !(builtins.hasAttr "materializeOpenClawRuntimeTrees" onyx.home-manager.users.gytkk.home.activation)
             )
-            (
-              !(nixpkgs.lib.hasInfix (builtins.unsafeDiscardStringContext "${output.openclaw}/skills") onyxOpenClawRuntimeMaterialization)
-            )
-            (
-              !(nixpkgs.lib.hasInfix "/home/gytkk/.local/share/openclaw/agent-core/skills" onyxOpenClawRuntimeMaterialization)
-            )
-            (nixpkgs.lib.hasInfix "/home/gytkk/.local/share/openclaw/extensions/agent-core-context" onyxOpenClawRuntimeMaterialization)
-            (nixpkgs.lib.hasInfix "/home/gytkk/.local/share/openclaw/extensions/agent-session-record" onyxOpenClawRuntimeMaterialization)
             (builtins.all (path: !(builtins.hasAttr path onyxHomeFiles)) [
+              ".local/share/openclaw/agent-core/AGENTS.core.md"
               ".local/share/openclaw/agent-core/skills"
               ".local/share/openclaw/extensions/agent-core-context"
               ".local/share/openclaw/extensions/agent-session-record"
@@ -297,9 +284,6 @@
             }
             ''
               agent-core check
-              node --test ${./modules/openclaw}/tests/agent-core-context.test.js
-              bash ${./modules/openclaw}/tests/materialize-runtime-tree.test.sh
-              bash ${./modules/openclaw}/tests/runtime-smoke.test.sh
               bash ${./modules/agent-skills}/tests/activation.test.sh ${
                 systemPkgs.writeText "agent-skills-activation.sh" (
                   builtins.unsafeDiscardStringContext
@@ -309,9 +293,8 @@
                 )
               } shared claude
               ${nixpkgs.lib.optionalString (system == "x86_64-linux") ''
-                bash ${./modules/agent-skills}/tests/activation.test.sh ${systemPkgs.writeText "openclaw-agent-skills-activation.sh" (builtins.unsafeDiscardStringContext nixosConfigurations.pylv-onyx.config.home-manager.users.gytkk.home.activation.installAgentSkills.data)} shared claude openclaw
+                bash ${./modules/agent-skills}/tests/activation.test.sh ${systemPkgs.writeText "onyx-agent-skills-activation.sh" (builtins.unsafeDiscardStringContext nixosConfigurations.pylv-onyx.config.home-manager.users.gytkk.home.activation.installAgentSkills.data)} shared claude
               ''}
-              test -d ${agentCoreGoldenOutputs.${system}.openclaw}/skills
               test -d ${agentCoreGoldenOutputs.${system}.claude}/skills
               test -d ${agentCoreGoldenOutputs.${system}.codex}/skills/devils-advocate
               test -d ${agentCoreGoldenOutputs.${system}.pi}/skills/pi-agent

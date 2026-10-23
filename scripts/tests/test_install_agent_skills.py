@@ -52,7 +52,7 @@ def fixture(tmp_path, monkeypatch):
             if output.exists():
                 shutil.rmtree(output)
             shutil.copytree(Path(source["path"]) / name, output)
-        lock = installer.lock_paths([plan], home, state)[0]
+        lock = installer.lock_paths(home, state)[0]
         value = installer.read_json(lock, {"version": 3, "skills": {}})
         for name in source["skills"]:
             value["skills"][name] = {"source": source["id"], "installation": len(calls)}
@@ -176,7 +176,7 @@ def test_partial_failure_restore_preserves_unrelated_skills_and_lock_entries(
     unrelated = destination / "personal"
     unrelated.mkdir()
     (unrelated / "SKILL.md").write_text("personal")
-    lock = installer.lock_paths([plan], home, state)[0]
+    lock = installer.lock_paths(home, state)[0]
     value = installer.read_json(lock)
     value["skills"]["personal"] = {"source": "personal"}
     installer.write_json(lock, value)
@@ -410,7 +410,7 @@ def test_latest_resolves_once_per_operation_and_replay_avoids_latest(
     }
     plans = [
         {**plan, "target": target, "sources": [source]}
-        for target in ("shared", "claude", "openclaw")
+        for target in ("shared", "claude")
     ]
     calls = []
 
