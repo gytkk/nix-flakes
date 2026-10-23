@@ -1223,7 +1223,7 @@ def herdr_theme_toml(ctx: dict[str, Any], root: Path) -> str:
     ui = ctx["roles"]["ui"]
     # Current spaces and agents share this background, including outside sidebar navigation.
     for step in range(101):
-        candidate = mix(ui["sidebarBg"], ui["borderActive"], step / 100)
+        candidate = mix(ui["sidebarBg"], ui["fg"], step / 100)
         if (
             contrast_ratio(candidate, ui["sidebarBg"]) >= 1.8
             and contrast_ratio(ui["fg"], candidate) >= 4.5
