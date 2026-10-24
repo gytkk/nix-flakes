@@ -4,7 +4,7 @@ Self-contained non-nixpkgs app packages used by the parent `nix-flakes` reposito
 
 The nested flake exports `aarch64-darwin`, `x86_64-linux`, and `aarch64-linux`. Intel Mac (`x86_64-darwin`) compatibility is not maintained.
 
-The [trading-agent repository](https://github.com/gytkk/trading-agent) owns its Rust and web package build and exports `nixosModules.default` for its supervisor and web services. Host configurations consume a verified, pinned product revision and supply host settings and runtime credential paths. This catalog does not duplicate the product package or service definitions.
+The [trading-agent repository](https://github.com/gytkk/trading-agent) owns its Rust and web package build and exports `nixosModules.default` for its authenticated read-only admin containers. Host configurations consume a verified, pinned product revision and supply host settings and runtime file paths. This catalog does not duplicate the product package or service definitions. Trading supervisor deployment remains separate from the read-only containers.
 
 ## Layout
 

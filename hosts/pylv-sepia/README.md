@@ -37,6 +37,34 @@ When applying this limit for the first time from a local checkout, pass it expli
 sudo nixos-rebuild switch --flake .#pylv-sepia --max-jobs 1
 ```
 
+## Container services
+
+Podman runs the application containers declared with NixOS `virtualisation.oci-containers`. Each application has a separate module, fixed image version, persistent data outside the image, and systemd services with health checks and journal logs. Ghost uses `ghost.nix`; the authenticated read-only trading dashboard uses `trading-agent.nix` and the module exported by the trading-agent source. Neither application requires Docker Engine.
+
+| Container | Service | Memory limit | CPU limit | Persistent state |
+| --- | --- | --- | --- | --- |
+| `ghost` | `podman-ghost` | 2 GiB | 2 CPUs | `/var/lib/ghost` |
+| `trading-agent-admin` | `podman-trading-agent-admin` | 512 MiB | 1 CPU | Access configuration and read-only IPC mount |
+| `trading-agent-reader` | `podman-trading-agent-reader` | 512 MiB | 2 CPUs | Read-only imported profile databases |
+
+Trading-agent owns its image build, Cargo and Bun dependency hashes, and container service definitions. This host pins its source in `trading-agent-source.nix` and supplies only runtime paths, hostname, and process UID/GID. The initial pin fetches an exact committed revision from the local repository at `/home/gytkk/workspace/trading-agent`; that revision has not been published. Rebuilding on another machine requires making that commit available at the same local repository path or replacing the source URL with an accessible repository containing the verified commit. Running containers use immutable Nix store outputs and do not execute files from the checkout.
+
+The admin binds to `127.0.0.1:8765` using host networking, preserving the existing Cloudflare Tunnel route and Access verification. Its container mounts only `~/.config/trading-agent/access.toml` and the read-only IPC directory. The reader mounts `~/.config/trading-agent/profiles.toml`, the imported database directory at its existing absolute path, and the writable private socket directory `/run/trading-agent-ipc`. This directory is separate from the per-container RuntimeDirectory managed by oci-containers. Both processes use UID 1000 and GID 100 to preserve file ownership and IPC peer checks. Broker credentials are not mounted, and no trading supervisor is started. The earlier `trade-admin` and `trade-admin-reader` user units are disabled after cutover.
+
+```bash
+sudo systemctl status podman-ghost podman-trading-agent-admin podman-trading-agent-reader
+sudo podman ps
+sudo journalctl -u podman-trading-agent-admin -u podman-trading-agent-reader
+```
+
+Ghost's health check requests its local HTTP endpoint. Trading's reader health check verifies socket creation, while its web health check verifies HTTP 401 for an unauthenticated request. A healthy container does not establish broker connectivity or current account balances. After deployment, separately verify profile queries and Cloudflare Access login. Database backups and restore procedures remain separate from image rollback; see the Ghost backup section below and the trading-agent repository's operating documentation.
+
+After deployment or a reader restart, run the IPC check from the local trading-agent checkout. It verifies private directory and socket ownership, registered profile database availability, and rejection of operating controls. This catches ownership changes that a socket-existence health check cannot detect.
+
+```bash
+bun trade-engine/scripts/check-admin-ipc.mjs --socket /run/trading-agent-ipc/read.sock --uid 1000 --expected-profiles 5
+```
+
 ## Menu by pylv
 
 The static Astro origin listens only on `127.0.0.1:12369` for

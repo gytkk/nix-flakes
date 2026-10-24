@@ -37,6 +37,9 @@ in
       extraOptions = [
         "--network=host"
         "--read-only"
+        "--memory=2g"
+        "--cpus=2"
+        "--pids-limit=256"
         "--tmpfs=/tmp:rw,nosuid,nodev,noexec,size=64m"
         "--security-opt=no-new-privileges"
         ''--health-cmd=node -e "require('http').get('http://127.0.0.1:2368/',r=>process.exit(r.statusCode>=200&&r.statusCode<400?0:1)).on('error',()=>process.exit(1))"''
