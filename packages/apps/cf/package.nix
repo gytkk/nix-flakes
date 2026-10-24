@@ -10,7 +10,7 @@
 }:
 
 let
-  # cf requires Node.js >=22.23 within major 22; stable nixpkgs retains Intel Mac support.
+  # Both flake entrypoints need a runtime that satisfies cf's Node.js engine requirement.
   nodePkgs = import (fetchFromGitHub {
     owner = "NixOS";
     repo = "nixpkgs";
@@ -58,7 +58,6 @@ buildNpmPackage rec {
     ];
     platforms = [
       "aarch64-darwin"
-      "x86_64-darwin"
       "aarch64-linux"
       "x86_64-linux"
     ];
