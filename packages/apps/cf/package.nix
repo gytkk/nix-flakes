@@ -2,25 +2,34 @@
   lib,
   stdenv,
   buildNpmPackage,
+  fetchFromGitHub,
   fetchurl,
-  nodejs_24,
   jq,
   autoPatchelfHook,
   versionCheckHook,
 }:
 
+let
+  # cf requires Node.js >=22.23 within major 22; stable nixpkgs retains Intel Mac support.
+  nodePkgs = import (fetchFromGitHub {
+    owner = "NixOS";
+    repo = "nixpkgs";
+    rev = "752cbac9446602fbb78bdd1c3597455a3dd38432";
+    hash = "sha256-P4nss8/EUu51hOQDdkso+pCQBdt0DT/lrfXWaZEDnEA=";
+  }) { system = stdenv.hostPlatform.system; };
+in
 buildNpmPackage rec {
   pname = "cf";
-  version = "1.0.0-beta.12";
+  version = "1.0.0-beta.21";
 
   src = fetchurl {
     url = "https://registry.npmjs.org/cf/-/cf-${version}.tgz";
-    hash = "sha512-tyQ+Jpnw+4NDwDtl7ZNteXBm7N0TeJ6gYww79kkabpcYoCEXkUUpmt9BlDUKH8ub17tjAeiuyqa9NQzH0vp2Aw==";
+    hash = "sha512-rJqfa8zW7pN0m/fmc11xT3GzcXrqwhtZ9pizO3LZyZJjoOPR+h/us/+ajK0tXPhL+jHqaW/39ODQ481GDUyziQ==";
   };
 
   sourceRoot = "package";
-  npmDepsHash = "sha256-/QexaG3E6VvI8UOsbRqgljwP4dusRFaNNvLsvf/3umA=";
-  nodejs = nodejs_24;
+  npmDepsHash = "sha256-Yz7HwSwXo2h/JQhTSU5SWkJMRmtbsdle+gyJ3/cEWGY=";
+  nodejs = nodePkgs.nodejs_22;
   dontNpmBuild = true;
   npmFlags = [ "--ignore-scripts" ];
   npmInstallFlags = [ "--omit=dev" ];
