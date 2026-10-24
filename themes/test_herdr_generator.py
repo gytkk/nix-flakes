@@ -118,6 +118,32 @@ class HerdrGeneratorTest(unittest.TestCase):
                 if contrast_ratio(original, colors["panel_bg"]) >= 4.5:
                     self.assertEqual(original.lower(), colors["accent"].lower())
 
+    def test_running_status_colors_survive_ghostty_contrast_on_focused_rows(self) -> None:
+        repo = ROOT.parent
+        ghostty = (repo / "modules/ghostty/files/config").read_text()
+        minimum = float(
+            re.search(r"^minimum-contrast\s*=\s*([\d.]+)$", ghostty, re.M)[1]
+        )
+        config = tomllib.loads((repo / "modules/herdr/files/config.toml").read_text())
+        running_colors = {
+            rule["fg"]
+            for rows in config["ui"]["sidebar"]["agents"]["rows_by_agent"].values()
+            for row in rows
+            for token in row
+            if isinstance(token, dict)
+            for rule in token.get("rules", [])
+            if rule.get("starts_with") == "●"
+        }
+        self.assertTrue(running_colors)
+        for theme_path in sorted((ROOT / "core").glob("*.yaml")):
+            colors = self.colors(self.context(theme_path.stem))
+            for foreground in running_colors | {colors["green"]}:
+                with self.subTest(theme=theme_path.stem, foreground=foreground):
+                    for background in (colors["sidebar_bg"], colors["active_row_bg"]):
+                        self.assertGreaterEqual(
+                            contrast_ratio(foreground, background), minimum
+                        )
+
 
 if __name__ == "__main__":
     unittest.main()

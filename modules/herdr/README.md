@@ -6,6 +6,8 @@ The custom palette follows `modules.commonTheme`, including its secondary text c
 
 The current space and agent use a row background derived from the sidebar and normal text colors, with at least 1.8:1 contrast against the sidebar. One Half Light uses a darker gray row background; the keyboard navigation cursor retains its separate selection color. The generator keeps normal and secondary text readable on focused rows and adjusts the selected-tab accent to provide at least 4.5:1 contrast with its label color. One Half Light uses light labels on a darker blue selected tab. The source colors and contrast rules live in the [canonical theme pipeline](../../themes/README.md#nix-integration).
 
+The active-row shade uses 0.1% blending steps so running status green retains enough contrast on selected agents for [Ghostty's configured minimum](../ghostty/files/config). Ghostty replaces colors below this threshold with black or white, as described in its [contrast behavior](https://github.com/ghostty-org/ghostty/issues/1524).
+
 ## Terminal shortcuts
 
 | Shortcut | Action |

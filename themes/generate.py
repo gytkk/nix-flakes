@@ -1220,9 +1220,9 @@ def herdr_theme_toml(ctx: dict[str, Any], root: Path) -> str:
     }
     slots.update({f"palette_{name}": value for name, value in ctx["palette"].items()})
     ui = ctx["roles"]["ui"]
-    # Current spaces and agents share this background, including outside sidebar navigation.
-    for step in range(101):
-        candidate = mix(ui["sidebarBg"], ui["fg"], step / 100)
+    # Fine steps preserve status-color contrast when the first visible row shade is chosen.
+    for step in range(1001):
+        candidate = mix(ui["sidebarBg"], ui["fg"], step / 1000)
         if (
             contrast_ratio(candidate, ui["sidebarBg"]) >= 1.8
             and contrast_ratio(ui["fg"], candidate) >= 4.5
