@@ -29,7 +29,7 @@ buildNpmPackage rec {
 
   sourceRoot = "package";
   npmDepsHash = "sha256-Yz7HwSwXo2h/JQhTSU5SWkJMRmtbsdle+gyJ3/cEWGY=";
-  nodejs = nodePkgs.nodejs_22;
+  nodejs = nodePkgs.nodejs_26;
   dontNpmBuild = true;
   npmFlags = [ "--ignore-scripts" ];
   npmInstallFlags = [ "--omit=dev" ];
