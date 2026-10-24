@@ -27,6 +27,16 @@ nix run nixpkgs#nixos-rebuild -- switch \
 sudo nixos-rebuild switch --flake github:gytkk/nix-flakes#pylv-sepia
 ```
 
+### Build memory
+
+This host limits Nix to one package build at a time because concurrent `code-server` and Rust builds can exhaust its memory. Its `code-server` package also runs VS Code's desktop, server, and web bundles in sequence to avoid exhausting memory within one build. All three bundles and the TypeScript checks remain enabled. Other build tasks can still use multiple CPU cores.
+
+When applying this limit for the first time from a local checkout, pass it explicitly because the new Nix settings take effect only after activation:
+
+```bash
+sudo nixos-rebuild switch --flake .#pylv-sepia --max-jobs 1
+```
+
 ## Menu by pylv
 
 The static Astro origin listens only on `127.0.0.1:12369` for

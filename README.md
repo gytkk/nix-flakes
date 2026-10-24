@@ -374,7 +374,7 @@ home-manager build --flake .#devsisters-macbook
 Available NixOS hosts:
 
 - `pylv-onyx`
-- `pylv-sepia`
+- [`pylv-sepia`](hosts/pylv-sepia/README.md)
 
 ```bash
 sudo nixos-rebuild switch --flake .#pylv-onyx
