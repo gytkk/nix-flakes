@@ -2,7 +2,6 @@
   lib,
   stdenv,
   buildNpmPackage,
-  fetchFromGitHub,
   fetchurl,
   jq,
   autoPatchelfHook,
@@ -10,12 +9,10 @@
 }:
 
 let
-  # Both flake entrypoints need a runtime that satisfies cf's Node.js engine requirement.
-  nodePkgs = import (fetchFromGitHub {
-    owner = "NixOS";
-    repo = "nixpkgs";
-    rev = "752cbac9446602fbb78bdd1c3597455a3dd38432";
-    hash = "sha256-P4nss8/EUu51hOQDdkso+pCQBdt0DT/lrfXWaZEDnEA=";
+  # Fetch during evaluation so --no-build does not need a source derivation.
+  nodePkgs = import (builtins.fetchTarball {
+    url = "https://github.com/NixOS/nixpkgs/archive/752cbac9446602fbb78bdd1c3597455a3dd38432.tar.gz";
+    sha256 = "sha256-P4nss8/EUu51hOQDdkso+pCQBdt0DT/lrfXWaZEDnEA=";
   }) { system = stdenv.hostPlatform.system; };
 in
 buildNpmPackage rec {
